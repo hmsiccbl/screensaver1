@@ -209,7 +209,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       log.debug("parse errors:\n" + StringUtils.makeListString(mockScreenResultParser.getErrors(), "\n"));
     }
     assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
-    assertEquals("well count", 4, mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
+    assertEquals("well count", 4, (int) mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
   }
   
   // Note: this test cannot pass because the POI/HSSF library is crappy and does

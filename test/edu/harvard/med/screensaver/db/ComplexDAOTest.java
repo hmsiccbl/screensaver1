@@ -847,7 +847,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
         assertEquals("wells", expectedWells, screen.getScreenResult().getWells());
-        assertEquals("experimental well count", expectedExperimentalWellCount[0], screen.getScreenResult().getExperimentalWellCount());
+        assertEquals("experimental well count", expectedExperimentalWellCount[0], (int) screen.getScreenResult().getExperimentalWellCount());
       }
     });
   }
