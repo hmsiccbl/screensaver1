@@ -56,13 +56,14 @@ abstract public class ScreenResultDataModel extends VirtualPagingDataModel<WellK
   // public constructors and methods
 
   public ScreenResultDataModel(List<ResultValueType> resultValueTypes,
+                               int totalRowCount,
                                int rowsToFetch,
                                int sortColumnIndex,
                                SortDirection sortDirection,
                                ScreenResultsDAO dao)
   {
     super(rowsToFetch,
-          resultValueTypes == null || resultValueTypes.size() == 0 ? 0 : resultValueTypes.get(0).getWellKeyToResultValueMap().size(),
+          totalRowCount,
           sortColumnIndex - DATA_TABLE_FIXED_COLUMNS,
           sortDirection);
     _resultValueTypes = resultValueTypes;

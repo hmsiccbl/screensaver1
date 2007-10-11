@@ -40,7 +40,12 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
                                             ScreenResultsDAO dao,
                                             ResultValueType positivesOnlyRvt)
   {
-    super(resultValueTypes, -1, sortColumnIndex, sortDirection, dao);
+    super(resultValueTypes,
+          positivesOnlyRvt.getPositivesCount(),
+          -1,
+          sortColumnIndex,
+          sortDirection,
+          dao);
     _positivesOnlyRvt = positivesOnlyRvt;
   }
 
@@ -53,10 +58,10 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
     return _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
                                                                _sortColumnIndex,
                                                                _sortDirection,
-                                                               0,
-                                                               null,
-                                                               _positivesOnlyRvt,
-                                                               null);
+                                                                0,
+                                                                null,
+                                                                _positivesOnlyRvt,
+                                                                null);
   }
 
   // private methods

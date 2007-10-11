@@ -256,7 +256,6 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
   public void rebuildRows()
   {
     _dataModel = null; // force rebuild
-    getRowsPerPageSelector().setAllRowsValue(getDataModel().getRowCount());
     if (_dataTableUIComponent != null) {
       _dataTableUIComponent.setFirst(0);
     }

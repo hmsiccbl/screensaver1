@@ -2,7 +2,7 @@
 // $Id$
 //
 //Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 //Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 //at Harvard Medical School. This software is distributed under the terms of
 //the GNU General Public License.
@@ -79,7 +79,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private ScreenViewer _screenViewer;
   private ScreenDetailViewer _screenDetailViewer;
   private ScreenResultExporter _screenResultExporter;
-  private ScreenResultDataTable _screenResultDataTable;
+  private ScreenResultDataTable _screenResultDataTable = new EmptyScreenResultDataTable();
   private FullScreenResultDataTable _fullScreenResultDataTable;
   private PositivesOnlyScreenResultDataTable _positivesOnlyScreenResultDataTable;
   private SinglePlateScreenResultDataTable _singlePlateScreenResultDataTable;
@@ -209,7 +209,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public ScreenResultDataTable getResultValueTable()
   {
-  return _screenResultDataTable;
+    return _screenResultDataTable;
   }
 
   public void update(Observable observable, Object o)

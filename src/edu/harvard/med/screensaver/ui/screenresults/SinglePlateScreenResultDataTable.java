@@ -41,11 +41,12 @@ public class SinglePlateScreenResultDataTable extends ScreenResultDataTable
   {
   }
 
-  public SinglePlateScreenResultDataTable(WellViewer wellViewer,
+  public SinglePlateScreenResultDataTable(ScreenResultViewer screenResultViewer,
+                                          WellViewer wellViewer,
                                           LibrariesDAO librariesDao,
                                           ScreenResultsDAO screenResultsDao)
   {
-    super(wellViewer, librariesDao, screenResultsDao);
+    super(screenResultViewer, wellViewer, librariesDao, screenResultsDao);
   }
 
 

@@ -11,8 +11,11 @@ package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import javax.faces.component.UIInput;
 
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -49,11 +52,12 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
 
   // instance data members
 
+  private ScreenResultViewer _screenResultViewer;
   private WellViewer _wellViewer;
   private LibrariesDAO _librariesDao;
   protected ScreenResultsDAO _screenResultsDao;
 
-  private List<ResultValueType> _resultValueTypes;
+  private List<ResultValueType> _resultValueTypes = Collections.emptyList();
 
 
   // constructors
@@ -65,10 +69,12 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
   {
   }
 
-  public ScreenResultDataTable(WellViewer wellViewer,
+  public ScreenResultDataTable(ScreenResultViewer screenResultViewer,
+                               WellViewer wellViewer,
                                LibrariesDAO librariesDao,
                                ScreenResultsDAO screenResultsDao)
   {
+    _screenResultViewer = screenResultViewer;
     _wellViewer = wellViewer;
     _librariesDao = librariesDao;
     _screenResultsDao = screenResultsDao;
@@ -86,7 +92,6 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
   {
     _resultValueTypes = resultValueTypes;
     rebuildColumnsAndRows();
-    getRowsPerPageSelector().setAllRowsValue(getRowCount()); // only has an effect in case where getRowsPerPageSelections() contains SHOW_ALL_VALUE
     if (getRowsPerPageUIComponent() != null) {
       getRowsPerPageUIComponent().setValue(getRowsPerPageSelector().getValue());
     }
@@ -97,6 +102,23 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
     return ((ScreenResultDataModel) getDataModel()).isResultValueCellExcluded(getSortManager().getCurrentColumnIndex());
   }
 
+  /**
+   * @motivation We need to give all instances of ScreenResultDataTable the same
+   *             UIInput object. See
+   *             {@link ScreenResultViewer#setSharedDataTableUIComponent(javax.faces.component.UIData)}.
+   *             Since we use dataTableNavigator.jspf, we can't customize the
+   *             UIInput component's binding attribute to be
+   *             screenViewer.sharedDataTableUIComponent, which would eliminate
+   *             need for this method; but it is bound to this method, and so we
+   *             delegate.
+   */
+  public void setRowsPerPageUIComponent(UIInput rowsPerPageUIComponent)
+  {
+    if (getRowsPerPageUIComponent() != rowsPerPageUIComponent) {
+      super.setRowsPerPageUIComponent(rowsPerPageUIComponent);
+      _screenResultViewer.setSharedRowsPerPageUIComponent(rowsPerPageUIComponent);
+    }
+  }
 
   // abstract method implementations
 

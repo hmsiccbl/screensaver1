@@ -122,7 +122,6 @@ public class ScreenViewer extends StudyViewer
           _dao.needReadOnly(screen.getScreenResult(),
                             "resultValueTypes.derivedTypes",
                             "resultValueTypes.typesDerivedFrom");
-
           setScreen(screen);
         }
       });

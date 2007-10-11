@@ -42,11 +42,12 @@ public class PositivesOnlyScreenResultDataTable extends ScreenResultDataTable
   {
   }
 
-  public PositivesOnlyScreenResultDataTable(WellViewer wellViewer,
+  public PositivesOnlyScreenResultDataTable(ScreenResultViewer screenResultViewer,
+                                            WellViewer wellViewer,
                                             LibrariesDAO librariesDao,
                                             ScreenResultsDAO screenResultsDao)
   {
-    super(wellViewer, librariesDao, screenResultsDao);
+    super(screenResultViewer, wellViewer, librariesDao, screenResultsDao);
   }
 
 
@@ -60,7 +61,7 @@ public class PositivesOnlyScreenResultDataTable extends ScreenResultDataTable
   public void setPositivesDataHeader(ResultValueType positivesDataHeader)
   {
     _positivesDataHeader = positivesDataHeader;
-    rebuildColumnsAndRows();
+    rebuildRows();
   }
 
 
@@ -71,7 +72,6 @@ public class PositivesOnlyScreenResultDataTable extends ScreenResultDataTable
   {
     DataTableRowsPerPageUISelectOneBean rowsPerPageSelector =
       new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
-    rowsPerPageSelector.setAllRowsValue(getDataModel().getRowCount());
     return rowsPerPageSelector;
   }
 

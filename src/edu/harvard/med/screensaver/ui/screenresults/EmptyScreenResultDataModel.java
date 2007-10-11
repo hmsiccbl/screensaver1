@@ -30,7 +30,7 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
 
   public EmptyScreenResultDataModel()
   {
-    super(null, -1, -1, SortDirection.ASCENDING, null);
+    super(null, 0, -1, -1, SortDirection.ASCENDING, null);
   }
 
   @Override

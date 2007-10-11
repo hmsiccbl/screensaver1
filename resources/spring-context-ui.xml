@@ -467,6 +467,7 @@
       <bean
         class="edu.harvard.med.screensaver.ui.screenresults.FullScreenResultDataTable"
         parent="uiBean">
+        <constructor-arg ref="screenResultViewer" />
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />
@@ -476,6 +477,7 @@
       <bean
         class="edu.harvard.med.screensaver.ui.screenresults.PositivesOnlyScreenResultDataTable"
         parent="uiBean">
+        <constructor-arg ref="screenResultViewer" />
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />
@@ -485,6 +487,7 @@
       <bean
         class="edu.harvard.med.screensaver.ui.screenresults.SinglePlateScreenResultDataTable"
         parent="uiBean">
+        <constructor-arg ref="screenResultViewer" />
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />

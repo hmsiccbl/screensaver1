@@ -36,7 +36,12 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
                                    SortDirection sortDirection,
                                    ScreenResultsDAO dao)
   {
-    super(resultValueTypes, rowsToFetch, sortColumnIndex, sortDirection, dao);
+    super(resultValueTypes,
+          resultValueTypes == null || resultValueTypes.size() == 0 ? 0 : resultValueTypes.get(0).getWellKeyToResultValueMap().size(),
+          rowsToFetch,
+          sortColumnIndex,
+          sortDirection,
+          dao);
   }
 
   @Override

@@ -242,69 +242,9 @@
 							</t:dataTable>
 						</t:buffer>
 
-						<t:panelGrid columns="3">
-							<t:dataScroller id="dataTableScroller"
-								for="resultValuesDataTable" firstRowIndexVar="fromRow"
-								lastRowIndexVar="toRow" rowsCountVar="rowCount" paginator="true"
-								paginatorMaxPages="10" fastStep="10"
-								renderFacetsIfSinglePage="false" styleClass="scroller"
-								paginatorActiveColumnClass="scroller_activePage">
-								<f:facet name="first">
-									<t:graphicImage url="/images/arrow-first.png" border="0"
-										title="First page" />
-								</f:facet>
-								<f:facet name="last">
-									<t:graphicImage url="/images/arrow-last.png" border="0"
-										title="Last page" />
-								</f:facet>
-								<f:facet name="previous">
-									<t:graphicImage url="/images/arrow-previous.png" border="0"
-										title="Previous page" />
-								</f:facet>
-								<f:facet name="next">
-									<t:graphicImage url="/images/arrow-next.png" border="0"
-										title="Next page" />
-								</f:facet>
-								<f:facet name="fastforward">
-									<t:graphicImage url="/images/arrow-fastforward.png" border="0"
-										title="Forward 10 pages" />
-								</f:facet>
-								<f:facet name="fastrewind">
-									<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
-										title="Back 10 pages" />
-								</f:facet>
-							</t:dataScroller>
-							<t:dataScroller id="dataTableScroller2"
-								for="resultValuesDataTable" firstRowIndexVar="fromRow"
-								lastRowIndexVar="toRow" rowsCountVar="rowCount">
-								<t:outputText value="#{fromRow}..#{toRow} of #{rowCount}"
-									styleClass="label" />
-							</t:dataScroller>
-
-							<t:panelGroup id="dataTableCommandPanel"
-								styleClass="commandPanel">
-
-								<t:inputText id="pageNumber"
-									valueChangeListener="#{screenResultViewer.resultValueTable.pageNumberListener}"
-									size="6" styleClass="inputText">
-								</t:inputText>
-								<%-- note: no 'action' attribute necessary, as 'rowNumber' inputText component, above, invokes update logic via valueChangeListener --%>
-								<t:commandButton id="updateDataTablePositionButton2" value="Go"
-									styleClass="command" />
-
-								<t:selectOneMenu id="dataTableRowsPerPageList"
-									value="#{screenResultViewer.resultValueTable.rowsPerPageSelector.value}"
-									binding="#{screenResultViewer.sharedRowsPerPageUIComponent}"
-									valueChangeListener="#{screenResultViewer.resultValueTable.rowsPerPageListener}"
-									onchange="document.getElementById('updateDataTableButton').click();"
-									styleClass="data" title="Number of rows to display per page">
-									<f:selectItems id="dataTableRowsPerPageSelectItems"
-										value="#{screenResultViewer.resultValueTable.rowsPerPageSelector.selectItems}" />
-								</t:selectOneMenu>
-								<t:outputText value=" per page" styleClass="label" />
-							</t:panelGroup>
-
-						</t:panelGrid>
+						<t:aliasBean alias="#{dataTable}" value="#{screenResultViewer.resultValueTable}">
+							<%@ include file="../../dataTableNavigator.jspf"%>
+						</t:aliasBean>
 
 						<t:outputText escape="false"
 							value="#{resultValuesDataTableBuffer}" />

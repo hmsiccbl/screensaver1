@@ -43,7 +43,6 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
   @Override
   protected DataModel buildDataModel()
   {
-
     return new FullScreenResultDataModel(getResultValueTypes(),
                                          getRowsPerPageSelector().getSelection(),
                                          getSortManager().getSortColumnIndex(),
@@ -60,11 +59,12 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
   {
   }
 
-  public FullScreenResultDataTable(WellViewer wellViewer,
+  public FullScreenResultDataTable(ScreenResultViewer screenResultViewer,
+                                   WellViewer wellViewer,
                                    LibrariesDAO librariesDao,
                                    ScreenResultsDAO screenResultsDao)
   {
-    super(wellViewer, librariesDao, screenResultsDao);
+    super(screenResultViewer, wellViewer, librariesDao, screenResultsDao);
   }
 
 

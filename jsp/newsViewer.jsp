@@ -10,26 +10,27 @@
 		<dl>
 			<dt><span class="newsDate">2007.Oct.10, v1.3.0</span></dt>
 			<dd>
-			<ul>
-			<li>Upgraded the Screensaver object model to use Hibernate
+			<p>Upgraded the Screensaver object model to use Hibernate
 			annotations instead of XDoclet annotations. Other various
 			across-the-board model updates that should improve understanding,
 			ease-of-use, and ease-of-maintenance of object model code for
 			developers. This upgrade should have little to no impact on
-			Screensaver users.</li>
-			<li>Most data tables in Screensaver now present a consistent and
-				improved navigation panel for interacting with the table.</li>
+			Screensaver users.</p>
+			<p>Users will be pleased that all data tables in Screensaver now
+			present a consistent and improved navigation panel for interacting
+			with the table. Developers will be pleased that all data tables are
+			now implemented in terms of the same DataTable class.</p>
 			</dd>
 			<dt><span class="newsDate">2007.Sep.13, v1.2.0</span></dt>
-			<dd>Added "Study" and "Annotations" data types to Screensaver,
+			<dd><p>Added "Study" and "Annotations" data types to Screensaver,
 			allowing the system to incorporate and present 3rd-party library
 			annotation data, as well as providing a means for sharing and
-			presenting biologically relevant results from in-house screens.</dd>
+			presenting biologically relevant results from in-house screens.</p></dd>
 			<dt><span class="newsDate">2007.Aug.24, v1.1.0</span></dt>
-			<dd>Screensaver released as open source project.</dd>
+			<dd><p>Screensaver released as open source project.</p></dd>
 			<dt><span class="newsDate">2007.Aug.6</span></dt>
-			<dd>Added workaround instructions for structure image viewing
-			problems to the Well Viewer and Compound Viewer pages and help pages.
+			<dd><p>Added workaround instructions for structure image viewing
+			problems to the Well Viewer and Compound Viewer pages and help pages.</p>
 			</dd>
 		</dl>
 	</f:verbatim>
