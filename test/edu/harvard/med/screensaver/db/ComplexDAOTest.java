@@ -1246,7 +1246,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     Screen screen = screenOut[0];
     try {
       assertEquals("keywords size", 2, screen.getKeywords().size());
-      assertEquals("labHead last name", "Screener", screen.getLabHead().getLastName());
+      assertEquals("labHead last name", "Screener_1", screen.getLabHead().getLastName());
       assertEquals("labHead.LabMembers size", 1, screen.getLabHead().getLabMembers().size());
       assertEquals("labHead.LabMembers[0].lastName", "Member", screen.getLabHead().getLabMembers().iterator().next().getLastName());
     }
