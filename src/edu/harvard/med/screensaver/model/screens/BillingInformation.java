@@ -130,6 +130,7 @@ public class BillingInformation extends AbstractEntity
     optional=false
   )
   @JoinColumn(name="screenId", nullable=false, updatable=false)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_billing_information_to_screen")
   @org.hibernate.annotations.Cascade(value={

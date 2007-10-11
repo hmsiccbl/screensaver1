@@ -157,6 +157,7 @@ public class ScreenerCherryPick extends AbstractEntity
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE,
