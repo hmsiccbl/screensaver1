@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
  */
 @Entity
 @DiscriminatorValue("LegacyCherryPickAssayPlate")
+@org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=CherryPickRequest.class)
 public class LegacyCherryPickAssayPlate extends CherryPickAssayPlate
 {
@@ -102,12 +103,12 @@ public class LegacyCherryPickAssayPlate extends CherryPickAssayPlate
   }
 
   
-  // private constructor
+  // protected constructor
 
   /**
    * Construct an uninitialized <code>LegacyCherryPickAssayPlate</code>.
-   * @motivation for hibernate
+   * @motivation for hibernate and CGLIB
    */
-  private LegacyCherryPickAssayPlate() {}
+  protected LegacyCherryPickAssayPlate() {}
 }
 
