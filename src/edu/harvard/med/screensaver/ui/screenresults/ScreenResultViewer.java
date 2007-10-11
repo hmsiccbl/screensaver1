@@ -91,7 +91,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private ResultValueTypeTable _rvtTable;
   private UISelectOneBean<Integer> _dataFilter;
   private UISelectOneBean<ResultValueType> _showPositivesOnlyForDataHeader;
-  private int _screenResultSize;
 
 
   // constructors
@@ -140,11 +139,14 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public void setScreenResult(ScreenResult screenResult)
   {
-    resetView();
     _screenResult = screenResult;
+    _dataFilter = null;
+    _showPositivesOnlyForDataHeader = null;
     getDataHeadersTable().initialize(getResultValueTypes(), this);
     // HACK: eager fetch size of full result values
-    getResultValueTypes().get(0).getWellKeyToResultValueMap().size();
+    if (getResultValueTypes().size() > 0) {
+      getResultValueTypes().get(0).getWellKeyToResultValueMap().size();
+    }
     updateDataTable();
   }
 
@@ -369,7 +371,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     getFacesContext().renderResponse();
   }
 
-
   /**
    * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
    */
@@ -452,15 +453,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
         return super.getLabel(val);
       }
     };
-  }
-
-  private void resetView()
-  {
-    _dataFilter = null;
-    _showPositivesOnlyForDataHeader = null;
-    // if the below is uncommented, errors occur when scrolling through screens in screens browser, when in "single" view mode
-    //setSharedDataTableUIComponent(null);
-    //setSharedRowsPerPageUIComponent(null);
   }
 
 }
