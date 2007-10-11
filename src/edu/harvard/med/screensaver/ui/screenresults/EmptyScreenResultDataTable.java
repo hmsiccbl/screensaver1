@@ -27,6 +27,14 @@ public class EmptyScreenResultDataTable extends ScreenResultDataTable
 
   // abstract method implementations
 
+  public EmptyScreenResultDataTable(ScreenResultViewer screenResultViewer)
+  {
+    super(screenResultViewer,
+          null,
+          null,
+          null);
+  }
+
   protected List<Integer> getRowsPerPageSelections()
   {
     return Arrays.asList(0);

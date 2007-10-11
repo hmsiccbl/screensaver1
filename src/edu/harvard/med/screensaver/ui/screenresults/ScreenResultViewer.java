@@ -79,7 +79,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private ScreenViewer _screenViewer;
   private ScreenDetailViewer _screenDetailViewer;
   private ScreenResultExporter _screenResultExporter;
-  private ScreenResultDataTable _screenResultDataTable = new EmptyScreenResultDataTable();
+  private ScreenResultDataTable _screenResultDataTable;
+  private EmptyScreenResultDataTable _emptyScreenResultDataTable;
   private FullScreenResultDataTable _fullScreenResultDataTable;
   private PositivesOnlyScreenResultDataTable _positivesOnlyScreenResultDataTable;
   private SinglePlateScreenResultDataTable _singlePlateScreenResultDataTable;
@@ -124,6 +125,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     _fullScreenResultDataTable = fullScreenResultDataTable;
     _positivesOnlyScreenResultDataTable = positivesOnlyScreenResultDataTable;
     _singlePlateScreenResultDataTable = singlePlateScreenResultDataTable;
+    _emptyScreenResultDataTable = new EmptyScreenResultDataTable(this);
+    _screenResultDataTable = _emptyScreenResultDataTable;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenResultSummary", false);
@@ -140,6 +143,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     resetView();
     _screenResult = screenResult;
     getDataHeadersTable().initialize(getResultValueTypes(), this);
+    // HACK: eager fetch size of full result values
+    getResultValueTypes().get(0).getWellKeyToResultValueMap().size();
     updateDataTable();
   }
 
@@ -163,6 +168,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
    */
   public void setSharedRowsPerPageUIComponent(UIInput rowsPerPageUIComponent)
   {
+    _emptyScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
     _fullScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
     _positivesOnlyScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
     _singlePlateScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
@@ -170,7 +176,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public UIInput getSharedRowsPerPageUIComponent()
   {
-    assert _fullScreenResultDataTable.getRowsPerPageUIComponent() == _positivesOnlyScreenResultDataTable.getRowsPerPageUIComponent() &&
+    assert _fullScreenResultDataTable.getRowsPerPageUIComponent() == _emptyScreenResultDataTable.getRowsPerPageUIComponent() &&
+    _fullScreenResultDataTable.getRowsPerPageUIComponent() == _positivesOnlyScreenResultDataTable.getRowsPerPageUIComponent() &&
     _fullScreenResultDataTable.getRowsPerPageUIComponent() == _singlePlateScreenResultDataTable.getRowsPerPageUIComponent();
     return _fullScreenResultDataTable.getRowsPerPageUIComponent();
   }
@@ -185,6 +192,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
    */
   public void setSharedDataTableUIComponent(UIData dataTableUIComponent)
   {
+    _emptyScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
     _fullScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
     _positivesOnlyScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
     _singlePlateScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
@@ -192,7 +200,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public UIData getSharedDataTableUIComponent()
   {
-    assert _fullScreenResultDataTable.getDataTableUIComponent() == _positivesOnlyScreenResultDataTable.getDataTableUIComponent() &&
+    assert _fullScreenResultDataTable.getDataTableUIComponent() == _emptyScreenResultDataTable.getDataTableUIComponent() &&
+    _fullScreenResultDataTable.getDataTableUIComponent() == _positivesOnlyScreenResultDataTable.getDataTableUIComponent() &&
     _fullScreenResultDataTable.getDataTableUIComponent() == _singlePlateScreenResultDataTable.getDataTableUIComponent();
     return _fullScreenResultDataTable.getDataTableUIComponent();
   }
@@ -399,7 +408,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     log.debug("updating data table content");
     if (_screenResult == null) {
-      _screenResultDataTable = new EmptyScreenResultDataTable();
+      _screenResultDataTable = new EmptyScreenResultDataTable(this);
     }
     else if (getDataFilter().getSelection().equals(DATA_TABLE_FILTER_SHOW_ALL)) {
       _screenResultDataTable = _fullScreenResultDataTable;
@@ -449,8 +458,9 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     _dataFilter = null;
     _showPositivesOnlyForDataHeader = null;
-    setSharedDataTableUIComponent(null);
-    setSharedRowsPerPageUIComponent(null);
+    // if the below is uncommented, errors occur when scrolling through screens in screens browser, when in "single" view mode
+    //setSharedDataTableUIComponent(null);
+    //setSharedRowsPerPageUIComponent(null);
   }
 
 }
