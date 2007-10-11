@@ -111,9 +111,13 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
           return super.getLabel(value);
         }
       }
-    };
 
-    rowsPerPageSelector.setAllRowsValue(getDataTable().getRowCount());
+      @Override
+      protected Integer getAllRowsValue()
+      {
+        return getDataTable().getRowCount();
+      }
+    };
 
     rowsPerPageSelector.addObserver(new Observer() {
       public void update(Observable obs, Object o)

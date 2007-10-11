@@ -122,9 +122,6 @@ public class AnnotationValuesTable extends DataTable<Map<String,Object>>
       });
     }
 
-    // we make this call here, rather than in buildRowsPerPageSelector(), to avoid infinite recursion
-    getRowsPerPageSelector().setAllRowsValue(totalRows[0]);
-
     return new AnnotationValuesDataModel(_annotationTypes,
                                          getRowsPerPageSelector().getSelection(),
                                          totalRows[0],

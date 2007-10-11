@@ -71,7 +71,13 @@ public class PositivesOnlyScreenResultDataTable extends ScreenResultDataTable
   protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
   {
     DataTableRowsPerPageUISelectOneBean rowsPerPageSelector =
-      new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
+      new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE)) {
+      @Override
+      protected Integer getAllRowsValue()
+      {
+        return getRowCount();
+      }
+    };
     return rowsPerPageSelector;
   }
 

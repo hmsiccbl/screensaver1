@@ -312,8 +312,13 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   {
     DataTableRowsPerPageUISelectOneBean rowsPerPageSelector =
       new DataTableRowsPerPageUISelectOneBean(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
-                                              DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1));
-    rowsPerPageSelector.setAllRowsValue(getDataTable().getDataModel().getRowCount());
+                                              DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1)) {
+      @Override
+      protected Integer getAllRowsValue()
+      {
+        return getDataTable().getRowCount();
+      }
+    };
     return rowsPerPageSelector;
   }
 

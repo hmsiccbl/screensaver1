@@ -408,7 +408,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       @Override
       protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
       {
-        return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
+        return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE)) {
+          @Override
+          protected Integer getAllRowsValue() { return getRowCount(); }
+        };
       }
 
       @Override
@@ -429,7 +432,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       @Override
       protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
       {
-        return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE));
+        return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 20, 50, 100, DataTableRowsPerPageUISelectOneBean.SHOW_ALL_VALUE)) {
+          @Override
+          protected Integer getAllRowsValue() { return getRowCount(); }
+        };
       }
 
       @Override

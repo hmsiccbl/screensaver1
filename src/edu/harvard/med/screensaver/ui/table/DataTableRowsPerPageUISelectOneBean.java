@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -24,10 +24,9 @@ public class DataTableRowsPerPageUISelectOneBean extends UISelectOneBean<Integer
 
   public static final Integer SHOW_ALL_VALUE = -1;
   private static Logger log = Logger.getLogger(DataTableRowsPerPageUISelectOneBean.class);
-  private Integer _allRowsValue;
 
   // instance data members
-  
+
   public DataTableRowsPerPageUISelectOneBean(List<Integer> values)
   {
     super(values);
@@ -41,40 +40,46 @@ public class DataTableRowsPerPageUISelectOneBean extends UISelectOneBean<Integer
   // public constructors and methods
 
   @Override
-  public String getLabel(Integer value) 
-  { 
+  public String getLabel(Integer value)
+  {
     if (SHOW_ALL_VALUE.equals(value)) {
       return "All";
     }
     return super.getLabel(value);
   }
-    
+
   @Override
   public Integer getSelection()
   {
     if (SHOW_ALL_VALUE.equals(super.getSelection())) {
-      return _allRowsValue;
+      return getAllRowsValue();
     }
     return super.getSelection();
   }
-  
+
   @Override
   public List<SelectItem> getSelectItems()
   {
     List<SelectItem> selectItems = new ArrayList<SelectItem>(super.getSelectItems());
-    if (_allRowsValue == null && 
+    if (getAllRowsValue() == null &&
       selectItems.size() > 0 && SHOW_ALL_VALUE.equals(selectItems.get(selectItems.size() - 1))) {
       selectItems.remove(selectItems.size() - 1);
     }
     return selectItems;
   }
 
-  public void setAllRowsValue(Integer allRowsValue)
-  {
-    _allRowsValue = allRowsValue;
-  }
 
-  // private methods
+  // protected methods
+
+  /**
+   * Subclasses should override this method to return the actual value returned
+   * by getSelection() when the user selects the "all" value. Overriding is only
+   * necessary if the selection values include the SHOW_ALL_VALUE value.
+   */
+  protected Integer getAllRowsValue()
+  {
+    return null;
+  }
 
 }
 
