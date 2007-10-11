@@ -59,11 +59,6 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
  */
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
-@Table(uniqueConstraints={ @UniqueConstraint(columnNames={
-  "firstName",
-  "lastName",
-  "dateCreated"
-}) })
 @org.hibernate.annotations.Proxy
 abstract public class ScreensaverUser extends AbstractEntity
 {
