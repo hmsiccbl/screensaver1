@@ -37,7 +37,7 @@ import org.hibernate.annotations.Parent;
 @Embeddable
 public class ResultValue
 {
-  
+
   // private static data
 
   private static final long serialVersionUID = -4066041317098744417L;
@@ -68,7 +68,7 @@ public class ResultValue
    * <li> PositiveIndicatorType.PARTITION: returns String
    * (PartitionedValue.getDisplayValue())
    * </ul>
-   * 
+   *
    * @return a Boolean, Double, or String
    * @motivation to preserve typed data in exported Workbooks (rather than treat
    *             all result values as text strings)
@@ -78,11 +78,11 @@ public class ResultValue
     if (rv == null || rv.isNull()) {
       return null;
     }
-    
+
     if (rvt.isNumeric()) {
       return rv.getNumericValue();
     }
-      
+
     if (rvt.isPositiveIndicator()) {
       PositiveIndicatorType activityIndicatorType = rvt.getPositiveIndicatorType();
       if (activityIndicatorType.equals(PositiveIndicatorType.BOOLEAN)) {
@@ -106,7 +106,7 @@ public class ResultValue
     return rv.getValue();
   }
 
-  
+
   // private instance data
 
   private String _wellId;
@@ -194,7 +194,7 @@ public class ResultValue
 
 
   // public instance methods
-  
+
   @Override
   public boolean equals(Object o)
   {
@@ -204,8 +204,8 @@ public class ResultValue
     ResultValue other = (ResultValue) o;
     return
     ((_value == null && other._value == null) ||
-      (_value != null && other._value != null && _value.equals(other._value))) && 
-      _assayWellType.equals(other._assayWellType) && 
+      (_value != null && other._value != null && _value.equals(other._value))) &&
+      _assayWellType.equals(other._assayWellType) &&
       _isExclude == other._isExclude;
   }
 
@@ -236,7 +236,7 @@ public class ResultValue
   {
     return _resultValueType;
   }
-  
+
   /**
    * Get the string value of this <code>ResultValue</code>.
    *
@@ -251,7 +251,7 @@ public class ResultValue
 
   /**
    * Return true whenever this result value has a null value.
-   * 
+   *
    * @return true whenever this result value has a null value
    * @motivation reduces confusion as to whether callers needs to check both
    *             {@link #getValue()} and {@link #getNumericValue()} to determine
@@ -314,7 +314,7 @@ public class ResultValue
 
   /**
    * Get the assay well's type.
-   * 
+   *
    * @return the assay well's type
    */
   @Column(nullable=false)
@@ -340,10 +340,12 @@ public class ResultValue
   /**
    * Get whether this result value indicates a positive. Returns false if the
    * {@link #getResultValueType() ResultValueType} is not a positive indicator.
-   * 
+   *
    * @return true whenever this result value is a positive indicator
    */
   @Column(nullable=false, name="isPositive")
+  // TODO: hibernate annotations is not processing the @Index on the @Embeddable columns
+  @org.hibernate.annotations.Index(name="index_rvtrv_is_positive")
   public boolean isPositive()
   {
     return _isPositive;
@@ -352,7 +354,7 @@ public class ResultValue
   /**
    * Return true iff the assay well type is
    * {@link AssayWellType#EXPERIMENTAL experimental}.
-   * 
+   *
    * @return true iff the assay well type is experimental
    * @see AssayWellType#EXPERIMENTAL
    */
@@ -364,7 +366,7 @@ public class ResultValue
 
   /**
    * Return true iff the assay well type is a control.
-   * 
+   *
    * @return true iff the assay well type is a control
    * @see AssayWellType#isControl()
    */
@@ -376,7 +378,7 @@ public class ResultValue
 
   /**
    * Return true iff the assay well type is data producing.
-   * 
+   *
    * @return true iff the assay well type is data producing
    * @see AssayWellType#isDataProducing()
    */
@@ -388,7 +390,7 @@ public class ResultValue
 
   /**
    * Return true iff the assay well type is {@link AssayWellType#OTHER other}.
-   * 
+   *
    * @return true iff the assay well type is other
    * @see AssayWellType#OTHER
    */
@@ -400,7 +402,7 @@ public class ResultValue
 
   /**
    * Return true iff the assay well type is {@link AssayWellType#EMPTY empty}.
-   * 
+   *
    * @return true iff the assay well type is empty
    * @see AssayWellType#EMPTY
    */
@@ -473,7 +475,7 @@ public class ResultValue
 
   /**
    * Constructs an uninitialized ResultValue object.
-   * 
+   *
    * @motivation for hibernatexs
    */
   private ResultValue() {}
@@ -502,7 +504,7 @@ public class ResultValue
 
   /**
    * Set the actual value of this result value.
-   * 
+   *
    * @param value the new value of this result value
    * @motivation for hibernate
    */
@@ -524,7 +526,7 @@ public class ResultValue
 
   /**
    * Set the numerical decimal precision.
-   * 
+   *
    * @param numericDecimalPrecision the new numerical decimal precision
    * @motivation for hibernate
    */
@@ -553,7 +555,7 @@ public class ResultValue
    * Technically, we should have an AssayWell entity, which groups all the
    * ResultValues for a given stock plate well (within the parent screen
    * result). But it's creates a lot of new bidirectional relationships!
-   * 
+   *
    * @param assayWellType the new type of the assay well
    * @motivation for hibernate
    */
