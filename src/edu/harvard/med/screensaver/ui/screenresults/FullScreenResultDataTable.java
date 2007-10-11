@@ -70,18 +70,6 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
 
   // public methods
 
-  public int getScreenResultSize()
-  {
-    return _screenResultSize;
-  }
-
-  public void setScreenResultSize(int screenResultSize)
-  {
-    _screenResultSize = screenResultSize;
-    rebuildColumnsAndRows();
-  }
-
-
   // private methods
 
 }
