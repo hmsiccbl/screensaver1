@@ -86,7 +86,7 @@ public class ScreenResult extends AbstractEntity
    *             normalized Plate table.
    */
   private SortedSet<Integer> _plateNumbers = new TreeSet<Integer>();
-  private int _experimentalWellCount;
+  private Integer _experimentalWellCount;
 
   private transient UniqueDataHeaderNames _uniqueDataHeaderNames;
 
@@ -433,7 +433,7 @@ public class ScreenResult extends AbstractEntity
    */
   @Column(nullable=false)
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
-  public int getExperimentalWellCount()
+  public Integer getExperimentalWellCount()
   {
     return _experimentalWellCount;
   }
@@ -566,7 +566,7 @@ public class ScreenResult extends AbstractEntity
    * @motivation for Hibernate
    * @param experimentalWellCount
    */
-  private void setExperimentalWellCount(int experimentalWellCount)
+  private void setExperimentalWellCount(Integer experimentalWellCount)
   {
     _experimentalWellCount = experimentalWellCount;
   }
