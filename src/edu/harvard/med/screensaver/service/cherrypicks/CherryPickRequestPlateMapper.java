@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
 /**
  * For a cherry pick request, generates the layout of the cherry picks onto a
  * set of assay plates.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -45,7 +45,7 @@ public class CherryPickRequestPlateMapper
 
 
   // instance data members
-  
+
   private GenericEntityDAO genericEntityDao;
 
 
@@ -61,9 +61,9 @@ public class CherryPickRequestPlateMapper
 
   public void generatePlateMapping(final CherryPickRequest cherryPickRequestIn)
   {
-    genericEntityDao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      public void runTransaction() 
+      public void runTransaction()
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
         doGeneratePlateMapping(cherryPickRequest);
@@ -71,7 +71,7 @@ public class CherryPickRequestPlateMapper
     });
   }
 
-  
+
   // private methods
 
   private void doGeneratePlateMapping(CherryPickRequest cherryPickRequest)
@@ -81,12 +81,12 @@ public class CherryPickRequestPlateMapper
     List<WellName> availableWellNamesOnCurrentPlate = null;
     int plateIndex = 0;
     CherryPickAssayPlate plate = null;
-    
+
     List<LabCherryPick> labCherryPicksAssignedToCurrentPlate = new ArrayList<LabCherryPick>();
     while (toBeMapped.size() > 0) {
       plate = cherryPickRequest.createCherryPickAssayPlate(
-        plateIndex++, 
-        0, 
+        plateIndex++,
+        0,
         cherryPickRequest.getAssayPlateType());
 
       labCherryPicksAssignedToCurrentPlate.clear();
@@ -119,12 +119,12 @@ public class CherryPickRequestPlateMapper
       if (cherryPickRequest.isRandomizedAssayPlateLayout()) {
         // only randomize over the left-most set of wells whose size is sufficent
         // to accommodate the remaining cherry picks to be mapped
-        availableWellNamesOnCurrentPlate.subList(Math.min(labCherryPicksAssignedToCurrentPlate.size(), 
+        availableWellNamesOnCurrentPlate.subList(Math.min(labCherryPicksAssignedToCurrentPlate.size(),
                                                           availableWellNamesOnCurrentPlate.size()),
                                                  availableWellNamesOnCurrentPlate.size()).clear();
         Collections.shuffle(availableWellNamesOnCurrentPlate);
       }
-      
+
       plateMapCherryPicks(plate,
                           labCherryPicksAssignedToCurrentPlate,
                           availableWellNamesOnCurrentPlate);
@@ -143,7 +143,7 @@ public class CherryPickRequestPlateMapper
     Iterator<WellName> availableWellNamesIter = availableWellNames.iterator();
     for (Iterator nextIndivisibleBlockIter = labCherryPicks.iterator(); nextIndivisibleBlockIter.hasNext();) {
       LabCherryPick cherryPick = (LabCherryPick) nextIndivisibleBlockIter.next();
-      
+
       WellName assayWellName = availableWellNamesIter.next();
       cherryPick.setMapped(assayPlate,
                            assayWellName.getRowIndex(),
@@ -165,7 +165,7 @@ public class CherryPickRequestPlateMapper
         plateNumber = cherryPick.getSourceWell().getPlateNumber();
         copyName = cherryPick.getSourceCopy().getName();
       }
-      
+
       if (!plateNumber.equals(cherryPick.getSourceWell().getPlateNumber()) ||
         !copyName.equals(cherryPick.getSourceCopy().getName())) {
         break;
@@ -182,6 +182,7 @@ public class CherryPickRequestPlateMapper
       for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; row++) {
         if (!cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate().contains(column) &&
           !cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate().contains(column) &&
+          !cherryPickRequest.getRequestedEmptyRowsOnAssayPlate().contains(row) &&
           !cherryPickRequest.getRequiredEmptyRowsOnAssayPlate().contains(row)) {
           availableWellNames.add(new WellName(row, column));
         }

@@ -224,21 +224,37 @@ TODO:
 						styleClass="command" displayValueOnlyStyleClass="dataText" />
 
 					<t:outputText
-						value="Screener-requested&nbsp;empty columns&nbsp;on&nbsp;plate"
+						value="Screener-requested&nbsp;empty columns&nbsp;&amp;&nbsp;rows&nbsp;on&nbsp;plate"
 						escape="false"
-						title="The columns the screener requested to leave empty" />
-					<t:outputText
-						value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
-						rendered="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="dataText" />
-					<t:selectManyListbox
-						value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.value}"
-						size="20"
-						rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.mapped}"
-						styleClass="input">
-						<f:selectItems
-							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
-					</t:selectManyListbox>
+						title="The columns and rows the screener requested to be left empty" />
+					<t:panelGrid columns="2"
+						rendered="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}">
+						<t:outputText value="Columns:"/>
+						<t:outputText
+							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
+							styleClass="dataText" />
+						<t:outputText value="Rows:"/>
+						<t:outputText
+							value="#{cherryPickRequestViewer.emptyRowsOnAssayPlateAsString}"
+							styleClass="dataText" />
+					</t:panelGrid>
+					<t:panelGrid columns="2"
+						rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.mapped}">
+						<t:outputText value="Columns:"/>
+						<t:outputText value="Rows:"/>
+						<t:selectManyListbox
+							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.value}"
+							size="20" styleClass="input">
+							<f:selectItems
+								value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
+						</t:selectManyListbox>
+						<t:selectManyListbox
+							value="#{cherryPickRequestViewer.emptyRowsOnAssayPlate.value}"
+							size="20" styleClass="input">
+							<f:selectItems
+								value="#{cherryPickRequestViewer.emptyRowsOnAssayPlate.selectItems}" />
+						</t:selectManyListbox>
+					</t:panelGrid>
 
 					<t:outputText value="Comments" escape="false"
 						title="Comments made by screening room staff" />

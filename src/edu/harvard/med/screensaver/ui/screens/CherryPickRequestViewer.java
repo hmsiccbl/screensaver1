@@ -317,10 +317,14 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   }
 
   private static final Collection<Integer> PLATE_COLUMNS_LIST = new ArrayList<Integer>();
+  private static final Collection<Character> PLATE_ROWS_LIST = new ArrayList<Character>();
 
   static {
     for (int i = Well.MIN_WELL_COLUMN; i <= Well.MAX_WELL_COLUMN; i++) {
       PLATE_COLUMNS_LIST.add(i);
+    }
+    for (char i = Well.MIN_WELL_ROW; i <= Well.MAX_WELL_ROW; i++) {
+      PLATE_ROWS_LIST.add(i);
     }
   }
 
@@ -346,6 +350,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
   private UISelectOneEntityBean<AdministratorUser> _volumeApprovedBy;
   private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
+  private UISelectManyBean<Character> _emptyRowsOnAssayPlate;
 
   private DataTable<ScreenerCherryPick> _screenerCherryPicksDataTable;
   private DataTable<LabCherryPick> _labCherryPicksDataTable;
@@ -359,9 +364,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<ScreensaverUser> _liquidTransferPerformedBy;
   private Date _dateOfLiquidTransfer;
   private String _liquidTransferComments;
-
-
-
 
 
   // public constructors and methods
@@ -493,6 +495,12 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       new UISelectManyBean<Integer>(selectableEmptyColumns,
                                     _cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
 
+    Set<Character> selectableEmptyRows = new TreeSet<Character>(PLATE_ROWS_LIST);
+    selectableEmptyRows.removeAll(_cherryPickRequest.getRequiredEmptyRowsOnAssayPlate());
+    _emptyRowsOnAssayPlate =
+      new UISelectManyBean<Character>(selectableEmptyRows,
+                                    _cherryPickRequest.getRequestedEmptyRowsOnAssayPlate());
+
     _screenerCherryPicksDataTable.rebuildRows();
     _labCherryPicksDataTable.rebuildRows();
     _assayPlatesColumnModel = new ArrayDataModel(AssayPlateRow.ASSAY_PLATES_TABLE_COLUMNS);
@@ -623,6 +631,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public String getEmptyColumnsOnAssayPlateAsString()
   {
     return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()), ", ");
+  }
+
+  public UISelectManyBean<Character> getEmptyRowsOnAssayPlate()
+  {
+    return _emptyRowsOnAssayPlate;
+  }
+
+  public String getEmptyRowsOnAssayPlateAsString()
+  {
+    return StringUtils.makeListString(new TreeSet<Character>(_cherryPickRequest.getRequestedEmptyRowsOnAssayPlate()), ", ");
   }
 
   public int getScreenerCherryPickCount()
@@ -1192,6 +1210,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
           _cherryPickRequest.clearRequestedEmptyColumnsOnAssayPlate();
           _cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(_emptyColumnsOnAssayPlate.getSelections());
+          _cherryPickRequest.addRequestedEmptyRowsOnAssayPlate(_emptyRowsOnAssayPlate.getSelections());
         }
       });
     }

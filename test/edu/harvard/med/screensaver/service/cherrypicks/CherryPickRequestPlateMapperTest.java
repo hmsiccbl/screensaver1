@@ -2,11 +2,11 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
-  
+
 package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.math.BigDecimal;
@@ -17,8 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -36,22 +34,24 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 
+import org.apache.log4j.Logger;
+
 public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceTest
 {
   // static members
 
   private static Logger log = Logger.getLogger(CherryPickRequestPlateMapperTest.class);
 
-  
+
   // instance data members
-  
+
   protected LibrariesDAO librariesDao;
   protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
-  
+
 
   // public constructors and methods
-  
+
   public void testCherryPickPlateMapper()
   {
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -60,9 +60,13 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes library", 1, 6, 384);
         makeLibraryCopy(duplexLibrary, "C", 10);
         makeLibraryCopy(duplexLibrary, "D", 10);
-        genericEntityDao.saveOrUpdateEntity(duplexLibrary);
+        genericEntityDao.persistEntity(duplexLibrary);
+        genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
-        // create and allocate a cherry pick request, to cause next cherry pick request to draw from multiple plates
+        // create and allocate a cherry pick request, to force next cherry pick
+        // request to allocate some cherry picks from alternate plate copies;
+        // we need to allocate from multiple copies to test sets of picks from
+        // different copies are kept together on same cherry pick plate
         {
           CherryPickRequest earlierCherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 10);
           ScreenerCherryPick dummyScreenerCherryPick = earlierCherryPickRequest.createScreenerCherryPick(
@@ -75,6 +79,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
           earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A03")));
           genericEntityDao.saveOrUpdateEntity(earlierCherryPickRequest.getScreen());
           cherryPickRequestAllocator.allocate(earlierCherryPickRequest);
+          genericEntityDao.flush(); // needed to make sure above allocations are in the database; allocate(), below, will query db (not just session) for existing well volume reservations
         }
 
         CherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(2, 10);
@@ -82,25 +87,27 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
           librariesDao.findWell(new WellKey(1, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(false);
         Set<Integer> emptyColumns = new HashSet<Integer>();
-        emptyColumns.addAll(Arrays.asList(4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22));
+        emptyColumns.addAll(Arrays.asList(/*3,*/ 4, 5, 6, 7, /*8,*/ 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22));
         cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(emptyColumns);
-        addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "A14"); // to assay plate 1, col 3 and 8 (partially)
-        addLabCherryPicks(dummyScreenerCherryPick, 2, "A01", "A08"); // to assay plate 1, col 8 (leaving 2 available)
+        Set<Character> emptyRows = new HashSet<Character>();
+        emptyRows.addAll(Arrays.asList('D'));
+        addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "A14"); // to assay plate 1, col 3 (fully) and 8 (partially)
+        addLabCherryPicks(dummyScreenerCherryPick, 2, "A01", "A08"); // to assay plate 1, col 8 (leaving 1 available)
         addLabCherryPicks(dummyScreenerCherryPick, 3, "A01", "A16"); // to assay plate 2
-        addLabCherryPicks(dummyScreenerCherryPick, 4, "A01", "A08"); // to assay plate 2 (exactly full)
+        addLabCherryPicks(dummyScreenerCherryPick, 4, "A01", "A06"); // to assay plate 2 (exactly full)
         addLabCherryPicks(dummyScreenerCherryPick, 5, "A01", "B02"); // C copies (23) to assay plate 3, D copies (3) to assay plate 4
         addLabCherryPicks(dummyScreenerCherryPick, 6, "A01", "A09"); // both C (3) and D copies (6) to assay plate 4
-        assertEquals(81, cherryPickRequest.getLabCherryPicks().size());
+        assertEquals(79, cherryPickRequest.getLabCherryPicks().size());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
         cherryPickRequestAllocator.allocate(cherryPickRequest);
         cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequest);
 
         assertEquals("assay plates count", 4, cherryPickRequest.getCherryPickAssayPlates().size());
         assertLabCherryPicksOnAssayPlate(cherryPickRequest, 0, 21, 0);
-        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 22, 45, 1);
-        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 46, 68, 2);
-        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 69, 80, 3);
-        
+        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 22, 43, 1);
+        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 44, 66, 2);
+        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 67, 78, 3);
+
         CherryPickAssayPlate lastPlate = cherryPickRequest.getCherryPickAssayPlates().last();
         for (int iCol = 0; iCol < Well.PLATE_COLUMNS; iCol++) {
           if (iCol == 2) {
@@ -110,12 +117,12 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
             assertColumnIsEmpty(cherryPickRequest, lastPlate, iCol);
           }
         }
-        
+
         assertFalse(cherryPickRequest.isSourcePlateReloadRequired());
       }
     });
   }
-  
+
   /**
    * Tests the case where the wells from a single source plate are too numerous
    * to fit on even an empty assay plate (in which case we must map these wells
@@ -129,13 +136,14 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes library", 1, 1, 384);
         makeLibraryCopy(duplexLibrary, "C", 10);
         genericEntityDao.saveOrUpdateEntity(duplexLibrary);
+        genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
         CherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 10);
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(
           librariesDao.findWell(new WellKey(1, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(false);
         Set<Integer> emptyColumns = new HashSet<Integer>();
-        emptyColumns.addAll(Arrays.asList(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22));
+        emptyColumns.addAll(Arrays.asList(/*3,*/ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22));
         cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(emptyColumns);
         addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "B04"); // enough to fill 2 assay plates completely, plus a 3rd, partially
         assertEquals(28, cherryPickRequest.getLabCherryPicks().size());
@@ -147,12 +155,12 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         assertLabCherryPicksOnAssayPlate(cherryPickRequest, 0, 11, 0);
         assertLabCherryPicksOnAssayPlate(cherryPickRequest, 12, 23, 1);
         assertLabCherryPicksOnAssayPlate(cherryPickRequest, 24, 27, 2);
-        
+
         assertTrue(cherryPickRequest.isSourcePlateReloadRequired());
       }
     });
   }
-  
+
   public void testRandomizedPlateMappingIsLeftConstrained()
   {
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -160,8 +168,8 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
       public void runTransaction() {
         Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
         makeLibraryCopy(library, "C", 10);
-        
         genericEntityDao.saveOrUpdateEntity(library);
+        genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
         CherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 10);
         ScreenerCherryPick dummyScreenerCherryPick1 = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
@@ -193,12 +201,12 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
       }
     });
   }
-  
+
   /**
    * Test that all available wells on a cherry pick plate are being assigned to
    * exactly once. By "available wells" we mean any well that is not in the
-   * "required empty columns", "required empty rows" and "screener-requested
-   * empty columns" are unused.
+   * "required empty columns", "required empty rows", "screener-requested
+   * empty columns", and "screener-requested empty rows" are unused.
    */
   public void testCherryPickPlateIsFullyUtilized()
   {
@@ -209,6 +217,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 1, 384);
         makeLibraryCopy(library, "C", 10);
         genericEntityDao.saveOrUpdateEntity(library);
+        genericEntityDao.flush(); // needed since cprAllocator.allocate() calls reload for each well, which must be in db (not just session)
 
         RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 10);
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
@@ -216,12 +225,15 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         Set<Integer> emptyColumns = new HashSet<Integer>();
         emptyColumns.addAll(Arrays.asList(3)); // 1-based column number
         cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(emptyColumns);
-        addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "J12"); // create 228 cherry picks, to fill all available wells on cherry pick plate
+        Set<Character> emptyRows = new HashSet<Character>();
+        emptyRows.addAll(Arrays.asList('C')); // 1-based row number
+        cherryPickRequest.addRequestedEmptyRowsOnAssayPlate(emptyRows);
+        addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "I17"); // create 209 cherry picks, to fill all available wells on cherry pick plate
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
         cherryPickRequestAllocator.allocate(cherryPickRequest);
         cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequest);
-        
-        
+
+
         TreeSet<LabCherryPick> sortedLabCherryPicks = new TreeSet<LabCherryPick>(new Comparator<LabCherryPick>() {
           public int compare(LabCherryPick o1, LabCherryPick o2) {
             return o1.getAssayPlateWellName().getName().compareTo(o2.getAssayPlateWellName().getName());
@@ -229,24 +241,26 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         sortedLabCherryPicks.addAll(cherryPickRequest.getLabCherryPicks());
 
         assertEquals("assay plates count", 1, cherryPickRequest.getCherryPickAssayPlates().size());
-        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 0, 228 - 1, 0);
+        assertLabCherryPicksOnAssayPlate(cherryPickRequest, 0, 209 - 1, 0);
         Set<WellName> usedWellNames = new HashSet<WellName>();
         for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
           log.debug("testing " + labCherryPick);
-          assertEquals("lab cherry pick assigned to assay plate 0", 
-                       0, 
+          assertEquals("lab cherry pick assigned to assay plate 0",
+                       0,
                        labCherryPick.getAssayPlate().getPlateOrdinal().intValue());
-          assertNotNull("lab cherry pick assigned to row", 
+          assertNotNull("lab cherry pick assigned to row",
                         labCherryPick.getAssayPlateRow());
-          assertNotNull("lab cherry pick assigned to column", 
+          assertNotNull("lab cherry pick assigned to column",
                         labCherryPick.getAssayPlateColumn());
-          assertFalse("lab cherry pick not assigned to a requested empty column", 
-                      cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate().contains(Well.MIN_WELL_COLUMN + labCherryPick.getAssayPlateColumn())); 
-          assertFalse("lab cherry pick not assigned to a required empty column", 
-                      cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate().contains(Well.MIN_WELL_COLUMN + labCherryPick.getAssayPlateColumn())); 
-          assertFalse("lab cherry pick not assigned to a required empty row", 
-                      cherryPickRequest.getRequiredEmptyRowsOnAssayPlate().contains(Well.MIN_WELL_ROW +  labCherryPick.getAssayPlateRow())); 
-          assertNotNull("lab cherry pick assigned to unused well", 
+          assertFalse("lab cherry pick not assigned to a requested empty column",
+                      cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate().contains(Well.MIN_WELL_COLUMN + labCherryPick.getAssayPlateColumn()));
+          assertFalse("lab cherry pick not assigned to a required empty column",
+                      cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate().contains(Well.MIN_WELL_COLUMN + labCherryPick.getAssayPlateColumn()));
+          assertFalse("lab cherry pick not assigned to a requested empty row",
+                      cherryPickRequest.getRequestedEmptyRowsOnAssayPlate().contains(Well.MIN_WELL_ROW + labCherryPick.getAssayPlateRow()));
+          assertFalse("lab cherry pick not assigned to a required empty row",
+                      cherryPickRequest.getRequiredEmptyRowsOnAssayPlate().contains(Well.MIN_WELL_ROW +  labCherryPick.getAssayPlateRow()));
+          assertNotNull("lab cherry pick assigned to unused well",
                         usedWellNames.contains(labCherryPick.getAssayPlateWellName()));
           usedWellNames.add(labCherryPick.getAssayPlateWellName());
         }
@@ -282,13 +296,14 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
       }
     }
     assertEquals("column " + columnIndex + " is full on plate " + assayPlate.getName(),
-                 Well.PLATE_ROWS - cherryPickRequest.getRequiredEmptyRowsOnAssayPlate().size(),
+                 Well.PLATE_ROWS - (cherryPickRequest.getRequiredEmptyRowsOnAssayPlate().size() +
+                   cherryPickRequest.getRequestedEmptyRowsOnAssayPlate().size()),
                  cherryPicksInColumn);
   }
 
   private void addLabCherryPicks(ScreenerCherryPick screenerCherryPick,
-                                 int libraryPlateNumber, 
-                                 String firstWellNameStr, 
+                                 int libraryPlateNumber,
+                                 String firstWellNameStr,
                                  String lastWellNameStr)
   {
     WellName firstWellName = new WellName(firstWellNameStr);
@@ -297,14 +312,14 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
       int iColFirst;
       if (iRow == firstWellName.getRowIndex()) {
         iColFirst = firstWellName.getColumnIndex();
-      } 
+      }
       else {
         iColFirst = Well.MIN_WELL_COLUMN - 1;
       }
       int iColLast;
       if (iRow == lastWellName.getRowIndex()) {
         iColLast = lastWellName.getColumnIndex();
-      } 
+      }
       else {
         iColLast = Well.MAX_WELL_COLUMN - 1;
       }
@@ -319,21 +334,29 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
 
   // private methods
 
-  private void assertLabCherryPicksOnAssayPlate(CherryPickRequest cherryPickRequest, 
-                                                int firstIndex, 
-                                                int lastIndex, 
+  private void assertLabCherryPicksOnAssayPlate(CherryPickRequest cherryPickRequest,
+                                                int firstIndex,
+                                                int lastIndex,
                                                 int expectedAssayPlateIndex)
   {
     TreeSet<LabCherryPick> sortedCherryPicks = new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance());
     sortedCherryPicks.addAll(cherryPickRequest.getLabCherryPicks());
     List<LabCherryPick> indexedCherryPicks = new ArrayList<LabCherryPick>(sortedCherryPicks);
     for (int index = firstIndex; index <= lastIndex; index++) {
-      String expectedAssayPlateName = String.format("Cherry Picker (%d) CP%d  Plate %02d of %d",
+      String expectedAssayPlateName = String.format("Cherry Picker_%d (%d) CP%d  Plate %02d of %d",
+                                                    cherryPickRequest.getScreen().getScreenNumber(),
                                                     cherryPickRequest.getScreen().getScreenNumber(),
                                                     cherryPickRequest.getEntityId(),
                                                     expectedAssayPlateIndex + 1,
                                                     cherryPickRequest.getCherryPickAssayPlates().size());
       LabCherryPick cherryPick = indexedCherryPicks.get(index);
+      if (log.isDebugEnabled()) {
+        log.debug("labCherryPick #" + index +
+                  " source_copy=" + cherryPick.getSourceCopy().getName() +
+                  " source_well=" + cherryPick.getSourceWell() +
+                  " plate=" + cherryPick.getAssayPlate().getPlateOrdinal() +
+                  " well=" + cherryPick.getAssayPlateWellName());
+      }
       assertEquals("cherry pick #" + index + " assay plate name",
                    expectedAssayPlateName,
                    cherryPick.getAssayPlate().getName());
@@ -350,7 +373,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
   {
     Copy copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
     for (int plateNumber = library.getStartPlate(); plateNumber <= library.getEndPlate(); plateNumber++) {
-      copy.createCopyInfo(plateNumber, "<loc>", PlateType.EPPENDORF, new BigDecimal(volume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));      
+      copy.createCopyInfo(plateNumber, "<loc>", PlateType.EPPENDORF, new BigDecimal(volume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
     }
   }
 }
