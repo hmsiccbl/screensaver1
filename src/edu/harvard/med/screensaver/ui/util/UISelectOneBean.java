@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -24,12 +24,12 @@ public class UISelectOneBean<T> extends UISelectBean<T>
 
 
   // instance data members
-  
+
   private T _selection;
   private String _selectionKey;
   private int _selectionIndex;
 
-  
+
   // public constructors and methods
 
   public UISelectOneBean(Collection<T> objects)
@@ -46,14 +46,14 @@ public class UISelectOneBean<T> extends UISelectBean<T>
     this(objects);
     setSelection(defaultSelection);
   }
-  
+
   public UISelectOneBean()
   {
     this(new ArrayList<T>());
   }
 
   /**
-   * Get the selected item's key. Called by JSF UISelect component. Naming of
+   * Set the selected item's key. Called by JSF UISelect component. Naming of
    * this method corresponds to the JSF UISelect component's "value" attribute.
    * @throws IllegalArgumentException if selectionKey is unknown
    */
@@ -63,12 +63,12 @@ public class UISelectOneBean<T> extends UISelectBean<T>
     {
       throw new IllegalArgumentException("unknown selection key " + selectionKey);
     }
-    
+
     _selectionKey = selectionKey;
     _selection = _key2Obj.get(selectionKey);
-    
+
     int newSelectionIndex = -1;
-    
+
     // TODO: linear search! yuck!
     int i = 0;
     for (SelectItem selectItem : getSelectItems()) {
@@ -85,7 +85,7 @@ public class UISelectOneBean<T> extends UISelectBean<T>
       notifyObservers(_selection);
     }
   }
-  
+
   /**
    * Returns selection key. Called by JSF UISelect component. Naming of this
    * method corresponds to the JSF UISelect component's "value" attribute.
@@ -99,21 +99,21 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   {
     setValue(getKey(t));
   }
-  
+
   /**
-   * called by controller 
+   * called by controller
    */
   public T getSelection()
   {
     return _selection;
   }
-  
+
   public void setSelectionIndex(int index)
   {
     _selectionIndex = index;
     setSelection(_key2Obj.get(getSelectItems().get(index).getValue()));
   }
-  
+
   public int getSelectionIndex()
   {
     return _selectionIndex;
