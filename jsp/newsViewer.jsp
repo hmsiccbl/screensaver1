@@ -8,7 +8,12 @@
 		<p>Check back here regularly for the latest Screensaver news and
 		gossip!</p>
 		<dl>
-			<dt><span class="newsDate">2007.Oct.10, v1.3.0</span></dt>
+			<dt><span class="newsDate">2007.Oct.12, v1.3.1</span></dt>
+			<dd>
+			<p>Administrator can now specify the set of rows to be left empty when
+			Screensaver generates cherry pick plate mappings.</p>
+			</dd>
+			<dt><span class="newsDate">2007.Oct.11, v1.3.0</span></dt>
 			<dd>
 			<p>Upgraded the Screensaver object model to use Hibernate
 			annotations instead of XDoclet annotations. Other various
