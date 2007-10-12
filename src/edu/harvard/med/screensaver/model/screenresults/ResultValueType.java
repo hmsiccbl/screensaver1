@@ -574,25 +574,17 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Get whether this result value type is an positive indicator.
-   * <p>
-   * TODO: explain what this is, exactly.
-   * @return true iff this result value type is an positive indicator
+   * Get whether this result value type is a positive indicator, meaning that
+   * its result value data is used to determine whether a given well is deemed a
+   * positive result in the screen.
+   *
+   * @return true iff this result value type is a positive indicator
    */
-  @Column(nullable=false, name="isPositiveIndicator")
+  @Column(nullable=false, updatable=false, name="isPositiveIndicator")
+  @org.hibernate.annotations.Immutable
   public boolean isPositiveIndicator()
   {
     return _isPositiveIndicator;
-  }
-
-  /**
-   * Set whether this <code>ResultValueType</code> is an positive indicator.
-   * @param isActivityIndicator set to <code>true</code> iff this
-   *          <code>ResultValueType</code> is an positive indicator
-   */
-  public void setPositiveIndicator(boolean isActivityIndicator)
-  {
-    _isPositiveIndicator = isActivityIndicator;
   }
 
   /**
@@ -739,7 +731,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param name the name of this result value type
    * @param replicateOrdinal the replicate ordinal
    * @param isDerived true iff this result value type is derived from other result value types
-   * @param isPositiveIndicator true iff this result value type is an positive indicator
+   * @param isPositiveIndicator true iff this result value type is a positive indicator
    * @param isFollowupData true iff this result value type contains follow up data
    * @param assayPhenotype the assay phenotype
    */
@@ -761,6 +753,9 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     setReplicateOrdinal(replicateOrdinal);
     setDerived(isDerived);
     setPositiveIndicator(isPositiveIndicator);
+    if (isPositiveIndicator) {
+      _positivesCount = 0;
+    }
     setFollowUpData(isFollowupData);
     setAssayPhenotype(assayPhenotype);
   }
@@ -816,6 +811,16 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
+  }
+
+  /**
+   * Set whether this <code>ResultValueType</code> is a positive indicator.
+   * @param isActivityIndicator set to <code>true</code> iff this
+   *          <code>ResultValueType</code> is a positive indicator
+   */
+  private void setPositiveIndicator(boolean isActivityIndicator)
+  {
+    _isPositiveIndicator = isActivityIndicator;
   }
 
   /**
@@ -994,6 +999,11 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
             break;
           }
         }
+      }
+    }
+    if (log.isDebugEnabled()) {
+      if (isPositive) {
+        log.debug("result value [well=" + rv.getWellId() + ", value=" + rv.getValue() + ", exclude=" + rv.isExclude() + ", wellType=" + rv.getAssayWellType() + "] is a positive");
       }
     }
     return isPositive;

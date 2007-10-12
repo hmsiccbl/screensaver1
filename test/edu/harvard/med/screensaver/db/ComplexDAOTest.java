@@ -796,7 +796,7 @@ public class ComplexDAOTest extends AbstractSpringTest
    * properties should be updated when a ResultValue is added to a
    * ScreenResult's ResultValueType.
    */
-  public void testScreenResultUpdates()
+  public void testScreenResultDerivedPersistentValues()
   {
     final SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
     final SortedSet<Well> expectedWells = new TreeSet<Well>();
@@ -809,11 +809,12 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         ScreenResult screenResult = screen.createScreenResult(new Date());
-        ResultValueType rvt = screenResult.createResultValueType("Raw Value");
-        rvt.setPositiveIndicator(true);
-        rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
-        rvt.setPositiveIndicatorCutoff(indicatorCutoff);
-        rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
+        ResultValueType rvt1 = screenResult.createResultValueType("RVT1", null, false, true, false, "");
+        rvt1.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
+        rvt1.setPositiveIndicatorCutoff(indicatorCutoff);
+        rvt1.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
+        ResultValueType rvt2 = screenResult.createResultValueType("RVT2", null, false, true, false, "");
+        rvt2.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
         Library library = new Library(
           "library 1",
           "lib1",
@@ -828,14 +829,16 @@ public class ComplexDAOTest extends AbstractSpringTest
           expectedWells.add(well);
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           boolean exclude = i % 4 == 0;
-          rvt.addResultValue(well, assayWellType, (double) i, 3, false);
+          double rvt1Value = (double) i;
+          rvt1.addResultValue(well, assayWellType, rvt1Value, 3, exclude);
+          rvt2.addResultValue(well, assayWellType, "false", false);
           if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
             expectedExperimentalWellCount[0]++;
-            if (!exclude && i >= indicatorCutoff) {
+            if (!exclude && rvt1Value >= indicatorCutoff) {
+              log.debug("result value " + rvt1Value + " is deemed a positive by this test");
               ++expectedPositives[0];
             }
           }
-
         }
         genericEntityDao.saveOrUpdateEntity(screen);
       }
@@ -847,7 +850,9 @@ public class ComplexDAOTest extends AbstractSpringTest
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
         assertEquals("wells", expectedWells, screen.getScreenResult().getWells());
-        assertEquals("experimental well count", expectedExperimentalWellCount[0], (int) screen.getScreenResult().getExperimentalWellCount());
+        assertEquals("experimental well count", expectedExperimentalWellCount[0], screen.getScreenResult().getExperimentalWellCount().intValue());
+        assertEquals("positives", expectedPositives[0], screen.getScreenResult().getResultValueTypesList().get(0).getPositivesCount().intValue());
+        assertEquals("0 positives (but not null)", 0, screen.getScreenResult().getResultValueTypesList().get(1).getPositivesCount().intValue());
       }
     });
   }
@@ -857,10 +862,8 @@ public class ComplexDAOTest extends AbstractSpringTest
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
     ScreenResult screenResult = screen.createScreenResult(new Date());
     ResultValueType rvt1 = screenResult.createResultValueType("Raw Value");
-    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value");
-    rvt2.setPositiveIndicator(true);
+    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value", null, true, true, false, null);
     rvt2.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
-    rvt2.setDerived(true);
     rvt2.setHowDerived("even wells are 'S', otherwise 'W'");
     rvt2.addTypeDerivedFrom(rvt1);
     Library library = new Library(

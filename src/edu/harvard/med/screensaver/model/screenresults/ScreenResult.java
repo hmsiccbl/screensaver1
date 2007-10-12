@@ -86,7 +86,7 @@ public class ScreenResult extends AbstractEntity
    *             normalized Plate table.
    */
   private SortedSet<Integer> _plateNumbers = new TreeSet<Integer>();
-  private Integer _experimentalWellCount;
+  private Integer _experimentalWellCount = 0; // can't be null
 
   private transient UniqueDataHeaderNames _uniqueDataHeaderNames;
 
