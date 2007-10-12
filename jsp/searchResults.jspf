@@ -26,6 +26,7 @@
 					var="column"
 					styleClass="#{column.numeric ? \"numericColumn\" : \"column\"}">
 					<f:facet name="header">
+						<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
 						<t:commandSortHeader columnName="#{column.name}" arrow="false"
 							immediate="false" title="#{column.description}">
 							<f:facet name="ascending">

@@ -367,7 +367,9 @@ TODO:
 							value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.columnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
-								<t:commandSortHeader columnName="#{column.name}" arrow="false">
+							<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
+								<t:commandSortHeader columnName="#{column.name}" arrow="false"
+									immediate="false">
 									<f:facet name="ascending">
 										<t:graphicImage value="/images/ascending-arrow.gif"
 											rendered="true" border="0" />
@@ -491,7 +493,9 @@ TODO:
 							value="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.columnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
-								<t:commandSortHeader columnName="#{column.name}" arrow="false">
+							<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
+								<t:commandSortHeader columnName="#{column.name}" arrow="false"
+									immediate="false">
 									<f:facet name="ascending">
 										<t:graphicImage value="/images/ascending-arrow.gif"
 											rendered="true" border="0" />

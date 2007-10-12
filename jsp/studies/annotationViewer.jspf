@@ -137,8 +137,9 @@
 									styleClass="#{(column.name==\"Reagent Source ID\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")}">
 									<f:facet name="header">
 										<t:popup displayAtDistanceY="20">
+											<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
 											<t:commandSortHeader columnName="#{column.name}"
-												arrow="false">
+												arrow="false" immediate="false">
 												<h:outputText value="#{column.name}" />
 												<f:facet name="ascending">
 													<t:graphicImage value="/images/ascending-arrow.gif"
