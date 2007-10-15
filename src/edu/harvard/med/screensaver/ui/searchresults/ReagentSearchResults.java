@@ -92,9 +92,8 @@ public class ReagentSearchResults extends EntitySearchResults<Well> implements O
     _annotationsDao = annotationsDao;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
-    // HACK: the "annotationTypes" panel must be expanded initially, if all metadata type selections are to be selected on initialization (MetaDataTable.initialize())
-    _isPanelCollapsedMap.put("annotationTypes", false);
-    _isPanelCollapsedMap.put("annotationValues", true);
+    _isPanelCollapsedMap.put("annotationTypes", true);
+    _isPanelCollapsedMap.put("reagentsData", false);
 
   }
 

@@ -54,10 +54,6 @@
 				</t:div>
 			</f:facet>
 
-			<%--t:outputText value="#{showHideAnnotationDialogBuffer}"
-				escape="false"
-				rendered="#{reagentsBrowser.isPanelCollapsedMap['annotationValues']}" /--%>
-
 			<t:dataTable id="annotationTypesTable"
 				value="#{reagentsBrowser.annotationTypesTable.dataModel}" var="row"
 				rendered="#{!isCollapsed}" styleClass="standardTable"
@@ -81,8 +77,8 @@
 			</t:dataTable>
 		</t:collapsiblePanel>
 
-		<t:collapsiblePanel id="annotationValuesPanel"
-			value="#{annotationViewer.isPanelCollapsedMap['annotationValues']}"
+		<t:collapsiblePanel id="reagentsDataPanel"
+		value="#{reagentsBrowser.isPanelCollapsedMap['reagentsData']}"
 			title="Reagents" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<t:div styleClass="subsectionHeader">
@@ -101,7 +97,7 @@
 		</t:collapsiblePanel>
 	</h:form>
 
-	<t:panelGroup rendered="#{reagentsBrowser.entityView && !annotationViewer.isPanelCollapsedMap['annotationValues']}">
+	<t:panelGroup rendered="#{reagentsBrowser.entityView && !reagentsBrowser.isPanelCollapsedMap['annotationValues']}">
 		<%@ include file="reagentViewer.jsp"%>
 	</t:panelGroup>
 </f:subview>
