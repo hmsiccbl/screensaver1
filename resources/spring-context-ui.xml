@@ -233,6 +233,11 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults">
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.AnnotationTypesTable"
+        parent="uiBean" />
+    </constructor-arg>
     <constructor-arg ref="reagentViewer" />
     <constructor-arg ref="compoundViewer" />
     <constructor-arg ref="geneViewer" />

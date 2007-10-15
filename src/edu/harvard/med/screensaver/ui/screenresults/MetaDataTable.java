@@ -120,7 +120,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     return _columnModel;
   }
 
-  public UISelectManyBean<T> getSelections()
+  public UISelectManyBean<T> getSelector()
   {
     if (_selections == null) {
       _selections = new UISelectManyBean<T>(getDataTypes())
@@ -176,13 +176,13 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   public void selectionListener(ValueChangeEvent event)
   {
     log.debug("meta data type selections changed to " + event.getNewValue());
-    getSelections().setValue((List<String>) event.getNewValue());
+    getSelector().setValue((List<String>) event.getNewValue());
 
     // enforce minimum of 1 selected meta data type (data table query will break otherwise)
-    if (getSelections().getSelections().size() == 0) {
-      getSelections().setSelections(getDataTypes().subList(0,1));
+    if (getSelector().getSelections().size() == 0) {
+      getSelector().setSelections(getDataTypes().subList(0,1));
       // this call shouldn't be necessary, as I would've expected UIInput component to query its model in render phase, but...
-      _selectManyUIComponent.setValue(getSelections().getValue());
+      _selectManyUIComponent.setValue(getSelector().getValue());
     }
 
     // skip "update model" JSF phase, to avoid overwriting model values set above
@@ -195,16 +195,16 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   @UIControllerMethod
   public String selectAll()
   {
-    getSelections().setSelections(getDataTypes());
-    _selectManyUIComponent.setValue(getSelections().getValue());
+    getSelector().setSelections(getDataTypes());
+    _selectManyUIComponent.setValue(getSelector().getValue());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod
   public String selectNone()
   {
-    getSelections().setSelections(getDataTypes().subList(0, 1));
-    _selectManyUIComponent.setValue(getSelections().getValue());
+    getSelector().setSelections(getDataTypes().subList(0, 1));
+    _selectManyUIComponent.setValue(getSelector().getValue());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -247,7 +247,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   private List<String> getSelectedMetaDataTypeNames()
   {
     List<String> namesOfSelected = new ArrayList<String>();
-    for (T metaDataType : getSelections().getSelections()) {
+    for (T metaDataType : getSelector().getSelections()) {
       namesOfSelected.add(metaDataType.getName());
     }
     return namesOfSelected;

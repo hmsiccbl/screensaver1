@@ -210,7 +210,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   public UISelectManyBean<ResultValueType> getDataHeaderSelections()
   {
-    return getDataHeadersTable().getSelections();
+    return getDataHeadersTable().getSelector();
   }
 
   public ResultValueTypeTable getDataHeadersTable()

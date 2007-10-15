@@ -32,7 +32,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import org.apache.log4j.Logger;
 
 /**
- * SearchResults subclass that add support for:
+ * SearchResults subclass that adds support for:
  * <ul>
  * <li>"Summary" and "Entity" viewing modes, corresponding to a multi-entity list
  * view and a single-entity full page view, respectively.</li>

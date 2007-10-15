@@ -12,8 +12,11 @@ package edu.harvard.med.screensaver.ui.searchresults;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
@@ -27,18 +30,21 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
+import edu.harvard.med.screensaver.ui.screenresults.AnnotationTypesTable;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
+import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 
 import org.apache.log4j.Logger;
 
 
 /**
- * A {@link SearchResults} for {@link Well Wells}.
+ * A {@link SearchResults} for {@link Well Wells}. Provides user-selectable
+ * annotation type columns.
  *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ReagentSearchResults extends EntitySearchResults<Well>
+public class ReagentSearchResults extends EntitySearchResults<Well> implements Observer
 {
 
   // private static final fields
@@ -48,13 +54,14 @@ public class ReagentSearchResults extends EntitySearchResults<Well>
 
   // instance fields
 
+  private AnnotationTypesTable _annotationTypesTable;
+  private Map<String,Boolean> _isPanelCollapsedMap;
   private ReagentViewer _reagentViewer;
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
   private AnnotationsDAO _annotationsDao;
 
   private List<TableColumn<Well>> _columns;
-  private List<AnnotationType> _annotationTypes;
   private Map<ReagentVendorIdentifier,List<AnnotationValue>> _annotationValues;
 
 
@@ -70,24 +77,32 @@ public class ReagentSearchResults extends EntitySearchResults<Well>
   /**
    * Construct a new <code>WellSearchResultsViewer</code> object.
    */
-  public ReagentSearchResults(ReagentViewer reagentViewer,
+  public ReagentSearchResults(AnnotationTypesTable annotationTypesTable,
+                              ReagentViewer reagentViewer,
                               CompoundViewer compoundViewer,
                               GeneViewer geneViewer,
                               AnnotationsDAO annotationsDao,
                               List<DataExporter<Well>> dataExporters)
   {
     super(dataExporters);
+    _annotationTypesTable = annotationTypesTable;
     _reagentViewer = reagentViewer;
     _compoundViewer = compoundViewer;
     _geneViewer = geneViewer;
     _annotationsDao = annotationsDao;
+
+    _isPanelCollapsedMap = new HashMap<String,Boolean>();
+    // HACK: the "annotationTypes" panel must be expanded initially, if all metadata type selections are to be selected on initialization (MetaDataTable.initialize())
+    _isPanelCollapsedMap.put("annotationTypes", false);
+    _isPanelCollapsedMap.put("annotationValues", true);
+
   }
 
   public void setContents(Collection<Well> unsortedResults,
                           String description,
                           List<AnnotationType> annotationTypes)
   {
-    _annotationTypes = annotationTypes;
+    _annotationTypesTable.initialize(annotationTypes, this);
     List<ReagentVendorIdentifier> rvids = new ArrayList<ReagentVendorIdentifier>(unsortedResults.size());
     for (Well well : unsortedResults) {
       rvids.add(well.getReagentVendorIdentifier());
@@ -95,6 +110,32 @@ public class ReagentSearchResults extends EntitySearchResults<Well>
     _annotationValues = _annotationsDao.findAnnotationValues(rvids, annotationTypes);
 
     super.setContents(unsortedResults, description);
+  }
+
+  public void update(Observable observable, Object selections)
+  {
+    log.debug("annotation type selection changed");
+    getDataTable().rebuildColumnsAndRows();
+  }
+
+  public UISelectManyBean<AnnotationType> getAnnotationTypeSelector()
+  {
+    return getAnnotationTypesTable().getSelector();
+  }
+
+  public List<AnnotationType> getSelectedAnnotationTypes()
+  {
+    return getAnnotationTypesTable().getSelector().getSelections();
+  }
+
+  public Map<?,?> getIsPanelCollapsedMap()
+  {
+    return _isPanelCollapsedMap;
+  }
+
+  public AnnotationTypesTable getAnnotationTypesTable()
+  {
+    return _annotationTypesTable;
   }
 
 
@@ -164,11 +205,9 @@ public class ReagentSearchResults extends EntitySearchResults<Well>
       }
     });
 
-    if (_annotationTypes != null) {
-      int i = 0;
-      for (AnnotationType annotationType : _annotationTypes) {
-        _columns.add(new AnnotationTypeColumn(annotationType, i++));
-      }
+    int i = 0;
+    for (AnnotationType annotationType : getSelectedAnnotationTypes()) {
+      _columns.add(new AnnotationTypeColumn(annotationType, i++));
     }
 
     return _columns;

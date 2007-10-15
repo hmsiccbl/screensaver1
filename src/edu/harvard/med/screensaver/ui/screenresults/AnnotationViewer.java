@@ -99,7 +99,7 @@ public class AnnotationViewer extends AbstractBackingBean implements Observer
 
   public UISelectManyBean<AnnotationType> getAnnotationTypeSelections()
   {
-    return getAnnotationTypesTable().getSelections();
+    return getAnnotationTypesTable().getSelector();
   }
 
   public AnnotationTypesTable getAnnotationTypesTable()
