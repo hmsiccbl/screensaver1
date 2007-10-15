@@ -9,19 +9,19 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer;
+import edu.harvard.med.screensaver.ui.annotations.AnnotationViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
+
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 public class ScreenViewer extends StudyViewer
 {

@@ -235,7 +235,7 @@
     class="edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults">
     <constructor-arg>
       <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.AnnotationTypesTable"
+        class="edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable"
         parent="uiBean" />
     </constructor-arg>
     <constructor-arg ref="reagentViewer" />
@@ -505,16 +505,16 @@
     id="annotationViewer"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer">
+    class="edu.harvard.med.screensaver.ui.annotations.AnnotationViewer">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg>
       <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.AnnotationTypesTable"
+        class="edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable"
         parent="uiBean" />
     </constructor-arg>
     <constructor-arg>
       <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.AnnotationValuesTable"
+        class="edu.harvard.med.screensaver.ui.annotations.AnnotationValuesTable"
         parent="uiBean">
         <constructor-arg ref="genericEntityDao" />
         <constructor-arg ref="annotationsDao" />

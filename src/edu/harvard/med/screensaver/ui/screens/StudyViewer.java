@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.screenresults.AnnotationViewer;
+import edu.harvard.med.screensaver.ui.annotations.AnnotationViewer;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
