@@ -117,8 +117,6 @@
 			<%@ include file="dataTableNavigator.jspf"%>
 		</t:aliasBean>
 
-		<t:outputText value="#{searchResultsHeader}" escape="false" />
-
 		<t:outputText value="#{dataTableBuffer}" escape="false"
 			rendered="#{!searchResults.capabilities[\"viewEntity\"] || !searchResults.entityView}" />
 

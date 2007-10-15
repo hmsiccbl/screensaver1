@@ -5,7 +5,8 @@
 
 <f:subview id="reagentSearchResultsViewer">
 
-	<t:buffer into="#{searchResultsHeader}">
+	<h:form id="reagentSearchResultsViewerForm">
+
 		<t:popup id="showHideAnnotationDialog" closePopupOnExitingPopup="true"
 			closePopupOnExitingElement="false" styleClass="popupDialog">
 			<t:commandLink>
@@ -38,18 +39,71 @@
 				</t:panelGrid>
 			</f:facet>
 		</t:popup>
-	</t:buffer>
 
-	<h:form id="reagentSearchResultsViewerForm">
-		<t:aliasBean alias="#{searchResults}" value="#{reagentsBrowser}">
-			<%@include file="../searchResults.jspf"%>
-		</t:aliasBean>
+		<t:collapsiblePanel id="annotationTypesPanel"
+			value="#{reagentsBrowser.isPanelCollapsedMap['annotationTypes']}"
+			title="Annotation Types" var="isCollapsed" titleVar="title">
+			<f:facet name="header">
+				<t:div styleClass="subsectionHeader">
+					<t:headerLink immediate="true" styleClass="subsectionHeader">
+						<h:graphicImage
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							styleClass="icon" />
+						<h:outputText value="#{title}" styleClass="subsectionHeader" />
+					</t:headerLink>
+				</t:div>
+			</f:facet>
+
+			<%--t:outputText value="#{showHideAnnotationDialogBuffer}"
+				escape="false"
+				rendered="#{reagentsBrowser.isPanelCollapsedMap['annotationValues']}" /--%>
+
+			<t:dataTable id="annotationTypesTable"
+				value="#{reagentsBrowser.annotationTypesTable.dataModel}" var="row"
+				rendered="#{!isCollapsed}" styleClass="standardTable"
+				headerClass="tableHeader" rowClasses="row1,row2">
+				<t:column styleClass="keyColumn">
+					<f:facet name="header">
+						<t:outputText value="Annotation Name" />
+					</f:facet>
+					<t:outputText value="#{row.rowLabel}" escape="false"
+						title="#{row.rowDescription}" />
+				</t:column>
+				<t:columns
+					value="#{reagentsBrowser.annotationTypesTable.columnModel}"
+					var="columnName" styleClass="column">
+					<f:facet name="header">
+						<t:outputText value="#{columnName}" />
+					</f:facet>
+					<t:outputText
+						value="#{reagentsBrowser.annotationTypesTable.cellValue}" />
+				</t:columns>
+			</t:dataTable>
+		</t:collapsiblePanel>
+
+		<t:collapsiblePanel id="annotationValuesPanel"
+			value="#{annotationViewer.isPanelCollapsedMap['annotationValues']}"
+			title="Reagents" var="isCollapsed" titleVar="title">
+			<f:facet name="header">
+				<t:div styleClass="subsectionHeader">
+					<t:headerLink immediate="true" styleClass="subsectionHeader">
+						<h:graphicImage
+							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+							styleClass="icon" />
+						<h:outputText value="#{title}" styleClass="subsectionHeader" />
+					</t:headerLink>
+				</t:div>
+			</f:facet>
+
+			<t:aliasBean alias="#{searchResults}" value="#{reagentsBrowser}">
+				<%@include file="../searchResults.jspf"%>
+			</t:aliasBean>
+		</t:collapsiblePanel>
 	</h:form>
 
-	<t:panelGroup rendered="#{reagentsBrowser.entityView}">
+	<t:panelGroup rendered="#{reagentsBrowser.entityView && !annotationViewer.isPanelCollapsedMap['annotationValues']}">
 		<%@ include file="reagentViewer.jsp"%>
 	</t:panelGroup>
-
 </f:subview>
 
 
