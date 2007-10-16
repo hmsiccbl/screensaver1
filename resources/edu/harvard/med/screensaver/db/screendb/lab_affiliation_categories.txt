@@ -34,6 +34,7 @@ HMS	Harvard Medical School, Center for Blood Research
 HMS	Harvard Medical School, Department of Otolaryngology
 HMS	Harvard Medical School, Department of Pathology and Center for Blood Research
 HMS	Harvard Medical School, Genetics Department
+HMS	Harvard Medical School, Immune Disease Institute
 HMS	Harvard Medical School, Institute of Chemistry and Cell Biology
 HMS	Harvard Medical School, Institute of Chemistry and Cell Biology and BCMP Department
 HMS	Harvard Medical School, Institute of Chemistry and Cell Biology and Cellular Biology Department
