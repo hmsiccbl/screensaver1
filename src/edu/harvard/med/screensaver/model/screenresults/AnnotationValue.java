@@ -14,6 +14,7 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,11 +23,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+
+import org.apache.log4j.Logger;
 
 /**
  * Annotation value on a particular library member (e.g. a compound or silencing
@@ -99,7 +100,8 @@ public class AnnotationValue extends AbstractEntity
    * Get the annotation type.
    * @return the annotation type
   */
-  @ManyToOne
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={})
   @JoinColumn(name="annotationTypeId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_annotation_type")

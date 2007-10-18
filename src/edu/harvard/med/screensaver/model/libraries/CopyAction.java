@@ -14,6 +14,7 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,12 +23,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -92,7 +93,8 @@ public class CopyAction extends AbstractEntity
    * Get the copy info.
    * @return the copy info
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+             fetch=FetchType.LAZY)
   @JoinColumn(name="copyInfoId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_copy_action_to_copy_info")

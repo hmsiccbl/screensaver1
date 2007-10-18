@@ -17,6 +17,7 @@ import java.util.TreeSet;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,8 +28,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -37,6 +36,8 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -143,7 +144,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * Get the parent {@link ScreenResult}.
    * @return the parent {@link ScreenResult}
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="screenResultId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_type_to_screen_result")
@@ -384,7 +386,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * {@link #setHowDerived}.
    * @return the set of result value types that this result value type was derived from
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(fetch=FetchType.LAZY,
+              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinTable(
     name="resultValueTypeDerivedFromLink",
     joinColumns=@JoinColumn(name="derivedFromResultValueTypeId"),
@@ -442,7 +445,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @ManyToMany(
     cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     mappedBy="typesDerivedFrom",
-    targetEntity=ResultValueType.class
+    targetEntity=ResultValueType.class,
+    fetch=FetchType.LAZY
   )
   @org.hibernate.annotations.ForeignKey(name="fk_derived_result_value_type")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)

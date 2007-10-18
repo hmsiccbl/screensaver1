@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -24,13 +25,13 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
-import edu.harvard.med.screensaver.model.Activity;
+
+import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a well volume adjustment. A well volume
@@ -133,7 +134,8 @@ public class WellVolumeAdjustment extends AbstractEntity
    * Note: This is a unidirectional relationship for performance reasons.
    * @return the copy
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="copyId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_copy")
@@ -152,7 +154,8 @@ public class WellVolumeAdjustment extends AbstractEntity
    * will still work due to cascade="save-update" setting on Copy relationship.
    * @return the well
    */
-  @ManyToOne
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={})
   @JoinColumn(name="wellId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well")
@@ -179,7 +182,8 @@ public class WellVolumeAdjustment extends AbstractEntity
    * Get the lab cherry pick.
    * @return the lab cherry pick
    */
-  @ManyToOne
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={})
   @JoinColumn(name="labCherryPickId", nullable=true, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_lab_cherry_pick")
@@ -193,7 +197,8 @@ public class WellVolumeAdjustment extends AbstractEntity
    * Get the well volume correction activity.
    * @return the well volume correction activity
    */
-  @ManyToOne
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={})
   @JoinColumn(name="wellVolumeCorrectionActivityId", nullable=true, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well_volume_correction_activity")

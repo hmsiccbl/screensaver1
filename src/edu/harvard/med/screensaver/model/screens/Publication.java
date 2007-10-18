@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.model.screens;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,10 +22,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -93,7 +94,8 @@ public class Publication extends AbstractEntity
    * Get the screen.
    * @return the screen
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="screenId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_publication_to_screen")

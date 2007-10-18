@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.annotations;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -39,6 +40,7 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 public @interface ContainedEntity {
   
   /**

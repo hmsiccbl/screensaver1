@@ -13,6 +13,7 @@ import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -63,7 +64,8 @@ abstract public class AdministrativeActivity extends Activity
    * Get the administrator user that approved the activity.
    * @return the administrator user that approved the activity
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="approvedById")
   @org.hibernate.annotations.ForeignKey(name="fk_activity_to_administrator_user")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)

@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -31,10 +32,10 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -131,7 +132,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * Get the library the well is in.
    * @return the library the well is in.
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+             fetch=FetchType.LAZY)
   @JoinColumn(name="libraryId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_to_library")
@@ -146,7 +148,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * Get the set of compounds.
    * @return the set of compounds
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+              fetch=FetchType.LAZY)
   @JoinTable(
     name="wellCompoundLink",
     joinColumns=@JoinColumn(name="wellId"),
@@ -223,7 +226,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * Get the set of silencing reagents.
    * @return the set of silencing reagents
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+              fetch=FetchType.LAZY)
   @JoinTable(
     name="wellSilencingReagentLink",
     joinColumns=@JoinColumn(name="wellId"),

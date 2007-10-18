@@ -109,7 +109,8 @@ public class CopyInfo extends AbstractEntity
    * Get the copy.
    * @return the copy
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+             fetch=FetchType.LAZY)
   @JoinColumn(name="copyId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_copy_info_to_copy")

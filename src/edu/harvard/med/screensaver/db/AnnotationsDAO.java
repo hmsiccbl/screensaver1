@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -135,6 +138,56 @@ public class AnnotationsDAO extends AbstractDAO
       }
     });
     return mapResult;
+  }
+
+  // TODO: this is a hack, needed because Reagent is not yet represented in our data model, so we're using Well as a surrogate entity for Reagent
+  @SuppressWarnings("unchecked")
+  public List<Well> findRepresentativeWellsForReagents(final Collection<ReagentVendorIdentifier> rvids)
+  {
+    List<Well> queryResult = getHibernateTemplate().executeFind(new HibernateCallback() {
+      public Object doInHibernate(Session session) throws HibernateException ,SQLException {
+        // TODO: only return 1 well per vendorIdentifier (instead of removing in code, below)
+        Query query = session.createQuery("select distinct w from " +
+                                          "Well w where w.vendorIdentifier in (:rvids)");
+        query.setParameterList("rvids", rvids);
+        return query.list();
+      }
+    } );
+    // remove duplicate wells with same reagentVendorIdentifier
+    Map<ReagentVendorIdentifier, Well> result = new HashMap<ReagentVendorIdentifier,Well>();
+    for (Iterator iterator = queryResult.iterator(); iterator.hasNext();) {
+      Well well = (Well) iterator.next();
+      if (!result.containsKey(well.getReagentVendorIdentifier())) {
+        result.put(well.getReagentVendorIdentifier(), well);
+      }
+    }
+    return new ArrayList<Well>(result.values());
+  }
+
+  // TODO: this is a hack, needed because Reagent is not yet represented in our data model, so we're using Well as a surrogate entity for Reagent
+  @SuppressWarnings("unchecked")
+  public List<Well> findRepresentativeWellsForStudyReagents(final Study study)
+  {
+    List<Well> queryResult = getHibernateTemplate().executeFind(new HibernateCallback() {
+      public Object doInHibernate(Session session) throws HibernateException ,SQLException {
+        // TODO: only return 1 well per vendorIdentifier (instead of removing in code, below)
+        Query query = session.createQuery("select distinct w from " +
+                                          "Well w join w.library l, AnnotationType t join t.annotationValues v " +
+                                          "where t.studyId = ? and w.vendorIdentifier = v.reagentVendorIdentifier.vendorIdentifier " /*+
+                                          "and l.vendor = v.reagentVendorIdentifier.vendorName"*/);
+        query.setParameter(0, (Screen) study);
+        return query.list();
+      }
+    } );
+    // remove duplicate wells with same reagentVendorIdentifier
+    Map<ReagentVendorIdentifier, Well> result = new HashMap<ReagentVendorIdentifier,Well>();
+    for (Iterator iterator = queryResult.iterator(); iterator.hasNext();) {
+      Well well = (Well) iterator.next();
+      if (!result.containsKey(well.getReagentVendorIdentifier())) {
+        result.put(well.getReagentVendorIdentifier(), well);
+      }
+    }
+    return new ArrayList<Well>(result.values());
   }
 
 

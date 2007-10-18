@@ -278,7 +278,8 @@ public class Screen extends Study
    * Get the lead screener.
    * @return the lead screener
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="leadScreenerId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lead_screener")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
@@ -311,7 +312,8 @@ public class Screen extends Study
    * Get the lab head.
    * @return the lab head
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labHeadId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
@@ -347,7 +349,8 @@ public class Screen extends Study
    * Get the set of collaborators.
    * @return the set of collaborators
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+              fetch=FetchType.LAZY)
   @JoinTable(
     name="collaboratorLink",
     joinColumns=@JoinColumn(name="screenId"),

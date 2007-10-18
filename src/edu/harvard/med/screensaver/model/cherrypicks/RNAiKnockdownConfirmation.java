@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -92,7 +93,8 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
    * Get the screener cherry pick.
    * @return the screener cherry pick
    */
-  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+            fetch=FetchType.LAZY)
   @JoinColumn(name="screenerCherryPickId", nullable=false, updatable=false, unique=true)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_rnai_knockdown_confirmation_to_screener_cherry_pick")

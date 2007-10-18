@@ -15,6 +15,7 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,10 +26,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
-
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 
 /**
@@ -98,7 +99,8 @@ public abstract class Activity extends AbstractEntity implements Comparable
    * Get the user that performed the activity.
    * @return the user that performed the activity
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="performedById", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_activity_to_screensaver_user")

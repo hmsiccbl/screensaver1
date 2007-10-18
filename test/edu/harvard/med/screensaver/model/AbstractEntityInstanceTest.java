@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -29,14 +30,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Transient;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -76,6 +69,14 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.time.DateUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
 {
@@ -368,18 +369,18 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 //                           getter.invoke(_bean));
 //              }
 //              else {
-                assertEquals("getter returns what setter set for " +
-                             bean.getClass() + "." + propertyDescriptor.getName(),
-                             (testValue instanceof AbstractEntity) ?
-                             genericEntityDao.reloadEntity((AbstractEntity) testValue) : testValue,
-                             getter.invoke(bean));
-//              }
+              if (testValue instanceof AbstractEntity) {
+                persistEntity((AbstractEntity) testValue, new HashSet<AbstractEntity>());
+              }
+              assertEquals("getter returns what setter set for " +
+                           bean.getClass() + "." + propertyDescriptor.getName(),
+                           testValue,
+                           getter.invoke(bean));
             }
             catch (Exception e) {
               e.printStackTrace();
-              fail(
-                   "getter threw exception: " +
-                   bean.getClass() + "." + propertyDescriptor.getName());
+              fail("getter " + bean.getClass() + "." + propertyDescriptor.getName() +
+                   " threw exception: " + e.getMessage());
             }
 
           }
@@ -572,17 +573,6 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
                          getExpectedInitialCollectionSize(propertyDescriptor) + 1,
                          result.size());
 
-//            // TODO: isContained1 is false while others are true! At least for DerivativeScreenResult. Something to do with hashCode probably, since collection is a Set...
-//            boolean isContained1 = false;
-//            boolean isContained2 = false;
-//            boolean isContained3 = false;
-//            isContained1 = result.contains(testValue);
-//            for (Object x : result) {
-//              if (x.equals(testValue)) {
-//                isContained2 = true;
-//              }
-//            }
-//            isContained3 = new ArrayList(result).contains(testValue);
             Object copiedTestValue = testValue;
             if (copiedTestValue instanceof AbstractEntity) {
               copiedTestValue = genericEntityDao.findEntityById(
@@ -704,7 +694,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   }
 
 
-  private void createPersistentBeanForTest()
+  protected void createPersistentBeanForTest()
   {
     schemaUtil.truncateTablesOrCreateSchema();
     //persistEntity(_bean, new HashSet<AbstractEntity>());
@@ -1143,6 +1133,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   private Integer _integerTestValue = 77;
   private double  _doubleTestValue = 77.1;
   private boolean _booleanTestValue = true;
+  private Character _characterTestValue = 'a';
   private int     _stringTestValueIndex = Integer.parseInt("antz", STRING_TEST_VALUE_RADIX);
   private long    _dateMilliseconds = 0;
   private int     _vocabularyTermCounter = 0;
@@ -1169,7 +1160,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   {
     if (type.equals(Integer.class)) {
       _integerTestValue += 1;
-      _integerTestValue %= 16; // prevent well row from exploding
+      _integerTestValue %= 16; // HACK: prevent well row from exploding (TODO: create WellRow class)
       return _integerTestValue;
     }
     if (type.equals(Double.class)) {
@@ -1189,9 +1180,18 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     if (type.equals(String.class)) {
       return getStringTestValue();
     }
+    if (type.equals(Character.class)) {
+      _characterTestValue++;
+      _characterTestValue %= Well.PLATE_ROWS; // HACK: prevent well row from exploding (TODO: create WellRow class)
+      return _characterTestValue;
+    }
     if (type.equals(Date.class)) {
       _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
       return DateUtils.round(new Date(_dateMilliseconds), Calendar.DATE);
+    }
+    if (type.equals(ScreenType.class)) {
+      // TODO: we need a way of controlling the ScreenType in particular circumstances; e.g., we want to run all tests on Screen for all ScreenTypes (and avoid problematic cases like testing createCPR() when ScreenType is Other
+      return ScreenType.RNAI;
     }
     if (AbstractEntity.class.isAssignableFrom(type)) {
       if (parentBean == null) {
@@ -1364,6 +1364,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   {
     if (Modifier.isAbstract(entityClass.getModifiers())) {
       // TODO: work out the type-safety crap below
+      @SuppressWarnings("unchecked")
       Class<? extends NE> concreteStandin = (Class<? extends NE>)
         _concreteStandinMap.get(entityClass);
       if (concreteStandin == null) {
@@ -1375,7 +1376,9 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     EntityFactory entityFactory = _entityFactoryMap.get(entityClass);
     if (entityFactory != null) {
       // TODO: work out the type-safety crap below
-      return (NE) entityFactory.createEntity(parentBean, persistEntities);
+      @SuppressWarnings("unchecked")
+      NE newEntity = (NE) entityFactory.createEntity(parentBean, persistEntities);
+      return newEntity;
     }
     ContainedEntity containedEntity = (ContainedEntity) // TODO: why do i need this cast??
       entityClass.getAnnotation(ContainedEntity.class);
@@ -1383,45 +1386,68 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       Class<? extends AbstractEntity> parentBeanClass = containedEntity.containingEntityClass();
       if (parentBean == null) {
         parentBean = newInstance(parentBeanClass, persistEntities);
+        log.debug("using newly instantiated parent " + parentBean + " for new contained entity " + entityClass);
       }
       else {
         assertTrue(
           "containing entity class is assignable from parent bean class",
           parentBeanClass.isAssignableFrom(parentBean.getClass()));
+        log.debug("using existing parent " + parentBean + " for new contained entity " + entityClass);
       }
     }
     else {
       assertNull("no parent bean for a non-ContainedEntity", parentBean);
     }
-    if (parentBean != null) {
-      Method factoryMethod = getFactoryMethod(entityClass, parentBean.getClass());
-      if (factoryMethod != null) {
-        Object [] arguments = getArgumentsForFactoryMethod(factoryMethod, persistEntities);
-        try {
-          // TODO: work out the type-safety crap below
-          NE newEntity = (NE) factoryMethod.invoke(parentBean, arguments);
-          if (persistEntities) {
-            genericEntityDao.saveOrUpdateEntity(newEntity);
-          }
-          return newEntity;
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-          fail("invoke for " + parentBean.getClass() +  "." + factoryMethod.getName() +
-            " threw an Exception: " + e);
-        }
-      }
-    }
 
+    NE newEntity;
+    if (parentBean != null) {
+      newEntity = newInstanceViaParent(entityClass, parentBean, persistEntities);
+    }
+    else {
+      newEntity = newInstanceViaConstructor(entityClass, persistEntities);
+    }
+    return newEntity;
+  }
+
+  protected <NE extends AbstractEntity> NE newInstanceViaParent(Class<NE> entityClass,
+                                                                AbstractEntity parentBean,
+                                                                boolean persistEntities)
+  {
+    Method factoryMethod = getFactoryMethod(entityClass, parentBean.getClass());
+    assertNotNull("contained entity's parent must have a factory method", factoryMethod);
+    Object [] arguments = getArgumentsForFactoryMethod(factoryMethod, persistEntities);
+    try {
+      // TODO: work out the type-safety crap below
+      @SuppressWarnings("unchecked")
+      NE newEntity = (NE) factoryMethod.invoke(parentBean, arguments);
+      if (persistEntities) {
+        genericEntityDao.saveOrUpdateEntity(newEntity);
+      }
+      log.debug("constructed new entity (via parent entity's factory method) " + newEntity + " with args " + Arrays.asList(arguments));
+      return newEntity;
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      fail("invoke for " + parentBean.getClass() +  "." + factoryMethod.getName() +
+           " threw an Exception: " + e);
+      return null;
+    }
+  }
+
+  protected <NE extends AbstractEntity> NE newInstanceViaConstructor(Class<NE> entityClass,
+                                                                     boolean persistEntities)
+  {
     try {
       Constructor constructor = getMaxArgConstructor(entityClass);
       assertNotNull("has public constructor: " + entityClass, constructor);
-      Object[] arguments = getArgumentsForConstructor(constructor, parentBean, persistEntities);
+      Object[] arguments = getArgumentsForConstructor(constructor, null, persistEntities);
       // TODO: work out the type-safety crap below
+      @SuppressWarnings("unchecked")
       NE newEntity = (NE) constructor.newInstance(arguments);
       if (persistEntities) {
         genericEntityDao.saveOrUpdateEntity(newEntity);
       }
+      log.debug("constructed new entity " + newEntity + " with args " + Arrays.asList(arguments));
       return newEntity;
     }
     catch (Exception e) {
@@ -1483,7 +1509,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     boolean persistEntities) {
     Object [] arguments = new Object[parameterTypes.length];
     for (int i = 0; i < arguments.length; i++) {
-      Class parameterType = parameterTypes[i];
+      Class<?> parameterType = parameterTypes[i];
       if (parentBean != null && parameterType.isAssignableFrom(parentBean.getClass())) {
         arguments[i] = parentBean;
       }
@@ -1514,14 +1540,17 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     Class<? extends AbstractEntity> entityClass,
     Class<? extends AbstractEntity> parentClass)
   {
-    String factoryMethodName = "create" + entityClass.getSimpleName();
     List<Method> candidateFactoryMethods = new ArrayList<Method>();
     for (Method method : parentClass.getMethods()) {
-      if (method.getName().equals(factoryMethodName)) {
+      if (method.getName().startsWith("create") &&
+        method.getReturnType().isAssignableFrom(entityClass)) {
         candidateFactoryMethods.add(method);
       }
     }
+    log.debug("candidate factory methods for " + entityClass + " in parent " + parentClass + ": " +
+              candidateFactoryMethods);
 
+    // TODO: should prefer factory methods that return type most specific to entityClass
     Method bestCandidate = null;
     int bestCandidateArgCount = -1;
     for (Method candidate : candidateFactoryMethods) {
@@ -1531,6 +1560,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
         bestCandidateArgCount = candidateArgCount;
       }
     }
+    log.debug("chose candidate factory method " + bestCandidate);
     return bestCandidate;
   }
 
@@ -1783,8 +1813,8 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   }
 
   private void doTestRelatedBeans(final AbstractEntity bean,
-                                final AbstractEntity relatedBean,
-                                final RelatedBeansTester tester)
+                                  final AbstractEntity relatedBean,
+                                  final RelatedBeansTester tester)
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -1796,18 +1826,17 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     });
   }
 
-  // if the _bean has already been persisted, then get the persisted copy, as the current
-  // copy is stale. if it has not, persist it now so we can get the entityId
+  /**
+   * If the bean has already been persisted, then get the persisted copy, as the
+   * current copy is detached. If it has not been persisted, persist it now so
+   * we can get the entityId.
+   */
   private AbstractEntity getPersistedEntity(AbstractEntity bean)
   {
-    AbstractEntity beanFromHibernate = null;
-    if (bean.getEntityId() != null) {
-      beanFromHibernate = (AbstractEntity) hibernateTemplate.get(bean.getClass(), bean.getEntityId());
+    if (hibernateTemplate.contains(bean)) {
+      return bean;
     }
-    if (beanFromHibernate == null) {
-      persistEntity(bean, new HashSet<AbstractEntity>());
-      beanFromHibernate = (AbstractEntity) hibernateTemplate.get(bean.getClass(), bean.getEntityId());
-    }
-    return beanFromHibernate;
+    persistEntity(bean, new HashSet<AbstractEntity>());
+    return (AbstractEntity) hibernateTemplate.get(bean.getClass(), bean.getEntityId());
   }
 }

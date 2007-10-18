@@ -15,6 +15,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -26,12 +27,12 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 
 
 /**
@@ -97,7 +98,8 @@ public class SilencingReagent extends SemanticIDAbstractEntity
    * Get the gene.
    * @return the gene
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+             fetch=FetchType.LAZY)
   @JoinColumn(name="geneId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_silencing_reagent_to_gene")
@@ -118,7 +120,8 @@ public class SilencingReagent extends SemanticIDAbstractEntity
   @ManyToMany(
     cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     mappedBy="silencingReagents",
-    targetEntity=Well.class
+    targetEntity=Well.class,
+    fetch=FetchType.LAZY
   )
   @org.hibernate.annotations.ForeignKey(name="fk_well_silencing_reagent_link_to_silencing_reagent")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)

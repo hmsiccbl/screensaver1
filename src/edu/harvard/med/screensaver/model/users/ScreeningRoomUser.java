@@ -121,7 +121,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    * is the lab head, return this user.
    * @return the lab head; null if this user is the head of her own lab.
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labHeadId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
@@ -219,10 +220,11 @@ public class ScreeningRoomUser extends ScreensaverUser
    * is a lab head or a lab member.
    * @return the lab affiliation
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.EAGER,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labAffiliationId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_affiliation")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  //@org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE
   })
@@ -396,7 +398,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    */
   @ManyToMany(
     mappedBy="collaborators",
-    targetEntity=Screen.class
+    targetEntity=Screen.class,
+    fetch=FetchType.LAZY
   )
   @org.hibernate.annotations.ForeignKey(name="fk_collaborator_link_to_screening_room_user")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)

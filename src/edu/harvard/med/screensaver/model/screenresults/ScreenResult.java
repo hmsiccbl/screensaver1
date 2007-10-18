@@ -389,7 +389,8 @@ public class ScreenResult extends AbstractEntity
    * the returned collection.</i> To add a well, call {@link #addWell}.
    * @return the set of wells associated with this screen result
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+              fetch=FetchType.LAZY)
   @JoinTable(
     name="screenResultWellLink",
     joinColumns=@JoinColumn(name="screenResultId"),

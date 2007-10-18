@@ -149,7 +149,8 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
    * Get the study.
    * @return the study
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="studyId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_type_to_screen")
