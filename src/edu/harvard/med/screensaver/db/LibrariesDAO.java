@@ -44,7 +44,7 @@ public interface LibrariesDAO
 
   /**
    * Find and return the well.
-   * 
+   *
    * @param wellKey the wellKey
    * @param loadContents if true, then load all the compounds, silencing reagents and genes
    * associated with the well
@@ -82,7 +82,6 @@ public interface LibrariesDAO
    * @return the library that contains the specified plate. return null if no
    *         such library contains the plate.
    */
-  @SuppressWarnings("unchecked")
   public Library findLibraryWithPlate(Integer plateNumber);
 
   /**
@@ -93,10 +92,10 @@ public interface LibrariesDAO
    */
   public void deleteLibraryContents(Library library);
 
-  @SuppressWarnings("unchecked")
   public Set<Well> findWellsForPlate(int plate);
 
-  @SuppressWarnings("unchecked")
+  public boolean isPlateRangeAvailable(Integer startPlate, Integer endPlate);
+
   public void loadOrCreateWellsForLibrary(Library library);
 
   public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy);

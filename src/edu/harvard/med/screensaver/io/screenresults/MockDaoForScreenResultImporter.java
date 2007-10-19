@@ -336,4 +336,9 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     // TODO Auto-generated method stub
     return null;
   }
+
+  public boolean isPlateRangeAvailable(Integer startPlate, Integer endPlate)
+  {
+    return false;
+  }
 }

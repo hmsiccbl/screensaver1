@@ -120,6 +120,16 @@
   </bean>
 
   <bean
+  id="libraryCreator"
+  class="edu.harvard.med.screensaver.service.libraries.LibraryCreator"
+  scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+  <constructor-arg ref="rnaiLibraryContentsParser"/>
+  <constructor-arg ref="compoundLibraryContentsParser"/>
+  </bean>
+
+  <bean
     id="libraryCopyGenerator"
     class="edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator"
     scope="singleton">

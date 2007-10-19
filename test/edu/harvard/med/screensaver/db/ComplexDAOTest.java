@@ -1035,8 +1035,51 @@ public class ComplexDAOTest extends AbstractSpringTest
       assertEquals("rv[1].value", new Double(iWell), rvs.get(1).getNumericValue());
       assertEquals("rv[0].value", new Double(iWell + 10.0), rvs.get(0).getNumericValue());
     }
+
   }
 
+  public void testIsPlateRangeAvaiable()
+  {
+    Library library1 = new Library("library 1",
+                                  "lib1",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  4);
+    Library library2 = new Library("library 2",
+                                  "lib2",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  10,
+                                  10);
+    genericEntityDao.persistEntity(library1);
+    genericEntityDao.persistEntity(library2);
+
+    assertFalse(librariesDao.isPlateRangeAvailable(-1, -1));
+    assertFalse(librariesDao.isPlateRangeAvailable(-1, 0));
+    assertFalse(librariesDao.isPlateRangeAvailable(0, 1));
+
+    assertFalse(librariesDao.isPlateRangeAvailable(1, 1));
+    assertFalse(librariesDao.isPlateRangeAvailable(2, 3));
+    assertFalse(librariesDao.isPlateRangeAvailable(1, 4));
+    assertFalse(librariesDao.isPlateRangeAvailable(3, 4));
+    assertFalse(librariesDao.isPlateRangeAvailable(4, 4));
+    assertFalse(librariesDao.isPlateRangeAvailable(4, 9));
+    assertFalse(librariesDao.isPlateRangeAvailable(5, 10));
+    assertFalse(librariesDao.isPlateRangeAvailable(4, 10));
+    assertFalse(librariesDao.isPlateRangeAvailable(10, 10));
+    assertFalse(librariesDao.isPlateRangeAvailable(9, 11));
+    assertFalse(librariesDao.isPlateRangeAvailable(10, 12));
+    assertFalse(librariesDao.isPlateRangeAvailable(9, 4));
+
+    assertTrue(librariesDao.isPlateRangeAvailable(5, 5));
+    assertTrue(librariesDao.isPlateRangeAvailable(9, 9));
+    assertTrue(librariesDao.isPlateRangeAvailable(5, 9));
+    assertTrue(librariesDao.isPlateRangeAvailable(9, 5));
+    assertTrue(librariesDao.isPlateRangeAvailable(6, 8));
+    assertTrue(librariesDao.isPlateRangeAvailable(11, 11));
+    assertTrue(librariesDao.isPlateRangeAvailable(11, 100000));
+  }
 
   public void testFindSortedAnnotationValueTableByRange()
   {

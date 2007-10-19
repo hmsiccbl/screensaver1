@@ -120,6 +120,28 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return libraries.get(0);
   }
 
+  @SuppressWarnings("unchecked")
+  public boolean isPlateRangeAvailable(Integer startPlate, Integer endPlate)
+  {
+    if (startPlate <= 0 || endPlate <= 0) {
+      return false;
+    }
+    // swap, if necessary
+    if (startPlate > endPlate) {
+      Integer tmp = endPlate;
+      endPlate = startPlate;
+      startPlate = tmp;
+    }
+    String hql =
+      "from Library library where not" +
+      "(library.startPlate > :endPlate or library.endPlate < :startPlate)";
+    List<Library> libraries = (List<Library>)
+    getHibernateTemplate().findByNamedParam(hql,
+                                            new String[] {"startPlate", "endPlate"},
+                                            new Integer[] {startPlate, endPlate});
+    return libraries.size() == 0;
+  }
+
   public void deleteLibraryContents(Library library)
   {
     for (Well well : library.getWells()) {
@@ -218,7 +240,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     Library library = _dao.reloadEntity(libraryIn, true, "wells");
     _dao.needReadOnly(library, "copies.copyInfos");
-    String hql = "from WellVolumeAdjustment wva where wva.copy.library = ?"; 
+    String hql = "from WellVolumeAdjustment wva where wva.copy.library = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { library });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(library, result), wellVolumeAdjustments);
@@ -238,7 +260,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber)
   {
     // TODO: eager fetch copies and wells
-    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.copyInfos ci where wva.copy = ? and ci.plateNumber = ?"; 
+    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.copyInfos ci where wva.copy = ? and ci.plateNumber = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy, plateNumber });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     if (wellVolumeAdjustments.size() == 0) {
@@ -251,7 +273,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public Collection<WellCopyVolume> findWellCopyVolumes(Integer plateNumber)
   {
     // TODO: eager fetch copies and wells
-    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.copyInfos ci where ci.plateNumber = ?"; 
+    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.copyInfos ci where ci.plateNumber = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { plateNumber });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     if (wellVolumeAdjustments.size() == 0) {
@@ -263,7 +285,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   @SuppressWarnings("unchecked")
   public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey)
   {
-    String hql = "select distinct wva from WellVolumeAdjustment wva left join fetch wva.copy left join fetch wva.well w left join fetch w.library l left join fetch l.copies where w.id = ?"; 
+    String hql = "select distinct wva from WellVolumeAdjustment wva left join fetch wva.copy left join fetch wva.well w left join fetch w.library l left join fetch l.copies where w.id = ?";
     List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { wellKey.toString() });
     List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
     Well well = null;
