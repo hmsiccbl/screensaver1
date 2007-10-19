@@ -921,7 +921,7 @@ public class Screen extends Study
    * Get the screen number.
    * @return the screen number
    */
-  @Column(nullable=false)
+  @Column(unique=true, nullable=false)
   public Integer getScreenNumber()
   {
     return _screenNumber;
