@@ -17,15 +17,17 @@ import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service that creates a new library and its wells and imports its well
  * contents into the database.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -57,8 +59,9 @@ public class LibraryCreator
   }
 
   // TODO: also create copies
-  // TODO: we need repeatable read isolation, to ensure that plate range is not taken about anothe process
-  //@Transactional(isolation=Isolation.REPEATABLE_READ)
+  // TODO: we need serializable isolation, to ensure that plate range is not taken about another process (we need a table-level lock)
+  //@Transactional(isolation=Isolation.SERIALIZABLE)
+  @Transactional
   public Library createLibrary(Library library, InputStream libraryContentsIn)
   {
     if (library.getLibraryId() != null)
@@ -66,6 +69,14 @@ public class LibraryCreator
       throw new IllegalArgumentException("library entity must be transient (i.e., no entity ID, never persisted)");
     }
 
+    // verify uniqueness constraints will not be violated.
+    // this would happen at flush time, but we can throw a more explicit exception by checking manually
+    if (_dao.findEntityByProperty(Library.class, "libraryName", library.getLibraryName()) != null) {
+      throw new DuplicateEntityException(library);
+    }
+    if (_dao.findEntityByProperty(Library.class, "shortName", library.getShortName()) != null) {
+      throw new DuplicateEntityException(library);
+    }
     if (!_librariesDao.isPlateRangeAvailable(library.getStartPlate(), library.getEndPlate())) {
       throw new DataModelViolationException("plate range [" + library.getStartPlate() + "," + library.getEndPlate() + "] is not available");
     }

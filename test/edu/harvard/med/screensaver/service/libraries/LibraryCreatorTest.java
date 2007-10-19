@@ -15,6 +15,8 @@ import java.io.InputStream;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -70,6 +72,20 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
       fail("expected failure on redundant library create");
     }
     catch (IllegalArgumentException e) {}
+
+    Library library4 = new Library("library", "lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 50439, 50439);
+    try {
+      libraryCreator.createLibrary(library4, null);
+      fail("expected failure on redundant library create");
+    }
+    catch (DuplicateEntityException e) {}
+
+    Library library5 = new Library("library5", "lib5", ScreenType.RNAI, LibraryType.COMMERCIAL, 50438, 50441);
+    try {
+      libraryCreator.createLibrary(library5, null);
+      fail("expected failure on conflicting plate range");
+    }
+    catch (DataModelViolationException e) {}
   }
 
   /**

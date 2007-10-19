@@ -10,9 +10,11 @@
 package edu.harvard.med.screensaver;
 
 import java.lang.reflect.Constructor;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,8 @@ public class CommandLineApplication
   private CommandLine _cmdLine;
   private String[] _cmdLineArgs;
   private Map<String,Object> _option2DefaultValue = new HashMap<String,Object>();
+
+  private Option _lastAccessOption;
 
 
   // public methods
@@ -132,6 +136,7 @@ public class CommandLineApplication
   public String getCommandLineOptionValue(String optionName) throws ParseException
   {
     verifyOptionsProcessed();
+    _lastAccessOption = _options.getOption(optionName);
     if (!_cmdLine.hasOption(optionName) &&
       _option2DefaultValue.containsKey(optionName)) {
       return _option2DefaultValue.get(optionName).toString();
@@ -144,6 +149,7 @@ public class CommandLineApplication
   public List<String> getCommandLineOptionValues(String optionName) throws ParseException
   {
     verifyOptionsProcessed();
+    _lastAccessOption = _options.getOption(optionName);
     List<String> optionValues = new ArrayList<String>();
     if (!_cmdLine.hasOption(optionName) &&
       _option2DefaultValue.containsKey(optionName)) {
@@ -165,17 +171,65 @@ public class CommandLineApplication
     throws ParseException
   {
     verifyOptionsProcessed();
+    _lastAccessOption = _options.getOption(optionName);
     if (!_cmdLine.hasOption(optionName) &&
       _option2DefaultValue.containsKey(optionName)) {
       return (T) _option2DefaultValue.get(optionName);
     }
     if (_cmdLine.hasOption(optionName)) {
+      Object value = getCommandLineOptionValue(optionName);
       try {
         Constructor cstr = ofType.getConstructor(String.class);
-        return (T) cstr.newInstance(getCommandLineOptionValue(optionName));
+        return (T) cstr.newInstance(value);
       }
       catch (Exception e) {
-        throw new ParseException("could not parse option " + optionName + " as type " + ofType.getSimpleName());
+        throw new ParseException("could not parse option " + optionName + " with arg " + value + " as type " + ofType.getSimpleName());
+      }
+    }
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T extends Enum<T>> T getCommandLineOptionEnumValue(String optionName, Class<T> ofEnum)
+    throws ParseException
+  {
+    verifyOptionsProcessed();
+    _lastAccessOption = _options.getOption(optionName);
+    if (!_cmdLine.hasOption(optionName) &&
+      _option2DefaultValue.containsKey(optionName)) {
+      return (T) _option2DefaultValue.get(optionName);
+    }
+    if (_cmdLine.hasOption(optionName)) {
+      Object value = getCommandLineOptionValue(optionName);
+      try {
+        Enum<T> valueOf = Enum.valueOf(ofEnum, value.toString().toUpperCase());
+        return (T) valueOf;
+      }
+      catch (Exception e) {
+        throw new ParseException("could not parse option " + optionName + " with arg " + value + " as enum " + ofEnum.getClass().getSimpleName());
+      }
+    }
+    return null;
+  }
+
+  public Date getCommandLineOptionValue(String optionName,
+                                        Class<? extends Date> ofType,
+                                        DateFormat dateFormat)
+    throws ParseException
+  {
+    verifyOptionsProcessed();
+    _lastAccessOption = _options.getOption(optionName);
+    if (!_cmdLine.hasOption(optionName) &&
+      _option2DefaultValue.containsKey(optionName)) {
+      return (Date) _option2DefaultValue.get(optionName);
+    }
+    if (_cmdLine.hasOption(optionName)) {
+      try {
+        String value = getCommandLineOptionValue(optionName);
+        return dateFormat.parse(value);
+      }
+      catch (Exception e) {
+        throw new ParseException("could not parse date option " + optionName);
       }
     }
     return null;
@@ -321,4 +375,9 @@ public class CommandLineApplication
     _springConfigurationResource = springConfigurationResource;
   }
 
+
+  public Option getLastAccessOption()
+  {
+    return _lastAccessOption;
+  }
 }

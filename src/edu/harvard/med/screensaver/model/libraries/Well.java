@@ -33,6 +33,7 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 
 import org.apache.log4j.Logger;
@@ -544,6 +545,12 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    */
   Well(Library library, WellKey wellKey, WellType wellType)
   {
+    if (wellKey.getPlateNumber() < library.getStartPlate() || wellKey.getPlateNumber() > library.getEndPlate()) {
+      throw new DataModelViolationException("well " + wellKey +
+                                            " is not within library plate range [" +
+                                            library.getStartPlate() + "," +
+                                            library.getEndPlate() + "]");
+    }
     _library = library;
     _wellKey = wellKey;
     _wellType = wellType;
