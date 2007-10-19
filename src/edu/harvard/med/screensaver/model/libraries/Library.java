@@ -25,20 +25,31 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
 
 /**
  * A Hibernate entity bean representing a screening library.
- *
+ * <ul>
+ * <li>Screensaver supports libraries for either RNAi and Small Molecule (compound) screens.  RNAi library wells contain silencing reagents and small molecule library wells contain compounds.</li>
+ * <li>Only 384 well plate configurations are currently supported.</li>
+ * <li>A library must be defined for a set of plates that have a sequential plate numbers.</li>
+ * </ul>
+ * <p>
+ * Screensaver allows a Library to be defined independently of its wells and its well contents.  In other words, the data model permits any of the following states for a library:
+ * <ul>
+ * <li>Library is defined with related Wells and Well contents.  This is the usual state of a library in Screensaver.
+ * <li>Library is defined with related Wells, but without Well contents.  This allows for a library's contents to unloaded and reloaded with deleting the Library definition itself, which is useful when updated/corrected well contents data becomes available.
+ * <li>Library is defined, but without related Wells, and thus without Well contents (i.e., compounds or silencing reagents).  This state is supported for legacy reasons only, but one must be aware that a given member Well may not be defined.  See {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library}.
+ * </ul>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
