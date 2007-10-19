@@ -47,8 +47,8 @@ import org.hibernate.annotations.Parameter;
  * Screensaver allows a Library to be defined independently of its wells and its well contents.  In other words, the data model permits any of the following states for a library:
  * <ul>
  * <li>Library is defined with related Wells and Well contents.  This is the usual state of a library in Screensaver.
- * <li>Library is defined with related Wells, but without Well contents.  This allows for a library's contents to unloaded and reloaded with deleting the Library definition itself, which is useful when updated/corrected well contents data becomes available.
- * <li>Library is defined, but without related Wells, and thus without Well contents (i.e., compounds or silencing reagents).  This state is supported for legacy reasons only, but one must be aware that a given member Well may not be defined.  See {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library}.
+ * <li>Library is defined with related Wells, but without Well contents.  This allows for a library's contents to be unloaded and reloaded without deleting the Library definition itself, which is useful if updated/corrected well contents data becomes available.
+ * <li>Library is defined, but without related Wells, and thus without Well contents (i.e., compounds or silencing reagents).  This state is supported for legacy reasons only, but one must be aware that a given member Well may not be defined.  See {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}.
  * </ul>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
