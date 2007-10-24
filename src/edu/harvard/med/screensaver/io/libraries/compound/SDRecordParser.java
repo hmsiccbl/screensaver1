@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -14,8 +14,11 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
@@ -25,12 +28,13 @@ class SDRecordParser
 {
 
   // private static data
-  
+
   private static final Logger log = Logger.getLogger(SDRecordParser.class);
 
-  
+
   // private instance data
-  
+
+  private GenericEntityDAO _dao;
   private BufferedReader _sdFileReader;
   private SDFileCompoundLibraryContentsParser _parser;
   private Library _library;
@@ -40,10 +44,10 @@ class SDRecordParser
   private MolfileToSmiles _molfileToSmiles;
   private OpenBabelClient _openBabelClient = new OpenBabelClient();
   private PubchemCidListProvider _pubchemCidListProvider = new PubchemCidListProvider();
-  
-  
+
+
   // package-private constructor and instance methods
-  
+
   /**
    * Construct a new <code>SDRecordParser</code> object.
    * @param sdFileReader the <code>BufferedReader</code> for the SDFile
@@ -51,9 +55,11 @@ class SDRecordParser
    * parser
    */
   SDRecordParser(
+    GenericEntityDAO dao,
     BufferedReader sdFileReader,
     SDFileCompoundLibraryContentsParser libraryContentsParser)
   {
+    _dao = dao;
     _sdFileReader = sdFileReader;
     _parser = libraryContentsParser;
     _library = _parser.getLibrary();
@@ -67,7 +73,7 @@ class SDRecordParser
   {
     return _nextLine != null;
   }
-  
+
   /**
    * Parse an SD record from the SDFile.
    */
@@ -83,7 +89,7 @@ class SDRecordParser
     else {
       _molfileToSmiles = new MolfileToSmiles(molfile);
     }
-    
+
     Well well = getWell();
     if (well != null && _molfileToSmiles != null && _molfileToSmiles.getSmiles() != null) {
       if (! _library.equals(well.getLibrary())) {
@@ -92,7 +98,7 @@ class SDRecordParser
           well.getLibrary().getLibraryName());
         return;
       }
-      
+
       addSmilesToWell(_molfileToSmiles.getPrimaryCompoundSmiles(), well, true);
       for (String secondaryCompoundSmiles : _molfileToSmiles.getSecondaryCompoundsSmiles()) {
         addSmilesToWell(secondaryCompoundSmiles, well, false);
@@ -100,10 +106,10 @@ class SDRecordParser
     }
     prepareNextRecord();
   }
-  
-  
+
+
   // private instance methods
-  
+
   private void prepareNextRecord()
   {
     _sdRecordNumber ++;
@@ -111,12 +117,12 @@ class SDRecordParser
   }
 
   /**
-   * 
+   *
    */
   private String readNextLine() {
     try {
       String nextLine = _sdFileReader.readLine();
-      return nextLine; 
+      return nextLine;
     }
     catch (IOException e) {
       log.error(e, e);
@@ -127,13 +133,13 @@ class SDRecordParser
       return null;
     }
   }
-  
+
   private SDRecordData gatherSDRecordData()
   {
     // initialize things
     String line = _nextLine;
     SDRecordData recordData = new SDRecordData();
-    
+
     // read the molfile, unless it is missing
     if (! line.startsWith(">")) {
       StringBuffer molfileBuffer = new StringBuffer();
@@ -145,14 +151,14 @@ class SDRecordParser
       String molfile = new String(molfileBuffer);
       recordData.setMolfile(molfile);
     }
-    
+
     // read the "associated data" part of the SD record
     while (! line.equals("$$$$")) {
-      
+
       if (line.matches("^>  <.*>(\\s+\\(.*\\))?")) {
         String header = line.substring(4, line.indexOf('>', 4));
         line = readNextLine();
-        
+
         if (header.equals("Plate")) {
           try {
             recordData.setPlateNumber(Integer.parseInt(line));
@@ -184,14 +190,14 @@ class SDRecordParser
           recordData.setCompoundName(line);
         }
       }
-      
+
       line = readNextLine();
     }
-    
+
     // return the accumulated data
     return recordData;
   }
-  
+
   /**
    * Build and return the {@link Well} represented by this data row.
    * @return the well represented by this data row
@@ -211,12 +217,21 @@ class SDRecordParser
     WellKey wellKey = new WellKey(plateNumber, wellName);
     Well well = _parser.getWell(wellKey);
     if (well == null) {
-      reportError("internal error: well " + wellKey + " was not created);");
+      reportError("internal error: well " + wellKey + " was not created");
       return null;
     }
     well.setWellType(WellType.EXPERIMENTAL);
     well.setIccbNumber(_sdRecordData.getIccbNumber());
-    well.setVendorIdentifier(_sdRecordData.getVendorIdentifier());
+
+
+    if (well.getReagent() == null) {
+      ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(_library.getVendor(),
+                                                                _sdRecordData.getVendorIdentifier());
+      Reagent reagent = new Reagent(rvi);
+      _dao.saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
+      log.info("created new reagent " + reagent + " for " + well);
+      well.setReagent(reagent);
+    }
     if (_molfileToSmiles != null) {
       well.setMolfile(_molfileToSmiles.getMolfile());
       well.setSmiles(_molfileToSmiles.getSmiles());
@@ -231,12 +246,12 @@ class SDRecordParser
       _parser.getSdFile(),
       _sdRecordNumber));
   }
-  
+
   /**
    * Retrieve or create a compound for the smiles. If it is the primary compound, then add
    * naming information such as the CAS number and the compound name. Add the compound to
    * the well.
-   * 
+   *
    * @param smiles
    * @param well
    * @param isPrimaryCompound

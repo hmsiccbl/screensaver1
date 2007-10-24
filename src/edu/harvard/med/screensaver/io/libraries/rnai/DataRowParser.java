@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -23,6 +23,8 @@ import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -33,20 +35,20 @@ import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfo;
 
 /**
  * Parses a single data row for the {@link RNAiLibraryContentsParser}.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class DataRowParser
 {
-  
+
   // private static data
-  
+
   private static final Logger log = Logger.getLogger(DataRowParser.class);
   private static final Pattern entrezgeneLocPattern = Pattern.compile("LOC(\\d+)");
 
-  
+
   // private instance data
-  
+
   private RNAiLibraryContentsParser _parser;
   private RNAiLibraryColumnHeaders _columnHeaders;
   private HSSFRow _dataRow;
@@ -54,10 +56,10 @@ public class DataRowParser
   private Factory _cellFactory;
   private ParseErrorManager _errorManager;
   private Map<ParsedRNAiLibraryColumn,String> _dataRowContents;
-  
-  
+
+
   // package constructor and instance method
-  
+
   /**
    * Construct a new <code>DataRowParser</code> object.
    * @param parser the parent library contents loader
@@ -81,10 +83,10 @@ public class DataRowParser
     _cellFactory = cellFactory;
     _errorManager = errorManager;
   }
-  
+
   /**
    * Parse the data row.
-   * @throws DataRowParserException 
+   * @throws DataRowParserException
    */
   void parseDataRow() throws DataRowParserException
   {
@@ -94,7 +96,7 @@ public class DataRowParser
     }
     populateDataRowContents();
     if (dataRowType.equals(DataRowType.PLATE_WELL_ONLY)) {
-      
+
       // when the data row has Plate, Well, and no gene information, we assume it is a control well
       parseControlWell();
     }
@@ -103,9 +105,9 @@ public class DataRowParser
     }
   }
 
-  
+
   // private instance methods
-  
+
   /**
    * populate the {@link #_dataRowContents data row contents}.
    */
@@ -113,10 +115,10 @@ public class DataRowParser
   {
     _dataRowContents = _columnHeaders.getDataRowContents(_dataRow, _rowIndex);
   }
-  
+
   /**
    * Parse the data row content
-   * @throws DataRowParserException 
+   * @throws DataRowParserException
    */
   private void parseDataRowContent() throws DataRowParserException
   {
@@ -125,10 +127,10 @@ public class DataRowParser
       return;
     }
     //log.debug("loading data for plate-well " + plateWellAbbreviation);
-    
+
     // get the well last, so that if we encounter any errors, we dont end up with a bogus
     // well in the library
-  
+
     Gene gene = getGene();
     if (gene == null) {
       return;
@@ -139,7 +141,7 @@ public class DataRowParser
       return;
     }
     addGenbankAccessionNumberToWell(well);
-    
+
     // remove any silencing reagents that were in the well from a previous import. but be careful
     // to not remove any that you are planning to add back in, or you might get a
     // org.hibernate.ObjectDeletedException
@@ -148,7 +150,7 @@ public class DataRowParser
         well.removeSilencingReagent(silencingReagent);
       }
     }
-    
+
     for (SilencingReagent silencingReagent : silencingReagents) {
       well.addSilencingReagent(silencingReagent);
     }
@@ -167,7 +169,7 @@ public class DataRowParser
   /**
    * Parse the well. Assume an empty plate-well is a control. (This is true for the
    * Excel files I've been handling so far, but it is pretty ad-hoc. -s)
-   * @throws DataRowParserException 
+   * @throws DataRowParserException
    */
   private void parseControlWell() throws DataRowParserException
   {
@@ -182,7 +184,7 @@ public class DataRowParser
   /**
    * Build and return the {@link Well} represented by this data row.
    * @return the well represented by this data row
-   * @throws DataRowParserException 
+   * @throws DataRowParserException
    */
   private Well getWell(boolean isControl) throws DataRowParserException
   {
@@ -224,9 +226,15 @@ public class DataRowParser
       _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.VENDOR_IDENTIFIER),
       _rowIndex).getString();
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
-      well.setVendorIdentifier(vendorIdentifier);
+      if (well.getReagent() == null) {
+        Reagent reagent = new Reagent(new ReagentVendorIdentifier(well.getLibrary().getVendor(),
+                                                                  vendorIdentifier));
+        _parser.getDAO().saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
+        log.info("created new reagent " + reagent + " for " + well);
+        well.setReagent(reagent);
+      }
     }
-    
+
     return well;
   }
 
@@ -250,7 +258,7 @@ public class DataRowParser
     }
     return plateNumber + "-" + wellName;
   }
-  
+
   /**
    * Build and return the {@link Gene} represented in this data row.
    * @return the Gene represented in this data row
@@ -264,7 +272,7 @@ public class DataRowParser
       _rowIndex,
       true);
     Integer entrezgeneId = entrezgeneIdCell.getInteger();
-    
+
     // entrezgeneSymbol
     Cell entrezgeneSymbolCell = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.ENTREZGENE_SYMBOL),
@@ -275,7 +283,7 @@ public class DataRowParser
       _errorManager.addError("missing EntrezGene Symbol", entrezgeneSymbolCell);
       return null;
     }
-    
+
     // sometimes Locus ID is 0, but Gene Symbol is LOC(\d+) with $1 being the EntrezGene ID
     if (entrezgeneId == 0) {
       Matcher entrezgeneLocMatcher = entrezgeneLocPattern.matcher(entrezgeneSymbol);
@@ -289,7 +297,7 @@ public class DataRowParser
         return null;
       }
     }
-    
+
     // genbankAccessionNumber
     Cell genbankAccessionNumberCell = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
@@ -300,7 +308,7 @@ public class DataRowParser
       _errorManager.addError("missing GenBank Accession Number", genbankAccessionNumberCell);
       return null;
     }
-    
+
     // gene name and species name
     NCBIGeneInfo geneInfo =
       _parser.getGeneInfoProvider().getGeneInfoForEntrezgeneId(entrezgeneId, entrezgeneIdCell);
@@ -308,12 +316,12 @@ public class DataRowParser
       // errors in this case are handled by the NCBIGeneInfoProvider
       return null;
     }
-    
+
     // revise the entrezgeneSymbol if the NCBIGeneInfoProvider has a better value
     if (geneInfo.getEntrezgeneSymbol() != null) {
       entrezgeneSymbol = geneInfo.getEntrezgeneSymbol();
     }
-    
+
     // lookup existing gene
     Gene gene = getExistingGene(entrezgeneId);
     if (gene != null) {
@@ -335,10 +343,10 @@ public class DataRowParser
     addOldEntrezgeneIds(gene);
     return gene;
   }
-  
+
   /**
    * Get an existing gene from the database with the specified EntrezGene ID. Return null
-   * if no such well exists in the database. 
+   * if no such well exists in the database.
    * @param entrezgeneId the EntrezGene ID
    * @return the existing gene from the database. Return null if no such gene exists in
    * the database
@@ -367,13 +375,13 @@ public class DataRowParser
     String oldEntrezgeneIds = oldEntrezgeneIdsCell.getAsString();
     if (oldEntrezgeneIds != null && ! oldEntrezgeneIds.equals("")) {
       for (String oldEntrezgeneIdString : oldEntrezgeneIds.split("[,;]")) {
-        
+
         // hack to work around quirkiness with HSSF spreadsheet parsing library
         if (oldEntrezgeneIdString.endsWith(".0")) {
           oldEntrezgeneIdString =
             oldEntrezgeneIdString.substring(0, oldEntrezgeneIdString.length() - 2);
         }
-        
+
         try {
           gene.addOldEntrezgeneId(new Integer(oldEntrezgeneIdString));
         }
@@ -385,7 +393,7 @@ public class DataRowParser
       }
     }
   }
-  
+
   /**
    * Build and return the set of {@link SilencingReagent SilencingReagents} represented
    * by this data row.
@@ -415,7 +423,7 @@ public class DataRowParser
     }
     return silencingReagents;
   }
-  
+
   private SilencingReagent getSilencingReagent(
     Gene gene,
     SilencingReagentType silencingReagentType,

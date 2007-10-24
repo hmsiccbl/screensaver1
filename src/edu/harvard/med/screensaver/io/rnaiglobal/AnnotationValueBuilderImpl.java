@@ -11,6 +11,9 @@ package edu.harvard.med.screensaver.io.rnaiglobal;
 
 import jxl.Cell;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 
@@ -18,12 +21,15 @@ class AnnotationValueBuilderImpl implements AnnotationValueBuilder
 {
   private int _sourceColumnIndex;
   private AnnotationType _annotationType;
+  private GenericEntityDAO _dao;
 
   public AnnotationValueBuilderImpl(int sourceColumnIndex,
-                                    AnnotationType annotationType)
+                                    AnnotationType annotationType,
+                                    GenericEntityDAO dao)
   {
     _sourceColumnIndex = sourceColumnIndex;
     _annotationType = annotationType;
+    _dao = dao;
   }
 
   public void addAnnotationValue(Cell[] row)
@@ -31,8 +37,11 @@ class AnnotationValueBuilderImpl implements AnnotationValueBuilder
     String value = transformValue(row[_sourceColumnIndex].getContents());
     ReagentVendorIdentifier reagentVendorIdentifier = new ReagentVendorIdentifier(DHARMACON_VENDOR_NAME,
                                                                                   row[0].getContents());
-    _annotationType.createAnnotationValue(reagentVendorIdentifier,
-                                          value);
+    Reagent reagent = _dao.findEntityById(Reagent.class, reagentVendorIdentifier);
+    if (reagent == null) {
+      throw new DataModelViolationException("no such reagent " + reagentVendorIdentifier);
+    }
+    _annotationType.createAnnotationValue(reagent, value);
   }
 
   public AnnotationType getAnnotationType()

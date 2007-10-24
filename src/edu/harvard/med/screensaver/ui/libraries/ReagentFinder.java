@@ -18,8 +18,8 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.ReagentVendorIdentifierListParser;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -131,9 +131,10 @@ public class ReagentFinder extends AbstractBackingBean
   @UIControllerMethod
   public String findReagent()
   {
-    List<Well> result = _librariesDao.findReagentWellsByVendorId(_reagentVendorIdentifier);
-    if (result.size() > 0) {
-      return _reagentViewer.viewReagent(result.get(0));
+    Reagent reagent = _dao.findEntityById(Reagent.class,
+                                          _reagentVendorIdentifier);
+    if (reagent != null)  {
+      return _reagentViewer.viewReagent(reagent);
     }
     else {
       showMessage("libraries.noSuchReagent", _reagentVendorIdentifier);
@@ -161,35 +162,32 @@ public class ReagentFinder extends AbstractBackingBean
           showMessage("libraries.reagentVendorIdentifierListParseError", error.getSecond());
         }
 
-        List<Well> foundWells = new ArrayList<Well>();
+        List<Reagent> foundReagents = new ArrayList<Reagent>();
         for (ReagentVendorIdentifier reagentVendorIdentifier : parseResult.getParsedReagentVendorIdentifiers()) {
-          List<Well> reagentWells = _librariesDao.findReagentWellsByVendorId(reagentVendorIdentifier);
-          Well well = null;
-          if (reagentWells.size() > 0) {
-            well = _dao.findEntityById(Well.class,
-                                       reagentWells.get(0).getWellKey().toString(),
-                                       true,
-                                       "silencingReagents.gene",
-                                       "compounds");
-            if (well != null) {
-              foundWells.add(well);
-            }
+          Reagent reagent = _dao.findEntityById(Reagent.class,
+                                                reagentVendorIdentifier,
+                                                true,
+                                                "wells.silencingReagents.gene",
+                                                "wells.compounds");
+          _dao.needReadOnly(reagent, "annotationValues");
+          if (reagent != null) {
+            foundReagents.add(reagent);
           }
-          if (well == null) {
+          if (reagent == null) {
             showMessage("libraries.noSuchReagent", reagentVendorIdentifier);
           }
         }
 
-        if (foundWells.size() == 0) {
+        if (foundReagents.size() == 0) {
           result[0] = REDISPLAY_PAGE_ACTION_RESULT;
         }
         // show in reagent viewer, iff the user entered exactly 1 reagent (counting erroneous reagent identifiers)
         else if (parseResult.getParsedReagentVendorIdentifiers().size() == 1 && parseResult.getErrors().size() == 0) {
-          result[0] = _reagentViewer.viewReagent(foundWells.get(0));
+          result[0] = _reagentViewer.viewReagent(foundReagents.get(0));
         }
         else {
           List<AnnotationType> annotationTypes = _annotationsDao.findAllAnnotationTypes();
-          _reagentsBrowser.setContents(foundWells, null, annotationTypes);
+          _reagentsBrowser.setContents(foundReagents, annotationTypes);
           result[0] = VIEW_REAGENT_SEARCH_RESULTS;
         }
       }

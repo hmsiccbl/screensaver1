@@ -23,19 +23,18 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
+
+import org.apache.log4j.Logger;
 
 /**
  * Annotation type on a library member (e.g., a compound or silencing reagent).
@@ -169,7 +168,6 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  @OrderBy("reagentVendorIdentifier")
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE
@@ -187,42 +185,22 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
    * @return the new annotation value
    */
   public AnnotationValue createAnnotationValue(
-    ReagentVendorIdentifier reagentVendorIdentifier,
+    Reagent reagent,
     String value)
   {
     AnnotationValue annotationValue = new AnnotationValue(
       this,
-      reagentVendorIdentifier,
+      reagent,
       value,
       _isNumeric && value != null ? new Double(value) : null);
-    boolean result = _values.add(annotationValue);
-    if (result) {
-      return annotationValue;
+    getStudy().addReagent(reagent);
+    if (_values.contains(annotationValue)) {
+      return null;
     }
-    return null;
-  }
-
-  /**
-   * Create and return an <b><i>Data Transfer Object</i></b> annotation value for the
-   * annotation type. This is an optimization for the purposes of {@link AnnotationsDAO}
-   * methods, which circumvent the normal method for loading a relationship property,
-   * using SQL instead. This allows us to retrieve a subset of the annotation values for an
-   * annotation type without loading the whole set of them. Annotation values loaded this
-   * way will not be persisted by any cascade from the parent annotation type.
-   * @param reagentVendorIdentifier the reagent vendor identifier
-   * @param value the value
-   * @param numericValue the numerical value
-   * @return the new annotation value
-   */
-  public AnnotationValue createAnnotationValueDTO(
-    ReagentVendorIdentifier reagentVendorIdentifier,
-    String value)
-  {
-    return new AnnotationValue(
-      this,
-      reagentVendorIdentifier,
-      value,
-      _isNumeric && value != null ? new Double(value) : null);
+    boolean wasAdded = _values.add(annotationValue);
+    wasAdded &= reagent.getAnnotationValues().contains(annotationValue);
+    assert wasAdded;
+    return annotationValue;
   }
 
   /**

@@ -17,16 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
+import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
@@ -44,7 +46,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ReagentSearchResults extends EntitySearchResults<Well> implements Observer
+public class ReagentSearchResults extends EntitySearchResults<Reagent> implements Observer
 {
 
   // private static final fields
@@ -59,10 +61,12 @@ public class ReagentSearchResults extends EntitySearchResults<Well> implements O
   private ReagentViewer _reagentViewer;
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
+  private GenericEntityDAO _dao;
   private AnnotationsDAO _annotationsDao;
 
-  private List<TableColumn<Well>> _columns;
-  private Map<ReagentVendorIdentifier,List<AnnotationValue>> _annotationValues;
+  private List<TableColumn<Reagent>> _columns;
+
+  private transient Well _representativeWell;
 
 
   // constructors
@@ -82,7 +86,7 @@ public class ReagentSearchResults extends EntitySearchResults<Well> implements O
                               CompoundViewer compoundViewer,
                               GeneViewer geneViewer,
                               AnnotationsDAO annotationsDao,
-                              List<DataExporter<Well>> dataExporters)
+                              List<DataExporter<Reagent>> dataExporters)
   {
     super(dataExporters);
     _annotationTypesTable = annotationTypesTable;
@@ -97,18 +101,11 @@ public class ReagentSearchResults extends EntitySearchResults<Well> implements O
 
   }
 
-  public void setContents(Collection<Well> unsortedResults,
-                          String description,
+  public void setContents(Collection<Reagent> unsortedResults,
                           List<AnnotationType> annotationTypes)
   {
     _annotationTypesTable.initialize(annotationTypes, this);
-    List<ReagentVendorIdentifier> rvids = new ArrayList<ReagentVendorIdentifier>(unsortedResults.size());
-    for (Well well : unsortedResults) {
-      rvids.add(well.getReagentVendorIdentifier());
-    }
-    _annotationValues = _annotationsDao.findAnnotationValues(rvids, annotationTypes);
-
-    super.setContents(unsortedResults, description);
+    super.setContents(unsortedResults, null);
   }
 
   public void update(Observable observable, Object selections)
@@ -141,32 +138,32 @@ public class ReagentSearchResults extends EntitySearchResults<Well> implements O
   // implementations of the SearchResults abstract methods
 
   @Override
-  protected List<TableColumn<Well>> getColumns()
+  protected List<TableColumn<Reagent>> getColumns()
   {
-    _columns = new ArrayList<TableColumn<Well>>();
-    _columns.add(new TableColumn<Well>("Reagent Source ID", "The vendor-assigned identifier for the reagent.") {
+    _columns = new ArrayList<TableColumn<Reagent>>();
+    _columns.add(new TableColumn<Reagent>("Reagent Source ID", "The vendor-assigned identifier for the reagent.") {
       @Override
-      public Object getCellValue(Well well) { return well.getFullVendorIdentifier(); }
+      public Object getCellValue(Reagent reagent) { return reagent.getEntityId(); }
 
       @Override
       public boolean isCommandLink() { return true; }
 
       @Override
-      public Object cellAction(Well well)
+      public Object cellAction(Reagent reagent)
       {
         return viewCurrentEntity();
       }
     });
-    _columns.add(new TableColumn<Well>("Contents", "The gene name for the silencing reagent, or SMILES for the compound reagent") {
+    _columns.add(new TableColumn<Reagent>("Contents", "The gene name for the silencing reagent, or SMILES for the compound reagent") {
       @Override
-      public Object getCellValue(Well well) { return getContentsValue(well); }
+      public Object getCellValue(Reagent reagent) { return getContentsValue(reagent); }
 
       @Override
-      protected Comparator<Well> getAscendingComparator()
+      protected Comparator<Reagent> getAscendingComparator()
       {
-        return new Comparator<Well>() {
+        return new Comparator<Reagent>() {
           @SuppressWarnings("unchecked")
-          public int compare(Well w1, Well w2) {
+          public int compare(Reagent w1, Reagent w2) {
             Object o1 = getContentsValue(w1);
             String s1 = (o1 instanceof String) ? (String) o1 : ((List<String>) o1).get(0);
             Object o2 = getContentsValue(w2);
@@ -183,112 +180,119 @@ public class ReagentSearchResults extends EntitySearchResults<Well> implements O
       public boolean isCommandLinkList() { return getContentsCount(getRowData()) > 1; }
 
       @Override
-      public Object cellAction(Well well)
+      public Object cellAction(Reagent reagent)
       {
-        if (getGeneCount(well) == 1) {
-          return _geneViewer.viewGene(well.getGene(), well);
+        if (getGeneCount(reagent) == 1) {
+          return _geneViewer.viewGene(getGenes(reagent).iterator().next());
         }
-        if (getCompoundCount(well) > 0) {
+        if (getCompoundCount(reagent) > 0) {
           // commandValue is really a smiles, not a compoundId
           String smiles = (String) getRequestParameter("commandValue");
           Compound compound = null;
-          for (Compound compound2 : well.getCompounds()) {
+          for (Compound compound2 : getCompounds(reagent)) {
             if (compound2.getSmiles().equals(smiles)) {
               compound = compound2;
               break;
             }
           }
-          return _compoundViewer.viewCompound(compound, well);
+          return _compoundViewer.viewCompound(compound);
         }
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
     });
 
-    int i = 0;
     for (AnnotationType annotationType : getSelectedAnnotationTypes()) {
-      _columns.add(new AnnotationTypeColumn(annotationType, i++));
+      _columns.add(new AnnotationTypeColumn(annotationType));
     }
 
     return _columns;
   }
 
-  private class AnnotationTypeColumn extends TableColumn<Well>
+  private class AnnotationTypeColumn extends TableColumn<Reagent>
   {
     private AnnotationType _annotationType;
-    private int _index;
 
-    public AnnotationTypeColumn(AnnotationType annotationType, int index)
+    public AnnotationTypeColumn(AnnotationType annotationType)
     {
       super(annotationType.getName(),
             annotationType.getDescription(),
             annotationType.isNumeric());
       _annotationType = annotationType;
-      _index = index;
     }
 
     @Override
-    public Object getCellValue(Well well)
+    public Object getCellValue(Reagent reagent)
     {
-      List<AnnotationValue> annotationValues = _annotationValues.get(well.getReagentVendorIdentifier());
-      if (annotationValues == null) {
-        return null;
-      }
-      return annotationValues.get(_index).getValue();
+      AnnotationValue annotationValue = reagent.getAnnotationValue(_annotationType);
+
+      return annotationValue == null ? null : annotationValue.getValue();
     }
   }
 
   @Override
-  protected void setEntityToView(Well well)
+  protected void setEntityToView(Reagent reagent)
   {
-    _reagentViewer.viewReagent(well);
+    _reagentViewer.viewReagent(reagent);
   }
 
 
   // private instance methods
 
 
-  private Object getContentsValue(Well well)
+  private Object getContentsValue(Reagent reagent)
   {
-    int geneCount = getGeneCount(well);
+    int geneCount = getGeneCount(reagent);
     if (geneCount == 1) {
-      return well.getGene().getGeneName();
+      return getGenes(reagent).iterator().next().getGeneName();
     }
     if (geneCount > 1) {
       return "multiple genes";
     }
-    int compoundCount = getCompoundCount(well);
+    int compoundCount = getCompoundCount(reagent);
     if (compoundCount == 1) {
-      return well.getCompounds().iterator().next().getSmiles();
+      return getCompounds(reagent).first().getSmiles();
     }
     if (compoundCount > 1) {
       List<String> smiles = new ArrayList<String>();
-      for (Compound compound : well.getOrderedCompounds()) {
+      for (Compound compound : getCompounds(reagent)) {
         smiles.add(compound.getSmiles());
       }
       return smiles;
     }
 
-    // at this point we know the well has no compounds or genes in it. but is it empty?
+    return "(reagent missing)";
+  }
 
-    if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE) &&
-      well.getWellType().equals(WellType.EXPERIMENTAL)) {
-      return "compound with unknown structure";
+  private Well getRepresentativeWell(Reagent reagent)
+  {
+    if (_representativeWell == null) {
+      _representativeWell = reagent.getWells().iterator().next();
     }
-    return "empty well";
+    return _representativeWell;
   }
 
-  private int getContentsCount(Well well)
+  private SortedSet<Compound> getCompounds(Reagent reagent)
   {
-    return getGeneCount(well) + getCompoundCount(well);
+    return getRepresentativeWell(reagent).getOrderedCompounds();
   }
 
-  private int getCompoundCount(Well well)
+  private Set<Gene> getGenes(Reagent reagent)
   {
-    return well.getCompounds().size();
+    return getRepresentativeWell(reagent).getGenes();
   }
 
-  private int getGeneCount(Well well)
+  private int getContentsCount(Reagent reagent)
   {
-    return well.getGenes().size();
+    return getGeneCount(reagent) + getCompoundCount(reagent);
+  }
+
+  private int getCompoundCount(Reagent reagent)
+  {
+    return getCompounds(reagent).size();
+  }
+
+  private int getGeneCount(Reagent reagent)
+  {
+    return getGenes(reagent).size();
   }
 }

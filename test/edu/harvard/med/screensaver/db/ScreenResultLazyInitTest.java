@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -15,22 +15,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.engine.EntityKey;
-import org.springframework.orm.hibernate3.HibernateTemplate;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.engine.EntityKey;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public class ScreenResultLazyInitTest extends AbstractSpringTest
 {
@@ -40,14 +41,14 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
 
 
   // instance data members
-  
+
   protected GenericEntityDAO genericEntityDao;
   protected SchemaUtil schemaUtil;
   //protected HibernateSessionFactory hibernateSessionFactory;
   protected HibernateTemplate hibernateTemplate;
 
   // public constructors and methods
-  
+
   @Override
   protected void onSetUp() throws Exception
   {
@@ -100,7 +101,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
           1,
           1);
         for (int i = 1; i < 10; ++i) {
-          Well well = library.createWell(i, "A01");
+          Well well = library.createWell(new WellKey(i, "A01"), WellType.EMPTY);
           genericEntityDao.saveOrUpdateEntity(well);
           rvt.addResultValue(well, Integer.toString(i));
         }
@@ -116,14 +117,14 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 107);
         List<ResultValueType> rvts = screen.getScreenResult().getResultValueTypesList();
         ResultValueType rvt = rvts.get(0);
-        
+
         for (Object key : session.getStatistics().getEntityKeys()) {
           EntityKey entityKey = (EntityKey) key;
           log.debug(entityKey);
           assertFalse("no resultValue entities in session",
                       entityKey.getEntityName().endsWith("ResultValue"));
         }
-        
+
         Set<Well> wells = rvt.getScreenResult().getWells();
         Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
         log.debug("resultValue count=" + resultValues.size());

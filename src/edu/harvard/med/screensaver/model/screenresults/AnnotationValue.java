@@ -11,8 +11,8 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -25,7 +25,7 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 
 import org.apache.log4j.Logger;
 
@@ -50,7 +50,7 @@ public class AnnotationValue extends AbstractEntity
   // private static data
 
   private static final long serialVersionUID = 1L;
-  private static Logger log = Logger.getLogger(AnnotationType.class);
+  private static Logger log = Logger.getLogger(AnnotationValue.class);
 
 
   // private instance data
@@ -58,7 +58,7 @@ public class AnnotationValue extends AbstractEntity
   private Integer _annotationValueId;
   private Integer _version;
   private AnnotationType _annotationType;
-  private ReagentVendorIdentifier _reagentVendorIdentifier;
+  private Reagent _reagent;
   private String _value;
   private Double _numericValue;
 
@@ -100,35 +100,33 @@ public class AnnotationValue extends AbstractEntity
    * Get the annotation type.
    * @return the annotation type
   */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={})
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+             fetch=FetchType.LAZY)
   @JoinColumn(name="annotationTypeId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_annotation_type")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   public AnnotationType getAnnotationType()
   {
     return _annotationType;
   }
 
   /**
-   * Get the reagent vendor identifier.
-   * @return the reagent vendor identifier
+   * Get the reagent the well is in.
+   * @return the reagent the well is in.
    */
-  @Column(nullable=false)
-  @Embedded
-  public ReagentVendorIdentifier getReagentVendorIdentifier()
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+             fetch=FetchType.LAZY)
+  @JoinColumn(nullable=false, updatable=false, name="reagent_id")
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_reagent")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @org.hibernate.annotations.Index(name="annotation_value_reagent_id_index", columnNames={"reagent_id"})
+  public Reagent getReagent()
   {
-    return _reagentVendorIdentifier;
-  }
-
-  /**
-   * Set the reagent vendor identifier.
-   * @param reagentVendorIdentifier the new reagent vendor identifier
-   */
-  public void setReagentVendorIdentifier(ReagentVendorIdentifier reagentVendorIdentifier)
-  {
-    _reagentVendorIdentifier = reagentVendorIdentifier;
+    return _reagent;
   }
 
   /**
@@ -170,7 +168,7 @@ public class AnnotationValue extends AbstractEntity
 
   /**
    * Construct an initialized <code>AnnotationValue</code>. Intended only for use by
-   * {@link AnnotationType#createAnnotationValue(ReagentVendorIdentifier, String, boolean)}.
+   * {@link AnnotationType#createAnnotationValue(Reagent, String)}.
    * @param annotationType the annotation type
    * @param reagentVendorIdentifier the reagent vendor identifier
    * @param value the value
@@ -178,7 +176,7 @@ public class AnnotationValue extends AbstractEntity
    */
   AnnotationValue(
     AnnotationType annotationType,
-    ReagentVendorIdentifier reagentVendorIdentifier,
+    Reagent reagent,
     String value,
     Double numericValue)
   {
@@ -186,9 +184,10 @@ public class AnnotationValue extends AbstractEntity
       throw new IllegalArgumentException("'numericValue' must be specified (in addition to 'value') for numeric annotation types");
     }
     _annotationType = annotationType;
-    _reagentVendorIdentifier = reagentVendorIdentifier;
+    _reagent = reagent;
     _value = value;
     _numericValue = numericValue;
+    _reagent.getAnnotationValues().add(this);
   }
 
 
@@ -233,6 +232,16 @@ public class AnnotationValue extends AbstractEntity
   private void setVersion(Integer version)
   {
     _version = version;
+  }
+
+  /**
+   * Set the reagent.
+   * @param Reagent the new reagent
+   * @motivation for hibernate
+   */
+  private void setReagent(Reagent reagent)
+  {
+    _reagent = reagent;
   }
 
   /**

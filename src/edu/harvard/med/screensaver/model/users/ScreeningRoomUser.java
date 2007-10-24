@@ -125,7 +125,7 @@ public class ScreeningRoomUser extends ScreensaverUser
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labHeadId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_head")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE
   })

@@ -52,6 +52,7 @@ import edu.harvard.med.screensaver.model.entitytesters.IsVersionedTester;
 import edu.harvard.med.screensaver.model.entitytesters.VersionAccessorsTester;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -1484,7 +1485,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     }
     else if (method.getName().equals("createAnnotationValue") &&
       parameterTypes.length == 2 &&
-      parameterTypes[0].equals(ReagentVendorIdentifier.class) &&
+      parameterTypes[0].equals(Reagent.class) &&
       parameterTypes[1].equals(String.class)) {
       parameterTypes[1] = BigDecimal.class;
       Object[] arguments = getArgumentsForParameterTypes(parameterTypes, null, persistEntities);

@@ -17,8 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -27,10 +25,13 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
+
+import org.apache.log4j.Logger;
 
 
 public class Menu extends AbstractBackingBean
@@ -162,10 +163,12 @@ public class Menu extends AbstractBackingBean
     {
       public void runTransaction()
       {
-        List<? extends Study> studies = _dao.findAllEntitiesOfType(Screen.class /* TODO: change to Study.class*/,
-                                                                   true,
-                                                                   "labHead",
-                                                                   "leadScreener");
+        List<? extends Study> studies = _dao.findEntitiesByProperty(Screen.class /* TODO: change to Study.class*/,
+                                                                    "studyType", // HACK! just a trick for identifying studies in ICCB-L database
+                                                                    StudyType.IN_SILICO, // HACK! just a trick for identifying studies in ICCB-L database
+                                                                    true,
+                                                                    "labHead",
+                                                                    "leadScreener");
         for (Iterator<? extends Study> iter = studies.iterator(); iter.hasNext();) {
           Study study = iter.next();
           if (study.isRestricted()) {

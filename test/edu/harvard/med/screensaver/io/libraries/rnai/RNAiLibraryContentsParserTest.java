@@ -316,12 +316,12 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertNotNull("library has well A11", a11);
     assertNotNull("library has well A15", a15);
       
-    assertNull("well A11 has no vendor id", a11.getVendorIdentifier());
-    assertEquals("well A05 vendor id", "M-005300-00", a05.getVendorIdentifier());
-    assertNull("well A07 has no vendor id", a07.getVendorIdentifier());
-    assertEquals("well A09 vendor id", "M-004061-00", a09.getVendorIdentifier());
-    assertNull("well A11 has no vendor id", a11.getVendorIdentifier());
-    assertEquals("well A15 vendor id", "M-003256-05", a15.getVendorIdentifier());
+    assertNull("well A11 has no vendor id", a11.getSimpleVendorIdentifier());
+    assertEquals("well A05 vendor id", "M-005300-00", a05.getSimpleVendorIdentifier());
+    assertNull("well A07 has no vendor id", a07.getSimpleVendorIdentifier());
+    assertEquals("well A09 vendor id", "M-004061-00", a09.getSimpleVendorIdentifier());
+    assertNull("well A11 has no vendor id", a11.getSimpleVendorIdentifier());
+    assertEquals("well A15 vendor id", "M-003256-05", a15.getSimpleVendorIdentifier());
     
     // silencing reagents and genes for A05 and A09
     assertEquals("well A05 has 4 silencing reagents", 4, a05.getSilencingReagents().size());

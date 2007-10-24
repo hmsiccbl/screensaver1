@@ -35,8 +35,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
@@ -44,6 +42,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferSta
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -51,6 +50,8 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -87,6 +88,7 @@ public class Screen extends Study
   private String _summary;
   private String _comments;
   private SortedSet<AnnotationType> _annotationTypes = new TreeSet<AnnotationType>();
+  private Set<Reagent> _reagents = new HashSet<Reagent>();
   private StudyType _studyType;
   private boolean _isShareable = true;
   private boolean _isDownloadable = true;
@@ -282,7 +284,7 @@ public class Screen extends Study
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="leadScreenerId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lead_screener")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensLed")
   public ScreeningRoomUser getLeadScreener()
@@ -316,7 +318,7 @@ public class Screen extends Study
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labHeadId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.NO_PROXY)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensHeaded")
   public ScreeningRoomUser getLabHead()
@@ -1436,6 +1438,50 @@ public class Screen extends Study
     return annotationType;
   }
 
+  /**
+   * Get the set of reagents associated with this screen result. <i>Do not modify
+   * the returned collection.</i> To add a reagent, call {@link #addReagent}.
+   * @motivation efficiently find all reagent-related data for a study (w/o reading annotationTypes.annotationValues.reagents)
+   * @return the set of reagents associated with this screen result
+   */
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+              fetch=FetchType.LAZY)
+  @JoinTable(
+    name="studyReagentLink",
+    joinColumns=@JoinColumn(name="studyId"),
+    inverseJoinColumns=@JoinColumn(name="reagentId", nullable=true, updatable=true)
+
+  )
+  @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+  @edu.harvard.med.screensaver.model.annotations.ManyToMany(unidirectional=true)
+  public Set<Reagent> getReagents()
+  {
+    return _reagents;
+  }
+
+  /**
+   * Add the reagent.
+   * @param reagent the reagent to add
+   * @return true iff the screen did not already have the reagent
+   */
+  public boolean addReagent(Reagent reagent)
+  {
+    return _reagents.add(reagent);
+
+  }
+
+  /**
+   * Remove the reagent.
+   * @param reagent the reagent to remove
+   * @return true iff the screen previously had the reagent
+   */
+  public boolean removeReagent(Reagent reagent)
+  {
+    return _reagents.remove(reagent);
+  }
+
 
   // protected constructor
 
@@ -1628,5 +1674,15 @@ public class Screen extends Study
   private void setAnnotationTypes(SortedSet<AnnotationType> annotationTypes)
   {
     _annotationTypes = annotationTypes;
+  }
+
+  /**
+   * Set the reagents.
+   * @param reagents the new reagents
+   * @motivation for hibernate
+   */
+  private void setReagents(Set<Reagent> reagents)
+  {
+    _reagents = reagents;
   }
 }

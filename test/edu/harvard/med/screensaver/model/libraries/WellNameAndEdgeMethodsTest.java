@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -28,7 +28,7 @@ public class WellNameAndEdgeMethodsTest extends TestCase
   {
     _library = new Library("testLibrary", "testLibrary", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
   }
-  
+
   public void testWellNameParser()
   {
     for (char row = Character.toLowerCase(Well.MIN_WELL_ROW); row <= Character.toLowerCase(Well.MAX_WELL_ROW); ++row) {
@@ -43,7 +43,7 @@ public class WellNameAndEdgeMethodsTest extends TestCase
       }
     }
   }
-  
+
   public void testWellEdge()
   {
     for (char row = Character.toLowerCase(Well.MIN_WELL_ROW); row <= Character.toLowerCase(Well.MAX_WELL_ROW); ++row) {
@@ -62,15 +62,15 @@ public class WellNameAndEdgeMethodsTest extends TestCase
   private void doTestWellEdge(char row, int col, boolean isEdge)
   {
     String wellName = "" + row + "" + (col + 1);
-    assertEquals("is edge @ " + wellName, 
+    assertEquals("is edge @ " + wellName,
                  isEdge,
-                 _library.createWell(1, wellName).isEdgeWell());
+                 _library.createWell(new WellKey(1, wellName), WellType.EMPTY).isEdgeWell());
   }
 
   private void doTestWellName(char rowLetter, int col)
   {
     String wellName = "" + rowLetter + "" + (col + 1);
-    Well well = _library.createWell(1, wellName);
+    Well well = _library.createWell(new WellKey(1, wellName), WellType.EMPTY);
     assertEquals(wellName + " row",
                  Character.isUpperCase(rowLetter) ? rowLetter - 'A'
                                                   : rowLetter - 'a',

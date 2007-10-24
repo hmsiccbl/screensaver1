@@ -72,7 +72,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
   {
     getDataTable().getRowsPerPageSelector().setSelection(1);
     getDataTable().gotoRowIndex(getDataTable().getDataModel().getRowIndex());
-    setEntityToView(getRowData());
+    updateEntityToView();
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -228,8 +228,9 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
   {
     if (isEntityView()) {
       if (getDataTable().getDataModel().isRowAvailable()) {
-        E rowData = (E) getDataTable().getDataModel().getRowData();
+        E rowData = (E) getRowData();
         if (rowData != null && rowData != entityToView) {
+          log.debug("setting entity for single-view mode: " + rowData);
           setEntityToView(rowData);
           entityToView = rowData;
         }

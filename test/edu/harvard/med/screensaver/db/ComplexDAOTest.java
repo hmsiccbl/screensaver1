@@ -24,9 +24,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.hibernate.LazyInitializationException;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -41,14 +38,15 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
@@ -65,6 +63,9 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocato
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.Pair;
+
+import org.apache.log4j.Logger;
+import org.hibernate.LazyInitializationException;
 
 
 /**
@@ -174,7 +175,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             2);
           Compound compound = new Compound("compound P", "inchi");
           compound.setChembankId("P");
-          Well well = library.createWell(27, "A01");
+          Well well = library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
           well.addCompound(compound);
           genericEntityDao.saveOrUpdateEntity(library);
         }
@@ -222,7 +223,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             LibraryType.KNOWN_BIOACTIVES,
             1,
             2);
-          library.createWell(27, "A01");
+          library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
           genericEntityDao.saveOrUpdateEntity(library);
         }
       });
@@ -264,9 +265,9 @@ public class ComplexDAOTest extends AbstractSpringTest
               LibraryType.KNOWN_BIOACTIVES,
               1,
               2);
-            library.createWell(27, "A01");
-            library.createWell(27, "A02");
-            library.createWell(27, "A03");
+            library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A02"), WellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A03"), WellType.EXPERIMENTAL);
             genericEntityDao.saveOrUpdateEntity(library);
             throw new RuntimeException("fooled ya!");
           }
@@ -292,9 +293,9 @@ public class ComplexDAOTest extends AbstractSpringTest
               LibraryType.KNOWN_BIOACTIVES,
               1,
               2);
-            library.createWell(27, "A01");
-            library.createWell(27, "A02");
-            library.createWell(27, "A03");
+            library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A02"), WellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A03"), WellType.EXPERIMENTAL);
             genericEntityDao.saveOrUpdateEntity(library);
           }
         });
@@ -355,11 +356,12 @@ public class ComplexDAOTest extends AbstractSpringTest
             1);
           Well[] wells = new Well[3];
           for (int iWell = 0; iWell < wells.length; ++iWell) {
-            wells[iWell] = library.createWell(
-              ( iWell / 2 ) + 1,
-              String.format("%c%02d",
-                            Well.MIN_WELL_ROW + ((iWell / Well.PLATE_ROWS) + 1),
-                            (iWell % Well.PLATE_COLUMNS) + 1));
+            WellKey wellKey = new WellKey(( iWell / 2 ) + 1,
+                                          String.format("%c%02d",
+                                                        Well.MIN_WELL_ROW + ((iWell / Well.PLATE_ROWS) + 1),
+                                                        (iWell % Well.PLATE_COLUMNS) + 1));
+
+            wells[iWell] = library.createWell(wellKey, WellType.EXPERIMENTAL);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
               rvt[iResultValue].addResultValue(wells[iWell],
                                                AssayWellType.EXPERIMENTAL,
@@ -825,7 +827,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         for (int i = 1; i <= 10; ++i) {
           int plateNumber = i;
           expectedPlateNumbers.add(i);
-          Well well = library.createWell(plateNumber, "A01");
+          Well well = library.createWell(new WellKey(plateNumber, "A01"), WellType.EXPERIMENTAL);
           expectedWells.add(well);
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           boolean exclude = i % 4 == 0;
@@ -876,7 +878,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 1; iWell <= 10; ++iWell) {
-        Well well = library.createWell(plateNumber, "A" + iWell);
+        Well well = library.createWell(new WellKey(plateNumber, "A" + iWell), WellType.EXPERIMENTAL);
         AssayWellType assayWellType = iPlate == 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL;
         rvt1.addResultValue(well, assayWellType, (double) iWell, 0, false);
         rvt2.addResultValue(well, assayWellType, iWell % 2 == 0 ? "S" : "W", false);
@@ -1011,7 +1013,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     for (int iPlate = 1; iPlate <= 3; ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {
-        Well well = library.createWell(plateNumber, "A" + (iWell + 1));
+        Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), WellType.EXPERIMENTAL);
         rvt1.addResultValue(well, (double) iWell, 3);
         rvt2.addResultValue(well, iWell + 10.0, 3);
       }
@@ -1081,136 +1083,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertTrue(librariesDao.isPlateRangeAvailable(11, 100000));
   }
 
-  public void testFindSortedAnnotationValueTableByRange()
-  {
-    final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    AnnotationType at1 = screen.createAnnotationType("annot1", "desc1", false);
-    AnnotationType at2 = screen.createAnnotationType("annot2", "desc2", true);
-    for (int i = 0; i < 20; ++i) {
-      ReagentVendorIdentifier reagentVendorId = new ReagentVendorIdentifier("vendor",
-                                                                            String.format("vendorId%02d", i));
-      at1.createAnnotationValue(reagentVendorId,
-                             String.format("value%02d", i));
-      at2.createAnnotationValue(reagentVendorId,
-                             Integer.toString(i));
-    }
-    genericEntityDao.saveOrUpdateEntity(screen);
-
-    // test sort by vendor id (fixed key column)
-    Map<String,Object> criteria = new HashMap<String,Object>();
-    Map<ReagentVendorIdentifier,List<AnnotationValue>> result =
-      annotationsDao.findSortedAnnotationValuesTableByRange(Arrays.asList(at1, at2),
-                                                            AnnotationsDAO.SORT_BY_VENDOR_ID,
-                                                            SortDirection.ASCENDING,
-                                                            0,
-                                                            null,
-                                                            null);
-    assertEquals("result size", 20, result.size());
-    int iWell = 0;
-    for (Map.Entry<ReagentVendorIdentifier,List<AnnotationValue>> entry : result.entrySet()) {
-      assertEquals("sorted key value for " + entry.getKey() + " at sort index " + iWell,
-                   new ReagentVendorIdentifier("vendor",
-                                               String.format("vendorId%02d",  iWell)),
-                   entry.getKey());
-      assertEquals("associated annotation 0 value for " + entry.getKey(),
-                   String.format("value%02d",  iWell),
-                   entry.getValue().get(0).getValue());
-      assertEquals("associated annotation 1 value for " + entry.getKey(),
-                   (double) iWell,
-                   entry.getValue().get(1).getNumericValue(),
-                   0.001);
-      ++iWell;
-    }
-
-    // test sort by 2nd AT, descending, with annotation types requested in reverse order, rows 14-10
-    result =
-      annotationsDao.findSortedAnnotationValuesTableByRange(Arrays.asList(at2, at1),
-                                                            0,
-                                                            SortDirection.DESCENDING,
-                                                            5,
-                                                            5,
-                                                            criteria);
-    assertEquals("result size", 5, result.size());
-    iWell = 15;
-    for (Map.Entry<ReagentVendorIdentifier,List<AnnotationValue>> entry : result.entrySet()) {
-      --iWell;
-      assertEquals("sorted annotation value for " + entry.getKey() + " at sort index " + iWell,
-                   String.format("value%02d",  iWell),
-                   entry.getValue().get(1).getValue());
-      assertEquals("associated annotation value for " + entry.getKey(),
-                   (double) iWell,
-                   entry.getValue().get(0).getNumericValue(),
-                   0.001);
-    }
-
-//    // test sort by wellname, plate number ascending
-//    result =
-//      screenResultsDao.findSortedAnnotationValueTableByRange(Arrays.asList(at1, at2),
-//                                                         ScreenResultsDAO.SORT_BY_WELL_PLATE,
-//                                                         SortDirection.ASCENDING,
-//                                                         0,
-//                                                         100,
-//                                                         null,
-//                                                         null);
-//    assertEquals("sort by well, plate ascending result size", 100, result.size());
-//    iWell = 0;
-//    for (Map.Entry<String,List<AnnotationValue>> entry : result.entrySet()) {
-//      int expectedWellColumn = (iWell / 10);
-//      assertEquals("sort by well, plate ascending: well",
-//                   expectedWellColumn,
-//                   entry.getKey().getColumn());
-//      int expectedPlateNumber = (iWell % 10) + 1;
-//      assertEquals("sort by well, plate ascending: plate",
-//                   expectedPlateNumber,
-//                   entry.getKey().getPlateNumber());
-//      ++iWell;
-//    }
-//
-//    // test sort by assayWellType descending
-//    result =
-//      screenResultsDao.findSortedAnnotationValueTableByRange(Arrays.asList(at1, at2),
-//                                                         ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE,
-//                                                         SortDirection.DESCENDING,
-//                                                         0,
-//                                                         11,
-//                                                         null,
-//                                                         null);
-//    for (Map.Entry<String,List<AnnotationValue>> entry : result.entrySet()) {
-//      log.debug(entry.getKey() + " " + entry.getValue().get(0).getAssayWellType());
-//    }
-//    iWell = 0;
-//    assertEquals("sort by assayWellType result size", 11, result.size());
-//    for (Map.Entry<String,List<AnnotationValue>> entry : result.entrySet()) {
-//      assertEquals("sort by assayWellType",
-//                   iWell < 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL,
-//                   entry.getValue().get(0).getAssayWellType());
-//      ++iWell;
-//    }
-//
-//    // test RVT ordering
-//    result =
-//      screenResultsDao.findSortedAnnotationValueTableByRange(Arrays.asList(at2, at1),
-//                                                         ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE,
-//                                                         SortDirection.DESCENDING,
-//                                                         0,
-//                                                         10,
-//                                                         null,
-//                                                         null);
-//    for (Map.Entry<String,List<AnnotationValue>> entry : result.entrySet()) {
-//      log.debug(entry.getKey() + " " + entry.getValue().get(0).getAssayWellType());
-//    }
-//    assertEquals("rvt order result size", 10, result.size());
-//    for (Map.Entry<String,List<AnnotationValue>> entry : result.entrySet()) {
-//      assertTrue("first rvt is 'Derived value' RVT",
-//                 entry.getValue().get(0).getValue().equals("S") || entry.getValue().get(0).getValue().equals("W"));
-//      assertNull("first rvt is 'Derived value' RVT",
-//                 entry.getValue().get(0).getNumericValue());
-//      assertNotNull("second rvt is 'Raw value' RVT",
-//                    entry.getValue().get(1).getNumericValue());
-//    }
-  }
-
-
+  // TODO: rename
   public void testFindAnnotationValuesAndAnnotationsTypes()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
@@ -1218,14 +1091,16 @@ public class ComplexDAOTest extends AbstractSpringTest
     final AnnotationType at2 = screen.createAnnotationType("annot2", "desc2", true);
     final AnnotationType at3 = screen.createAnnotationType("annot3", "desc3", true);
     for (int i = 0; i < 20; ++i) {
-      ReagentVendorIdentifier reagentVendorId = new ReagentVendorIdentifier("vendor",
-                                                                            String.format("vendorId%02d", i));
-      at1.createAnnotationValue(reagentVendorId,
+      Reagent reagent = new Reagent(new ReagentVendorIdentifier("vendor",
+                                                                String.format("vendorId%02d", i)));
+      genericEntityDao.persistEntity(reagent);
+      at1.createAnnotationValue(reagent,
                                 String.format("value%02d", i));
-      at2.createAnnotationValue(reagentVendorId,
+      at2.createAnnotationValue(reagent,
                                 Integer.toString(i));
     }
     genericEntityDao.saveOrUpdateEntity(screen);
+    //genericEntityDao.persistEntity(screen);
 
     // this transaction may seem unnecessary, but if any of the assertions fail, they lead
     // to calling toString() on the annotationsDao method result, which causes LazyInitE
@@ -1239,12 +1114,6 @@ public class ComplexDAOTest extends AbstractSpringTest
         assertEquals("reagent's annotation types",
           new TreeSet<AnnotationType>(Arrays.asList(at1, at2)),
           new TreeSet<AnnotationType>(annotationsDao.findAllAnnotationTypesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"))));
-
-        List<AnnotationValue> annotationValues = annotationsDao.findAnnotationValuesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"));
-        assertEquals("annotation values count", 2, annotationValues.size());
-        // TODO: the ordering of these asserts relies upon the database maintaining the same physical ordering as above insertions
-        assertEquals("value02", annotationValues.get(0).getFormattedValue());
-        assertEquals("2", annotationValues.get(1).getFormattedValue());
       }
     });
   }
@@ -1315,7 +1184,7 @@ public class ComplexDAOTest extends AbstractSpringTest
                                   LibraryType.COMMERCIAL,
                                   1,
                                   1);
-    library.createWell(1, "A01");
+    library.createWell(new WellKey(1, "A01"), WellType.EXPERIMENTAL);
     genericEntityDao.saveOrUpdateEntity(library);
     try {
         // oops...should've been "wells"!
@@ -1551,7 +1420,7 @@ public class ComplexDAOTest extends AbstractSpringTest
     //Well plate2WellB02 =
     genericEntityDao.findEntityById(Well.class, "00002:B02");
 
-    Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
+    Screen screen = MakeDummyEntities.makeDummyScreen(2, ScreenType.RNAI);
 
     {
       CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();

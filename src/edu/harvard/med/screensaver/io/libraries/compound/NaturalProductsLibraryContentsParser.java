@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -18,30 +18,32 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+
+import org.apache.log4j.Logger;
 
 
 /**
  * Parses the contents (either partial or complete) of a natural products library from
  * an Excel file.
  * <p>
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class NaturalProductsLibraryContentsParser implements LibraryContentsParser
 {
 
   // private static data
-  
+
   private static final Logger log = Logger.getLogger(NaturalProductsLibraryContentsParser.class);
 
   private static final WorkbookSettings WORKBOOK_SETTINGS = new WorkbookSettings();
@@ -57,9 +59,9 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
     private static final long serialVersionUID = -6789546240931907100L;
   }
 
-  
+
   // private instance data
-  
+
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private Library _library;
@@ -67,9 +69,9 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
   private File _file;
   private int _plateColumn, _wellColumn, _vendorIdentifierColumn, _iccbNumberColumn;
 
-  
+
   // public constructor and instance methods
-  
+
   /**
    * Construct a new <code>SDFileCompoundLibraryContentsParser</code> object.
    */
@@ -117,32 +119,32 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
     });
     return _library;
   }
-  
+
   public List<FileParseError> getErrors()
   {
     return _errorManager.getErrors();
   }
-  
+
   public boolean getHasErrors()
   {
     return _errorManager != null && _errorManager.getHasErrors();
   }
-  
+
   public void clearErrors()
   {
     _errorManager = new FileParseErrorManager();
   }
-  
-  
+
+
   // private instance methods
-  
+
   private void parseWorkbook(Workbook workbook) throws NaturalProductsLibraryContentsException
   {
     for (Sheet sheet : workbook.getSheets()) {
       parseSheet(sheet);
     }
   }
-  
+
   private void parseSheet(Sheet sheet) throws NaturalProductsLibraryContentsException
   {
     log.info("parsing worksheet " + sheet.getName());
@@ -153,9 +155,15 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
         String wellName = getWellName(sheet, i);
         String vendorIdentifier = getVendorIdentifier(sheet, i);
         String iccbNumber = getIccbNumber(sheet, i);
-        
+
         Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
-        well.setVendorIdentifier(vendorIdentifier);
+        if (well.getReagent() == null) {
+          Reagent reagent = new Reagent(new ReagentVendorIdentifier(well.getLibrary().getVendor(),
+                                                                    vendorIdentifier));
+          _dao.saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
+          log.info("created new reagent " + reagent + " for " + well);
+          well.setReagent(reagent);
+        }
         well.setIccbNumber(iccbNumber);
         well.setWellType(WellType.EXPERIMENTAL);
         _dao.saveOrUpdateEntity(well);
@@ -179,11 +187,11 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
     if (plateNumber < _library.getStartPlate() || plateNumber > _library.getEndPlate()) {
       _errorManager.addError(
         "plate number out of library range on sheet '" + sheet.getName() + "'", _file, i + 1);
-      throw new NaturalProductsLibraryContentsException();      
+      throw new NaturalProductsLibraryContentsException();
     }
     return plateNumber;
   }
-  
+
   private String getWellName(Sheet sheet, int i) throws NaturalProductsLibraryContentsException
   {
     String wellName = sheet.getCell(_wellColumn, i).getContents();
@@ -206,11 +214,11 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
       _errorManager.addError(
         "suspicious vendor identifier value '0' on sheet '" + sheet.getName() +
         "'. Try changing the cell format to 'Text'.", _file, i + 1);
-      throw new NaturalProductsLibraryContentsException();      
+      throw new NaturalProductsLibraryContentsException();
     }
     return contents;
   }
-  
+
   private String getIccbNumber(Sheet sheet, int i) throws NaturalProductsLibraryContentsException
   {
     if (_iccbNumberColumn == -1) {
@@ -225,11 +233,11 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
       _errorManager.addError(
         "suspicious iccb number value '0' on sheet '" + sheet.getName() +
         "'. Try changing the cell format to 'Text'.", _file, i + 1);
-      throw new NaturalProductsLibraryContentsException();      
+      throw new NaturalProductsLibraryContentsException();
     }
     return contents;
-  }  
-  
+  }
+
   private void parseHeaders(Sheet sheet) throws NaturalProductsLibraryContentsException
   {
     _plateColumn = _wellColumn = _vendorIdentifierColumn = _iccbNumberColumn = -1;

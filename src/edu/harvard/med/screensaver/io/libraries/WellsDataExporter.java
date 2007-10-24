@@ -315,8 +315,8 @@ public class WellsDataExporter implements DataExporter<Well>
     row.createCell((short) 1).setCellValue(well.getPlateNumber());
     row.createCell((short) 2).setCellValue(well.getWellName());
     row.createCell((short) 3).setCellValue(well.getWellType().getValue());
-    if (well.getVendorIdentifier() != null) {
-      row.createCell((short) 4).setCellValue(well.getVendorIdentifier());
+    if (well.getSimpleVendorIdentifier() != null) {
+      row.createCell((short) 4).setCellValue(well.getSimpleVendorIdentifier());
     }
     if (well.getIccbNumber() != null) {
       row.createCell((short) 5).setCellValue(well.getIccbNumber());
@@ -357,9 +357,9 @@ public class WellsDataExporter implements DataExporter<Well>
       pw.println(well.getIccbNumber());
       pw.println();
     }
-    if (well.getFullVendorIdentifier() != null) {
+    if (well.getReagent() != null) {
       pw.println(">  <Vendor_Identifier>");
-      pw.println(well.getFullVendorIdentifier());
+      pw.println(well.getReagent().getEntityId());
       pw.println();
     }
     Compound compound = well.getPrimaryCompound();

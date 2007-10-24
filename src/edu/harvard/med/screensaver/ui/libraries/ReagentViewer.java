@@ -9,9 +9,9 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -19,18 +19,16 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
-import edu.harvard.med.screensaver.io.libraries.WellsDataExporterFormat;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.ReagentNameValueTable;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
 
@@ -48,7 +46,9 @@ public class ReagentViewer extends AbstractBackingBean
   protected GeneViewer _geneViewer;
   protected CompoundViewer _compoundViewer;
 
-  private Well _well;
+  private Reagent _reagent;
+  private Collection<Gene> _genes;
+  private Collection<Compound> _compounds;
   private NameValueTable _nameValueTable;
   private NameValueTable _annotationNameValueTable;
 
@@ -76,22 +76,24 @@ public class ReagentViewer extends AbstractBackingBean
 
   // public instance methods
 
-  public Well getWell()
+  public Reagent getReagent()
   {
-    return _well;
+    return _reagent;
   }
 
-  public void setWell(Well well)
+  public void setReagent(Reagent reagent,
+                         Collection<Gene> genes,
+                         Collection<Compound> compounds)
   {
-    _well = well;
-    List<AnnotationValue> annotationValues =
-      _annotationsDao.findAnnotationValuesForReagent(_well.getReagentVendorIdentifier());
+    List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>(reagent.getAnnotationValues());
     for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
       AnnotationValue annotationValue = (AnnotationValue) iterator.next();
       if (annotationValue.isRestricted()) {
         iterator.remove();
       }
     }
+    _genes = genes;
+    _compounds = compounds;
     setAnnotationNameValueTable(new AnnotationNameValueTable(annotationValues));
   }
 
@@ -118,42 +120,51 @@ public class ReagentViewer extends AbstractBackingBean
   @UIControllerMethod
   public String viewReagent()
   {
-    WellKey wellKey = new WellKey((String) getRequestParameter("wellId"));
-    return viewReagent(wellKey);
+    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier((String) getRequestParameter("reagentId"));
+    return viewReagent(rvi);
   }
 
   @UIControllerMethod
-  public String viewReagent(Well well)
+  public String viewReagent(Reagent reagent)
   {
-    if (well == null) {
-      reportApplicationError("attempted to view an unknown well (not in database)");
+    if (reagent == null) {
+      reportApplicationError("attempted to view an unknown reagent (not in database)");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return viewReagent(well.getWellKey());
+    return viewReagent(reagent.getReagentId());
   }
 
   @UIControllerMethod
-  public String viewReagent(final WellKey wellKey)
+  public String viewReagent(final ReagentVendorIdentifier rvi)
   {
     try {
       _dao.doInTransaction(new DAOTransaction() {
 
         public void runTransaction()
         {
-          Well well = _dao.findEntityById(Well.class,
-                                          wellKey.toString(),
-                                          true,
-                                          "library",
-                                          "silencingReagents.gene.genbankAccessionNumbers",
-                                          "compounds.compoundNames",
-                                          "compounds.pubchemCids",
-                                          "compounds.nscNumbers",
-                                          "compounds.casNumbers");
-          if (well == null) {
+          Reagent reagent = _dao.findEntityById(Reagent.class,
+                                                rvi,
+                                                true,
+                                                "wells.library",
+                                                "wells.silencingReagents.gene.genbankAccessionNumbers",
+                                                "wells.compounds.compoundNames",
+                                                "wells.compounds.pubchemCids",
+                                                "wells.compounds.nscNumbers",
+                                                "wells.compounds.casNumbers");
+          if (reagent == null) {
             throw new IllegalArgumentException("no such reagent");
           }
-          setWell(well);
-          setNameValueTable(new ReagentNameValueTable(well,
+          Set<Gene> genes = Collections.emptySet();
+          Set<Compound> compounds = Collections.emptySet();
+          if (reagent.getWells().size() > 0) {
+            Well representativeWell = reagent.getWells().iterator().next();
+            genes = representativeWell.getGenes();
+            compounds = representativeWell.getCompounds();
+          }
+          setReagent(reagent,
+                     genes,
+                     compounds);
+          setNameValueTable(new ReagentNameValueTable(reagent,
                                                       ReagentViewer.this,
                                                       _geneViewer,
                                                       _compoundViewer));
@@ -161,7 +172,7 @@ public class ReagentViewer extends AbstractBackingBean
       });
     }
     catch (IllegalArgumentException e) {
-      showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
+      showMessage("libraries.noSuchReagent", rvi);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return VIEW_REAGENT;
@@ -171,45 +182,37 @@ public class ReagentViewer extends AbstractBackingBean
   {
     String geneId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("geneId");
     Gene gene = null;
-    for (Gene gene2 : _well.getGenes()) {
+    for (Gene gene2 : _genes) {
       if (gene2.getGeneId().equals(geneId)) {
         gene = gene2;
         break;
       }
     }
-    return _geneViewer.viewGene(gene, _well);
+    return _geneViewer.viewGene(gene);
   }
 
   public String viewCompound()
   {
     String compoundId = (String) getRequestParameter("compoundId");
     Compound compound = null;
-    for (Compound compound2 : _well.getCompounds()) {
+    for (Compound compound2 : _compounds) {
       if (compound2.getCompoundId().equals(compoundId)) {
         compound = compound2;
         break;
       }
     }
-    return _compoundViewer.viewCompound(compound, _well);
+    return _compoundViewer.viewCompound(compound);
   }
 
-  @UIControllerMethod
-  public String downloadSDFile()
+  public Collection<Gene> getGenes()
   {
-    try {
-      WellsDataExporter dataExporter = new WellsDataExporter(_dao, WellsDataExporterFormat.SDF);
-      Set<Well> wells = new HashSet<Well>(1, 2.0f);
-      wells.add(_well);
-      InputStream inputStream = dataExporter.export(wells);
-      JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                         inputStream,
-                                         dataExporter.getFileName(),
-                                         dataExporter.getMimeType());
-    }
-    catch (IOException e) {
-      reportApplicationError(e.toString());
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _genes;
   }
+
+  public Collection<Compound> getCompounds()
+  {
+    return _compounds;
+  }
+
 }
 

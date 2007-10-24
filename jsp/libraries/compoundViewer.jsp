@@ -29,7 +29,7 @@
 
 	<t:panelGroup rendered="#{empty compoundViewer.compound}">
 		<t:outputText
-			value="There are no compounds in well #{compoundViewer.parentWellOfInterest.wellKey}"
+			value="There are no reagents in this well"
 			styleClass="label" />
 	</t:panelGroup>
 </f:subview>

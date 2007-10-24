@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.ui.libraries;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
@@ -26,7 +25,6 @@ public class GeneViewer extends AbstractBackingBean
 
   private Gene _gene;
   private GeneNameValueTable _geneNameValueTable;
-  private Well _parentWellOfInterest;
 
 
   // constructors
@@ -66,19 +64,6 @@ public class GeneViewer extends AbstractBackingBean
     _geneNameValueTable = geneNameValueTable;
   }
 
-  /**
-   * Get the parent Well of interest, for which this compound is being viewed (a
-   * compound can be in multiple wells, but the UI may want to be explicit about
-   * which Well "led" to this viewer").
-   *
-   * @return the parent Well of interest, for which this compound is being
-   *         viewed; may be null
-   */
-  public Well getParentWellOfInterest()
-  {
-    return _parentWellOfInterest;
-  }
-
   @UIControllerMethod
   public String viewGene(final Gene geneIn)
   {
@@ -101,12 +86,4 @@ public class GeneViewer extends AbstractBackingBean
     });
     return VIEW_GENE;
   }
-
-  @UIControllerMethod
-  public String viewGene(Gene gene, Well forWell)
-  {
-    _parentWellOfInterest = forWell;
-    return viewGene(gene);
-  }
-
 }

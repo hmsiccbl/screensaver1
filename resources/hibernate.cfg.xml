@@ -32,6 +32,7 @@
     <mapping class="edu.harvard.med.screensaver.model.libraries.Gene" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Library" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.SilencingReagent" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Reagent" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Well" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity" />

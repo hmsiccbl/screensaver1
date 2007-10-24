@@ -7,7 +7,9 @@
 
 	<t:panelGrid columns="1" width="100%">
 		<%@include file="studyDetailViewer.jspf"%>
-		<%@include file="annotationViewer.jspf"%>
+		<t:aliasBean alias="#{reagentsBrowser}" value="#{studyViewer.reagentSearchResults}">
+			<%@include file="../libraries/reagentSearchResults.jsp"%>
+		</t:aliasBean>
 	</t:panelGrid>
 
 </f:subview>

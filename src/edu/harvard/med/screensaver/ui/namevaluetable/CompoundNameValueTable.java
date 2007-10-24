@@ -123,8 +123,7 @@ public class CompoundNameValueTable extends NameValueTable
     if (isEmbedded()) {
       String name = getName(index);
       if (name.equals(SMILES)) {
-        return _compoundViewer.viewCompound(_compound,
-                                            isEmbedded() ? _parentViewer.getWell() : null);
+        return _compoundViewer.viewCompound(_compound);
       }
     }
     // other fields do not have actions

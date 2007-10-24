@@ -111,8 +111,7 @@ public class GeneNameValueTable extends NameValueTable
     if (isEmbedded()) {
       String name = getName(index);
       if (name.equals(GENE_NAME)) {
-        return _geneViewer.viewGene(_gene,
-                                    isEmbedded() ? _parentViewer.getWell() : null);
+        return _geneViewer.viewGene(_gene);
       }
     }
     // other fields do not have actions

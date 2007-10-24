@@ -9,13 +9,17 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.util.ArrayList;
+
+import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.annotations.AnnotationViewer;
+import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
@@ -30,8 +34,10 @@ public class StudyViewer extends AbstractBackingBean
   // instance data members
 
   private GenericEntityDAO _dao;
+  private AnnotationsDAO _annotationsDao;
   private StudyDetailViewer _studyDetailViewer;
-  private AnnotationViewer _annotationViewer;
+  private ReagentSearchResults _reagentSearchResults;
+
 
   private Study _study;
 
@@ -45,27 +51,27 @@ public class StudyViewer extends AbstractBackingBean
   }
 
   public StudyViewer(GenericEntityDAO dao,
+                     AnnotationsDAO annotationsDao,
                      StudyDetailViewer studyDetailViewer,
-                     AnnotationViewer annotationViewer)
+                     ReagentSearchResults reagentSearchResults)
   {
     _dao = dao;
+    _annotationsDao = annotationsDao;
     _studyDetailViewer = studyDetailViewer;
-    _annotationViewer = annotationViewer;
+    _reagentSearchResults = reagentSearchResults;
   }
 
 
   // public methods
 
-  public void setStudy(Study study)
-  {
-    _study = study;
-    _studyDetailViewer.setStudy(study);
-    _annotationViewer.setStudy(study);
-  }
-
   public Study getStudy()
   {
     return _study;
+  }
+
+  public ReagentSearchResults getReagentSearchResults()
+  {
+    return _reagentSearchResults;
   }
 
 
@@ -88,12 +94,15 @@ public class StudyViewer extends AbstractBackingBean
         {
           Study study = _dao.reloadEntity(studyIn,
                                           true,
-                                          "labHead.labAffiliation",
                                           "labHead.labMembers",
                                           "leadScreener");
-          _dao.needReadOnly(study, "collaborators.labAffiliation");
-          _dao.needReadOnly(study, "publications");
-          _dao.needReadOnly(study, "annotationTypes");
+          _dao.needReadOnly((Screen) study, "collaborators");
+          _dao.needReadOnly((Screen) study, "publications");
+          _dao.needReadOnly((Screen) study, "annotationTypes");
+          _dao.needReadOnly((Screen) study, "reagents.annotationValues");
+          // TODO: only call one of the following, depending upon study's screen type
+          _dao.needReadOnly((Screen) study, "reagents.wells.silencingReagents.gene");
+          _dao.needReadOnly((Screen) study, "reagents.wells.compounds");
           setStudy(study);
         }
       });
@@ -106,7 +115,14 @@ public class StudyViewer extends AbstractBackingBean
   }
 
 
-  // private methods
+  // protected methods
 
+  protected void setStudy(Study study)
+  {
+    _study = study;
+    _studyDetailViewer.setStudy(study);
+    _reagentSearchResults.setContents(study.getReagents(),
+                                      new ArrayList<AnnotationType>(study.getAnnotationTypes()));
+  }
 }
 

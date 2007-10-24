@@ -42,6 +42,7 @@ public class WellDetailsNameValueTable extends ReagentDetailsNameValueTable
 
   private LibraryViewer _libraryViewer;
 
+  private Well _well;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<String> _descriptions = new ArrayList<String>();
@@ -53,7 +54,9 @@ public class WellDetailsNameValueTable extends ReagentDetailsNameValueTable
   public WellDetailsNameValueTable(Well well,
                                    LibraryViewer libraryViewer)
   {
-    super(well);
+    super(well.getReagent());
+    _well = well;
+    initializeLists(_well);
     _libraryViewer = libraryViewer;
   }
 
@@ -63,7 +66,7 @@ public class WellDetailsNameValueTable extends ReagentDetailsNameValueTable
   {
     String name = getName(index);
     if (name.equals(LIBRARY)) {
-      return _libraryViewer.viewLibrary(getWell().getLibrary());
+      return _libraryViewer.viewLibrary(_well.getLibrary());
     }
     // other fields do not have actions
     return super.getAction(index, value);
@@ -84,7 +87,6 @@ public class WellDetailsNameValueTable extends ReagentDetailsNameValueTable
     if (well.getIccbNumber() != null) {
       addItem(ICCB_NUMBER, well.getIccbNumber(), ValueType.TEXT, "The ICCB number for the well contents");
     }
-    super.initializeLists(well);
   }
 }
 

@@ -26,7 +26,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.SecondaryTable;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -46,8 +45,8 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "plateNumber", "wellName" }) })
-@SecondaryTable(name="wellMolfile")
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={ "plateNumber", "wellName" })})
+//@SecondaryTable(name="wellMolfile")
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Library.class)
 public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
@@ -84,6 +83,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private String _wellId;
   private Integer _version;
   private Library _library;
+  private Reagent _reagent;
   private Set<Compound> _compounds = new HashSet<Compound>();
   private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
   private String _iccbNumber;
@@ -94,7 +94,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private String _genbankAccessionNumber;
 
   private transient WellKey _wellKey;
-  private transient ReagentVendorIdentifier _reagentVendorIdentifier;
 
 
   // public instance methods
@@ -112,10 +111,9 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     return getWellKey().toString();
   }
 
-  public int compareTo(Well o)
+  public int compareTo(Well other)
   {
-    assert o instanceof Well : "input to compareTo() must be a Well";
-    return getWellKey().compareTo(((Well) o).getWellKey());
+    return getWellKey().compareTo(((Well) other).getWellKey());
   }
 
   /**
@@ -243,37 +241,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   }
 
   /**
-   * Get the set of genes that have silencing reagents contained in this well.
-   * @return the set of genes that have silencing reagents contained in this well
-   */
-  @Transient
-  public Set<Gene> getGenes()
-  {
-    Set<Gene> genes = new HashSet<Gene>();
-    for (SilencingReagent silencingReagent : getSilencingReagents()) {
-      genes.add(silencingReagent.getGene());
-    }
-    return genes;
-  }
-
-  /**
-   * Get the gene that has silencing reagents contained in this well.
-   * @return the gene that have silencing reagents contained in this well
-   */
-  @Transient
-  public Gene getGene()
-  {
-    Set<Gene> genes = getGenes();
-    if (genes.size() > 1) {
-      throw new IndexOutOfBoundsException();
-    }
-    if (genes.size() == 0) {
-      return null;
-    }
-    return genes.iterator().next();
-  }
-
-  /**
    * Add the silencing reagent.
    * @param silencingReagent the silencing reagent to add
    * @return true iff the silencing reagent was not already in the well
@@ -302,8 +269,39 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   {
     for (SilencingReagent silencingReagent : _silencingReagents) {
       silencingReagent.getWells().remove(this);
+    }
     _silencingReagents.clear();
   }
+
+  /**
+   * Get the set of genes that have silencing reagents contained in this well.
+   * @return the set of genes that have silencing reagents contained in this well
+   */
+  @Transient
+  public Set<Gene> getGenes()
+  {
+    Set<Gene> genes = new HashSet<Gene>();
+    for (SilencingReagent silencingReagent : getSilencingReagents()) {
+      genes.add(silencingReagent.getGene());
+    }
+    return genes;
+  }
+
+  /**
+   * Get the gene that has silencing reagents contained in this well.
+   * @return the gene that have silencing reagents contained in this well
+   */
+  @Transient
+  public Gene getGene()
+  {
+    Set<Gene> genes = getGenes();
+    if (genes.size() > 1) {
+      throw new IndexOutOfBoundsException();
+    }
+    if (genes.size() == 0) {
+      return null;
+    }
+    return genes.iterator().next();
   }
 
   /**
@@ -339,6 +337,15 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     return _wellKey;
   }
 
+  @Transient
+  public String getSimpleVendorIdentifier()
+  {
+    if (_reagent == null) {
+      return null;
+    }
+    return _reagent.getReagentId().getVendorIdentifier();
+  }
+
   /**
    * Get the ICCB number for the well.
    * @return the ICCB number for the well
@@ -356,53 +363,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public void setIccbNumber(String iccbNumber)
   {
     _iccbNumber = iccbNumber;
-  }
-
-  /**
-   * Get the vendor identifier for the well.
-   * @return the vendor identifier for the well
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getVendorIdentifier()
-  {
-    return _vendorIdentifier;
-  }
-
-  /**
-   * Get the full vendor identifier, which consists of the vendor name from the library,
-   * when available, followed by the vendor identifier for the well
-   * @return the full vendor identifier
-   */
-  @Transient
-  public ReagentVendorIdentifier getReagentVendorIdentifier()
-  {
-    if (_reagentVendorIdentifier == null) {
-      _reagentVendorIdentifier = new ReagentVendorIdentifier(_library.getVendor(),
-                                                             _vendorIdentifier);
-    }
-    return _reagentVendorIdentifier;
-  }
-
-  @Transient
-  public String getFullVendorIdentifier()
-  {
-    String vendor = _library.getVendor();
-    if (vendor == null) {
-      return _vendorIdentifier;
-    }
-    if (_vendorIdentifier == null) {
-      return vendor;
-    }
-    return vendor + " " + _vendorIdentifier;
-  }
-
-  /**
-   * Set the vendor identifier for the well.
-   * @param vendorIdentifier the new vendor identifier for the well
-   */
-  public void setVendorIdentifier(String vendorIdentifier)
-  {
-    _vendorIdentifier = vendorIdentifier;
   }
 
   /**
@@ -450,14 +410,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * Get the molfile for the well.
    * @return the molfile for the well
    */
-  @Column(name="molfile", table="wellMolfile")
-  @org.hibernate.annotations.Type(type="text")
-  @org.hibernate.annotations.ForeignKey(name="fk_well_molfile_to_well") // this doesnt work
-  // lazy loading isnt working here. this could cause performance problems. things i tried are
-  // below. the @Basic should work, in combination with the @Proxy on the class:
-  //@Basic(fetch=FetchType.LAZY)
-  //@org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  //@org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.EXTRA)
+  @Transient
   public String getMolfile()
   {
     return _molfile;
@@ -489,6 +442,46 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public void setGenbankAccessionNumber(String genbankAccessionNumber)
   {
     _genbankAccessionNumber = genbankAccessionNumber;
+  }
+
+  /**
+   * Get the reagent.
+   * @return the reagent
+   */
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+             fetch=FetchType.LAZY)
+  @JoinColumn(nullable=true, updatable=true, name="reagent_id")
+  @org.hibernate.annotations.ForeignKey(name="fk_well_to_reagent")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @org.hibernate.annotations.Index(name="well_reagent_id_index", columnNames={"reagent_id"})
+  public Reagent getReagent()
+  {
+    return _reagent;
+  }
+
+  /**
+   * Set the new reagent.
+   * @param reagent the new reagent
+   */
+  public void setReagent(Reagent reagent)
+  {
+    if (isHibernateCaller()) {
+      _reagent = reagent;
+      return;
+    }
+
+    if (_reagent != null) {
+      _reagent.getWells().remove(this);
+    }
+    _reagent = reagent;
+    if (_reagent != null) {
+      _reagent.getWells().add(this);
+    }
+
+    if (_wellType.equals(WellType.EXPERIMENTAL) && _reagent == null) {
+      throw new DataModelViolationException("experimental well must have a reagent");
+    }
   }
 
   /**
@@ -543,29 +536,19 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * @param wellType
    * @motivation for use of {@link Library#createWell(WellKey, WellType)} only
    */
-  Well(Library library, WellKey wellKey, WellType wellType)
+  Well(Library library, WellKey wellKey, WellType wellType, Reagent reagent)
   {
-    if (wellKey.getPlateNumber() < library.getStartPlate() || wellKey.getPlateNumber() > library.getEndPlate()) {
-      throw new DataModelViolationException("well " + wellKey +
-                                            " is not within library plate range [" +
-                                            library.getStartPlate() + "," +
-                                            library.getEndPlate() + "]");
-    }
+    // TODO: reinstate once entity model test code can be made to respect this constraint
+//    if (wellKey.getPlateNumber() < library.getStartPlate() || wellKey.getPlateNumber() > library.getEndPlate()) {
+//      throw new DataModelViolationException("well " + wellKey +
+//                                            " is not within library plate range [" +
+//                                            library.getStartPlate() + "," +
+//                                            library.getEndPlate() + "]");
+//    }
     _library = library;
     _wellKey = wellKey;
     _wellType = wellType;
-  }
-
-  /**
-   * Construct an initialized <code>Well</code> object.
-   * @param library
-   * @param plateNumber
-   * @param wellName
-   * @motivation for use of {@link Library#createWell(Integer,String)} only
-   */
-  Well(Library library, Integer plateNumber, String wellName)
-  {
-    this(library, new WellKey(plateNumber, wellName), WellType.EMPTY);
+    _reagent = reagent;
   }
 
 

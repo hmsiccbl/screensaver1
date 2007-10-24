@@ -9,16 +9,17 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.annotations.AnnotationViewer;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
+import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
@@ -52,14 +53,15 @@ public class ScreenViewer extends StudyViewer
   }
 
   public ScreenViewer(GenericEntityDAO dao,
+                      AnnotationsDAO annotationsDao,
                       ScreenDetailViewer screenDetailViewer,
-                      AnnotationViewer annotationViewer,
+                      ReagentSearchResults reagentSearchResults,
                       ScreenResultsDAO screenResultsDao,
                       ScreenResultViewer screenResultViewer,
                       HeatMapViewer heatMapViewer,
                       ScreenResultImporter screenResultImporter)
   {
-    super(dao, screenDetailViewer, annotationViewer);
+    super(dao, annotationsDao, screenDetailViewer, reagentSearchResults);
     _dao = dao;
     _screenResultsDao = screenResultsDao;
     _screenDetailViewer = screenDetailViewer;
@@ -108,11 +110,11 @@ public class ScreenViewer extends StudyViewer
         {
           Screen screen = _dao.reloadEntity(screenIn,
                                             true,
-                                            "labHead.labAffiliation",
+                                            "labHead",
                                             "labHead.labMembers",
                                             "leadScreener",
                                             "billingInformation");
-          _dao.needReadOnly(screen, "collaborators.labAffiliation");
+          _dao.needReadOnly(screen, "collaborators.labHead");
           _dao.needReadOnly(screen, "screeningRoomActivities.performedBy");
           _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
           _dao.needReadOnly(screen, "statusItems");

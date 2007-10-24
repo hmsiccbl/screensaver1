@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,24 +13,26 @@ import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapCell;
 
+import org.apache.log4j.Logger;
+
 public class HeatMapCellTest extends AbstractSpringTest
 {
   private static Logger log = Logger.getLogger(HeatMapCellTest.class);
-  
+
   protected ScreenResultParser screenResultParser;
 
   public void testHeatMapCell()
@@ -39,9 +41,9 @@ public class HeatMapCellTest extends AbstractSpringTest
     ScreenResult screenResult = screen.createScreenResult(new Date());
     ResultValueType rvt = screenResult.createResultValueType("rvt1");
     Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
-    Well well = library.createWell(1, "A01" );
+    Well well = library.createWell(new WellKey(1, "A01"), WellType.EMPTY);
     rvt.addResultValue(well, "1.0");
-    
+
     HeatMapCell cell = new HeatMapCell(rvt.getWellKeyToResultValueMap().get(well.getWellKey()),
                                        well.getWellKey(),
                                        1.0,

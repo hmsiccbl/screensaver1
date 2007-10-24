@@ -33,7 +33,11 @@ public class WellNameValueTable extends ReagentNameValueTable
                             GeneViewer geneViewer,
                             CompoundViewer compoundViewer)
   {
-    super(well, wellViewer, geneViewer, compoundViewer, new WellDetailsNameValueTable(well, libraryViewer));
+    super(well.getReagent(),
+          wellViewer,
+          geneViewer,
+          compoundViewer,
+          new WellDetailsNameValueTable(well, libraryViewer));
   }
 }
 

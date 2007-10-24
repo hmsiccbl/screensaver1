@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.libraries.CopyAction;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
@@ -208,6 +209,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   public boolean visit(Publication entity)
   {
 
+    return true;
+  }
+
+  public boolean visit(Reagent entity)
+  {
     return true;
   }
 

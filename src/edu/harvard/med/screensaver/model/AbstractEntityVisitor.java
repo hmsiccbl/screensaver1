@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.libraries.CopyAction;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
@@ -93,6 +94,7 @@ public interface AbstractEntityVisitor
   public boolean visit(LibraryScreening entity);
   public boolean visit(PlatesUsed entity);
   public boolean visit(Publication entity);
+  public boolean visit(Reagent reagent);
   public boolean visit(ResultValue entity);
   public boolean visit(ResultValueType entity);
   public boolean visit(RNAiCherryPickRequest entity);

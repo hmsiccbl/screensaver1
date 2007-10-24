@@ -2,7 +2,7 @@
 // $Id: PackageTestSuite.java 1654 2007-08-02 14:02:19Z s $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -18,7 +18,7 @@ public class PackageTestSuite extends TestSuite
   {
     junit.textui.TestRunner.run(suite());
   }
-  
+
   public static Test suite()
   {
     return new PackageTestSuite();
@@ -33,6 +33,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(CopyInfoTest.class);
     addTestSuite(GeneTest.class);
     addTestSuite(LibraryTest.class);
+    addTestSuite(ReagentTest.class);
     addTestSuite(SilencingReagentTest.class);
     addTestSuite(WellTest.class);
     addTestSuite(WellVolumeAdjustmentTest.class);

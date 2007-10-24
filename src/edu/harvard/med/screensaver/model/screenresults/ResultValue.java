@@ -344,7 +344,6 @@ public class ResultValue
    * @return true whenever this result value is a positive indicator
    */
   @Column(nullable=false, name="isPositive")
-  // TODO: hibernate annotations is not processing the @Index on the @Embeddable columns
   @org.hibernate.annotations.Index(name="index_rvtrv_is_positive")
   public boolean isPositive()
   {

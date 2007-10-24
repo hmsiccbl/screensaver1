@@ -23,7 +23,7 @@
 
 	<t:panelGroup rendered="#{empty geneViewer.gene}">
 		<t:outputText
-			value="There are no genes in well #{geneViewer.parentWellOfInterest.wellKey}"
+			value="There are no genes in this well"
 			styleClass="label" />
 	</t:panelGroup>
 

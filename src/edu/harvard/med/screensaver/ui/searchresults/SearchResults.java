@@ -101,6 +101,26 @@ abstract public class SearchResults<E> extends AbstractBackingBean
         _capabilities.put(capability, true);
       }
     }
+    // HACK: create a dummy data table as soon as possible to allow JSF component bindings to work
+    _dataTable = new DataTable<E>() {
+      @Override
+      protected List<TableColumn<E>> buildColumns()
+      {
+        return Collections.emptyList();
+      }
+
+      @Override
+      protected DataModel buildDataModel()
+      {
+        return new ListDataModel();
+      }
+
+      @Override
+      protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
+      {
+        return new DataTableRowsPerPageUISelectOneBean(Collections.<Integer>emptyList());
+      }
+    };
   }
 
   // abstract methods
@@ -141,6 +161,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   {
     _unsortedResults = unsortedResults;
     _description = description;
+    DataTable oldDataTable = _dataTable;
     _dataTable = new DataTable<E>()
     {
       @Override
@@ -161,6 +182,13 @@ abstract public class SearchResults<E> extends AbstractBackingBean
         return SearchResults.this.buildRowsPerPageSelector();
       }
     };
+    // HACK: we use DataTable to maintain JSF component bindings, so if we
+    // recreate the DataTable, we have to preserve these bindings, since JSF
+    // will not give them to us again during the processing of this requests
+    if (oldDataTable != null) {
+      _dataTable.setDataTableUIComponent(oldDataTable.getDataTableUIComponent());
+      _dataTable.setRowsPerPageUIComponent(oldDataTable.getRowsPerPageUIComponent());
+    }
 
     initializeCompoundSorts();
     initializeHasEditableColumns(getSortManager().getColumns());

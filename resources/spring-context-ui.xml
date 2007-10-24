@@ -396,8 +396,9 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.StudyViewer">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="studyDetailViewer" />
-    <constructor-arg ref="annotationViewer" />
+    <constructor-arg ref="reagentsBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -419,8 +420,9 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="screenDetailViewer" />
-    <constructor-arg ref="annotationViewer" />
+    <constructor-arg ref="reagentsBrowser" />
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />
@@ -496,30 +498,6 @@
         <constructor-arg ref="wellViewer" />
         <constructor-arg ref="librariesDao" />
         <constructor-arg ref="screenResultsDao" />
-      </bean>
-    </constructor-arg>
-    <aop:scoped-proxy />
-  </bean>
-
-  <bean
-    id="annotationViewer"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.annotations.AnnotationViewer">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg>
-      <bean
-        class="edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable"
-        parent="uiBean" />
-    </constructor-arg>
-    <constructor-arg>
-      <bean
-        class="edu.harvard.med.screensaver.ui.annotations.AnnotationValuesTable"
-        parent="uiBean">
-        <constructor-arg ref="genericEntityDao" />
-        <constructor-arg ref="annotationsDao" />
-        <constructor-arg ref="librariesDao" />
-        <constructor-arg ref="reagentViewer" />
       </bean>
     </constructor-arg>
     <aop:scoped-proxy />

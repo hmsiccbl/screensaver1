@@ -14,6 +14,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
@@ -31,24 +32,24 @@ public class ReagentNameValueTable extends ComboNameValueTable
 {
   private static Logger log = Logger.getLogger(ReagentNameValueTable.class);
 
-  public ReagentNameValueTable(Well well,
+  public ReagentNameValueTable(Reagent reagent,
                                ReagentViewer reagentViewer,
                                GeneViewer geneViewer,
                                CompoundViewer compoundViewer)
   {
-    initialize(well, reagentViewer, geneViewer, compoundViewer, new ReagentDetailsNameValueTable(well));
+    initialize(reagent, reagentViewer, geneViewer, compoundViewer, new ReagentDetailsNameValueTable(reagent));
   }
 
-  protected ReagentNameValueTable(Well well,
+  protected ReagentNameValueTable(Reagent reagent,
                                   ReagentViewer reagentViewer,
                                   GeneViewer geneViewer,
                                   CompoundViewer compoundViewer,
                                   NameValueTable detailsNameValueTable)
   {
-    initialize(well, reagentViewer, geneViewer, compoundViewer, detailsNameValueTable);
+    initialize(reagent, reagentViewer, geneViewer, compoundViewer, detailsNameValueTable);
   }
 
-  private void initialize(Well well,
+  private void initialize(Reagent reagent,
                           ReagentViewer reagentViewer,
                           GeneViewer geneViewer,
                           CompoundViewer compoundViewer,
@@ -56,6 +57,8 @@ public class ReagentNameValueTable extends ComboNameValueTable
   {
     List<NameValueTable> comboNameValueTables = new ArrayList<NameValueTable>();
     comboNameValueTables.add(detailsNameValueTable);
+    // TODO: once Well.{compounds,silencingReagents} are moved to Reagent, we won't need to go through well anymore
+    Well well = reagent.getWells().iterator().next();
     for (Gene gene : well.getGenes()) {
       comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, reagentViewer));
     }

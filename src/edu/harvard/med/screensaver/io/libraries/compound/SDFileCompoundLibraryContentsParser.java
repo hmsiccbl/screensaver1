@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -43,19 +43,19 @@ import org.apache.log4j.Logger;
  * if sufficient memory is not available, the caller may opt to not provide a
  * compound cache, in which case this class will revert to making database
  * queries.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class SDFileCompoundLibraryContentsParser implements LibraryContentsParser
 {
-  
+
   // private static data
-  
+
   private static final Logger log = Logger.getLogger(SDFileCompoundLibraryContentsParser.class);
 
-  
+
   // private instance data
-  
+
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private Library _library;
@@ -64,9 +64,9 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   private FileParseErrorManager _errorManager;
   private Map<String,Compound> _compoundCache;
 
-  
+
   // public constructor and instance methods
-  
+
   /**
    * Construct a new <code>SDFileCompoundLibraryContentsParser</code> object.
    */
@@ -95,6 +95,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
       {
         initialize(library, file, stream);
         SDRecordParser sdRecordParser = new SDRecordParser(
+          _dao,
           _sdFileReader,
           SDFileCompoundLibraryContentsParser.this);
         for (int i = 1; sdRecordParser.sdFileHasMoreRecords(); i++) {
@@ -109,28 +110,28 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     });
     return _library;
   }
-  
+
   public List<FileParseError> getErrors()
   {
     return _errorManager.getErrors();
   }
-  
+
   public boolean getHasErrors()
   {
     return _errorManager != null && _errorManager.getHasErrors();
   }
-  
+
   public void clearErrors()
   {
     _errorManager = null;
   }
-  
+
   public void setCompoundCache(Map<String,Compound> compoundCache)
   {
     _compoundCache = compoundCache;
   }
 
-  
+
   // package getters, for the SDRecordParser
 
   /**
@@ -150,7 +151,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   {
     return _library;
   }
-  
+
   /**
    * Get the SDFile.
    * @return the SDFile
@@ -171,7 +172,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
 
   /**
    * Get the specified well. Return null if no such well exists in the database.
-   * 
+   *
    * @param key the key that identifies the well
    * @return the existing well. Return null if no such well exists
    */
@@ -184,7 +185,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
    * Get an existing compound with the specified SMILES from a local cache (if
    * one exists), otherwise directly from the database. If a cache exists, the
    * database will never queried. Return null if no such compound exists.
-   * 
+   *
    * @param smiles the SMILES string for the compound
    * @return the existing compound. Return null if no such compound exists.
    */
@@ -201,7 +202,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   /**
    * Add the specified compound to the local cache (if it exists). Compounds
    * added to the cache will be accessible via {@link #getExistingCompound}.
-   * 
+   *
    * @param compound the compound to be added to the local cache
    */
   public void cacheCompound(Compound compound)
@@ -210,10 +211,10 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
       _compoundCache.put(compound.getSmiles(), compound);
     }
   }
-  
-  
+
+
   // private instance methods
-  
+
   /**
   /**
    * Initialize the instance variables.

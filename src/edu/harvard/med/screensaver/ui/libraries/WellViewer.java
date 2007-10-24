@@ -9,13 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
+import edu.harvard.med.screensaver.io.libraries.WellsDataExporterFormat;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
 
@@ -28,6 +36,8 @@ public class WellViewer extends ReagentViewer
   // private instance fields
 
   private LibraryViewer _libraryViewer;
+
+  private Well _well;
 
 
   // constructors
@@ -51,6 +61,14 @@ public class WellViewer extends ReagentViewer
 
 
   // public instance methods
+
+  public void setWell(Well well)
+  {
+    _well = well;
+    setReagent(_well.getReagent(),
+               _well.getGenes(),
+               _well.getCompounds());
+  }
 
   @UIControllerMethod
   public String viewWell()
@@ -106,7 +124,25 @@ public class WellViewer extends ReagentViewer
 
   public String viewLibrary()
   {
-    return _libraryViewer.viewLibrary(getWell().getLibrary());
+    return _libraryViewer.viewLibrary(_well.getLibrary());
   }
 
+  @UIControllerMethod
+  public String downloadSDFile()
+  {
+    try {
+      WellsDataExporter dataExporter = new WellsDataExporter(_dao, WellsDataExporterFormat.SDF);
+      Set<Well> wells = new HashSet<Well>(1, 2.0f);
+      wells.add(_well);
+      InputStream inputStream = dataExporter.export(wells);
+      JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                         inputStream,
+                                         dataExporter.getFileName(),
+                                         dataExporter.getMimeType());
+    }
+    catch (IOException e) {
+      reportApplicationError(e.toString());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
 }

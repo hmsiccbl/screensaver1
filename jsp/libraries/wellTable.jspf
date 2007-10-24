@@ -54,8 +54,8 @@
           <t:outputText value="Reagent Source ID" title="The reagent source identifier (e.g., catalog number; reorder number) for the well contents" />
         </f:facet>
 				<t:commandLink action="#{reagentViewer.viewReagent}"
-					value="#{well.fullVendorIdentifier}">
-					<f:param name="wellId" value="#{well.wellId}" />
+					value="#{well.reagent.reagentId}">
+					<f:param name="reagentId" value="#{well.reagent.reagentId.id}" />
 				</t:commandLink>
       </h:column>
     </t:dataTable>

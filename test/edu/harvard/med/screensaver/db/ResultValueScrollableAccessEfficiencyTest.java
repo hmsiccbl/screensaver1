@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  * to produce timing output, for review (and interpretation) by a developer. For
  * this reason, these tests should NOT be run from our PackageTestSuite test
  * aggregator.</i>
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -85,11 +86,11 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   {
     super.onSetUp();
     schemaUtil.truncateTablesOrCreateSchema();
-    genericEntityDao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        final Screen screen = MakeDummyEntities.makeDummyScreen(1); 
+        final Screen screen = MakeDummyEntities.makeDummyScreen(1);
         ScreenResult screenResult = screen.createScreenResult(new Date());
         ResultValueType rvt = screenResult.createResultValueType("rvt");
         Library library = new Library(
@@ -102,7 +103,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
         for (int iPlate = 1; iPlate <= plates; ++iPlate) {
           int plateNumber = iPlate;
           for (int iWell = 1; iWell <= Well.MAX_WELL_COLUMN; ++iWell) {
-            Well well = library.createWell(plateNumber, "A" + iWell);
+            Well well = library.createWell(new WellKey(plateNumber, "A" + iWell), WellType.EMPTY);
             String value = Integer.toString(plateNumber * Well.MAX_WELL_COLUMN + iWell);
             rvt.addResultValue(well, value);
           }
@@ -111,7 +112,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
       }
     });
 
-    genericEntityDao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -134,16 +135,16 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
   }
 
 
-  // JUnit test methods 
+  // JUnit test methods
 
   public void testOnlyFirstResultValue()
   {
 
-    Map<WellKey,List<ResultValue>> result = 
+    Map<WellKey,List<ResultValue>> result =
       screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt),
-                                                         0, 
+                                                         0,
                                                          SortDirection.ASCENDING,
-                                                         0, 
+                                                         0,
                                                          1,
                                                          null,
                                                          null);
@@ -152,9 +153,9 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
 
   public void testOnlyLastResultValue()
   {
-    Map<WellKey,List<ResultValue>> result = 
-      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
-                                                         0, 
+    Map<WellKey,List<ResultValue>> result =
+      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt),
+                                                         0,
                                                          SortDirection.ASCENDING,
                                                          expectedFullResultSize - 1,
                                                          1,
@@ -165,9 +166,9 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
 
   public void testFullResultValueSet()
   {
-    Map<WellKey,List<ResultValue>> result = 
-      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt), 
-                                                         0, 
+    Map<WellKey,List<ResultValue>> result =
+      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt),
+                                                         0,
                                                          SortDirection.ASCENDING,
                                                          0,
                                                          expectedFullResultSize,
@@ -178,7 +179,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
 
   public void testFullResultValueSetViaEntityAccessorWithoutTableInitialization()
   {
-    genericEntityDao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -194,7 +195,7 @@ public class ResultValueScrollableAccessEfficiencyTest extends AbstractSpringTes
 
   public void testFullResultValueSetViaEntityAccessorWithTableInitialization()
   {
-    genericEntityDao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {

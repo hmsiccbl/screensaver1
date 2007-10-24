@@ -154,7 +154,7 @@ public class WellSearchResults extends EntitySearchResults<Well>
         public Object cellAction(Well well)
         {
           if (getGeneCount(well) == 1) {
-            return _geneViewer.viewGene(well.getGene(), well);
+            return _geneViewer.viewGene(well.getGene());
           }
           if (getCompoundCount(well) > 0) {
             // commandValue is really a smiles, not a compoundId
@@ -166,7 +166,7 @@ public class WellSearchResults extends EntitySearchResults<Well>
                 break;
               }
             }
-            return _compoundViewer.viewCompound(compound, well);
+            return _compoundViewer.viewCompound(compound);
           }
           return REDISPLAY_PAGE_ACTION_RESULT;
         }

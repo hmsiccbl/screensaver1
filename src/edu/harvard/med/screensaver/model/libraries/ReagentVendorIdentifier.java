@@ -9,54 +9,76 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
 
 /**
- * Not yet part of the data model, but needed by UI code. (We really need a
- * Reagent entity type!)
- *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Embeddable
-public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifier>
+public class ReagentVendorIdentifier implements Serializable, Comparable<ReagentVendorIdentifier>
 {
+  private static final long serialVersionUID = 1L;
+
+
   // instance data members
 
-  private String _vendorName;
-  private String _vendorIdentifier;
+  private String _id;
 
-  transient private String _asString;
-  transient private String _id;
+  private transient String _vendorName;
+  private transient String _vendorIdentifier;
+  private transient String _asString;
 
 
   // public constructors and methods
 
+  public ReagentVendorIdentifier(String id)
+  {
+    setReagentId(id);
+  }
+
   public ReagentVendorIdentifier(String vendorName, String reagentIdentifier)
   {
-    // convert nulls to empty strings, for safety
+    // convert nulls to empty strings, for safety and db constraints
     _vendorName = vendorName == null ? "" : vendorName;
     _vendorIdentifier = reagentIdentifier == null ? "" : reagentIdentifier;
+  }
+
+  @Column
+  @org.hibernate.annotations.Type(type="text")
+  public String getReagentId()
+  {
+    if (_id == null) {
+      _id = _vendorName + ":" + _vendorIdentifier;
+    }
+    return _id;
+  }
+
+  public void setReagentId(String id)
+  {
+    String[] parts = id.split(":");
+    _vendorName = parts[0];
+    _vendorIdentifier = parts[1];
   }
 
   /**
    * @return vendor the library vendor (from {@link Library#getVendor}).
    */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="text")
+  @Transient
   public String getVendorName()
   {
     return _vendorName;
   }
 
   /**
-   * @return vendorId the vendor ID (from {@link Well#getVendorIdentifier()})
+   * @return vendorId the vendor ID
    */
-  @Column
-  @org.hibernate.annotations.Type(type="text")
+  @Transient
   public String getVendorIdentifier()
   {
     return _vendorIdentifier;
@@ -72,7 +94,7 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
   @Override
   public int hashCode()
   {
-    return _vendorName.hashCode() * 7 + _vendorIdentifier.hashCode() * 17;
+    return getReagentId().hashCode();
   }
 
   @Override
@@ -84,23 +106,14 @@ public class ReagentVendorIdentifier implements Comparable<ReagentVendorIdentifi
     return _asString;
   }
 
-  @Transient
-  public String getId()
-  {
-    if (_id == null) {
-      _id = _vendorName + ":" + _vendorIdentifier;
-    }
-    return _id;
-  }
-
   private void setVendorName(String vendorName)
   {
     _vendorName = vendorName;
   }
 
-  private void setVendorIdentifier(String reagentIdentifier)
+  private void setVendorIdentifier(String vendorIdentifier)
   {
-    _vendorIdentifier = reagentIdentifier;
+    _vendorIdentifier = vendorIdentifier;
   }
 
   /**

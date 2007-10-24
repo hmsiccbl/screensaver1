@@ -14,13 +14,13 @@ import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
+import org.apache.log4j.Logger;
+
 /**
- * A NameValueTable for the well details portion of the Reagent Viewer.
+ * A NameValueTable for the reagent details portion of the Reagent Viewer.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -38,7 +38,7 @@ public class ReagentDetailsNameValueTable extends NameValueTable
 
   // private instance fields
 
-  private Well _well;
+  private Reagent _reagent;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<String> _descriptions = new ArrayList<String>();
@@ -47,10 +47,10 @@ public class ReagentDetailsNameValueTable extends NameValueTable
 
   // public constructor and implementations of NameValueTable abstract methods
 
-  public ReagentDetailsNameValueTable(Well well)
+  public ReagentDetailsNameValueTable(Reagent reagent)
   {
-    _well = well;
-    initializeLists(well);
+    _reagent = reagent;
+    initializeLists(reagent);
     setDataModel(new ListDataModel(_values));
   }
 
@@ -94,29 +94,24 @@ public class ReagentDetailsNameValueTable extends NameValueTable
   @Override
   public String getLink(int index, String value)
   {
-    // no well detail fields have links
+    // no reagent detail fields have links
     return null;
   }
 
 
   // protected instance methods
 
-  protected Well getWell()
+  protected Reagent getReagent()
   {
-    return _well;
+    return _reagent;
   }
 
   /**
    * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
    * add rows for missing values.
    */
-  protected void initializeLists(Well well) {
-    if (well.getVendorIdentifier() != null) {
-      String vendor = well.getLibrary().getVendor();
-      String vendorIdentifier = vendor == null ?
-        well.getVendorIdentifier() : vendor + " " + well.getVendorIdentifier();
-      addItem(VENDOR_IDENTIFIER, vendorIdentifier, ValueType.TEXT, "The reagent source identifier (e.g., catalog number; reorder number) for the well contents");
-    }
+  protected void initializeLists(Reagent reagent) {
+    addItem(VENDOR_IDENTIFIER, reagent.getEntityId().toString(), ValueType.TEXT, "The reagent source identifier (e.g., catalog number; reorder number) for the reagent contents");
   }
 
   protected void addItem(String name, Object value, ValueType valueType, String description)

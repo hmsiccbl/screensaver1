@@ -112,7 +112,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     });
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Vendor ID", "The vendor ID of the screened well") {
       @Override
-      public Object getCellValue(ScreenerCherryPick scp) { return scp.getScreenedWell().getVendorIdentifier(); }
+      public Object getCellValue(ScreenerCherryPick scp) { return scp.getScreenedWell().getSimpleVendorIdentifier(); }
     });
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<ScreenerCherryPick>("Gene", "The name of the gene targeted by the screened well") {
       @Override
@@ -209,7 +209,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     });
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Vendor ID", "The Vendor ID of the of the cherry picked well") {
       @Override
-      public Object getCellValue(LabCherryPick lcp) { return lcp.getSourceWell().getVendorIdentifier(); }
+      public Object getCellValue(LabCherryPick lcp) { return lcp.getSourceWell().getSimpleVendorIdentifier(); }
     });
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TableColumn<LabCherryPick>("Gene", "The name of the gene targeted by the cherry picked well") {
       @Override

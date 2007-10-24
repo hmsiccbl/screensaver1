@@ -25,7 +25,6 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -81,17 +80,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       "silencingReagents.gene");
   }
 
-  public List<Well> findReagentWellsByVendorId(ReagentVendorIdentifier reagentVendorIdentifier)
-  {
-    String hql = "select w from Well w join w.library l where l.vendor = ? and w.vendorIdentifier = ?";
-    List<Well> result = getHibernateTemplate().find(hql,
-                                                    new Object[] { reagentVendorIdentifier.getVendorName(), reagentVendorIdentifier.getVendorIdentifier() } );
-    return result;
-  }
-
   public List<String> findAllVendorNames()
   {
     String hql = "select distinct l.vendor from Library l where l.vendor is not null";
+    @SuppressWarnings("unchecked")
     List<String> vendorNames = getHibernateTemplate().find(hql);
     return vendorNames;
   }

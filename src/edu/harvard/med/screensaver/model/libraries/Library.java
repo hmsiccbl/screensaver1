@@ -39,17 +39,30 @@ import org.hibernate.annotations.Parameter;
 /**
  * A Hibernate entity bean representing a screening library.
  * <ul>
- * <li>Screensaver supports libraries for either RNAi and Small Molecule (compound) screens.  RNAi library wells contain silencing reagents and small molecule library wells contain compounds.</li>
+ * <li>Screensaver supports libraries for either RNAi and Small Molecule
+ * (compound) screens. RNAi library wells contain silencing reagents and small
+ * molecule library wells contain compounds.</li>
  * <li>Only 384 well plate configurations are currently supported.</li>
- * <li>A library must be defined for a set of plates that have a sequential plate numbers.</li>
+ * <li>A library must be defined for a set of plates that have a sequential
+ * plate numbers.</li>
  * </ul>
  * <p>
- * Screensaver allows a Library to be defined independently of its wells and its well contents.  In other words, the data model permits any of the following states for a library:
+ * Screensaver allows a Library to be defined independently of its wells and its
+ * well reagents. In other words, the data model permits any of the following
+ * states for a library:
  * <ul>
- * <li>Library is defined with related Wells and Well contents.  This is the usual state of a library in Screensaver.
- * <li>Library is defined with related Wells, but without Well contents.  This allows for a library's contents to be unloaded and reloaded without deleting the Library definition itself, which is useful if updated/corrected well contents data becomes available.
- * <li>Library is defined, but without related Wells, and thus without Well contents (i.e., compounds or silencing reagents).  This state is supported for legacy reasons only, but one must be aware that a given member Well may not be defined.  See {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}.
+ * <li>Library is defined with related Wells and Well reagents. This is the
+ * usual state of a library in Screensaver.
+ * <li>Library is defined with related Wells, but without Well reagents. This
+ * allows for a library's contents to be unloaded and reloaded without deleting
+ * the Library definition itself, which is useful if updated/corrected well
+ * contents data becomes available.
+ * <li>Library is defined, but without related Wells, and thus without Well
+ * reagents. This state is supported for legacy reasons only, but one must be
+ * aware that a given member Well may not be defined. See
+ * {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}.
  * </ul>
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -199,38 +212,7 @@ public class Library extends AbstractEntity
    */
   public Well createWell(WellKey wellKey, WellType wellType)
   {
-    Well well = new Well(this, wellKey, wellType);
-    if (! _wells.add(well)) {
-      throw new DuplicateEntityException(this, well);
-    }
-    return well;
-  }
-
-  /**
-   * Create a new well for the library.
-   * @param plateNumber the plate number for the new well
-   * @param wellName the well name for the new well
-   * @return the new well
-   */
-  public Well createWell(Integer plateNumber, String wellName)
-  {
-    Well well = new Well(this, plateNumber, wellName);
-    if (! _wells.add(well)) {
-      throw new DuplicateEntityException(this, well);
-    }
-    return well;
-  }
-
-  /**
-   * Create a new well for the library.
-   * @param plateNumber the plate number for the new well
-   * @param wellName the well name for the new well
-   * @param wellType the well type for the new well
-   * @return the new well
-   */
-  public Well createWell(Integer plateNumber, String wellName, WellType wellType)
-  {
-    Well well = new Well(this, new WellKey(plateNumber, wellName), wellType);
+    Well well = new Well(this, wellKey, wellType, null);
     if (! _wells.add(well)) {
       throw new DuplicateEntityException(this, well);
     }

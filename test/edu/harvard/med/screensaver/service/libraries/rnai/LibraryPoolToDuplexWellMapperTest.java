@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -42,7 +42,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
   private static Logger log = Logger.getLogger(LibraryPoolToDuplexWellMapperTest.class);
 
   // instance data members
-  
+
   protected LibraryPoolToDuplexWellMapper libraryPoolToDuplexWellMapper;
   protected LibrariesDAO librariesDao;
 
@@ -84,75 +84,75 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
         SilencingReagent silencingReagent3_4 = gene3.createSilencingReagent(SilencingReagentType.SIRNA, "GATTAGG");
 
         // gene 1
-        Well poolWell1_1 = poolLibrary1.createWell(1, "A01", WellType.EXPERIMENTAL);
+        Well poolWell1_1 = poolLibrary1.createWell(new WellKey(1,  "A01"),  WellType.EXPERIMENTAL);
         poolWell1_1.addSilencingReagent(silencingReagent1_1);
         poolWell1_1.addSilencingReagent(silencingReagent1_2);
         poolWell1_1.addSilencingReagent(silencingReagent1_3);
         poolWell1_1.addSilencingReagent(silencingReagent1_4);
 
-        Well duplexWell1_1_1 = duplexLibrary1.createWell(2, "A01", WellType.EXPERIMENTAL);
-        Well duplexWell1_1_2 = duplexLibrary1.createWell(3, "B02", WellType.EXPERIMENTAL);
-        Well duplexWell1_1_3 = duplexLibrary1.createWell(4, "C03", WellType.EXPERIMENTAL);
-        Well duplexWell1_1_4 = duplexLibrary1.createWell(5, "D04", WellType.EXPERIMENTAL);
+        Well duplexWell1_1_1 = duplexLibrary1.createWell(new WellKey(2,  "A01"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_1_2 = duplexLibrary1.createWell(new WellKey(3,  "B02"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_1_3 = duplexLibrary1.createWell(new WellKey(4,  "C03"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_1_4 = duplexLibrary1.createWell(new WellKey(5,  "D04"),  WellType.EXPERIMENTAL);
         duplexWell1_1_1.addSilencingReagent(silencingReagent1_1);
         duplexWell1_1_2.addSilencingReagent(silencingReagent1_2);
         duplexWell1_1_3.addSilencingReagent(silencingReagent1_3);
         duplexWell1_1_4.addSilencingReagent(silencingReagent1_4);
 
-        Well poolWell2_1 = poolLibrary2.createWell(6, "A01", WellType.EXPERIMENTAL);
+        Well poolWell2_1 = poolLibrary2.createWell(new WellKey(6,  "A01"),  WellType.EXPERIMENTAL);
         poolWell2_1.addSilencingReagent(silencingReagent1_1);
         poolWell2_1.addSilencingReagent(silencingReagent1_2);
         poolWell2_1.addSilencingReagent(silencingReagent1_3);
         poolWell2_1.addSilencingReagent(silencingReagent1_4);
 
-        Well duplexWell2_1_1 = duplexLibrary2.createWell(7, "A01", WellType.EXPERIMENTAL);
-        Well duplexWell2_1_2 = duplexLibrary2.createWell(8, "B02", WellType.EXPERIMENTAL);
-        Well duplexWell2_1_3 = duplexLibrary2.createWell(9, "C03", WellType.EXPERIMENTAL);
-        Well duplexWell2_1_4 = duplexLibrary2.createWell(10, "D04", WellType.EXPERIMENTAL);
+        Well duplexWell2_1_1 = duplexLibrary2.createWell(new WellKey(7,  "A01"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_1_2 = duplexLibrary2.createWell(new WellKey(8,  "B02"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_1_3 = duplexLibrary2.createWell(new WellKey(9,  "C03"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_1_4 = duplexLibrary2.createWell(new WellKey(10,  "D04"),  WellType.EXPERIMENTAL);
         duplexWell2_1_1.addSilencingReagent(silencingReagent1_1);
         duplexWell2_1_2.addSilencingReagent(silencingReagent1_2);
         duplexWell2_1_3.addSilencingReagent(silencingReagent1_3);
         duplexWell2_1_4.addSilencingReagent(silencingReagent1_4);
 
         // gene 2
-        Well poolWell1_2 = poolLibrary1.createWell(1, "B02", WellType.EXPERIMENTAL);
+        Well poolWell1_2 = poolLibrary1.createWell(new WellKey(1,  "B02"),  WellType.EXPERIMENTAL);
         poolWell1_2.addSilencingReagent(silencingReagent2_1);
         poolWell1_2.addSilencingReagent(silencingReagent2_2);
         poolWell1_2.addSilencingReagent(silencingReagent2_3);
         poolWell1_2.addSilencingReagent(silencingReagent2_4);
 
-        Well duplexWell1_2_1 = duplexLibrary1.createWell(2, "A02", WellType.EXPERIMENTAL);
-        Well duplexWell1_2_2 = duplexLibrary1.createWell(3, "B03", WellType.EXPERIMENTAL);
-        Well duplexWell1_2_3 = duplexLibrary1.createWell(4, "C04", WellType.EXPERIMENTAL);
-        Well duplexWell1_2_4 = duplexLibrary1.createWell(5, "D05", WellType.EXPERIMENTAL);
+        Well duplexWell1_2_1 = duplexLibrary1.createWell(new WellKey(2,  "A02"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_2_2 = duplexLibrary1.createWell(new WellKey(3,  "B03"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_2_3 = duplexLibrary1.createWell(new WellKey(4,  "C04"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_2_4 = duplexLibrary1.createWell(new WellKey(5,  "D05"),  WellType.EXPERIMENTAL);
         duplexWell1_2_1.addSilencingReagent(silencingReagent2_1);
         duplexWell1_2_2.addSilencingReagent(silencingReagent2_2);
         duplexWell1_2_3.addSilencingReagent(silencingReagent2_3);
         duplexWell1_2_4.addSilencingReagent(silencingReagent2_4);
 
         // gene 3
-        Well poolWell2_2 = poolLibrary2.createWell(6, "B02", WellType.EXPERIMENTAL);
+        Well poolWell2_2 = poolLibrary2.createWell(new WellKey(6,  "B02"),  WellType.EXPERIMENTAL);
         poolWell2_2.addSilencingReagent(silencingReagent3_1);
         poolWell2_2.addSilencingReagent(silencingReagent3_2);
         poolWell2_2.addSilencingReagent(silencingReagent3_3);
         poolWell2_2.addSilencingReagent(silencingReagent3_4);
 
-        Well duplexWell2_2_1 = duplexLibrary2.createWell(7, "A02", WellType.EXPERIMENTAL);
-        Well duplexWell2_2_2 = duplexLibrary2.createWell(8, "B03", WellType.EXPERIMENTAL);
-        Well duplexWell2_2_3 = duplexLibrary2.createWell(9, "C04", WellType.EXPERIMENTAL);
-        Well duplexWell2_2_4 = duplexLibrary2.createWell(10, "D05", WellType.EXPERIMENTAL);
+        Well duplexWell2_2_1 = duplexLibrary2.createWell(new WellKey(7,  "A02"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_2_2 = duplexLibrary2.createWell(new WellKey(8,  "B03"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_2_3 = duplexLibrary2.createWell(new WellKey(9,  "C04"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_2_4 = duplexLibrary2.createWell(new WellKey(10,  "D05"),  WellType.EXPERIMENTAL);
         duplexWell2_2_1.addSilencingReagent(silencingReagent3_1);
         duplexWell2_2_2.addSilencingReagent(silencingReagent3_2);
         duplexWell2_2_3.addSilencingReagent(silencingReagent3_3);
         duplexWell2_2_4.addSilencingReagent(silencingReagent3_4);
-        
+
         genericEntityDao.saveOrUpdateEntity(poolLibrary1);
         genericEntityDao.saveOrUpdateEntity(duplexLibrary1);
         genericEntityDao.saveOrUpdateEntity(poolLibrary2);
         genericEntityDao.saveOrUpdateEntity(duplexLibrary2);
       }
     });
-    
+
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -161,7 +161,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
         {
           Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest,
                                                                                          new WellKey(1, "A01"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(2, "A01"));
@@ -172,12 +172,12 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
-        
+
         // cherry pick pool whose gene is in both library 1 and 2, and cherry picked from both libraries
         {
           Screen screen = MakeDummyEntities.makeDummyScreen(2, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest,
                                                                                   new WellKey(1, "A01"),
                                                                                   new WellKey(6, "A01"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
@@ -193,12 +193,12 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
-        
+
         // cherry pick pool whose gene is only in library1
         {
           Screen screen = MakeDummyEntities.makeDummyScreen(31, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest,
                                                                                   new WellKey(1, "B02"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(2, "A02"));
@@ -209,12 +209,12 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
-        
+
         // cherry pick pool whose gene is only in library2
         {
           Screen screen = MakeDummyEntities.makeDummyScreen(4, ScreenType.RNAI);
           RNAiCherryPickRequest rnaiCherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest, 
+          Set<WellKey> actualDuplexCherryPickWellKeys = createLabCherryPicksForPoolWells(rnaiCherryPickRequest,
                                                                                          new WellKey(6, "B02"));
           TreeSet<WellKey> expectedDuplexCherryPickWellKeys = new TreeSet<WellKey>();
           expectedDuplexCherryPickWellKeys.add(new WellKey(7, "A02"));
@@ -225,7 +225,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
-        
+
         // test reverse lookup, from duplex to pool
         {
           // TODO: this test code is relying upon state created above, which is not great practice; should make this into an independent test
@@ -255,7 +255,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
 
 
   // private methods
-    
+
   private Set<WellKey> createLabCherryPicksForPoolWells(RNAiCherryPickRequest rnaiCherryPickRequest, WellKey... wellKeys)
   {
     for (WellKey wellKey : wellKeys) {

@@ -188,7 +188,7 @@ public class CherryPickRequestExporter
                                                            return ((SilencingReagent) silencingReagent).getSequence();
                                                          }
                                                        }), LIST_OF_VALUES_DELIMITER),
-                            sourceWell.getVendorIdentifier());
+                            sourceWell.getSimpleVendorIdentifier());
   }
 
   private List<Map<WellKey,ResultValue>> getResultValuesForDataHeaders(ScreenerCherryPick screenerCherryPick)
@@ -237,7 +237,7 @@ public class CherryPickRequestExporter
                                                            return ((SilencingReagent) silencingReagent).getSequence();
                                                          }
                                                        }), LIST_OF_VALUES_DELIMITER),
-                            screenedWell.getVendorIdentifier());
+                            screenedWell.getSimpleVendorIdentifier());
 
     List<Map<WellKey,ResultValue>> resultValueMaps = getResultValuesForDataHeaders(screenerCherryPick);
     int resultValueCol = 0;

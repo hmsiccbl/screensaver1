@@ -11,7 +11,7 @@
 	</t:aliasBean>
 
 	<t:panelGrid style="margin-top: 10px;">
-		<t:panelGroup rendered="#{! empty reagentViewer.well.compounds}">
+		<t:panelGroup rendered="#{! empty reagentViewer.compounds}">
 			<h:form id="reagentContentsDownloadForm">
 				<h:commandButton value="Dowload SD File"
 					action="#{reagentViewer.downloadSDFile}" styleClass="command"
@@ -20,7 +20,7 @@
 		</t:panelGroup>
 	</t:panelGrid>
 
-	<t:panelGroup rendered="#{! empty reagentViewer.well.compounds}">
+	<t:panelGroup rendered="#{! empty reagentViewer.compounds}">
 		<%@ include file="structureImageNotice.jspf"%>
 	</t:panelGroup>
 
