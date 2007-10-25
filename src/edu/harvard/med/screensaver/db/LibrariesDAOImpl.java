@@ -179,6 +179,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         new Object [] { library.getStartPlate(), library.getEndPlate() });
     }
     if (wells.size() > 0) {
+      log.debug("loaded wells for library " + library.getLibraryName());
       return;
     }
     for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
@@ -188,7 +189,8 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         }
       }
     }
-    _dao.saveOrUpdateEntity(library);
+    // note: we need persistEntity(), not saveUpdateEntity(), to ensure wells are in session cache and can be found within the current transaction, without flushing
+    _dao.persistEntity(library);
     log.info("created wells for library " + library.getLibraryName());
   }
 
