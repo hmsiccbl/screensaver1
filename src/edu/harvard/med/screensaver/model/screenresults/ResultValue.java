@@ -73,6 +73,7 @@ public class ResultValue
    * @motivation to preserve typed data in exported Workbooks (rather than treat
    *             all result values as text strings)
    */
+  // TODO: now that ResultValue.resultValueType relationship exists, we can make this an instance method, and eliminate the RVT param
   public static Object getTypedValue(ResultValue rv, ResultValueType rvt)
   {
     if (rv == null || rv.isNull()) {
