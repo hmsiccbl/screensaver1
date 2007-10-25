@@ -175,7 +175,7 @@ public class BoutrosAnnotationImporter
       user.setLabAffiliation(labAffiliation);
     }
     else {
-      log.warn("user with login ID " + loginId +
+      log.warn("user with email " + email +
       " already exists and will be associated with imported study");
     }
     return user;
