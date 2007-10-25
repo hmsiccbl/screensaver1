@@ -64,8 +64,11 @@ public interface GenericEntityDAO
 
   /**
    * Make the specified entity persistent. The entity's ID property will be set
-   * upon return. This is the one with JPA semantics: save-update cascades will be followed
-   * at the time this method is called.
+   * upon return. This is the one with JPA semantics: save-update cascades will
+   * be followed at the time this method is called. This ensures that all
+   * cascade-reachable transient entities will be added to the session cache,
+   * allowing subsequent
+   * {@link #findEntityById(Class, Serializable) to succeed prior to session flush.
    *
    * @param entity
    */
