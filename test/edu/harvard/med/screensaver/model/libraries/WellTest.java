@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -28,8 +28,12 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
   {
     super(Well.class);
   }
-  
-  public void testMolfileLazyToOne()
+
+  /**
+   * Test the special-case molfile property, which is implemented as a set of
+   * strings (with size 0 or 1).
+   */
+  public void testMolfile()
   {
     schemaUtil.truncateTablesOrCreateSchema();
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -46,24 +50,37 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         genericEntityDao.saveOrUpdateEntity(library);
         librariesDao.loadOrCreateWellsForLibrary(library);
         for (Well well : library.getWells()) {
-          well.setMolfile("molfile");
-        }        
+          well.setMolfile("molfile:" + well.getEntityId());
+        }
       }
     });
     class WellPocketDAOTransaction implements DAOTransaction
     {
-      Well well;
+      Well wellWithMolfileLoadedEagerly;
+      Well wellWithMolfileNotLoaded;
       public void runTransaction()
       {
-        well = genericEntityDao.findEntityById(Well.class, "00001:A01");
+        // test that we can load the molfile on demand, within session
+        Well well = genericEntityDao.findEntityById(Well.class, "00001:A01");
+        assertEquals("molfile:00001:A01", well.getMolfile());
+
+        // test that we can eager load the molfile via our dao methods, and access after session is closed
+        wellWithMolfileLoadedEagerly = genericEntityDao.findEntityById(Well.class, "00001:A02");
+        genericEntityDao.need(well, "molfileSet");
+
+        // test that a molfile not loaded is not accessible after session is closed
+        assertEquals("molfile:00001:A01", well.getMolfile());
+        wellWithMolfileNotLoaded = genericEntityDao.findEntityById(Well.class, "00001:A01");
       }
     }
     WellPocketDAOTransaction wellPocketDAOTransaction = new WellPocketDAOTransaction();
     genericEntityDao.doInTransaction(wellPocketDAOTransaction);
-    
+
     // this should cause an error because well.molfile should be lazily loaded
     try {
-      wellPocketDAOTransaction.well.getMolfile();
+      assertEquals("molfile:00001A02",
+                   wellPocketDAOTransaction.wellWithMolfileLoadedEagerly.getMolfile());
+      wellPocketDAOTransaction.wellWithMolfileNotLoaded.getMolfile();
       fail("failed to get a LazyInitException for well.molfile");
     }
     catch (Exception e) {

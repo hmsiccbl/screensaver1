@@ -90,7 +90,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
   private String _smiles;
-  private String _molfile;
+  private Set<String> _molfile = new HashSet<String>();
   private String _genbankAccessionNumber;
 
   private transient WellKey _wellKey;
@@ -413,7 +413,10 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   @Transient
   public String getMolfile()
   {
-    return _molfile;
+    if (_molfile.size() == 0) {
+      return null;
+    }
+    return _molfile.iterator().next();
   }
 
   /**
@@ -421,6 +424,33 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * @param molfile The new molfile for the well
    */
   public void setMolfile(String molfile)
+  {
+    _molfile.clear();
+    _molfile.add(molfile);
+  }
+
+  /**
+   * @motivation we want lazy loading of molfile property, due to its large data
+   *             size, but can only make it lazy loadable by mapping it in a
+   *             value collection
+   * @see #getMolfile()
+   */
+  @org.hibernate.annotations.CollectionOfElements(fetch=FetchType.LAZY)
+  @org.hibernate.annotations.Type(type="text")
+  @JoinTable(name="wellMolfile", joinColumns=@JoinColumn(name="well_id"))
+  @Column(name="molfile", nullable=false)
+  private Set<String> getMolfileSet()
+  {
+    return _molfile;
+  }
+
+  /**
+   * @motivation we want lazy loading of molfile property, due to its large data
+   *             size, but can only make it lazy loadable by mapping it in a
+   *             value collection
+   * @see #setMolfile(String)
+   */
+  private void setMolfileSet(Set<String> molfile)
   {
     _molfile = molfile;
   }
