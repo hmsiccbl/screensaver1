@@ -26,10 +26,8 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
-import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -211,16 +209,16 @@ public class ScreenSynchronizer
 
   private void synchronizeBillingInformation(ResultSet resultSet, Screen screen) throws SQLException
   {
-    BillingInformation oldBillingInformation = screen.getBillingInformation();
-    if (oldBillingInformation != null) {
-      _dao.deleteEntity(oldBillingInformation);
-    }
-    boolean billingInfoToBeRequested = resultSet.getBoolean("billing_info_to_be_requested");
+    BillingInformation billingInformation = screen.getBillingInformation();
+    BillingInfoToBeRequested billingInfoToBeRequested = resultSet.getBoolean("billing_info_to_be_requested") ? BillingInfoToBeRequested.YES : BillingInfoToBeRequested.NO;
     Date billingInfoReturnDate = resultSet.getDate("billing_info_return_date");
     String billingComments = resultSet.getString("billing_comments");
-    BillingInformation billingInformation = new BillingInformation(
-      screen,
-      billingInfoToBeRequested ? BillingInfoToBeRequested.YES : BillingInfoToBeRequested.NO);
+    if (billingInformation == null) {
+      billingInformation = new BillingInformation(screen, billingInfoToBeRequested);
+    }
+    else {
+      billingInformation.setBillingInfoToBeRequested(billingInfoToBeRequested);
+    }
     billingInformation.setBillingInfoReturnDate(billingInfoReturnDate);
     billingInformation.setComments(billingComments);
   }
@@ -258,9 +256,9 @@ public class ScreenSynchronizer
   {
     // synchronizing requires emptying out all previous statuses
     for (Screen screen : _screenNumberToScreenMap.values()) {
-      Set<StatusItem> statusItems = screen.getStatusItems();
-      statusItems.removeAll(statusItems);
+      screen.getStatusItems().clear();
     }
+    _dao.flush(); // force db deletes before inserts
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery("SELECT * FROM screen_status");
     while (resultSet.next()) {
@@ -327,9 +325,9 @@ public class ScreenSynchronizer
   {
     // synchronizing requires emptying out all previous publications
     for (Screen screen : _screenNumberToScreenMap.values()) {
-      Set<Publication> publications = screen.getPublications();
-      publications.removeAll(publications);
+      screen.getPublications().clear();
     }
+    _dao.flush(); // force db deletes before inserts
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery("SELECT * FROM pub_med");
     while (resultSet.next()) {
@@ -339,18 +337,20 @@ public class ScreenSynchronizer
       PublicationInfo publicationInfo =
         _publicationInfoProvider.getPublicationInfoForPubmedId(new Integer(pubmedId));
       if (publicationInfo == null) {
-        throw new ScreenDBSynchronizationException("unable to get publication info from pubmed");
+        //throw new ScreenDBSynchronizationException("unable to get publication info from pubmed");
+        log.error("unable to get publication info from pubmed for " + pubmedId + " for " + screen);
       }
-      try {
-        screen.createPublication(
-          pubmedId,
-          publicationInfo.getYearPublished(),
-          publicationInfo.getAuthors(),
-          publicationInfo.getTitle());
-      }
-      catch (DuplicateEntityException e) {
-        throw new ScreenDBSynchronizationException(
-          "duplicate publication for screen number " + screenNumber, e);
+      else {
+        try {
+          screen.createPublication(pubmedId,
+                                   publicationInfo.getYearPublished(),
+                                   publicationInfo.getAuthors(),
+                                   publicationInfo.getTitle());
+        }
+        catch (DuplicateEntityException e) {
+          throw new ScreenDBSynchronizationException(
+                                                     "duplicate publication for screen number " + screenNumber, e);
+        }
       }
     }
     statement.close();

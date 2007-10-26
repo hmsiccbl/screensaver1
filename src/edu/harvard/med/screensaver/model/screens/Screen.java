@@ -457,8 +457,7 @@ public class Screen extends Study
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
+    org.hibernate.annotations.CascadeType.DELETE
   })
   public ScreenResult getScreenResult()
   {
@@ -554,7 +553,8 @@ public class Screen extends Study
   //@OrderBy("dateOfActivity")
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="screeningRoomActivity")
   public Set<ScreeningRoomActivity> getScreeningRoomActivities()
@@ -758,7 +758,8 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<AbaseTestset> getAbaseTestsets()
   {
@@ -790,7 +791,8 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<Publication> getPublications()
   {
@@ -835,7 +837,8 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="letterOfSupport")
   public Set<LetterOfSupport> getLettersOfSupport()
@@ -867,7 +870,8 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<AttachedFile> getAttachedFiles()
   {
@@ -898,8 +902,7 @@ public class Screen extends Study
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
+    org.hibernate.annotations.CascadeType.DELETE
   })
   public BillingInformation getBillingInformation()
   {

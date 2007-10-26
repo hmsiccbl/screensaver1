@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.db.screendb.ScreenDBSynchronizer;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -40,19 +39,19 @@ public class CherryPickRequestDAO extends AbstractDAO
 
 
   // instance data members
-  
+
   private GenericEntityDAO _dao;
-  
+
 
   // public constructors and methods
-  
+
   /**
    * @motivation for CGLIB dynamic proxy creation
    */
   public CherryPickRequestDAO()
   {
   }
-  
+
   public CherryPickRequestDAO(GenericEntityDAO dao)
   {
     _dao = dao;
@@ -105,27 +104,14 @@ public class CherryPickRequestDAO extends AbstractDAO
     }
 
     // dissociate from related entities
-    cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);    
+    cherryPickRequest.getScreen().getCherryPickRequests().remove(cherryPickRequest);
     getHibernateTemplate().delete(cherryPickRequest);
-  }
-
-  /**
-   * @motivation for {@link ScreenDBSynchronizer}, for efficient removal of compound cherry pick
-   * requests.
-   */
-  public void deleteAllCompoundCherryPickRequests()
-  {
-    // TODO: want to do the following, as in Spring 2.0 API:
-    // http://www.springframework.org/docs/api/org/springframework/orm/hibernate/HibernateTemplate.html#delete(java.lang.String)
-    // but it doesn't work - it ends up treating the String as an entity, and fails.
-    //getHibernateTemplate().delete("from CherryPickRequest");
-    getHibernateTemplate().deleteAll(getHibernateTemplate().find("from CompoundCherryPickRequest"));
   }
 
   public CherryPickRequest findCherryPickRequestByNumber(int cherryPickRequestNumber)
   {
-    CherryPickRequest cherryPickRequest = _dao.findEntityByProperty(CherryPickRequest.class, 
-                                                                    "legacyCherryPickRequestNumber", 
+    CherryPickRequest cherryPickRequest = _dao.findEntityByProperty(CherryPickRequest.class,
+                                                                    "legacyCherryPickRequestNumber",
                                                                     cherryPickRequestNumber);
     if (cherryPickRequest == null) {
       int cherryPickRequestId = cherryPickRequestNumber;
@@ -136,9 +122,9 @@ public class CherryPickRequestDAO extends AbstractDAO
 
   public Set<LabCherryPick> findLabCherryPicksForWell(Well well)
   {
-    return new HashSet<LabCherryPick>(_dao.findEntitiesByProperty(LabCherryPick.class, 
-                                                                  "sourceWell", 
-                                                                  well)); 
+    return new HashSet<LabCherryPick>(_dao.findEntitiesByProperty(LabCherryPick.class,
+                                                                  "sourceWell",
+                                                                  well));
   }
 
   @SuppressWarnings("unchecked")
@@ -147,7 +133,7 @@ public class CherryPickRequestDAO extends AbstractDAO
     return new HashSet<ScreenerCherryPick>(
       getHibernateTemplate().find("from ScreenerCherryPick where screenedWell = ?", well));
   }
-  
+
   @SuppressWarnings("unchecked")
   public Map<WellKey,Number> findDuplicateCherryPicksForScreen(final Screen screen)
   {

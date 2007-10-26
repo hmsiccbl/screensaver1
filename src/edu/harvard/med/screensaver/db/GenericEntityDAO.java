@@ -29,6 +29,8 @@ public interface GenericEntityDAO
    */
   public void flush();
 
+  public void clear();
+
   /**
    * Executes a block of code, presumably with multiple GenericEntityDAO calls, into a single
    * transactions.

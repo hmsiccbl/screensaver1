@@ -38,6 +38,11 @@ public class AbstractDAO extends HibernateDaoSupport
     getHibernateTemplate().flush();
   }
 
+  public void clear()
+  {
+    getHibernateTemplate().clear();
+  }
+
   /**
    * Executes a block of code, presumably with multiple GenericEntityDAO calls, into a single
    * transactions.

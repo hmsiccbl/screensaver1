@@ -341,4 +341,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
     return false;
   }
+
+  public void clear() {}
+
 }

@@ -80,6 +80,24 @@ public class ScreenerCherryPick extends AbstractEntity
   }
 
   @Override
+  public boolean equals(Object obj)
+  {
+    return obj == this || (obj instanceof ScreenerCherryPick && obj.hashCode() == hashCode());
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return _cherryPickRequest.hashCode() * 7 + _screenedWell.hashCode() * 17;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "(" + _cherryPickRequest.toString() + ":" + _screenedWell.toString() + ")";
+  }
+
+  @Override
   @Transient
   public Integer getEntityId()
   {
@@ -142,6 +160,7 @@ public class ScreenerCherryPick extends AbstractEntity
     mappedBy="screenerCherryPick",
     fetch=FetchType.LAZY
   )
+  // TODO: this is actually a bidirectional relationship; correct, then run model tests to verify change
   @edu.harvard.med.screensaver.model.annotations.OneToMany(unidirectional=true)
   public Set<LabCherryPick> getLabCherryPicks()
   {
@@ -160,8 +179,7 @@ public class ScreenerCherryPick extends AbstractEntity
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
+    org.hibernate.annotations.CascadeType.DELETE
   })
   public RNAiKnockdownConfirmation getRnaiKnockdownConfirmation()
   {

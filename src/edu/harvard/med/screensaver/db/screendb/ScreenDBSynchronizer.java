@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -41,18 +41,18 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * This could only happen when part of the "business key" for the entity changes. These aren't
  * necessarilly Screensaver entity business keys, and also should not really change that much.
  * A list of the different entity types, and the "business keys" used by the synchronizer, follows:
- * 
+ *
  * <ul>
  * <li>ScreeningRoomUsers are looked up by firstName, lastName
  * <li>Libraries are looked up by startPlate
  * <li>Screens are looked up by screenNumber
  * </ul>
- * 
+ *
  * <p>
  * It should be noted that this synchronizer may not run correctly against a newly created Screensaver
  * database, or a Screensaver databaase that is out-of-date in relation to the ScreenDB database.
  * There are two places where this kind of issue currently comes up:
- * 
+ *
  * <ul>
  * <li>For {@link CompoundCherryPickSynchronizer compound cherry picks}, if a cherry pick in ScreenDB
  * goes against a well in Screensaver that is non-experimental, then an error is reported, and the
@@ -78,12 +78,12 @@ public class ScreenDBSynchronizer
     }
     catch (ClassNotFoundException e) {
       log.error("couldn't find postgresql driver");
-    }    
+    }
   }
-  
+
   public static void main(String [] args)
   {
-    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {
       CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
     Options options = new Options();
@@ -110,10 +110,10 @@ public class ScreenDBSynchronizer
     synchronizer.synchronize();
     log.info("successfully synchronized with ScreenDB.");
   }
-  
+
 
   // instance data members
-  
+
   private String _server;
   private String _database;
   private String _username;
@@ -123,14 +123,14 @@ public class ScreenDBSynchronizer
   private LibrariesDAO _librariesDao;
   private CherryPickRequestDAO _cherryPickRequestDao;
   private CompoundCherryPickSynchronizer compoundCherryPickSynchronizer;
-  
+
 
   // public constructors and methods
 
-  public ScreenDBSynchronizer(String server, 
-                              String database, 
-                              String username, 
-                              String password, 
+  public ScreenDBSynchronizer(String server,
+                              String database,
+                              String username,
+                              String password,
                               GenericEntityDAO dao,
                               LibrariesDAO librariesDao,
                               CherryPickRequestDAO cherryPickRequestDao)
@@ -143,7 +143,7 @@ public class ScreenDBSynchronizer
     _librariesDao = librariesDao;
     _cherryPickRequestDao = cherryPickRequestDao;
   }
-  
+
   /**
    * Synchronize Screensaver with ScreenDB.
    * @throws ScreenDBSynchronizationException whenever there is a problem synchronizing
@@ -151,7 +151,6 @@ public class ScreenDBSynchronizer
   public void synchronize() throws ScreenDBSynchronizationException
   {
     initializeConnection();
-    deleteOldCompoundCherryPickRequests();
     synchronizeLibraries();
     synchronizeNonLibraries();
     closeConnection();
@@ -170,30 +169,6 @@ public class ScreenDBSynchronizer
     }
   }
 
-  /**
-   * Delete the old compound cherry pick requests in a separate transaction.
-   * 
-   * @motivation This should really be part of
-   *             {@link CompoundCherryPickSynchronizer}, but I need to run
-   *             it in a separate transaction or I get hibernate exceptions
-   *             about deleted entities that would be resaved by cascade. I
-   *             probably should refactor things a bit so I can call
-   *             "deleteOldCherryPickRequests" methods in the
-   *             CCPSynchronizer, in separate transactions.
-   */
-  private void deleteOldCompoundCherryPickRequests()
-  {
-    log.info("deleting old compound cherry pick requests..");
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        _cherryPickRequestDao.deleteAllCompoundCherryPickRequests();
-      }
-    });
-    log.info("done deleting old compound cherry pick requests.");
-  }
-
   private void synchronizeLibraries() throws ScreenDBSynchronizationException
   {
     log.info("synchronizing libraries..");
@@ -205,7 +180,7 @@ public class ScreenDBSynchronizer
           new LibrarySynchronizer(_connection, _dao, _librariesDao);
         librarySynchronizer.synchronizeLibraries();
       }
-    }); 
+    });
     log.info("done synchronizing libraries.");
  }
 
@@ -221,7 +196,7 @@ public class ScreenDBSynchronizer
       new CompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
     final RNAiCherryPickScreeningSynchronizer rnaiCherryPickScreeningSynchronizer =
       new RNAiCherryPickScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
-    
+
     log.info("synchronizing non-libraries..");
     _dao.doInTransaction(new DAOTransaction()
     {
@@ -236,12 +211,16 @@ public class ScreenDBSynchronizer
         log.info("synchronizing library screenings..");
         libraryScreeningSynchronizer.synchronizeLibraryScreenings();
         log.info("done synchronizing library screenings.");
-        log.info("synchronizing compound cherry picks..");
-        compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
-        log.info("done synchronizing compound cherry picks.");
         log.info("synchronizing rnai cherry pick screenings..");
         rnaiCherryPickScreeningSynchronizer.synchronizeRnaiCherryPickScreenings();
         log.info("done synchronizing rnai cherry pick screenings.");
+        // WARNING: for efficiency, the following call has the side-effect of
+        // clearing the Hibernate session cache, so that any subsequent accesses
+        // of previously loaded entities' uninitialized relationships will cause
+        // LazyInitExceptions
+        log.info("synchronizing compound cherry picks..");
+        compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
+        log.info("done synchronizing compound cherry picks.");
       }
     });
     log.info("done synchronizing non-libraries.");

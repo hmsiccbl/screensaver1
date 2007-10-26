@@ -275,7 +275,8 @@ public class ScreeningRoomUser extends ScreensaverUser
   @OrderBy("checklistItemType") // TODO: would like this to be checklistItemType.orderStatistic
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<ChecklistItem> getChecklistItems()
   {

@@ -44,6 +44,7 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -328,7 +329,8 @@ public abstract class CherryPickRequest extends AbstractEntity
   )
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<ScreenerCherryPick> getScreenerCherryPicks()
   {
@@ -343,7 +345,9 @@ public abstract class CherryPickRequest extends AbstractEntity
   public ScreenerCherryPick createScreenerCherryPick(Well screenedWell)
   {
     ScreenerCherryPick screenerCherryPick = new ScreenerCherryPick(this, screenedWell);
-    _screenerCherryPicks.add(screenerCherryPick);
+    if (!_screenerCherryPicks.add(screenerCherryPick)) {
+      throw new DuplicateEntityException(this, screenerCherryPick);
+    }
     return screenerCherryPick;
   }
 
@@ -358,7 +362,8 @@ public abstract class CherryPickRequest extends AbstractEntity
   )
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<LabCherryPick> getLabCherryPicks()
   {

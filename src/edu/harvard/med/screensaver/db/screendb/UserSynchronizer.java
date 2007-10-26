@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -23,7 +23,6 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
-import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -81,7 +80,7 @@ public class UserSynchronizer
 
 
   // instance data members
-  
+
   private Connection _connection;
   private GenericEntityDAO _dao;
 
@@ -94,7 +93,7 @@ public class UserSynchronizer
     new LabAffiliationCategoryMapper();
   private ScreenDBSynchronizationException _synchronizationException = null;
 
-  
+
   // public constructors and methods
 
   public UserSynchronizer(Connection connection, GenericEntityDAO dao)
@@ -102,7 +101,7 @@ public class UserSynchronizer
     _connection = connection;
     _dao = dao;
   }
-  
+
   public void synchronizeUsers() throws ScreenDBSynchronizationException
   {
     _dao.doInTransaction(new DAOTransaction()
@@ -128,20 +127,20 @@ public class UserSynchronizer
       throw _synchronizationException;
     }
   }
-  
+
   public ScreeningRoomUser getScreeningRoomUserForScreenDBUserId(Integer userId)
   {
     return _screenDBUserIdToScreeningRoomUserMap.get(userId);
   }
-  
-  
+
+
   // private methods
 
   /**
    * Construct the {@link #_screenDBUserIdToLabHeadIdMap} and
-   * {@link #_screenDBUserIdToScreensaverUserMap} maps. 
-   * @throws SQLException 
-   * @throws ScreenDBSynchronizationException 
+   * {@link #_screenDBUserIdToScreensaverUserMap} maps.
+   * @throws SQLException
+   * @throws ScreenDBSynchronizationException
    */
   private void constructMappings() throws SQLException, ScreenDBSynchronizationException
   {
@@ -176,7 +175,7 @@ public class UserSynchronizer
     boolean isRnaiUser = resultSet.getBoolean("rani_user" /*[sic]*/);
     String comsCrhbaPermitNumber = resultSet.getString("permit_no");
     String comsCrhbaPermitPrincipalInvestigator = resultSet.getString("permit_pi");
-    
+
     ScreeningRoomUser user = getExistingUser(firstName, lastName);
     if (user == null) {
       user = new ScreeningRoomUser(dateCreated, firstName, lastName, email, phone,
@@ -206,13 +205,13 @@ public class UserSynchronizer
     // represents the "lab" as a whole), should have the lab affiliation;
     // non-lab heads' labAffiliation properties are ignored.
     user.setLabAffiliation(getLabAffiliation(affiliationName));
-    
+
     user.setComsCrhbaPermitNumber(comsCrhbaPermitNumber);
     user.setComsCrhbaPermitPrincipalInvestigator(comsCrhbaPermitPrincipalInvestigator);
-    
+
     return user;
   }
-  
+
   private LabAffiliation getLabAffiliation(String affiliationName)
   throws ScreenDBSynchronizationException
   {
@@ -237,7 +236,7 @@ public class UserSynchronizer
     }
     return labAffiliation;
   }
-  
+
   private ScreeningRoomUser getExistingUser(String firstName, String lastName) {
     ScreeningRoomUser user;
     Map<String,Object> nameMap = new HashMap<String,Object>();
@@ -268,7 +267,7 @@ public class UserSynchronizer
     }
     return email;
   }
-  
+
   private ScreeningRoomUserClassification getClassification(ResultSet resultSet)
   throws SQLException
   {
@@ -276,18 +275,18 @@ public class UserSynchronizer
     if (classificationString != null && classificationString.equals("PI")) {
       classificationString = "Principal Investigator";
     }
-    ScreeningRoomUserClassification classification = 
+    ScreeningRoomUserClassification classification =
       _userClassificationUserType.getTermForValue(classificationString);
     if (classification == null) {
       classification = ScreeningRoomUserClassification.UNASSIGNED;
     }
     return classification;
   }
-  
+
   private void synchronizeChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
   {
-    Set<ChecklistItem> checklistItems = user.getChecklistItems();
-    checklistItems.removeAll(checklistItems);
+    user.getChecklistItems().clear();
+    _dao.flush(); // force db deletes before inserts
     addScreenDBChecklistItems(screendbUserId, user);
     addNonScreenDBChecklistItems(user);
   }
@@ -309,18 +308,18 @@ public class UserSynchronizer
       String screendbChecklistItemName = resultSet.getString("name");
       ChecklistItemType checklistItemType =
         getChecklistItemTypeForScreenDBChecklistItemName(screendbChecklistItemName);
-      
+
       user.createChecklistItem(
         checklistItemType, activationDate, activationInitials, deactivationDate, deactivationInitials);
       screendbChecklistItemTypeNamesFound.add(screendbChecklistItemName);
     }
-    
+
     // go back and fill in anything missing in ScreenDB
     for (String screendbChecklistItemTypeName : CHECKLIST_ITEM_TYPE_MAP.keySet()) {
       if (screendbChecklistItemTypeNamesFound.contains(screendbChecklistItemTypeName)) {
         continue;
       }
-      String screensaverChecklistItemTypeName = 
+      String screensaverChecklistItemTypeName =
         CHECKLIST_ITEM_TYPE_MAP.get(screendbChecklistItemTypeName);
       addEmptyChecklistItem(user, screensaverChecklistItemTypeName);
     }
@@ -358,7 +357,7 @@ public class UserSynchronizer
     }
     user.createChecklistItem(checklistItemType);
   }
-  
+
   private void connectUsersToLabHeads()
   {
     for (Integer memberId : _screenDBUserIdToLabHeadIdMap.keySet()) {
@@ -373,7 +372,7 @@ public class UserSynchronizer
       }
     }
   }
-  
+
   private void persistScreeningRoomUsers()
   {
     for (ScreeningRoomUser user : _screenDBUserIdToScreeningRoomUserMap.values()) {

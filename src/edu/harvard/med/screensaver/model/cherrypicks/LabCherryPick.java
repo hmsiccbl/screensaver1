@@ -428,12 +428,16 @@ public class LabCherryPick extends AbstractEntity
     }
     _cherryPickRequest = screenerCherryPick.getCherryPickRequest();
 
+    // TODO: reinstate the following BusinessRuleViolationExceptions once we have some means of setting the well
+    // type for experimental wells in natural products libraries. (see rt#72830)
     if (!sourceWell.getWellType().equals(WellType.EXPERIMENTAL)) {
-      throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (not experimental)");
+      log.warn(sourceWell + " is not a valid source well (not experimental)");
+      //throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (not experimental)");
     }
     if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) &&
       sourceWell.getCompounds().size() == 0) {
-      throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a compound)");
+      log.warn(sourceWell + " is not a valid source well (does not contain a compound)");
+      //throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a compound)");
     }
 
     if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) &&
