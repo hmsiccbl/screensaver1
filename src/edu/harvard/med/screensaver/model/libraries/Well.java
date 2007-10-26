@@ -11,7 +11,9 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -36,6 +38,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.IndexColumn;
 
 
 /**
@@ -90,7 +93,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
   private String _smiles;
-  private Set<String> _molfile = new HashSet<String>();
+  private List<String> _molfile = new ArrayList<String>();
   private String _genbankAccessionNumber;
 
   private transient WellKey _wellKey;
@@ -416,7 +419,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     if (_molfile.size() == 0) {
       return null;
     }
-    return _molfile.iterator().next();
+    return _molfile.get(0);
   }
 
   /**
@@ -427,32 +430,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   {
     _molfile.clear();
     _molfile.add(molfile);
-  }
-
-  /**
-   * @motivation we want lazy loading of molfile property, due to its large data
-   *             size, but can only make it lazy loadable by mapping it in a
-   *             value collection
-   * @see #getMolfile()
-   */
-  @org.hibernate.annotations.CollectionOfElements(fetch=FetchType.LAZY)
-  @org.hibernate.annotations.Type(type="text")
-  @JoinTable(name="wellMolfile", joinColumns=@JoinColumn(name="well_id"))
-  @Column(name="molfile", nullable=false)
-  private Set<String> getMolfileSet()
-  {
-    return _molfile;
-  }
-
-  /**
-   * @motivation we want lazy loading of molfile property, due to its large data
-   *             size, but can only make it lazy loadable by mapping it in a
-   *             value collection
-   * @see #setMolfile(String)
-   */
-  private void setMolfileSet(Set<String> molfile)
-  {
-    _molfile = molfile;
   }
 
   /**
@@ -683,5 +660,32 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     else {
       _wellKey.setWellName(wellName);
     }
+  }
+
+  /**
+   * @motivation we want lazy loading of molfile property, due to its large data
+   *             size, but can only make it lazy loadable by mapping it in a
+   *             value collection
+   * @see #getMolfile()
+   */
+  @org.hibernate.annotations.CollectionOfElements(fetch=FetchType.LAZY)
+  @org.hibernate.annotations.Type(type="text")
+  @JoinTable(name="wellMolfile", joinColumns=@JoinColumn(name="well_id", unique=true)) // note "unique=true" ensures 1-to-1 mapping
+  @Column(name="molfile", nullable=false)
+  @IndexColumn(name="ordinal", base=0)
+  private List<String> getMolfileList()
+  {
+    return _molfile;
+  }
+
+  /**
+   * @motivation we want lazy loading of molfile property, due to its large data
+   *             size, but can only make it lazy loadable by mapping it in a
+   *             value collection
+   * @see #setMolfile(String)
+   */
+  private void setMolfileList(List<String> molfile)
+  {
+    _molfile = molfile;
   }
 }
