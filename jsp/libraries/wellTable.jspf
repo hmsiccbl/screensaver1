@@ -55,7 +55,7 @@
         </f:facet>
 				<t:commandLink action="#{reagentViewer.viewReagent}"
 					value="#{well.reagent.reagentId}">
-					<f:param name="reagentId" value="#{well.reagent.reagentId.id}" />
+					<f:param name="reagentId" value="#{well.reagent.reagentId.reagentId}" />
 				</t:commandLink>
       </h:column>
     </t:dataTable>
