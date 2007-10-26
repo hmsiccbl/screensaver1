@@ -12,8 +12,8 @@ DROP INDEX well_molfile_index;
 ALTER TABLE well_molfile DROP CONSTRAINT well_molfile_pkey;
 ALTER TABLE well_molfile ADD COLUMN ordinal int4;
 ALTER TABLE well_molfile ADD CONSTRAINT well_molfile_well_id UNIQUE (well_id);
-ALTER TABLE well_molfile ADD PRIMARY KEY (well_id, ordinal);
 UPDATE well_molfile SET ordinal = 1;
+ALTER TABLE well_molfile ADD PRIMARY KEY (well_id, ordinal);
 ALTER TABLE well_molfile ALTER COLUMN molfile SET NOT NULL;
 ALTER TABLE well_molfile ALTER COLUMN ordinal SET NOT NULL;
 
