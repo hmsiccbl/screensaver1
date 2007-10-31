@@ -103,7 +103,7 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
         for (int i = 1; i < 10; ++i) {
           Well well = library.createWell(new WellKey(i, "A01"), WellType.EMPTY);
           genericEntityDao.saveOrUpdateEntity(well);
-          rvt.addResultValue(well, Integer.toString(i));
+          rvt.createResultValue(well, Integer.toString(i));
         }
         genericEntityDao.saveOrUpdateEntity(screen);
       }

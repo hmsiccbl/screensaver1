@@ -10,11 +10,14 @@
 package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.util.Arrays;
+import java.util.List;
 
 import javax.faces.model.DataModel;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 
@@ -29,8 +32,6 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
 
   // instance data members
 
-  private int _screenResultSize;
-
 
   // abstract & template method implementations
 
@@ -43,11 +44,30 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
   @Override
   protected DataModel buildDataModel()
   {
-    return new FullScreenResultDataModel(getResultValueTypes(),
+    final List<ResultValueType> resultValueTypes = getResultValueTypes();
+    int totalRows = findTotalRows(resultValueTypes);
+    return new FullScreenResultDataModel(getScreenResult(),
+                                         resultValueTypes,
+                                         totalRows,
                                          getRowsPerPageSelector().getSelection(),
-                                         getSortManager().getSortColumnIndex(),
+                                         getSortManager().getSortColumn(),
                                          getSortManager().getSortDirection(),
-                                         _screenResultsDao);
+                                         _dao);
+  }
+
+  private int findTotalRows(final List<ResultValueType> resultValueTypes)
+  {
+    final int[] totalRows = new int[1];
+    if (resultValueTypes != null && resultValueTypes.size() > 0) {
+      _dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction() {
+          ResultValueType rvt = resultValueTypes.get(0);
+          rvt = _dao.reloadEntity(rvt);
+          totalRows[0] = _dao.relationshipSize(rvt, "resultValues");
+        }
+      });
+    }
+    return totalRows[0];
   }
 
   // constructors
@@ -62,9 +82,9 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
   public FullScreenResultDataTable(ScreenResultViewer screenResultViewer,
                                    WellViewer wellViewer,
                                    LibrariesDAO librariesDao,
-                                   ScreenResultsDAO screenResultsDao)
+                                   GenericEntityDAO dao)
   {
-    super(screenResultViewer, wellViewer, librariesDao, screenResultsDao);
+    super(screenResultViewer, wellViewer, librariesDao, dao);
   }
 
 

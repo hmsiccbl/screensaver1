@@ -52,6 +52,8 @@ public interface GenericEntityDAO
   public <E extends AbstractEntity> E defineEntity(Class<E> entityClass,
                                                    Object... constructorArguments);
 
+  public <E> List<E> runQuery(edu.harvard.med.screensaver.db.Query query);
+
   /**
    * Make the specified entity persistent. The entity's ID property will be set
    * upon return. This method calls the underlying Hibernate Session.saveOrUpdate, which

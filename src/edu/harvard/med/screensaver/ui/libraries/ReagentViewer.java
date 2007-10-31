@@ -85,11 +85,14 @@ public class ReagentViewer extends AbstractBackingBean
                          Collection<Gene> genes,
                          Collection<Compound> compounds)
   {
-    List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>(reagent.getAnnotationValues());
-    for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
-      AnnotationValue annotationValue = (AnnotationValue) iterator.next();
-      if (annotationValue.isRestricted()) {
-        iterator.remove();
+    List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
+    if (reagent != null) { // note: reagent can be null when used in the context of WellViewer subclass
+      annotationValues.addAll(reagent.getAnnotationValues());
+      for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
+        AnnotationValue annotationValue = (AnnotationValue) iterator.next();
+        if (annotationValue.isRestricted()) {
+          iterator.remove();
+        }
       }
     }
     _genes = genes;

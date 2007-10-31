@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -52,6 +52,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericalnessException;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -89,7 +90,7 @@ import org.apache.log4j.Logger;
  * Each call to {@link #parse} will clear the errors accumulated from the
  * previous call, and so the result of calling {@link #getErrors()} will change
  * after each call to {@link #parse}.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -97,10 +98,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 {
 
   // static data members
-  
+
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
   private static final Logger memoryDebugLog = Logger.getLogger(ScreenResultParser.class + "memoryDebug");
-  
+
   private static final String NO_SCREEN_ID_FOUND_ERROR = "Screen ID not found";
   private static final String DATA_HEADER_SHEET_NOT_FOUND_ERROR = "\"Data Headers\" sheet not found";
   private static final String UNKNOWN_ERROR = "unknown error";
@@ -123,7 +124,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       assayReadoutTypeMap.put(assayReadoutType.getValue(),
                               assayReadoutType);
     }
-    
+
     indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE, PositiveIndicatorDirection.LOW_VALUES_INDICATE);
     indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE, PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
 
@@ -204,14 +205,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private Library _lastLibrary;
 
 
-  
+
   // public methods and constructors
 
-  public ScreenResultParser(LibrariesDAO librariesDao) 
+  public ScreenResultParser(LibrariesDAO librariesDao)
   {
     _librariesDao = librariesDao;
   }
-  
+
   /**
    * Parses the specified workbook file that contains Screen Result data in the
    * <a
@@ -221,7 +222,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
-   * 
+   *
    * @param screen the parent Screen of the Screen Result being parsed
    * @param workbookFile the workbook file to be parsed
    * @return a ScreenResult object containing the data parsed from the workbook
@@ -233,7 +234,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   public ScreenResult parse(Screen screen, File workbookFile)
   {
     try {
-      return doParse(screen, 
+      return doParse(screen,
                      workbookFile,
                      new BufferedInputStream(new FileInputStream(workbookFile)));
     }
@@ -250,7 +251,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * {@link #getErrors}. The returned <code>ScreenResult</code> may only be
    * partially populated if errors are encountered, so always call getErrors()
    * to determine parsing success.
-   * 
+   *
    * @param screen the parent Screen of the Screen Result being parsed
    * @param inputSourceName the name of the workbook file to be parsed; if
    *          inputStream is null, will be used to obtain the workbook file,
@@ -266,8 +267,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   public ScreenResult parse(Screen screen, String inputSourceName, InputStream inputStream)
   {
-    return doParse(screen, 
-                   new File(inputSourceName), 
+    return doParse(screen,
+                   new File(inputSourceName),
                    inputStream);
   }
 
@@ -320,19 +321,19 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
     return _screenResult;
   }
-  
+
   public boolean getHasErrors()
   {
     return _errors.getHasErrors();
   }
-  
+
   /**
    * Return all errors the were detected during parsing. This class attempts to
    * parse as much of the workbook as possible, continuing on after finding an
    * error. The hope is that multiple errors will help a user/administrator
    * correct a workbook's errors in a batch fashion, rather than in a piecemeal
    * fashion.
-   * 
+   *
    * @return a <code>List&lt;String&gt;</code> of all errors generated during
    *         parsing
    */
@@ -340,19 +341,19 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     return _errors.getErrors();
   }
-  
+
   /**
    * Get an annotated copy of the parsed workbook with parse errors. Cells with
    * errors will have a red background and error message will be contained in
    * the cell's comment field.
-   * 
+   *
    * @throws IOException
    */
   public jxl.write.WritableWorkbook getErrorAnnotatedWorkbook() throws IOException
   {
     return _errors.getErrorAnnotatedWorkbook();
   }
-  
+
   public ScreenResult getParsedScreenResult()
   {
     return _screenResult;
@@ -363,7 +364,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   /**
    * Initialize the 'Data Headers' worksheet and related data members.
-   * 
+   *
    * @throws UnrecoverableScreenResultParseException if 'Data Headers' worksheet could
    *           not be initialized or does not appear to be valid
    */
@@ -394,7 +395,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   /**
    * Finds the total number of data header columns.
-   * 
+   *
    * @param dataHeadersSheet
    * @throws UnrecoverableScreenResultParseException
    */
@@ -407,7 +408,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     int iCol = 1; // skip label column
     int n = 0;
     jxl.Cell[] row = dataHeadersSheet.getRow(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex());
-    while (iCol < row.length && !row[iCol].getType().equals(CellType.EMPTY)) { 
+    while (iCol < row.length && !row[iCol].getType().equals(CellType.EMPTY)) {
       ++n;
       ++iCol;
     }
@@ -425,23 +426,23 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     Sheet dataSheet = workbook.getWorkbook().getSheet(sheetIndex);
     _dataCellParserFactory = new Cell.Factory(workbook,
                                               sheetIndex,
-                                              _errors);  
+                                              _errors);
     return dataSheet;
   }
 
 
-  private Cell dataHeadersCell(DataHeaderRow row, int dataHeader, boolean isRequired) 
+  private Cell dataHeadersCell(DataHeaderRow row, int dataHeader, boolean isRequired)
   {
     return _dataHeadersCellParserFactory.getCell((short) (DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX + dataHeader),
                                                  row.getRowIndex(),
                                                  isRequired);
   }
-  
+
   private Cell dataHeadersCell(DataHeaderRow row, int dataHeader)
   {
     return dataHeadersCell(row, dataHeader, /*required=*/false);
   }
-  
+
   private Cell dataCell(int row, DataColumn column)
   {
     return dataCell(row, column, false);
@@ -457,8 +458,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return _dataCellParserFactory.getCell((short) (_dataHeaderIndex2DataHeaderColumn.get(iDataHeader)),
                                           row);
   }
-                                        
-  
+
+
   private static class DataHeadersParseResult
   {
     private ScreenResult _screenResult;
@@ -484,20 +485,20 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _screenResult = screenResult;
     }
   }
-  
+
   /**
    * Parse the worksheet containing the ScreenResult data headers
    * @param workbook
-   * @throws UnrecoverableScreenResultParseException 
+   * @throws UnrecoverableScreenResultParseException
    */
   private DataHeadersParseResult parseDataHeaders(Screen screen,
                                                   Workbook workbook)
-    throws UnrecoverableScreenResultParseException 
+    throws UnrecoverableScreenResultParseException
   {
     DataHeadersParseResult dataHeadersParseResult = new DataHeadersParseResult();
     Sheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
     ParsedScreenInfo parsedScreenInfo = parseScreenInfo(workbook, screen);
-    
+
     dataHeadersParseResult.setScreenResult(screen.createScreenResult(parsedScreenInfo.getDateCreated()));
     int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
@@ -512,8 +513,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       rvt.setDescription(dataHeadersCell(DataHeaderRow.DESCRIPTION, iDataHeader).getString());
       rvt.setTimePoint(dataHeadersCell(DataHeaderRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {
-        for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(dataHeadersCell(DataHeaderRow.COLUMNS_DERIVED_FROM, 
-                                                                                                   iDataHeader, 
+        for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(dataHeadersCell(DataHeaderRow.COLUMNS_DERIVED_FROM,
+                                                                                                   iDataHeader,
                                                                                                    true))) {
           if (resultValueType != null) { // can be null if unparsable value is encountered in list
             rvt.addTypeDerivedFrom(resultValueType);
@@ -558,17 +559,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   /**
    * Parse the workbook containing the ScreenResult data.
-   * 
+   *
    * @param workbook the workbook containing some or all of the raw data for a
    *          ScreenResult
    * @throws ExtantLibraryException if an existing Well entity cannot be found
    *           in the database
-   * @throws IOException 
-   * @throws UnrecoverableScreenResultParseException 
+   * @throws IOException
+   * @throws UnrecoverableScreenResultParseException
    */
   void parseData(
     Workbook workbook,
-    ScreenResult screenResult) 
+    ScreenResult screenResult)
     throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
   {
     int dataSheetsParsed = 0;
@@ -579,12 +580,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       log.info("parsing sheet " + (dataSheetsParsed + 1) + " of " + totalDataSheets + ", " + sheetName);
       initializeDataSheet(workbook, iSheet);
       DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
-      
+
       int iDataHeader = 0;
       for (ResultValueType rvt : screenResult.getResultValueTypes()) {
         determineNumericalnessOfDataHeader(rvt, workbook, iSheet, iDataHeader++);
       }
-      
+
       while (rowIter.hasNext()) {
         Integer iRow = rowIter.next();
         Well well = rowIter.getWell();
@@ -598,32 +599,32 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           Cell cell = dataCell(iRow, iDataHeader);
           boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
           try {
-            boolean resultValueAdded = false;
+            ResultValue newResultValue = null;
             if (rvt.isPositiveIndicator()) {
               String value;
               if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
                 if (cell.isBoolean()) {
                   value = cell.getBoolean().toString();
-                } 
+                }
                 else {
                   value = _booleanParser.parse(cell).toString();
                 }
-                resultValueAdded = 
-                  rvt.addResultValue(well,
-                                     assayWellType,
-                                     value,
-                                     isExclude);
+                newResultValue =
+                  rvt.createResultValue(well,
+                                        assayWellType,
+                                        value,
+                                        isExclude);
               }
               else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
-                resultValueAdded = 
-                  rvt.addResultValue(well,
+                newResultValue =
+                  rvt.createResultValue(well,
                                      assayWellType,
                                      _partitionedValueParser.parse(cell).toString(),
                                      isExclude);
               }
               else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
-                resultValueAdded = 
-                  rvt.addResultValue(well,
+                newResultValue =
+                  rvt.createResultValue(well,
                                      assayWellType,
                                      cell.getDouble(),
                                      cell.getDoublePrecision(),
@@ -632,22 +633,22 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
             }
             else { // not assay activity indicator
               if (rvt.isNumeric()) {
-                resultValueAdded = 
-                  rvt.addResultValue(well,
+                newResultValue =
+                  rvt.createResultValue(well,
                                      assayWellType,
                                      cell.getDouble(),
                                      cell.getDoublePrecision(),
                                      isExclude);
               }
               else {
-                resultValueAdded = 
-                  rvt.addResultValue(well,
+                newResultValue =
+                  rvt.createResultValue(well,
                                      assayWellType,
                                      cell.getString(),
                                      isExclude);
               }
             }
-            if (!resultValueAdded) {
+            if (newResultValue == null) {
               _errors.addError("duplicate well", cell);
             }
           }
@@ -674,15 +675,15 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * inconclusive for a given worksheet (if the entire column contains empty
    * cells), but that a later worksheet may used to make the determination.
    */
-  private void determineNumericalnessOfDataHeader(ResultValueType rvt, 
-                                                  Workbook workbook, 
-                                                  int iSheet, 
+  private void determineNumericalnessOfDataHeader(ResultValueType rvt,
+                                                  Workbook workbook,
+                                                  int iSheet,
                                                   int iDataHeader)
   {
     if (!rvt.isNumericalnessDetermined()) {
       if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
         rvt.setNumeric(true);
-      } 
+      }
       else {
         DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
         while (rowIter.hasNext()) {
@@ -704,7 +705,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
     }
   }
-  
+
   private class DataRowIterator implements Iterator<Integer>
   {
     private Sheet _sheet;
@@ -719,7 +720,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _iRow = RAWDATA_FIRST_DATA_ROW_INDEX - 1;
       _lastRowIndex = _sheet.getRows() - 1;
     }
-    
+
     public DataRowIterator(DataRowIterator rowIter)
     {
       _sheet = rowIter._sheet;
@@ -746,17 +747,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         return null;
       }
     }
-    
+
     public Integer getRowIndex()
     {
       return new Integer(_iRow);
     }
-    
+
     public Well getWell()
     {
       return _well;
     }
-    
+
     public void remove()
     {
       throw new UnsupportedOperationException();
@@ -794,7 +795,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         return null;
       }
       preloadLibraryWells(library);
-      
+
       Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
       if (well == null) {
         _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName, wellNameCell);
@@ -808,7 +809,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * Determines if row at the specified 0-based index should be ignored,
    * which is the case if the row is undefined, has no cells, or the first cell
    * is blank or contains the empty string or only whitespace.
-   * 
+   *
    * @param sheet
    * @param rowIndex
 
@@ -838,7 +839,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     if (_lastLibrary == null ||
       !_lastLibrary.containsPlate(plateNumber)) {
-      _lastLibrary = _librariesDao.findLibraryWithPlate(plateNumber); 
+      _lastLibrary = _librariesDao.findLibraryWithPlate(plateNumber);
     }
     return _lastLibrary;
   }
@@ -880,16 +881,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _screenId = screenId;
     }
   }
-  
+
   /**
    * Parses the "Screen Info" worksheet.
    * <p>
    * For now, we just parse the ScreenResult date, but if we ever need to parse
    * more, we should return a composite object, rather than just a Date.
-   * 
+   *
    * @throws UnrecoverableScreenResultParseException if a screen ID is not found
    */
-  private ParsedScreenInfo parseScreenInfo(Workbook workbook, Screen screen) 
+  private ParsedScreenInfo parseScreenInfo(Workbook workbook, Screen screen)
     throws UnrecoverableScreenResultParseException
   {
     ParsedScreenInfo parsedScreenInfo = new ParsedScreenInfo();
@@ -919,13 +920,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError(NO_SCREEN_ID_FOUND_ERROR);
     }
     else if (!parsedScreenInfo.getScreenNumber().equals(screen.getScreenNumber())) {
-      _errors.addError("screen result data file is for screen number " + 
-                       parsedScreenInfo.getScreenNumber() + 
+      _errors.addError("screen result data file is for screen number " +
+                       parsedScreenInfo.getScreenNumber() +
                        ", expected " + screen.getScreenNumber());
     }
     if (parsedScreenInfo.getDateCreated() == null) {
       if (screen.getScreeningRoomActivities().size() > 0) {
-        SortedSet<ScreeningRoomActivity> sortedScreeningRoomActivities = 
+        SortedSet<ScreeningRoomActivity> sortedScreeningRoomActivities =
           new TreeSet<ScreeningRoomActivity>(screen.getScreeningRoomActivities());
         parsedScreenInfo.setDate(sortedScreeningRoomActivities.first().getDateOfActivity());
       }
@@ -936,23 +937,23 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
     return parsedScreenInfo;
   }
-  
+
   public class ColumnLabelsParser implements CellValueParser<ResultValueType>
   {
     protected Map<String,ResultValueType> _columnLabel2RvtMap;
     private Pattern columnIdPattern = Pattern.compile("[A-Z]+");
     private ParseErrorManager _errors;
-    
+
 
     // public methods
-    
+
     public ColumnLabelsParser(Map<String,ResultValueType> columnLabel2RvtMap, ParseErrorManager errors)
     {
       _columnLabel2RvtMap =  columnLabel2RvtMap;
       _errors = errors;
     }
 
-    public ResultValueType parse(Cell cell) 
+    public ResultValueType parse(Cell cell)
     {
       throw new UnsupportedOperationException();
     }
@@ -965,7 +966,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (textMultiValue == null || textMultiValue.trim().length() == 0) {
         return result;
       }
-      
+
       String[] textValues = textMultiValue.split(",");
       for (int i = 0; i < textValues.length; i++) {
         String text = textValues[i].trim();
@@ -974,17 +975,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           result.add(rvt);
         }
         else {
-          _errors.addError("invalid Data Header column reference '" + text + 
-            "' (expected one of " + _columnLabel2RvtMap.keySet() + ")", 
+          _errors.addError("invalid Data Header column reference '" + text +
+            "' (expected one of " + _columnLabel2RvtMap.keySet() + ")",
             cell);
         }
       }
       return result;
     }
 
-    
+
     // private methods
-    
+
     private ResultValueType doParseSingleValue(String value, Cell cell)
     {
       Matcher matcher = columnIdPattern.matcher(value);
@@ -1000,7 +1001,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
 
     // public methods
-    
+
     public ExcludeParser(Map<String,ResultValueType> columnLabel2RvtMap, ParseErrorManager errors)
     {
       super(columnLabel2RvtMap, errors);
@@ -1011,15 +1012,15 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       String textMultiValue = cell.getString();
       List<ResultValueType> result = new ArrayList<ResultValueType>();
 
-      if (textMultiValue != null && 
+      if (textMultiValue != null &&
         textMultiValue.equalsIgnoreCase(ScreenResultWorkbookSpecification.EXCLUDE_ALL_VALUE)) {
         return new ArrayList<ResultValueType>(_columnLabel2RvtMap.values());
       }
-      
+
       if (textMultiValue == null) {
         return result;
       }
-      
+
       return super.parseList(cell);
     }
   }

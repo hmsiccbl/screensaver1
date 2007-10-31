@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 
 /**
  * Annotation value on a particular library member (e.g. a compound or silencing
@@ -42,6 +43,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
+@Immutable
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=AnnotationType.class)
 public class AnnotationValue extends AbstractEntity

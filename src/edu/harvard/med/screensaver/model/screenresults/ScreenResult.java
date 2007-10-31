@@ -471,7 +471,7 @@ public class ScreenResult extends AbstractEntity
 
   /**
    * Increment the number of experimental wells that have data in this screen result.
-   * Intended only for use by {@link ResultValueType#addResultValue(ResultValue, Well)}.
+   * Intended only for use by {@link ResultValueType#createResultValue(ResultValue, Well)}.
    * @see #getExperimentalWellCount()
    */
   void incrementExperimentalWellCount()

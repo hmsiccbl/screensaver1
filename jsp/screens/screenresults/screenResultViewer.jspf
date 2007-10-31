@@ -233,12 +233,12 @@
 												title="#{screenResultViewer.resultValueTable.sortManager.currentColumn.description}" />
 										</t:commandSortHeader>
 									</f:facet>
-									<t:outputText value="#{row[column.name]}"
+									<t:outputText value="#{screenResultViewer.resultValueTable.cellValue}"
 										rendered="#{!column.isCommandLink}" />
 									<t:commandLink
 										action="#{screenResultViewer.resultValueTable.cellAction}"
 										rendered="#{column.isCommandLink}">
-										<t:outputText value="#{row[column.name]}" />
+										<t:outputText value="#{screenResultViewer.resultValueTable.cellValue}" />
 									</t:commandLink>
 								</t:columns>
 							</t:dataTable>

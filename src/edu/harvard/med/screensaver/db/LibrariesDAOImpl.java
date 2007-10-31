@@ -160,23 +160,25 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   public void loadOrCreateWellsForLibrary(Library library)
   {
     // this might not perform awesome, but:
-    //   - is correct, in terms of the "load" part of method contract, since it is
-    //     always possible that some but not all of the library's wells have already
-    //     been loaded into the session.
-    //   - presumably this method is not called in time-critical sections of code
-    // further performance improvements possible by checking if a single well (or
+    // - is correct, in terms of the "load" part of method contract, since it is
+    // always possible that some but not all of the library's wells have already
+    // been loaded into the session.
+    // - presumably this method is not called in time-critical sections of code
+    // further performance improvements possible by checking if a single well
+    // (or
     // something like that) was in the session, but this fails to be correct, in
-    // terms of the "load" part of the method contract, although it will not cause
-    // any errors, just perf problems later when code is forced to get wells one at
+    // terms of the "load" part of the method contract, although it will not
+    // cause
+    // any errors, just perf problems later when code is forced to get wells one
+    // at
     // a time.
     Collection<Well> wells;
     try {
       wells = library.getWells();
     }
     catch (TransientObjectException e) {
-      wells = getHibernateTemplate().find(
-        "from Well where plateNumber >= ? and plateNumber <= ?",
-        new Object [] { library.getStartPlate(), library.getEndPlate() });
+      wells = getHibernateTemplate().find("from Well where plateNumber >= ? and plateNumber <= ?",
+                                          new Object[] { library.getStartPlate(), library.getEndPlate() });
     }
     if (wells.size() > 0) {
       log.debug("loaded wells for library " + library.getLibraryName());
@@ -189,7 +191,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         }
       }
     }
-    // note: we need persistEntity(), not saveUpdateEntity(), to ensure wells are in session cache and can be found within the current transaction, without flushing
+    // note: saveUpdateEntity() reattaches library to session, and then
+    // persistEntity() immediately adds new wells to sessions, so that they can
+    // be found within the current transaction, without flushing
+    _dao.saveOrUpdateEntity(library);
     _dao.persistEntity(library);
     log.info("created wells for library " + library.getLibraryName());
   }

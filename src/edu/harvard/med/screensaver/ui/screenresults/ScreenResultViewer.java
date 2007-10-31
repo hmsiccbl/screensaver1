@@ -143,10 +143,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     _dataFilter = null;
     _showPositivesOnlyForDataHeader = null;
     getDataHeadersTable().initialize(getResultValueTypes(), this);
-    // HACK: eager fetch size of full result values
-    if (getResultValueTypes().size() > 0) {
-      getResultValueTypes().get(0).getWellKeyToResultValueMap().size();
-    }
     updateDataTable();
   }
 
@@ -422,6 +418,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
       _singlePlateScreenResultDataTable.setPlateNumber(getDataFilter().getSelection());
       _screenResultDataTable = _singlePlateScreenResultDataTable;
     }
+    _screenResultDataTable.setScreenResult(getScreenResult());
     _screenResultDataTable.setResultValueTypes(getDataHeaderSelections().getSelections());
   }
 
@@ -434,11 +431,12 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
     log.debug("updating data table filter selections");
 
-    SortedSet<Integer> filters = new TreeSet<Integer>(_screenResult.getPlateNumbers());
+    // TODO: reinstate data filters
+    SortedSet<Integer> filters = new TreeSet<Integer>(/*_screenResult.getPlateNumbers()*/);
     filters.add(DATA_TABLE_FILTER_SHOW_ALL);
-    if (getShowPositivesOnlyForDataHeader().getSize() > 0) {
-      filters.add(DATA_TABLE_FILTER_SHOW_POSITIVES);
-    }
+//    if (getShowPositivesOnlyForDataHeader().getSize() > 0) {
+//      filters.add(DATA_TABLE_FILTER_SHOW_POSITIVES);
+//    }
     _dataFilter =
       new UISelectOneBean<Integer>(filters, DATA_TABLE_FILTER_SHOW_ALL) {
       @Override

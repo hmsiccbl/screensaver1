@@ -25,6 +25,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -72,8 +74,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private Integer _resultValueTypeId;
   private Integer _version;
   private ScreenResult _screenResult;
-  private Map<String,ResultValue> _resultValues = new HashMap<String,ResultValue>();
-  private WellKeyToResultValueMap _wellKeyToResultValueMap = new WellKeyToResultValueMap(_resultValues);
+  private Map<Well,ResultValue> _resultValues = new HashMap<Well,ResultValue>();
+  private transient WellKeyToResultValueMap _wellKeyToResultValueMap = new WellKeyToResultValueMap(_resultValues);
   private String _name;
   private String _description;
   private Integer _ordinal;
@@ -176,11 +178,11 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * Add a non-numeric, experimental type, non-excluded result value to the result value type.
    * @param well the well of the new ResultValue
    * @param value the value of the new ResultValue
-   * @return true, iff the ResultValue was added
+   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public boolean addResultValue(Well well, String value)
+  public ResultValue createResultValue(Well well, String value)
   {
-    return addResultValue(well, AssayWellType.EXPERIMENTAL, value, false);
+    return createResultValue(well, AssayWellType.EXPERIMENTAL, value, false);
   }
 
   /**
@@ -189,14 +191,14 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
-   * @return true iff a result value did not already exist for the given well and result value type
+   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public boolean addResultValue(Well well,
-                                AssayWellType assayWellType,
-                                String value,
-                                boolean exclude)
+  public ResultValue createResultValue(Well well,
+                                       AssayWellType assayWellType,
+                                       String value,
+                                       Boolean exclude)
   {
-    return addResultValue(well, assayWellType, value, null, 0, exclude);
+    return createResultValue(well, assayWellType, value, null, 0, exclude);
   }
 
   /**
@@ -204,11 +206,13 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param well the well of the new ResultValue
    * @param numericValue the value of the new ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
-   * @return true iff a result value did not already exist for the given well and result value type
+   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public boolean addResultValue(Well well, Double value, int decimalPrecision)
+  public ResultValue createResultValue(Well well,
+                                       Double value,
+                                       Integer decimalPrecision)
   {
-    return addResultValue(well, AssayWellType.EXPERIMENTAL, value, decimalPrecision, false);
+    return createResultValue(well, AssayWellType.EXPERIMENTAL, value, decimalPrecision, false);
   }
 
   /**
@@ -218,15 +222,15 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param numericValue the numeric value of the new ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal point, when value is displayed
    * @param exclude the exclude flag of the new ResultValue
-   * @return true iff a result value did not already exist for the given well and result value type
+   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public boolean addResultValue(Well well,
-                                AssayWellType assayWellType,
-                                Double numericValue,
-                                int decimalPrecision,
-                                boolean exclude)
+  public ResultValue createResultValue(Well well,
+                                       AssayWellType assayWellType,
+                                       Double numericValue,
+                                       Integer decimalPrecision,
+                                       boolean exclude)
   {
-    return addResultValue(well, assayWellType, null, numericValue, decimalPrecision, exclude);
+    return createResultValue(well, assayWellType, null, numericValue, decimalPrecision, exclude);
   }
 
   /**
@@ -840,12 +844,12 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @return a mapping from the well ids to the result values for this result value type
    * @motivation for hibernate
    */
-  @org.hibernate.annotations.CollectionOfElements
-  @org.hibernate.annotations.MapKey(columns=@Column(name="wellId"))
-  @org.hibernate.annotations.LazyCollection(
-    value=org.hibernate.annotations.LazyCollectionOption.EXTRA
-  )
-  private Map<String,ResultValue> getResultValues()
+  @OneToMany(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+             mappedBy="resultValueType")
+  @MapKey(name="well")
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
+  private Map<Well,ResultValue> getResultValues()
   {
     return _resultValues;
   }
@@ -856,7 +860,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * value type
    * @motivation for hibernate
    */
-  private void setResultValues(Map<String,ResultValue> resultValues)
+  private void setResultValues(Map<Well,ResultValue> resultValues)
   {
     _resultValues = resultValues;
     _wellKeyToResultValueMap = new WellKeyToResultValueMap(_resultValues);
@@ -874,19 +878,19 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param numericValue the numeric value of the new ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal point, when value is displayed
    * @param exclude the exclude flag of the new ResultValue
-   * @return true iff a result value did not already exist for the given well and result value type
+   * @return a new ResultValue iff a result value did not already exist for the given well and result value type
    */
-  private boolean addResultValue(
+  private ResultValue createResultValue(
     Well well,
     AssayWellType assayWellType,
     String value,
     Double numericValue,
-    int decimalPrecision,
+    Integer decimalPrecision,
     boolean exclude)
   {
     assert (value == null) != (numericValue == null) :  "either numeric or non-numeric value";
     if (_resultValues.containsKey(well.getWellId())) {
-      return false;
+      return null;
     }
     if (_resultValues.size() == 0) {
       setNumeric(value == null);
@@ -898,13 +902,14 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
       throw new DataModelViolationException("cannot add a numeric value to a non-numeric ResultValueType");
     }
 
-    ResultValue resultValue = new ResultValue(
-      assayWellType,
-      value,
-      numericValue,
-      decimalPrecision,
-      exclude,
-      false);
+    ResultValue resultValue = new ResultValue(this,
+                                              well,
+                                              assayWellType,
+                                              value,
+                                              numericValue,
+                                              decimalPrecision,
+                                              exclude,
+                                              false);
 
     if (getOrdinal() == 0) { // yuck! due to denormalization...
       if (resultValue.isExperimentalWell()) {
@@ -922,8 +927,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
     getScreenResult().addWell(well);
 
-    _resultValues.put(well.getWellId(), resultValue);
-    return true;
+    _resultValues.put(well, resultValue);
+    return resultValue;
   }
 
   /**
@@ -1007,7 +1012,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     }
     if (log.isDebugEnabled()) {
       if (isPositive) {
-        log.debug("result value [well=" + rv.getWellId() + ", value=" + rv.getValue() + ", exclude=" + rv.isExclude() + ", wellType=" + rv.getAssayWellType() + "] is a positive");
+        log.debug("result value [well=" + rv.getWell() + ", value=" + rv.getValue() + ", exclude=" + rv.isExclude() + ", wellType=" + rv.getAssayWellType() + "] is a positive");
       }
     }
     return isPositive;

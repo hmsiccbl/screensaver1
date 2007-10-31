@@ -13,8 +13,8 @@ import java.util.Arrays;
 
 import javax.faces.model.DataModel;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
@@ -45,9 +45,9 @@ public class PositivesOnlyScreenResultDataTable extends ScreenResultDataTable
   public PositivesOnlyScreenResultDataTable(ScreenResultViewer screenResultViewer,
                                             WellViewer wellViewer,
                                             LibrariesDAO librariesDao,
-                                            ScreenResultsDAO screenResultsDao)
+                                            GenericEntityDAO dao)
   {
-    super(screenResultViewer, wellViewer, librariesDao, screenResultsDao);
+    super(screenResultViewer, wellViewer, librariesDao, dao);
   }
 
 
@@ -84,10 +84,11 @@ public class PositivesOnlyScreenResultDataTable extends ScreenResultDataTable
   @Override
   public DataModel buildDataModel()
   {
-    return new PositivesOnlyScreenResultDataModel(getResultValueTypes(),
-                                                  getSortManager().getSortColumnIndex(),
+    return new PositivesOnlyScreenResultDataModel(getScreenResult(),
+                                                  getResultValueTypes(),
+                                                  getSortManager().getSortColumn(),
                                                   getSortManager().getSortDirection(),
-                                                  _screenResultsDao,
+                                                  _dao,
                                                   _positivesDataHeader);
   }
 

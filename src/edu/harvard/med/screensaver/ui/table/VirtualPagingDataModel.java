@@ -10,10 +10,10 @@
 package edu.harvard.med.screensaver.ui.table;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import javax.faces.model.DataModel;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.ui.screenresults.FullScreenResultDataModel;
@@ -36,12 +36,11 @@ import org.apache.log4j.Logger;
  * whenever it is called.
  *
  * @param <K> the type of the key used to identify a row of data
- * @param <V> the data type of each cell. Use <code>Object</code> (or some common
- *          base type) if cell data types are heterogenous.
+ * @param <V> the data type containing the data displayed across each row.
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class VirtualPagingDataModel<K,V> extends DataModel
+public abstract class VirtualPagingDataModel<K,V> extends SortableDataModel<V>
 {
 
   // static members
@@ -53,10 +52,11 @@ public abstract class VirtualPagingDataModel<K,V> extends DataModel
 
   private int _rowsToFetch;
   private int _totalRowCount;
-  protected int _sortColumnIndex;
-  protected SortDirection _sortDirection;
   protected int _rowIndex;
-  private Map<Integer,Map<String,Object>> _fetchedRows = new HashMap<Integer,Map<String,Object>>();
+  private TableColumn<V> _sortColumn;
+  private SortDirection _sortDirection;
+  private List<K> _sortedKeys;
+  private Map<K,V> _fetchedRows = new HashMap<K,V>();
 
 
   // constructors
@@ -67,22 +67,20 @@ public abstract class VirtualPagingDataModel<K,V> extends DataModel
 
   protected VirtualPagingDataModel(int rowsToFetch,
                                    int totalRowCount,
-                                   int sortColumnIndex,
+                                   TableColumn<V> sortColumn,
                                    SortDirection sortDirection)
   {
     _rowsToFetch = rowsToFetch;
     _totalRowCount = totalRowCount;
-    _sortColumnIndex = sortColumnIndex;
+    _sortColumn = sortColumn;
     _sortDirection = sortDirection;
   }
 
   // abstract methods
 
-  abstract protected Map<K,List<V>> fetchData(int firstRowIndex, int rowsToFetch);
+  abstract protected List<K> fetchAscendingSortOrder(TableColumn<V> column);
 
-  abstract protected Map<String,Object> makeRow(int rowIndex, K rowKey, List<V> rowData);
-
-  //abstract public void sort(String sortColumnName, SortDirection sortDirection);
+  abstract protected Map<K,V> fetchData(Set<K> keys);
 
 
   // public methods
@@ -126,24 +124,21 @@ public abstract class VirtualPagingDataModel<K,V> extends DataModel
   }
 
   @Override
-  public Map<String,Object> getRowData()
+  final public void sort(TableColumn<V> column, SortDirection direction)
   {
-    if (!_fetchedRows.containsKey(_rowIndex)) {
-      if (log.isDebugEnabled()) {
-        log.debug("row not yet fetched: " + _rowIndex);
-      }
-      Map<K,List<V>> data = fetchData(_rowIndex, _rowsToFetch);
-      int i = _rowIndex;
-      for (Map.Entry<K,List<V>> entry : data.entrySet()) {
-        _fetchedRows.put(i, makeRow(i, entry.getKey(), entry.getValue()));
-        ++i;
-      }
-      if (log.isDebugEnabled()) {
-        log.debug("  fetched " + data.size() + " rows " + _rowIndex +
-                  " to " + ((_rowIndex + data.size()) - 1));
-      }
+    _sortColumn = column;
+    _sortDirection = direction;
+    _sortedKeys = null;  // force re-query
+  }
+
+  @Override
+  public V getRowData()
+  {
+    if (!isRowAvailable()) {
+      return null;
     }
-    return _fetchedRows.get(_rowIndex);
+    doFetchIfNecessary();
+    return _fetchedRows.get(getSortedKeys().get(getSortIndex(_rowIndex)));
   }
 
   @Override
@@ -156,5 +151,58 @@ public abstract class VirtualPagingDataModel<K,V> extends DataModel
   final public void setWrappedData(Object data)
   {
     throw new UnsupportedOperationException("virtual paging data model cannot be provided an object representing the full underlying dataset");
+  }
+
+
+  // private methods
+
+  private int getSortIndex(int rowIndex)
+  {
+    if (_sortDirection == SortDirection.ASCENDING) {
+      return rowIndex;
+    }
+    return (_totalRowCount - rowIndex) - 1;
+  }
+
+  private List<K> getSortedKeys()
+  {
+    if (_sortedKeys == null) {
+      _sortedKeys = fetchAscendingSortOrder(_sortColumn);
+    }
+    return _sortedKeys;
+  }
+
+  private void doFetchIfNecessary()
+  {
+    if (!_fetchedRows.containsKey(getSortedKeys().get(getSortIndex(_rowIndex)))) {
+      Map<K,V> data = fetchData(getUnfetchedKeysBatch());
+      cacheFetchedData(data);
+    }
+  }
+
+  private Set<K> getUnfetchedKeysBatch()
+  {
+    Set<K> keys = new HashSet<K>();
+    int from = _rowIndex;
+    int to = Math.min(_rowIndex + _rowsToFetch, _totalRowCount);
+    for (int i = from; i < to; ++i) {
+      K key = getSortedKeys().get(getSortIndex(i));
+      if (!_fetchedRows.containsKey(key)) {
+        keys.add(key);
+      }
+    }
+    if (log.isDebugEnabled()) {
+      log.debug("need to fetch keys " + keys + " for rows " + from + ".." + to);
+    }
+    return keys;
+  }
+
+  private void cacheFetchedData(Map<K,V> fetchedData)
+  {
+    _fetchedRows.putAll(fetchedData);
+    if (log.isDebugEnabled()) {
+      log.debug("fetched " + fetchedData.size() + " rows: " + _rowIndex +
+                " to " + ((_rowIndex + fetchedData.size()) - 1));
+    }
   }
 }

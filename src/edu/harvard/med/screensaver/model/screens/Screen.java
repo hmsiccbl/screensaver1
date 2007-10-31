@@ -1458,7 +1458,7 @@ public class Screen extends Study
   @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
   @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="studies")
   public Set<Reagent> getReagents()
   {
     return _reagents;
@@ -1471,8 +1471,11 @@ public class Screen extends Study
    */
   public boolean addReagent(Reagent reagent)
   {
-    return _reagents.add(reagent);
-
+    if (_reagents.add(reagent)) {
+      reagent.addStudy(this);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -1482,7 +1485,11 @@ public class Screen extends Study
    */
   public boolean removeReagent(Reagent reagent)
   {
-    return _reagents.remove(reagent);
+    if (_reagents.remove(reagent)) {
+      reagent.removeStudy(this);
+      return true;
+    }
+    return false;
   }
 
 

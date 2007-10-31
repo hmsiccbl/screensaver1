@@ -36,6 +36,21 @@ public class DebugUtils
     log.debug("debug stack trace:\n" + StringUtils.makeListString(stackTrace, "\n"));
   }
 
+  public static long elapsedTime(String description, int repetitions, Logger log, Runnable r)
+  {
+
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < repetitions; ++i) {
+      r.run();
+    }
+    long end = System.currentTimeMillis();
+    long elapsed = end - start;
+    log.debug(String.format("elapsed time for %s: %.3f",
+                            description,
+                            (elapsed / 1000.0) / (double) repetitions));
+    return elapsed;
+  }
+
   // private methods
 
 }

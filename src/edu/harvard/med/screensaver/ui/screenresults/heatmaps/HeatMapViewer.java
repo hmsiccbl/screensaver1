@@ -33,7 +33,6 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -86,9 +85,9 @@ public class HeatMapViewer extends AbstractBackingBean
   private static final DataModel HEAT_MAP_CELL_LEGEND_MODEL;
   static {
     List<LegendItem> legendItems = new ArrayList<LegendItem>();
-    legendItems.add(new LegendItem("Experimental", HeatMapCell.getStyle(new ResultValue(AssayWellType.EXPERIMENTAL, 0.0, 0, false, false), Color.GREEN)));
-    legendItems.add(new LegendItem("Control", HeatMapCell.getStyle(new ResultValue(AssayWellType.ASSAY_CONTROL, 0.0, 0, false, false), Color.BLUE)));
-    legendItems.add(new LegendItem("Empty/Excluded", HeatMapCell.getStyle(new ResultValue(AssayWellType.EMPTY, 0.0, 0, true, false), Color.WHITE)));
+    legendItems.add(new LegendItem("Experimental", HeatMapCell.getStyle(true, false, true, false, Color.GREEN)));
+    legendItems.add(new LegendItem("Control", HeatMapCell.getStyle(true, false, false, true, Color.BLUE)));
+    legendItems.add(new LegendItem("Empty/Excluded", HeatMapCell.getStyle(true, true, false, false, Color.WHITE)));
     HEAT_MAP_CELL_LEGEND_MODEL = new ListDataModel(legendItems);
   }
 

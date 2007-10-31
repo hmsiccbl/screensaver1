@@ -103,16 +103,39 @@ public class HeatMapCell
 
   public static String getStyle(ResultValue resultValue, Color color)
   {
+    boolean hasValue = false;
+    boolean isExclude = false;
+    boolean isExperimentalWell = false;
+    boolean isControlWell = false;
+    if (resultValue != null) {
+      hasValue = resultValue.getValue() != null;
+      isExclude = resultValue.isExclude();
+      isExperimentalWell = resultValue.isExperimentalWell();
+      isControlWell = resultValue.isControlWell();
+    }
+    return getStyle(hasValue,
+                    isExclude,
+                    isExperimentalWell,
+                    isControlWell,
+                    color);
+  }
+
+  public static String getStyle(boolean hasValue,
+                                boolean isExclude,
+                                boolean isExperimentalWell,
+                                boolean isControlWell,
+                                Color color)
+  {
     String hexColor = String.format("#%02x%02x%02x",
                                     color.getRed(),
                                     color.getGreen(),
                                     color.getBlue());
 
-    if (resultValue != null && resultValue.getValue() != null && !resultValue.isExclude()) {
-      if (resultValue.isExperimentalWell()) {
+    if (hasValue && !isExclude) {
+      if (isExperimentalWell) {
         return "background-color: " + hexColor;
       }
-      else if (resultValue.isControlWell()) {
+      else if (isControlWell) {
         // note: if you change the border-width, also change heatMapCell.border-width in screensaver.css
         return "padding: 0px; border-width: 4px; border-style: double; border-color: black; background-color: " + hexColor;
       }
@@ -122,4 +145,3 @@ public class HeatMapCell
     return "background-color: #eeeeee";
   }
 }
-

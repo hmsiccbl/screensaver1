@@ -62,6 +62,7 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.propertytesters.CollectionPropertiesInitialCardinalityTester;
 import edu.harvard.med.screensaver.model.propertytesters.PropertiesGetterAndSetterTester;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
@@ -112,6 +113,32 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     _entityClass = clazz;
     _beanInfo = Introspector.getBeanInfo(_entityClass);
     _bean = newInstance(_entityClass);
+  }
+
+  public void testEqualsAndHashCode()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    E transientEntity = _bean;
+    Set<E> set = new HashSet<E>();
+    set.add(transientEntity);
+    assertTrue(set.contains(transientEntity));
+    genericEntityDao.persistEntity(transientEntity);
+    E detachedEntity = transientEntity;
+    transientEntity = null; // no longer transient!
+    E reloadedEntity = genericEntityDao.reloadEntity(detachedEntity);
+    assertNotSame(reloadedEntity, detachedEntity);
+    assertTrue(set.contains(detachedEntity));
+    boolean isSemanticId = SemanticIDAbstractEntity.class.isAssignableFrom(_entityClass);
+    if (isSemanticId) {
+      assertEquals(reloadedEntity, detachedEntity);
+      assertEquals(reloadedEntity.hashCode(), detachedEntity.hashCode());
+      assertTrue(set.contains(reloadedEntity));
+    }
+    else {
+      assertFalse(reloadedEntity.equals(detachedEntity));
+      assertFalse(reloadedEntity.hashCode() == detachedEntity.hashCode());
+      assertFalse(set.contains(reloadedEntity));
+    }
   }
 
   /**
@@ -1201,6 +1228,12 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       return newInstance((Class<AbstractEntity>) type, parentBean, persistEntities);
     }
     if (VocabularyTerm.class.isAssignableFrom(type)) {
+      if (type.equals(AssayWellType.class)) {
+        return AssayWellType.EXPERIMENTAL;
+      }
+      if (type.equals(WellType.class)) {
+        return WellType.EXPERIMENTAL;
+      }
       try {
         Method valuesMethod = type.getMethod("values");
         Object values = (Object) valuesMethod.invoke(null);

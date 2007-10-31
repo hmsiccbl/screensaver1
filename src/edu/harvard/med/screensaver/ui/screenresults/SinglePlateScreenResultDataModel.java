@@ -12,11 +12,14 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenResultSortQuery;
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
 public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
@@ -24,57 +27,38 @@ public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
   // static members
 
   private static Logger log = Logger.getLogger(SinglePlateScreenResultDataModel.class);
-  private Map<WellKey,List<ResultValue>> _data;
-  private int _plateNumber;
+
 
   // instance data members
 
+  private Map<WellKey,Well> _data;
+  private Integer _size;
+  private int _plateNumber;
+
+
   // public constructors and methods
 
-  public SinglePlateScreenResultDataModel(List<ResultValueType> resultValueTypes,
-                                          int sortColumnIndex,
+  public SinglePlateScreenResultDataModel(ScreenResult screenResult,
+                                          List<ResultValueType> resultValueTypes,
+                                          TableColumn<Well> sortColumn,
                                           SortDirection sortDirection,
-                                          ScreenResultsDAO dao,
+                                          GenericEntityDAO dao,
                                           int plateNumber)
   {
-    super(resultValueTypes, -1, -1, sortColumnIndex, sortDirection, dao);
+    super(screenResult, resultValueTypes, -1, -1, sortColumn, sortDirection, dao);
     _plateNumber = plateNumber;
   }
 
   @Override
   public int getRowCount()
   {
-    if (_data == null) {
-      fetchData();
+    if (_size == null) {
+      if (_resultValueTypes.size() > 0) {
+        _size = _dao.runQuery(new ScreenResultSortQuery(_resultValueTypes.get(0).getScreenResult(),
+                                                        _plateNumber)).size();
+      }
     }
-    return _data.size();
+    return _size;
   }
-
-
-  // protected methods
-
-  @Override
-  protected Map<WellKey,List<ResultValue>> fetchData(int firstRowIndex, int rowsToFetch)
-  {
-    return fetchData();
-  }
-
-  private Map<WellKey,List<ResultValue>> fetchData()
-  {
-    if (_data == null) {
-      _data = _screenResultsDao.findSortedResultValueTableByRange(_resultValueTypes,
-                                                                  _sortColumnIndex,
-                                                                  _sortDirection,
-                                                                  0,
-                                                                  null,
-                                                                  null,
-                                                                  _plateNumber);
-    }
-    return _data;
-  }
-
-
-  // private methods
-
 }
 

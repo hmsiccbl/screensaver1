@@ -66,7 +66,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
 
         // test that we can eager load the molfile via our dao methods, and access after session is closed
         wellWithMolfileLoadedEagerly = genericEntityDao.findEntityById(Well.class, "00001:A02");
-        genericEntityDao.need(well, "molfileSet");
+        genericEntityDao.need(well, "molfileList");
 
         // test that a molfile not loaded is not accessible after session is closed
         assertEquals("molfile:00001:A01", well.getMolfile());
@@ -81,7 +81,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
       assertEquals("molfile:00001A02",
                    wellPocketDAOTransaction.wellWithMolfileLoadedEagerly.getMolfile());
       wellPocketDAOTransaction.wellWithMolfileNotLoaded.getMolfile();
-      fail("failed to get a LazyInitException for well.molfile");
+      fail("failed to get a LazyInitException for well.molfileList");
     }
     catch (Exception e) {
     }

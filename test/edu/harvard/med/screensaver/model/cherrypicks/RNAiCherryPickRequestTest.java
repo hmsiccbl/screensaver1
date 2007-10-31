@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -14,18 +14,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataIntegrityViolationException;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
+
+import org.apache.log4j.Logger;
 
 public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCherryPickRequest>
 {
@@ -37,7 +37,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
   {
     super(RNAiCherryPickRequest.class);
   }
-  
+
   public void testRequestedEmptyColumnsOnAssayPlate()
   {
     schemaUtil.truncateTablesOrCreateSchema();
@@ -45,7 +45,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
     final Set<Integer> requestedEmptyColumns = new HashSet<Integer>(Arrays.asList(3, 7, 11));
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      public void runTransaction() 
+      public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
@@ -54,10 +54,10 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
-    
+
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
-      public void runTransaction() 
+      public void runTransaction()
       {
         Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         assertEquals(requestedEmptyColumns,
@@ -96,7 +96,7 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
       }
     });
   }
-  
+
   /**
    * Test creating two screener cherry picks for the same cherry pick request / well causes
    * some kind of error. Right now, it causes a DataIntegrityViolationException on commit, so
@@ -117,16 +117,14 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
           Well well = librariesDao.findWell(wellKey);
           cherryPickRequest.createScreenerCherryPick(well);
           cherryPickRequest.createScreenerCherryPick(well);
-
           genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
         }
       });
+      fail("DuplicateEntityException was not thrown for duplicate screener cherry picks");
     }
-    catch (DataIntegrityViolationException e) {
-      log.info("caught the data integrity violation exception");
+    catch (DuplicateEntityException e) {
       return;
     }
-    fail("data integrity violation was not thrown for duplicate screener cherry picks");
   }
 }
 

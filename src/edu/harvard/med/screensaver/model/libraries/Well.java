@@ -11,9 +11,11 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -28,6 +30,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -36,7 +39,11 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.util.CollectionUtils;
 
+import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.IndexColumn;
 
@@ -49,7 +56,6 @@ import org.hibernate.annotations.IndexColumn;
  */
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={ "plateNumber", "wellName" })})
-//@SecondaryTable(name="wellMolfile")
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Library.class)
 public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
@@ -95,8 +101,10 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private String _smiles;
   private List<String> _molfile = new ArrayList<String>();
   private String _genbankAccessionNumber;
+  private Set<ResultValue> _resultValues = new HashSet<ResultValue>();
 
   private transient WellKey _wellKey;
+  private transient Map<Serializable,ResultValue> _resultValueTypeIdToResultValue;
 
 
   // public instance methods
@@ -453,7 +461,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   /**
    * Get the reagent.
-   * @return the reagent
+   * @return the reagent; can be null if library contents have not been loaded
    */
   @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
              fetch=FetchType.LAZY)
@@ -533,6 +541,36 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     _wellKey.getColumn() == 0 || _wellKey.getColumn() == PLATE_COLUMNS - 1;
   }
 
+
+  /**
+   * Get the set of result values.
+   * @return the set of result values
+   */
+  @OneToMany(cascade={}, fetch=FetchType.LAZY, mappedBy="well")
+  public Set<ResultValue> getResultValues()
+  {
+    return _resultValues;
+  }
+
+  @Transient
+  public ResultValue getResultValue(ResultValueType resultType)
+  {
+    if (_resultValueTypeIdToResultValue == null) {
+      _resultValueTypeIdToResultValue =
+        CollectionUtils.indexCollection(_resultValues,
+                                        new Transformer() {
+          public Object transform(Object resultValue) {
+            Serializable entityId = ((ResultValue) resultValue).getResultValueType().getEntityId();
+            if (entityId == null) {
+              throw new IllegalStateException("cannot call getResultValue() unless resultTypes are persisted");
+            }
+            return entityId;
+          }
+        },
+        Serializable.class, ResultValue.class);
+    }
+    return _resultValueTypeIdToResultValue.get(resultType.getResultValueTypeId());
+  }
 
   // package constructors
 
@@ -687,5 +725,15 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private void setMolfileList(List<String> molfile)
   {
     _molfile = molfile;
+  }
+
+  /**
+   * Set the result values.
+   * @param resultValues the new result values
+   * @motivation for hibernate
+   */
+  private void setResultValues(Set<ResultValue> resultValues)
+  {
+    _resultValues = resultValues;
   }
 }

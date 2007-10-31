@@ -80,7 +80,7 @@ public class ScreenViewer extends StudyViewer
 
   public void setScreen(Screen screen)
   {
-    setStudy(screen);
+    setStudy(screen, -1 /*not yet showing reagents in screen viewer*/);
     _screen = screen;
     _screenDetailViewer.setScreen(screen);
     _screenResultImporter.setScreen(screen);

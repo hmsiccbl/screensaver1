@@ -13,17 +13,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.faces.component.UIInput;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.db.ScreenResultSortQuery.SortByWellProperty;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
+import edu.harvard.med.screensaver.ui.searchresults.ResultValueTypeColumn;
+import edu.harvard.med.screensaver.ui.searchresults.WellColumn;
 import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -44,7 +46,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>>
+public abstract class ScreenResultDataTable extends DataTable<Well>
 {
   // static members
 
@@ -55,8 +57,9 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
   private ScreenResultViewer _screenResultViewer;
   private WellViewer _wellViewer;
   private LibrariesDAO _librariesDao;
-  protected ScreenResultsDAO _screenResultsDao;
+  protected GenericEntityDAO _dao;
 
+  private ScreenResult _screenResult;
   private List<ResultValueType> _resultValueTypes = Collections.emptyList();
 
 
@@ -72,16 +75,26 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
   public ScreenResultDataTable(ScreenResultViewer screenResultViewer,
                                WellViewer wellViewer,
                                LibrariesDAO librariesDao,
-                               ScreenResultsDAO screenResultsDao)
+                               GenericEntityDAO dao)
   {
     _screenResultViewer = screenResultViewer;
     _wellViewer = wellViewer;
     _librariesDao = librariesDao;
-    _screenResultsDao = screenResultsDao;
+    _dao = dao;
   }
 
 
   // public constructors and methods
+
+  public void setScreenResult(ScreenResult screenResult)
+  {
+    _screenResult = screenResult;
+  }
+
+  public ScreenResult getScreenResult()
+  {
+    return _screenResult;
+  }
 
   public List<ResultValueType> getResultValueTypes()
   {
@@ -99,7 +112,9 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
 
   public boolean isResultValueExcluded()
   {
-    return ((ScreenResultDataModel) getDataModel()).isResultValueCellExcluded(getSortManager().getCurrentColumnIndex());
+    return false;
+    // TODO: reinstate
+    //return ((ScreenResultDataModel) getDataModel()).isResultValueCellExcluded(getSortManager().getCurrentColumnIndex());
   }
 
   /**
@@ -122,9 +137,9 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
 
   // abstract method implementations
 
-  protected List<TableColumn<Map<String,Object>>> buildColumns()
+  protected List<TableColumn<Well>> buildColumns()
   {
-    List<TableColumn<Map<String,Object>>> columns = new ArrayList<TableColumn<Map<String,Object>>>();
+    List<TableColumn<Well>> columns = new ArrayList<TableColumn<Well>>();
     columns.addAll(buildFixedColumns());
     columns.addAll(buildVariableColumns());
     return columns;
@@ -133,48 +148,47 @@ public abstract class ScreenResultDataTable extends DataTable<Map<String,Object>
 
   // private methods
 
-  private List<TableColumn<Map<String,Object>>> buildFixedColumns()
+  private List<TableColumn<Well>> buildFixedColumns()
   {
-    List<TableColumn<Map<String,Object>>> fixedColumns = new ArrayList<TableColumn<Map<String,Object>>>(3);
-    fixedColumns.add(new TableColumn<Map<String,Object>>("Plate", "The plate number", true) {
+    List<TableColumn<Well>> fixedColumns = new ArrayList<TableColumn<Well>>(3);
+    fixedColumns.add(new WellColumn(SortByWellProperty.PLATE_NUMBER,
+                                            "Plate",
+                                            "The plate number",
+                                            true) {
       @Override
-      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+      public Object getCellValue(Well well) { return well.getWellKey().getPlateNumber(); }
     });
-    fixedColumns.add(new TableColumn<Map<String,Object>>("Well", "The well name") {
+    fixedColumns.add(new WellColumn(SortByWellProperty.WELL_NAME,
+                                            "Well",
+                                            "The well name",
+                                            false) {
       @Override
-      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+      public Object getCellValue(Well well) { return well.getWellKey().getWellName(); }
 
       @Override
       public boolean isCommandLink() { return true; }
 
       @Override
-      public Object cellAction(Map<String,Object> row)
+      public Object cellAction(Well well)
       {
-        Integer plateNumber = (Integer) getSortManager().getColumn(0).getCellValue(row);
-        String wellName = (String) getSortManager().getColumn(1).getCellValue(row);
-        Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
         return _wellViewer.viewWell(well);
       }
     });
-    fixedColumns.add(new TableColumn<Map<String,Object>>("Type",
-      StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase()) {
+    fixedColumns.add(new WellColumn(SortByWellProperty.WELL_TYPE,
+                                            "Type",
+                                            StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase(),
+                                            false) {
       @Override
-      public Object getCellValue(Map<String,Object> row) { return row.get(getName()); }
+      public Object getCellValue(Well well) { return well.getWellType(); }
     });
     return fixedColumns;
   }
 
-  private List<TableColumn<Map<String,Object>>> buildVariableColumns()
+  private List<TableColumn<Well>> buildVariableColumns()
   {
-    ArrayList<TableColumn<Map<String,Object>>> result = new ArrayList<TableColumn<Map<String,Object>>>();
-    for (MetaDataType rvt : getResultValueTypes()) {
-      result.add(new TableColumn<Map<String,Object>>(rvt.getName(), rvt.getDescription(), rvt.isNumeric()) {
-        @Override
-        public Object getCellValue(Map<String,Object> row)
-        {
-          return row.get(getName());
-        }
-      });
+    ArrayList<TableColumn<Well>> result = new ArrayList<TableColumn<Well>>();
+    for (ResultValueType rvt : getResultValueTypes()) {
+      result.add(new ResultValueTypeColumn(rvt));
     }
     return result;
   }

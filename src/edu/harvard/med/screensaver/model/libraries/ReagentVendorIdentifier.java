@@ -125,9 +125,9 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
 
   public int compareTo(ReagentVendorIdentifier other)
   {
-    int result = other._vendorName.compareTo(_vendorName);
+    int result = _vendorName.compareTo(other._vendorName);
     if (result == 0) {
-      result = other._vendorIdentifier.compareTo(_vendorIdentifier);
+      result = _vendorIdentifier.compareTo(other._vendorIdentifier);
     }
     return result;
   }

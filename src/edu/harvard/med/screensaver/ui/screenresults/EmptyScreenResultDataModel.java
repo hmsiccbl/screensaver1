@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 
 import org.apache.log4j.Logger;
 
@@ -30,13 +28,7 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
 
   public EmptyScreenResultDataModel()
   {
-    super(null, 0, -1, -1, SortDirection.ASCENDING, null);
-  }
-
-  @Override
-  protected Map<WellKey,List<ResultValue>> fetchData(int firstRowIndex, int rowsToFetch)
-  {
-    return new HashMap<WellKey,List<ResultValue>>();
+    super(null, null, 0, -1, null, SortDirection.ASCENDING, null);
   }
 
 }

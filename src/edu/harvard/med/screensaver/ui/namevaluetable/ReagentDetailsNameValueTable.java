@@ -111,7 +111,9 @@ public class ReagentDetailsNameValueTable extends NameValueTable
    * add rows for missing values.
    */
   protected void initializeLists(Reagent reagent) {
-    addItem(VENDOR_IDENTIFIER, reagent.getEntityId().toString(), ValueType.TEXT, "The reagent source identifier (e.g., catalog number; reorder number) for the reagent contents");
+    if (reagent != null) { // can be null when used in WellViewer (and well has no reagent)
+      addItem(VENDOR_IDENTIFIER, reagent.getEntityId().toString(), ValueType.TEXT, "The reagent source identifier (e.g., catalog number; reorder number) for the reagent contents");
+    }
   }
 
   protected void addItem(String name, Object value, ValueType valueType, String description)

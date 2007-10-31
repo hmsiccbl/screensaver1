@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -16,12 +16,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 
 /**
  * An unmodifiable map from {@link WellKey} to {@link ResultValue} that wraps a map from
  * <code>String</code> to <code>ResultValue</code>.
- * 
+ *
  * To modify the collection of <code>ResultValues</code>, call
  * {@link ResultValueType#addResultValue} or {@link ResultValueType#removeResultValue}.
  *
@@ -38,13 +39,13 @@ public class WellKeyToResultValueMap implements Map<WellKey,ResultValue>
 {
   private static Logger log = Logger.getLogger(WellKeyToResultValueMap.class);
 
-  private Map<String,ResultValue> _wellIdToResultValueMap;
-  
-  public WellKeyToResultValueMap(Map<String,ResultValue> wellIdToResultValueMap)
+  private Map<Well,ResultValue> _wellToResultValueMap;
+
+  public WellKeyToResultValueMap(Map<Well,ResultValue> wellToResultValueMap)
   {
-    _wellIdToResultValueMap = wellIdToResultValueMap;
+    _wellToResultValueMap = wellToResultValueMap;
   }
-  
+
   public void clear()
   {
     throw new UnsupportedOperationException();
@@ -53,26 +54,26 @@ public class WellKeyToResultValueMap implements Map<WellKey,ResultValue>
   public boolean containsKey(Object key)
   {
     WellKey wellKey = (WellKey) key;
-    return _wellIdToResultValueMap.containsKey(wellKey.getKey());
+    return _wellToResultValueMap.containsKey(wellKey.getKey());
   }
 
   public boolean containsValue(Object value)
   {
-    return _wellIdToResultValueMap.containsValue(value);
+    return _wellToResultValueMap.containsValue(value);
   }
 
   class WellKeyToResultValueMapEntry implements Map.Entry<WellKey,ResultValue>
   {
-    private String _wellId;
+    private Well _well;
     private ResultValue _resultValue;
-    public WellKeyToResultValueMapEntry(String wellId, ResultValue resultValue)
+    public WellKeyToResultValueMapEntry(Well well, ResultValue resultValue)
     {
-      _wellId = wellId;
+      _well = well;
       _resultValue = resultValue;
     }
     public WellKey getKey()
     {
-      return new WellKey(_wellId);
+      return _well.getWellKey();
     }
     public ResultValue getValue()
     {
@@ -86,12 +87,12 @@ public class WellKeyToResultValueMap implements Map<WellKey,ResultValue>
 
   public Set<Map.Entry<WellKey,ResultValue>> entrySet()
   {
-    Set<Map.Entry<String,ResultValue>> stringMapEntries = _wellIdToResultValueMap.entrySet();
+    Set<Map.Entry<Well,ResultValue>> wellMapEntries = _wellToResultValueMap.entrySet();
     Set<Map.Entry<WellKey,ResultValue>> wellKeyMapEntries =
       new HashSet<Map.Entry<WellKey,ResultValue>>();
-    for (Map.Entry<String,ResultValue> stringMapEntry : stringMapEntries) {
+    for (Map.Entry<Well,ResultValue> wellMapEntry : wellMapEntries) {
       Map.Entry<WellKey,ResultValue> wellKeyMapEntry =
-        new WellKeyToResultValueMapEntry(stringMapEntry.getKey(), stringMapEntry.getValue());
+        new WellKeyToResultValueMapEntry(wellMapEntry.getKey(), wellMapEntry.getValue());
       wellKeyMapEntries.add(wellKeyMapEntry);
     }
     return wellKeyMapEntries;
@@ -100,20 +101,20 @@ public class WellKeyToResultValueMap implements Map<WellKey,ResultValue>
   public ResultValue get(Object key)
   {
     WellKey wellKey = (WellKey) key;
-    return _wellIdToResultValueMap.get(wellKey.getKey());
+    return _wellToResultValueMap.get(wellKey.getKey());
   }
 
   public boolean isEmpty()
   {
-    return _wellIdToResultValueMap.isEmpty();
+    return _wellToResultValueMap.isEmpty();
   }
 
   public Set<WellKey> keySet()
   {
-    Set<String> wellIds = _wellIdToResultValueMap.keySet();
-    Set<WellKey> wellKeys = new HashSet<WellKey>(wellIds.size());
-    for (String wellId : wellIds) {
-      wellKeys.add(new WellKey(wellId));
+    Set<Well> wells = _wellToResultValueMap.keySet();
+    Set<WellKey> wellKeys = new HashSet<WellKey>(wells.size());
+    for (Well well : wells) {
+      wellKeys.add(well.getWellKey());
     }
     return wellKeys;
   }
@@ -135,11 +136,11 @@ public class WellKeyToResultValueMap implements Map<WellKey,ResultValue>
 
   public int size()
   {
-    return _wellIdToResultValueMap.size();
+    return _wellToResultValueMap.size();
   }
 
   public Collection<ResultValue> values()
   {
-    return _wellIdToResultValueMap.values();
+    return _wellToResultValueMap.values();
   }
 }

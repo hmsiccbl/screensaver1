@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -30,6 +33,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 
 import org.apache.commons.collections.Transformer;
@@ -59,7 +63,8 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
   private Integer _version;
   private Set<Well> _wells = new HashSet<Well>();
   private Set<AnnotationValue> _annotationValues = new HashSet<AnnotationValue>();
-  private transient Map<AnnotationType,AnnotationValue> _annotationTypeToValue;
+  private Set<Screen> _studies = new HashSet<Screen>();
+  private transient Map<AnnotationType,AnnotationValue> _annotationTypeIdToAnnotationValue;
 // TODO: implement
   //private Set<Reagent> _reagents = new HashSet<Reagent>();
 
@@ -164,14 +169,54 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
   @Transient
   public AnnotationValue getAnnotationValue(AnnotationType annotationType)
   {
-    if (_annotationTypeToValue == null) {
-      _annotationTypeToValue =
+    if (_annotationTypeIdToAnnotationValue == null) {
+      _annotationTypeIdToAnnotationValue =
         CollectionUtils.indexCollection(_annotationValues,
-                                        new Transformer() { public Object transform(Object annotationValue) { return ((AnnotationValue) annotationValue).getAnnotationType(); } },
-                                        AnnotationType.class,
-                                        AnnotationValue.class);
+                                        new Transformer() {
+          public Object transform(Object annotationValue) {
+            Serializable entityId = ((AnnotationValue) annotationValue).getAnnotationType().getEntityId();
+            if (entityId == null) {
+              throw new IllegalStateException("cannot call getAnnotationValue() unless annotationTypes are persisted");
+            }
+            return entityId;
+          }
+        },
+        AnnotationType.class,
+        AnnotationValue.class);
     }
-    return _annotationTypeToValue.get(annotationType);
+    return _annotationTypeIdToAnnotationValue.get(annotationType.getAnnotationTypeId());
+  }
+
+  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+              targetEntity=Screen.class,
+              mappedBy="reagents",
+              fetch=FetchType.LAZY)
+  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+  @JoinColumn(name="studyId", nullable=false, updatable=false)
+  @org.hibernate.annotations.ForeignKey(name="fk_reagent_to_study")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName="study")
+  public Set<Screen> getStudies()
+  {
+    return _studies;
+  }
+
+  public boolean addStudy(Screen study)
+  {
+    if (_studies.add(study)) {
+      study.addReagent(this);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean removeStudy(Screen study)
+  {
+    if (_studies.remove(study)) {
+      study.removeReagent(this);
+      return true;
+    }
+    return false;
   }
 
 
@@ -236,5 +281,10 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
   private void setAnnotationValues(Set<AnnotationValue> annotationValues)
   {
     _annotationValues = annotationValues;
+  }
+
+  private void setStudies(Set<Screen> studies)
+  {
+    _studies = studies;
   }
 }

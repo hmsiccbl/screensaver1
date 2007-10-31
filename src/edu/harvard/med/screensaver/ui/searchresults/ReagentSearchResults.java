@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -20,15 +21,17 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.db.AnnotationsDAO;
+import javax.faces.model.DataModel;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ReagentsSortQuery.SortByReagentProperty;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
@@ -62,11 +65,13 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
   private GenericEntityDAO _dao;
-  private AnnotationsDAO _annotationsDao;
 
+  private Study _study;
+  private int _studyReagentCount;
   private List<TableColumn<Reagent>> _columns;
 
   private transient Well _representativeWell;
+
 
 
   // constructors
@@ -85,7 +90,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
                               ReagentViewer reagentViewer,
                               CompoundViewer compoundViewer,
                               GeneViewer geneViewer,
-                              AnnotationsDAO annotationsDao,
+                              GenericEntityDAO dao,
                               List<DataExporter<Reagent>> dataExporters)
   {
     super(dataExporters);
@@ -93,7 +98,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
     _reagentViewer = reagentViewer;
     _compoundViewer = compoundViewer;
     _geneViewer = geneViewer;
-    _annotationsDao = annotationsDao;
+    _dao = dao;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("annotationTypes", true);
@@ -106,6 +111,19 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
   {
     _annotationTypesTable.initialize(annotationTypes, this);
     super.setContents(unsortedResults, null);
+    _study = null;
+    _studyReagentCount = 0;
+  }
+
+  public void setContents(Study study,
+                          int reagentCount)
+  {
+    _annotationTypesTable.initialize(new ArrayList<AnnotationType>(study.getAnnotationTypes()),
+                                     this);
+    // HACK: we should extend a superclass that is virtual-paging savvy! (i.e., doesn't require the full contents to be provided)
+    super.setContents(null, null);
+    _study = study;
+    _studyReagentCount = reagentCount;
   }
 
   public void update(Observable observable, Object selections)
@@ -141,7 +159,10 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
   protected List<TableColumn<Reagent>> getColumns()
   {
     _columns = new ArrayList<TableColumn<Reagent>>();
-    _columns.add(new TableColumn<Reagent>("Reagent Source ID", "The vendor-assigned identifier for the reagent.") {
+    _columns.add(new ReagentColumn(SortByReagentProperty.ID,
+                                   "Reagent Source ID",
+                                   "The vendor-assigned identifier for the reagent.",
+                                   false) {
       @Override
       public Object getCellValue(Reagent reagent) { return reagent.getEntityId(); }
 
@@ -154,7 +175,10 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
         return viewCurrentEntity();
       }
     });
-    _columns.add(new TableColumn<Reagent>("Contents", "The gene name for the silencing reagent, or SMILES for the compound reagent") {
+    _columns.add(new ReagentColumn(SortByReagentProperty.CONTENTS,
+                                   "Contents",
+                                   "The gene name for the silencing reagent, or SMILES for the compound reagent",
+                                   false) {
       @Override
       public Object getCellValue(Reagent reagent) { return getContentsValue(reagent); }
 
@@ -208,24 +232,24 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
     return _columns;
   }
 
-  private class AnnotationTypeColumn extends TableColumn<Reagent>
+  @Override
+  protected DataModel buildDataModel()
   {
-    private AnnotationType _annotationType;
-
-    public AnnotationTypeColumn(AnnotationType annotationType)
-    {
-      super(annotationType.getName(),
-            annotationType.getDescription(),
-            annotationType.isNumeric());
-      _annotationType = annotationType;
+    if (_study != null) {
+      return new ReagentsDataModel(_study,
+                                   getDataTable().getRowsPerPage(),
+                                   _studyReagentCount,
+                                   getDataTable().getSortManager().getSortColumn(),
+                                   getDataTable().getSortManager().getSortDirection(),
+                                   _dao);
     }
-
-    @Override
-    public Object getCellValue(Reagent reagent)
-    {
-      AnnotationValue annotationValue = reagent.getAnnotationValue(_annotationType);
-
-      return annotationValue == null ? null : annotationValue.getValue();
+    else {
+      return new ReagentsDataModel(new HashSet<Reagent>(getContents()),
+                                   getDataTable().getRowsPerPage(),
+                                   getContents().size(),
+                                   getDataTable().getSortManager().getSortColumn(),
+                                   getDataTable().getSortManager().getSortDirection(),
+                                   _dao);
     }
   }
 

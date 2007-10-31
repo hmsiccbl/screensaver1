@@ -363,7 +363,7 @@ public class ComplexDAOTest extends AbstractSpringTest
 
             wells[iWell] = library.createWell(wellKey, WellType.EXPERIMENTAL);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
-              rvt[iResultValue].addResultValue(wells[iWell],
+              rvt[iResultValue].createResultValue(wells[iWell],
                                                AssayWellType.EXPERIMENTAL,
                                                "value " + iWell + "," + iResultValue,
                                                iWell % 2 == 1);
@@ -832,8 +832,8 @@ public class ComplexDAOTest extends AbstractSpringTest
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           boolean exclude = i % 4 == 0;
           double rvt1Value = (double) i;
-          rvt1.addResultValue(well, assayWellType, rvt1Value, 3, exclude);
-          rvt2.addResultValue(well, assayWellType, "false", false);
+          rvt1.createResultValue(well, assayWellType, rvt1Value, 3, exclude);
+          rvt2.createResultValue(well, assayWellType, "false", false);
           if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
             expectedExperimentalWellCount[0]++;
             if (!exclude && rvt1Value >= indicatorCutoff) {
@@ -859,143 +859,6 @@ public class ComplexDAOTest extends AbstractSpringTest
     });
   }
 
-  public void testFindSortedResultValueTableByRange()
-  {
-    final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    ScreenResult screenResult = screen.createScreenResult(new Date());
-    ResultValueType rvt1 = screenResult.createResultValueType("Raw Value");
-    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value", null, true, true, false, null);
-    rvt2.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
-    rvt2.setHowDerived("even wells are 'S', otherwise 'W'");
-    rvt2.addTypeDerivedFrom(rvt1);
-    Library library = new Library(
-      "library 1",
-      "lib1",
-      ScreenType.SMALL_MOLECULE,
-      LibraryType.COMMERCIAL,
-      1,
-      10);
-    for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
-      int plateNumber = iPlate;
-      for (int iWell = 1; iWell <= 10; ++iWell) {
-        Well well = library.createWell(new WellKey(plateNumber, "A" + iWell), WellType.EXPERIMENTAL);
-        AssayWellType assayWellType = iPlate == 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL;
-        rvt1.addResultValue(well, assayWellType, (double) iWell, 0, false);
-        rvt2.addResultValue(well, assayWellType, iWell % 2 == 0 ? "S" : "W", false);
-      }
-    }
-    genericEntityDao.saveOrUpdateEntity(screen);
-
-    // test sort by 2nd RVT, ascending
-    Map<WellKey,List<ResultValue>> result =
-      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt1, rvt2),
-                                                         1,
-                                                         SortDirection.ASCENDING,
-                                                         10,
-                                                         80,
-                                                         null,
-                                                         null);
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      log.debug(entry.getKey() + " => " + entry.getValue());
-    }
-    assertEquals("result size", 80, result.size());
-    int iWell = 10;
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      assertEquals("sorted result values for " + entry.getKey() + " at sort index " + iWell,
-                   iWell < 50 ? "S" : "W",
-                   entry.getValue().get(1).getValue());
-      assertEquals("associated result value for " + entry.getKey(),
-                   Integer.toString(entry.getKey().getColumn() + 1),
-                   entry.getValue().get(0).getValue());
-      ++iWell;
-    }
-
-    // test sort by wellname, plate number ascending
-    result =
-      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt1, rvt2),
-                                                         ScreenResultsDAO.SORT_BY_WELL_PLATE,
-                                                         SortDirection.ASCENDING,
-                                                         0,
-                                                         100,
-                                                         null,
-                                                         null);
-    assertEquals("sort by well, plate ascending result size", 100, result.size());
-    iWell = 0;
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      int expectedWellColumn = (iWell / 10);
-      assertEquals("sort by well, plate ascending: well",
-                   expectedWellColumn,
-                   entry.getKey().getColumn());
-      int expectedPlateNumber = (iWell % 10) + 1;
-      assertEquals("sort by well, plate ascending: plate",
-                   expectedPlateNumber,
-                   entry.getKey().getPlateNumber());
-      ++iWell;
-    }
-
-    // test sort by assayWellType descending
-    result =
-      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt1, rvt2),
-                                                         ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE,
-                                                         SortDirection.DESCENDING,
-                                                         0,
-                                                         11,
-                                                         null,
-                                                         null);
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      log.debug(entry.getKey() + " " + entry.getValue().get(0).getAssayWellType());
-    }
-    iWell = 0;
-    assertEquals("sort by assayWellType result size", 11, result.size());
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      assertEquals("sort by assayWellType",
-                   iWell < 10 ? AssayWellType.LIBRARY_CONTROL : AssayWellType.EXPERIMENTAL,
-                   entry.getValue().get(0).getAssayWellType());
-      ++iWell;
-    }
-
-    // test filter by plateNumber
-    int filterPlateNumber = 5;
-    result =
-      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt1, rvt2),
-                                                         ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE,
-                                                         SortDirection.DESCENDING,
-                                                         0,
-                                                         11,
-                                                         null,
-                                                         filterPlateNumber);
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      log.debug(entry.getKey() + " " + entry.getValue().get(0).getAssayWellType());
-    }
-    assertEquals("filter by plateNumber result size", 10, result.size());
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      assertEquals("filter by plateNumber",
-                   filterPlateNumber,
-                   entry.getKey().getPlateNumber());
-    }
-
-    // test RVT ordering
-    result =
-      screenResultsDao.findSortedResultValueTableByRange(Arrays.asList(rvt2, rvt1),
-                                                         ScreenResultsDAO.SORT_BY_ASSAY_WELL_TYPE,
-                                                         SortDirection.DESCENDING,
-                                                         0,
-                                                         10,
-                                                         null,
-                                                         null);
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      log.debug(entry.getKey() + " " + entry.getValue().get(0).getAssayWellType());
-    }
-    assertEquals("rvt order result size", 10, result.size());
-    for (Map.Entry<WellKey,List<ResultValue>> entry : result.entrySet()) {
-      assertTrue("first rvt is 'Derived value' RVT",
-                 entry.getValue().get(0).getValue().equals("S") || entry.getValue().get(0).getValue().equals("W"));
-      assertNull("first rvt is 'Derived value' RVT",
-                 entry.getValue().get(0).getNumericValue());
-      assertNotNull("second rvt is 'Raw value' RVT",
-                    entry.getValue().get(1).getNumericValue());
-    }
-  }
 
   public void testFindResultValuesByPlate()
   {
@@ -1014,10 +877,11 @@ public class ComplexDAOTest extends AbstractSpringTest
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {
         Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), WellType.EXPERIMENTAL);
-        rvt1.addResultValue(well, (double) iWell, 3);
-        rvt2.addResultValue(well, iWell + 10.0, 3);
+        rvt1.createResultValue(well, (double) iWell, 3);
+        rvt2.createResultValue(well, iWell + 10.0, 3);
       }
     }
+    genericEntityDao.saveOrUpdateEntity(library);
     genericEntityDao.saveOrUpdateEntity(screen);
 
     // test findResultValuesByPlate(Integer, RVT)
@@ -1027,17 +891,6 @@ public class ComplexDAOTest extends AbstractSpringTest
       ResultValue rv = resultValues1.get(new WellKey(2, 0, iWell));
       assertEquals("rv.value", new Double(iWell), rv.getNumericValue());
     }
-
-    // test findResultValuesByPlate(Integer, List<RVT>)
-    // note: we ask for result values types in reverse order, to test that returned result values are ordered similarly
-    Map<WellKey,List<ResultValue>> resultValues2 = screenResultsDao.findResultValuesByPlate(2, Arrays.asList(rvt2, rvt1));
-    assertEquals("result values size", 10, resultValues2.size());
-    for (int iWell = 0; iWell < 10; ++iWell) {
-      List<ResultValue> rvs = resultValues2.get(new WellKey(2, 0, iWell));
-      assertEquals("rv[1].value", new Double(iWell), rvs.get(1).getNumericValue());
-      assertEquals("rv[0].value", new Double(iWell + 10.0), rvs.get(0).getNumericValue());
-    }
-
   }
 
   public void testIsPlateRangeAvaiable()

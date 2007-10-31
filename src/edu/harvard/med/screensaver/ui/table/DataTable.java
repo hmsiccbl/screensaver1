@@ -48,7 +48,7 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
 
   // instance data members
 
-  private DataModel _dataModel;
+  private /*Sortable*/DataModel _dataModel;
   private UIData _dataTableUIComponent;
   private TableSortManager<E> _sortManager;
   private UIInput _rowsPerPageUIComponent;
@@ -70,7 +70,7 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
    *
    * @return sorted DataModel
    */
-  abstract protected DataModel buildDataModel();
+  abstract protected /*Sortable*/DataModel buildDataModel();
 
   abstract protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector();
 
@@ -241,10 +241,14 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
 
   public void resort()
   {
-    // TODO: full rebuild is only strictly needed by VirtualPagingDataModel,
-    // other DataModel classes could have a callback method called to avoid
-    // database calls (as they could do their own in-memory sorting)
-    rebuildRows();
+    // TODO:
+//    if (getDataModel() instanceof VirtualPagingDataModel) {
+//      ((VirtualPagingDataModel) getDataModel()).sort(getSortManager().getSortColumnName(),
+//                                                     getSortManager().getSortDirection());
+//    }
+//    else {
+      rebuildRows();
+//    }
   }
 
   public void rebuildColumnsAndRows()

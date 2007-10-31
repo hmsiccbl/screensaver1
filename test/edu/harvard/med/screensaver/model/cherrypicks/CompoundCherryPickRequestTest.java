@@ -77,7 +77,7 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest<Co
         ScreenResult screenResult = screen.createScreenResult(new Date());
         ResultValueType resultValueType = screenResult.createResultValueType("values");
         for (Well well : wells) {
-          resultValueType.addResultValue(well, "1.0");
+          resultValueType.createResultValue(well, "1.0");
         }
         
         CompoundCherryPickRequest cherryPickRequest = (CompoundCherryPickRequest) screen.createCherryPickRequest();

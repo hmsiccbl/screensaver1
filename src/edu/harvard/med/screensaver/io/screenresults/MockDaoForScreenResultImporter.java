@@ -21,6 +21,7 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -343,5 +344,10 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   }
 
   public void clear() {}
+
+  public <E> List<E> runQuery(Query query)
+  {
+    return null;
+  }
 
 }

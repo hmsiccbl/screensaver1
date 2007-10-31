@@ -169,7 +169,6 @@ public class ReagentFinder extends AbstractBackingBean
                                                 true,
                                                 "wells.silencingReagents.gene",
                                                 "wells.compounds");
-          _dao.needReadOnly(reagent, "annotationValues");
           if (reagent != null) {
             foundReagents.add(reagent);
           }

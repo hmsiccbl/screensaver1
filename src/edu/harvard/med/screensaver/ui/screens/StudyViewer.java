@@ -9,12 +9,9 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import java.util.ArrayList;
-
 import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -99,11 +96,8 @@ public class StudyViewer extends AbstractBackingBean
           _dao.needReadOnly((Screen) study, "collaborators");
           _dao.needReadOnly((Screen) study, "publications");
           _dao.needReadOnly((Screen) study, "annotationTypes");
-          _dao.needReadOnly((Screen) study, "reagents.annotationValues");
-          // TODO: only call one of the following, depending upon study's screen type
-          _dao.needReadOnly((Screen) study, "reagents.wells.silencingReagents.gene");
-          _dao.needReadOnly((Screen) study, "reagents.wells.compounds");
-          setStudy(study);
+          int reagentCount = _dao.relationshipSize((Screen) study, "reagents");
+          setStudy(study, reagentCount);
         }
       });
     }
@@ -117,12 +111,11 @@ public class StudyViewer extends AbstractBackingBean
 
   // protected methods
 
-  protected void setStudy(Study study)
+  protected void setStudy(Study study, int reagentCount)
   {
     _study = study;
     _studyDetailViewer.setStudy(study);
-    _reagentSearchResults.setContents(study.getReagents(),
-                                      new ArrayList<AnnotationType>(study.getAnnotationTypes()));
+    _reagentSearchResults.setContents(study, reagentCount);
   }
 }
 

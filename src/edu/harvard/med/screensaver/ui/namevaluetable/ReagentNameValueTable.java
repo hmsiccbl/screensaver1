@@ -58,12 +58,14 @@ public class ReagentNameValueTable extends ComboNameValueTable
     List<NameValueTable> comboNameValueTables = new ArrayList<NameValueTable>();
     comboNameValueTables.add(detailsNameValueTable);
     // TODO: once Well.{compounds,silencingReagents} are moved to Reagent, we won't need to go through well anymore
-    Well well = reagent.getWells().iterator().next();
-    for (Gene gene : well.getGenes()) {
-      comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, reagentViewer));
-    }
-    for (Compound compound : well.getOrderedCompounds()) {
-      comboNameValueTables.add(new CompoundNameValueTable(compound, compoundViewer, reagentViewer));
+    if (reagent != null) {
+      Well well = reagent.getWells().iterator().next();
+      for (Gene gene : well.getGenes()) {
+        comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, reagentViewer));
+      }
+      for (Compound compound : well.getOrderedCompounds()) {
+        comboNameValueTables.add(new CompoundNameValueTable(compound, compoundViewer, reagentViewer));
+      }
     }
     initializeComboNameValueTable((NameValueTable [])
       comboNameValueTables.toArray(new NameValueTable [0]));

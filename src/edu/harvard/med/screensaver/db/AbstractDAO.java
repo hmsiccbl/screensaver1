@@ -9,7 +9,14 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.sql.SQLException;
+import java.util.List;
+
 import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +66,20 @@ public class AbstractDAO extends HibernateDaoSupport
     daoTransaction.runTransaction();
   }
 
+
+  @SuppressWarnings("unchecked")
+  public <E> List<E> runQuery(final edu.harvard.med.screensaver.db.Query query)
+  {
+    return (List<E>)
+    getHibernateTemplate().execute(new HibernateCallback()
+    {
+      public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        Query hibQuery = query.buildQuery(session);
+        return hibQuery.list();
+      }
+    });
+  }
 
   // private methods
 

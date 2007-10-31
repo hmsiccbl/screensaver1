@@ -11,12 +11,27 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellType;
+
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parent;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Index;
 
 /**
  * A <code>ResultValue</code> holds the actual value of a screen result data
@@ -34,8 +49,11 @@ import org.hibernate.annotations.Parent;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-@Embeddable
-public class ResultValue
+@Entity
+@Immutable
+@org.hibernate.annotations.Proxy
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ResultValueType.class)
+public class ResultValue extends AbstractEntity
 {
 
   // private static data
@@ -110,7 +128,8 @@ public class ResultValue
 
   // private instance data
 
-  private String _wellId;
+  private Integer _resultValueId;
+  private Well _well;
   private ResultValueType _resultValueType;
   private String _value;
   private Double _numericValue;
@@ -135,9 +154,11 @@ public class ResultValue
    * @param well
    * @param value
    */
-  ResultValue(String value)
+  ResultValue(ResultValueType rvt,
+              Well well,
+              String value)
   {
-    this(AssayWellType.EXPERIMENTAL, value, false, false);
+    this(rvt, well, AssayWellType.EXPERIMENTAL, value, null, -1, false, false);
   }
 
   /**
@@ -147,9 +168,12 @@ public class ResultValue
    * @param value
    * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    */
-  ResultValue(Double value, int decimalPrecision)
+  ResultValue(ResultValueType rvt,
+              Well well,
+              Double value,
+              int decimalPrecision)
   {
-    this(AssayWellType.EXPERIMENTAL, value, decimalPrecision, false, false);
+    this(rvt, well, AssayWellType.EXPERIMENTAL, null, value, decimalPrecision, false, false);
   }
 
   /**
@@ -163,14 +187,15 @@ public class ResultValue
    *          point, when displayed
    * @param exclude the exclude flag of the new ResultValue
    */
-  public ResultValue(
-    AssayWellType assayWellType,
-    Double numericalValue,
-    int decimalPrecision,
-    boolean exclude,
-    boolean isPositive)
+  public ResultValue(ResultValueType rvt,
+                     Well well,
+                     AssayWellType assayWellType,
+                     Double numericalValue,
+                     int decimalPrecision,
+                     boolean exclude,
+                     boolean isPositive)
   {
-    this(assayWellType, null, numericalValue, decimalPrecision, exclude, isPositive);
+    this(rvt, well, assayWellType, null, numericalValue, decimalPrecision, exclude, isPositive);
   }
 
   /**
@@ -184,17 +209,51 @@ public class ResultValue
    *          point, when displayed
    * @param exclude the exclude flag of the new ResultValue
    */
-  public ResultValue(
-    AssayWellType assayWellType,
-    String value,
-    boolean exclude,
-    boolean isPositive)
+  public ResultValue(ResultValueType rvt,
+                     Well well,
+                     AssayWellType assayWellType,
+                     String value,
+                     boolean exclude,
+                     boolean isPositive)
   {
-    this(assayWellType, value, null, 0, exclude, isPositive);
+    this(rvt, well, assayWellType, value, null, 0, exclude, isPositive);
   }
 
 
   // public instance methods
+
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+
+  @Override
+  @Transient
+  public Serializable getEntityId()
+  {
+    return getResultValueId();
+  }
+
+  /**
+   * Get the id for the result value.
+   * @return the id for the result value
+   */
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="result_value_id_seq",
+    strategy="sequence",
+    parameters = {
+      @org.hibernate.annotations.Parameter(name="sequence", value="result_value_id_seq")
+    }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="result_value_id_seq")
+  public Integer getResultValueId()
+  {
+//    if (_resultValueId == null) {
+//      _resultValueId = _resultValueType.getScreenResult().getScreen().getScreenNumber() * 10000000 + _resultValueType.getOrdinal() + _well.getWellKey().getPlateNumber()
+    return _resultValueId;
+  }
 
   @Override
   public boolean equals(Object o)
@@ -211,31 +270,33 @@ public class ResultValue
   }
 
   /**
-   * Get the well id.
-   * @return the well id
-   */
-  // TODO: should be text not null
-  @Transient
-  @org.hibernate.annotations.Type(type="text")
-  // TODO: hibernate annotations is not processing the @Index on the @Embeddable columns
-  @org.hibernate.annotations.Index(name="index_rvtrv_well_id")
-  public String getWellId()
-  {
-    return _wellId;
-  }
-
-  /**
    * Get the result value type.
    * @return the result value type
    */
-  @Parent
-  // TODO: hibernate annotations is not processing @Column(name="...") on the @Parent
-  @Column(name="resultValueTypeId")
-  // TODO: hibernate annotations is not processing the @Index on the @Embeddable columns
-  @org.hibernate.annotations.Index(name="index_rvtrv_rvt")
+  @ManyToOne(cascade={}, fetch=FetchType.LAZY)
+  @JoinColumn(name="resultValueTypeId", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_result_value_type")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @Index(name="result_value_result_value_type_index")
   public ResultValueType getResultValueType()
   {
     return _resultValueType;
+  }
+
+  /**
+   * Get the well.
+   * @return the well
+   */
+  @ManyToOne(cascade={}, fetch=FetchType.LAZY)
+  @JoinColumn(name="well_id", nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_well")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @Index(name="result_value_well_index")
+  public Well getWell()
+  {
+    return _well;
   }
 
   /**
@@ -345,7 +406,7 @@ public class ResultValue
    * @return true whenever this result value is a positive indicator
    */
   @Column(nullable=false, name="isPositive")
-  @org.hibernate.annotations.Index(name="index_rvtrv_is_positive")
+  @org.hibernate.annotations.Index(name="result_value_is_positive_index")
   public boolean isPositive()
   {
     return _isPositive;
@@ -420,7 +481,7 @@ public class ResultValue
    * with {@link #ResultValue(AssayWellType, String, boolean, boolean)},
    * {@link #ResultValue(AssayWellType, Double, int, boolean, boolean)}, and
    * {@link
-   * ResultValueType#addResultValue(edu.harvard.med.screensaver.model.libraries.Well,
+   * ResultValueType#createResultValue(edu.harvard.med.screensaver.model.libraries.Well,
    * AssayWellType, Double, int, boolean)}.
    *
    * @param assayWellType the AssayWellType of the new ResultValue
@@ -430,14 +491,25 @@ public class ResultValue
    *          point, when displayed
    * @param exclude the exclude flag of the new ResultValue
    */
-  ResultValue(
-    AssayWellType assayWellType,
-    String value,
-    Double numericalValue,
-    int decimalPrecision,
-    boolean exclude,
-    boolean isPositive)
+  ResultValue(ResultValueType rvt,
+              Well well,
+              AssayWellType assayWellType,
+              String value,
+              Double numericalValue,
+              int decimalPrecision,
+              boolean exclude,
+              boolean isPositive)
   {
+    if (rvt == null) {
+      throw new DataModelViolationException("resultValueType is required for ResultValue");
+    }
+    if (well == null) {
+      throw new DataModelViolationException("well is required for ResultValue");
+    }
+    _resultValueType = rvt;
+    _well = well;
+    _well.getResultValues().add(this);
+
     setAssayWellType(assayWellType);
     if (value != null) {
       setValue(value);
@@ -459,7 +531,7 @@ public class ResultValue
   /**
    * Set whether this result value is a positive. Intended only for use by
    * hibernate and {@link
-   * ResultValueType#addResultValue(edu.harvard.med.screensaver.model.libraries.Well,
+   * ResultValueType#createResultValue(edu.harvard.med.screensaver.model.libraries.Well,
    * AssayWellType, Double, int, boolean)}.
    *
    * @param isPositive true iff this result value is a positive
@@ -481,14 +553,24 @@ public class ResultValue
   private ResultValue() {}
 
   /**
-   * Set the well id.
-   *
-   * @param wellId the new well id
+   * Set the id for the result value.
+   * @param resultValueId the new id for the result value
    * @motivation for hibernate
    */
-  private void setWellId(String wellId)
+  private void setResultValueId(Integer resultValueId)
   {
-    _wellId = wellId;
+    _resultValueId = resultValueId;
+  }
+
+  /**
+   * Set the well.
+   *
+   * @param well the new well
+   * @motivation for hibernate
+   */
+  private void setWell(Well well)
+  {
+    _well = well;
   }
 
   /**
@@ -561,9 +643,28 @@ public class ResultValue
    */
   private void setAssayWellType(AssayWellType assayWellType)
   {
+    if (!isHibernateCaller()) {
+      validateAssayWellType(assayWellType);
+    }
+
     // TODO: consider updating all related ResultValues (i.e., for the same well
     // within this ScreenResult); would require parallel
     // {get,set}HbnAssayWellType methods.
     _assayWellType = assayWellType;
+  }
+
+
+  private void validateAssayWellType(AssayWellType assayWellType)
+  {
+    if (assayWellType == AssayWellType.ASSAY_CONTROL ||
+      assayWellType == AssayWellType.ASSAY_POSITIVE_CONTROL ||
+      assayWellType == AssayWellType.OTHER) {
+      if (_well.getWellType() != WellType.EMPTY) {
+        throw new DataModelViolationException("result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
+      }
+    }
+    else if (!_well.getWellType().getValue().equals(assayWellType.getValue())) {
+      throw new DataModelViolationException("result value assay well type does not match library well type of associated well");
+    }
   }
 }

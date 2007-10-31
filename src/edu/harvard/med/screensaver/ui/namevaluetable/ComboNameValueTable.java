@@ -167,6 +167,6 @@ abstract public class ComboNameValueTable extends NameValueTable
     for (int i = 0; i < childTables.length; i++) {
       numRows += childTables[i].getNumRows() + 1;
     }
-    return -- numRows;
+    return Math.max(-- numRows, 0);
   }
 }

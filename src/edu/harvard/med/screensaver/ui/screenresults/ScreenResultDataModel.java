@@ -9,17 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenResultSortQuery;
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.ui.searchresults.ResultValueTypeColumn;
+import edu.harvard.med.screensaver.ui.searchresults.WellColumn;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.VirtualPagingDataModel;
 
 import org.apache.log4j.Logger;
@@ -37,7 +41,8 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-abstract public class ScreenResultDataModel extends VirtualPagingDataModel<WellKey,ResultValue>
+// note: more type-safe to use WellKey instead of String for VirtualPagingDataModel K param, but doubles memory usage
+abstract public class ScreenResultDataModel extends VirtualPagingDataModel<String,Well>
 {
   // static members
 
@@ -48,26 +53,31 @@ abstract public class ScreenResultDataModel extends VirtualPagingDataModel<WellK
 
   // instance data members
 
-  protected ScreenResultsDAO _screenResultsDao;
+  protected GenericEntityDAO _dao;
+
+  private ScreenResult _screenResult;
   protected List<ResultValueType> _resultValueTypes;
   private Map<Integer,List<Boolean>> _excludedResultValuesMap = new HashMap<Integer,List<Boolean>>();
 
 
+
   // public constructors and methods
 
-  public ScreenResultDataModel(List<ResultValueType> resultValueTypes,
+  public ScreenResultDataModel(ScreenResult screenResult,
+                               List<ResultValueType> resultValueTypes,
                                int totalRowCount,
                                int rowsToFetch,
-                               int sortColumnIndex,
+                               TableColumn<Well> sortColumn,
                                SortDirection sortDirection,
-                               ScreenResultsDAO dao)
+                               GenericEntityDAO dao)
   {
     super(rowsToFetch,
           totalRowCount,
-          sortColumnIndex - DATA_TABLE_FIXED_COLUMNS,
+          sortColumn,
           sortDirection);
+    _dao = dao;
+    _screenResult = screenResult;
     _resultValueTypes = resultValueTypes;
-    _screenResultsDao = dao;
   }
 
   public boolean isResultValueCellExcluded(int colIndex)
@@ -82,28 +92,47 @@ abstract public class ScreenResultDataModel extends VirtualPagingDataModel<WellK
 
   // protected methods
 
-  /**
-   * @sideeffect adds element to {@link #_excludedResultValues}
-   */
-  @Override
-  protected Map<String,Object> makeRow(int rowIndex, WellKey wellKey, List<ResultValue> rowData)
+  protected ScreenResultSortQuery getScreenResultDataQuery()
   {
-    HashMap<String,Object> row = new HashMap<String,Object>();
-    // TODO: eliminate hardcoded column name strings
-    row.put("Plate", wellKey.getPlateNumber());
-    row.put("Well", wellKey.getWellName());
-    row.put("Type", rowData.get(0).getAssayWellType());
-    List<Boolean> rowExcludes = new ArrayList<Boolean>();
-    Iterator<ResultValueType> rvtIter = _resultValueTypes.iterator();
-    for (ResultValue rv : rowData) {
-      ResultValueType rvt = rvtIter.next();
-      rowExcludes.add(rv.isExclude());
-      Object typedValue = ResultValue.getTypedValue(rv, rvt);
-      row.put(rvt.getUniqueName(),
-                     typedValue == null ? null : typedValue.toString());
-    }
-    _excludedResultValuesMap.put(rowIndex, rowExcludes);
-    return row;
+    return null;
   }
 
+  @Override
+  protected List<String> fetchAscendingSortOrder(TableColumn column)
+  {
+    ScreenResultSortQuery query = new ScreenResultSortQuery(_screenResult);
+    if (column instanceof WellColumn) {
+      query.setSortByWellProperty(((WellColumn) column).getWellProperty());
+    }
+    else if (column instanceof ResultValueTypeColumn) {
+      query.setSortByResultValueType(((ResultValueTypeColumn) column).getResultValueType());
+    }
+    else {
+      throw new IllegalArgumentException("invalid TableColumn type: "  + column.getClass());
+    }
+    return _dao.<String>runQuery(query);
+  }
+
+  @Override
+  protected Map<String,Well> fetchData(final Set<String> keys)
+  {
+    final Map<String,Well> result = new HashMap<String,Well>(keys.size());
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction() {
+        for (String wellId : keys) {
+          // TODO: make a single db call to fetch a *set* of wells
+          Well well = _dao.findEntityById(Well.class,
+                                          wellId,
+                                          true,
+          "resultValues.resultValueType");
+          if (log.isDebugEnabled()) {
+            log.debug("fetched " + well);
+          }
+          result.put(wellId, well);
+        }
+      }
+    });
+    return result;
+  }
 }

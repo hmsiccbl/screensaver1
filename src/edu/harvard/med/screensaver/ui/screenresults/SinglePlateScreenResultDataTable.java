@@ -13,8 +13,8 @@ import java.util.Arrays;
 
 import javax.faces.model.DataModel;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 
@@ -44,9 +44,9 @@ public class SinglePlateScreenResultDataTable extends ScreenResultDataTable
   public SinglePlateScreenResultDataTable(ScreenResultViewer screenResultViewer,
                                           WellViewer wellViewer,
                                           LibrariesDAO librariesDao,
-                                          ScreenResultsDAO screenResultsDao)
+                                          GenericEntityDAO dao)
   {
-    super(screenResultViewer, wellViewer, librariesDao, screenResultsDao);
+    super(screenResultViewer, wellViewer, librariesDao, dao);
   }
 
 
@@ -74,10 +74,11 @@ public class SinglePlateScreenResultDataTable extends ScreenResultDataTable
   @Override
   protected DataModel buildDataModel()
   {
-    return new SinglePlateScreenResultDataModel(getResultValueTypes(),
-                                                getSortManager().getSortColumnIndex(),
+    return new SinglePlateScreenResultDataModel(getScreenResult(),
+                                                getResultValueTypes(),
+                                                getSortManager().getSortColumn(),
                                                 getSortManager().getSortDirection(),
-                                                _screenResultsDao,
+                                                _dao,
                                                 _plateNumber);
   }
 

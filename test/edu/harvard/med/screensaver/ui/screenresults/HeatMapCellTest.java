@@ -42,7 +42,7 @@ public class HeatMapCellTest extends AbstractSpringTest
     ResultValueType rvt = screenResult.createResultValueType("rvt1");
     Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
     Well well = library.createWell(new WellKey(1, "A01"), WellType.EMPTY);
-    rvt.addResultValue(well, "1.0");
+    rvt.createResultValue(well, "1.0");
 
     HeatMapCell cell = new HeatMapCell(rvt.getWellKeyToResultValueMap().get(well.getWellKey()),
                                        well.getWellKey(),

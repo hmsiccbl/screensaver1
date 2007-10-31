@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -92,14 +92,11 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
     return dataModel;
   }
 
-  protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
+  final protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
   {
-    List<Integer> rowsPerPageSelections = new ArrayList<Integer>(SearchResults.DEFAULT_ROWS_PER_PAGE_SELECTIONS);
-    // add special "single" selection item, for viewing the entity in its full viewer page
-    rowsPerPageSelections.add(0, 1);
+    // note: we need a special "single" (1) selection item, for viewing the entity in its full viewer page
     DataTableRowsPerPageUISelectOneBean rowsPerPageSelector =
-      new DataTableRowsPerPageUISelectOneBean(rowsPerPageSelections,
-                                              rowsPerPageSelections.get(2))
+      new DataTableRowsPerPageUISelectOneBean(Arrays.asList(1, 10, 20, 50, 100), 20)
     {
       @Override
       public String getLabel(Integer value)
@@ -110,12 +107,6 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
         else {
           return super.getLabel(value);
         }
-      }
-
-      @Override
-      protected Integer getAllRowsValue()
-      {
-        return getDataTable().getRowCount();
       }
     };
 
