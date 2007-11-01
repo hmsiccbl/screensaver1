@@ -255,13 +255,6 @@
 
     <antcall target="copy.downloads.dir" />
 
-    <exec executable="${svnversion.cmd}"
-          output="${exploded.war.dir}/WEB-INF/classes/build-number.txt"
-    >
-      <arg value="-n" />
-      <arg value="${basedir}" />
-    </exec>
-
   </target>
 
   <!--
@@ -412,7 +405,7 @@
       <fileset refid="deploy.lib.fileset" />
     </copy>
 
-		<!-- ${log4j.properties.file} is defined in cfg/*/screensaver.properties* -->
+    <!-- ${log4j.properties.file} is defined in cfg/*/screensaver.properties* -->
     <copy file="${log4j.properties.file}"
           tofile="${classes.dir}/log4j.properties"
           verbose="${verbose}"
@@ -431,6 +424,14 @@
         <exclude name="README.txt" />
       </fileset>
     </copy>
+
+    <exec executable="${svnversion.cmd}"
+          output="${build.dir}/build-number.txt"
+    >
+      <arg value="-n" />
+      <arg value="${basedir}" />
+    </exec>
+
   </target>
 
 
@@ -468,9 +469,10 @@
 
 
   <target name="clean"
- 		description="Clean out generated files by deleting the build directory.">
-    <delete dir="${build.dir}"/>
-	</target>
+          description="Clean out generated files by deleting the build directory."
+  >
+    <delete dir="${build.dir}" />
+  </target>
 
 
   <!--
