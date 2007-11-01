@@ -426,7 +426,7 @@
     </copy>
 
     <exec executable="${svnversion.cmd}"
-          output="${classes.dir}/build-number.txt"
+          output="${build.dir}/build-number.txt"
     >
       <arg value="-n" />
       <arg value="${basedir}" />
