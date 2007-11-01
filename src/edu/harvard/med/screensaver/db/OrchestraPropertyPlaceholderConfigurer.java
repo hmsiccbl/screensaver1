@@ -111,7 +111,7 @@ extends PropertyPlaceholderConfigurer
 
   private void useUnixUser()
   {
-    String unixUser = System.getenv("$USER");
+    String unixUser = System.getenv("USER");
     if (unixUser == null) {
       log.warn("could not determine UNIX user name");
     }
