@@ -5,7 +5,7 @@
 
 ### build-time properties
 
-install.dir=/www/screensaver.med.harvard.edu/docroot/screensaver/
+install.dir=build/screensaver-util-dev
 log4j.properties.file=cfg/orchestra/log4j.properties.util
 
 
