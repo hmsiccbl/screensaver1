@@ -36,6 +36,7 @@ log4j.logger.userActivity=info, userActivityLog
 #log4j.logger.org.hibernate.SQL=debug
 # log JDBC bind parameters
 #log4j.logger.org.hibernate.type=trace
+log4j.logger.org.hibernate.proxy=debug
 
 # view load, save, etc. events on a per-entity basis
 #log4j.logger.org.hibernate.event=debug

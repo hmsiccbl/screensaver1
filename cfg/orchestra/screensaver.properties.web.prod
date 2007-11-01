@@ -4,9 +4,10 @@
 
 ### build-time properties
 
-#appserver.dir=/www/screensaver.med.harvard.edu/tomcat/
-#deploy.dir=/www/screensaver.med.harvard.edu/docroot/screensaver/
-log4j.properties.resource=log4j.properties.orchestra.prod
+appserver.dir=/www/screensaver.med.harvard.edu/tomcat/
+deploy.dir=/www/screensaver.med.harvard.edu/docroot/screensaver/
+log4j.properties.file=cfg/orchestra/log4j.properties.web.prod
+copy.downloads.dir=true
 
 
 ### run-time properties
@@ -18,8 +19,9 @@ log4j.properties.resource=log4j.properties.orchestra.prod
 # https://wiki.med.harvard.edu/ICCBL/OpenBabelVersions
 babel.executable.path=/home/js163/bin/openbabel/bin/babel
 
-# database connection - no SCREENSAVER_PGSQL_PASSWORD indicates to the
-# OrchestraPropertyPlaceholderConfigurer to look up the password in the .pgpass file
-SCREENSAVER_PGSQL_SERVER=pgsql.cl.med.harvard.edu
-SCREENSAVER_PGSQL_DB=screensaver
-SCREENSAVER_PGSQL_USER=js163
+# database connection
+# missing SCREENSAVER_PGSQL_SERVER causes values to be pulled from RITG-configured values in /opt/apache/conf/auth/
+# SCREENSAVER_PGSQL_SERVER=
+# SCREENSAVER_PGSQL_DB=
+# SCREENSAVER_PGSQL_PASSWORD=
+# SCREENSAVER_PGSQL_USER=

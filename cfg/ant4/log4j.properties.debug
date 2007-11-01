@@ -1,8 +1,8 @@
 # Log4J configuration, to be used during debugging
 
-# By default, Screensaver log level is 'debug', while other 
-# technology-specific log levels are set to 'info', by default, 
-# with the intention that the developer will edit their local 
+# By default, Screensaver log level is 'debug', while other
+# technology-specific log levels are set to 'info', by default,
+# with the intention that the developer will edit their local
 # copy of this file when they want more detail
 
 ### direct log messages to stdout ###
@@ -28,7 +28,11 @@ log4j.logger.userActivity=info
 
 ### Screensaver application
 
-log4j.logger.edu.harvard.med.screensaver=debug
+log4j.logger.edu.harvard.med.screensaver=info
+#log4j.logger.edu.harvard.med.screensaver.db=debug
+log4j.logger.edu.harvard.med.screensaver.ui.screenresults=debug
+
+
 log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
 
 # filter out debug output that is especially verbose and common
@@ -65,7 +69,7 @@ log4j.logger.org.springframework.orm.hibernate3=error
 ### JavaServer Faces
 
 log4j.logger.org.apache.myfaces=warn
-log4j.logger.org.apache.myfaces.application=warn
+log4j.logger.org.apache.myfaces.application=debug
 log4j.logger.org.apache.myfaces.application.jsp=error
 
 # hide silly warnings about obsolete JSP comment styles, in Tomahawk components
@@ -75,22 +79,22 @@ log4j.logger.org.apache.myfaces.shared_tomahawk.taglib=error
 
 # Show lifecycle phases as they occur
 log4j.logger.org.apache.myfaces.lifecycle.LifecycleImpl=warn
-	
+
 # Show servlet invocation
 #log4j.logger.org.apache.myfaces.webapp.MyFacesServlet=warn
 #log4j.logger.javax.faces.webapp.FacesServlet=trace
 #log4j.logger.org.apache.myfaces.share_tomahawk.taglib=error
 #log4j.logger.org.apache.myfaces.tomahawk.application.jsp.JspTilesViewHandlerImpl=warn
-	
+
 # Show navigation processing
 #log4j.logger.org.apache.myfaces.application.NavigationHandlerImpl=debug
-	
+
 # Show modifications to Application
 #log4j.logger.org.apache.myfaces.application.ApplicationImpl=debug
 
 # Show unresolved variables (note: an error will be shown when the bean is Spring-managed but available via Spring)
 log4j.logger.org.apache.myfaces.el.VariableResolverImpl=error
-	
+
 # Controls DebugUtils.traceView() output
 # controls the verbose output of the rendered JSF component tree
 #log4j.logger.org.apache.myfaces.util.DebugUtils=trace
@@ -100,7 +104,7 @@ log4j.logger.org.apache.myfaces.el.VariableResolverImpl=error
 
 # HTML rendering related issues (e.g, no content type). Good setting during development
 log4j.logger.org.apache.myfaces.renderkit.html.HtmlResponseWriterImpl=warn
-	
+
 
 ### Hibernate
 
@@ -113,7 +117,7 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 
 # log just the SQL - set this to "debug" to get all the SQL stmts
-#log4j.logger.org.hibernate.SQL=debug
+log4j.logger.org.hibernate.SQL=debug
 
 # log transaction activity (should set these all at once to same log level)
 #log4j.logger.org.hibernate.transaction=debug

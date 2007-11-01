@@ -1,10 +1,12 @@
-# screensaver.properties.test
+# screensaver.properties.js163
 # contains properties used at both build-time and run-time
 
 
 ### build-time properties
 
-log4j.properties.resource=log4j.properties.debug
+appserver.dir=/usr/local/jakarta-tomcat
+log4j.properties.file=cfg/js163/log4j.properties.debug
+svnversion.cmd=/usr/local/bin/svnversion
 
 
 ### run-time properties
@@ -18,6 +20,6 @@ babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
-SCREENSAVER_PGSQL_DB=testscreensaver1
-SCREENSAVER_PGSQL_USER=testscreensaver1
+SCREENSAVER_PGSQL_DB=ssu-test-screensaver
+SCREENSAVER_PGSQL_USER=s
 SCREENSAVER_PGSQL_PASSWORD=

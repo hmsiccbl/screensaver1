@@ -19,12 +19,9 @@
 
   <!-- properties -->
 
-  <property name="screensaver.properties.file"
-            location="resources/screensaver.properties"
-            description="A properties file to use for build and runtime screensaver properties.
-                 Substituting a value for ${screensaver.properties.file} will propagate to
-                 resource 'screensaver.properties' in the runtime for any deployed sites."
-  />
+  <!--property name="screensaver.properties.file"
+            description="A properties file to use for build and runtime screensaver properties. Must be specified on the command line!"
+   -->
   <property file="${screensaver.properties.file}"
             description="loads all build-time properties from specified file"
   />
@@ -415,23 +412,23 @@
       <fileset refid="deploy.lib.fileset" />
     </copy>
 
-    <!-- ${log4j.properties.file} is defined in resources/screensaver.properties -->
-    <copy file="resources/${log4j.properties.resource}"
+		<!-- ${log4j.properties.file} is defined in cfg/*/screensaver.properties* -->
+    <copy file="${log4j.properties.file}"
           tofile="${classes.dir}/log4j.properties"
           verbose="${verbose}"
+          failonerror="false"
     />
 
     <copy file="${screensaver.properties.file}"
           tofile="${classes.dir}/screensaver.properties"
           verbose="${verbose}"
+          failonerror="false"
     />
 
     <copy todir="${classes.dir}" verbose="${verbose}">
       <fileset dir="resources">
         <include name="**/*" />
         <exclude name="README.txt" />
-        <exclude name="log4j*properties*" />
-        <exclude name="screensaver*properties*" />
       </fileset>
     </copy>
   </target>
@@ -470,25 +467,10 @@
   </target>
 
 
-  <!-- cleanup routines -->
-
   <target name="clean"
-          description="Clean out generated files."
-          depends="clean-build,clean-persistence"
-  />
-
-  <target name="clean-build" description="Clean the build directory.">
-    <delete includeemptydirs="true" failonerror="false" dir="${build.dir}" />
-  </target>
-
-  <target name="clean-persistence"
-          description="Clean out generated files related to persistence (currently, just sql schema/ddl files)."
-  >
-    <delete includeemptydirs="true">
-      <fileset dir="resources/sql" includes="create_schema.sql" />
-      <fileset dir="resources/sql" includes="drop_schema.sql" />
-    </delete>
-  </target>
+ 		description="Clean out generated files by deleting the build directory.">
+    <delete dir="${build.dir}"/>
+	</target>
 
 
   <!--
@@ -513,7 +495,7 @@
     inspiring!
   -->
   <target name="place-correct-log4j-props-file-in-dot-eclipse-dot-classes">
-    <copy file=".eclipse.classes/${log4j.properties.resource}"
+    <copy file=".eclipse.classes/${log4j.properties.file}"
           tofile=".eclipse.classes/log4j.properties"
           verbose="${verbose}"
     />
