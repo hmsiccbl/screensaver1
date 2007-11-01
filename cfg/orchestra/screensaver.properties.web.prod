@@ -20,8 +20,4 @@ copy.downloads.dir=true
 babel.executable.path=/home/js163/bin/openbabel/bin/babel
 
 # database connection
-# missing SCREENSAVER_PGSQL_SERVER causes values to be pulled from RITG-configured values in /opt/apache/conf/auth/
-# SCREENSAVER_PGSQL_SERVER=
-# SCREENSAVER_PGSQL_DB=
-# SCREENSAVER_PGSQL_PASSWORD=
-# SCREENSAVER_PGSQL_USER=
+orchestra.db.connection.file=/opt/apache/conf/auth/screensaver.med.harvard.edu

@@ -21,8 +21,7 @@ babel.executable.path=/home/js163/bin/openbabel/bin/babel
 # database connection
 SCREENSAVER_PGSQL_SERVER=pgsql.cl.med.harvard.edu
 SCREENSAVER_PGSQL_DB=screensaver
-# no SCREENSAVER_PGSQL_PASSWORD tells OrchestraPropertyPlaceholderConfigurer to look up the password in the .pgpass file
-# SCREENSAVER_PGSQL_PASSWORD tells
-# SCREENSAVER_PGSQL_USER should be defined as environment variable to allow different users to use this properties file unmodified
+# undefined SCREENSAVER_PGSQL_USER tells OrchestraPropertyPlaceholderConfigurer to use UNIX user
 # SCREENSAVER_PGSQL_USER
-
+# undefined SCREENSAVER_PGSQL_PASSWORD tells OrchestraPropertyPlaceholderConfigurer to find password in the .pgpass file
+# SCREENSAVER_PGSQL_PASSWORD tells
