@@ -892,13 +892,27 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     if (_resultValues.containsKey(well.getWellId())) {
       return null;
     }
-    if (_resultValues.size() == 0) {
-      setNumeric(value == null);
+    // TODO: this fail to set isNumeric=true if first numeric value happens to be null (which is allowed);
+    // we really shouldn't use data values to determine a RVT's numerical-ness
+    if (!_isNumericalnessDetermined) {
+      if (value == null && numericValue != null) {
+        setNumeric(true);
+      }
+      else if (value != null && numericValue == null) {
+        setNumeric(false);
+      }
+      else if (value == null && numericValue == null) {
+        log.warn("setting " + this + ".isNumeric=false since both value and numericValue are null");
+        setNumeric(false);
+      }
+      else {
+        throw new IllegalArgumentException("either value or numericValue must be null");
+      }
     }
     else if (isNumeric() && value != null) {
       throw new DataModelViolationException("cannot add a non-numeric value to a numeric ResultValueType");
     }
-    else if (! isNumeric() && value == null) {
+    else if (! isNumeric() && numericValue != null) {
       throw new DataModelViolationException("cannot add a numeric value to a non-numeric ResultValueType");
     }
 

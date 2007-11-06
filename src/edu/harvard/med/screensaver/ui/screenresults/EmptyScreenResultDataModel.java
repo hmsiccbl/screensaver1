@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.db.ScreenResultSortQuery;
 import edu.harvard.med.screensaver.db.SortDirection;
 
 import org.apache.log4j.Logger;
@@ -28,7 +29,12 @@ public class EmptyScreenResultDataModel extends ScreenResultDataModel
 
   public EmptyScreenResultDataModel()
   {
-    super(null, null, 0, -1, null, SortDirection.ASCENDING, null);
+    super(null, null, 0, 0, null, SortDirection.ASCENDING, null);
   }
 
+  @Override
+  ScreenResultSortQuery getScreenResultSortQuery()
+  {
+    return null;
+  }
 }

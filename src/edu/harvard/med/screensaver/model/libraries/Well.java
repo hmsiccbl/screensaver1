@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -39,13 +41,14 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.model.screenresults.AbstractEntityIdComparator;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.util.CollectionUtils;
 
-import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.IndexColumn;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 
 /**
@@ -101,7 +104,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private String _smiles;
   private List<String> _molfile = new ArrayList<String>();
   private String _genbankAccessionNumber;
-  private Set<ResultValue> _resultValues = new HashSet<ResultValue>();
+  private Map<ResultValueType,ResultValue> _resultValues = new HashMap<ResultValueType,ResultValue>();
 
   private transient WellKey _wellKey;
   private transient Map<Serializable,ResultValue> _resultValueTypeIdToResultValue;
@@ -547,30 +550,13 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * @return the set of result values
    */
   @OneToMany(cascade={}, fetch=FetchType.LAZY, mappedBy="well")
-  public Set<ResultValue> getResultValues()
+  @LazyCollection(LazyCollectionOption.EXTRA)
+  @MapKey(name="resultValueType")
+  public Map<ResultValueType,ResultValue> getResultValues()
   {
     return _resultValues;
   }
 
-  @Transient
-  public ResultValue getResultValue(ResultValueType resultType)
-  {
-    if (_resultValueTypeIdToResultValue == null) {
-      _resultValueTypeIdToResultValue =
-        CollectionUtils.indexCollection(_resultValues,
-                                        new Transformer() {
-          public Object transform(Object resultValue) {
-            Serializable entityId = ((ResultValue) resultValue).getResultValueType().getEntityId();
-            if (entityId == null) {
-              throw new IllegalStateException("cannot call getResultValue() unless resultTypes are persisted");
-            }
-            return entityId;
-          }
-        },
-        Serializable.class, ResultValue.class);
-    }
-    return _resultValueTypeIdToResultValue.get(resultType.getResultValueTypeId());
-  }
 
   // package constructors
 
@@ -732,7 +718,25 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * @param resultValues the new result values
    * @motivation for hibernate
    */
-  private void setResultValues(Set<ResultValue> resultValues)
+  private void setResultValues(Map<ResultValueType,ResultValue> resultValues)
+  {
+    _resultValues = resultValues;
+  }
+
+  /**
+   * Set a subset of eagerly fetched result values for this well. Well must be
+   * detached or loaded read-only! Otherwise, Hibernate *might* persist the
+   * limited subset! (untested theory). You probably want Map to be a TreeMap,
+   * with a {@link AbstractEntityIdComparator} comparator, to allow entity
+   * ID-based equality, rather than instance equality.
+   * 
+   * @motivation Allows Well to be used as a DTO, of sorts, allowing a limited
+   *             subset of result values to be loaded efficiently and then later
+   *             accessed via client code, but naturally through the entity
+   *             object model.
+   * @param map
+   */
+  public void setResultValuesSubset(Map<ResultValueType,ResultValue> resultValues)
   {
     _resultValues = resultValues;
   }

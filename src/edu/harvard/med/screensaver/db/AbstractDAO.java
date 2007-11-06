@@ -75,7 +75,7 @@ public class AbstractDAO extends HibernateDaoSupport
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
-        Query hibQuery = query.buildQuery(session);
+        Query hibQuery = query.getQuery(session);
         return hibQuery.list();
       }
     });

@@ -51,7 +51,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
   public Map<WellKey,ResultValue> findResultValuesByPlate(final Integer plateNumber, final ResultValueType rvt)
   {
     List<ResultValue> result = runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public Query buildQuery(Session session)
+      public Query getQuery(Session session)
       {
         // note: use of "left join fetch" instead of just "join" avoids additional selects in indexCollection() call, below
         String hql = "select r from ResultValue r left join fetch r.well w where r.resultValueType.id = :rvtId and w.plateNumber = :plateNumber";

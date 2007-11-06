@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenResultSortQuery;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -36,6 +37,7 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
 
   public PositivesOnlyScreenResultDataModel(ScreenResult screenResult,
                                             List<ResultValueType> resultValueTypes,
+                                            int rowsToFetch,
                                             TableColumn<Well> sortColumn,
                                             SortDirection sortDirection,
                                             GenericEntityDAO dao,
@@ -43,12 +45,19 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
   {
     super(screenResult,
           resultValueTypes,
-          positivesOnlyRvt.getPositivesCount(),
-          -1,
+          positivesOnlyRvt.getPositivesCount() == null ? 0 : positivesOnlyRvt.getPositivesCount(),
+          rowsToFetch,
           sortColumn,
           sortDirection,
           dao);
     _positivesOnlyRvt = positivesOnlyRvt;
+  }
+
+
+  @Override
+  protected ScreenResultSortQuery getScreenResultSortQuery()
+  {
+    return new ScreenResultSortQuery(_screenResult, _positivesOnlyRvt);
   }
 }
 

@@ -60,7 +60,7 @@ public class ReagentsSortQuery implements edu.harvard.med.screensaver.db.Query
     _reagentProperty = reagentProperty;
   }
 
-  public org.hibernate.Query buildQuery(Session session)
+  public org.hibernate.Query getQuery(Session session)
   {
     StringBuilder hql = new StringBuilder();
     hql.append("select r from Reagent r ");

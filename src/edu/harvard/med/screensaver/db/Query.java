@@ -13,5 +13,5 @@ import org.hibernate.Session;
 
 public interface Query
 {
-  public org.hibernate.Query buildQuery(Session session);
+  public org.hibernate.Query getQuery(Session session);
 }

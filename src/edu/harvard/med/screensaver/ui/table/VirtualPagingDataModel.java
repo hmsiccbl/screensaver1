@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.ui.screenresults.FullScreenResultDataModel;
 
 import org.apache.log4j.Logger;
 
@@ -45,7 +44,7 @@ public abstract class VirtualPagingDataModel<K,V> extends SortableDataModel<V>
 
   // static members
 
-  private static Logger log = Logger.getLogger(FullScreenResultDataModel.class);
+  private static Logger log = Logger.getLogger(VirtualPagingDataModel.class);
 
 
   // instance data
@@ -70,6 +69,12 @@ public abstract class VirtualPagingDataModel<K,V> extends SortableDataModel<V>
                                    TableColumn<V> sortColumn,
                                    SortDirection sortDirection)
   {
+    if (rowsToFetch < 0) {
+      throw new IllegalArgumentException("rowsToFetch >= 0");
+    }
+    if (totalRowCount < 0) {
+      throw new IllegalArgumentException("totalRowCount >= 0");
+    }
     _rowsToFetch = rowsToFetch;
     _totalRowCount = totalRowCount;
     _sortColumn = sortColumn;

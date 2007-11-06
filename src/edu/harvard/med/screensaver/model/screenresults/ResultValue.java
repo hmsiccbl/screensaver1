@@ -508,7 +508,7 @@ public class ResultValue extends AbstractEntity
     }
     _resultValueType = rvt;
     _well = well;
-    _well.getResultValues().add(this);
+    _well.getResultValues().put(rvt, this);
 
     setAssayWellType(assayWellType);
     if (value != null) {

@@ -15,6 +15,7 @@ import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.ScreenResultSortQuery;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 
@@ -74,12 +75,16 @@ public class SinglePlateScreenResultDataTable extends ScreenResultDataTable
   @Override
   protected DataModel buildDataModel()
   {
+    int totalRowCount = _dao.runQuery(new ScreenResultSortQuery(getScreenResult(), _plateNumber)).size();
     return new SinglePlateScreenResultDataModel(getScreenResult(),
                                                 getResultValueTypes(),
+                                                totalRowCount,
+                                                getRowsPerPageSelector().getSelection(),
                                                 getSortManager().getSortColumn(),
                                                 getSortManager().getSortDirection(),
                                                 _dao,
                                                 _plateNumber);
+
   }
 
 

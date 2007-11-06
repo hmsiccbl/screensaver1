@@ -95,13 +95,12 @@ public class ReagentsDataModel extends VirtualPagingDataModel<Reagent,Reagent>
     {
       public void runTransaction() {
         for (Reagent reagentIn : reagents) {
-          // TODO: make a single db call to fetch a *set* of wells
+          // TODO: batch fetch
           Reagent reagent = _dao.reloadEntity(reagentIn,
                                               true,
-          "annotationValues.annotationType");
-          _dao.needReadOnly(reagent,
-                            "wells.silencingReagents.gene",
-                            "wells.compounds");
+                                              "annotationValues.annotationType");
+          _dao.needReadOnly(reagent, "wells.silencingReagents.gene");
+          _dao.needReadOnly(reagent, "wells.compounds");
           if (log.isDebugEnabled()) {
             log.debug("fetched " + reagent);
           }

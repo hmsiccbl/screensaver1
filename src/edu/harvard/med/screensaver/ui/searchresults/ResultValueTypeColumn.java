@@ -29,9 +29,8 @@ public class ResultValueTypeColumn extends TableColumn<Well>
   @Override
   public Object getCellValue(Well well)
   {
-    ResultValue resultValue = well.getResultValue(_resultValueType);
-
-    return resultValue == null ? null : resultValue.getValue();
+    ResultValue resultValue = well.getResultValues().get(_resultValueType);
+    return resultValue == null ? null : ResultValue.getTypedValue(resultValue, _resultValueType);
   }
 
   public ResultValueType getResultValueType()

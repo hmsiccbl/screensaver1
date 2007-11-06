@@ -431,12 +431,11 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
     log.debug("updating data table filter selections");
 
-    // TODO: reinstate data filters
-    SortedSet<Integer> filters = new TreeSet<Integer>(/*_screenResult.getPlateNumbers()*/);
+    SortedSet<Integer> filters = new TreeSet<Integer>(_screenResult.getPlateNumbers());
     filters.add(DATA_TABLE_FILTER_SHOW_ALL);
-//    if (getShowPositivesOnlyForDataHeader().getSize() > 0) {
-//      filters.add(DATA_TABLE_FILTER_SHOW_POSITIVES);
-//    }
+    if (getShowPositivesOnlyForDataHeader().getSize() > 0) {
+      filters.add(DATA_TABLE_FILTER_SHOW_POSITIVES);
+    }
     _dataFilter =
       new UISelectOneBean<Integer>(filters, DATA_TABLE_FILTER_SHOW_ALL) {
       @Override

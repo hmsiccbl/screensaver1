@@ -9,21 +9,21 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
 public class ScreenResultSortQuery implements edu.harvard.med.screensaver.db.Query
 {
+  private static final Logger log = Logger.getLogger(ScreenResultSortQuery.class);
+
   public enum SortByWellProperty {
     PLATE_NUMBER,
     WELL_NAME,
-    WELL_TYPE;
+    ASSAY_WELL_TYPE;
   };
 
   // filtering criteria
@@ -34,6 +34,9 @@ public class ScreenResultSortQuery implements edu.harvard.med.screensaver.db.Que
   // sorting criteria
   private SortByWellProperty _sortByWellProperty;
   private ResultValueType _sortByResultValueType;
+  private Query _query;
+  private HqlBuilder _hql = new HqlBuilder();
+
 
   public ScreenResultSortQuery(ScreenResult screenResult,
                                ResultValueType positivesOnlyRvt)
@@ -54,18 +57,61 @@ public class ScreenResultSortQuery implements edu.harvard.med.screensaver.db.Que
     _screenResult = screenResult;
   }
 
-  public Query buildQuery(Session session)
+  public Query getQuery(Session session)
   {
-    String hql = "select w.id from ScreenResult sr join sr.wells w where sr = ? order by w.id";
-    List<Object> args = new ArrayList<Object>();
-    args.add(_screenResult);
-    Query query = session.createQuery(hql);
-    for (int i = 0; i < args.size(); i++) {
-      query.setParameter(i, args.get(i));
+    if (_sortByWellProperty == null && _sortByResultValueType == null) {
+      _sortByWellProperty = SortByWellProperty.PLATE_NUMBER;
     }
-    return query;
+
+    _hql.select("w", "id").from(ScreenResult.class, "sr").from("sr", "wells", "w").where("sr", _screenResult);
+
+    if (_sortByWellProperty != null) {
+      if (_sortByWellProperty == SortByWellProperty.PLATE_NUMBER) {
+        _hql.orderBy("w", "id");
+      }
+      else if (_sortByWellProperty == SortByWellProperty.WELL_NAME) {
+        _hql.orderBy("w", "wellName").orderBy("w", "plateNumber");
+      }
+      else if (_sortByWellProperty == SortByWellProperty.ASSAY_WELL_TYPE) {
+        _hql.orderBy("w", "wellType").orderBy("w", "id");
+      }
+      else {
+        throw new IllegalArgumentException("unhandled well property ordering: " + _sortByWellProperty);
+      }
+    }
+    else if (_sortByResultValueType != null) {
+      _hql.from("w", "resultValues", "v");
+      _hql.where("v", "resultValueType.id", _sortByResultValueType.getResultValueTypeId());
+      if (_sortByResultValueType.isNumeric()) {
+        _hql.orderBy("v", "numericValue").orderBy("w", "id");
+      }
+      else {
+        _hql.orderBy("v", "value").orderBy("w", "id");
+      }
+    }
+    addFilterRestriction();
+    if (log.isDebugEnabled()) {
+      log.debug(_hql.hql());
+    }
+    _query = session.createQuery(_hql.hql());
+    for (int i = 0; i < _hql.args().size(); i++) {
+      _query.setParameter(i, _hql.arg(i));
+    }
+    return _query;
   }
 
+
+  private void addFilterRestriction()
+  {
+    if (_plateNumber != null) {
+      _hql.where("w", "plateNumber", _plateNumber);
+    }
+    else if (_positivesOnlyRvt != null) {
+      _hql.from("w", "resultValues", "pv");
+      _hql.where("pv", "resultValueType.id", _positivesOnlyRvt.getResultValueTypeId());
+      _hql.where("pv", "positive", true);
+    }
+  }
 
   public ResultValueType getPositivesOnlyRvt()
   {

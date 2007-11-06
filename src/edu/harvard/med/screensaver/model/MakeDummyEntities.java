@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -87,8 +88,8 @@ public class MakeDummyEntities
 
     // create ResultValueTypes
 
-    screenResult.createResultValueType("numeric_repl1", 1, false, false, false, "phenotype");
-    screenResult.createResultValueType("numeric_repl2", 1, false, false, false, "phenotype");
+    screenResult.createResultValueType("numeric_repl1", 1, false, false, false, "phenotype").setNumeric(true);
+    screenResult.createResultValueType("numeric_repl2", 1, false, false, false, "phenotype").setNumeric(true);
     screenResult.createResultValueType("text_repl1", 2, false, false, false, "phenotype").setNumeric(false);
     screenResult.createResultValueType("text_repl2", 2, false, false, false, "phenotype").setNumeric(false);
 
@@ -128,7 +129,7 @@ public class MakeDummyEntities
         }
 
         else if (rvt.isPositiveIndicator() && rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
-          rvt.createResultValue(well, i % 3 == 0 ? "W" : i % 3 == 1 ? "M" : "S");
+          rvt.createResultValue(well, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
         }
         else if (!rvt.isNumeric()) {
           rvt.createResultValue(well,

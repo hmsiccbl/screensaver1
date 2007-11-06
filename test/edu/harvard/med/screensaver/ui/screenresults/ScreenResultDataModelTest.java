@@ -9,9 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -20,10 +18,13 @@ import edu.harvard.med.screensaver.db.ScreenResultSortQuery.SortByWellProperty;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.ui.searchresults.ResultValueTypeColumn;
 import edu.harvard.med.screensaver.ui.searchresults.WellColumn;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 import edu.harvard.med.screensaver.ui.table.VirtualPagingDataModel;
 
 import org.apache.log4j.Logger;
@@ -39,33 +40,154 @@ public class ScreenResultDataModelTest extends AbstractSpringPersistenceTest
   protected ScreenResultsDAO screenResultsDao;
 
   private Screen _rnaiScreen;
-
   private Screen _smallMoleculeScreen;
+  private Library _rnaiLibrary;
+  private WellColumn _plateNumberColumn;
+  private WellColumn _wellNameColumn;
+  private WellColumn _assayWellTypeColumn;
+  private ScreenResult _screenResult;
+  private int _plates = 3;
+  private int _rowsToFetch = 10;
 
   @Override
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
-    _smallMoleculeScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
-    Library smallMoleculeLibrary = MakeDummyEntities.makeDummyLibrary(_smallMoleculeScreen.getScreenNumber(), _smallMoleculeScreen.getScreenType(), 3);
-    MakeDummyEntities.makeDummyScreenResult(_smallMoleculeScreen, smallMoleculeLibrary);
-    genericEntityDao.saveOrUpdateEntity(smallMoleculeLibrary);
-    genericEntityDao.saveOrUpdateEntity(_smallMoleculeScreen);
+
+//    _smallMoleculeScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
+//    Library smallMoleculeLibrary = MakeDummyEntities.makeDummyLibrary(_smallMoleculeScreen.getScreenNumber(), _smallMoleculeScreen.getScreenType(), 3);
+//    MakeDummyEntities.makeDummyScreenResult(_smallMoleculeScreen, smallMoleculeLibrary);
+//    genericEntityDao.saveOrUpdateEntity(smallMoleculeLibrary);
+//    genericEntityDao.saveOrUpdateEntity(_smallMoleculeScreen);
 
     _rnaiScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.RNAI);
-    Library rnaiLibrary = MakeDummyEntities.makeDummyLibrary(_rnaiScreen.getScreenNumber(), _rnaiScreen.getScreenType(), 3);
-    MakeDummyEntities.makeDummyScreenResult(_rnaiScreen, rnaiLibrary);
-    genericEntityDao.saveOrUpdateEntity(rnaiLibrary);
+    _rnaiLibrary = MakeDummyEntities.makeDummyLibrary(_rnaiScreen.getScreenNumber(), _rnaiScreen.getScreenType(), _plates);
+    MakeDummyEntities.makeDummyScreenResult(_rnaiScreen, _rnaiLibrary);
+    genericEntityDao.saveOrUpdateEntity(_rnaiLibrary);
     genericEntityDao.saveOrUpdateEntity(_rnaiScreen);
+
+    _screenResult = _rnaiScreen.getScreenResult();
+
+    _plateNumberColumn = new WellColumn(SortByWellProperty.PLATE_NUMBER,
+                                        "plateNumber",
+                                        "Plate Number",
+                                        true) {
+      @Override public Object getCellValue(Well entity) { return entity.getPlateNumber(); }
+    };
+    _wellNameColumn = new WellColumn(SortByWellProperty.WELL_NAME,
+                                     "wellName",
+                                     "Well Name",
+                                     false) {
+      @Override public Object getCellValue(Well entity) { return entity.getWellName(); }
+    };
+    _assayWellTypeColumn = new WellColumn(SortByWellProperty.ASSAY_WELL_TYPE,
+                                          "assayWellType",
+                                          "Assay Well Type",
+                                          true) {
+      @Override public Object getCellValue(Well entity) { return entity.getResultValues().get(_screenResult.getResultValueTypes().first()); }
+    };
   }
 
-  // TODO: test all ScreenResultDataModel subclasses
-  // TODO: test all sort columns
-  // TODO: sort asc & desc
-  // TODO: test fetch efficiency by inspecting Hib statistics (e.g.)
   public void testFullScreenResultDataModel()
   {
-    ScreenResult screenResult = _rnaiScreen.getScreenResult();
+    FullScreenResultDataModel dataModel =
+      new FullScreenResultDataModel(_screenResult,
+                                    _screenResult.getResultValueTypesList(),
+                                    _screenResult.getWellCount(),
+                                    _rowsToFetch,
+                                    _wellNameColumn,
+                                    SortDirection.ASCENDING,
+                                    genericEntityDao);
+    assertEquals("result size", 384 * _plates, dataModel.getRowCount());
+    doTestSorts(_screenResult,
+                _plateNumberColumn,
+                _wellNameColumn,
+                _assayWellTypeColumn,
+                dataModel);
+  }
+
+  public void testPositivesScreenResultDataModel()
+  {
+    ResultValueType positivesRvt = _screenResult.getResultValueTypes().last();
+    assertTrue("properly created 'positives' RVT with positives", positivesRvt.getPositivesCount() > 0);
+    PositivesOnlyScreenResultDataModel dataModel =
+      new PositivesOnlyScreenResultDataModel(_screenResult,
+                                             _screenResult.getResultValueTypesList(),
+                                             _rowsToFetch,
+                                             _wellNameColumn,
+                                             SortDirection.ASCENDING,
+                                             genericEntityDao,
+                                             positivesRvt);
+
+    assertEquals("result size", (384 * 3 / 4) * _plates, dataModel.getRowCount());
+
+    for (int i = 0; i < dataModel.getRowCount(); i++) {
+      dataModel.setRowIndex(i);
+      Well rowData = dataModel.getRowData();
+      assertTrue("well is a positive", rowData.getResultValues().get(positivesRvt).isPositive());
+    }
+    doTestSorts(_screenResult,
+                _plateNumberColumn,
+                _wellNameColumn,
+                _assayWellTypeColumn,
+                dataModel);
+  }
+
+  public void testEmptyPositivesScreenResultDataModel()
+  {
+    PositivesOnlyScreenResultDataModel dataModel =
+      new PositivesOnlyScreenResultDataModel(_screenResult,
+                                             _screenResult.getResultValueTypesList(),
+                                             _rowsToFetch,
+                                             _wellNameColumn,
+                                             SortDirection.ASCENDING,
+                                             genericEntityDao,
+                                             _screenResult.getResultValueTypes().first());
+    assertEquals("empty positives filter", 0, dataModel.getRowCount());
+  }
+
+  public void testSinglePlateScreenResultDataModel()
+  {
+    Integer expectedPlateNumber = _screenResult.getPlateNumbers().last();
+    SinglePlateScreenResultDataModel dataModel =
+      new SinglePlateScreenResultDataModel(_screenResult,
+                                           _screenResult.getResultValueTypesList(),
+                                           384,
+                                           _rowsToFetch,
+                                           _wellNameColumn,
+                                           SortDirection.ASCENDING,
+                                           genericEntityDao,
+                                           expectedPlateNumber);
+    assertEquals("single plate result size", 384, dataModel.getRowCount());
+    for (int i = 0; i < dataModel.getRowCount(); i++) {
+      dataModel.setRowIndex(i);
+      Well rowData = dataModel.getRowData();
+      assertEquals("well is for filter plate", expectedPlateNumber, rowData.getPlateNumber());
+    }
+    doTestSorts(_screenResult,
+                _plateNumberColumn,
+                _wellNameColumn,
+                _assayWellTypeColumn,
+                dataModel);
+  }
+
+  public void testEmptyScreenResultDataModel()
+  {
+    EmptyScreenResultDataModel dataModel = new EmptyScreenResultDataModel();
+    assertEquals("0 result size", 0, dataModel.getRowCount());
+  }
+
+  public void testMinimalDataLoaded()
+  {
+    // create another screen result using the same wells as screen 2, to associate more result values with those wells
+    Screen rnaiScreen2 = MakeDummyEntities.makeDummyScreen(3, ScreenType.RNAI);
+    ScreenResult screenResult2 = MakeDummyEntities.makeDummyScreenResult(rnaiScreen2, _rnaiLibrary);
+    genericEntityDao.saveOrUpdateEntity(rnaiScreen2);
+    Well well = genericEntityDao.findEntityById(Well.class, screenResult2.getWells().first().getWellId(), true, "resultValues");
+    assertEquals("well has result values for two screen results",
+                 well.getResultValues().size(),
+                 screenResult2.getResultValueTypes().size() * 2);
+
     WellColumn sortColumn =
       new WellColumn(SortByWellProperty.WELL_NAME,
                      "wellName",
@@ -73,34 +195,53 @@ public class ScreenResultDataModelTest extends AbstractSpringPersistenceTest
                      false) {
       @Override public Object getCellValue(Well entity) { return entity; }
     };
+    ScreenResult screenResult = _rnaiScreen.getScreenResult();
     FullScreenResultDataModel dataModel =
       new FullScreenResultDataModel(screenResult,
                                     screenResult.getResultValueTypesList(),
                                     screenResult.getWellCount(),
-                                    10,
+                                    _rowsToFetch,
                                     sortColumn,
                                     SortDirection.ASCENDING,
                                     genericEntityDao);
-    testSort(dataModel, sortColumn, SortDirection.ASCENDING);
+    dataModel.setRowIndex(0);
+    Well rowData = dataModel.getRowData();
+    assertEquals("well has only result values for this screen result",
+                 screenResult.getResultValueTypes(),
+                 new TreeSet<ResultValueType>(rowData.getResultValues().keySet()));
+  }
+
+  private void doTestSorts(final ScreenResult screenResult,
+                           WellColumn plateNumberColumn,
+                           WellColumn wellNameColumn,
+                           WellColumn assayWellTypeColumn,
+                           ScreenResultDataModel dataModel)
+  {
+    for (SortDirection sortDir : SortDirection.values()) {
+      doTestSort(dataModel, plateNumberColumn, sortDir);
+      doTestSort(dataModel, wellNameColumn, sortDir);
+      doTestSort(dataModel, assayWellTypeColumn, sortDir);
+      for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
+        ResultValueTypeColumn rvtColumn = new ResultValueTypeColumn(rvt);
+        doTestSort(dataModel, rvtColumn, sortDir);
+      }
+    }
   }
 
   @SuppressWarnings("unchecked")
-  private void testSort(VirtualPagingDataModel<String,Well> dataModel, WellColumn sortColumn, SortDirection sortDirection)
+  private void doTestSort(VirtualPagingDataModel<String,Well> dataModel, TableColumn sortColumn, SortDirection sortDirection)
   {
     dataModel.sort(sortColumn, sortDirection);
-    List<Comparable> actualSortedValues = new ArrayList<Comparable>();
-    List<Comparable> expectedSortedValues = new ArrayList<Comparable>();
-    for (int i = 0; i < 10; i++) {
+    Well lastRowData = null;
+    for (int i = 0; i < _rowsToFetch; i++) {
       dataModel.setRowIndex(i);
       Well rowData = dataModel.getRowData();
-      actualSortedValues.add((Comparable) sortColumn.getCellValue(rowData));
+      if (lastRowData != null) {
+        assertTrue("sorted values on column " + sortColumn + ", " + sortDirection,
+                   sortColumn.getComparator(sortDirection).compare(lastRowData, rowData) <= 0);
+        lastRowData = rowData;
+      }
     }
-    assertEquals("row count", 10, actualSortedValues.size());
-    expectedSortedValues.addAll(actualSortedValues);
-    Collections.sort(expectedSortedValues);
-    assertEquals("sorted values on " + sortColumn.getName() + ", " + sortDirection,
-                 expectedSortedValues,
-                 actualSortedValues);
   }
 
 }

@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultSortQuery.SortByWellProperty;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
@@ -112,9 +113,15 @@ public abstract class ScreenResultDataTable extends DataTable<Well>
 
   public boolean isResultValueExcluded()
   {
+    TableColumn<Well> column = getSortManager().getCurrentColumn();
+    if (column instanceof ResultValueTypeColumn) {
+      ResultValueTypeColumn rvtColumn = (ResultValueTypeColumn) column;
+      ResultValue resultValue = getRowData().getResultValues().get(rvtColumn.getResultValueType());
+      if (resultValue != null) {
+        return resultValue.isExclude();
+      }
+    }
     return false;
-    // TODO: reinstate
-    //return ((ScreenResultDataModel) getDataModel()).isResultValueCellExcluded(getSortManager().getCurrentColumnIndex());
   }
 
   /**
@@ -152,16 +159,16 @@ public abstract class ScreenResultDataTable extends DataTable<Well>
   {
     List<TableColumn<Well>> fixedColumns = new ArrayList<TableColumn<Well>>(3);
     fixedColumns.add(new WellColumn(SortByWellProperty.PLATE_NUMBER,
-                                            "Plate",
-                                            "The plate number",
-                                            true) {
+                                    "Plate",
+                                    "The plate number",
+                                    true) {
       @Override
       public Object getCellValue(Well well) { return well.getWellKey().getPlateNumber(); }
     });
     fixedColumns.add(new WellColumn(SortByWellProperty.WELL_NAME,
-                                            "Well",
-                                            "The well name",
-                                            false) {
+                                    "Well",
+                                    "The well name",
+                                    false) {
       @Override
       public Object getCellValue(Well well) { return well.getWellKey().getWellName(); }
 
@@ -174,12 +181,12 @@ public abstract class ScreenResultDataTable extends DataTable<Well>
         return _wellViewer.viewWell(well);
       }
     });
-    fixedColumns.add(new WellColumn(SortByWellProperty.WELL_TYPE,
-                                            "Type",
-                                            StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase(),
-                                            false) {
+    fixedColumns.add(new WellColumn(SortByWellProperty.ASSAY_WELL_TYPE,
+                                    "Assay Well Type",
+                                    StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase(),
+                                    false) {
       @Override
-      public Object getCellValue(Well well) { return well.getWellType(); }
+      public Object getCellValue(Well well) { return well.getResultValues().values().iterator().next().getAssayWellType(); }
     });
     return fixedColumns;
   }

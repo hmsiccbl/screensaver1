@@ -38,7 +38,7 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
   @Override
   protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
   {
-    return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(16, 24, 48, 96, 384));
+    return new DataTableRowsPerPageUISelectOneBean(Arrays.asList(10, 24, 48, 96));
   }
 
   @Override
@@ -49,7 +49,7 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
     return new FullScreenResultDataModel(getScreenResult(),
                                          resultValueTypes,
                                          totalRows,
-                                         getRowsPerPageSelector().getSelection(),
+                                         getRowsPerPage(),
                                          getSortManager().getSortColumn(),
                                          getSortManager().getSortDirection(),
                                          _dao);
@@ -62,7 +62,7 @@ public class FullScreenResultDataTable extends ScreenResultDataTable
       _dao.doInTransaction(new DAOTransaction() {
         public void runTransaction() {
           ResultValueType rvt = resultValueTypes.get(0);
-          rvt = _dao.reloadEntity(rvt);
+          rvt = _dao.reloadEntity(rvt, true);
           totalRows[0] = _dao.relationshipSize(rvt, "resultValues");
         }
       });
