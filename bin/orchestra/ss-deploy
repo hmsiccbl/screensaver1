@@ -4,4 +4,4 @@
 # has been checked out (defaults to $HOME/screensaver)
 
 cd ${SCREENSAVER_ROOT:-$HOME/screensaver}
-ant -Dscreensaver.properties.file=resources/screensaver.properties.orchestra.prod deploy
+ant -Dscreensaver.properties.file=cfg/orchestra/screensaver.properties.web.prod deploy
