@@ -59,7 +59,7 @@
 		</t:panelGroup>
 
 		<t:panelGrid columns="2" title="The sort column and direction">
-			<t:outputLabel for="sortOrderMenu" value="Sort by" styleClass="label" />
+			<t:outputLabel for="sortColumnMenu" value="Sort by" styleClass="label" />
 			<t:panelGroup>
 				<t:selectOneMenu id="sortColumnMenu"
 					value="#{dataTable.sortManager.sortColumnSelector.value}"
