@@ -31,7 +31,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -49,6 +48,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.IndexColumn;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.annotations.MapKeyManyToMany;
 
 
 /**
@@ -551,10 +551,28 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    */
   @OneToMany(cascade={}, fetch=FetchType.LAZY, mappedBy="well")
   @LazyCollection(LazyCollectionOption.EXTRA)
-  @MapKey(name="resultValueType")
+  @MapKeyManyToMany(joinColumns={ @JoinColumn(name="resultValueTypeId") }, targetEntity=ResultValueType.class)
   public Map<ResultValueType,ResultValue> getResultValues()
   {
     return _resultValues;
+  }
+
+  /**
+   * Set a subset of eagerly fetched result values for this well. Well must be
+   * detached or loaded read-only! Otherwise, Hibernate *might* persist the
+   * limited subset! (untested theory). You probably want Map to be a TreeMap,
+   * with a {@link AbstractEntityIdComparator} comparator, to allow entity
+   * ID-based equality, rather than instance equality.
+   *
+   * @motivation Allows Well to be used as a DTO, of sorts, allowing a limited
+   *             subset of result values to be loaded efficiently and then later
+   *             accessed via client code, but naturally through the entity
+   *             object model.
+   * @param map
+   */
+  public void setResultValuesSubset(Map<ResultValueType,ResultValue> resultValues)
+  {
+    _resultValues = resultValues;
   }
 
 
@@ -719,24 +737,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * @motivation for hibernate
    */
   private void setResultValues(Map<ResultValueType,ResultValue> resultValues)
-  {
-    _resultValues = resultValues;
-  }
-
-  /**
-   * Set a subset of eagerly fetched result values for this well. Well must be
-   * detached or loaded read-only! Otherwise, Hibernate *might* persist the
-   * limited subset! (untested theory). You probably want Map to be a TreeMap,
-   * with a {@link AbstractEntityIdComparator} comparator, to allow entity
-   * ID-based equality, rather than instance equality.
-   * 
-   * @motivation Allows Well to be used as a DTO, of sorts, allowing a limited
-   *             subset of result values to be loaded efficiently and then later
-   *             accessed via client code, but naturally through the entity
-   *             object model.
-   * @param map
-   */
-  public void setResultValuesSubset(Map<ResultValueType,ResultValue> resultValues)
   {
     _resultValues = resultValues;
   }

@@ -83,29 +83,31 @@ TODO:
 
 			<t:panelGrid columns="1">
 				<t:panelGroup id="cherryPickRequestCommandPanel"
-					rendered="#{cherryPickRequestViewer.editable}"
 					styleClass="commandPanel">
-					<t:commandButton id="editCommand" value="Edit"
-						action="#{cherryPickRequestViewer.setEditMode}"
-						styleClass="command"
-						rendered="#{!cherryPickRequestViewer.editMode}"
-						title="Enter edit mode for the cherry pick request" />
-					<t:commandButton id="deleteCommand" value="Delete"
-						action="#{cherryPickRequestViewer.deleteCherryPickRequest}"
-						onclick="javascript: return confirm('Delete this cherry pick request and all of its cherry picks permanently?');"
-						styleClass="command"
-						rendered="#{cherryPickRequestViewer.editable && !cherryPickRequestViewer.editMode}"
-						disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
-						title="Delete this cherry pick request" />
-					<t:commandButton id="saveCommand" value="Save"
-						action="#{cherryPickRequestViewer.save}" styleClass="command"
-						rendered="#{cherryPickRequestViewer.editMode}"
-						title="Save your changes and leave edit mode" />
-					<t:commandButton id="cancelEditCommand" value="Cancel"
-						rendered="#{cherryPickRequestViewer.editMode}"
-						action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
-						styleClass="command"
-						title="Discard your changes and leave edit mode" />
+					<t:panelGroup id="adminCommandPanel"
+						rendered="#{cherryPickRequestViewer.editable}">
+						<t:commandButton id="editCommand" value="Edit"
+							action="#{cherryPickRequestViewer.setEditMode}"
+							styleClass="command"
+							rendered="#{!cherryPickRequestViewer.editMode}"
+							title="Enter edit mode for the cherry pick request" />
+						<t:commandButton id="deleteCommand" value="Delete"
+							action="#{cherryPickRequestViewer.deleteCherryPickRequest}"
+							onclick="javascript: return confirm('Delete this cherry pick request and all of its cherry picks permanently?');"
+							styleClass="command"
+							rendered="#{cherryPickRequestViewer.editable && !cherryPickRequestViewer.editMode}"
+							disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
+							title="Delete this cherry pick request" />
+						<t:commandButton id="saveCommand" value="Save"
+							action="#{cherryPickRequestViewer.save}" styleClass="command"
+							rendered="#{cherryPickRequestViewer.editMode}"
+							title="Save your changes and leave edit mode" />
+						<t:commandButton id="cancelEditCommand" value="Cancel"
+							rendered="#{cherryPickRequestViewer.editMode}"
+							action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
+							styleClass="command"
+							title="Discard your changes and leave edit mode" />
+					</t:panelGroup>
 					<t:commandButton id="downloadCherryPickRequestCommand"
 						value="Download"
 						action="#{cherryPickRequestViewer.downloadCherryPickRequest}"
@@ -229,19 +231,19 @@ TODO:
 						title="The columns and rows the screener requested to be left empty" />
 					<t:panelGrid columns="2"
 						rendered="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}">
-						<t:outputText value="Columns:"/>
+						<t:outputText value="Columns:" />
 						<t:outputText
 							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
 							styleClass="dataText" />
-						<t:outputText value="Rows:"/>
+						<t:outputText value="Rows:" />
 						<t:outputText
 							value="#{cherryPickRequestViewer.emptyRowsOnAssayPlateAsString}"
 							styleClass="dataText" />
 					</t:panelGrid>
 					<t:panelGrid columns="2"
 						rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.mapped}">
-						<t:outputText value="Columns:"/>
-						<t:outputText value="Rows:"/>
+						<t:outputText value="Columns:" />
+						<t:outputText value="Rows:" />
 						<t:selectManyListbox
 							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.value}"
 							size="20" styleClass="input">
@@ -367,7 +369,7 @@ TODO:
 							value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.columnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
-							<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
+								<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
 								<t:commandSortHeader columnName="#{column.name}" arrow="false"
 									immediate="false">
 									<f:facet name="ascending">
@@ -493,7 +495,7 @@ TODO:
 							value="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.columnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
-							<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
+								<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
 								<t:commandSortHeader columnName="#{column.name}" arrow="false"
 									immediate="false">
 									<f:facet name="ascending">

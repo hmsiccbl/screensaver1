@@ -14,9 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import jxl.Workbook;
 import jxl.write.WritableSheet;
@@ -35,7 +33,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -120,7 +117,15 @@ public class CherryPickRequestExporter
   public Workbook exportRNAiCherryPickRequest(final RNAiCherryPickRequest cherryPickRequestIn)
   {
     try {
-      RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) _dao.reloadEntity(cherryPickRequestIn);
+      RNAiCherryPickRequest cherryPickRequest =
+        _dao.reloadEntity(cherryPickRequestIn,
+                          true,
+                          "screen.screenResult.resultValueTypes");
+      _dao.needReadOnly(cherryPickRequest,
+                        "labCherryPicks.sourceWell.silencingReagents.gene");
+      _dao.needReadOnly(cherryPickRequest,
+                        "screenerCherryPicks.screenedWell.silencingReagents.gene",
+                        "screenerCherryPicks.rnaiKnockdownConfirmation");
 
       ByteArrayOutputStream rawBytes = new ByteArrayOutputStream();
       OutputStream out = new BufferedOutputStream(rawBytes);
@@ -191,19 +196,6 @@ public class CherryPickRequestExporter
                             sourceWell.getSimpleVendorIdentifier());
   }
 
-  private List<Map<WellKey,ResultValue>> getResultValuesForDataHeaders(ScreenerCherryPick screenerCherryPick)
-  {
-    List<Map<WellKey,ResultValue>> result = new ArrayList<Map<WellKey,ResultValue>>();
-    ScreenResult screenResult = screenerCherryPick.getCherryPickRequest().getScreen().getScreenResult();
-    if (screenResult != null) {
-      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-        result.add(rvt.getWellKeyToResultValueMap());
-      }
-    }
-    return result;
-  }
-
-
   private void writeScreenerCherryPicks(WritableWorkbook workbook, CherryPickRequest cherryPickRequest) throws RowsExceededException, WriteException
   {
     // TODO: this sheet is not always representing pools (it could be representing duplex cherry pick wells, e.g.),
@@ -239,14 +231,17 @@ public class CherryPickRequestExporter
                                                        }), LIST_OF_VALUES_DELIMITER),
                             screenedWell.getSimpleVendorIdentifier());
 
-    List<Map<WellKey,ResultValue>> resultValueMaps = getResultValuesForDataHeaders(screenerCherryPick);
-    int resultValueCol = 0;
-    for (Map<WellKey,ResultValue> resultValues : resultValueMaps) {
-      ResultValue resultValue = resultValues.get(screenedWell.getWellKey());
+    Set<ResultValueType> rvts = screenerCherryPick.getCherryPickRequest().getScreen().getScreenResult().getResultValueTypes();
+    for (ResultValueType rvt : rvts) {
+      Object value = null;
+      ResultValue rv = screenedWell.getResultValues().get(rvt);
+      if (rv != null) {
+        value = ResultValue.getTypedValue(rv, rvt);
+      }
       Workbook2Utils.writeCell(sheet,
                                iRow,
-                               6 + resultValueCol++,
-                               resultValue == null ? "" : resultValue.getValue());
+                               6 + rvt.getOrdinal(),
+                               value);
     }
   }
 
