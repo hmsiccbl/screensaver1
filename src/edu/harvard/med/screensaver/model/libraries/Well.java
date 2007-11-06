@@ -717,7 +717,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   @org.hibernate.annotations.Type(type="text")
   @JoinTable(name="wellMolfile", joinColumns=@JoinColumn(name="well_id", unique=true)) // note "unique=true" ensures 1-to-1 mapping
   @Column(name="molfile", nullable=false)
-  @IndexColumn(name="ordinal", base=0)
+  @IndexColumn(name="ordinal")
   private List<String> getMolfileList()
   {
     return _molfile;
