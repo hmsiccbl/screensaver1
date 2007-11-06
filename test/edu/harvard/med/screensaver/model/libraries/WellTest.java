@@ -16,6 +16,11 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class WellTest extends AbstractEntityInstanceTest<Well>
@@ -86,5 +91,37 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
     catch (Exception e) {
     }
   }
+
+  public void testResultValueMap()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
+        /*final ScreenResult screenResult = */MakeDummyEntities.makeDummyScreenResult(screen, library);
+        genericEntityDao.persistEntity(library);
+        genericEntityDao.persistEntity(screen);
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        ScreenResult screenResult = screen.getScreenResult();
+        Well well = genericEntityDao.findEntityById(Well.class, screen.getScreenResult().getWells().first().getWellId());
+        assertEquals("well.resultValues size",
+                     screenResult.getResultValueTypes().size(),
+                     well.getResultValues().size());
+
+        ResultValueType rvt = genericEntityDao.findEntityByProperty(ResultValueType.class, "name", "numeric_repl1");
+        ResultValue resultValue = well.getResultValues().get(rvt);
+        assertNotNull(resultValue);
+        assertEquals(rvt, resultValue.getResultValueType());
+      }
+    });
+
+  }
+
 }
 

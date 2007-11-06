@@ -564,13 +564,16 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * with a {@link AbstractEntityIdComparator} comparator, to allow entity
    * ID-based equality, rather than instance equality.
    *
+   * The "_" prefix prevents our test code from treating this method as a property
+   * setter method.
+   *
    * @motivation Allows Well to be used as a DTO, of sorts, allowing a limited
    *             subset of result values to be loaded efficiently and then later
    *             accessed via client code, but naturally through the entity
    *             object model.
    * @param map
    */
-  public void setResultValuesSubset(Map<ResultValueType,ResultValue> resultValues)
+  public void _setResultValuesSubset(Map<ResultValueType,ResultValue> resultValues)
   {
     _resultValues = resultValues;
   }

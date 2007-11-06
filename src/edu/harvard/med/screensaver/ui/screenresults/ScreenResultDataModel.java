@@ -129,7 +129,7 @@ abstract public class ScreenResultDataModel extends VirtualPagingDataModel<Strin
       });
 
       for (Well well : result.values()) {
-        well.setResultValuesSubset(well2RestrictedResultValues.get(well));
+        well._setResultValuesSubset(well2RestrictedResultValues.get(well));
       }
     }
     return result;
