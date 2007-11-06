@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -40,15 +40,15 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
 
   protected ScreenResultParser screenResultParser;
   protected LibrariesDAO librariesDao;
-  
-  
+
+
   // public constructors and methods
 
   public ResultValueTypeTest() throws IntrospectionException
   {
     super(ResultValueType.class);
   }
-  
+
   /**
    * Regression test for (apparent) Hibernate bug, which determines size of
    * extra-lazy value-typed collections by counting non-null values of the first
@@ -62,7 +62,7 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
     genericEntityDao.saveOrUpdateEntity(library);
     librariesDao.loadOrCreateWellsForLibrary(library);
 
-    genericEntityDao.doInTransaction(new DAOTransaction() 
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
@@ -74,15 +74,15 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
         persistEntity(screen, new HashSet<AbstractEntity>());
       }
     });
-    
-    genericEntityDao.doInTransaction(new DAOTransaction() 
+
+    genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 115); 
-        assertEquals("result values count", 
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 115);
+        assertEquals("result values count",
                      28,
-                     screen.getScreenResult().getResultValueTypesList().get(0).getWellKeyToResultValueMap().size());
+                     screen.getScreenResult().getResultValueTypesList().get(0).getResultValues().size());
       }
     });
   }

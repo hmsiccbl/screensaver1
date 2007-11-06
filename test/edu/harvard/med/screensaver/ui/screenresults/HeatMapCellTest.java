@@ -44,7 +44,7 @@ public class HeatMapCellTest extends AbstractSpringTest
     Well well = library.createWell(new WellKey(1, "A01"), WellType.EMPTY);
     rvt.createResultValue(well, "1.0");
 
-    HeatMapCell cell = new HeatMapCell(rvt.getWellKeyToResultValueMap().get(well.getWellKey()),
+    HeatMapCell cell = new HeatMapCell(rvt.getResultValues().get(well),
                                        well.getWellKey(),
                                        1.0,
                                        new Color(128, 0, 196),

@@ -126,14 +126,14 @@ public class ScreenResultLazyInitTest extends AbstractSpringTest
         }
 
         Set<Well> wells = rvt.getScreenResult().getWells();
-        Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
+        Map<Well,ResultValue> resultValues = rvt.getResultValues();
         log.debug("resultValue count=" + resultValues.size());
         Iterator iter = wells.iterator();
         int n = session.getStatistics().getEntityKeys().size();
         log.debug("entity key count (pre-iteration)=" + n);
         while (iter.hasNext()) {
           Well well = (Well) iter.next();
-          ResultValue rv = resultValues.get(well.getWellKey());
+          ResultValue rv = resultValues.get(well);
           rv.getValue();
           log.debug("entity key count=" + session.getStatistics().getEntityKeys().size());
           assertEquals("Hibernate session cache did not grow in size",

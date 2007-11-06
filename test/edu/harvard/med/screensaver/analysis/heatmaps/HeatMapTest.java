@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -15,6 +15,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.analysis.ChainedFilter;
@@ -24,8 +26,10 @@ import edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImport
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.Pair;
@@ -38,7 +42,9 @@ public class HeatMapTest extends AbstractSpringTest
 
   private ScreenResult _screenResult;
   private ScreenResultParser _parser;
-  
+
+  private Map<WellKey,ResultValue> _wellKeyToResultValueMap;
+
   @Override
   protected void onSetUp() throws Exception
   {
@@ -47,18 +53,24 @@ public class HeatMapTest extends AbstractSpringTest
     _parser = new ScreenResultParser(librarieDao);
     _screenResult = _parser.parse(screen,
                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "ScreenResultHeatmapTest107.xls"));
+    ResultValueType rvt = _screenResult.getResultValueTypes().first();
+    Map<Well,ResultValue> resultValues = rvt.getResultValues();
+    _wellKeyToResultValueMap = new HashMap<WellKey,ResultValue>();
+    for (ResultValue rv : resultValues.values()) {
+      _wellKeyToResultValueMap.put(rv.getWell().getWellKey(), rv);
+    }
     if (_parser.getHasErrors()) {
       System.err.println("Parser errors:\n" + _parser.getErrors());
       fail("could not parse screen results");
     }
   }
-  
-  
+
+
   public void testIdentityHeatMap()
   {
     assertFalse(_parser.getHasErrors());
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
+                                  _wellKeyToResultValueMap,
                                   new NoOpFilter(),
                                   new IdentityFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
@@ -74,13 +86,13 @@ public class HeatMapTest extends AbstractSpringTest
                                       interpolatedColorComponent,
                                       interpolatedColorComponent);
     assertEquals("A1 color", expectedA2Color, heatMap.getColor(0, 0));
-    
+
   }
-  
+
   public void testZScoreHeatMap()
   {
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
+                                  _wellKeyToResultValueMap,
                                   new NoOpFilter(),
                                   new ZScoreFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
@@ -100,21 +112,21 @@ public class HeatMapTest extends AbstractSpringTest
   public void testFilters()
   {
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
-                                  new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(), 
+                                  _wellKeyToResultValueMap,
+                                  new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(),
                                     new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),
                                   new IdentityFunction(),
                                   new MultiGradientColorFunction(Color.BLACK,
                                                                  Color.WHITE));
-    assertEquals("max", 2156.0, heatMap.getMin(), 0.01);  
+    assertEquals("max", 2156.0, heatMap.getMin(), 0.01);
     assertEquals("min", 19205.0, heatMap.getMax(), 0.01);
-    
+
   }
-  
+
   public void testMakeHtmlHeatMap() throws IOException
   {
     HeatMap heatMap = new HeatMap(1,
-                                  _screenResult.getResultValueTypes().first().getWellKeyToResultValueMap(),
+                                  _wellKeyToResultValueMap,
                                   new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(),
                                                                  new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),
                                   new ZScoreFunction(),
@@ -138,7 +150,7 @@ public class HeatMapTest extends AbstractSpringTest
     writer.print("</table></body></html>");
     writer.close();
   }
-  
+
 
 }
 

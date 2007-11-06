@@ -34,12 +34,12 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.LazyCollectionOption;
 
 
 /**
@@ -75,7 +75,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private Integer _version;
   private ScreenResult _screenResult;
   private Map<Well,ResultValue> _resultValues = new HashMap<Well,ResultValue>();
-  private transient WellKeyToResultValueMap _wellKeyToResultValueMap = new WellKeyToResultValueMap(_resultValues);
   private String _name;
   private String _description;
   private Integer _ordinal;
@@ -155,23 +154,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   public ScreenResult getScreenResult()
   {
     return _screenResult;
-  }
-
-  /**
-   * Get a mapping from the {@link WellKey well keys} to the result values for this result value
-   * type. <i>The returned map should not be modified</i> To add a result value, call {@link
-   * #addResultValue}.
-   * <p>
-   * WARNING: obtaining an iterator() on the returned Map will cause Hibernate
-   * to load all ResultValues. If you want to take advantage of extra-lazy
-   * loading, be sure to call only size() and get(Well) on the returned Map.
-   *
-   * @return a mapping from the well keys to the result values for this result value type
-   */
-  @Transient
-  public Map<WellKey,ResultValue> getWellKeyToResultValueMap()
-  {
-    return _wellKeyToResultValueMap;
   }
 
   /**
@@ -728,6 +710,30 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     return null;
   }
 
+  /**
+   * Get a mapping from the well ids to the result values for this result value type.
+   * <p>
+   * WARNING: obtaining an iterator on the returned Map will cause Hibernate
+   * to load all ResultValues. If you want to take advantage of extra-lazy
+   * loading, be sure to call only <code>size()</code> and <code>get(String wellId)</code>
+   * on the returned Map.
+   * <p>
+   * WARNING: removing an element from this map is not supported; doing so
+   * breaks ScreenResult.plateNumbers semantics.
+   * @return a mapping from the wells to result values for this result value type
+   * @motivation for hibernate
+   */
+  @OneToMany(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+             mappedBy="resultValueType")
+  @MapKey(name="well")
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
+  @org.hibernate.annotations.LazyCollection(LazyCollectionOption.EXTRA)
+  public Map<Well,ResultValue> getResultValues()
+  {
+    return _resultValues;
+  }
+
 
   // package constructor
 
@@ -832,29 +838,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Get a mapping from the well ids to the result values for this result value type.
-   * <p>
-   * WARNING: obtaining an iterator on the returned Map will cause Hibernate
-   * to load all ResultValues. If you want to take advantage of extra-lazy
-   * loading, be sure to call only <code>size()</code> and <code>get(String wellId)</code>
-   * on the returned Map.
-   * <p>
-   * WARNING: removing an element from this map is not supported; doing so
-   * breaks ScreenResult.plateNumbers semantics.
-   * @return a mapping from the well ids to the result values for this result value type
-   * @motivation for hibernate
-   */
-  @OneToMany(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-             mappedBy="resultValueType")
-  @MapKey(name="well")
-  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
-  private Map<Well,ResultValue> getResultValues()
-  {
-    return _resultValues;
-  }
-
-  /**
    * Set the mapping from the well ids to the result values for this result value type.
    * @param resultValue the new mapping from the well ids to the result values for this result
    * value type
@@ -863,7 +846,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private void setResultValues(Map<Well,ResultValue> resultValues)
   {
     _resultValues = resultValues;
-    _wellKeyToResultValueMap = new WellKeyToResultValueMap(_resultValues);
   }
 
   /**

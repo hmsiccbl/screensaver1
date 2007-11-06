@@ -2,7 +2,7 @@
 // $Id: ScreenResultParserTest.java 693 2006-10-26 18:42:59Z ant4 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -33,7 +33,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
 {
 
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
-  
+
   protected GenericEntityDAO genericEntityDao;
   protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
@@ -47,7 +47,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
 
   /**
    */
-  public void testParseSaveLoadScreenResult() throws Exception 
+  public void testParseSaveLoadScreenResult() throws Exception
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
@@ -63,8 +63,8 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
         librariesDao.loadOrCreateWellsForLibrary(library);
         genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush();
-        
-        screenResultParser.parse(screen, 
+
+        screenResultParser.parse(screen,
                                  workbookFile);
         for (ParseError error: screenResultParser.getErrors()) {
           System.out.println("error: " + error);
@@ -73,7 +73,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
-    
+
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction() {
@@ -81,10 +81,10 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
         ScreenResult screenResult = screen.getScreenResult();
         assertNotNull(screenResult);
         ResultValueType rvt0 = screenResult.getResultValueTypesList().get(0);
-        ResultValue rv = rvt0.getWellKeyToResultValueMap().get(new WellKey(1,0,0));
+        ResultValue rv = rvt0.getResultValues().get(librariesDao.findWell(new WellKey(1,0,0)));
         assertEquals("1071894", rv.getValue());
         // this tests how Hibernate will make use of WellKey, initializing with a concatenated key string
-        rv = rvt0.getWellKeyToResultValueMap().get(new WellKey("00001:A01"));
+        rv = rvt0.getResultValues().get(librariesDao.findWell(new WellKey("00001:A01")));
         assertEquals("1071894", rv.getValue());
       }
     });

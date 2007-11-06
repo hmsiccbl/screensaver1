@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -36,7 +36,7 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
     writeDataColumnNames(sheet,
                          screenResult);
     writeData(workbook,
-              sheet, 
+              sheet,
               screenResult,
               plateNumber);
     sheet.setColumnWidth((short) 0, ROW_HEADER_COLUMN_WIDTH);
@@ -65,18 +65,19 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
     for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
       for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
         WellKey wellKey = new WellKey(plateNumber, iRow, iCol);
+
         // TODO: assayWellType should default to Well's assayWellType
         AssayWellType assayWellType = AssayWellType.EXPERIMENTAL;
         StringBuilder excludeBuf = new StringBuilder();
         HSSFRow row = HSSFCellUtil.getRow(rowIndex, sheet);
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          ResultValue rv = rvt.getWellKeyToResultValueMap().get(wellKey);
+          ResultValue rv = rvt.getResultValues().get(wellKey);
           if (rv != null) {
             assayWellType = rv.getAssayWellType(); // overwrites, but should be same for all resultValues of a well
             addExclude(excludeBuf, row, rvt, rv);
-            HSSFCell cell = 
+            HSSFCell cell =
               HSSFCellUtil.getCell(row,
-                                   rvt.getOrdinal() + 
+                                   rvt.getOrdinal() +
                                    RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX);
             Object typedValue = ResultValue.getTypedValue(rv, rvt);
             Cell.setTypedCellValue(workbook, cell, typedValue);
@@ -89,11 +90,11 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
 //            }
           }
         }
-        writeWell(row, 
+        writeWell(row,
                   wellKey,
                   assayWellType);
         if (excludeBuf.length() > 0) {
-          HSSFCell excludeCell = HSSFCellUtil.getCell(row, 3);        
+          HSSFCell excludeCell = HSSFCellUtil.getCell(row, 3);
           excludeCell.setCellValue(excludeBuf.toString());
         }
         ++rowIndex;

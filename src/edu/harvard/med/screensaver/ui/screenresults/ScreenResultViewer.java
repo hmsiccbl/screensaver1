@@ -246,12 +246,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
           // would include a considerable amount of redundant data
           // for the (denormalized) RVT fields
           for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-            // note: requesting the iterator generates an SQL statement that
-            // only includes the result_value_type_result_values table, whereas
-            // the needReadOnly() call's SQL statement joins to the
-            // result_value_type table as well, which is slower
-            rvt.getWellKeyToResultValueMap().keySet().iterator();
-            //_dao.needReadOnly(rvt, "resultValues");
+            _dao.needReadOnly(rvt, "resultValues");
           }
           File exportedWorkbookFile = null;
           FileOutputStream out = null;

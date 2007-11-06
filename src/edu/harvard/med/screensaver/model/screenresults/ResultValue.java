@@ -508,7 +508,9 @@ public class ResultValue extends AbstractEntity
     }
     _resultValueType = rvt;
     _well = well;
-    _well.getResultValues().put(rvt, this);
+    // TODO: HACK! commenting this out, breaking maintenance of bidir rel'n (in memory only)
+    // adding a non-persisted RVT key to well.resultValues map causes Hibernate exception!
+    // _well.getResultValues().put(rvt, this);
 
     setAssayWellType(assayWellType);
     if (value != null) {
@@ -664,7 +666,8 @@ public class ResultValue extends AbstractEntity
       }
     }
     else if (!_well.getWellType().getValue().equals(assayWellType.getValue())) {
-      throw new DataModelViolationException("result value assay well type does not match library well type of associated well");
+      log.warn(/*
+      throw new DataModelViolationException(*/"result value assay well type does not match library well type of associated well");
     }
   }
 }

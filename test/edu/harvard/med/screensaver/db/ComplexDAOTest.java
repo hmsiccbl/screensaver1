@@ -421,13 +421,14 @@ public class ComplexDAOTest extends AbstractSpringTest
               "human",
               rvt.getAssayPhenotype());
 
-            Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
-            for (WellKey wellKey : resultValues.keySet()) {
+            Map<Well,ResultValue> resultValues = rvt.getResultValues();
+            for (Well well : resultValues.keySet()) {
+              WellKey wellKey = well.getWellKey();
               assertTrue(wellKeys.contains(wellKey));
               // note that our naming scheme is testing the ordering of the
               // ResultValueType and ResultValue entities (within their parent
               // sets)
-              ResultValue rv = resultValues.get(wellKey);
+              ResultValue rv = resultValues.get(well);
               assertEquals("value " + wellKey.getColumn() + "," + iResultValue, rv.getValue());
               assertEquals(wellKey.getColumn() % 2 == 1, rv.isExclude());
             }
