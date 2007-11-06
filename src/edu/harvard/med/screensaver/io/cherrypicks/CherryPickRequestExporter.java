@@ -122,9 +122,12 @@ public class CherryPickRequestExporter
                           true,
                           "screen.screenResult.resultValueTypes");
       _dao.needReadOnly(cherryPickRequest,
-                        "labCherryPicks.sourceWell.silencingReagents.gene");
+                        "cherryPickAssayPlates.cherryPickLiquidTransfer");
       _dao.needReadOnly(cherryPickRequest,
-                        "screenerCherryPicks.screenedWell.silencingReagents.gene",
+                        "labCherryPicks.sourceWell.silencingReagents",
+                        "labCherryPicks.wellVolumeAdjustments");
+      _dao.needReadOnly(cherryPickRequest,
+                        "screenerCherryPicks.screenedWell.silencingReagents.gene.genbankAccessionNumbers",
                         "screenerCherryPicks.rnaiKnockdownConfirmation");
 
       ByteArrayOutputStream rawBytes = new ByteArrayOutputStream();
