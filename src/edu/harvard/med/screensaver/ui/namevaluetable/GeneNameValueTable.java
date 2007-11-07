@@ -17,7 +17,6 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
-import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -39,7 +38,7 @@ public class GeneNameValueTable extends NameValueTable
     "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
 
   // the row names
-  private static final String GENE_NAME = HtmlUtils.toNonBreakingSpaces("Gene Name");
+  private static final String GENE_NAME = "Gene Name";
   private static final String ENTREZGENE_ID = "EntrezGene ID";
   private static final String ENTREZGENE_SYMBOL = "EntrezGene Symbol";
   private static final String OLD_ENTREZGENE_IDS = "Old EntrezGene IDs";

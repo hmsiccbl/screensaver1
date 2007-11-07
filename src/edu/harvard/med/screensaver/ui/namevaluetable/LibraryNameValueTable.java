@@ -14,10 +14,9 @@ import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.ui.util.HtmlUtils;
+
+import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the Library Viewer.
@@ -126,7 +125,7 @@ public class LibraryNameValueTable extends NameValueTable
 
   private void addItem(String name, String value, String description)
   {
-    _names.add(HtmlUtils.toNonBreakingSpaces(name));
+    _names.add(name);
     _values.add(value);
     _descriptions.add(description);
   }

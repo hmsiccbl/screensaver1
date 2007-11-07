@@ -15,7 +15,6 @@ import java.util.List;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.libraries.Reagent;
-import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -118,7 +117,7 @@ public class ReagentDetailsNameValueTable extends NameValueTable
 
   protected void addItem(String name, Object value, ValueType valueType, String description)
   {
-    _names.add(HtmlUtils.toNonBreakingSpaces(name));
+    _names.add(name);
     _values.add(value);
     _valueTypes.add(valueType);
     _descriptions.add(description);

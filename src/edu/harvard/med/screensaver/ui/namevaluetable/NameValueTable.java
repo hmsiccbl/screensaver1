@@ -18,6 +18,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -124,7 +125,7 @@ abstract public class NameValueTable extends AbstractBackingBean
   public Object getCellValue()
   {
     if (isNameColumn()) {
-      return getName(getRowIndex());
+      return HtmlUtils.toNonBreakingSpaces(getName(getRowIndex()));
     }
     return getValue(getRowIndex());
   }

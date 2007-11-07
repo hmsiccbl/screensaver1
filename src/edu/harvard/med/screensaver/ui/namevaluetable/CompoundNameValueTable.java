@@ -19,7 +19,6 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
-import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 
@@ -189,7 +188,7 @@ public class CompoundNameValueTable extends NameValueTable
 
   private void addItem(String name, Object value, ValueType valueType, String description)
   {
-    _names.add(HtmlUtils.toNonBreakingSpaces(name));
+    _names.add(name);
     _values.add(value);
     _valueTypes.add(valueType);
     _descriptions.add(description);
