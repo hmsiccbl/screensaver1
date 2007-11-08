@@ -3,8 +3,8 @@
 
 ### build-time properties
 
-#servlet.authentication.method=FORM
-servlet.authentication.method=BASIC
+servlet.authentication.method=FORM
+#servlet.authentication.method=BASIC
 appserver.dir=/usr/local/tomcat
 log4j.properties.file=cfg/ant4/log4j.properties.web
 #log4j.properties.file=cfg/ant4/log4j.properties.debug

@@ -140,7 +140,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
   }
 
   @Override
-  public void setContents(Collection<E> unsortedResults, String description)
+  public void setContents(Collection<? extends E> unsortedResults, String description)
   {
     super.setContents(unsortedResults, description);
 

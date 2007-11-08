@@ -225,6 +225,21 @@
   </definition>
 
 
+  <!-- users tiles -->
+
+  <definition name="/users/usersBrowser.tiles" extends=".base">
+    <put name="pageTitle" value="Users Browser" />
+    <put name="pageHelpURL" value="../help/screens/usersBrowserHelp.jsf" />
+    <put name="body" value="/users/usersBrowser.jsp" />
+  </definition>
+
+  <!-- definition name="/screens/userViewer.tiles" extends=".base">
+    <put name="pageTitle" value="User Viewer" />
+    <put name="pageHelpURL" value="../help/screens/userViewerHelp.jsf" />
+    <put name="body" value="/users/userViewer.jsp" />
+  </definition-->
+
+
   <!-- dev tiles -->
 
   <definition name="/dev/env.tiles" extends=".base">

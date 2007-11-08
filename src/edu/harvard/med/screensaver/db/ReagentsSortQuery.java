@@ -62,6 +62,7 @@ public class ReagentsSortQuery implements edu.harvard.med.screensaver.db.Query
 
   public org.hibernate.Query getQuery(Session session)
   {
+    // TODO: implement using HqlQuery class
     StringBuilder hql = new StringBuilder();
     hql.append("select r from Reagent r ");
     if (_annotationType != null) {

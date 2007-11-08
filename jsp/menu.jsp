@@ -80,6 +80,12 @@
 				<t:commandNavigation2 action="#{menu.browseStudies}"
 					value="Browse Studies" accesskey="T"
 					title="Browse the studies currently available and accessible to you" />
+				<t:commandNavigation2 action="#{menu.browseScreeners}"
+					rendered="#{menu.readAdmin}" value="Browse Screeners" accesskey="U"
+					title="Browse the screeners" />
+				<t:commandNavigation2 action="#{menu.browseStaff}"
+					rendered="#{menu.readAdmin}" value="Browse Staff"
+					title="Browse the staff members of the lab" />
 				<t:commandNavigation2 />
 				<t:commandNavigation2 action="#{menu.viewNews}" value="Latest News"
 					accesskey="N" title="The latest Screensaver news" />

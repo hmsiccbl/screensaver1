@@ -396,6 +396,7 @@
       <url-pattern>/helpViewer.jsf</url-pattern>
       <url-pattern>/libraries/*</url-pattern>
       <url-pattern>/studies/*</url-pattern>
+      <url-pattern>/users/*</url-pattern>
       <url-pattern>/help/*</url-pattern>
     </web-resource-collection>
 
@@ -473,6 +474,22 @@
 
     <auth-constraint>
       <role-name>screenResultsAdmin</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>usersAdmin</web-resource-name>
+      <url-pattern>/users/admin/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>usersAdmin</role-name>
     </auth-constraint>
 
     <user-data-constraint>

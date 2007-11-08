@@ -78,7 +78,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
 
   private Map<String,Boolean> _capabilities = new HashMap<String,Boolean>();
   private String _description;
-  private Collection<E> _unsortedResults;
+  private Collection<? extends E> _unsortedResults;
   private DataTable<E> _dataTable;
   private List<E> _sortedData;
   private boolean _editMode;
@@ -146,7 +146,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return _capabilities;
   }
 
-  public void setContents(Collection<E> unsortedResults)
+  public void setContents(Collection<? extends E> unsortedResults)
   {
     setContents(unsortedResults, null);
   }
@@ -157,7 +157,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    * @param unsortedResults the unsorted list of the results, as they are
    *          returned from the database
    */
-  public void setContents(Collection<E> unsortedResults, String description)
+  public void setContents(Collection<? extends E> unsortedResults, String description)
   {
     _unsortedResults = unsortedResults;
     _description = description;
@@ -222,7 +222,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return new ArrayList<Integer[]>();
   }
 
-  public Collection<E> getContents()
+  public Collection<? extends E> getContents()
   {
     return _unsortedResults;
   }

@@ -92,7 +92,7 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
 
   @SuppressWarnings("unchecked")
   @Override
-  public void setContents(Collection<WellCopyVolume> wellCopyVolumes)
+  public void setContents(Collection<? extends WellCopyVolume> wellCopyVolumes)
   {
     super.setContents(wellCopyVolumes);
 

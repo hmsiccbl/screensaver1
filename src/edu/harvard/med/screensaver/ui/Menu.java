@@ -26,10 +26,12 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 
 import org.apache.log4j.Logger;
 
@@ -50,6 +52,7 @@ public class Menu extends AbstractBackingBean
   private ScreenSearchResults _screensBrowser;
   private StudySearchResults _studiesBrowser;
   private LibrarySearchResults _librariesBrowser;
+  private UserSearchResults _usersBrowser;
 
 
   // public methods
@@ -65,13 +68,15 @@ public class Menu extends AbstractBackingBean
               LibrariesDAO librariesDao,
               ScreenSearchResults screensBrowser,
               StudySearchResults studiesBrowser,
-              LibrarySearchResults librariesBrowser)
+              LibrarySearchResults librariesBrowser,
+              UserSearchResults usersBrowser)
   {
     _dao = dao;
     _librariesDao = librariesDao;
     _screensBrowser = screensBrowser;
     _studiesBrowser = studiesBrowser;
     _librariesBrowser = librariesBrowser;
+    _usersBrowser = usersBrowser;
   }
 
 
@@ -154,6 +159,22 @@ public class Menu extends AbstractBackingBean
                                   (screenType == null ? "All" : screenType.getValue())
                                   + " Libraries");
     return BROWSE_LIBRARIES;
+  }
+
+  @UIControllerMethod
+  public String browseScreeners()
+  {
+    List<ScreeningRoomUser> users = _dao.findAllEntitiesOfType(ScreeningRoomUser.class, true);
+    _usersBrowser.setContents(users, "Screening Room Users");
+    return BROWSE_USERS;
+  }
+
+  @UIControllerMethod
+  public String browseStaff()
+  {
+    List<AdministratorUser> users = _dao.findAllEntitiesOfType(AdministratorUser.class, true);
+    _usersBrowser.setContents(users, "Staff Members");
+    return BROWSE_USERS;
   }
 
   @UIControllerMethod
