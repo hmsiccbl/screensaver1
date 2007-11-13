@@ -83,10 +83,10 @@
 									value="#{column.criterion.value}"
 									converter="#{column.converter}"
 									rendered="#{column.columnType.name == \"TEXT\" || column.columnType.name == \"INTEGER\" || column.columnType.name == \"REAL\" || column.columnType.name == \"FIXED_DECIMAL\"}"
-									size="12"
+									size="8"
 									styleClass="inputText"
 									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}" />
-								<t:inputDate id="dateCriterionValue"
+								<t:inputDate id="dateCriterionValue" type="date" popupCalendar="true"
 									value="#{column.criterion.value}"
 									rendered="#{column.columnType.name == \"DATE\"}"
 									styleClass="inputText"

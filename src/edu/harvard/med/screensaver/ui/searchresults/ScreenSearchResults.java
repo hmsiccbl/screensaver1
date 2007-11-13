@@ -62,7 +62,6 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
   {
     _screenViewer = screenViewer;
     _dao = dao;
-    getCapabilities().remove("filter");
   }
 
 
