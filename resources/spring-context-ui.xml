@@ -153,6 +153,7 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="librariesBrowser" />
     <constructor-arg ref="usersBrowser" />
+    <constructor-arg ref="screeningRoomActivitiesBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -589,6 +590,20 @@
     <constructor-arg ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean-->
+
+  <!-- === activities backing beans === -->
+
+  <bean
+    id="screeningRoomActivitiesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.ScreeningRoomActivitySearchResults">
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <!-- constructor-arg ref="activityViewer" /-->
+    <aop:scoped-proxy/>
+  </bean>
+
 
   <!-- converters -->
 

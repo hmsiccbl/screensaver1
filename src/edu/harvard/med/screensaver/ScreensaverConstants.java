@@ -61,5 +61,5 @@ public interface ScreensaverConstants
   public static final String VIEW_ATTACHED_FILE_ACTION_RESULT = "viewAttachedFile";
   public static final String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
   public static final String BROWSE_USERS = "browseUsers";
-
+  public static final String BROWSE_ACTIVITIES = "browseActivities";
 }

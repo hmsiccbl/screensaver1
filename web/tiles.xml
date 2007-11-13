@@ -224,7 +224,6 @@
     <put name="body" value="/screens/cherryPickRequestViewer.jsp" />
   </definition>
 
-
   <!-- users tiles -->
 
   <definition name="/users/usersBrowser.tiles" extends=".base">
@@ -239,6 +238,13 @@
     <put name="body" value="/users/userViewer.jsp" />
   </definition-->
 
+  <!-- activities tiles -->
+
+  <definition name="/activities/screeningRoomActivitiesBrowser.tiles" extends=".base">
+    <put name="pageTitle" value="Activities Browser" />
+    <put name="pageHelpURL" value="../help/activities/screeningRoomActivitiesBrowserHelp.jsf" />
+    <put name="body" value="/activities/screeningRoomActivitiesBrowser.jsp" />
+  </definition>
 
   <!-- dev tiles -->
 

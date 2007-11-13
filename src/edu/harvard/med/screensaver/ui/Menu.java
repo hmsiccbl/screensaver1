@@ -20,16 +20,20 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 
@@ -53,6 +57,7 @@ public class Menu extends AbstractBackingBean
   private StudySearchResults _studiesBrowser;
   private LibrarySearchResults _librariesBrowser;
   private UserSearchResults _usersBrowser;
+  private ActivitySearchResults _activitiesBrowser;
 
 
   // public methods
@@ -69,7 +74,8 @@ public class Menu extends AbstractBackingBean
               ScreenSearchResults screensBrowser,
               StudySearchResults studiesBrowser,
               LibrarySearchResults librariesBrowser,
-              UserSearchResults usersBrowser)
+              UserSearchResults usersBrowser,
+              ActivitySearchResults activitySearchResults)
   {
     _dao = dao;
     _librariesDao = librariesDao;
@@ -77,6 +83,7 @@ public class Menu extends AbstractBackingBean
     _studiesBrowser = studiesBrowser;
     _librariesBrowser = librariesBrowser;
     _usersBrowser = usersBrowser;
+    _activitiesBrowser = activitySearchResults;
   }
 
 
@@ -275,5 +282,30 @@ public class Menu extends AbstractBackingBean
       }
     });
     return result[0];
+  }
+
+  @UIControllerMethod
+  public String browseScreeningRoomActivities()
+  {
+    _dao.doInTransaction(new DAOTransaction()
+    {
+
+      public void runTransaction()
+      {
+        List<? extends Activity> activities =
+          _dao.findAllEntitiesOfType(ScreeningRoomActivity.class,
+                                     true,
+                                     "performedBy",
+                                     "screen");
+        for (Iterator<? extends Activity> iter = activities.iterator(); iter.hasNext();) {
+          Activity activity = iter.next();
+          if (activity.isRestricted()) {
+            iter.remove();
+          }
+        }
+        _activitiesBrowser.setContents(activities);
+      }
+    });
+    return BROWSE_ACTIVITIES;
   }
 }

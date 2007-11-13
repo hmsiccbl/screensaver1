@@ -85,11 +85,11 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
         @Override
         public String getCellValue(Screen screen) { return screen.getTitle(); }
       });
-      _columns.add(new UserNameColumn<Screen>("Lab Head", "The head of the lab performing the screen", _dao) {
+      _columns.add(new UserNameColumn<Screen>("Lab Head", "The head of the lab performing the screen") {
         @Override
         public ScreensaverUser getUser(Screen screen) { return screen.getLabHead(); }
       });
-      _columns.add(new UserNameColumn<Screen>("Lead Screener", "The scientist primarily responsible for running the screen", _dao) {
+      _columns.add(new UserNameColumn<Screen>("Lead Screener", "The scientist primarily responsible for running the screen") {
         @Override
         public ScreensaverUser getUser(Screen screen) { return screen.getLeadScreener(); }
       });

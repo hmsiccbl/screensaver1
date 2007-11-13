@@ -57,13 +57,12 @@ public class UserSearchResults extends EntitySearchResults<ScreensaverUser>
   {
     if (_columns == null) {
       _columns = new ArrayList<TableColumn<ScreensaverUser,?>>();
-      _columns.add(new TextColumn<ScreensaverUser>("Last", "The last name of the user") {
+      _columns.add(new UserNameColumn<ScreensaverUser>("User", "The name of the user (last, first)") {
         @Override
-        public String getCellValue(ScreensaverUser user) { return user.getLastName(); }
-      });
-      _columns.add(new TextColumn<ScreensaverUser>("First", "The first name of the user") {
-        @Override
-        public String getCellValue(ScreensaverUser user) { return user.getFirstName(); }
+        protected ScreensaverUser getUser(ScreensaverUser user)
+        {
+          return user;
+        }
       });
       _columns.add(new DateColumn<ScreensaverUser>("Date Created",
         "The date the user's account was created") {
@@ -77,9 +76,9 @@ public class UserSearchResults extends EntitySearchResults<ScreensaverUser>
   protected List<Integer[]> getCompoundSorts()
   {
     List<Integer[]> compoundSorts = super.getCompoundSorts();
-    compoundSorts.add(new Integer[] {0, 1, 2});
-    compoundSorts.add(new Integer[] {1, 0, 2});
-    compoundSorts.add(new Integer[] {2, 1, 2});
+//    compoundSorts.add(new Integer[] {0, 1, 2});
+//    compoundSorts.add(new Integer[] {1, 0, 2});
+//    compoundSorts.add(new Integer[] {2, 1, 2});
     return compoundSorts;
   }
 

@@ -19,8 +19,8 @@ import edu.harvard.med.screensaver.util.NullSafeComparator;
 public abstract class UserNameColumn<T> extends TextColumn<T>
 {
   public UserNameColumn(String name,
-                    String description,
-                    GenericEntityDAO dao)
+                        String description/*,
+                        GenericEntityDAO dao*/)
   {
     super(name,
           description);

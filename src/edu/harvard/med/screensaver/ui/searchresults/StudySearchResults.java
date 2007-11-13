@@ -79,11 +79,11 @@ public class StudySearchResults extends EntitySearchResults<Study>
         @Override
         public String getCellValue(Study study) { return study.getTitle(); }
       });
-      _columns.add(new UserNameColumn<Study>("Lab Head", "The head of the lab performing the study", _dao) {
+      _columns.add(new UserNameColumn<Study>("Lab Head", "The head of the lab performing the study") {
         @Override
         public ScreensaverUser getUser(Study study) { return study.getLabHead(); }
       });
-      _columns.add(new UserNameColumn<Study>("Study Head", "The scientist primarily responsible for running the study", _dao) {
+      _columns.add(new UserNameColumn<Study>("Study Head", "The scientist primarily responsible for running the study") {
         @Override
         public ScreensaverUser getUser(Study study) { return study.getLeadScreener(); }
       });

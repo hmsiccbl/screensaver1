@@ -143,7 +143,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(CherryPickLiquidTransfer entity)
   {
-    return true;
+    return visit((ScreeningRoomActivity) entity);
   }
 
   public boolean visit(Compound entity)

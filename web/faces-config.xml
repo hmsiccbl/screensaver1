@@ -224,6 +224,20 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
 
+    <!-- === activities navigation rules === -->
+
+    <navigation-case>
+      <from-outcome>browseActivities</from-outcome>
+      <to-view-id>/activities/screeningRoomActivitiesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewActivity</from-outcome>
+      <to-view-id>/activities/activityViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+
+
     <!-- === users navigation rules === -->
     <navigation-case>
       <from-outcome>browseUsers</from-outcome>

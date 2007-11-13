@@ -65,7 +65,7 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
         return null;
       }
     });
-    columns.add(new UserNameColumn<WellVolumeAdjustment>("Performed By", "The person that performed the volume adjustment", _dao) {
+    columns.add(new UserNameColumn<WellVolumeAdjustment>("Performed By", "The person that performed the volume adjustment") {
       @Override
       protected ScreensaverUser getUser(WellVolumeAdjustment wva)
       {
