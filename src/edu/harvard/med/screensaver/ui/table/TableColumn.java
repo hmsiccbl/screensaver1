@@ -13,23 +13,82 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.faces.convert.BigDecimalConverter;
+import javax.faces.convert.BooleanConverter;
+import javax.faces.convert.Converter;
+import javax.faces.convert.DateTimeConverter;
+import javax.faces.convert.DoubleConverter;
+import javax.faces.convert.IntegerConverter;
+
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.util.NoOpStringConverter;
 
 import org.apache.log4j.Logger;
 
-public abstract class TableColumn<E>
+/**
+ *
+ * @param R the row data type
+ * @param T the column data type
+ */
+public abstract class TableColumn<R,T>
 {
   // static members
 
   private static Logger log = Logger.getLogger(TableColumn.class);
 
+  private static DateTimeConverter dateTimeConverter = new DateTimeConverter();
+  static {
+    dateTimeConverter.setDateStyle("short");
+  }
+
+  public enum ColumnType {
+    TEXT(false, new NoOpStringConverter()),
+    INTEGER(true, new IntegerConverter()),
+    REAL(true, new DoubleConverter()),
+    FIXED_DECIMAL(true, new BigDecimalConverter()),
+    DATE(false, dateTimeConverter),
+    BOOLEAN(false, new BooleanConverter()),
+    VOCABULARY(false, null);
+
+    private Converter _converter = NoOpStringConverter.getInstance();
+    private boolean _isNumeric;
+
+    private ColumnType(boolean isNumeric,
+                       Converter converter)
+    {
+      _isNumeric = isNumeric;
+      _converter = converter;
+    }
+
+    /**
+     * @motivation for JSF EL expression usage
+     */
+    public String getName()
+    {
+      return toString();
+    }
+
+    public boolean isNumeric()
+    {
+      return _isNumeric;
+    }
+
+    public Converter getConverter()
+    {
+      return _converter;
+    }
+  };
+
 
   // instance data members
 
-  private Map<SortDirection,Comparator<E>> _comparators = new HashMap<SortDirection,Comparator<E>>();
+  private Map<SortDirection,Comparator<R>> _comparators = new HashMap<SortDirection,Comparator<R>>();
+  private ColumnType _columnType;
   private String _name;
   private String _description;
   private boolean _isNumeric;
+  private Criterion _criterion = new Criterion<T>();
+  private Converter _converter = NoOpStringConverter.getInstance();
 
 
   // public constructors and methods
@@ -38,18 +97,16 @@ public abstract class TableColumn<E>
   {
   }
 
-  public TableColumn(String name, String description)
+  public TableColumn(String name, String description, ColumnType columnType)
   {
+    _columnType = columnType;
     _name = name;
     _description = description;
+    _isNumeric = columnType.isNumeric();
+    _converter = columnType.getConverter();
   }
 
-  public TableColumn(String name, String description, boolean isNumeric)
-  {
-    _name = name;
-    _description = description;
-    _isNumeric = isNumeric;
-  }
+  public ColumnType getColumnType() { return _columnType; }
 
   /**
    * Get the name of the column.
@@ -65,18 +122,28 @@ public abstract class TableColumn<E>
    */
   public String getDescription() { return _description; }
 
+  public Converter getConverter()
+  {
+    return _converter;
+  }
+
+  public void setConverter(Converter converter)
+  {
+    _converter = converter;
+  }
+
   /**
    * Get a comparator for sorting the column for the specified sortDirection and
    * that is null-safe.
    *
    * @return a comparator for sorting the column
    */
-  final public Comparator<E> getComparator(final SortDirection sortDirection)
+  final public Comparator<R> getComparator(final SortDirection sortDirection)
   {
     if (_comparators.get(sortDirection) == null) {
       _comparators.put(sortDirection,
-                       new Comparator<E>() {
-        public int compare(E o1, E o2)
+                       new Comparator<R>() {
+        public int compare(R o1, R o2)
         {
           int result = getAscendingComparator().compare(o1, o2);
           if (sortDirection.equals(SortDirection.DESCENDING)) {
@@ -97,11 +164,11 @@ public abstract class TableColumn<E>
    *
    * @return a comparator for sorting the column
    */
-  protected Comparator<E> getAscendingComparator()
+  protected Comparator<R> getAscendingComparator()
   {
-    return new Comparator<E>() {
+    return new Comparator<R>() {
       @SuppressWarnings("unchecked")
-      public int compare(E o1, E o2)
+      public int compare(R o1, R o2)
       {
         Object v1 = getCellValue(o1);
         Object v2 = getCellValue(o2);
@@ -122,13 +189,33 @@ public abstract class TableColumn<E>
     };
   }
 
+  public Criterion getCriterion()
+  {
+    return _criterion;
+  }
+
+  public void setCriterion(Criterion criterion)
+  {
+    _criterion = criterion;
+  }
+
+  /**
+   * Returns whether the specified entity matches the criterion for the column.
+   * @param e the entity to be matched
+   * @return boolean
+   */
+  public boolean matches(R e)
+  {
+    return getCriterion().matches(getCellValue(e));
+  }
+
   /**
    * Get the value to be displayed for the current column and cell.
    *
    * @param entity the entity displayed in the current cell (the row index)
    * @return the value to be displayed for the current cell
    */
-  abstract public Object getCellValue(E entity);
+  abstract public T getCellValue(R entity);
 
   /**
    * Set the new value of the entity for the current column and cell.
@@ -136,11 +223,11 @@ public abstract class TableColumn<E>
    * @param entity the entity displayed in the current cell (the row index)
    * @param value the new value
    */
-  public void setCellValue(E entity, Object value) {}
+  public void setCellValue(R entity, Object value) {}
 
   /**
    * Get whether this table column is editable by the user. If it is, you must
-   * implement {@link #setCellValue(Object, Object)}, if submitted values are
+   * implement {@link #setCellValue(R, T)}, if submitted values are
    * to update your data model. Also, {@link #isCommandLink()} and
    * {@link #isCommandLinkList()} should be return false if this method return
    * true.
@@ -160,9 +247,9 @@ public abstract class TableColumn<E>
   /**
    * Return true whenever the cell values for the column should be a
    * semicolon-separated list of hyperlinks. In this situation, {@link
-   * #getCellValue(Object)} returns an array of values, and {@link #cellAction(Object)} is
+   * #getCellValue(R)} returns an array of values, and {@link #cellAction(R)} is
    * called with a <code>commandValue</code> parameter equal to the results of
-   * {@link #getCellValue(Object)}.
+   * {@link #getCellValue(R)}.
    *
    * @return true whenever the cell values for the column should be a list of
    *         hyperlinks.
@@ -177,7 +264,7 @@ public abstract class TableColumn<E>
    * @param entity the entity displayed in the current cell (the row index)
    * @return the navigation rule to go along with the action for clicking on the current cell
    */
-  public Object cellAction(E entity) { return null; }
+  public Object cellAction(R entity) { return null; }
 
   /**
    * Return true whenever the cell values for the column should be a hyperlink.
@@ -193,9 +280,9 @@ public abstract class TableColumn<E>
   /**
    * Return true whenever the cell values for the column should be a
    * semicolon-separated list of hyperlinks. In this situation, {@link
-   * #getCellValue(Object)} returns an array of values, and {@link #cellAction(Object)} is
+   * #getCellValue(R)} returns an array of values, and {@link #cellAction(R)} is
    * called with a <code>commandValue</code> parameter equal to the results of
-   * {@link #getCellValue(Object)}.
+   * {@link #getCellValue(R)}.
    *
    * @motivation isCommandLinkList() translates to just 'commandLinkList'
    *             JavaBean property name, which is not as nice as

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.table.CriterionMatchException;
 import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
@@ -80,9 +82,10 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   private String _description;
   private Collection<? extends E> _unsortedResults;
   private DataTable<E> _dataTable;
-  private List<E> _sortedData;
+  private List<? extends E> _sortedData;
   private boolean _editMode;
   private boolean _hasEditableColumns;
+  private boolean _filterMode;
 
 
   // public constructor
@@ -104,7 +107,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     // HACK: create a dummy data table as soon as possible to allow JSF component bindings to work
     _dataTable = new DataTable<E>() {
       @Override
-      protected List<TableColumn<E>> buildColumns()
+      protected List<TableColumn<E,?>> buildColumns()
       {
         return Collections.emptyList();
       }
@@ -130,7 +133,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
    *
    * @return a list of the column headers
    */
-  abstract protected List<TableColumn<E>> getColumns();
+  abstract protected List<TableColumn<E,?>> getColumns();
 
 
   // public methods
@@ -165,7 +168,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     _dataTable = new DataTable<E>()
     {
       @Override
-      protected List<TableColumn<E>> buildColumns()
+      protected List<TableColumn<E,?>> buildColumns()
       {
         return getColumns();
       }
@@ -232,6 +235,16 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return _description;
   }
 
+  public boolean isFilterMode()
+  {
+    return _filterMode;
+  }
+
+  public void setFilterMode(boolean filterMode)
+  {
+    _filterMode = filterMode;
+  }
+
 
   // public action command methods & action listeners
 
@@ -270,6 +283,14 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  public String resetFilter()
+  {
+    for (TableColumn<E,?> column : getSortManager().getColumns()) {
+      column.getCriterion().reset();
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
 
   // protected instance methods
 
@@ -299,7 +320,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return _backslashEscaper;
   }
 
-  final protected TableColumn<E> getCurrentColumn()
+  final protected TableColumn<E,?> getCurrentColumn()
   {
     return getSortManager().getCurrentColumn();
   }
@@ -314,7 +335,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return (E) _dataTable.getDataModel().getRowData();
   }
 
-  final protected List<E> getCurrentSort()
+  final protected List<? extends E> getCurrentSort()
   {
     buildDataModel();
     return _sortedData;
@@ -324,8 +345,32 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   {
     _sortedData = new ArrayList<E>(_unsortedResults);
     Collections.sort(_sortedData, getSortManager().getSortColumnComparator());
-    DataModel dataModel = new ListDataModel(_sortedData);
+    DataModel dataModel = new ListDataModel(filter(_sortedData));
     return dataModel;
+  }
+
+  private ArrayList<? extends E> filter(List<? extends E> sortedResults)
+  {
+    ArrayList<? extends E> filteredResults = new ArrayList<E>(sortedResults);
+    List<TableColumn<E,?>> columns = getSortManager().getColumns();
+    // TODO: consider operator types to optimize this (can short-circuit <, <=, >, >=, can do binary search with equals)
+    for (TableColumn<E,?> column : columns) {
+      try {
+        if (!column.getCriterion().isUndefined()) {
+          Iterator<? extends E> rowIter = filteredResults.iterator();
+          while (rowIter.hasNext()) {
+            if (!column.matches(rowIter.next())) {
+              rowIter.remove();
+            }
+          }
+        }
+      }
+      catch (CriterionMatchException e) {
+        e.getCriterion().reset();
+        reportApplicationError(e);
+      }
+    }
+    return filteredResults;
   }
 
   /**
@@ -361,9 +406,9 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     }
   }
 
-  private void initializeHasEditableColumns(List<TableColumn<E>> columns)
+  private void initializeHasEditableColumns(List<TableColumn<E,?>> columns)
   {
-    for (TableColumn<E> column : columns) {
+    for (TableColumn<E,?> column : columns) {
       if (column.isEditable()) {
         _hasEditableColumns = true;
         break;

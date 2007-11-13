@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultSortQuery.SortByWellProperty;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -113,7 +114,7 @@ public abstract class ScreenResultDataTable extends DataTable<Well>
 
   public boolean isResultValueExcluded()
   {
-    TableColumn<Well> column = getSortManager().getCurrentColumn();
+    TableColumn<Well,?> column = getSortManager().getCurrentColumn();
     if (column instanceof ResultValueTypeColumn) {
       ResultValueTypeColumn rvtColumn = (ResultValueTypeColumn) column;
       ResultValue resultValue = getRowData().getResultValues().get(rvtColumn.getResultValueType());
@@ -144,9 +145,9 @@ public abstract class ScreenResultDataTable extends DataTable<Well>
 
   // abstract method implementations
 
-  protected List<TableColumn<Well>> buildColumns()
+  protected List<TableColumn<Well,?>> buildColumns()
   {
-    List<TableColumn<Well>> columns = new ArrayList<TableColumn<Well>>();
+    List<TableColumn<Well,?>> columns = new ArrayList<TableColumn<Well,?>>();
     columns.addAll(buildFixedColumns());
     columns.addAll(buildVariableColumns());
     return columns;
@@ -155,22 +156,20 @@ public abstract class ScreenResultDataTable extends DataTable<Well>
 
   // private methods
 
-  private List<TableColumn<Well>> buildFixedColumns()
+  private List<TableColumn<Well,?>> buildFixedColumns()
   {
-    List<TableColumn<Well>> fixedColumns = new ArrayList<TableColumn<Well>>(3);
-    fixedColumns.add(new WellColumn(SortByWellProperty.PLATE_NUMBER,
+    List<TableColumn<Well,?>> fixedColumns = new ArrayList<TableColumn<Well,?>>(3);
+    fixedColumns.add(new WellColumn<Integer>(SortByWellProperty.PLATE_NUMBER,
                                     "Plate",
-                                    "The plate number",
-                                    true) {
+                                    "The plate number") {
       @Override
-      public Object getCellValue(Well well) { return well.getWellKey().getPlateNumber(); }
+      public Integer getCellValue(Well well) { return well.getWellKey().getPlateNumber(); }
     });
-    fixedColumns.add(new WellColumn(SortByWellProperty.WELL_NAME,
+    fixedColumns.add(new WellColumn<String>(SortByWellProperty.WELL_NAME,
                                     "Well",
-                                    "The well name",
-                                    false) {
+                                    "The well name") {
       @Override
-      public Object getCellValue(Well well) { return well.getWellKey().getWellName(); }
+      public String getCellValue(Well well) { return well.getWellKey().getWellName(); }
 
       @Override
       public boolean isCommandLink() { return true; }
@@ -181,21 +180,25 @@ public abstract class ScreenResultDataTable extends DataTable<Well>
         return _wellViewer.viewWell(well);
       }
     });
-    fixedColumns.add(new WellColumn(SortByWellProperty.ASSAY_WELL_TYPE,
+    fixedColumns.add(new WellColumn<AssayWellType>(SortByWellProperty.ASSAY_WELL_TYPE,
                                     "Assay Well Type",
-                                    StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase(),
-                                    false) {
+                                    StringUtils.makeListString(StringUtils.wrapStrings(Arrays.asList(WellType.values()), "'", "'"), ", ").toLowerCase()) {
       @Override
-      public Object getCellValue(Well well) { return well.getResultValues().values().iterator().next().getAssayWellType(); }
+      public AssayWellType getCellValue(Well well) { return well.getResultValues().values().iterator().next().getAssayWellType(); }
     });
     return fixedColumns;
   }
 
-  private List<TableColumn<Well>> buildVariableColumns()
+  private List<TableColumn<Well,?>> buildVariableColumns()
   {
-    ArrayList<TableColumn<Well>> result = new ArrayList<TableColumn<Well>>();
+    ArrayList<TableColumn<Well,?>> result = new ArrayList<TableColumn<Well,?>>();
     for (ResultValueType rvt : getResultValueTypes()) {
-      result.add(new ResultValueTypeColumn(rvt));
+      if (rvt.isNumeric()) {
+        result.add(new ResultValueTypeColumn<Double>(rvt));
+      }
+      else {
+        result.add(new ResultValueTypeColumn<String>(rvt));
+      }
     }
     return result;
   }

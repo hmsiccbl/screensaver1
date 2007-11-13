@@ -38,7 +38,7 @@ public class PositivesOnlyScreenResultDataModel extends ScreenResultDataModel
   public PositivesOnlyScreenResultDataModel(ScreenResult screenResult,
                                             List<ResultValueType> resultValueTypes,
                                             int rowsToFetch,
-                                            TableColumn<Well> sortColumn,
+                                            TableColumn<Well,?> sortColumn,
                                             SortDirection sortDirection,
                                             GenericEntityDAO dao,
                                             ResultValueType positivesOnlyRvt)

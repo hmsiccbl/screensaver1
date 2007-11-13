@@ -7,14 +7,20 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.table;
+package edu.harvard.med.screensaver.util;
 
-import javax.faces.model.DataModel;
-
-import edu.harvard.med.screensaver.db.SortDirection;
-
-public abstract class SortableDataModel<E> extends DataModel
+public class NullSafeUtils
 {
-  public abstract void sort(TableColumn<E,?> column,
-                            SortDirection direction);
+  // static members
+
+  public static boolean nullSafeEquals(Object o1, Object o2)
+  {
+    if (o1 == null) {
+      return o2 == null;
+    }
+    if (o2 == null) {
+      return false;
+    }
+    return o1.equals(o2);
+  }
 }

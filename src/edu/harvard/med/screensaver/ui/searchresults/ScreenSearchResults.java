@@ -11,16 +11,20 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 
@@ -39,8 +43,9 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
   // instance fields
 
   private ScreenViewer _screenViewer;
+  private GenericEntityDAO _dao;
 
-  private ArrayList<TableColumn<Screen>> _columns;
+  private ArrayList<TableColumn<Screen,?>> _columns;
 
 
   // public constructor
@@ -52,21 +57,24 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
   {
   }
 
-  public ScreenSearchResults(ScreenViewer screenViewer)
+  public ScreenSearchResults(ScreenViewer screenViewer,
+                             GenericEntityDAO dao)
   {
     _screenViewer = screenViewer;
+    _dao = dao;
+    getCapabilities().remove("filter");
   }
 
 
   // implementations of the SearchResults abstract methods
 
-  protected List<TableColumn<Screen>> getColumns()
+  protected List<TableColumn<Screen,?>> getColumns()
   {
     if (_columns == null) {
-      _columns = new ArrayList<TableColumn<Screen>>();
-      _columns.add(new TableColumn<Screen>("Screen Number", "The screen number", true) {
+      _columns = new ArrayList<TableColumn<Screen,?>>();
+      _columns.add(new IntegerColumn<Screen>("Screen Number", "The screen number") {
         @Override
-        public Object getCellValue(Screen screen) { return screen.getScreenNumber(); }
+        public Integer getCellValue(Screen screen) { return screen.getScreenNumber(); }
 
         @Override
         public Object cellAction(Screen screen) { return viewCurrentEntity(); }
@@ -74,54 +82,33 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
         @Override
         public boolean isCommandLink() { return true; }
       });
-      _columns.add(new TableColumn<Screen>("Title", "The title of the screen") {
+      _columns.add(new TextColumn<Screen>("Title", "The title of the screen") {
         @Override
-        public Object getCellValue(Screen screen) { return screen.getTitle(); }
+        public String getCellValue(Screen screen) { return screen.getTitle(); }
       });
-      _columns.add(new TableColumn<Screen>("Lab Head", "The head of the lab performing the screen") {
+      _columns.add(new UserNameColumn<Screen>("Lab Head", "The head of the lab performing the screen", _dao) {
         @Override
-        public Object getCellValue(Screen screen) { return screen.getLabHead().getFullNameLastFirst(); }
-
-        @Override
-        protected Comparator<Screen> getAscendingComparator()
-        {
-          return new Comparator<Screen>() {
-            public int compare(Screen s1, Screen s2) {
-              return ScreensaverUserComparator.getInstance().compare(s1.getLabHead(),
-                                                                     s2.getLabHead());
-            }
-          };
-        }
+        public ScreensaverUser getUser(Screen screen) { return screen.getLabHead(); }
       });
-      _columns.add(new TableColumn<Screen>("Lead Screener", "The scientist primarily responsible for running the screen") {
+      _columns.add(new UserNameColumn<Screen>("Lead Screener", "The scientist primarily responsible for running the screen", _dao) {
         @Override
-        public Object getCellValue(Screen screen) { return screen.getLeadScreener().getFullNameLastFirst(); }
-
-        @Override
-        protected Comparator<Screen> getAscendingComparator()
-        {
-          return new Comparator<Screen>() {
-            public int compare(Screen s1, Screen s2) {
-              return ScreensaverUserComparator.getInstance().compare(s1.getLeadScreener(),
-                                                                     s2.getLeadScreener());
-            }
-          };
-        }
+        public ScreensaverUser getUser(Screen screen) { return screen.getLeadScreener(); }
       });
-      _columns.add(new TableColumn<Screen>("Screen Result",
+      _columns.add(new EnumColumn<Screen,ScreenResultAvailability>("Screen Result",
         "'available' if the screen result is loaded into Screensaver and viewable by the current user;" +
-        " 'not shared' if loaded but not viewable by the current user; otherwise 'none'") {
+        " 'not shared' if loaded but not viewable by the current user; otherwise 'none'",
+        ScreenResultAvailability.values()) {
         @Override
-        public Object getCellValue(Screen screen)
+        public ScreenResultAvailability getCellValue(Screen screen)
         {
           if (screen.getScreenResult() == null) {
-            return "none";
+            return ScreenResultAvailability.NONE;
           }
           else if (screen.getScreenResult().isRestricted()) {
-            return "not shared";
+            return ScreenResultAvailability.NOT_SHARED;
           }
           else {
-            return "available";
+            return ScreenResultAvailability.AVAILABLE;
           }
         }
 
@@ -152,17 +139,17 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
           };
         }
       });
-      _columns.add(new TableColumn<Screen>("Screen Type", "'RNAi' or 'Small Molecule'") {
+      _columns.add(new EnumColumn<Screen, ScreenType>("Screen Type", "'RNAi' or 'Small Molecule'", ScreenType.values()) {
         @Override
-        public Object getCellValue(Screen screen) { return screen.getScreenType().getValue(); }
+        public ScreenType getCellValue(Screen screen) { return screen.getScreenType(); }
       });
-      _columns.add(new TableColumn<Screen>("Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.") {
+      _columns.add(new EnumColumn<Screen,StatusValue>("Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.", StatusValue.values()) {
         @Override
-        public Object getCellValue(Screen screen)
+        public StatusValue getCellValue(Screen screen)
         {
           SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
           if (statusItems.size() == 0) {
-            return "";
+            return null;
           }
           StatusItem statusItem = statusItems.last();
           return statusItem.getStatusValue();
@@ -171,39 +158,11 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
         @Override
         public boolean isVisible() { return showStatusFields(); }
       });
-      _columns.add(new TableColumn<Screen>("Status Date", "The date of the most recent change of status for the screen") {
+      _columns.add(new DateColumn<Screen>("Status Date", "The date of the most recent change of status for the screen") {
         @Override
-        public Object getCellValue(Screen screen)
-        {
+        protected Date getDate(Screen screen) {
           SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
-          if (statusItems.size() == 0) {
-            return "";
-          }
-          StatusItem statusItem = statusItems.last();
-          return String.format("%tD", statusItem.getStatusDate());
-        }
-
-        @Override
-        protected Comparator<Screen> getAscendingComparator()
-        {
-          return new Comparator<Screen>() {
-            public int compare(Screen s1, Screen s2) {
-              SortedSet<StatusItem> statusItems1 = s1.getSortedStatusItems();
-              SortedSet<StatusItem> statusItems2 = s2.getSortedStatusItems();
-              if (statusItems1.size() == 0) {
-                if (statusItems2.size() == 0) {
-                  return 0;
-                }
-                return -1;
-              }
-              if (statusItems2.size() == 0) {
-                return 1;
-              }
-              StatusItem statusItem1 = statusItems1.last();
-              StatusItem statusItem2 = statusItems2.last();
-              return statusItem1.getStatusDate().compareTo(statusItem2.getStatusDate());
-            }
-          };
+          return statusItems.size() == 0 ? null : statusItems.last().getStatusDate();
         }
 
         @Override

@@ -9,12 +9,20 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
-import javax.faces.model.DataModel;
-
-import edu.harvard.med.screensaver.db.SortDirection;
-
-public abstract class SortableDataModel<E> extends DataModel
+public class CriterionMatchException extends RuntimeException
 {
-  public abstract void sort(TableColumn<E,?> column,
-                            SortDirection direction);
+  private static final long serialVersionUID = 1L;
+
+  private Criterion _criterion;
+
+  public CriterionMatchException(String s, Criterion c)
+  {
+    super(c + ": " + s);
+    _criterion = c;
+  }
+
+  public Criterion getCriterion()
+  {
+    return _criterion;
+  }
 }

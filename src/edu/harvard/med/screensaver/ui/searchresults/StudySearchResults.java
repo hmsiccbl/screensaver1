@@ -10,15 +10,16 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 
 /**
@@ -36,8 +37,10 @@ public class StudySearchResults extends EntitySearchResults<Study>
   // instance fields
 
   private StudyViewer _studyViewer;
+  private GenericEntityDAO _dao;
 
-  private ArrayList<TableColumn<Study>> _columns;
+  private ArrayList<TableColumn<Study,?>> _columns;
+
 
 
   // public constructor
@@ -49,21 +52,22 @@ public class StudySearchResults extends EntitySearchResults<Study>
   {
   }
 
-  public StudySearchResults(StudyViewer studyViewer)
+  public StudySearchResults(StudyViewer studyViewer, GenericEntityDAO dao)
   {
     _studyViewer = studyViewer;
+    _dao = dao;
   }
 
 
   // implementations of the SearchResults abstract methods
 
-  protected List<TableColumn<Study>> getColumns()
+  protected List<TableColumn<Study,?>> getColumns()
   {
     if (_columns == null) {
-      _columns = new ArrayList<TableColumn<Study>>();
-      _columns.add(new TableColumn<Study>("Study Number", "The study number", true) {
+      _columns = new ArrayList<TableColumn<Study,?>>();
+      _columns.add(new IntegerColumn<Study>("Study Number", "The study number") {
         @Override
-        public Object getCellValue(Study study) { return study.getStudyNumber(); }
+        public Integer getCellValue(Study study) { return study.getStudyNumber(); }
 
         @Override
         public Object cellAction(Study study) { return viewCurrentEntity(); }
@@ -71,47 +75,26 @@ public class StudySearchResults extends EntitySearchResults<Study>
         @Override
         public boolean isCommandLink() { return true; }
       });
-      _columns.add(new TableColumn<Study>("Title", "The title of the study") {
+      _columns.add(new TextColumn<Study>("Title", "The title of the study") {
         @Override
-        public Object getCellValue(Study study) { return study.getTitle(); }
+        public String getCellValue(Study study) { return study.getTitle(); }
       });
-      _columns.add(new TableColumn<Study>("Lab Head", "The head of the lab performing the study") {
+      _columns.add(new UserNameColumn<Study>("Lab Head", "The head of the lab performing the study", _dao) {
         @Override
-        public Object getCellValue(Study study) { return study.getLabHead().getFullNameLastFirst(); }
-
-        @Override
-        protected Comparator<Study> getAscendingComparator()
-        {
-          return new Comparator<Study>() {
-            public int compare(Study s1, Study s2) {
-              return ScreensaverUserComparator.getInstance().compare(s1.getLabHead(),
-                                                                     s2.getLabHead());
-            }
-          };
-        }
+        public ScreensaverUser getUser(Study study) { return study.getLabHead(); }
       });
-      _columns.add(new TableColumn<Study>("Study Head", "The scientist primarily responsible for running the study") {
+      _columns.add(new UserNameColumn<Study>("Study Head", "The scientist primarily responsible for running the study", _dao) {
         @Override
-        public Object getCellValue(Study study) { return study.getLeadScreener().getFullNameLastFirst(); }
-
-        @Override
-        protected Comparator<Study> getAscendingComparator()
-        {
-          return new Comparator<Study>() {
-            public int compare(Study s1, Study s2) {
-              return ScreensaverUserComparator.getInstance().compare(s1.getLeadScreener(),
-                                                                     s2.getLeadScreener());
-            }
-          };
-        }
+        public ScreensaverUser getUser(Study study) { return study.getLeadScreener(); }
       });
-      _columns.add(new TableColumn<Study>("Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'") {
+      _columns.add(new EnumColumn<Study,StudyType>("Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'",
+        StudyType.values()) {
         @Override
-        public Object getCellValue(Study study) { return study.getStudyType().getValue(); }
+        public StudyType getCellValue(Study study) { return study.getStudyType(); }
       });
-      _columns.add(new TableColumn<Study>("Library Screen Type", "'RNAi' or 'Small Molecule'") {
+      _columns.add(new EnumColumn<Study,ScreenType>("Library Screen Type", "'RNAi' or 'Small Molecule'", ScreenType.values()) {
         @Override
-        public Object getCellValue(Study study) { return study.getScreenType().getValue(); }
+        public ScreenType getCellValue(Study study) { return study.getScreenType(); }
       });
     }
     return _columns;

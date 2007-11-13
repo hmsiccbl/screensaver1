@@ -68,7 +68,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
 
   private Study _study;
   private int _studyReagentCount;
-  private List<TableColumn<Reagent>> _columns;
+  private List<TableColumn<Reagent,?>> _columns;
 
   private transient Well _representativeWell;
 
@@ -104,6 +104,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
     _isPanelCollapsedMap.put("annotationTypes", true);
     _isPanelCollapsedMap.put("reagentsData", false);
 
+    getCapabilities().remove("filter");
   }
 
   public void setContents(Collection<Reagent> unsortedResults,
@@ -156,15 +157,15 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
   // implementations of the SearchResults abstract methods
 
   @Override
-  protected List<TableColumn<Reagent>> getColumns()
+  protected List<TableColumn<Reagent,?>> getColumns()
   {
-    _columns = new ArrayList<TableColumn<Reagent>>();
-    _columns.add(new ReagentColumn(SortByReagentProperty.ID,
+    _columns = new ArrayList<TableColumn<Reagent,?>>();
+    _columns.add(new ReagentColumn<String>(SortByReagentProperty.ID,
                                    "Reagent Source ID",
                                    "The vendor-assigned identifier for the reagent.",
                                    false) {
       @Override
-      public Object getCellValue(Reagent reagent) { return reagent.getEntityId(); }
+      public String getCellValue(Reagent reagent) { return reagent.getEntityId().getReagentId(); }
 
       @Override
       public boolean isCommandLink() { return true; }
@@ -175,12 +176,12 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
         return viewCurrentEntity();
       }
     });
-    _columns.add(new ReagentColumn(SortByReagentProperty.CONTENTS,
+    _columns.add(new ReagentColumn<String>(SortByReagentProperty.CONTENTS,
                                    "Contents",
                                    "The gene name for the silencing reagent, or SMILES for the compound reagent",
                                    false) {
       @Override
-      public Object getCellValue(Reagent reagent) { return getContentsValue(reagent); }
+      public String getCellValue(Reagent reagent) { return getContentsValue(reagent).toString(); }
 
       @Override
       protected Comparator<Reagent> getAscendingComparator()

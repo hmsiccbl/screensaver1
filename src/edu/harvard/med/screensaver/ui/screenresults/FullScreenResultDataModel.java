@@ -25,7 +25,7 @@ public class FullScreenResultDataModel extends ScreenResultDataModel
                                    List<ResultValueType> resultValueTypes,
                                    int totalRows,
                                    int rowsToFetch,
-                                   TableColumn<Well> sortColumn,
+                                   TableColumn<Well,?> sortColumn,
                                    SortDirection sortDirection,
                                    GenericEntityDAO dao)
   {

@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -20,6 +20,10 @@ import java.util.Observer;
 import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.searchresults.EnumColumn;
+import edu.harvard.med.screensaver.ui.searchresults.IntegerColumn;
+import edu.harvard.med.screensaver.ui.searchresults.RealColumn;
+import edu.harvard.med.screensaver.ui.searchresults.TextColumn;
 
 import org.apache.log4j.Logger;
 
@@ -31,39 +35,39 @@ public class TableSortManagerTest extends TestCase
 
 
   // instance data members
-  
+
   private TableSortManager<RowItem> _sortManager;
-  private List<TableColumn<RowItem>> _columns;
-  private TableColumn<RowItem> _currentSortColumn;
+  private List<TableColumn<RowItem,?>> _columns;
+  private TableColumn<RowItem,?> _currentSortColumn;
   private SortDirection _currentSortDirection;
 
-  private TableColumn<RowItem> _idCol;
-  private TableColumn<RowItem> _nameCol;
-  private TableColumn<RowItem> _statusCol;
-  private TableColumn<RowItem> _valueCol;
-  private TableColumn<RowItem> _urlCol;
+  private IntegerColumn<RowItem> _idCol;
+  private TextColumn<RowItem> _nameCol;
+  private EnumColumn<RowItem,Status> _statusCol;
+  private RealColumn<RowItem> _valueCol;
+  private TextColumn<RowItem> _urlCol;
 
   private List<RowItem> _unsortedData;
   private List<RowItem> _sortedData;
 
 
   // public constructors and methods
-  
+
   @Override
   protected void setUp() throws Exception
   {
-    _columns = new ArrayList<TableColumn<RowItem>>();
-    _idCol = new TableColumn<RowItem>("ID", "The row's ID", true) {
+    _columns = new ArrayList<TableColumn<RowItem,?>>();
+    _idCol = new IntegerColumn<RowItem>("ID", "The row's ID") {
       @Override
-      public Object getCellValue(RowItem row) { return row.getId(); }
+      public Integer getCellValue(RowItem row) { return row.getId(); }
     };
-    _nameCol = new TableColumn<RowItem>("Name", "The row's name") {
+    _nameCol = new TextColumn<RowItem>("Name", "The row's name") {
       @Override
-      public Object getCellValue(RowItem row) { return row.getName(); }
+      public String getCellValue(RowItem row) { return row.getName(); }
     };
-    _statusCol = new TableColumn<RowItem>("Status", "The row's status") {
+    _statusCol = new EnumColumn<RowItem,Status>("Status", "The row's status", Status.values()) {
       @Override
-      public Object getCellValue(RowItem row) { return row.getStatus(); }
+      public Status getCellValue(RowItem row) { return row.getStatus(); }
       @Override
       protected Comparator<RowItem> getAscendingComparator()
       {
@@ -72,18 +76,18 @@ public class TableSortManagerTest extends TestCase
           {
             Integer orderedStatus1 = row1.getStatus().equals(Status.NEW) ? 0 : row1.getStatus().equals(Status.ACTIVE) ? 1 : 2;
             Integer orderedStatus2 = row2.getStatus().equals(Status.NEW) ? 0 : row2.getStatus().equals(Status.ACTIVE) ? 1 : 2;
-            return orderedStatus1.compareTo(orderedStatus2); 
+            return orderedStatus1.compareTo(orderedStatus2);
           }
         };
       }
     };
-    _valueCol = new TableColumn<RowItem>("Value", "The row's value", true) {
+    _valueCol = new RealColumn<RowItem>("Value", "The row's value") {
       @Override
-      public Object getCellValue(RowItem row) { return row.getValue(); }
+      public Double getCellValue(RowItem row) { return row.getValue(); }
     };
-    _urlCol = new TableColumn<RowItem>("URL", "The row's URL") {
+    _urlCol = new TextColumn<RowItem>("URL", "The row's URL") {
       @Override
-      public Object getCellValue(RowItem row) { return row.getUrl(); }
+      public String getCellValue(RowItem row) { return row.getUrl().toString(); }
 
       @Override
       protected Comparator<RowItem> getAscendingComparator()
@@ -91,11 +95,11 @@ public class TableSortManagerTest extends TestCase
         return new Comparator<RowItem>() {
           public int compare(RowItem row1, RowItem row2)
           {
-            return row1.getUrl().toString().compareTo(row2.getUrl().toString()); 
+            return row1.getUrl().toString().compareTo(row2.getUrl().toString());
           }
         };
       }
-      
+
     };
     _columns.add(_idCol);
     _columns.add(_nameCol);
@@ -118,19 +122,19 @@ public class TableSortManagerTest extends TestCase
         Collections.sort(_sortedData, _sortManager.getSortColumnComparator());
       }
     });
-    
+
     _currentSortColumn = _sortManager.getSortColumn();
     _currentSortDirection = _sortManager.getSortDirection();
-    
+
     _unsortedData = new ArrayList<RowItem>();
     // Note: test data rows must be initially unsorted by every column!
     _unsortedData.add(new RowItem(1, "A", Status.ACTIVE, 3.5, new URL("https://screensaver.med.harvard.edu/screensaver")));
     _unsortedData.add(new RowItem(2, "D", Status.DEAD, 2.0, new URL("http://www.java.sun.com")));
     _unsortedData.add(new RowItem(4, "B", Status.NEW, -3.0, new URL("http://www.hibernate.org")));
     _unsortedData.add(new RowItem(3, "C", Status.ACTIVE, 0.0, new URL("http://www.springframework.org")));
-    
+
   }
-  
+
   public void testCurrentSortColumn()
   {
     assertEquals("initial sort column", _idCol, _sortManager.getSortColumn());
@@ -166,31 +170,31 @@ public class TableSortManagerTest extends TestCase
     assertEquals("new sort direction in UISelectBean via selector update", SortDirection.ASCENDING, _sortManager.getSortDirectionSelector().getSelection());
     assertEquals("new sort direction in callback via selector update", SortDirection.ASCENDING, _currentSortDirection);
   }
-  
+
   public void testSingleColumnSort()
   {
     // ensure that first update to sort order forces a change; TableSortManager
     // only invokes sortChanged() callback if sort column or direction changes
-    List<TableColumn<RowItem>> columnsTestOrder = new ArrayList<TableColumn<RowItem>>(_columns);
+    List<TableColumn<RowItem,?>> columnsTestOrder = new ArrayList<TableColumn<RowItem,?>>(_columns);
     Collections.rotate(columnsTestOrder, 1);
-    
+
     int i = 0;
-    for (TableColumn<RowItem> col : columnsTestOrder) {
+    for (TableColumn<RowItem,?> col : columnsTestOrder) {
       // ensure sortDir always changes from previous sort
       SortDirection sortDir = i++ % 2 == 0 ? SortDirection.DESCENDING : SortDirection.ASCENDING;
       doTestSort(col, sortDir);
     }
   }
-  
+
   public void testCompoundColumnSort()
   {
-    List<TableColumn<RowItem>> compoundSort = new ArrayList<TableColumn<RowItem>>();
+    List<TableColumn<RowItem,?>> compoundSort = new ArrayList<TableColumn<RowItem,?>>();
     compoundSort.add(_statusCol);
     compoundSort.add(_nameCol);
     _sortManager.addCompoundSortColumns(compoundSort);
-    
+
     _sortedData = null;
-    TableColumn<RowItem> primarySortCol = _statusCol;
+    TableColumn<RowItem,?> primarySortCol = _statusCol;
     _sortManager.setSortColumn(primarySortCol);
     _sortManager.setSortDirection(SortDirection.ASCENDING);
     assertNotNull("compound sort occurred on " + primarySortCol.getName() + " " + SortDirection.ASCENDING, _sortedData);
@@ -198,7 +202,7 @@ public class TableSortManagerTest extends TestCase
     assertEquals("compound sort row 1", 1, _sortedData.get(1).getId().intValue());
     assertEquals("compound sort row 2", 3, _sortedData.get(2).getId().intValue());
     assertEquals("compound sort row 3", 2, _sortedData.get(3).getId().intValue());
-    
+
     _sortedData = null;
     _sortManager.setSortDirection(SortDirection.DESCENDING);
     assertNotNull("compound sort occurred on " + primarySortCol.getName() + " " + SortDirection.DESCENDING, _sortedData);
@@ -211,7 +215,7 @@ public class TableSortManagerTest extends TestCase
 
   // private methods
 
-  private void doTestSort(TableColumn<RowItem> sortCol, SortDirection sortDir)
+  private void doTestSort(TableColumn<RowItem,?> sortCol, SortDirection sortDir)
   {
     _sortedData = null;
     _sortManager.setSortColumn(sortCol);
@@ -222,10 +226,10 @@ public class TableSortManagerTest extends TestCase
   }
 
   @SuppressWarnings("unchecked")
-  private void assertSorted(TableColumn<RowItem> sortCol, SortDirection sortDir)
+  private void assertSorted(TableColumn<RowItem,?> sortCol, SortDirection sortDir)
   {
     assertNotNull("sort occurred on " + sortCol.getName() + " " + sortDir, _sortedData);
-    for (int i = 0; i < _sortedData.size(); ++i) { 
+    for (int i = 0; i < _sortedData.size(); ++i) {
       log.debug("row " + i +" : " + _sortedData.get(i));
     }
     for (int i = 0; i < _sortedData.size() - 1; ++i) {
@@ -233,12 +237,12 @@ public class TableSortManagerTest extends TestCase
     }
   }
 
-  private void assertRowPairSorted(int i, TableColumn<RowItem> sortCol, SortDirection sortDir)
+  private void assertRowPairSorted(int i, TableColumn<RowItem,?> sortCol, SortDirection sortDir)
   {
     RowItem prevRow = _sortedData.get(i);
     RowItem currRow = _sortedData.get(i + 1);
     int cmpResult = sortCol.getAscendingComparator().compare(prevRow, currRow);
-    assertTrue("row " + i + " sorted by " + sortCol.getName() + " " + sortDir, 
+    assertTrue("row " + i + " sorted by " + sortCol.getName() + " " + sortDir,
                sortDir.equals(SortDirection.ASCENDING) ? (cmpResult <= 0) : (cmpResult >= 0));
   }
 }

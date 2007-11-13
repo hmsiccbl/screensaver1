@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-public abstract class ReagentColumn extends TableColumn<Reagent>
+public abstract class ReagentColumn<T> extends TableColumn<Reagent,T>
 {
   // static members
 
@@ -35,7 +35,7 @@ public abstract class ReagentColumn extends TableColumn<Reagent>
   {
     super(name,
           description,
-          isNumeric);
+          reagentProperty == SortByReagentProperty.ID ? ColumnType.INTEGER : ColumnType.TEXT);
     _reagentProperty = reagentProperty;
   }
 

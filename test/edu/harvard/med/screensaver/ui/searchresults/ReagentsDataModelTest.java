@@ -37,7 +37,7 @@ public class ReagentsDataModelTest extends AbstractSpringPersistenceTest
 
   private Screen _study;
 
-  private List<TableColumn<Reagent>> _columns;
+  private List<TableColumn<Reagent,?>> _columns;
 
   @Override
   protected void onSetUp() throws Exception
@@ -72,13 +72,13 @@ public class ReagentsDataModelTest extends AbstractSpringPersistenceTest
 
   private void setupColumns()
   {
-    _columns = new ArrayList<TableColumn<Reagent>>();
-    _columns.add(new ReagentColumn(SortByReagentProperty.ID,
+    _columns = new ArrayList<TableColumn<Reagent,?>>();
+    _columns.add(new ReagentColumn<String>(SortByReagentProperty.ID,
                                    "Reagent Source ID",
                                    "The vendor-assigned identifier for the reagent.",
                                    false) {
       @Override
-      public Object getCellValue(Reagent reagent) { return reagent.getEntityId(); }
+      public String getCellValue(Reagent reagent) { return reagent.getEntityId().getReagentId(); }
     });
 //    _columns.add(new ReagentColumn(SortByReagentProperty.CONTENTS,
 //                                   "Contents",
@@ -90,7 +90,12 @@ public class ReagentsDataModelTest extends AbstractSpringPersistenceTest
 //    });
 
     for (AnnotationType annotationType : _study.getAnnotationTypes()) {
-      _columns.add(new AnnotationTypeColumn(annotationType));
+      if (annotationType.isNumeric()) {
+        _columns.add(new AnnotationTypeColumn<Double>(annotationType));
+      }
+      else {
+        _columns.add(new AnnotationTypeColumn<String>(annotationType));
+      }
     }
   }
 
@@ -110,7 +115,7 @@ public class ReagentsDataModelTest extends AbstractSpringPersistenceTest
   private void doTestSortForAllColumnsAndDirections(ReagentsDataModel dataModel)
   {
     for (SortDirection sortDirection : SortDirection.values()) {
-      for (TableColumn<Reagent> sortColumn : _columns) {
+      for (TableColumn<Reagent,?> sortColumn : _columns) {
         doTestSort(dataModel,
                    sortColumn,
                    sortDirection);
@@ -120,7 +125,7 @@ public class ReagentsDataModelTest extends AbstractSpringPersistenceTest
 
   @SuppressWarnings("unchecked")
   private void doTestSort(ReagentsDataModel dataModel,
-                          TableColumn<Reagent> sortColumn,
+                          TableColumn<Reagent,?> sortColumn,
                           SortDirection sortDirection)
   {
     log.info("testing sort on " + sortColumn + " in " + sortDirection);

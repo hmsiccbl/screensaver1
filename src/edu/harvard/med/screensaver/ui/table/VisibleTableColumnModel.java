@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 /**
  * A {@link DataModel} for {@link HtmlDataTable} columns that manages table column
  * visibility, making use of {@link TableColumn#isVisible()}.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -32,17 +32,17 @@ public class VisibleTableColumnModel<E> extends DataModel
 
 
   // instance data members
-  
-  private List<TableColumn<E>> _columns;
+
+  private List<TableColumn<E,?>> _columns;
   private List<String> _visibleColumnNames;
-  private List<TableColumn<E>> _visibleColumns;
+  private List<TableColumn<E,?>> _visibleColumns;
   private List<Integer> _baseIndexMap;
   private int _visibleColumnIndex = -1;
 
-  
+
   // public constructors and methods
-  
-  public VisibleTableColumnModel(List<TableColumn<E>> columns)
+
+  public VisibleTableColumnModel(List<TableColumn<E,?>> columns)
   {
     setWrappedData(columns);
   }
@@ -54,9 +54,9 @@ public class VisibleTableColumnModel<E> extends DataModel
   }
 
   @Override
-  public TableColumn<E> getRowData()
+  public TableColumn<E,?> getRowData()
   {
-    if (isRowAvailable()) { 
+    if (isRowAvailable()) {
       return _visibleColumns.get(_visibleColumnIndex);
     }
     return null;
@@ -98,25 +98,25 @@ public class VisibleTableColumnModel<E> extends DataModel
   @Override
   public void setWrappedData(Object columns)
   {
-    _columns = (List<TableColumn<E>>) columns;
+    _columns = (List<TableColumn<E,?>>) columns;
     updateVisibleColumns();
   }
 
   public void updateVisibleColumns()
   {
-    TableColumn<E> currentColumn = getRowData();
-    _visibleColumns = new ArrayList<TableColumn<E>>();
+    TableColumn<E,?> currentColumn = getRowData();
+    _visibleColumns = new ArrayList<TableColumn<E,?>>();
     _baseIndexMap = new ArrayList<Integer>();
     _visibleColumnNames = null;
     int i = 0;
-    for (TableColumn<E> column : _columns) {
+    for (TableColumn<E,?> column : _columns) {
       if (column.isVisible()) {
         _visibleColumns.add(column);
         _baseIndexMap.add(i);
       }
       ++i;
     }
-    
+
     // preserve current column, if it's still visible
     if (_visibleColumns.size() == 0) {
       _visibleColumnIndex = -1;
@@ -124,19 +124,19 @@ public class VisibleTableColumnModel<E> extends DataModel
     else {
       _visibleColumnIndex = 0;
       for (int j = 0; j < _visibleColumns.size(); j++) {
-        TableColumn<E> visibleColumn = _visibleColumns.get(j);
+        TableColumn<E,?> visibleColumn = _visibleColumns.get(j);
         if (visibleColumn.equals(currentColumn)) {
           _visibleColumnIndex = j;
         }
       }
     }
   }
-  
+
   public List<String> getColumnNames()
   {
     if (_visibleColumnNames == null) {
       _visibleColumnNames = new ArrayList<String>(_columns.size());
-      for (TableColumn<E> column : _columns) {
+      for (TableColumn<E,?> column : _columns) {
         if (column.isVisible()) {
           _visibleColumnNames.add(column.getName());
         }
@@ -145,15 +145,15 @@ public class VisibleTableColumnModel<E> extends DataModel
     return _visibleColumnNames;
   }
 
-  public TableColumn<E> getColumn(String sortColumnName)
+  public TableColumn<E,?> getColumn(String sortColumnName)
   {
     int i = getColumnNames().indexOf(sortColumnName);
     if (isColumnAvailable(i)) {
       return _visibleColumns.get(i);
     }
-    return null; 
+    return null;
   }
-  
+
   // private methods
 
   private boolean isColumnAvailable(int visibleColumnIndex)

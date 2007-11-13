@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.db.SortDirection;
 
 import org.apache.log4j.Logger;
 
-public class SortChangedEvent<E>
+public class SortChangedEvent<R>
 {
   // static members
 
@@ -21,12 +21,12 @@ public class SortChangedEvent<E>
 
 
   // instance data members
-  
+
   private SortDirection _direction;
-  private TableColumn<E> _column;
+  private TableColumn<R,?> _column;
 
   // public constructors and methods
-  
+
   public SortChangedEvent()
   {
   }
@@ -36,12 +36,12 @@ public class SortChangedEvent<E>
     _direction = direction;
   }
 
-  public SortChangedEvent(TableColumn<E> column)
+  public SortChangedEvent(TableColumn<R,?> column)
   {
     _column = column;
   }
-  
-  public TableColumn<E> getColumn()
+
+  public TableColumn<R,?> getColumn()
   {
     return _column;
   }
@@ -51,7 +51,7 @@ public class SortChangedEvent<E>
     return _direction;
   }
 
-  public void setColumn(TableColumn<E> column)
+  public void setColumn(TableColumn<R,?> column)
   {
     _column = column;
   }
@@ -60,7 +60,7 @@ public class SortChangedEvent<E>
   {
     _direction = direction;
   }
-  
+
   @Override
   public String toString()
   {

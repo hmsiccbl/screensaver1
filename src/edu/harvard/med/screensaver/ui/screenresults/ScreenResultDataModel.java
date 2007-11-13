@@ -76,7 +76,7 @@ abstract public class ScreenResultDataModel extends VirtualPagingDataModel<Strin
                                List<ResultValueType> resultValueTypes,
                                int totalRowCount,
                                int rowsToFetch,
-                               TableColumn<Well> sortColumn,
+                               TableColumn<Well,?> sortColumn,
                                SortDirection sortDirection,
                                GenericEntityDAO dao)
   {
@@ -93,7 +93,7 @@ abstract public class ScreenResultDataModel extends VirtualPagingDataModel<Strin
   // protected methods
 
   @Override
-  final protected List<String> fetchAscendingSortOrder(TableColumn column)
+  final protected List<String> fetchAscendingSortOrder(TableColumn<Well,?> column)
   {
 
     ScreenResultSortQuery query = getScreenResultSortQuery();

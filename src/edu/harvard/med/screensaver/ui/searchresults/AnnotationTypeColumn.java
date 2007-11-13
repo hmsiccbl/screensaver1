@@ -14,7 +14,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-public class AnnotationTypeColumn extends TableColumn<Reagent>
+public class AnnotationTypeColumn<T> extends TableColumn<Reagent,T>
 {
   private AnnotationType _annotationType;
 
@@ -22,7 +22,7 @@ public class AnnotationTypeColumn extends TableColumn<Reagent>
   {
     super(annotationType.getName(),
           annotationType.getDescription(),
-          annotationType.isNumeric());
+          annotationType.isNumeric() ? ColumnType.REAL : ColumnType.TEXT);
     _annotationType = annotationType;
   }
 
@@ -31,11 +31,19 @@ public class AnnotationTypeColumn extends TableColumn<Reagent>
     return _annotationType;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public Object getCellValue(Reagent reagent)
+  public T getCellValue(Reagent reagent)
   {
     AnnotationValue annotationValue = reagent.getAnnotationValue(_annotationType);
-
-    return annotationValue == null ? null : annotationValue.getValue();
+    if (annotationValue == null) {
+      return null;
+    }
+    if (_annotationType.isNumeric()) {
+      return (T) annotationValue.getNumericValue();
+    }
+    else {
+      return (T) annotationValue.getValue();
+    }
   }
 }

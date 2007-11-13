@@ -7,14 +7,16 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.table;
+package edu.harvard.med.screensaver.ui.searchresults;
 
-import javax.faces.model.DataModel;
+import java.math.BigDecimal;
 
-import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-public abstract class SortableDataModel<E> extends DataModel
+public abstract class FixedDecimalColumn<T> extends TableColumn<T,BigDecimal>
 {
-  public abstract void sort(TableColumn<E,?> column,
-                            SortDirection direction);
+  public FixedDecimalColumn(String name, String description)
+  {
+    super(name, description, ColumnType.FIXED_DECIMAL);
+ }
 }

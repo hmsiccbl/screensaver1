@@ -38,13 +38,14 @@ public class TableSortManager<E> extends Observable implements Observer
 
   private VisibleTableColumnModel<E> _columnModel;
   private UISelectOneBean<SortDirection> _sortDirectionSelector;
-  private UISelectOneBean<TableColumn<E>> _sortColumnSelector;
-  private Map<TableColumn<E>,Map<SortDirection,Comparator<E>>> _comparators = new HashMap<TableColumn<E>,Map<SortDirection,Comparator<E>>>();
+  private UISelectOneBean<TableColumn<E,?>> _sortColumnSelector;
+  private Map<TableColumn<E,?>,Map<SortDirection,Comparator<E>>> _comparators =
+    new HashMap<TableColumn<E,?>,Map<SortDirection,Comparator<E>>>();
 
 
   // public constructors and methods
 
-  public TableSortManager(List<TableColumn<E>> columns)
+  public TableSortManager(List<TableColumn<E,?>> columns)
   {
     setColumns(columns);
   }
@@ -56,7 +57,7 @@ public class TableSortManager<E> extends Observable implements Observer
    *             (in addition to clicking on table column headers)
    * @return the current sort column
    */
-  public TableColumn<E> getSortColumn()
+  public TableColumn<E,?> getSortColumn()
   {
     return getSortColumnSelector().getSelection();
   }
@@ -83,7 +84,7 @@ public class TableSortManager<E> extends Observable implements Observer
     return getSortColumn().getComparator(getSortDirection());
   }
 
-  public void addCompoundSortColumns(List<TableColumn<E>> compoundSortColumns)
+  public void addCompoundSortColumns(List<TableColumn<E,?>> compoundSortColumns)
   {
     Map<SortDirection,Comparator<E>> comparators = new HashMap<SortDirection,Comparator<E>>(2);
     comparators.put(SortDirection.ASCENDING, new CompoundColumnComparator<E>(compoundSortColumns, SortDirection.ASCENDING));
@@ -95,16 +96,16 @@ public class TableSortManager<E> extends Observable implements Observer
 
   public void addCompoundSortColumns(Integer[] compoundSortIndexes)
   {
-    List<TableColumn<E>> compoundSortColumns = new ArrayList<TableColumn<E>>();
+    List<TableColumn<E,?>> compoundSortColumns = new ArrayList<TableColumn<E,?>>();
     for (Integer colIndex : compoundSortIndexes) {
       compoundSortColumns.add(getColumns().get(colIndex));
     }
     addCompoundSortColumns(compoundSortColumns);
   }
 
-  public void addAllCompoundSorts(List<List<TableColumn<E>>> allCompoundSorts)
+  public void addAllCompoundSorts(List<List<TableColumn<E,?>>> allCompoundSorts)
   {
-    for (List<TableColumn<E>> compoundSort : allCompoundSorts) {
+    for (List<TableColumn<E,?>> compoundSort : allCompoundSorts) {
       addCompoundSortColumns(compoundSort);
     }
   }
@@ -126,12 +127,12 @@ public class TableSortManager<E> extends Observable implements Observer
    * Get the column currently being rendered by JSF.
    */
   @SuppressWarnings("unchecked")
-  public TableColumn<E> getCurrentColumn()
+  public TableColumn<E,?> getCurrentColumn()
   {
-    return (TableColumn<E>) getColumnModel().getRowData();
+    return (TableColumn<E,?>) getColumnModel().getRowData();
   }
 
-  public TableColumn<E> getColumn(int i)
+  public TableColumn<E,?> getColumn(int i)
   {
     return getColumns().get(i);
   }
@@ -143,7 +144,7 @@ public class TableSortManager<E> extends Observable implements Observer
    *             (in addition to clicking on table column headers)
    * @param currentSortColumn the new current sort column
    */
-  public void setSortColumn(TableColumn<E> newSortColumn)
+  public void setSortColumn(TableColumn<E,?> newSortColumn)
   {
     if (newSortColumn != null) {
       if (!newSortColumn.equals(getSortColumn())) {
@@ -236,7 +237,7 @@ public class TableSortManager<E> extends Observable implements Observer
     return _columnModel;
   }
 
-  public void setColumns(List<TableColumn<E>> columns)
+  public void setColumns(List<TableColumn<E,?>> columns)
   {
     _columnModel = new VisibleTableColumnModel<E>(columns) {
       /**
@@ -248,9 +249,9 @@ public class TableSortManager<E> extends Observable implements Observer
       {
         super.updateVisibleColumns();
         if (_sortColumnSelector != null) {
-          TableColumn<E> sortColumn = _sortColumnSelector.getSelection();
+          TableColumn<E,?> sortColumn = _sortColumnSelector.getSelection();
           _sortColumnSelector = null; // force recreate, based upon new set of visible columns
-          UISelectOneBean<TableColumn<E>> sortColumnSelector = getSortColumnSelector(); // recreate now
+          UISelectOneBean<TableColumn<E,?>> sortColumnSelector = getSortColumnSelector(); // recreate now
           // re-select previous selection, if it still exists
           if (sortColumn.isVisible()) {
             sortColumnSelector.setSelection(sortColumn);
@@ -258,6 +259,11 @@ public class TableSortManager<E> extends Observable implements Observer
         }
       }
     };
+
+    for (TableColumn<E,?> column : columns) {
+      column.getCriterion().addObserver(this);
+    }
+
     // ensure sort column exists in the new set of columns
     if (columns.size() > 0 && !columns.contains(getSortColumn())) {
       getSortColumnSelector().setSelectionIndex(0);
@@ -266,17 +272,17 @@ public class TableSortManager<E> extends Observable implements Observer
   }
 
   @SuppressWarnings("unchecked")
-  public List<TableColumn<E>> getColumns()
+  public List<TableColumn<E,?>> getColumns()
   {
-    return (List<TableColumn<E>>) getColumnModel().getWrappedData();
+    return (List<TableColumn<E,?>>) getColumnModel().getWrappedData();
   }
 
-  public UISelectOneBean<TableColumn<E>> getSortColumnSelector()
+  public UISelectOneBean<TableColumn<E,?>> getSortColumnSelector()
   {
     if (_sortColumnSelector == null) {
-      _sortColumnSelector = new UISelectOneBean<TableColumn<E>>(getColumns()) {
+      _sortColumnSelector = new UISelectOneBean<TableColumn<E,?>>(getColumns()) {
         @Override
-        protected String getLabel(TableColumn<E> t) { return t.getName(); }
+        protected String getLabel(TableColumn<E,?> t) { return t.getName(); }
       };
       _sortColumnSelector.addObserver(this);
     }
@@ -297,17 +303,17 @@ public class TableSortManager<E> extends Observable implements Observer
 
   public void update(Observable o, Object arg)
   {
-    SortChangedEvent<E> sortChangedEvent = null;
     if (o == _sortColumnSelector) {
-      sortChangedEvent = new SortChangedEvent<E>(getSortColumn());
       setChanged();
+      notifyObservers(new SortChangedEvent<E>(getSortColumn()));
     }
     else if (o == _sortDirectionSelector) {
-      sortChangedEvent = new SortChangedEvent<E>(getSortDirection());
       setChanged();
+      notifyObservers(new SortChangedEvent<E>(getSortDirection()));
     }
-    if (sortChangedEvent != null) {
-      notifyObservers(sortChangedEvent);
+    else if (o instanceof Criterion) {
+      setChanged();
+      notifyObservers(o);
     }
   }
 

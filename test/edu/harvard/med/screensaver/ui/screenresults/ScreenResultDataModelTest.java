@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.db.ScreenResultSortQuery.SortByWellProperty;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -42,9 +43,9 @@ public class ScreenResultDataModelTest extends AbstractSpringPersistenceTest
   private Screen _rnaiScreen;
   private Screen _smallMoleculeScreen;
   private Library _rnaiLibrary;
-  private WellColumn _plateNumberColumn;
-  private WellColumn _wellNameColumn;
-  private WellColumn _assayWellTypeColumn;
+  private WellColumn<?> _plateNumberColumn;
+  private WellColumn<?> _wellNameColumn;
+  private WellColumn<?> _assayWellTypeColumn;
   private ScreenResult _screenResult;
   private int _plates = 3;
   private int _rowsToFetch = 10;
@@ -68,23 +69,20 @@ public class ScreenResultDataModelTest extends AbstractSpringPersistenceTest
 
     _screenResult = _rnaiScreen.getScreenResult();
 
-    _plateNumberColumn = new WellColumn(SortByWellProperty.PLATE_NUMBER,
+    _plateNumberColumn = new WellColumn<Integer>(SortByWellProperty.PLATE_NUMBER,
                                         "plateNumber",
-                                        "Plate Number",
-                                        true) {
-      @Override public Object getCellValue(Well entity) { return entity.getPlateNumber(); }
+                                        "Plate Number") {
+      @Override public Integer getCellValue(Well entity) { return entity.getPlateNumber(); }
     };
-    _wellNameColumn = new WellColumn(SortByWellProperty.WELL_NAME,
+    _wellNameColumn = new WellColumn<String>(SortByWellProperty.WELL_NAME,
                                      "wellName",
-                                     "Well Name",
-                                     false) {
-      @Override public Object getCellValue(Well entity) { return entity.getWellName(); }
+                                     "Well Name") {
+      @Override public String getCellValue(Well entity) { return entity.getWellName(); }
     };
-    _assayWellTypeColumn = new WellColumn(SortByWellProperty.ASSAY_WELL_TYPE,
+    _assayWellTypeColumn = new WellColumn<AssayWellType>(SortByWellProperty.ASSAY_WELL_TYPE,
                                           "assayWellType",
-                                          "Assay Well Type",
-                                          true) {
-      @Override public Object getCellValue(Well entity) { return entity.getResultValues().get(_screenResult.getResultValueTypes().first()); }
+                                          "Assay Well Type") {
+      @Override public AssayWellType getCellValue(Well entity) { return entity.getResultValues().get(_screenResult.getResultValueTypes().first()).getAssayWellType(); }
     };
   }
 
@@ -188,12 +186,11 @@ public class ScreenResultDataModelTest extends AbstractSpringPersistenceTest
                  well.getResultValues().size(),
                  screenResult2.getResultValueTypes().size() * 2);
 
-    WellColumn sortColumn =
-      new WellColumn(SortByWellProperty.WELL_NAME,
+    WellColumn<?> sortColumn =
+      new WellColumn<String>(SortByWellProperty.WELL_NAME,
                      "wellName",
-                     "Well Name",
-                     false) {
-      @Override public Object getCellValue(Well entity) { return entity; }
+                     "Well Name") {
+      @Override public String getCellValue(Well well) { return well.getWellName(); }
     };
     ScreenResult screenResult = _rnaiScreen.getScreenResult();
     FullScreenResultDataModel dataModel =

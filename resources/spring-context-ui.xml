@@ -280,6 +280,7 @@
       <bean
         class="edu.harvard.med.screensaver.ui.libraries.WellVolumeAdjustmentSearchResults">
         <constructor-arg ref="cherryPickRequestViewer" />
+        <constructor-arg ref="genericEntityDao" />
       </bean>
     </constructor-arg>
     <aop:scoped-proxy/>
@@ -298,6 +299,7 @@
       <bean
         class="edu.harvard.med.screensaver.ui.libraries.WellVolumeAdjustmentSearchResults">
         <constructor-arg ref="cherryPickRequestViewer" />
+        <constructor-arg ref="genericEntityDao" />
       </bean>
     </constructor-arg>
     <aop:scoped-proxy/>
@@ -388,6 +390,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.StudySearchResults">
     <constructor-arg ref="studyViewer" />
+    <constructor-arg ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -412,6 +415,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults">
     <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -585,6 +589,10 @@
     <constructor-arg ref="genericEntityDao" />
     <aop:scoped-proxy/>
   </bean-->
+
+  <!-- converters -->
+
+  <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.table.OperatorConverter" />
 
   <!-- Development/Debug related beans -->
 

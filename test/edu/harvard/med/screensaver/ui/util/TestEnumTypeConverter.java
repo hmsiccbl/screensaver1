@@ -13,7 +13,7 @@ import java.util.EnumSet;
 
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 
-public class TestEnumTypeConverter extends EnumTypeConverter<LibraryType>
+public class TestEnumTypeConverter extends VocabularlyConverter<LibraryType>
 {
   public TestEnumTypeConverter()
   {

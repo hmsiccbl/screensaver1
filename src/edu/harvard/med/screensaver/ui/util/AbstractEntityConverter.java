@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -19,17 +19,18 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 
 /**
  * Base class for Converters that convert between an AbstractEntity and its entity ID.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class AbstractEntityConverter<E extends AbstractEntity> implements Converter
+public class AbstractEntityConverter<E extends AbstractEntity> implements Converter
 {
-  
+  private Class<E> _entityType;
   private GenericEntityDAO _dao;
 
-  public void setDao(GenericEntityDAO dao)
+  public AbstractEntityConverter(Class<E> entityType, GenericEntityDAO dao)
   {
+    _entityType = entityType;
     _dao = dao;
   }
 
@@ -43,8 +44,11 @@ public abstract class AbstractEntityConverter<E extends AbstractEntity> implemen
                            .getVariableResolver()
                            .resolveVariable(facesCtx, "genericEntityDao");
     }
+    if (entityId == null) {
+      return null;
+    }
     try {
-      E entity = _dao.findEntityById(getEntityClass(),
+      E entity = _dao.findEntityById(_entityType,
                                      Integer.parseInt(entityId));
       if (entity == null) {
         throw new ConverterException("cannot find ScreeningRoomUser for id="
@@ -62,8 +66,11 @@ public abstract class AbstractEntityConverter<E extends AbstractEntity> implemen
   public String getAsString(FacesContext arg0, UIComponent arg1, Object entity)
     throws ConverterException
   {
-    if (!(getEntityClass().isInstance(entity))) {
-      throw new ConverterException(getEntityClass().getSimpleName()
+    if (entity == null) {
+      return null;
+    }
+    if (!(_entityType.isInstance(entity))) {
+      throw new ConverterException(_entityType.getSimpleName()
                                    + " object expected: cannot convert object of type "
                                    + (entity == null ? "<null>" : entity.getClass())
                                    + " to ID string for component "
@@ -71,7 +78,4 @@ public abstract class AbstractEntityConverter<E extends AbstractEntity> implemen
     }
     return ((E) entity).getEntityId().toString();
   }
-
-  abstract protected Class<E> getEntityClass();
-
 }

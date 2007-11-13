@@ -32,7 +32,7 @@ public class SinglePlateScreenResultDataModel extends ScreenResultDataModel
                                           List<ResultValueType> resultValueTypes,
                                           int totalRowCount,
                                           int rowsToFetch,
-                                          TableColumn<Well> sortColumn,
+                                          TableColumn<Well,?> sortColumn,
                                           SortDirection sortDirection,
                                           GenericEntityDAO dao,
                                           int plateNumber)

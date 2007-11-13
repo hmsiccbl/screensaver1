@@ -7,14 +7,25 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.table;
+package edu.harvard.med.screensaver.ui.searchresults;
 
-import javax.faces.model.DataModel;
+public enum ScreenResultAvailability {
+  AVAILABLE("available"),
+  NOT_SHARED("not shared"),
+  NONE("none");
 
-import edu.harvard.med.screensaver.db.SortDirection;
+  private String _text;
 
-public abstract class SortableDataModel<E> extends DataModel
-{
-  public abstract void sort(TableColumn<E,?> column,
-                            SortDirection direction);
+  ScreenResultAvailability(String text)
+  {
+    _text = text;
+  }
+
+  public String getText() { return _text; }
+
+  @Override
+  public String toString()
+  {
+    return _text;
+  }
 }

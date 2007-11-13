@@ -20,6 +20,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 
 import org.apache.log4j.Logger;
 
@@ -58,7 +59,7 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
 
   // abstract & template methods
 
-  abstract protected List<TableColumn<E>> buildColumns();
+  abstract protected List<TableColumn<E,?>> buildColumns();
 
   /**
    * Template method that must build a DataModel for the data table. Data must
@@ -111,7 +112,7 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
   public TableSortManager<E> getSortManager()
   {
     if (_sortManager == null) {
-      List<TableColumn<E>> columns = buildColumns();
+      List<TableColumn<E,?>> columns = buildColumns();
       _sortManager = new TableSortManager<E>(columns);
       _sortManager.addObserver(this);
     }
@@ -134,6 +135,7 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
    * <code>getSortManager().getCurrentColumn().cellAction((E) getDataModel().getRowData())</code>.
    */
   @SuppressWarnings("unchecked")
+  @UIControllerMethod
   public String cellAction()
   {
     return (String) getSortManager().getCurrentColumn().cellAction((E) getDataModel().getRowData());
@@ -233,9 +235,16 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
   @SuppressWarnings("unchecked")
   public void update(Observable o, Object obj)
   {
-    resort();
-    for (Observer observer : _observers) {
-      observer.update(o, obj);
+    if (o == getSortManager()) {
+      if (obj instanceof SortChangedEvent) {
+        resort();
+      }
+      else if (obj instanceof Criterion) {
+        rebuildRows();
+      }
+      for (Observer observer : _observers) {
+        observer.update(o, obj);
+      }
     }
   }
 

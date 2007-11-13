@@ -2,21 +2,19 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.ui.util;
 
-import java.util.EnumSet;
-
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
-public class ScreenTypeConverter extends EnumTypeConverter<ScreenType>
+public class ScreenTypeConverter extends VocabularlyConverter<ScreenType>
 {
   public ScreenTypeConverter()
   {
-    super(EnumSet.allOf(ScreenType.class));
+    super(ScreenType.values());
   }
 }

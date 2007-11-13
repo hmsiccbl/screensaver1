@@ -7,14 +7,14 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.table;
+package edu.harvard.med.screensaver.ui.searchresults;
 
-import javax.faces.model.DataModel;
+import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-import edu.harvard.med.screensaver.db.SortDirection;
-
-public abstract class SortableDataModel<E> extends DataModel
+public abstract class IntegerColumn<T> extends TableColumn<T,Integer>
 {
-  public abstract void sort(TableColumn<E,?> column,
-                            SortDirection direction);
+  public IntegerColumn(String name, String description)
+  {
+    super(name, description, ColumnType.INTEGER);
+  }
 }

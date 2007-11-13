@@ -9,18 +9,28 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
+import edu.harvard.med.screensaver.ui.searchresults.DateColumn;
+import edu.harvard.med.screensaver.ui.searchresults.FixedDecimalColumn;
+import edu.harvard.med.screensaver.ui.searchresults.IntegerColumn;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.TextColumn;
+import edu.harvard.med.screensaver.ui.searchresults.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeAdjustment>
 {
   private CherryPickRequestViewer _cherryPickRequestViewer;
+  private GenericEntityDAO _dao;
 
   /**
    * @motivation for CGLIB2
@@ -29,18 +39,20 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
   {
   }
 
-  public WellVolumeAdjustmentSearchResults(CherryPickRequestViewer cherryPickRequestViewer)
+  public WellVolumeAdjustmentSearchResults(CherryPickRequestViewer cherryPickRequestViewer,
+                                           GenericEntityDAO dao)
   {
     _cherryPickRequestViewer = cherryPickRequestViewer;
+    _dao = dao;
   }
 
   @Override
-  protected List<TableColumn<WellVolumeAdjustment>> getColumns()
+  protected List<TableColumn<WellVolumeAdjustment,?>> getColumns()
   {
-    List<TableColumn<WellVolumeAdjustment>> columns = new ArrayList<TableColumn<WellVolumeAdjustment>>();
-    columns.add(new TableColumn<WellVolumeAdjustment>("Date", "The date the volume adjustment was made") {
+    List<TableColumn<WellVolumeAdjustment,?>> columns = new ArrayList<TableColumn<WellVolumeAdjustment,?>>();
+    columns.add(new DateColumn<WellVolumeAdjustment>("Date", "The date the volume adjustment was made") {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva)
+      protected Date getDate(WellVolumeAdjustment wva)
       {
         Activity activity = wva.getRelatedActivity();
         if (activity != null) {
@@ -53,28 +65,28 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
         return null;
       }
     });
-    columns.add(new TableColumn<WellVolumeAdjustment>("Performed By", "The person that performed the volume adjustment") {
+    columns.add(new UserNameColumn<WellVolumeAdjustment>("Performed By", "The person that performed the volume adjustment", _dao) {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva)
+      protected ScreensaverUser getUser(WellVolumeAdjustment wva)
       {
         Activity activity = wva.getRelatedActivity();
         if (activity != null) {
-          return activity.getPerformedBy().getFullNameLastFirst();
+          return activity.getPerformedBy();
         }
         return null;
       }
     });
-    columns.add(new TableColumn<WellVolumeAdjustment>("Copy", "The name of the library plate copy") {
+    columns.add(new TextColumn<WellVolumeAdjustment>("Copy", "The name of the library plate copy") {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva) { return wva.getCopy().getName(); }
+      public String getCellValue(WellVolumeAdjustment wva) { return wva.getCopy().getName(); }
     });
-    columns.add(new TableColumn<WellVolumeAdjustment>("Volume", "The volume adjustment amount", true) {
+    columns.add(new FixedDecimalColumn<WellVolumeAdjustment>("Volume", "The volume adjustment amount") {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva) { return wva.getMicroliterVolume(); }
+      public BigDecimal getCellValue(WellVolumeAdjustment wva) { return wva.getMicroliterVolume(); }
     });
-    columns.add(new TableColumn<WellVolumeAdjustment>("Cherry Pick Request", "The cherry pick request that made the volume adjustment", true) {
+    columns.add(new IntegerColumn<WellVolumeAdjustment>("Cherry Pick Request", "The cherry pick request that made the volume adjustment") {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva) { return wva.getLabCherryPick() == null ? null : wva.getLabCherryPick().getCherryPickRequest().getCherryPickRequestNumber(); }
+      public Integer getCellValue(WellVolumeAdjustment wva) { return wva.getLabCherryPick() == null ? null : wva.getLabCherryPick().getCherryPickRequest().getCherryPickRequestNumber(); }
 
       @Override
       public boolean isCommandLink() { return true; }
@@ -82,9 +94,9 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
       @Override
       public Object cellAction(WellVolumeAdjustment entity) { return _cherryPickRequestViewer.viewCherryPickRequest(entity.getLabCherryPick().getCherryPickRequest()); }
     });
-    columns.add(new TableColumn<WellVolumeAdjustment>("Admin Adjustment", "The well volume correction activity that made the volume adjustment", true) {
+    columns.add(new IntegerColumn<WellVolumeAdjustment>("Admin Adjustment", "The well volume correction activity that made the volume adjustment") {
       @Override
-      public Object getCellValue(WellVolumeAdjustment wva) { return wva.getWellVolumeCorrectionActivity() == null ? null : wva.getWellVolumeCorrectionActivity().getEntityId(); }
+      public Integer getCellValue(WellVolumeAdjustment wva) { return wva.getWellVolumeCorrectionActivity() == null ? null : wva.getWellVolumeCorrectionActivity().getEntityId(); }
     });
     return columns;
   }

@@ -9,12 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
-import javax.faces.model.DataModel;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.util.VocabularlyConverter;
 
-import edu.harvard.med.screensaver.db.SortDirection;
-
-public abstract class SortableDataModel<E> extends DataModel
+public class OperatorConverter extends VocabularlyConverter<Operator>
 {
-  public abstract void sort(TableColumn<E,?> column,
-                            SortDirection direction);
+  public OperatorConverter()
+  {
+    super(Operator.ALL_OPERATORS);
+  }
 }

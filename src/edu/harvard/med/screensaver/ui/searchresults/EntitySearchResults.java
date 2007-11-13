@@ -48,7 +48,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
 
   private static Logger log = Logger.getLogger(EntitySearchResults.class);
 
-  private static final String[] CAPABILITIES = { "viewEntity", "exportData" };
+  private static final String[] CAPABILITIES = { "viewEntity", "exportData", "filter" };
 
 
   // instance data members

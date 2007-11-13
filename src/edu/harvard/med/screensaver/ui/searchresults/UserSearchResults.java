@@ -10,12 +10,11 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
-import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 
 /**
@@ -34,7 +33,7 @@ public class UserSearchResults extends EntitySearchResults<ScreensaverUser>
 
   /*private UserViewer _screenViewer;*/
 
-  private ArrayList<TableColumn<ScreensaverUser>> _columns;
+  private ArrayList<TableColumn<ScreensaverUser,?>> _columns;
 
 
   // public constructor
@@ -54,33 +53,21 @@ public class UserSearchResults extends EntitySearchResults<ScreensaverUser>
 
   // implementations of the SearchResults abstract methods
 
-  protected List<TableColumn<ScreensaverUser>> getColumns()
+  protected List<TableColumn<ScreensaverUser,?>> getColumns()
   {
     if (_columns == null) {
-      _columns = new ArrayList<TableColumn<ScreensaverUser>>();
-      _columns.add(new TableColumn<ScreensaverUser>("Last", "The last name of the user") {
+      _columns = new ArrayList<TableColumn<ScreensaverUser,?>>();
+      _columns.add(new TextColumn<ScreensaverUser>("Last", "The last name of the user") {
         @Override
-        public Object getCellValue(ScreensaverUser user) { return user.getLastName(); }
+        public String getCellValue(ScreensaverUser user) { return user.getLastName(); }
       });
-      _columns.add(new TableColumn<ScreensaverUser>("First", "The first name of the user") {
+      _columns.add(new TextColumn<ScreensaverUser>("First", "The first name of the user") {
         @Override
-        public Object getCellValue(ScreensaverUser user) { return user.getFirstName(); }
+        public String getCellValue(ScreensaverUser user) { return user.getFirstName(); }
       });
-      _columns.add(new TableColumn<ScreensaverUser>("Date Created", "The date the user's account was created") {
-        @Override
-        public Object getCellValue(ScreensaverUser user)
-        {
-          return String.format("%tD", user.getDateCreated());
-        }
-
-        @Override
-        protected Comparator<ScreensaverUser> getAscendingComparator()
-        {
-          return new NullSafeComparator<ScreensaverUser>() {
-            @Override
-            protected int doCompare(ScreensaverUser u1, ScreensaverUser u2) { return u1.getDateCreated().compareTo(u2.getDateCreated()); }
-          };
-        }
+      _columns.add(new DateColumn<ScreensaverUser>("Date Created",
+        "The date the user's account was created") {
+        public Date getDate(ScreensaverUser user) { return user.getDateCreated(); }
       });
     }
     return _columns;

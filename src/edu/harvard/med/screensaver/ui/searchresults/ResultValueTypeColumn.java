@@ -14,7 +14,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-public class ResultValueTypeColumn extends TableColumn<Well>
+public class ResultValueTypeColumn<T> extends TableColumn<Well,T>
 {
   private ResultValueType _resultValueType;
 
@@ -22,15 +22,16 @@ public class ResultValueTypeColumn extends TableColumn<Well>
   {
     super(resultValueType.getName(),
           resultValueType.getDescription(),
-          resultValueType.isNumeric());
+          resultValueType.isNumeric() ? ColumnType.REAL : ColumnType.TEXT);
     _resultValueType = resultValueType;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public Object getCellValue(Well well)
+  public T getCellValue(Well well)
   {
     ResultValue resultValue = well.getResultValues().get(_resultValueType);
-    return resultValue == null ? null : ResultValue.getTypedValue(resultValue, _resultValueType);
+    return resultValue == null ? null : (T) ResultValue.getTypedValue(resultValue, _resultValueType);
   }
 
   public ResultValueType getResultValueType()

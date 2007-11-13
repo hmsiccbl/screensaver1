@@ -38,7 +38,7 @@ public class ReagentsDataModel extends VirtualPagingDataModel<Reagent,Reagent>
   public ReagentsDataModel(Study study,
                            int rowsToFetch,
                            int totalRowCount,
-                           TableColumn<Reagent> sortColumn,
+                           TableColumn<Reagent,?> sortColumn,
                            SortDirection sortDirection,
                            GenericEntityDAO dao)
   {
@@ -53,7 +53,7 @@ public class ReagentsDataModel extends VirtualPagingDataModel<Reagent,Reagent>
   public ReagentsDataModel(Set<Reagent> reagents,
                            int rowsToFetch,
                            int totalRowCount,
-                           TableColumn<Reagent> sortColumn,
+                           TableColumn<Reagent,?> sortColumn,
                            SortDirection sortDirection,
                            GenericEntityDAO dao)
   {
@@ -66,7 +66,7 @@ public class ReagentsDataModel extends VirtualPagingDataModel<Reagent,Reagent>
   }
 
   @Override
-  protected List<Reagent> fetchAscendingSortOrder(TableColumn<Reagent> sortColumn)
+  protected List<Reagent> fetchAscendingSortOrder(TableColumn<Reagent,?> sortColumn)
   {
     ReagentsSortQuery query;
     if (_study != null) {

@@ -48,7 +48,7 @@ public class WellSearchResults extends EntitySearchResults<Well>
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
 
-  private List<TableColumn<Well>> _columns;
+  private List<TableColumn<Well,?>> _columns;
 
 
   // constructors
@@ -80,13 +80,13 @@ public class WellSearchResults extends EntitySearchResults<Well>
   // implementations of the SearchResults abstract methods
 
   @Override
-  protected List<TableColumn<Well>> getColumns()
+  protected List<TableColumn<Well,?>> getColumns()
   {
     if (_columns == null) {
-      _columns = new ArrayList<TableColumn<Well>>();
-      _columns.add(new TableColumn<Well>("Library", "The library containing the well") {
+      _columns = new ArrayList<TableColumn<Well,?>>();
+      _columns.add(new TextColumn<Well>("Library", "The library containing the well") {
         @Override
-        public Object getCellValue(Well well) { return well.getLibrary().getLibraryName(); }
+        public String getCellValue(Well well) { return well.getLibrary().getLibraryName(); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -94,9 +94,9 @@ public class WellSearchResults extends EntitySearchResults<Well>
         @Override
         public Object cellAction(Well well) { return _libraryViewer.viewLibrary(well.getLibrary()); }
       });
-      _columns.add(new TableColumn<Well>("Plate", "The number of the plate the well is located on", true) {
+      _columns.add(new IntegerColumn<Well>("Plate", "The number of the plate the well is located on") {
         @Override
-        public Object getCellValue(Well well) { return well.getPlateNumber(); }
+        public Integer getCellValue(Well well) { return well.getPlateNumber(); }
 
         @Override
         protected Comparator<Well> getAscendingComparator()
@@ -111,9 +111,9 @@ public class WellSearchResults extends EntitySearchResults<Well>
           };
         }
       });
-      _columns.add(new TableColumn<Well>("Well", "The plate coordinates of the well") {
+      _columns.add(new TextColumn<Well>("Well", "The plate coordinates of the well") {
         @Override
-        public Object getCellValue(Well well) { return well.getWellName(); }
+        public String getCellValue(Well well) { return well.getWellName(); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -121,13 +121,14 @@ public class WellSearchResults extends EntitySearchResults<Well>
         @Override
         public Object cellAction(Well well) { return viewCurrentEntity(); }
       });
-      _columns.add(new TableColumn<Well>("Well Type", "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.") {
+      _columns.add(new EnumColumn<Well,WellType>("Well Type", "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.", WellType.values()) {
         @Override
-        public Object getCellValue(Well well) { return well.getWellType(); }
+        public WellType getCellValue(Well well) { return well.getWellType(); }
       });
-      _columns.add(new TableColumn<Well>("Contents", "The gene name for the silencing reagent, or SMILES for the compound, in the well") {
+      // TODO: consider splitting this column into two, one for compounds, one for genes
+      _columns.add(new TextColumn<Well>("Contents", "The gene name for the silencing reagent, or SMILES for the compound, in the well") {
         @Override
-        public Object getCellValue(Well well) { return getContentsValue(well); }
+        public String getCellValue(Well well) { return getContentsValue(well).toString(); }
 
         @Override
         protected Comparator<Well> getAscendingComparator()

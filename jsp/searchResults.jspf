@@ -10,6 +10,30 @@
 			styleClass="sectionHeader"
 			rendered="#{! empty searchResults.description}" />
 
+		<t:popup id="showHideFilterDialog" closePopupOnExitingPopup="true"
+			closePopupOnExitingElement="false" styleClass="popupDialog"
+			rendered="#{false && searchResults.capabilities[\"filter\"] && !searchResults.entityView}">
+			<t:commandLink>
+				<t:outputText value="Filters >>" styleClass="label" />
+			</t:commandLink>
+			<f:facet name="popup">
+				<t:panelGrid id="filterCommandPanel">
+					<t:panelGroup>
+						<t:outputLabel for="showFilterOption" value="Show filters"
+							styleClass="label" />
+						<t:selectBooleanCheckbox id="showFilterOption"
+							value="#{searchResults.filterMode}"
+							onchange="javascript:document.getElementById('updateFilterButton').click()" />
+					</t:panelGroup>
+					<%-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field --%>
+					<t:commandButton id="updateFilterButton" forceId="true"
+						styleClass="hiddenCommand" />
+					<t:commandButton value="Reset All Filters" immediate="true"
+						action="#{searchResults.resetFilter}" />
+				</t:panelGrid>
+			</f:facet>
+		</t:popup>
+
 		<t:buffer into="#{dataTableBuffer}">
 			<t:dataTable id="searchResultsTable"
 				binding="#{searchResults.dataTable.dataTableUIComponent}"
@@ -26,27 +50,61 @@
 					var="column"
 					styleClass="#{column.numeric ? \"numericColumn\" : \"column\"}">
 					<f:facet name="header">
-						<t:popup displayAtDistanceY="20">
-							<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
-							<t:commandSortHeader columnName="#{column.name}" arrow="false"
-								immediate="false">
-								<f:facet name="ascending">
-									<t:graphicImage value="/images/ascending-arrow.gif"
-										rendered="true" border="0" />
+						<t:panelGrid columns="1">
+							<t:popup displayAtDistanceY="20">
+								<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
+								<t:commandSortHeader columnName="#{column.name}" arrow="false"
+									immediate="false">
+									<f:facet name="ascending">
+										<t:graphicImage value="/images/ascending-arrow.gif"
+											rendered="true" border="0" />
+									</f:facet>
+									<f:facet name="descending">
+										<t:graphicImage value="/images/descending-arrow.gif"
+											rendered="true" border="0" />
+									</f:facet>
+									<t:outputText value="#{column.name}" />
+								</t:commandSortHeader>
+								<f:facet name="popup">
+									<t:panelGrid styleClass="popupHelp">
+										<t:outputText styleClass="popupText"
+											value="#{column.description}" escape="false" />
+									</t:panelGrid>
 								</f:facet>
-								<f:facet name="descending">
-									<t:graphicImage value="/images/descending-arrow.gif"
-										rendered="true" border="0" />
-								</f:facet>
-								<t:outputText value="#{column.name}" />
-							</t:commandSortHeader>
-							<f:facet name="popup">
-								<t:panelGrid styleClass="popupHelp">
-									<t:outputText styleClass="popupText"
-										value="#{column.description}" escape="false" />
-								</t:panelGrid>
-							</f:facet>
-						</t:popup>
+
+							</t:popup>
+							<t:panelGrid rendered="#{searchResults.filterMode}" columns="2" >
+								<t:selectOneMenu id="operator"
+									value="#{column.criterion.operator}"
+									converter="#{operatorConverter}" styleClass="inputText">
+									<f:selectItems value="#{column.criterion.operatorSelections}" />
+								</t:selectOneMenu>
+								<t:inputText id="simpleCriterionValue"
+									value="#{column.criterion.value}"
+									converter="#{column.converter}"
+									rendered="#{column.columnType.name == \"TEXT\" || column.columnType.name == \"INTEGER\" || column.columnType.name == \"REAL\" || column.columnType.name == \"FIXED_DECIMAL\"}"
+									size="12"
+									styleClass="inputText"
+									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}" />
+								<t:inputDate id="dateCriterionValue"
+									value="#{column.criterion.value}"
+									rendered="#{column.columnType.name == \"DATE\"}"
+									styleClass="inputText"
+									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}" />
+								<t:selectOneMenu id="vocabularyCriterionValue"
+									value="#{column.criterion.value}"
+									converter="#{column.converter}"
+									rendered="#{column.columnType.name == \"VOCABULARY\" || column.columnType.name == \"BOOLEAN\"}"
+									styleClass="inputText"
+									onchange="javascript:document.getElementById('search').click()"
+									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}">
+									<f:selectItems value="#{column.vocabularlySelections}" />
+								</t:selectOneMenu>
+								<t:commandButton id="search" forceId="true" value="Filter" styleClass="command"/>
+								<t:commandButton image="/images/delete.png" immediate="true"
+									action="#{column.criterion.reset}"styleClass="command" />
+							</t:panelGrid>
+						</t:panelGrid>
 					</f:facet>
 					<t:outputText value="#{searchResults.cellValue}"
 						rendered="#{! (column.isCommandLink || column.isCommandLinkList || (column.editable && searchResults.editMode))}" />

@@ -52,7 +52,7 @@ public abstract class VirtualPagingDataModel<K,V> extends SortableDataModel<V>
   private int _rowsToFetch;
   private int _totalRowCount;
   protected int _rowIndex;
-  private TableColumn<V> _sortColumn;
+  private TableColumn<V,?> _sortColumn;
   private SortDirection _sortDirection;
   private List<K> _sortedKeys;
   private Map<K,V> _fetchedRows = new HashMap<K,V>();
@@ -66,7 +66,7 @@ public abstract class VirtualPagingDataModel<K,V> extends SortableDataModel<V>
 
   protected VirtualPagingDataModel(int rowsToFetch,
                                    int totalRowCount,
-                                   TableColumn<V> sortColumn,
+                                   TableColumn<V,?> sortColumn,
                                    SortDirection sortDirection)
   {
     if (rowsToFetch < 0) {
@@ -83,7 +83,7 @@ public abstract class VirtualPagingDataModel<K,V> extends SortableDataModel<V>
 
   // abstract methods
 
-  abstract protected List<K> fetchAscendingSortOrder(TableColumn<V> column);
+  abstract protected List<K> fetchAscendingSortOrder(TableColumn<V,?> column);
 
   abstract protected Map<K,V> fetchData(Set<K> keys);
 
@@ -129,7 +129,7 @@ public abstract class VirtualPagingDataModel<K,V> extends SortableDataModel<V>
   }
 
   @Override
-  final public void sort(TableColumn<V> column, SortDirection direction)
+  final public void sort(TableColumn<V,?> column, SortDirection direction)
   {
     _sortColumn = column;
     _sortDirection = direction;

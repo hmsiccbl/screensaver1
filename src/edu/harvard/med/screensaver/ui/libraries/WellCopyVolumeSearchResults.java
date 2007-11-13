@@ -21,14 +21,16 @@ import java.util.Map;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.searchresults.FixedDecimalColumn;
+import edu.harvard.med.screensaver.ui.searchresults.IntegerColumn;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResultsWithRowDetail;
+import edu.harvard.med.screensaver.ui.searchresults.TextColumn;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.commons.collections.MultiMap;
@@ -61,7 +63,7 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
   private WellViewer _wellViewer;
   private WellVolumeSearchResults _wellVolumeSearchResults;
 
-  private ArrayList<TableColumn<WellCopyVolume>> _columns;
+  private ArrayList<TableColumn<WellCopyVolume,?>> _columns;
   private Map<WellCopyVolume,BigDecimal> _newRemainingVolumes;
   private String _wellVolumeAdjustmentActivityComments;
 
@@ -123,13 +125,13 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
   }
 
   @Override
-  protected List<TableColumn<WellCopyVolume>> getColumns()
+  protected List<TableColumn<WellCopyVolume,?>> getColumns()
   {
     if (_columns == null) {
-      _columns = new ArrayList<TableColumn<WellCopyVolume>>();
-      _columns.add(new TableColumn<WellCopyVolume>("Library", "The library containing the well") {
+      _columns = new ArrayList<TableColumn<WellCopyVolume,?>>();
+      _columns.add(new TextColumn<WellCopyVolume>("Library", "The library containing the well") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getLibrary().getLibraryName(); }
+        public String getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getLibrary().getLibraryName(); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -137,13 +139,13 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
         @Override
         public Object cellAction(WellCopyVolume wellVolume) { return _libraryViewer.viewLibrary(wellVolume.getWell().getLibrary()); }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("Plate", "The number of the plate the well is located on", true) {
+      _columns.add(new IntegerColumn<WellCopyVolume>("Plate", "The number of the plate the well is located on") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getPlateNumber(); }
+        public Integer getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getPlateNumber(); }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("Well", "The plate coordinates of the well") {
+      _columns.add(new TextColumn<WellCopyVolume>("Well", "The plate coordinates of the well") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getWellName(); }
+        public String getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWell().getWellName(); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -151,9 +153,9 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
         @Override
         public Object cellAction(WellCopyVolume wellVolume) { return _wellViewer.viewWell(wellVolume.getWell()); }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("Copy", "The name of the library plate copy") {
+      _columns.add(new TextColumn<WellCopyVolume>("Copy", "The name of the library plate copy") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getCopy().getName(); }
+        public String getCellValue(WellCopyVolume wellVolume) { return wellVolume.getCopy().getName(); }
 
         // TODO
 //        @Override
@@ -162,21 +164,21 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
 //        @Override
 //        public Object cellAction(WellCopyVolume wellVolume) { return _libraryViewer.viewLibraryCopyVolumes(wellVolume.getWell(), WellCopyVolumeSearchResults.this); }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("Initial Volume", "The initial volume of this well copy", true) {
+      _columns.add(new FixedDecimalColumn<WellCopyVolume>("Initial Volume", "The initial volume of this well copy") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getInitialMicroliterVolume(); }
+        public BigDecimal getCellValue(WellCopyVolume wellVolume) { return wellVolume.getInitialMicroliterVolume(); }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("Consumed Volume", "The volume already used from this well copy", true) {
+      _columns.add(new FixedDecimalColumn<WellCopyVolume>("Consumed Volume", "The volume already used from this well copy") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getConsumedMicroliterVolume(); }
+        public BigDecimal getCellValue(WellCopyVolume wellVolume) { return wellVolume.getConsumedMicroliterVolume(); }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("Remaining Volume", "The remaining volume of this well copy", true) {
+      _columns.add(new FixedDecimalColumn<WellCopyVolume>("Remaining Volume", "The remaining volume of this well copy") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getRemainingMicroliterVolume(); }
+        public BigDecimal getCellValue(WellCopyVolume wellVolume) { return wellVolume.getRemainingMicroliterVolume(); }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustment smade from this well copy", true) {
+      _columns.add(new IntegerColumn<WellCopyVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustment smade from this well copy") {
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
+        public Integer getCellValue(WellCopyVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
 
         @Override
         public boolean isVisible() { return !isEditMode(); }
@@ -190,25 +192,16 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
           return showRowDetail();
         }
       });
-      _columns.add(new TableColumn<WellCopyVolume>("New Remaining Volume", "Enter new remaining volume", true) {
+      _columns.add(new FixedDecimalColumn<WellCopyVolume>("New Remaining Volume", "Enter new remaining volume") {
 
         @Override
-        public Object getCellValue(WellCopyVolume wellVolume) { return _newRemainingVolumes.get(wellVolume); }
+        public BigDecimal getCellValue(WellCopyVolume wellVolume) { return _newRemainingVolumes.get(wellVolume); }
 
         @Override
         public void setCellValue(WellCopyVolume wellVolume, Object value)
         {
-          if (value != null && value.toString().trim().length() > 0) {
-            try {
-              BigDecimal newValue = new BigDecimal(value.toString()).setScale(Well.VOLUME_SCALE);
-              _newRemainingVolumes.put(wellVolume, newValue);
-            }
-            catch (Exception e) {
-              showMessage("libraries.badWellVolumeAdjustmentValue", value, wellVolume.getWell().getWellKey(), wellVolume.getCopy().getName());
-            }
-          }
+          _newRemainingVolumes.put(wellVolume, (BigDecimal) value);
         }
-
 
         @Override
         public boolean isEditable() { return true; }

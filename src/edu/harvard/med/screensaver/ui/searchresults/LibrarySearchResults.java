@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
@@ -37,7 +39,7 @@ public class LibrarySearchResults extends EntitySearchResults<Library>
 
   private LibraryViewer _libraryViewer;
 
-  private ArrayList<TableColumn<Library>> _columns;
+  private ArrayList<TableColumn<Library,?>> _columns;
 
 
   // constructors
@@ -57,13 +59,13 @@ public class LibrarySearchResults extends EntitySearchResults<Library>
 
   // implementations of the SearchResults abstract methods
 
-  protected List<TableColumn<Library>> getColumns()
+  protected List<TableColumn<Library,?>> getColumns()
   {
     if (_columns == null) {
-      _columns = new ArrayList<TableColumn<Library>>();
-      _columns.add(new TableColumn<Library>("Short Name", "The abbreviated name for the library") {
+      _columns = new ArrayList<TableColumn<Library,?>>();
+      _columns.add(new TextColumn<Library>("Short Name", "The abbreviated name for the library") {
         @Override
-        public Object getCellValue(Library library) { return library.getShortName(); }
+        public String getCellValue(Library library) { return library.getShortName(); }
 
         @Override
         public boolean isCommandLink() { return true; }
@@ -71,25 +73,27 @@ public class LibrarySearchResults extends EntitySearchResults<Library>
         @Override
         public Object cellAction(Library library) { return viewCurrentEntity(); }
       });
-      _columns.add(new TableColumn<Library>("Library Name", "The full name of the library") {
+      _columns.add(new TextColumn<Library>("Library Name", "The full name of the library") {
         @Override
-        public Object getCellValue(Library library) { return library.getLibraryName(); }
+        public String getCellValue(Library library) { return library.getLibraryName(); }
       });
-      _columns.add(new TableColumn<Library>("Screen Type", "'RNAi' or 'Small Molecule'") {
+      _columns.add(new EnumColumn<Library,ScreenType>("Screen Type", "'RNAi' or 'Small Molecule'",
+        ScreenType.values()) {
         @Override
-        public Object getCellValue(Library library) { return library.getScreenType(); }
+        public ScreenType getCellValue(Library library) { return library.getScreenType(); }
       });
-      _columns.add(new TableColumn<Library>("Library Type", "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.") {
+      _columns.add(new EnumColumn<Library,LibraryType>("Library Type", "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.",
+        LibraryType.values()) {
         @Override
-        public Object getCellValue(Library library) { return library.getLibraryType(); }
+        public LibraryType getCellValue(Library library) { return library.getLibraryType(); }
       });
-      _columns.add(new TableColumn<Library>("Start Plate", "The plate number for the first plate in the library", true) {
+      _columns.add(new IntegerColumn<Library>("Start Plate", "The plate number for the first plate in the library") {
         @Override
-        public Object getCellValue(Library library) { return library.getStartPlate(); }
+        public Integer getCellValue(Library library) { return library.getStartPlate(); }
       });
-      _columns.add(new TableColumn<Library>("End Plate", "The plate number for the last plate in the library", true) {
+      _columns.add(new IntegerColumn<Library>("End Plate", "The plate number for the last plate in the library") {
         @Override
-        public Object getCellValue(Library library) { return library.getEndPlate(); }
+        public Integer getCellValue(Library library) { return library.getEndPlate(); }
       });
     }
     return _columns;

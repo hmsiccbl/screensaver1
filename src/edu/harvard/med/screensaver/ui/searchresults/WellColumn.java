@@ -9,28 +9,41 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import edu.harvard.med.screensaver.db.ScreenResultSortQuery;
 import edu.harvard.med.screensaver.db.ScreenResultSortQuery.SortByWellProperty;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-public abstract class WellColumn extends TableColumn<Well>
+public abstract class WellColumn<T> extends TableColumn<Well,T>
 {
   private SortByWellProperty _wellProperty;
+  private Set<T> _items;
 
+  @SuppressWarnings("unchecked")
   public WellColumn(ScreenResultSortQuery.SortByWellProperty wellProperty,
                     String name,
-                    String description,
-                    boolean isNumeric)
+                    String description)
   {
     super(name,
           description,
-          isNumeric);
+          wellProperty == SortByWellProperty.PLATE_NUMBER ? ColumnType.INTEGER :
+            wellProperty == SortByWellProperty.ASSAY_WELL_TYPE ? ColumnType.VOCABULARY :
+              ColumnType.TEXT);
+    _items = (Set<T>) EnumSet.allOf(AssayWellType.class);
     _wellProperty = wellProperty;
   }
 
   public SortByWellProperty getWellProperty()
   {
     return _wellProperty;
+  }
+
+  public Set<T> getVocabularly()
+  {
+    return _items;
   }
 }
