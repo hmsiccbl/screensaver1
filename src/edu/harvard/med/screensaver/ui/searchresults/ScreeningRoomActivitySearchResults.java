@@ -25,8 +25,6 @@ import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 import org.apache.log4j.Logger;
 
-import sun.security.krb5.internal.ac;
-
 public class ScreeningRoomActivitySearchResults extends ActivitySearchResults
 {
   // static members
