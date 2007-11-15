@@ -16,7 +16,7 @@ CLASSPATH="$SCREENSAVER/classes$LIBS"
 JAVA=/opt/java/jdk1.5/bin/java
 
 $JAVA -Xmx1500m -cp $CLASSPATH \
-    edu.harvard.med.screensaver.io.libraries.LibraryCopyGenerator \
+    edu.harvard.med.screensaver.io.libraries.LibraryCopyGenerator "$@" \
     > $THIS.out 2> $THIS.err
 
 echo $0 is complete
