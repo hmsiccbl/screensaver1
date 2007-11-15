@@ -10,12 +10,14 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -62,6 +64,15 @@ public class ScreenSearchResults extends EntitySearchResults<Screen>
   {
     _screenViewer = screenViewer;
     _dao = dao;
+  }
+
+  @Override
+  public void setContents(Collection<? extends Screen> unsortedResults,
+                          String description)
+  {
+    super.setContents(unsortedResults, description);
+    // default to descending sort order on screen number
+    getSortManager().setSortAscending(false);
   }
 
 
