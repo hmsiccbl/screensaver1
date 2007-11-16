@@ -21,22 +21,22 @@ import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
-public abstract class VocabularlyColumn<T,V> extends TableColumn<T,V>
+public abstract class VocabularyColumn<T,V> extends TableColumn<T,V>
 {
   private Set<V> _items;
   private ArrayList<SelectItem> _selectItems;
 
-  public VocabularlyColumn(String name,
-                           String description,
-                           Converter converter,
-                           Set<V> items)
+  public VocabularyColumn(String name,
+                          String description,
+                          Converter converter,
+                          Set<V> items)
   {
     super(name, description, ColumnType.VOCABULARY);
     setConverter(converter);
     _items = new LinkedHashSet<V>(items);
   }
 
-  public VocabularlyColumn(String name,
+  public VocabularyColumn(String name,
                            String description,
                            Converter converter,
                            V[] items)
@@ -44,17 +44,17 @@ public abstract class VocabularlyColumn<T,V> extends TableColumn<T,V>
     this(name, description, converter, new TreeSet<V>(Arrays.asList(items)));
   }
 
-  public Set<V> getVocabularly()
+  public Set<V> getVocabulary()
   {
     return _items;
   }
 
-  public List<SelectItem> getVocabularlySelections()
+  public List<SelectItem> getVocabularySelections()
   {
     if (_selectItems == null) {
       _selectItems = new ArrayList<SelectItem>();
       _selectItems.add(new SelectItem("", ""));
-      for (V v : getVocabularly()) {
+      for (V v : getVocabulary()) {
         _selectItems.add(new SelectItem(v));
       }
     }

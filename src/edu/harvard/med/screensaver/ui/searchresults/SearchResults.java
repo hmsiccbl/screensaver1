@@ -85,7 +85,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
   private List<? extends E> _sortedData;
   private boolean _editMode;
   private boolean _hasEditableColumns;
-  private boolean _filterMode;
+  private boolean _isTableFilterMode;
 
 
   // public constructor
@@ -235,14 +235,14 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     return _description;
   }
 
-  public boolean isFilterMode()
+  public boolean isTableFilterMode()
   {
-    return _filterMode;
+    return _isTableFilterMode;
   }
 
-  public void setFilterMode(boolean filterMode)
+  public void setTableFilterMode(boolean isTableFilterMode)
   {
-    _filterMode = filterMode;
+    _isTableFilterMode = isTableFilterMode;
   }
 
 

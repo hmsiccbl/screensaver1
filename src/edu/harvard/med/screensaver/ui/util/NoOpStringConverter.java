@@ -14,6 +14,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+/**
+ * Note: converts empty string to null object, and null object to empty string (to be consistent with other converters)
+ * @author drew
+ */
 public class NoOpStringConverter implements Converter
 {
   public static Converter _instance = new NoOpStringConverter();
@@ -22,6 +26,9 @@ public class NoOpStringConverter implements Converter
                             UIComponent component,
                             String value) throws ConverterException
   {
+    if (value.length() ==0) {
+      return null;
+    }
     return value;
   }
 
@@ -30,7 +37,7 @@ public class NoOpStringConverter implements Converter
                             Object value) throws ConverterException
   {
     if (value == null) {
-      return null;
+      return "";
     }
     return value.toString();
   }

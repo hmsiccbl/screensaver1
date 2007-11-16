@@ -9,9 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.ui.table.TableColumn;
 
@@ -25,10 +29,5 @@ public abstract class BooleanColumn<T> extends TableColumn<T,Boolean>
           description,
           ColumnType.BOOLEAN);
     _items = new TreeSet<Boolean>(Arrays.asList(null, true, false));
-  }
-
-  Set<Boolean> getVocabularly()
-  {
-    return _items;
   }
 }

@@ -64,7 +64,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   {
     if (_columns == null) {
       _columns = new ArrayList<TableColumn<A,?>>();
-      _columns.add(new VocabularlyColumn<A,String>(
+      _columns.add(new VocabularyColumn<A,String>(
         "Activity Type",
         "The type of the activity",
         new VocabularlyConverter<String>(getActivityTypes()),

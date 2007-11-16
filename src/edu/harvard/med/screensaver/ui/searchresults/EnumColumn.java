@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.util.VocabularlyConverter;
 
 
-public abstract class EnumColumn<T, E extends Enum<E>> extends VocabularlyColumn<T,E>
+public abstract class EnumColumn<T, E extends Enum<E>> extends VocabularyColumn<T,E>
 {
   public EnumColumn(String name,
                     String description,

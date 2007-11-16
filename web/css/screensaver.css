@@ -111,13 +111,8 @@ hr {
 	float: left;
 }
 
-/* for panelGrid that is being used to visually associate a set of related components */
-.groupingPanel {
-	border-style: groove;
-	border-width: 2px;
-}
-
-.searchResultsCommandPanel {
+/* groupingPanel is for panelGrid that is being used to visually associate a set of related components */
+.groupingPanel, .searchResultsCommandPanel {
 	padding: 1px;
 	border-width: 1px;
 	border-style: solid;
@@ -223,6 +218,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	background-color: #bbbbbb;
 	padding-left: 1px;
 	padding-right: 1px;
+	vertical-align: top;
 }
 
 .tableHeader {
@@ -285,7 +281,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited {
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited
+	{
 	color: white;
 	text-decoration: none;
 	vertical-align: bottom;
@@ -392,4 +389,8 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 	font-family: sans-serif;
 	font-size: small;
 	font-weight: normal;
+}
+
+.tableFilterPanel {
+	vertical-align: bottom;
 }

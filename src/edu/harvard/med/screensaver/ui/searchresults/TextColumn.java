@@ -17,6 +17,6 @@ public abstract class TextColumn<T> extends TableColumn<T,String>
   public TextColumn(String name, String description)
   {
     super(name, description, ColumnType.TEXT);
-    getCriterion().setOperator(Operator.STARTS_WITH);
+    getCriterion().setOperator(Operator.TEXT_STARTS_WITH);
   }
 }

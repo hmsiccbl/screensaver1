@@ -30,33 +30,98 @@ public class CriterionTest extends TestCase
 
   public void testLikeOperator()
   {
-    String data = "Hello World!\nHow are you?";
-    Operator operator = Operator.LIKE;
+    String data = "Hello World.\nHow *are* you?";
+    Operator operator = Operator.TEXT_LIKE;
     assertNotMatches(operator, "Hello", data);
     assertNotMatches(operator, "helLo", data);
     assertMatches(operator, "Hello*", data);
     assertMatches(operator, "hello*", data);
-//    assertMatches(operator, "Hello\\*", data);
+    assertNotMatches(operator, "Hello\\*", data);
     assertMatches(operator, "*Hello*", data);
     assertMatches(operator, "*World*", data);
     assertMatches(operator, "*World*How*", data);
+    assertNotMatches(operator, "Hello World?", data);
     assertMatches(operator, "Hello World?*", data);
-    assertMatches(operator, "hello world?*", data);
-//    assertMatches(operator, "Hello World\\?", data);
+    assertMatches(operator, "hello world*", data);
+    assertMatches(operator, "hello world.*How*", data);
+    assertNotMatches(operator, "Hello World\\?", data);
+    assertMatches(operator, "?ello World*", data);
+    assertMatches(operator, "Hello World*you\\?", data);
+    assertMatches(operator, "Hello World*you?", data);
+    assertNotMatches(operator, "Hello World*you\\??", data);
+    assertNotMatches(operator, "?", data);
+    assertMatches(operator, "?*", data);
+    assertNotMatches(operator, "\\?", data);
     assertMatches(operator, "*", data);
+    assertNotMatches(operator, "\\*", data);
+    assertMatches(operator, "*\\?", data);
+    assertNotMatches(operator, "\\*???\\*", data);
+    assertMatches(operator, "*\\*???\\**", data);
+    assertNotMatches(operator, "\\**\\*", data);
+    assertMatches(operator, "*\\**\\**", data);
 
     doTestEmptyAndNullCasesWithOperator(operator);
   }
 
   public void testStartsWithOperator()
   {
-    String data = "Hello World!\nHow are you?";
-    Operator operator = Operator.STARTS_WITH;
+    String data = "Hello World.\nHow *are* you?";
+    Operator operator = Operator.TEXT_STARTS_WITH;
     assertMatches(operator, "Hello", data);
     assertMatches(operator, "helLo", data);
-//    assertNotMatches(operator, "Hello*", data);
+    assertMatches(operator, "Hello*", data);
+    assertMatches(operator, "*Hello", data);
+    assertMatches(operator, "*ello", data);
+    assertNotMatches(operator, "Jello", data);
+    assertMatches(operator, "?", data);
+    assertMatches(operator, "*", data);
+    assertNotMatches(operator, "\\?", data);
+    assertNotMatches(operator, "\\*", data);
+    assertMatches(operator, "*\\?", data);
+    assertMatches(operator, "*\\*", data);
+    assertNotMatches(operator, "\\*???\\*", data);
+    assertNotMatches(operator, "\\**\\*", data);
+    assertMatches(operator, "*\\*???\\*", data);
+    assertMatches(operator, "*\\**\\*", data);
+
 
     doTestEmptyAndNullCasesWithOperator(operator);
+  }
+
+  public void testContainsOperator()
+  {
+    String data = "Hello World.\nHow *are* you?";
+    Operator operator = Operator.TEXT_CONTAINS;
+    assertMatches(operator, "Hello", data);
+    assertMatches(operator, "Hello*you?", data);
+    assertMatches(operator, "helLo", data);
+    assertMatches(operator, "World", data);
+    assertMatches(operator, "*World*", data);
+    assertMatches(operator, "World*How", data);
+    assertMatches(operator, "World??How", data);
+    assertMatches(operator, "?", data);
+    assertMatches(operator, "*", data);
+    assertMatches(operator, "\\?", data);
+    assertMatches(operator, "\\*", data);
+    assertMatches(operator, "\\*???\\*", data);
+    assertMatches(operator, "\\**\\*", data);
+
+    doTestEmptyAndNullCasesWithOperator(operator);
+  }
+
+  public void testRegexCharactersAreIgnoredInUserExpression()
+  {
+    assertNotMatches(Operator.TEXT_LIKE, ".", "x");
+    assertMatches(Operator.TEXT_LIKE, ".", ".");
+    assertMatches(Operator.TEXT_LIKE, "..", "..");
+    assertNotMatches(Operator.TEXT_LIKE, "..", ".x");
+    assertMatches(Operator.TEXT_LIKE, ".*", ".x");
+    assertMatches(Operator.TEXT_LIKE, ".*", ".x");
+    assertMatches(Operator.TEXT_LIKE, ".*", ".*");
+    assertNotMatches(Operator.TEXT_LIKE, ".*", "x*");
+    assertMatches(Operator.TEXT_LIKE, "*", "*");
+    assertMatches(Operator.TEXT_LIKE, "\\\\x", "\\x");
+    assertMatches(Operator.TEXT_LIKE, "\\\\x\\?", "\\x?");
   }
 
   public void testEmptyOperator()

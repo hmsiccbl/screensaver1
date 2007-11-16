@@ -9,8 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.ScreenResultSortQuery;
 import edu.harvard.med.screensaver.db.ScreenResultSortQuery.SortByWellProperty;
@@ -42,8 +46,22 @@ public abstract class WellColumn<T> extends TableColumn<Well,T>
     return _wellProperty;
   }
 
-  public Set<T> getVocabularly()
+  public Set<T> getVocabulary()
   {
     return _items;
+  }
+
+  private ArrayList<SelectItem> _selectItems;
+
+  public List<SelectItem> getVocabularySelections()
+  {
+    if (_selectItems == null) {
+      _selectItems = new ArrayList<SelectItem>();
+      _selectItems.add(new SelectItem("", ""));
+      for (T v : getVocabulary()) {
+        _selectItems.add(new SelectItem(v));
+      }
+    }
+    return _selectItems;
   }
 }

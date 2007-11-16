@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 
@@ -17,8 +18,12 @@ import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Pattern;
+import com.sun.org.apache.xerces.internal.impl.xs.identity.Selector.Matcher;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -32,28 +37,30 @@ public class Criterion<T> extends Observable
 
   public enum Operator {
     ANY(""),
-    EMPTY("{}"),
-    NOT_EMPTY("{*}"),
+    EMPTY("blank"),
+    NOT_EMPTY("not blank"),
     EQUAL("="),
-    NOT_EQUAL("!="),
+    NOT_EQUAL("<>"),
     // operators for Comparable objects
     LESS_THAN("<"),
     LESS_THAN_EQUAL("<="),
     GREATER_THAN(">"),
     GREATER_THAN_EQUAL(">="),
     // operators for String objects
-    STARTS_WITH("^"),
-    CONTAINS("*"),
-    NOT_CONTAINS("!*"),
-    LIKE("~"),
-    NOT_LIKE("!~");
+    TEXT_STARTS_WITH("starts with"),
+    TEXT_CONTAINS("contains"),
+    TEXT_NOT_CONTAINS("doesn't contain"),
+    TEXT_LIKE("matches"),
+    TEXT_NOT_LIKE("doesn't match");
 
     public static List<Operator> ALL_OPERATORS = new ArrayList<Operator>();
-    public static List<SelectItem> ALL_OPERATOR_SELECTIONS = new ArrayList<SelectItem>();
+    public static List<Operator> COMPARABLE_OPERATORS = new ArrayList<Operator>();
     static {
       for (Operator operator : Operator.values()) {
         ALL_OPERATORS.add(operator);
-        ALL_OPERATOR_SELECTIONS.add(new SelectItem(operator, operator.getSymbol()));
+        if (!operator.name().startsWith("TEXT")) {
+          COMPARABLE_OPERATORS.add(operator);
+        }
       }
     }
 
@@ -84,15 +91,6 @@ public class Criterion<T> extends Observable
 
   public Criterion()
   {
-  }
-
-  /**
-   * @motivation for JSF EL expressions
-   * @return
-   */
-  public List<SelectItem> getOperatorSelections()
-  {
-    return Operator.ALL_OPERATOR_SELECTIONS;
   }
 
   public Operator getOperator()
@@ -196,14 +194,14 @@ public class Criterion<T> extends Observable
           operator == Operator.GREATER_THAN_EQUAL ? cmpResult >= 0 :
             cmpResult <= 0;
     }
-    else if (operator == Operator.LIKE || operator == Operator.NOT_LIKE ||
-      operator == Operator.STARTS_WITH ||
-      operator == Operator.CONTAINS || operator == Operator.NOT_CONTAINS) {
+    else if (operator == Operator.TEXT_LIKE || operator == Operator.TEXT_NOT_LIKE ||
+      operator == Operator.TEXT_STARTS_WITH ||
+      operator == Operator.TEXT_CONTAINS || operator == Operator.TEXT_NOT_CONTAINS) {
       if (! (criterionValue instanceof String)) {
         throw new CriterionMatchException("expecting String criterion value", this);
       }
       result = ((String) inputValue).matches(getRegex());
-      if (operator == Operator.NOT_LIKE || operator == Operator.NOT_CONTAINS) {
+      if (operator == Operator.TEXT_NOT_LIKE || operator == Operator.TEXT_NOT_CONTAINS) {
         result = !result;
       }
     }
@@ -213,23 +211,52 @@ public class Criterion<T> extends Observable
     return result;
   }
 
-  // TODO: handle escape sequences '\*' and '\?'
   private String getRegex()
   {
     if (_regex == null) {
+      String expr = (String) _value;
       assert _value != null;
-      if (_operator == Operator.STARTS_WITH) {
-        _regex = _value + ".*";
+      if (_operator == Operator.TEXT_STARTS_WITH) {
+        expr = expr + "*";
       }
-      else if (_operator == Operator.LIKE || _operator == Operator.NOT_LIKE) {
-        _regex = ((String) _value).replaceAll("\\?", ".").replaceAll("\\*", ".*");
+      else if (_operator == Operator.TEXT_LIKE || _operator == Operator.TEXT_NOT_LIKE) {
+        // use expression exactly as provided
       }
-      else if (_operator == Operator.CONTAINS || _operator == Operator.NOT_CONTAINS) {
-        _regex = ".*" + _value + ".*";
+      else if (_operator == Operator.TEXT_CONTAINS || _operator == Operator.TEXT_NOT_CONTAINS) {
+        expr = "*" + expr + "*";
       }
-      _regex = "(?i)(?s)" + _regex; // case insensitive, single-line mode (i.e., match across all lines)
-      log.debug("regex=" + _regex);
+      _regex = convertToRegex(expr);
     }
     return _regex;
+  }
+
+  /**
+   * @param expr search string containing wildcard characters "*" and "?", which can be escaped with a preceding "\" to be treats as literals.
+   */
+  private String convertToRegex(String expr)
+  {
+    String regex = expr;
+    String lastRegex;
+    // note: loop is necessary to properly handle sequential '?' characters
+    do {
+      lastRegex = regex;
+      regex = regex.replaceAll("([^\\\\])\\?|^\\?", "$1__ANY_ONE__");
+      regex = regex.replaceAll("([^\\\\])\\*|^\\*", "$1__ANY_MULTI__");
+    } while (! regex.equals(lastRegex));
+
+    // escape any remaining regex special characters in user's expression
+    regex = regex.replaceAll("\\\\\\\\", "\\\\\\\\");
+    String[] REGEX_CHARACTERS = { ".", "^", "$", "|", "(", ")", "{", "}", "[", "]" };
+    for (String c : REGEX_CHARACTERS ) {
+      if (regex.contains(c)) {
+        regex = regex.replace(c, "\\" + c);
+      }
+    }
+
+    // convert user's wildcards to regex equivalents
+    regex = regex.replaceAll("__ANY_ONE__", ".").replaceAll("__ANY_MULTI__", ".*");
+    regex = "(?i)(?s)" + regex; // case insensitive, single-line mode (i.e., match across all lines)
+    log.debug("regex=" + regex);
+    return regex;
   }
 }

@@ -9,8 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.faces.convert.BigDecimalConverter;
@@ -19,8 +21,10 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.DateTimeConverter;
 import javax.faces.convert.DoubleConverter;
 import javax.faces.convert.IntegerConverter;
+import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.util.NoOpStringConverter;
 
 import org.apache.log4j.Logger;
@@ -42,22 +46,29 @@ public abstract class TableColumn<R,T>
   }
 
   public enum ColumnType {
-    TEXT(false, new NoOpStringConverter()),
-    INTEGER(true, new IntegerConverter()),
-    REAL(true, new DoubleConverter()),
-    FIXED_DECIMAL(true, new BigDecimalConverter()),
-    DATE(false, dateTimeConverter),
-    BOOLEAN(false, new BooleanConverter()),
-    VOCABULARY(false, null);
+    TEXT(false, new NoOpStringConverter(), Operator.ALL_OPERATORS),
+    INTEGER(true, new IntegerConverter(), Operator.COMPARABLE_OPERATORS),
+    REAL(true, new DoubleConverter(), Operator.COMPARABLE_OPERATORS),
+    FIXED_DECIMAL(true, new BigDecimalConverter(), Operator.COMPARABLE_OPERATORS),
+    DATE(false, dateTimeConverter, Operator.COMPARABLE_OPERATORS),
+    BOOLEAN(false, new BooleanConverter(), Operator.COMPARABLE_OPERATORS),
+    VOCABULARY(false, null, Operator.COMPARABLE_OPERATORS);
 
     private Converter _converter = NoOpStringConverter.getInstance();
     private boolean _isNumeric;
+    private List<Operator> _validOperators;
+    private List<SelectItem> _operatorSelections = new ArrayList<SelectItem>();
 
     private ColumnType(boolean isNumeric,
-                       Converter converter)
+                       Converter converter,
+                       List<Operator> validOperators)
     {
       _isNumeric = isNumeric;
       _converter = converter;
+      _validOperators = validOperators;
+      for (Operator operator : validOperators) {
+        _operatorSelections.add(new SelectItem(operator, operator.getSymbol()));
+      }
     }
 
     /**
@@ -76,6 +87,16 @@ public abstract class TableColumn<R,T>
     public Converter getConverter()
     {
       return _converter;
+    }
+
+    public List<Operator> getValidOperators()
+    {
+      return _validOperators;
+    }
+
+    public List<SelectItem> getOperatorSelections()
+    {
+      return _operatorSelections;
     }
   };
 
