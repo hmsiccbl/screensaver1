@@ -662,7 +662,8 @@ public class ResultValue extends AbstractEntity
       assayWellType == AssayWellType.ASSAY_POSITIVE_CONTROL ||
       assayWellType == AssayWellType.OTHER) {
       if (_well.getWellType() != WellType.EMPTY) {
-        throw new DataModelViolationException("result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
+        log.warn(/*(
+        throw new DataModelViolationException(*/"result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
       }
     }
     else if (!_well.getWellType().getValue().equals(assayWellType.getValue())) {
