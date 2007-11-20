@@ -40,6 +40,7 @@ import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.annotations.OptimisticLock;
 
 
 /**
@@ -727,6 +728,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
              cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
              mappedBy="resultValueType")
   @MapKey(name="well")
+  @OptimisticLock(excluded=true)
   @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
   @org.hibernate.annotations.LazyCollection(LazyCollectionOption.EXTRA)
   public Map<Well,ResultValue> getResultValues()

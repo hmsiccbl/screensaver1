@@ -607,9 +607,6 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertTrue(expectedLabHeads.containsAll(actualLabHeads) && actualLabHeads.containsAll(expectedLabHeads));
   }
 
-  // TODO: this test needs to be updated to include an *imported* screen result,
-  // with ResultValueTypes and ResultValues, which are linked to Wells.
-  // Otherwise we're testing fluff!
   public void testDeleteScreenResult()
   {
     final int[] screenResultIds = new int[1];
@@ -619,7 +616,9 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
-        screen1.createScreenResult(new Date());
+        Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+        MakeDummyEntities.makeDummyScreenResult(screen1, library);
+        genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.saveOrUpdateEntity(screen1);
       }
     });

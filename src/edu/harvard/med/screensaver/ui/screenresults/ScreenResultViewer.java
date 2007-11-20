@@ -287,8 +287,14 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   {
     if (_screenResult != null) {
       try {
-        _screenResultsDao.deleteScreenResult(_screenResult);
-        _screensBrowser.invalidateSearchResult();
+        _dao.doInTransaction(new DAOTransaction() {
+          public void runTransaction() {
+            ScreenResult screenResult = _dao.reattachEntity(_screenResult);
+            _dao.need(screenResult, "wells");
+            _screenResultsDao.deleteScreenResult(screenResult);
+            _screensBrowser.invalidateSearchResult();
+          }
+        });
         return _screenViewer.viewScreen(_screenResult.getScreen());
       }
       catch (ConcurrencyFailureException e) {

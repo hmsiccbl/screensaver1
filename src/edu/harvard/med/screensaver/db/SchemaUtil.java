@@ -60,22 +60,22 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
                              withArgName("create").
                              withLongOpt("create").
                              withDescription("create database schema in an empty database").
-                             create());
+                             create('c'));
     app.addCommandLineOption(OptionBuilder.
                              withArgName("drop").
                              withLongOpt("drop").
                              withDescription("drop database schema").
-                             create());
+                             create('d'));
     app.addCommandLineOption(OptionBuilder.
                              withArgName("recreate").
                              withLongOpt("recreate").
                              withDescription("drop, then create and initialize the database schema").
-                             create());
+                             create('r'));
     app.addCommandLineOption(OptionBuilder.
                              withArgName("initialize").
                              withLongOpt("initialize").
                              withDescription("initialize the database by running database initialization scripts (assumes empty database tables)").
-                             create());
+                             create('i'));
     try {
       if (!app.processOptions(/*acceptDatabaseOptions=*/true, /*showHelpOnError=*/true)) {
         return;

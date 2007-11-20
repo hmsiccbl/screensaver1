@@ -22,6 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
+//import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -30,7 +31,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 
 /**
@@ -50,7 +50,7 @@ import org.hibernate.annotations.Index;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Immutable
+@org.hibernate.annotations.Entity(mutable=false)
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ResultValueType.class)
 public class ResultValue extends AbstractEntity
@@ -129,6 +129,7 @@ public class ResultValue extends AbstractEntity
   // private instance data
 
   private Integer _resultValueId;
+  //private Integer _version;
   private Well _well;
   private ResultValueType _resultValueType;
   private String _value;
@@ -550,7 +551,7 @@ public class ResultValue extends AbstractEntity
   /**
    * Constructs an uninitialized ResultValue object.
    *
-   * @motivation for hibernatexs
+   * @motivation for hibernate
    */
   private ResultValue() {}
 
@@ -563,6 +564,28 @@ public class ResultValue extends AbstractEntity
   {
     _resultValueId = resultValueId;
   }
+
+//  /**
+//   * Get the version number of the result value.
+//   * @return the version number of the <code>ResultValue</code>
+//   * @motivation for hibernate
+//   */
+//  @Column(nullable=false)
+//  @Version
+//  private Integer getVersion()
+//  {
+//    return _version;
+//  }
+//
+//  /**
+//   * Set the version number of the <code>ResultValue</code>
+//   * @param version the new version number for the <code>ResultValue</code>
+//   * @motivation for hibernate
+//   */
+//  private void setVersion(Integer version)
+//  {
+//    _version = version;
+//  }
 
   /**
    * Set the well.
