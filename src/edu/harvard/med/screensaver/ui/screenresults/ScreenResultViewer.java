@@ -290,7 +290,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
         _dao.doInTransaction(new DAOTransaction() {
           public void runTransaction() {
             ScreenResult screenResult = _dao.reattachEntity(_screenResult);
-            _dao.need(screenResult, "wells");
             _screenResultsDao.deleteScreenResult(screenResult);
             _screensBrowser.invalidateSearchResult();
           }

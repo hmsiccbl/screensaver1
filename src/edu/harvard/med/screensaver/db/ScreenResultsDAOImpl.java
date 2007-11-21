@@ -103,11 +103,25 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     });
   }
 
-  public void deleteScreenResult(ScreenResult screenResult)
+  public void deleteScreenResult(final ScreenResult screenResult)
   {
     // disassociate ScreenResult from Screen
     screenResult.getScreen().clearScreenResult();
 
+    getHibernateTemplate().execute(new HibernateCallback() {
+      public Object doInHibernate(Session session)
+        throws HibernateException, SQLException
+      {
+        Query query = session.createQuery("delete ResultValue v where v.resultValueType.id = :rvt");
+        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+          query.setParameter("rvt", rvt.getResultValueTypeId());
+          int rows = query.executeUpdate();
+          log.debug("deleted " + rows + " result values for " + rvt);
+          rvt.getResultValues().clear();
+        }
+        return null;
+      }
+    });
     getHibernateTemplate().delete(screenResult);
     log.debug("deleted " + screenResult);
   }
