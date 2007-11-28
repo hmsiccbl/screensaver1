@@ -13,7 +13,7 @@
 	<t:panelGrid style="margin-top: 10px;">
 		<t:panelGroup rendered="#{! empty reagentViewer.compounds}">
 			<h:form id="reagentContentsDownloadForm">
-				<h:commandButton value="Dowload SD File"
+				<h:commandButton value="Download SD File"
 					action="#{reagentViewer.downloadSDFile}" styleClass="command"
 					title="Download the contents of the reagent as an SD File" />
 			</h:form>
