@@ -227,10 +227,14 @@ public class DataRowParser
       _rowIndex).getString();
     if (! (vendorIdentifier == null || vendorIdentifier.equals(""))) {
       if (well.getReagent() == null) {
-        Reagent reagent = new Reagent(new ReagentVendorIdentifier(well.getLibrary().getVendor(),
-                                                                  vendorIdentifier));
-        _parser.getDAO().saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
-        log.info("created new reagent " + reagent + " for " + well);
+        ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(well.getLibrary().getVendor(),
+                                                                  vendorIdentifier);
+        Reagent reagent = _parser.getDAO().findEntityById(Reagent.class, rvi);
+        if (reagent == null) {
+          reagent = new Reagent(rvi);
+          _parser.getDAO().saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
+          log.info("created new reagent " + reagent + " for " + well);
+        }
         well.setReagent(reagent);
       }
     }

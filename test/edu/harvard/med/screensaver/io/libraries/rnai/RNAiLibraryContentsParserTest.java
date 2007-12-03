@@ -24,6 +24,8 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -78,61 +80,60 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
-    List<WorkbookParseError> errors = rnaiLibraryContentsParser.getErrors();
-    assertEquals("workbook has 5 errors", 5, errors.size());
-    WorkbookParseError error;
+    try {
+      library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+    }
+    catch (ParseLibraryContentsException e) {
+      List<WorkbookParseError> errors = (List<WorkbookParseError>) e.getErrors();
+      assertEquals("workbook has 5 errors", 5, errors.size());
+      WorkbookParseError error;
 
-    // error 0
-    error = errors.get(0);
-    assertEquals(
-      "error text for error 0",
-      "required column \"Plate\" matches multiple column headers in the same sheet",
-      error.getErrorMessage());
-    assertNotNull("error 0 has cell", error.getCell());
-    assertEquals(
-      "cell for error 0",
-      "duplicate plate:(C,1)",
-      error.getCell().toString());
+      // error 0
+      error = errors.get(0);
+      assertEquals(
+                   "error text for error 0",
+                   "required column \"Plate\" matches multiple column headers in the same sheet",
+                   error.getErrorMessage());
+      assertNotNull("error 0 has cell", error.getCell());
+      assertEquals("cell for error 0",
+                   "duplicate plate:(C,1)",
+                   error.getCell().toString());
 
-    // error 1
-    error = errors.get(1);
-    assertEquals(
-      "error text for error 1",
-      "couldn't import sheet contents due to problems with column headers: duplicate plate",
-      error.getErrorMessage());
-    assertNull("no cell for error 1", error.getCell());
+      // error 1
+      error = errors.get(1);
+      assertEquals("error text for error 1",
+                   "couldn't import sheet contents due to problems with column headers: duplicate plate",
+                   error.getErrorMessage());
+      assertNull("no cell for error 1", error.getCell());
 
-    // error 2
-    error = errors.get(2);
-    assertEquals(
-      "error text for error 2",
-      "required column \"Plate\" does not match any column headers in sheet: missing plate",
-      error.getErrorMessage());
-    assertNull("no cell for error 2", error.getCell());
+      // error 2
+      error = errors.get(2);
+      assertEquals("error text for error 2",
+                   "required column \"Plate\" does not match any column headers in sheet: missing plate",
+                   error.getErrorMessage());
+      assertNull("no cell for error 2", error.getCell());
 
-    // error 3
-    error = errors.get(3);
-    assertEquals(
-      "error text for error 3",
-      "couldn't import sheet contents due to problems with column headers: missing plate",
-      error.getErrorMessage());
-    assertNull("no cell for error 3", error.getCell());
+      // error 3
+      error = errors.get(3);
+      assertEquals("error text for error 3",
+                   "couldn't import sheet contents due to problems with column headers: missing plate",
+                   error.getErrorMessage());
+      assertNull("no cell for error 3", error.getCell());
 
-    // error 4
-    error = errors.get(4);
-    assertEquals(
-      "error text for error 4",
-      "encountered a sheet without any rows: empty sheet",
-      error.getErrorMessage());
-    assertNull("no cell for error 4", error.getCell());
+      // error 4
+      error = errors.get(4);
+      assertEquals("error text for error 4",
+                   "encountered a sheet without any rows: empty sheet",
+                   error.getErrorMessage());
+      assertNull("no cell for error 4", error.getCell());
 
-    // if any minor changes in the error formatting break this test, you can uncomment this code,
-    // see what it prints, and correct the hardcoded tests above:
-    // for (ParseError error1 : errors) {
-    //   log.info("error: " + error1.getMessage());
-    //   log.info("cell:  " + error1.getCell());
-    // }
+      // if any minor changes in the error formatting break this test, you can uncomment this code,
+      // see what it prints, and correct the hardcoded tests above:
+      // for (ParseError error1 : errors) {
+      //   log.info("error: " + error1.getMessage());
+      //   log.info("cell:  " + error1.getCell());
+      // }
+    }
   }
 
   public void testDataRowErrors()
@@ -153,112 +154,117 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
-    List<WorkbookParseError> errors = rnaiLibraryContentsParser.getErrors();
-    assertEquals("workbook has 8 errors", 8, errors.size());
-    assertEquals("library has no wells", 0, library.getWells().size());
-    WorkbookParseError error;
-
-    for (WorkbookParseError error1 : errors) {
-      log.info("error: " + error1.getErrorMessage());
-      log.info("cell:  " + error1.getCell());
+    try {
+      library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
     }
+    catch (ParseLibraryContentsException e) {
+      List<WorkbookParseError> errors = (List<WorkbookParseError>) e.getErrors();
+      assertEquals("workbook has 11 errors", 11, errors.size());
+      WorkbookParseError error;
 
-    // error 0
-    error = errors.get(0);
-    assertEquals(
-      "error text for error 0",
-      "unparseable plate number '50001-zappa'",
-      error.getErrorMessage());
-    assertNotNull("error 0 has cell", error.getCell());
-    assertEquals(
-      "cell for error 0",
-      "Human Kinases:(A,2)",
-      error.getCell().toString());
+      assertEquals("library has no wells", 0, library.getWells().size());
 
-    // error 1
-    error = errors.get(1);
-    assertEquals(
-      "error text for error 1",
-      "unparseable plate number ''",
-      error.getErrorMessage());
-    assertNotNull("error 1 has cell", error.getCell());
-    assertEquals(
-      "cell for error 1",
-      "Human Kinases:(A,3)",
-      error.getCell().toString());
+      for (WorkbookParseError error1 : errors) {
+        log.info("error: " + error1.getErrorMessage());
+        log.info("cell:  " + error1.getCell());
+      }
 
-    // error 2
-    error = errors.get(2);
-    assertEquals(
-      "error text for error 2",
-      "unparseable well name 'A09-zappa'",
-      error.getErrorMessage());
-    assertNotNull("error 2 has cell", error.getCell());
-    assertEquals(
-      "cell for error 2",
-      "Human Kinases:(B,4)",
-      error.getCell().toString());
+      // error 0
+      error = errors.get(0);
+      assertEquals(
+                   "error text for error 0",
+                   "unparseable plate number '50001-zappa'",
+                   error.getErrorMessage());
+      assertNotNull("error 0 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 0",
+                   "Human Kinases:(A,2)",
+                   error.getCell().toString());
 
-    // error 3
-    error = errors.get(3);
-    assertEquals(
-      "error text for error 3",
-      "well name cell is empty",
-      error.getErrorMessage());
-    assertNotNull("error 3 has cell", error.getCell());
-    assertEquals(
-      "cell for error 3",
-      "Human Kinases:(B,5)",
-      error.getCell().toString());
+      // error 1
+      error = errors.get(1);
+      assertEquals(
+                   "error text for error 1",
+                   "unparseable plate number ''",
+                   error.getErrorMessage());
+      assertNotNull("error 1 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 1",
+                   "Human Kinases:(A,3)",
+                   error.getCell().toString());
 
-    // error 4
-    error = errors.get(4);
-    assertEquals(
-      "error text for error 4",
-      "value required",
-      error.getErrorMessage());
-    assertNotNull("error 4 has cell", error.getCell());
-    assertEquals(
-      "cell for error 4",
-      "Human Kinases:(F,6)",
-      error.getCell().toString());
+      // error 2
+      error = errors.get(2);
+      assertEquals(
+                   "error text for error 2",
+                   "unparseable well name 'A09-zappa'",
+                   error.getErrorMessage());
+      assertNotNull("error 2 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 2",
+                   "Human Kinases:(B,4)",
+                   error.getCell().toString());
 
-    // error 5
-    error = errors.get(5);
-    assertEquals(
-      "error text for error 5",
-      "value required",
-      error.getErrorMessage());
-    assertNotNull("error 5 has cell", error.getCell());
-    assertEquals(
-      "cell for error 5",
-      "Human Kinases:(G,7)",
-      error.getCell().toString());
+      // error 3
+      error = errors.get(3);
+      assertEquals(
+                   "error text for error 3",
+                   "well name cell is empty",
+                   error.getErrorMessage());
+      assertNotNull("error 3 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 3",
+                   "Human Kinases:(B,5)",
+                   error.getCell().toString());
 
-    // error 6
-    error = errors.get(6);
-    assertEquals(
-      "error text for error 6",
-      "value required",
-      error.getErrorMessage());
-    assertNotNull("error 6 has cell", error.getCell());
-    assertEquals(
-      "cell for error 6",
-      "Human Kinases:(H,8)",
-      error.getCell().toString());
+      // error 4
+      error = errors.get(4);
+      assertEquals(
+                   "error text for error 4",
+                   "value required",
+                   error.getErrorMessage());
+      assertNotNull("error 4 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 4",
+                   "Human Kinases:(F,6)",
+                   error.getCell().toString());
 
-    // error 7
-    error = errors.get(7);
-    assertEquals(
-      "error text for error 7",
-      "Error querying NCBI for EntrezGene ID 99999999: no such EntrezGene ID",
-      error.getErrorMessage());
-    assertNotNull("error 7 has cell", error.getCell());
-    assertEquals(
-      "cell for error 7",
-      "Human Kinases:(H,9)",
-      error.getCell().toString());
+      // error 5
+      error = errors.get(5);
+      assertEquals(
+                   "error text for error 5",
+                   "value required",
+                   error.getErrorMessage());
+      assertNotNull("error 5 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 5",
+                   "Human Kinases:(G,7)",
+                   error.getCell().toString());
+
+      // error 6
+      error = errors.get(6);
+      assertEquals(
+                   "error text for error 6",
+                   "value required",
+                   error.getErrorMessage());
+      assertNotNull("error 6 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 6",
+                   "Human Kinases:(H,8)",
+                   error.getCell().toString());
+
+      // error 7
+      error = errors.get(10);
+      assertEquals(
+                   "error text for error 10",
+                   "Error querying NCBI for EntrezGene ID 99999999: no such EntrezGene ID",
+                   error.getErrorMessage());
+      assertNotNull("error 10 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 10",
+                   "Human Kinases:(H,9)",
+                   error.getCell().toString());
+    }
   }
 
   public void testCleanData()
@@ -279,10 +285,12 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
-
-    List<WorkbookParseError> errors = rnaiLibraryContentsParser.getErrors();
-    assertEquals("workbook has no errors", 0, errors.size());
+    try {
+      library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+    }
+    catch (ParseLibraryContentsException e) {
+      fail("workbook has no errors");
+    }
     assertEquals("library has all wells for all plates",
                  384,
                  library.getWells().size());
@@ -546,46 +554,50 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
-    List<WorkbookParseError> errors = rnaiLibraryContentsParser.getErrors();
-
-    for (WorkbookParseError error : errors) {
-      log.info("error message: " + error.getErrorMessage());
-      log.info("error cell: " + error.getCell());
+    try {
+      library = rnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
     }
+    catch (ParseLibraryContentsException e) {
+      List<WorkbookParseError> errors = (List<WorkbookParseError>) e.getErrors();
 
-    assertEquals("workbook has 2 errors", 2, errors.size());
-    WorkbookParseError error;
+      for (WorkbookParseError error : errors) {
+        log.info("error message: " + error.getErrorMessage());
+        log.info("error cell: " + error.getCell());
+      }
 
-    // error 0
-    error = errors.get(0);
-    assertEquals(
-      "error text for error 0",
-      "SD record specifies a well from the wrong library: Human2",
-      error.getErrorMessage());
-    assertNotNull("error 0 has cell", error.getCell());
-    assertEquals(
-      "cell for error 0",
-      "Human Kinases:(B,2)",
-      error.getCell().toString());
+      assertEquals("workbook has 2 errors", 2, errors.size());
+      WorkbookParseError error;
 
-    // error 1
-    error = errors.get(1);
-    assertEquals(
-      "error text for error 1",
-      "specified well does not exist. this is probably due to an erroneous plate number.",
-      error.getErrorMessage());
-    assertNotNull("error 1 has cell", error.getCell());
-    assertEquals(
-      "cell for error 1",
-      "Human Kinases:(B,3)",
-      error.getCell().toString());
+      // error 0
+      error = errors.get(0);
+      assertEquals(
+                   "error text for error 0",
+                   "SD record specifies a well from the wrong library: Human2",
+                   error.getErrorMessage());
+      assertNotNull("error 0 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 0",
+                   "Human Kinases:(B,2)",
+                   error.getCell().toString());
 
-    // if any minor changes in the error formatting break this test, you can uncomment this code,
-    // see what it prints, and correct the hardcoded tests above:
-    // for (ParseError error1 : errors) {
-    //   log.info("error: " + error1.getMessage());
-    //   log.info("cell:  " + error1.getCell());
-    // }
+      // error 1
+      error = errors.get(1);
+      assertEquals(
+                   "error text for error 1",
+                   "specified well does not exist. this is probably due to an erroneous plate number.",
+                   error.getErrorMessage());
+      assertNotNull("error 1 has cell", error.getCell());
+      assertEquals(
+                   "cell for error 1",
+                   "Human Kinases:(B,3)",
+                   error.getCell().toString());
+
+      // if any minor changes in the error formatting break this test, you can uncomment this code,
+      // see what it prints, and correct the hardcoded tests above:
+      // for (ParseError error1 : errors) {
+      //   log.info("error: " + error1.getMessage());
+      //   log.info("cell:  " + error1.getCell());
+      // }
+    }
   }
 }
