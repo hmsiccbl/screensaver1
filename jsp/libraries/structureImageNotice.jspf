@@ -9,7 +9,7 @@
 			<t:outputText
 				value="On rare occasions, a compound will fail to display a structure image.
         We apologize for this and we are working on fixing the problem.
-        In the meantime, if you encounter this problem, you can click on the PubChem CID link(s), above, to view the compound structure."
+        In the meantime, if you encounter this problem, you can click on the PubChem CID link(s), above, to view the compound structure."/>
 		</t:panelGroup>
 	</t:panelGrid>
 </f:subview>
