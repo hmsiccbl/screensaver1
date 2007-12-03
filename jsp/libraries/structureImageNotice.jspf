@@ -6,17 +6,11 @@
 <f:subview id="structureImageNotice">
 	<t:panelGrid style="color: fuchsia; font-size: small; margin-top: 10px;">
 	  <t:panelGroup>
-      <t:outputText value="
-        On rare occasions, a compound will fail to display a structure image.
+			<t:outputText
+				value="On rare occasions, a compound will fail to display a structure image.
         We apologize for this and we are working on fixing the problem.
-        In the meantime, if you encounter this problem, you can copy the SMILES string and paste it
-        into "
-      />
-      <h:outputLink value="http://demo.eyesopen.com/cgi-bin/depict" target="_blank" style="color: blue">
-        <h:outputText value="OpenEye depict" />
-      </h:outputLink>
-      <t:outputText value=" as a workaround." />
-    </t:panelGroup>
+        In the meantime, if you encounter this problem, you can click on the PubChem CID link(s), above, to view the compound structure."
+		</t:panelGroup>
 	</t:panelGrid>
 </f:subview>
 
