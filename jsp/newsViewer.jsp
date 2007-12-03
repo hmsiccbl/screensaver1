@@ -8,11 +8,27 @@
 		<p>Check back here regularly for the latest Screensaver news and
 		gossip!</p>
 		<dl>
+			<dt><span class="newsDate">2007.Dec.03, v1.4.0</span></dt>
+			<dd>
+			<p>Updated PubChem CIDs have been assigned to Screensaver's
+			compounds, allowing the user to directly navigate to the latest
+			PubChem entries for each compound. PubChem provides information on
+			the biological activities of small molecules.</p>
+			<p>Search results can be filtered by specifying criterion for each
+			column in the search result data table. (beta)</p>
+			<p>Screeners can now browse (and filter) all of their screening room
+			activities in a search result page. Administrators can now browse
+			(and filter) screening room users and staff in a search result page.
+			(beta)<p>
+			</p>
+			</dd>
+
 			<dt><span class="newsDate">2007.Oct.12, v1.3.1</span></dt>
 			<dd>
 			<p>Administrator can now specify the set of rows to be left empty when
 			Screensaver generates cherry pick plate mappings.</p>
 			</dd>
+
 			<dt><span class="newsDate">2007.Oct.11, v1.3.0</span></dt>
 			<dd>
 			<p>Upgraded the Screensaver object model to use Hibernate
@@ -26,13 +42,16 @@
 			with the table. Developers will be pleased that all data tables are
 			now implemented in terms of the same DataTable class.</p>
 			</dd>
+
 			<dt><span class="newsDate">2007.Sep.13, v1.2.0</span></dt>
 			<dd><p>Added "Study" and "Annotations" data types to Screensaver,
 			allowing the system to incorporate and present 3rd-party library
 			annotation data, as well as providing a means for sharing and
 			presenting biologically relevant results from in-house screens.</p></dd>
+
 			<dt><span class="newsDate">2007.Aug.24, v1.1.0</span></dt>
 			<dd><p>Screensaver released as open source project.</p></dd>
+
 			<dt><span class="newsDate">2007.Aug.6</span></dt>
 			<dd><p>Added workaround instructions for structure image viewing
 			problems to the Well Viewer and Compound Viewer pages and help pages.</p>

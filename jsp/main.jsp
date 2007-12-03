@@ -40,6 +40,13 @@
 			<li>Use "Find Wells" to search for information on a particular
 			set of wells, such as those that scored as positive (or potentially
 			positive) in your screen.</li>
+			<ul>
+			<li><span class="new">New!</span>&nbsp;&nbsp;Updated PubChem CIDs
+				have been assigned to Screensaver's compounds, allowing the user to
+				directly navigate to the latest PubChem entries for each compound.
+				PubChem provides information on the biological activities of small
+				molecules.</li>
+			</ul>
 		</f:verbatim>
 	</t:div>
 	<t:div >

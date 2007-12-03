@@ -281,15 +281,13 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited
-	{
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited	{
 	color: white;
 	text-decoration: none;
 	vertical-align: bottom;
 }
 
-a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:hover
-	{
+a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:hover {
 	color: inherit;
 	text-decoration: underline;
 }
@@ -350,11 +348,9 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 }
 
 .activeTab {
-
 }
 
 .inactiveTab {
-
 }
 
 .newsDate {
@@ -393,4 +389,10 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 
 .tableFilterPanel {
 	vertical-align: bottom;
+}
+
+.new {
+	color: fuchsia;
+	font-style: italic;
+	font-weight: bold;
 }
