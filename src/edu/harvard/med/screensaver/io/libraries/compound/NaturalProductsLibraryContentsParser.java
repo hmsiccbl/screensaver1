@@ -21,7 +21,9 @@ import jxl.WorkbookSettings;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
@@ -89,11 +91,15 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
+   * @throws ParseLibraryContentsException if parse errors encountered. The
+   *           exception will contain a reference to a ParseErrors object which
+   *           can be inspected and/or reported to the user.
    */
   public Library parseLibraryContents(
     final Library library,
     final File file,
     final InputStream stream)
+  throws ParseLibraryContentsException
   {
     log.info("parsing natural products Excel file " + file.getName());
     _library = library;
@@ -115,12 +121,15 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
         }
         catch (NaturalProductsLibraryContentsException e) {
         }
+        if (getHasErrors()) {
+          throw new ParseLibraryContentsException(_errorManager);
+        }
       }
     });
     return _library;
   }
 
-  public List<FileParseError> getErrors()
+  public List<? extends ParseError> getErrors()
   {
     return _errorManager.getErrors();
   }

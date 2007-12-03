@@ -38,7 +38,7 @@ import jxl.write.WriteException;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecification.ScreenInfoRow;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
-import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -332,8 +332,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
     Set<Cell> cellsWithErrors = new HashSet<Cell>();
-    List<ParseError> errors = mockScreenResultParser.getErrors();
-    for (ParseError error : errors) {
+    List<WorkbookParseError> errors = mockScreenResultParser.getErrors();
+    for (WorkbookParseError error : errors) {
       assertFalse("every error assigned to distinct cell",
                   cellsWithErrors.contains(error.getCell()));
       cellsWithErrors.add(error.getCell());
@@ -345,10 +345,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
     ScreenResult result1 = mockScreenResultParser.parse(screen, workbookFile);
-    List<ParseError> errors1 = mockScreenResultParser.getErrors();
+    List<WorkbookParseError> errors1 = mockScreenResultParser.getErrors();
     assertNotNull("1st parse returns a result", result1);
     ScreenResult result2 = mockScreenResultParser.parse(screen, workbookFile);
-    List<ParseError> errors2 = mockScreenResultParser.getErrors();
+    List<WorkbookParseError> errors2 = mockScreenResultParser.getErrors();
     assertNotNull("2nd parse returns a result", result2);
     assertNotSame("parses returned different ScreenResult objects", result1, result2);
     assertTrue(errors1.size() > 0);
@@ -611,7 +611,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     mockScreenResultParser.parse(screen,
                                  workbookFile);
     assertEquals("screen result data file is for screen number 115, expected 999",
-                 mockScreenResultParser.getErrors().get(0).getMessage());
+                 mockScreenResultParser.getErrors().get(0).getErrorMessage());
   }
 
   public void testMultiCharColumnLabels()

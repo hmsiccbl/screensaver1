@@ -22,9 +22,9 @@ public class NullCell extends Cell
   }
 
   @Override
-  public void annotateWithError(ParseError error)
+  public void annotateWithError(WorkbookParseError error)
   {
-    _errors.addError(error.getMessage());
+    _errors.addError(error.getErrorMessage());
   }
 
   @Override

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -97,10 +98,16 @@ public class LibraryCreator
       log.error(msg);
       System.exit(1);
     }
+    catch (ParseLibraryContentsException e) {
+      log.error("library contents file contained errors:");
+      for (ParseError error : e.getErrors()) {
+        log.error(error.getErrorMessage());
+      }
+    }
     catch (Exception e) {
       e.printStackTrace();
       log.error(e.toString());
-      System.err.println("error: " + e.toString());
+      System.err.println("error: " + e.getMessage());
       System.exit(1);
     }
   }

@@ -24,7 +24,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -220,7 +220,7 @@ public class BulkScreenResultImporter
             _parser.parse(screen, screenResultFile);
             if (_parser.getHasErrors()) {
               int nErrors = 0;
-              for (ParseError error : _parser.getErrors()) {
+              for (WorkbookParseError error : _parser.getErrors()) {
                 log.error("parse error " + (++nErrors) + ": " + error);
                 int totalErrors = _parser.getErrors().size();
                 if (nErrors == MAX_ERRORS_TO_LOG && nErrors < totalErrors) {

@@ -33,7 +33,7 @@
         <f:facet name="header">
           <h:outputText value="Error" />
         </f:facet>
-        <h:outputText value="#{row.message}" />
+        <h:outputText value="#{row.errorMessage}" />
       </t:column>
     </t:dataTable>
     <t:dataScroller id="errorsScroller" for="importErrorsTable" firstRowIndexVar="fromRow"

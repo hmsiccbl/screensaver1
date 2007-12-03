@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -22,7 +22,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
+import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 /**
@@ -33,17 +35,17 @@ import edu.harvard.med.screensaver.model.libraries.Library;
  */
 public class BulkRNAiLibraryLoader
 {
-  
+
   // static members
 
   private static final Logger log = Logger.getLogger(BulkRNAiLibraryLoader.class);
   private static final File _rnaiLibraryDir = new File("/usr/local/rnai-libraries");
   private static final Pattern _pattern = Pattern.compile(
     "^((Mitchison1)|(([^_]*)_([^_]*)_(Pools|Duplexes)))\\.xls$");
-  
+
   public static void main(String[] args)
   {
-    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {
       CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
     BulkRNAiLibraryLoader libraryLoader =
@@ -53,11 +55,11 @@ public class BulkRNAiLibraryLoader
 
 
   // instance data members
-  
+
   private GenericEntityDAO _dao;
   private RNAiLibraryContentsParser _parser;
-  
-  
+
+
   // public constructors and methods
 
   public BulkRNAiLibraryLoader(GenericEntityDAO dao, RNAiLibraryContentsParser parser)
@@ -71,7 +73,7 @@ public class BulkRNAiLibraryLoader
    */
   public void bulkLoadLibraries()
   {
-    
+
     File [] rnaiFiles = _rnaiLibraryDir.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String filename) {
         return filename.endsWith(".xls");
@@ -85,16 +87,17 @@ public class BulkRNAiLibraryLoader
           Library library = getLibraryForRNAiFile(rnaiFile);
           try {
             _parser.parseLibraryContents(library, rnaiFile, new FileInputStream(rnaiFile));
+            _dao.saveOrUpdateEntity(library);
           }
           catch (FileNotFoundException e) {
             throw new InternalError("braindamage: " + e.getMessage());
           }
-          if (_parser.getHasErrors()) {
-            for (ParseError error : _parser.getErrors()) {
+          catch (ParseLibraryContentsException e) {
+            log.error("parse errors for library " + library + ":");
+            for (ParseError error : e.getErrors()) {
               log.error(error.toString());
             }
           }
-          _dao.saveOrUpdateEntity(library);
           log.info("finished processing RNAi File: " + rnaiFile.getName());
         }
       });

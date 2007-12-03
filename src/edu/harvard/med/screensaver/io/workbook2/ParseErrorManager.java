@@ -37,7 +37,7 @@ public class ParseErrorManager
 {
   private static Logger log = Logger.getLogger(ParseErrorManager.class);
   
-  private List<ParseError> _errors = new ArrayList<ParseError>();
+  private List<WorkbookParseError> _errors = new ArrayList<WorkbookParseError>();
   /**
    * The workbook being parsed.
    */
@@ -61,7 +61,7 @@ public class ParseErrorManager
    */
   public void addError(String errorMessage)
   {
-    ParseError error = new ParseError(errorMessage);
+    WorkbookParseError error = new WorkbookParseError(errorMessage);
     _errors.add(error);
 
   }
@@ -74,7 +74,7 @@ public class ParseErrorManager
    */
   public void addError(String errorMessage, Cell cell)
   {
-    ParseError error = new ParseError(errorMessage, cell);
+    WorkbookParseError error = new WorkbookParseError(errorMessage, cell);
     _errors.add(error);
   }
   
@@ -83,7 +83,7 @@ public class ParseErrorManager
    * 
    * @return a list of <code>ParseError</code> objects
    */
-  public List<ParseError> getErrors()
+  public List<WorkbookParseError> getErrors()
   {
     return _errors;
   }
@@ -116,13 +116,13 @@ public class ParseErrorManager
       }
 
       // annotate workbook with non-cell-specific error by appending to a specially created "errors" sheet
-       for (ParseError error : _errors) {
+       for (WorkbookParseError error : _errors) {
         if (error.getCell() == null) {
           WritableSheet generalParseErrorsSheet = errorAnnotatedWorkbook.getSheet("Parse Errors");
           if (generalParseErrorsSheet == null) {
             generalParseErrorsSheet = errorAnnotatedWorkbook.createSheet("Parse Errors", 0);
           }
-          generalParseErrorsSheet.addCell(new Label(0, generalParseErrorsSheet.getRows(), error.getMessage()));
+          generalParseErrorsSheet.addCell(new Label(0, generalParseErrorsSheet.getRows(), error.getErrorMessage()));
         }
         else {
           
@@ -147,11 +147,11 @@ public class ParseErrorManager
     }
   }
   
-  private void annotateCellWithError(jxl.Cell parsedCell, jxl.write.WritableSheet annotatedErrorSheet, ParseError error) throws WriteException
+  private void annotateCellWithError(jxl.Cell parsedCell, jxl.write.WritableSheet annotatedErrorSheet, WorkbookParseError error) throws WriteException
   {
     Label errorLabel = new Label(parsedCell.getColumn(),
                                  parsedCell.getRow(),
-                                 (parsedCell.getContents().trim().length() > 0 ? parsedCell.getContents() + ": " : "") + error.getMessage());
+                                 (parsedCell.getContents().trim().length() > 0 ? parsedCell.getContents() + ": " : "") + error.getErrorMessage());
     annotatedErrorSheet.addCell(errorLabel);
     
 //  WritableCellFeatures cellFeatures = new WritableCellFeatures();

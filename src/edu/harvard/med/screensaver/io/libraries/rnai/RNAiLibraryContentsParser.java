@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -13,17 +13,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook.WellNameParser;
@@ -34,25 +30,30 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProvider;
 
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
 
 /**
  * Parses the contents (either partial or complete) of an RNAi library
  * from an Excel spreadsheet into the domain model.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class RNAiLibraryContentsParser implements LibraryContentsParser
 {
-  
+
   // static fields
-  
+
   private static final Logger log = Logger.getLogger(RNAiLibraryContentsParser.class);
   public static final SilencingReagentType DEFAULT_SILENCING_REAGENT_TYPE =
     SilencingReagentType.SIRNA;
 
-  
+
   // private instance fields
-  
+
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private Library _library;
@@ -62,10 +63,10 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   private WellNameParser _wellNameParser;
   private NCBIGeneInfoProvider _geneInfoProvider;
   private SilencingReagentType _silencingReagentType = DEFAULT_SILENCING_REAGENT_TYPE;
-  
-  
+
+
   // public constructor and instance methods
-  
+
   /**
    * Construct a new <code>RNAiLibraryContentsParser</code> object.
    */
@@ -105,11 +106,15 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
+   * @throws ParseLibraryContentsException if parse errors encountered. The
+   *           exception will contain a reference to a ParseErrors object which
+   *           can be inspected and/or reported to the user.
    */
   public Library parseLibraryContents(
     final Library library,
     final File file,
     final InputStream stream)
+    throws ParseLibraryContentsException
   {
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -118,7 +123,10 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
         HSSFWorkbook hssfWorkbook = _workbook.getWorkbook();
         for (int i = 0; i < hssfWorkbook.getNumberOfSheets(); i++) {
           loadLibraryContentsFromHSSFSheet(i, hssfWorkbook.getSheetAt(i));
-        }        
+        }
+        if (getHasErrors()) {
+          throw new ParseLibraryContentsException(_errorManager);
+        }
       }
     });
     return _library;
@@ -130,29 +138,29 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * error. The hope is that multiple errors will help a user/administrator
    * correct a workbook's errors in a batch fashion, rather than in a piecemeal
    * fashion.
-   * 
+   *
    * @return a <code>List&lt;String&gt;</code> of all errors generated during
    *         parsing
    */
-  public List<ParseError> getErrors()
+  public List<WorkbookParseError> getErrors()
   {
     if (_errorManager == null) {
       return null;
     }
     return _errorManager.getErrors();
   }
-  
+
   public boolean getHasErrors()
   {
     return _errorManager != null && _errorManager.getHasErrors();
   }
-  
+
   public void clearErrors()
   {
     _errorManager = null;
   }
-  
-    
+
+
   // package getters, for the DataRowParser
 
   /**
@@ -163,12 +171,12 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   {
     return _dao;
   }
-  
+
   LibrariesDAO getLibrariesDAO()
   {
     return _librariesDao;
   }
-  
+
   /**
    * Get the {@link NCBIGeneInfoProvider}.
    * @return the geneInfoProvider.
@@ -204,8 +212,8 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   {
     return _wellNameParser;
   }
-  
-  
+
+
   // private instance methods
 
   /**
@@ -227,7 +235,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     // to make database queries when checking for existence of wells
     _librariesDao.loadOrCreateWellsForLibrary(library);
   }
-  
+
 
   /**
    * Load library contents from a single worksheet.
@@ -269,7 +277,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * Parse the column headers. Return the resulting {@link RNAiLibraryColumnHeaders}.
    * @param columnHeaderRow the row containing the column headers
    * @param sheetName the name of the worksheet
-   * @param cellFactory the cell factory 
+   * @param cellFactory the cell factory
    * @return the ParsedRNAiLibraryColumn
    */
   private RNAiLibraryColumnHeaders parseColumnHeaders(
@@ -278,7 +286,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     Factory cellFactory)
   {
     if (columnHeaderRow == null) {
-      _errorManager.addError("ecountered a sheet without any rows: " + sheetName);
+      _errorManager.addError("encountered a sheet without any rows: " + sheetName);
       return null;
     }
     RNAiLibraryColumnHeaders columnHeaders = new RNAiLibraryColumnHeaders(

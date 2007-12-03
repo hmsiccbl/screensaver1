@@ -1,5 +1,8 @@
-// $HeadURL$
-// $Id$
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/libraries/compound/SDFileCompoundLibraryContentsParser.java
+// $
+// $Id: SDFileCompoundLibraryContentsParser.java 1990 2007-10-24 02:12:17Z ant4
+// $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
@@ -16,17 +19,19 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 
 import org.apache.log4j.Logger;
-
 
 /**
  * Parses the contents (either partial or complete) of an compound library from
@@ -53,7 +58,6 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
 
   private static final Logger log = Logger.getLogger(SDFileCompoundLibraryContentsParser.class);
 
-
   // private instance data
 
   private GenericEntityDAO _dao;
@@ -63,7 +67,6 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   private BufferedReader _sdFileReader;
   private FileParseErrorManager _errorManager;
   private Map<String,Compound> _compoundCache;
-
 
   // public constructor and instance methods
 
@@ -78,40 +81,44 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   }
 
   /**
-   * Load library contents (either partial or complete) from an input
-   * stream of an Excel spreadsheet into a library.
+   * Load library contents (either partial or complete) from an input stream of
+   * an Excel spreadsheet into a library.
+   *
    * @param library the library to load contents of
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
    * @return the library with the contents loaded
+   * @throws ParseLibraryContentsException if parse errors encountered. The
+   *           exception will contain a reference to a ParseErrors object which
+   *           can be inspected and/or reported to the user.
    */
-  public Library parseLibraryContents(
-    final Library library,
-    final File file,
-    final InputStream stream)
+  public Library parseLibraryContents(final Library library,
+                                      final File file,
+                                      final InputStream stream)
   {
-    _dao.doInTransaction(new DAOTransaction() {
+    _dao.doInTransaction(new DAOTransaction()
+    {
       public void runTransaction()
       {
         initialize(library, file, stream);
-        SDRecordParser sdRecordParser = new SDRecordParser(
-          _dao,
-          _sdFileReader,
-          SDFileCompoundLibraryContentsParser.this);
+        SDRecordParser sdRecordParser = new SDRecordParser(_dao,
+                                                           _sdFileReader,
+                                                           SDFileCompoundLibraryContentsParser.this);
         for (int i = 1; sdRecordParser.sdFileHasMoreRecords(); i++) {
           sdRecordParser.parseSDRecord();
           if ((i % 100) == 0) {
-            log.info(
-              "loaded " + i + " records into library " + library.getLibraryName() +
-              " (" + _sdFile.getName() + ")");
+            log.info("loaded " + i + " records into library " + library.getLibraryName() + " (" + _sdFile.getName() + ")");
           }
+        }
+        if (getHasErrors()) {
+          throw new ParseLibraryContentsException(_errorManager);
         }
       }
     });
     return _library;
   }
 
-  public List<FileParseError> getErrors()
+  public List<? extends ParseError> getErrors()
   {
     return _errorManager.getErrors();
   }
@@ -131,11 +138,11 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     _compoundCache = compoundCache;
   }
 
-
   // package getters, for the SDRecordParser
 
   /**
    * Get the {@link GenericEntityDAO data access object}.
+   *
    * @return the data access object
    */
   GenericEntityDAO getDAO()
@@ -145,6 +152,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
 
   /**
    * Get the {@link Library}.
+   *
    * @return the library.
    */
   Library getLibrary()
@@ -154,6 +162,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
 
   /**
    * Get the SDFile.
+   *
    * @return the SDFile
    */
   File getSdFile()
@@ -163,6 +172,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
 
   /**
    * Get the error manager.
+   *
    * @return the error manager
    */
   FileParseErrorManager getErrorManager()
@@ -212,12 +222,11 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     }
   }
 
-
   // private instance methods
 
   /**
-  /**
-   * Initialize the instance variables.
+   * /** Initialize the instance variables.
+   *
    * @param library the library to load contents of
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
@@ -229,7 +238,8 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
     _sdFileReader = new BufferedReader(new InputStreamReader(stream));
     _errorManager = new FileParseErrorManager();
 
-    // load all of the library's wells in the Hibernate session, which avoids the need
+    // load all of the library's wells in the Hibernate session, which avoids
+    // the need
     // to make database queries when checking for existence of wells
     _librariesDao.loadOrCreateWellsForLibrary(library);
   }

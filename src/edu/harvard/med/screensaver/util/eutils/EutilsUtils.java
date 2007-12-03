@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -46,7 +46,7 @@ abstract public class EutilsUtils
   protected class EutilsConnectionException extends Exception {
     private static final long serialVersionUID = 1L;
   };
-  
+
   protected DocumentBuilder _documentBuilder;
 
   protected abstract void reportError(String error);
@@ -63,24 +63,24 @@ abstract public class EutilsUtils
 
   /**
    * Find the element node in the node list that has an attribute named "Name" with the
-   * specified attribute value. Return the text content of that element node. 
+   * specified attribute value. Return the text content of that element node.
    * @param nodes the list of element nodes
    * @param attributeValue the attribute value
    * @return the text content of the specified element node. Return null if the specified
-   * element node is not found. 
+   * element node is not found.
    */
   protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue)
   {
     return getNamedItemFromNodeList(nodes, attributeValue, true);
   }
-  
+
   /**
    * Find the element node in the node list that has an attribute named "Name" with the
-   * specified attribute value. Return the text content of that element node. 
+   * specified attribute value. Return the text content of that element node.
    * @param nodes the list of element nodes
    * @param attributeValue the attribute value
    * @return the text content of the specified element node. Return null if the specified
-   * element node is not found. 
+   * element node is not found.
    */
   protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue, boolean reportError)
   {
@@ -98,7 +98,7 @@ abstract public class EutilsUtils
 
   /**
    * Find all the element node in the node list that has an attribute named "Name" with the
-   * specified attribute value. Return a list of the text content of those element node. 
+   * specified attribute value. Return a list of the text content of those element node.
    * @param nodes the list of element nodes
    * @param attributeValue the attribute value
    * @return the a list of the text content of the specified element nodes
@@ -148,7 +148,7 @@ abstract public class EutilsUtils
    * @param fcgi one of "esummary.fcgi", "esearch.fcgi"
    * @param queryParams any extra query params, starting with '&'. needs to include param for
    * "db".
-   * @return the xml document. return null if any errors were ecountered.
+   * @return the xml document. return null if any errors were encountered.
    */
   protected Document getXMLForEutilsQuery(String fcgi, String queryParams)
   {
@@ -211,7 +211,7 @@ abstract public class EutilsUtils
     try {
       TransformerFactory tFactory = TransformerFactory.newInstance();
       Transformer transformer = tFactory.newTransformer();
-  
+
       DOMSource source = new DOMSource(document);
       StreamResult result = new StreamResult(outputStream);
       transformer.transform(source, result);
@@ -219,7 +219,7 @@ abstract public class EutilsUtils
     catch (Exception e) {
     }
   }
-  
+
   /**
    * Debugging helper method.
    * @param inputStream

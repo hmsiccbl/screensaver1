@@ -18,6 +18,7 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -142,14 +143,12 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
           }
         }
       });
-      if (_compoundLibraryContentsParser.getHasErrors()) {
-        return IMPORT_COMPOUND_LIBRARY_CONTENTS;
-      }
-      else {
-        showMessage("libraries.importedLibraryContents", "libraryViewer");
-        // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
-        return _libraryViewer.viewLibrary(_library);
-      }
+      showMessage("libraries.importedLibraryContents", "libraryViewer");
+      // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
+      return _libraryViewer.viewLibrary(_library);
+    }
+    catch (ParseLibraryContentsException e) {
+      return IMPORT_COMPOUND_LIBRARY_CONTENTS;
     }
     catch (DataAccessException e) {
       // TODO: should reload library and goto library viewer

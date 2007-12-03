@@ -22,7 +22,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -109,7 +109,7 @@ public class ScreenCreator
               parser.parse(screen, screenResultFile);
               if (parser.getHasErrors()) {
                 log.error("errors found in screen result file");
-                for (ParseError error : parser.getErrors()) {
+                for (WorkbookParseError error : parser.getErrors()) {
                   log.error(error.toString());
                 }
                 System.exit(1);

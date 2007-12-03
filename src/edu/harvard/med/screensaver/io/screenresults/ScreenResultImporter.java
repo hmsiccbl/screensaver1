@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.FileUtils;
@@ -113,7 +113,7 @@ public class ScreenResultImporter
                                                                     inputFile);
           if (finalScreenResultParser.getHasErrors()) {
             log.error("Errors encountered during parse:");
-            for (ParseError error : finalScreenResultParser.getErrors()) {
+            for (WorkbookParseError error : finalScreenResultParser.getErrors()) {
               log.error(error.toString());
             }
 

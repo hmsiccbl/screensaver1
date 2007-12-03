@@ -39,7 +39,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.CellValueParser;
 import edu.harvard.med.screensaver.io.workbook2.CellVocabularyParser;
-import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook2.WellNameParser;
@@ -337,7 +337,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @return a <code>List&lt;String&gt;</code> of all errors generated during
    *         parsing
    */
-  public List<ParseError> getErrors()
+  public List<WorkbookParseError> getErrors()
   {
     return _errors.getErrors();
   }

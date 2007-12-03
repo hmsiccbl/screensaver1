@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.io.libraries.compound;
 
 import java.io.File;
 
+import edu.harvard.med.screensaver.io.ParseError;
+
 /**
  * Contains pertinent data for parse errors. Essentially, a data struct, with a
  * toString() method.
@@ -18,7 +20,7 @@ import java.io.File;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class FileParseError
+public class FileParseError implements ParseError
 {
   private String _message;
   private File _file;
@@ -55,7 +57,7 @@ public class FileParseError
     return _message + " @ " + _file + " (line " + _recordNumber + ")";
   }
   
-  public String getMessage() 
+  public String getErrorMessage() 
   {
     return _message;
   }

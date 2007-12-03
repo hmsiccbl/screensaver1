@@ -545,7 +545,7 @@ public class Cell
     }
   }
   
-  public void annotateWithError(ParseError error)
+  public void annotateWithError(WorkbookParseError error)
   {
     HSSFCell cell = getOrCreateCell();
     
@@ -561,7 +561,7 @@ public class Cell
     else {
       annotatedCellValue = "ERROR: ";
     }
-    annotatedCellValue += error.getMessage();
+    annotatedCellValue += error.getErrorMessage();
     // HSSF requires us to null the cell before changing it's type! (or its throws an exception)
     cell.setCellValue((String) null);
     cell.setCellType(HSSFCell.CELL_TYPE_STRING);

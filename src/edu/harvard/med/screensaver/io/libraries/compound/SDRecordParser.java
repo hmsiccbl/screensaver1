@@ -241,10 +241,10 @@ class SDRecordParser
 
   private void reportError(String errorMessage)
   {
-    _parser.getErrors().add(new FileParseError(
+    _parser.getErrorManager().addError(
       errorMessage,
       _parser.getSdFile(),
-      _sdRecordNumber));
+      _sdRecordNumber);
   }
 
   /**

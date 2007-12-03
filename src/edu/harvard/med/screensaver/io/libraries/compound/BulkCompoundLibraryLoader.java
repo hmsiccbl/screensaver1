@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -25,6 +25,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
+import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
@@ -36,16 +39,16 @@ import edu.harvard.med.screensaver.model.libraries.Library;
  */
 public class BulkCompoundLibraryLoader
 {
-  
+
   // static members
 
   private static final Logger log = Logger.getLogger(BulkCompoundLibraryLoader.class);
   private static final File _compoundLibraryDir = new File("/usr/local/compound-libraries");
   private static final Pattern _sdFilenamePattern = Pattern.compile("^(.*?)(_\\d+)?\\.sdf$");
-  
+
   public static void main(String[] args)
   {
-    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] { 
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {
       CommandLineApplication.DEFAULT_SPRING_CONFIG,
     });
     BulkCompoundLibraryLoader libraryLoader =
@@ -55,11 +58,11 @@ public class BulkCompoundLibraryLoader
 
 
   // instance data members
-  
+
   private GenericEntityDAO _dao;
   private SDFileCompoundLibraryContentsParser _parser;
 
-  
+
   // public constructors and methods
 
   public BulkCompoundLibraryLoader(
@@ -75,7 +78,7 @@ public class BulkCompoundLibraryLoader
    */
   public void bulkLoadLibraries()
   {
-    
+
     File [] sdFiles = _compoundLibraryDir.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String filename) {
         return filename.endsWith(".sdf");
@@ -102,16 +105,17 @@ public class BulkCompoundLibraryLoader
           Library library = getLibraryForSDFile(sdFile);
           try {
             _parser.parseLibraryContents(library, sdFile, new FileInputStream(sdFile));
+            _dao.saveOrUpdateEntity(library);
           }
           catch (FileNotFoundException e) {
             throw new InternalError("braindamage: " + e.getMessage());
           }
-          if (_parser.getHasErrors()) {
-            for (FileParseError error : _parser.getErrors()) {
-              log.error(error.toString());
+          catch (ParseLibraryContentsException e) {
+            log.error("parse errors for library " + library + ":");
+            for (ParseError error : e.getErrors()) {
+              log.error(error.getErrorMessage());
             }
           }
-          _dao.saveOrUpdateEntity(library);
         }
       });
       log.info("finished processing SD File: " + sdFile.getName());
@@ -140,7 +144,7 @@ public class BulkCompoundLibraryLoader
     }
     return library;
   }
-  
+
   private Map<String,Compound> buildCompoundCache(Collection<Compound> compounds)
   {
     Map<String,Compound> cache = new HashMap<String,Compound>();

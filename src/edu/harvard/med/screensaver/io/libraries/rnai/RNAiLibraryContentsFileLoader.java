@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.model.libraries.Library;
 
 /**
@@ -130,7 +130,7 @@ public class RNAiLibraryContentsFileLoader
           throw new InternalError("braindamage: " + e.getMessage());
         }
         if (_parser.getHasErrors()) {
-          for (ParseError error : _parser.getErrors()) {
+          for (WorkbookParseError error : _parser.getErrors()) {
             log.error(error.toString());
           }
         }

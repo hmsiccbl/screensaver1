@@ -16,7 +16,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.ParseError;
+import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -50,7 +50,7 @@ public class NCBIGeneInfoProvider extends EutilsUtils
     NCBIGeneInfoProvider provider = new NCBIGeneInfoProvider(manager);
     NCBIGeneInfo info = provider.getGeneInfoForEntrezgeneId(400714, factory.getCell((short) 0, 0));
     
-    for (ParseError error : manager.getErrors()) {
+    for (WorkbookParseError error : manager.getErrors()) {
       System.out.println("error = " + error);
     }
     

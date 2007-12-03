@@ -16,7 +16,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.io.workbook2.ParseError;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -66,7 +66,7 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
 
         screenResultParser.parse(screen,
                                  workbookFile);
-        for (ParseError error: screenResultParser.getErrors()) {
+        for (WorkbookParseError error: screenResultParser.getErrors()) {
           System.out.println("error: " + error);
         }
         assertFalse(screenResultParser.getHasErrors());
