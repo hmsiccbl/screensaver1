@@ -51,7 +51,7 @@ public abstract class TableColumn<R,T>
     REAL(true, new DoubleConverter(), Operator.COMPARABLE_OPERATORS),
     FIXED_DECIMAL(true, new BigDecimalConverter(), Operator.COMPARABLE_OPERATORS),
     DATE(false, dateTimeConverter, Operator.COMPARABLE_OPERATORS),
-    BOOLEAN(false, new BooleanConverter(), Operator.COMPARABLE_OPERATORS),
+    BOOLEAN(false, new BooleanConverter(), Operator.EQUALITY_OPERATORS),
     VOCABULARY(false, null, Operator.COMPARABLE_OPERATORS);
 
     private Converter _converter = NoOpStringConverter.getInstance();

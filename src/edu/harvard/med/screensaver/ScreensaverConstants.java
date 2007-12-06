@@ -14,7 +14,7 @@ public interface ScreensaverConstants
   // static data members
 
   public static final String APPLICATION_NAME = "Screensaver";
-  public static final String APPLICATION_VERSION = "1.4.0";
+  public static final String APPLICATION_VERSION = "1.4.1";
   public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
   public static final String FEEDBACK_URL = "mailto:screensaver-feedback@hms.harvard.edu";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
@@ -56,6 +56,7 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENS = "browseScreens";
   public static final String VIEW_SCREEN = "viewScreen";
   public static final String VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT = "viewScreeningRoomActivity";
+  public static final String BROWSE_CHERRY_PICK_REQUESTS = "browseCherryPickRequests";
   public static final String VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT = "viewCherryPickRequest";
   public static final String VIEW_BILLING_INFORMATION_ACTION_RESULT = "viewBillingInformation";
   public static final String VIEW_ATTACHED_FILE_ACTION_RESULT = "viewAttachedFile";

@@ -266,25 +266,35 @@ TODO:
 						displayValueOnly="#{!cherryPickRequestViewer.editMode}"
 						styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
-					<t:outputText value="Screener&nbsp;cherry&nbsp;picks"
+					<t:outputText value="# Screener&nbsp;cherry&nbsp;picks"
 						escape="false" title="The number of screener cherry picks" />
 					<t:outputText id="screenerCherryPickCount"
 						value="#{cherryPickRequestViewer.screenerCherryPickCount}"
 						styleClass="dataText" />
 
-					<t:outputText value="Lab&nbsp;cherry&nbsp;picks" escape="false"
+					<t:outputText value="# Lab&nbsp;cherry&nbsp;picks" escape="false"
 						title="The number of lab cherry picks" />
 					<t:outputText id="labCherryPickCount"
 						value="#{cherryPickRequestViewer.labCherryPickCount}"
 						styleClass="dataText" />
 
-					<t:outputText value="Cherry&nbsp;Pick&nbsp;Plates" escape="false"
-						title="The number of cherry pick plates" />
-					<t:outputText id="assayPlatesCount"
-						value="#{cherryPickRequestViewer.assayPlatesDataModel.rowCount}"
+					<t:outputText value="#&nbsp;Unfulfilled&nbsp;Lab&nbsp;Cherry&nbsp;Picks" escape="false"
+						title="The number of unfulfilled lab cherry picks" />
+					<t:outputText id="unfulfilledLabCherryPicksCount"
+						value="#{cherryPickRequestViewer.cherryPickRequest.numberUnfulfilledLabCherryPicks}"
 						styleClass="dataText" />
 
+					<t:outputText value="#&nbsp;Cherry&nbsp;Pick&nbsp;Plates&nbsp;Completed" escape="false"
+						title="The number of completed cherry pick plates" />
+					<t:outputText id="assayPlatesCompletedCount"
+						value="#{cherryPickRequestViewer.completedCherryPickPlatesCount} of #{cherryPickRequestViewer.activeCherryPickPlatesCount}"
+						styleClass="dataText" />
 
+					<t:outputText value="Completed" escape="false"
+						title="Has the cherry pick request been completed, such that all cherry pick plates have been plated" />
+					<t:outputText id="isCompleted"
+						value="#{cherryPickRequestViewer.cherryPickRequest.plated}"
+						styleClass="dataText" />
 
 				</t:panelGrid>
 			</t:panelGrid>
@@ -462,12 +472,12 @@ TODO:
 						title="Choose plate number and destination well for the cherry picks" />
 					<t:commandButton id="createCherryPickRequestForUnfulfilled"
 						value="New Cherry Pick Request for Unfulfilled"
-						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated}"
+						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.numberUnfulfilledLabCherryPicks == 0}"
 						action="#{cherryPickRequestViewer.createNewCherryPickRequestForUnfulfilledCherryPicks}"
 						styleClass="command"
-						title="Create a new cherry pick request consisting of unfulfilled cherry picks" />
+						title="Create a new cherry pick request consisting of the unfulfilled cherry picks" />
 					<t:outputLabel for="showFailedLabCherryPicks" value="Show failed:"
-						styleClass="label" title="Show or hide failed lab cherry picks" />
+						styleClass="label" title="Show or hide lab cherry picks on failed assay plate attempts" />
 					<t:selectBooleanCheckbox id="showFailedLabCherryPicks"
 						value="#{cherryPickRequestViewer.showFailedLabCherryPicks}"
 						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedLabCherryPicks}"
@@ -556,8 +566,8 @@ TODO:
 						styleClass="command"
 						title="Download the input files for the liquid transfer equipment" />
 					<t:outputLabel for="showFailedAssayPlates"
-						value="Show all failed plates:" styleClass="label"
-						title="Show or hide the failed assay plates" />
+						value="Show all failed plate attempts:" styleClass="label"
+						title="Show or hide the assay plate attempts that failed" />
 					<t:selectBooleanCheckbox id="showFailedAssayPlates"
 						value="#{cherryPickRequestViewer.showFailedAssayPlates}"
 						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedAssayPlates}"

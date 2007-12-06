@@ -236,8 +236,11 @@ public abstract class CherryPickRequest extends AbstractEntity
   private String _comments;
   private Set<ScreenerCherryPick> _screenerCherryPicks = new HashSet<ScreenerCherryPick>();
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
+  private int _numberUnfulfilledLabCherryPicks;
   private SortedSet<CherryPickAssayPlate> _cherryPickAssayPlates = new TreeSet<CherryPickAssayPlate>();
   private transient List<CherryPickAssayPlate> _activeAssayPlates;
+  private transient HashSet<CherryPickAssayPlate> _pendingAssayPlates;
+  private transient HashSet<CherryPickAssayPlate> _completedAssayPlates;
 
 
   // public instance methods
@@ -371,6 +374,16 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
+   * Get the number of unfulfilled lab cherry picks, indicating whether this cherry pick request is complete.
+   * @motivation optimization, to allow Hibernate queries to efficiently determine this value
+   * @return the number of unfulfilled lab cherry picks
+   */
+  public int getNumberUnfulfilledLabCherryPicks()
+  {
+    return _numberUnfulfilledLabCherryPicks;
+  }
+
+  /**
    * Create and return a new lab cherry pick for the cherry pick request.
    * @param sourceWell the source well
    * @param screenerCherryPick the screener cherry pick
@@ -388,6 +401,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, sourceWell);
     _labCherryPicks.add(labCherryPick);
     screenerCherryPick.getLabCherryPicks().add(labCherryPick);
+    incUnfulfilledLabCherryPicks();
     return labCherryPick;
   }
 
@@ -448,6 +462,35 @@ public abstract class CherryPickRequest extends AbstractEntity
       }
     }
     return _activeAssayPlates;
+  }
+
+  @Transient
+  public Set<CherryPickAssayPlate> getPendingCherryPickAssayPlates()
+  {
+    if (_pendingAssayPlates == null) {
+      _pendingAssayPlates = new HashSet<CherryPickAssayPlate>();
+      for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
+        if (! (cpap.isCancelled() || cpap.isFailed() || cpap.isPlated())) {
+          _pendingAssayPlates.add(cpap);
+        }
+      }
+    }
+    return _pendingAssayPlates;
+  }
+
+  @Transient
+  public Set<CherryPickAssayPlate> getCompletedCherryPickAssayPlates()
+  {
+    if (_completedAssayPlates == null) {
+      _completedAssayPlates = new HashSet<CherryPickAssayPlate>();
+      for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
+        // note: we do not consider 'failed' plates, since they are not "active" (every failed plate will have another active plate created in place of it)
+        if (cpap.isCancelled() || cpap.isPlated()) {
+          _completedAssayPlates.add(cpap);
+        }
+      }
+    }
+    return _completedAssayPlates;
   }
 
   /**
@@ -836,7 +879,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   @Transient
   public boolean isPlated()
   {
-    return getCherryPickLiquidTransfers().size() > 0;
+    return isMapped() && getPendingCherryPickAssayPlates().size() == 0;
   }
 
   /**
@@ -875,6 +918,19 @@ public abstract class CherryPickRequest extends AbstractEntity
       }
     }
     return platesRequiringReload;
+  }
+
+
+  // package methods
+
+  void incUnfulfilledLabCherryPicks()
+  {
+    ++_numberUnfulfilledLabCherryPicks;
+  }
+
+  void decUnfulfilledLabCherryPicks()
+  {
+    --_numberUnfulfilledLabCherryPicks;
   }
 
 
@@ -997,6 +1053,11 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setLabCherryPicks(Set<LabCherryPick> labCherryPicks)
   {
     _labCherryPicks = labCherryPicks;
+  }
+
+  private void setNumberUnfulfilledLabCherryPicks(int n)
+  {
+    _numberUnfulfilledLabCherryPicks = n;
   }
 
   /**

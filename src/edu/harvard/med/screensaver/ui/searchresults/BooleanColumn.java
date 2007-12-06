@@ -11,9 +11,9 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.faces.model.SelectItem;
 
@@ -21,13 +21,21 @@ import edu.harvard.med.screensaver.ui.table.TableColumn;
 
 public abstract class BooleanColumn<T> extends TableColumn<T,Boolean>
 {
-  private Set<Boolean> _items;
+  private ArrayList<SelectItem> _selectItems;
 
   public BooleanColumn(String name, String description)
   {
     super(name,
           description,
           ColumnType.BOOLEAN);
-    _items = new TreeSet<Boolean>(Arrays.asList(null, true, false));
+    _selectItems = new ArrayList<SelectItem>();
+    _selectItems.add(new SelectItem("", ""));
+    _selectItems.add(new SelectItem(true, "true"));
+    _selectItems.add(new SelectItem(false, "false"));
+  }
+
+  public List<SelectItem> getBooleanSelections()
+  {
+    return _selectItems;
   }
 }

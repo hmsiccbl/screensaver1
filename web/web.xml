@@ -420,6 +420,7 @@
       <web-resource-name>screener</web-resource-name>
       <url-pattern>/screens/*</url-pattern>
       <url-pattern>/screens/screenresults/*</url-pattern>
+      <url-pattern>/cherryPickRequests/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

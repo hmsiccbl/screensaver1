@@ -252,12 +252,21 @@ public class LabCherryPick extends AbstractEntity
       throw new BusinessRuleViolationException("cannot allocate or deallocate a cherry pick after it has been plated");
     }
 
+    boolean wasUnfulfilled = isUnfulfilled();
     _wellVolumeAdjustments.clear();
     if (sourceCopy != null) {
       createWellVolumeAdjustment(
           sourceCopy,
           getSourceWell(),
           getCherryPickRequest().getMicroliterTransferVolumePerWellApproved().negate());
+    }
+
+    boolean nowUnfulfilled = isUnfulfilled();
+    if (!wasUnfulfilled && nowUnfulfilled) {
+      _cherryPickRequest.incUnfulfilledLabCherryPicks();
+    }
+    else if (wasUnfulfilled && !nowUnfulfilled) {
+      _cherryPickRequest.decUnfulfilledLabCherryPicks();
     }
   }
 
@@ -353,7 +362,8 @@ public class LabCherryPick extends AbstractEntity
   @Transient
   public boolean isUnfulfilled()
   {
-    return !isAllocated() && !isCancelled();
+    // note: a failed labCherryPick will be unallocated, so an isFailed() check would be redundant
+    return !isAllocated() && !isCancelled() /*&& !isFailed()*/;
   }
 
   /**

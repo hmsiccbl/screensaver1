@@ -211,13 +211,22 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/screens/screenViewer</to-view-id>
       <redirect/>
     </navigation-case>
+
+    <!--  === cherryPickRequests navigation rules === -->
+
+    <navigation-case>
+      <from-outcome>browseCherryPickRequests</from-outcome>
+      <to-view-id>/cherryPickRequests/cherryPickRequestsBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
     <navigation-case>
       <from-outcome>viewCherryPickRequest</from-outcome>
-      <to-view-id>/screens/cherryPickRequestViewer</to-view-id>
+      <to-view-id>/cherryPickRequests/cherryPickRequestViewer</to-view-id>
       <redirect/>
     </navigation-case>
 
     <!-- === screenresults navigation rules === -->
+
     <navigation-case>
       <from-outcome>viewScreenResultImportErrors</from-outcome>
       <to-view-id>/screens/screenresults/admin/screenResultImporter</to-view-id>

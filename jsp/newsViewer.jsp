@@ -8,6 +8,14 @@
 		<p>Check back here regularly for the latest Screensaver news and
 		gossip!</p>
 		<dl>
+			<dt><span class="newsDate">2007.Dec.06, v1.4.1</span></dt>
+			<dd><p>Added Cherry Pick Requests Browser for administrators, allowing
+			them to view that status of all cherry pick requests. Added
+			additional status fields to the Cherry Pick Request Viewer to
+			indicate whether the request has been completed.</p>
+			</p>
+			</dd>
+
 			<dt><span class="newsDate">2007.Dec.03, v1.4.0</span></dt>
 			<dd>
 			<p>Updated PubChem CIDs have been assigned to Screensaver's

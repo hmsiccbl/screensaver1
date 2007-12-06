@@ -48,13 +48,12 @@
 							styleClass="inputText">
 							<f:selectItems value="#{column.vocabularySelections}" />
 						</t:selectOneMenu>
-						<t:selectOneRadio id="booleanCriterionValue"
+						<t:selectOneMenu id="booleanCriterionValue"
 							value="#{column.criterion.value}" converter="#{column.converter}"
 							rendered="#{column.columnType.name == \"BOOLEAN\"}"
 							styleClass="inputText">
-							<f:selectItem itemLabel="Yes" itemValue="true" />
-							<f:selectItem itemLabel="No" itemValue="false" />
-						</t:selectOneRadio>
+							<f:selectItems value="#{column.booleanSelections}" />
+						</t:selectOneMenu>
 					</t:column>
 					<t:column>
 						<t:commandButton image="/images/delete.png" immediate="true"
@@ -152,7 +151,7 @@
 									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}">
 									<f:selectItems value="#{column.vocabularySelections}" />
 								</t:selectOneMenu>
-								<t:selectOneRadio id="booleanCriterionValue"
+								<t:selectOneMenu id="booleanCriterionValue"
 									value="#{column.criterion.value}"
 									converter="#{column.converter}"
 									rendered="#{column.columnType.name == \"BOOLEAN\" && (searchResults.tableFilterMode || !column.criterion.undefined)}"
@@ -160,9 +159,8 @@
 									displayValueOnly="#{!searchResults.tableFilterMode && !column.criterion.undefined}"
 									displayValueOnlyStyleClass="data"
 									onchange="javascript:document.getElementById('search').click()">
-									<f:selectItem itemLabel="Yes" itemValue="true" />
-									<f:selectItem itemLabel="No" itemValue="false" />
-								</t:selectOneRadio>
+									<f:selectItems value="#{column.booleanSelections}" />
+								</t:selectOneMenu>
 								<t:panelGroup>
 									<t:commandButton id="search" forceId="true" value="Search"
 										styleClass="command"

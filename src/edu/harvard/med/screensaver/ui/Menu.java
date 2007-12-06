@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -31,6 +32,7 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
@@ -55,6 +57,7 @@ public class Menu extends AbstractBackingBean
   private LibrariesDAO _librariesDao;
   private ScreenSearchResults _screensBrowser;
   private StudySearchResults _studiesBrowser;
+  private CherryPickRequestSearchResults _cherryPickRequestsBrowser;
   private LibrarySearchResults _librariesBrowser;
   private UserSearchResults _usersBrowser;
   private ActivitySearchResults _activitiesBrowser;
@@ -73,6 +76,7 @@ public class Menu extends AbstractBackingBean
               LibrariesDAO librariesDao,
               ScreenSearchResults screensBrowser,
               StudySearchResults studiesBrowser,
+              CherryPickRequestSearchResults cherryPickRequestsBrowser,
               LibrarySearchResults librariesBrowser,
               UserSearchResults usersBrowser,
               ActivitySearchResults activitySearchResults)
@@ -81,6 +85,7 @@ public class Menu extends AbstractBackingBean
     _librariesDao = librariesDao;
     _screensBrowser = screensBrowser;
     _studiesBrowser = studiesBrowser;
+    _cherryPickRequestsBrowser = cherryPickRequestsBrowser;
     _librariesBrowser = librariesBrowser;
     _usersBrowser = usersBrowser;
     _activitiesBrowser = activitySearchResults;
@@ -282,6 +287,32 @@ public class Menu extends AbstractBackingBean
       }
     });
     return result[0];
+  }
+
+  @UIControllerMethod
+  public String browseCherryPickRequests()
+  {
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        List<CherryPickRequest> cprs = _dao.findAllEntitiesOfType(CherryPickRequest.class,
+                                                                  true,
+                                                                  "requestedBy",
+                                                                  "screen",
+                                                                  "screen.leadScreener",
+                                                                  "screen.labHead",
+                                                                  "cherryPickAssayPlates.cherryPickLiquidTransfer");
+        for (Iterator<CherryPickRequest> iter = cprs.iterator(); iter.hasNext();) {
+          CherryPickRequest cpr = iter.next();
+          if (cpr.isRestricted()) {
+            iter.remove();
+          }
+        }
+        _cherryPickRequestsBrowser.setContents(cprs);
+      }
+    });
+    return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
   @UIControllerMethod

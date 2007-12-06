@@ -148,9 +148,10 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.Menu">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="studiesBrowser" />
-    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="cherryPickRequestsBrowser" />
     <constructor-arg ref="librariesBrowser" />
     <constructor-arg ref="usersBrowser" />
     <constructor-arg ref="screeningRoomActivitiesBrowser" />
@@ -518,6 +519,17 @@
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="screenResultParser" />
+  </bean>
+
+  <bean
+    id="cherryPickRequestsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults">
+    <constructor-arg ref="cherryPickRequestViewer" />
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
   </bean>
 
   <bean

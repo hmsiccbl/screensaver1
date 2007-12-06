@@ -364,7 +364,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private boolean _showFailedLabCherryPicks;
 
   private UISelectOneEntityBean<ScreensaverUser> _liquidTransferPerformedBy;
-  private Date _dateOfLiquidTransfer;
+  private Date _dateOfLiquidTransfer = new Date();
   private String _liquidTransferComments;
 
 
@@ -653,6 +653,16 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public int getLabCherryPickCount()
   {
     return _cherryPickRequest.getLabCherryPicks().size();
+  }
+
+  public int getActiveCherryPickPlatesCount()
+  {
+    return _cherryPickRequest.getActiveCherryPickAssayPlates().size();
+  }
+
+  public int getCompletedCherryPickPlatesCount()
+  {
+    return _cherryPickRequest.getCompletedCherryPickAssayPlates().size();
   }
 
   public boolean isRnaiScreen()
@@ -1035,13 +1045,14 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
     // create new assay plates, duplicating plate name, lab cherry picks with same layout but new copy selection, incrementing attempt ordinal
     try {
+      final ScreensaverUser performedBy = getLiquidTransferPerformedBy().getSelection();
       _dao.doInTransaction(new DAOTransaction()
       {
         public void runTransaction()
         {
           Set<CherryPickAssayPlate> selectedAssayPlates = getSelectedAssayPlates();
           doRecordLiquidTransferForAssayPlates(selectedAssayPlates,
-                                               getLiquidTransferPerformedBy().getSelection(),
+                                               performedBy,
                                                getDateOfLiquidTransfer(),
                                                getLiquidTransferComments(),
                                                false);
@@ -1061,7 +1072,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
               LabCherryPick newLabCherryPick =
                 labCherryPick.getScreenerCherryPick().getCherryPickRequest().createLabCherryPick(
                     labCherryPick.getScreenerCherryPick(),
-                                                                 labCherryPick.getSourceWell());
+                    labCherryPick.getSourceWell());
               _dao.saveOrUpdateEntity(newLabCherryPick);
               if (!_cherryPickRequestAllocator.allocate(newLabCherryPick)) {
                 someCherryPicksUnfulfillable = true;

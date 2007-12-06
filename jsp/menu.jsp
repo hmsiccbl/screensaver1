@@ -80,6 +80,10 @@
 				<t:commandNavigation2 action="#{menu.browseStudies}"
 					value="Browse Studies" accesskey="T"
 					title="Browse the studies currently available and accessible to you" />
+				<t:commandNavigation2 action="#{menu.browseCherryPickRequests}"
+					value="Browse CPRs" accesskey="C"
+					title="Browse the cherry pick requests currently available and accessible to you"
+					rendered="#{menu.readAdmin}" />
 				<t:commandNavigation2 action="#{menu.browseScreeningRoomActivities}"
 					value="Browse Activities" accesskey="A"
 					title="Browse the screening room activities currently available and accessible to you"/>

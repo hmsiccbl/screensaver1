@@ -37,24 +37,27 @@ public class Criterion<T> extends Observable
 
   public enum Operator {
     ANY(""),
-    EMPTY("blank"),
-    NOT_EMPTY("not blank"),
+    // equality operators
     EQUAL("="),
     NOT_EQUAL("<>"),
-    // operators for Comparable objects
+    // ranking operators
     LESS_THAN("<"),
     LESS_THAN_EQUAL("<="),
     GREATER_THAN(">"),
     GREATER_THAN_EQUAL(">="),
-    // operators for String objects
+    // text operators
     TEXT_STARTS_WITH("starts with"),
     TEXT_CONTAINS("contains"),
     TEXT_NOT_CONTAINS("doesn't contain"),
     TEXT_LIKE("matches"),
-    TEXT_NOT_LIKE("doesn't match");
+    TEXT_NOT_LIKE("doesn't match"),
+    // empty operators
+    EMPTY("blank"),
+    NOT_EMPTY("not blank");
 
     public static List<Operator> ALL_OPERATORS = new ArrayList<Operator>();
     public static List<Operator> COMPARABLE_OPERATORS = new ArrayList<Operator>();
+    public static List<Operator> EQUALITY_OPERATORS = new ArrayList<Operator>();
     static {
       for (Operator operator : Operator.values()) {
         ALL_OPERATORS.add(operator);
@@ -62,6 +65,8 @@ public class Criterion<T> extends Observable
           COMPARABLE_OPERATORS.add(operator);
         }
       }
+      EQUALITY_OPERATORS.add(Operator.EQUAL);
+      EQUALITY_OPERATORS.add(Operator.NOT_EQUAL);
     }
 
     private String _symbol;
