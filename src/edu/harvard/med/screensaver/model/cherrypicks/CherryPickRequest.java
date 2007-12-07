@@ -47,6 +47,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -231,8 +232,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   private AdministratorUser _volumeApprovedBy;
   private Date _dateVolumeApproved;
   private boolean _randomizedAssayPlateLayout;
-  private Set<Integer> _requestedEmptyColumnsOnAssayPlate = new HashSet<Integer>();
-  private Set<Character> _requestedEmptyRowsOnAssayPlate = new HashSet<Character>();
+  private Set<WellName> _requestedEmptyWellsOnAssayPlate = new HashSet<WellName>();
   private String _comments;
   private Set<ScreenerCherryPick> _screenerCherryPicks = new HashSet<ScreenerCherryPick>();
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
@@ -378,6 +378,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @motivation optimization, to allow Hibernate queries to efficiently determine this value
    * @return the number of unfulfilled lab cherry picks
    */
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public int getNumberUnfulfilledLabCherryPicks()
   {
     return _numberUnfulfilledLabCherryPicks;
@@ -680,56 +681,6 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Get the set of empty columns requested by the screener. The union of this
-   * method's result with the result of {@link
-   * #getRequiredEmptyColumnsOnAssayPlate()} determines the full set columns that must left empty.
-   * @return 1-based column numbers that screener has requested be left empty on cherry pick assay plate
-   * @see #getRequiredEmptyRowsOnAssayPlate()
-   */
-  @org.hibernate.annotations.CollectionOfElements
-  @Column(name="requestedEmptyColumn", nullable=false)
-  @JoinTable(
-    name="cherryPickRequestRequestedEmptyColumn",
-    joinColumns=@JoinColumn(name="cherryPickRequestId")
-  )
-  @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_requested_empty_column_to_cherry_pick_request")
-  @OrderBy("requestedEmptyColumn")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="requestedEmptyColumnOnAssayPlate")
-  public Set<Integer> getRequestedEmptyColumnsOnAssayPlate()
-  {
-    return _requestedEmptyColumnsOnAssayPlate;
-  }
-
-  /**
-   * Add a set of requested empty columns to the set of empty columns requested by the screener.
-   * @param requestedEmptyColumnsOnAssayPlate 1-based column numbers that screener has requested be
-   * left empty on cherry pick assay plate
-   */
-  public void addRequestedEmptyColumnsOnAssayPlate(Collection<Integer> requestedEmptyColumnsOnAssayPlate)
-  {
-    _requestedEmptyColumnsOnAssayPlate.addAll(requestedEmptyColumnsOnAssayPlate);
-  }
-
-  /**
-   * Add a requested empty column on the assay plate.
-   * @param requestedEmptyColumn the requested empty column to add
-   * @return true iff the requested empty column to add was not already in the set of requested
-   * empty columns
-   */
-  public boolean addRequestedEmptyColumnOnAssayPlate(Integer requestedEmptyColumn)
-  {
-    return _requestedEmptyColumnsOnAssayPlate.add(requestedEmptyColumn);
-  }
-
-  /**
-   * Clear the set of empty columns requested by the screener.
-   */
-  public void clearRequestedEmptyColumnsOnAssayPlate()
-  {
-    _requestedEmptyColumnsOnAssayPlate.clear();
-  }
-
-  /**
    * The union of this method's result with the result of
    * {@link #getEmptyColumnsOnAssayPlate()} determines the full set columns that
    * must left empty.
@@ -744,52 +695,34 @@ public abstract class CherryPickRequest extends AbstractEntity
 
   /**
    * Get the set of empty rows requested by the screener. The union of this
-   * method's result with the result of {@link
-   * #getRequiredEmptyRowsOnAssayPlate()} determines the full set rows that must left empty.
-   * @return 1-based row numbers that screener has requested be left empty on cherry pick assay plate
-   * @see #getRequiredEmptyRowsOnAssayPlate()
+   * method's result with the result of {@link #getRequiredEmptyColumnsOnAssayPlate()}
+   * and {@link #getRequiredEmptyRowsOnAssayPlate()} determines the full set of wells
+   * that must be left empty on each cherry pick assay plate.
+   *
+   * @return well names that screener has requested be left empty on each cherry
+   *         pick assay plate
    */
   @org.hibernate.annotations.CollectionOfElements
-  @Column(name="requestedEmptyRow", nullable=false)
   @JoinTable(
-    name="cherryPickRequestRequestedEmptyRow",
+    name="cherryPickRequestRequestedEmptyWell",
     joinColumns=@JoinColumn(name="cherryPickRequestId")
   )
-  @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_requested_empty_row_to_cherry_pick_request")
-  @OrderBy("requestedEmptyRow")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="requestedEmptyRowOnAssayPlate")
-  public Set<Character> getRequestedEmptyRowsOnAssayPlate()
+  @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_requested_empty_wells_to_cherry_pick_request")
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="requestedEmptyWellOnAssayPlate")
+  public Set<WellName> getRequestedEmptyWellsOnAssayPlate()
   {
-    return _requestedEmptyRowsOnAssayPlate;
+    return _requestedEmptyWellsOnAssayPlate;
   }
 
   /**
-   * Add a set of requested empty rows to the set of empty rows requested by the screener.
-   * @param requestedEmptyRowsOnAssayPlate 1-based row numbers that screener has requested be
-   * left empty on cherry pick assay plate
+   * Set the set of empty wells requested by the screener.
+   * @param requestedEmptyWellsOnAssayPlate wells that screener has requested be
+   * left empty on each cherry pick assay plate
+   * @motivation for hibernate
    */
-  public void addRequestedEmptyRowsOnAssayPlate(Collection<Character> requestedEmptyRowsOnAssayPlate)
+  public void setRequestedEmptyWellsOnAssayPlate(Set<WellName> requestedEmptyWellsOnAssayPlate)
   {
-    _requestedEmptyRowsOnAssayPlate.addAll(requestedEmptyRowsOnAssayPlate);
-  }
-
-  /**
-   * Add a requested empty row on the assay plate.
-   * @param requestedEmptyRow the requested empty row to add
-   * @return true iff the requested empty row to add was not already in the set of requested
-   * empty rows
-   */
-  public boolean addRequestedEmptyRowOnAssayPlate(Character requestedEmptyRow)
-  {
-    return _requestedEmptyRowsOnAssayPlate.add(requestedEmptyRow);
-  }
-
-  /**
-   * Clear the set of empty rows requested by the screener.
-   */
-  public void clearRequestedEmptyRowsOnAssayPlate()
-  {
-    _requestedEmptyRowsOnAssayPlate.clear();
+    _requestedEmptyWellsOnAssayPlate = requestedEmptyWellsOnAssayPlate;
   }
 
   /**
@@ -1068,27 +1001,5 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setCherryPickAssayPlates(SortedSet<CherryPickAssayPlate> cherryPickAssayPlates)
   {
     _cherryPickAssayPlates = cherryPickAssayPlates;
-  }
-
-  /**
-   * Set the set of empty columns requested by the screener.
-   * @param requestedEmptyColumnsOnAssayPlate 1-based column numbers that screener has requested be
-   * left empty on cherry pick assay plate
-   * @motivation for hibernate
-   */
-  private void setRequestedEmptyColumnsOnAssayPlate(Set<Integer> requestedEmptyColumnsOnAssayPlate)
-  {
-    _requestedEmptyColumnsOnAssayPlate = requestedEmptyColumnsOnAssayPlate;
-  }
-
-  /**
-   * Set the set of empty rows requested by the screener.
-   * @param requestedEmptyRowsOnAssayPlate 1-based row numbers that screener has requested be
-   * left empty on cherry pick assay plate
-   * @motivation for hibernate
-   */
-  private void setRequestedEmptyRowsOnAssayPlate(Set<Character> requestedEmptyRowsOnAssayPlate)
-  {
-    _requestedEmptyRowsOnAssayPlate = requestedEmptyRowsOnAssayPlate;
   }
 }

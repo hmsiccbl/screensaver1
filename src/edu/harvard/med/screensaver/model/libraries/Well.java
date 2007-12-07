@@ -68,7 +68,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   private static final Logger log = Logger.getLogger(Well.class);
   private static final long serialVersionUID = 2682270079212906959L;
-  private static Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
+  public static Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
 
   // constants for well names
   // note that these can be hardcoded for now, since we only support 384 well plates

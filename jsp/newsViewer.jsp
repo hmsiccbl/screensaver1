@@ -8,6 +8,13 @@
 		<p>Check back here regularly for the latest Screensaver news and
 		gossip!</p>
 		<dl>
+			<dt><span class="newsDate">2007.Dec.07, v1.4.2</span></dt>
+			<dd><p>Cherry Pick Requests now allow an arbitrary set of
+			screener-requested empty wells to be specified (rather than entire
+			columns and rows).</p>
+			</p>
+			</dd>
+
 			<dt><span class="newsDate">2007.Dec.06, v1.4.1</span></dt>
 			<dd><p>Added Cherry Pick Requests Browser for administrators, allowing
 			them to view that status of all cherry pick requests. Added

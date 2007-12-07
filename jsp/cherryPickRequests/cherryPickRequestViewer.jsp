@@ -226,37 +226,19 @@ TODO:
 						styleClass="command" displayValueOnlyStyleClass="dataText" />
 
 					<t:outputText
-						value="Screener-requested&nbsp;empty columns&nbsp;&amp;&nbsp;rows&nbsp;on&nbsp;plate"
+						value="Screener-requested&nbsp;empty&nbsp;wells&nbsp;on&nbsp;plate"
 						escape="false"
-						title="The columns and rows the screener requested to be left empty" />
-					<t:panelGrid columns="2"
-						rendered="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}">
-						<t:outputText value="Columns:" />
-						<t:outputText
-							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlateAsString}"
-							styleClass="dataText" />
-						<t:outputText value="Rows:" />
-						<t:outputText
-							value="#{cherryPickRequestViewer.emptyRowsOnAssayPlateAsString}"
-							styleClass="dataText" />
-					</t:panelGrid>
-					<t:panelGrid columns="2"
-						rendered="#{cherryPickRequestViewer.editMode && !cherryPickRequestViewer.cherryPickRequest.mapped}">
-						<t:outputText value="Columns:" />
-						<t:outputText value="Rows:" />
-						<t:selectManyListbox
-							value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.value}"
-							size="20" styleClass="input">
-							<f:selectItems
-								value="#{cherryPickRequestViewer.emptyColumnsOnAssayPlate.selectItems}" />
-						</t:selectManyListbox>
-						<t:selectManyListbox
-							value="#{cherryPickRequestViewer.emptyRowsOnAssayPlate.value}"
-							size="20" styleClass="input">
-							<f:selectItems
-								value="#{cherryPickRequestViewer.emptyRowsOnAssayPlate.selectItems}" />
-						</t:selectManyListbox>
-					</t:panelGrid>
+						title="The wells the screener requested to be left empty" />
+					<t:panelGroup>
+						<t:inputText id="emptyWells"
+							value="#{cherryPickRequestViewer.cherryPickRequest.requestedEmptyWellsOnAssayPlate}"
+							converter="#{cherryPickRequestViewer.emptyWellsConverter}"
+							displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
+							displayValueOnlyStyleClass="dataText" styleClass="inputText"
+							size="40" />
+						<t:outputText value="(e.g. \"Col:3, Row:H, B2, N18\")"
+						  styleClass="label" rendered="#{cherryPickRequestViewer.editMode}"/>
+					</t:panelGroup>
 
 					<t:outputText value="Comments" escape="false"
 						title="Comments made by screening room staff" />

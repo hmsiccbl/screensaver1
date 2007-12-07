@@ -180,9 +180,8 @@ public class CherryPickRequestPlateMapper
     List<WellName> availableWellNames = new ArrayList<WellName>();
     for (int column = Well.MIN_WELL_COLUMN; column <= Well.MAX_WELL_COLUMN; column++) {
       for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; row++) {
-        if (!cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate().contains(column) &&
+        if (!cherryPickRequest.getRequestedEmptyWellsOnAssayPlate().contains(new WellName(row, column)) &&
           !cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate().contains(column) &&
-          !cherryPickRequest.getRequestedEmptyRowsOnAssayPlate().contains(row) &&
           !cherryPickRequest.getRequiredEmptyRowsOnAssayPlate().contains(row)) {
           availableWellNames.add(new WellName(row, column));
         }

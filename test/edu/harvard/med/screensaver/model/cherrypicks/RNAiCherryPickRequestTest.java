@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
@@ -38,18 +39,20 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
     super(RNAiCherryPickRequest.class);
   }
 
-  public void testRequestedEmptyColumnsOnAssayPlate()
+  public void testRequestedEmptyWellsOnAssayPlate()
   {
     schemaUtil.truncateTablesOrCreateSchema();
 
-    final Set<Integer> requestedEmptyColumns = new HashSet<Integer>(Arrays.asList(3, 7, 11));
+    final Set<WellName> requestedEmptyWells= new HashSet<WellName>(Arrays.asList(new WellName("A03"),
+                                                                                 new WellName("G07"),
+                                                                                 new WellName("P11")));
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(requestedEmptyColumns);
+        cherryPickRequest.setRequestedEmptyWellsOnAssayPlate(requestedEmptyWells);
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
         genericEntityDao.saveOrUpdateEntity(screen);
       }
@@ -60,8 +63,8 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
       public void runTransaction()
       {
         Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-        assertEquals(requestedEmptyColumns,
-                     screen2.getCherryPickRequests().iterator().next().getRequestedEmptyColumnsOnAssayPlate());
+        assertEquals(requestedEmptyWells,
+                     screen2.getCherryPickRequests().iterator().next().getRequestedEmptyWellsOnAssayPlate());
       }
     });
   }

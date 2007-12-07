@@ -85,8 +85,6 @@ import org.springframework.dao.DataAccessException;
 
 public class CherryPickRequestViewer extends AbstractBackingBean
 {
-
-
   // static members
 
   private static Logger log = Logger.getLogger(CherryPickRequestViewer.class);
@@ -351,8 +349,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private String _cherryPicksInput;
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
   private UISelectOneEntityBean<AdministratorUser> _volumeApprovedBy;
-  private UISelectManyBean<Integer> _emptyColumnsOnAssayPlate;
-  private UISelectManyBean<Character> _emptyRowsOnAssayPlate;
 
   private DataTable<ScreenerCherryPick> _screenerCherryPicksDataTable;
   private DataTable<LabCherryPick> _labCherryPicksDataTable;
@@ -366,6 +362,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private UISelectOneEntityBean<ScreensaverUser> _liquidTransferPerformedBy;
   private Date _dateOfLiquidTransfer = new Date();
   private String _liquidTransferComments;
+
+  private EmptyWellsConverter _emptyWellsConverter;
 
 
   // public constructors and methods
@@ -491,18 +489,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       protected String getLabel(ScreensaverUser u) { return u.getFullNameLastFirst(); }
     };
 
-    Set<Integer> selectableEmptyColumns = new TreeSet<Integer>(PLATE_COLUMNS_LIST);
-    selectableEmptyColumns.removeAll(_cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate());
-    _emptyColumnsOnAssayPlate =
-      new UISelectManyBean<Integer>(selectableEmptyColumns,
-                                    _cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
-
-    Set<Character> selectableEmptyRows = new TreeSet<Character>(PLATE_ROWS_LIST);
-    selectableEmptyRows.removeAll(_cherryPickRequest.getRequiredEmptyRowsOnAssayPlate());
-    _emptyRowsOnAssayPlate =
-      new UISelectManyBean<Character>(selectableEmptyRows,
-                                    _cherryPickRequest.getRequestedEmptyRowsOnAssayPlate());
-
+    _emptyWellsConverter = new EmptyWellsConverter();
     _screenerCherryPicksDataTable.rebuildRows();
     _labCherryPicksDataTable.rebuildRows();
     _assayPlatesColumnModel = new ArrayDataModel(AssayPlateRow.ASSAY_PLATES_TABLE_COLUMNS);
@@ -543,6 +530,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
             throw new UnsupportedOperationException("Sorry, but viewing compound cherry pick requests is not yet implemented.");
           }
 
+          _dao.needReadOnly(cherryPickRequest,
+                            "requestedEmptyWellsOnAssayPlate");
           _dao.needReadOnly(cherryPickRequest,
                             "cherryPickAssayPlates.cherryPickLiquidTransfer.performedBy",
                             "cherryPickAssayPlates.labCherryPicks.sourceWell");
@@ -625,26 +614,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     return _liquidTransferPerformedBy;
   }
 
-  public UISelectManyBean<Integer> getEmptyColumnsOnAssayPlate()
-  {
-    return _emptyColumnsOnAssayPlate;
-  }
-
-  public String getEmptyColumnsOnAssayPlateAsString()
-  {
-    return StringUtils.makeListString(new TreeSet<Integer>(_cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate()), ", ");
-  }
-
-  public UISelectManyBean<Character> getEmptyRowsOnAssayPlate()
-  {
-    return _emptyRowsOnAssayPlate;
-  }
-
-  public String getEmptyRowsOnAssayPlateAsString()
-  {
-    return StringUtils.makeListString(new TreeSet<Character>(_cherryPickRequest.getRequestedEmptyRowsOnAssayPlate()), ", ");
-  }
-
   public int getScreenerCherryPickCount()
   {
     return _cherryPickRequest.getScreenerCherryPicks().size();
@@ -663,6 +632,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public int getCompletedCherryPickPlatesCount()
   {
     return _cherryPickRequest.getCompletedCherryPickAssayPlates().size();
+  }
+
+  public EmptyWellsConverter getEmptyWellsConverter()
+  {
+    return _emptyWellsConverter;
   }
 
   public boolean isRnaiScreen()
@@ -1137,7 +1111,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           newCherryPickRequest.setDateVolumeApproved(cherryPickRequest.getDateVolumeApproved());
           newCherryPickRequest.setDateRequested(new Date());
           newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
-          newCherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(cherryPickRequest.getRequestedEmptyColumnsOnAssayPlate());
+          newCherryPickRequest.setRequestedEmptyWellsOnAssayPlate(cherryPickRequest.getRequestedEmptyWellsOnAssayPlate());
           newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
           // note: we can only instantiate one new ScreenerCherryPick per *set*
           // of LabCherryPicks from the same screenedWell, otherwise we'll
@@ -1221,9 +1195,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           _dao.reattachEntity(_cherryPickRequest);
           _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
           _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
-          _cherryPickRequest.clearRequestedEmptyColumnsOnAssayPlate();
-          _cherryPickRequest.addRequestedEmptyColumnsOnAssayPlate(_emptyColumnsOnAssayPlate.getSelections());
-          _cherryPickRequest.addRequestedEmptyRowsOnAssayPlate(_emptyRowsOnAssayPlate.getSelections());
         }
       });
     }
