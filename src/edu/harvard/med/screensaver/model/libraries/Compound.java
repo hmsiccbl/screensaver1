@@ -26,7 +26,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
-import org.openscience.cdk.SetOfMolecules;
+import org.openscience.cdk.MoleculeSet;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.io.SMILESReader;
@@ -641,16 +641,16 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
     if (_mfAnalyser != null) {
       return _mfAnalyser;
     }
-    SetOfMolecules setOfMolecules = new SetOfMolecules();
+    MoleculeSet moleculeSet = new MoleculeSet();
     SMILESReader smilesReader = new SMILESReader(new StringReader(_smiles));
     try {
-      smilesReader.read(setOfMolecules);
+      smilesReader.read(moleculeSet);
     }
     catch (CDKException e) {
       log.error("encountered Exception reading the SMILES!", e);
       return null;
     }
-    IMolecule molecule = setOfMolecules.getMolecule(0);
+    IMolecule molecule = moleculeSet.getMolecule(0);
     _mfAnalyser = new MFAnalyser(molecule);
     return _mfAnalyser;
   }
