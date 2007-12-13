@@ -58,6 +58,8 @@ public class AssayInfoProducer
 
   private void setAssayCategory(AssayInfo assayInfo, String assayCategoryText)
   {
+    // NOTE: assayCategory is a CHAR(30) in NAPIS. some existing values are getting truncated in the
+    // ICBG report.
     if (
       assayCategoryText.contains("MALARIA")) {
       assayInfo.setAssayCategory("ANTI-MALARIA");
