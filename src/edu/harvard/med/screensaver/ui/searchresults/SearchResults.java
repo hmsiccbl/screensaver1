@@ -194,7 +194,7 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     }
 
     initializeCompoundSorts();
-    initializeHasEditableColumns(getSortManager().getColumns());
+    initializeHasEditableColumns(/*getSortManager().*/getColumns());
   }
 
   /**

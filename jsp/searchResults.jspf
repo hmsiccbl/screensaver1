@@ -174,7 +174,7 @@
 					</f:facet>
 					<t:outputText value="#{searchResults.cellValue}"
 						rendered="#{! (column.isCommandLink || column.isCommandLinkList || (column.editable && searchResults.editMode))}" />
-					<t:inputText value="#{searchResults.cellValue}"
+					<t:inputText value="#{searchResults.cellValue}" converter="#{column.converter}"
 						rendered="#{column.editable && searchResults.editMode}"
 						immediate="true" />
 					<t:commandLink action="#{searchResults.dataTable.cellAction}"

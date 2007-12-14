@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.faces.convert.Converter;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -200,7 +202,12 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
         @Override
         public void setCellValue(WellCopyVolume wellVolume, Object value)
         {
-          _newRemainingVolumes.put(wellVolume, (BigDecimal) value);
+          if (value != null) {
+            _newRemainingVolumes.put(wellVolume, (BigDecimal) value);
+          }
+          else {
+            _newRemainingVolumes.remove(wellVolume);
+          }
         }
 
         @Override
@@ -276,7 +283,7 @@ public class WellCopyVolumeSearchResults extends SearchResultsWithRowDetail<Well
             WellVolumeAdjustment wellVolumeAdjustment =
               wellVolumeCorrectionActivity.createWellVolumeAdjustment(
                   wellCopyVolume.getCopy(),
-                                       wellCopyVolume.getWell(),
+                  wellCopyVolume.getWell(),
                   newRemainingVolume.subtract(wellCopyVolume.getRemainingMicroliterVolume()));
             wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
           }
