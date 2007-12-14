@@ -234,17 +234,20 @@ public class CherryPickRequestExporter
                                                        }), LIST_OF_VALUES_DELIMITER),
                             screenedWell.getSimpleVendorIdentifier());
 
-    Set<ResultValueType> rvts = screenerCherryPick.getCherryPickRequest().getScreen().getScreenResult().getResultValueTypes();
-    for (ResultValueType rvt : rvts) {
-      Object value = null;
-      ResultValue rv = screenedWell.getResultValues().get(rvt);
-      if (rv != null) {
-        value = ResultValue.getTypedValue(rv, rvt);
+    ScreenResult screenResult = screenerCherryPick.getCherryPickRequest().getScreen().getScreenResult();
+    if (screenResult != null) {
+      Set<ResultValueType> rvts = screenResult.getResultValueTypes();
+      for (ResultValueType rvt : rvts) {
+        Object value = null;
+        ResultValue rv = screenedWell.getResultValues().get(rvt);
+        if (rv != null) {
+          value = ResultValue.getTypedValue(rv, rvt);
+        }
+        Workbook2Utils.writeCell(sheet,
+                                 iRow,
+                                 6 + rvt.getOrdinal(),
+                                 value);
       }
-      Workbook2Utils.writeCell(sheet,
-                               iRow,
-                               6 + rvt.getOrdinal(),
-                               value);
     }
   }
 
