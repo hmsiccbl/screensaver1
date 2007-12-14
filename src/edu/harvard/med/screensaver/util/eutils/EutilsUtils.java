@@ -215,6 +215,10 @@ abstract public class EutilsUtils
       DOMSource source = new DOMSource(document);
       StreamResult result = new StreamResult(outputStream);
       transformer.transform(source, result);
+
+      // throw in a newline for output formatting 
+      outputStream.write('\n');
+      outputStream.flush();
     }
     catch (Exception e) {
     }
