@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -55,6 +56,7 @@ public class ScreenCreator
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("#").withLongOpt("number").create("n"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("title").withLongOpt("title").withDescription("the title of the screen").create("t"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("screen type").withLongOpt("screen-type").withDescription(StringUtils.makeListString(Arrays.asList(ScreenType.values()), ", ")).create("y"));
+      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("study type").withLongOpt("study-type").withDescription(StringUtils.makeListString(Arrays.asList(ScreenType.values()), ", ")).create("yy"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("text").withLongOpt("summary").create("s"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("text").withLongOpt("protocol").create("p"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName(dateFormat.toPattern()).withLongOpt("date-created").create("d"));
@@ -77,6 +79,7 @@ public class ScreenCreator
       final int screenNumber = app.getCommandLineOptionValue("n", Integer.class);
       final String title = app.getCommandLineOptionValue("t");
       final ScreenType screenType = app.getCommandLineOptionEnumValue("y", ScreenType.class);
+      final StudyType studyType = app.getCommandLineOptionEnumValue("yy", StudyType.class);
       final String summary = app.isCommandLineFlagSet("s") ? app.getCommandLineOptionValue("s") : null;
       final String protocol = app.isCommandLineFlagSet("p") ? app.getCommandLineOptionValue("p") : null;
       final Date dateCreated = app.isCommandLineFlagSet("d") ? app.getCommandLineOptionValue("d", Date.class, dateFormat) : new Date();
@@ -100,7 +103,7 @@ public class ScreenCreator
               log.info("set lab head for lead screener");
             }
 
-            Screen screen = new Screen(leadScreener, labHead, screenNumber, dateCreated, screenType, title);
+            Screen screen = new Screen(leadScreener, labHead, screenNumber, dateCreated, screenType, studyType, title);
             screen.setSummary(summary);
             screen.setPublishableProtocol(protocol);
 
@@ -145,7 +148,7 @@ public class ScreenCreator
     }
   }
 
-  private static ScreeningRoomUser findOrCreateScreeningRoomUser(GenericEntityDAO dao,
+  public static ScreeningRoomUser findOrCreateScreeningRoomUser(GenericEntityDAO dao,
                                                                  String firstName,
                                                                  String lastName,
                                                                  String email)
