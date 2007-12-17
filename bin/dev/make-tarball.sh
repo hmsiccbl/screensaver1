@@ -7,4 +7,4 @@ SCREENSAVER=`basename $SCREENSAVER`
 cd `dirname $0`/..
 echo making tarball of \"$SCREENSAVER\" from `pwd`
 THIS=$SCREENSAVER/bin/`basename $0`
-tar czvf screensaver.tgz -follow --exclude '*compound-libraries*.zip' --exclude '*/.svn*' --exclude '*/lib/*/unused*' --exclude $THIS $SCREENSAVER
+tar czvf screensaver.tgz -h --exclude '*compound-libraries*.zip' --exclude '*/.svn*' --exclude '*/lib/*/unused*' --exclude $THIS $SCREENSAVER
