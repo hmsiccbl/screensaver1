@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.namevaluetable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -59,12 +60,15 @@ public class ReagentNameValueTable extends ComboNameValueTable
     comboNameValueTables.add(detailsNameValueTable);
     // TODO: once Well.{compounds,silencingReagents} are moved to Reagent, we won't need to go through well anymore
     if (reagent != null) {
-      Well well = reagent.getWells().iterator().next();
-      for (Gene gene : well.getGenes()) {
-        comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, reagentViewer));
-      }
-      for (Compound compound : well.getOrderedCompounds()) {
-        comboNameValueTables.add(new CompoundNameValueTable(compound, compoundViewer, reagentViewer));
+      Iterator<Well> iterator = reagent.getWells().iterator();
+      if (iterator.hasNext()) {
+        Well well = iterator.next();
+        for (Gene gene : well.getGenes()) {
+          comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, reagentViewer));
+        }
+        for (Compound compound : well.getOrderedCompounds()) {
+          comboNameValueTables.add(new CompoundNameValueTable(compound, compoundViewer, reagentViewer));
+        }
       }
     }
     initializeComboNameValueTable((NameValueTable [])

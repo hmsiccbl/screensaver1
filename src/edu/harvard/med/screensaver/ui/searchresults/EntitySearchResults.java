@@ -69,10 +69,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
    */
   final protected String viewCurrentEntity()
   {
-    getDataTable().getRowsPerPageSelector()
-                  .setSelection(1);
-    getDataTable().gotoRowIndex(getDataTable().getDataModel()
-                                              .getRowIndex());
+    getDataTable().getRowsPerPageSelector().setSelection(1);
+    getDataTable().gotoRowIndex(getDataTable().getDataModel().getRowIndex());
     updateEntityToView();
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

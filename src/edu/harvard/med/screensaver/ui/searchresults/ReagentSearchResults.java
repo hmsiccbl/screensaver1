@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -114,6 +115,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
     super.setContents(unsortedResults, null);
     _study = null;
     _studyReagentCount = 0;
+    _representativeWell = null;
   }
 
   public void setContents(Study study,
@@ -125,6 +127,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
     super.setContents(null, null);
     _study = study;
     _studyReagentCount = reagentCount;
+    _representativeWell = null;
   }
 
   public void update(Observable observable, Object selections)
@@ -291,7 +294,13 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
   private Well getRepresentativeWell(Reagent reagent)
   {
     if (_representativeWell == null) {
-      _representativeWell = reagent.getWells().iterator().next();
+      Iterator<Well> iterator = reagent.getWells().iterator();
+      if (iterator.hasNext()) {
+        _representativeWell = iterator.next();
+      }
+      if (_representativeWell == null) {
+        _representativeWell = Well.NULL_WELL;
+      }
     }
     return _representativeWell;
   }

@@ -15,12 +15,11 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
@@ -29,12 +28,14 @@ import org.apache.log4j.Logger;
 
 public class IccbCompoundsStudyCreator
 {
+
   // static members
 
   private static Logger log = Logger.getLogger(IccbCompoundsStudyCreator.class);
 
+  private static final int STUDY_NUMBER = 100001;
   private static final String TITLE = "ICCB Compounds";
-  private  static final String SUMMARY = "Annotations for ICCB compounds, heard through the grapevine.";
+  private static final String SUMMARY = "Annotations for ICCB compounds, heard through the grapevine.";
 
   public static void main(String[] args)
   {
@@ -49,14 +50,20 @@ public class IccbCompoundsStudyCreator
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         try {
+          deleteExistingStudy(dao);
+
           ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu");
           ScreeningRoomUser leadScreener = labHead;
 
-          Screen study = new Screen(leadScreener, labHead, 100001, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO, TITLE);
+          Screen study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
 
-          study.createAnnotationType("Undesirable", "Flag indicating whether compound is undesirable for screening.", false);
-          study.createAnnotationType("Comment", "Comment explaining why compound is undesirable for screening.", false);
+          AnnotationType undesirableAnnotType = study.createAnnotationType("Undesirable", "Flag indicating whether compound is undesirable for screening.", false);
+          AnnotationType commentAnnotType = study.createAnnotationType("Comment", "Comment explaining why compound is undesirable for screening.", false);
+
+          Reagent reagent = findOrCreateReagent(dao);
+          undesirableAnnotType.createAnnotationValue(reagent, "true");
+          commentAnnotType.createAnnotationValue(reagent, "Chelates metal and has shown up in a number of assays");
 
           dao.saveOrUpdateEntity(study);
         }
@@ -64,7 +71,29 @@ public class IccbCompoundsStudyCreator
           throw new DAOTransactionRollbackException(e);
         }
       }
+
+      private Reagent findOrCreateReagent(final GenericEntityDAO dao)
+      {
+        ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("Novartis", "NIBR1 K839-0057");
+        Reagent reagent = dao.findEntityById(Reagent.class, rvi);
+        if (reagent == null) {
+          reagent = new Reagent(rvi);
+        }
+        return reagent;
+      }
+
+      private void deleteExistingStudy(GenericEntityDAO dao)
+      {
+        Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
+        if (study != null) {
+          //dao.deleteEntity(study.getLeadScreener());
+          //dao.deleteEntity(study.getLabHead());
+          dao.deleteEntity(study);
+          dao.flush();
+          log.info("deleted existing study");
+        }
+      }
     });
-    log.info("study succesfully added to database");
+    log.info("study successfully added to database");
   }
 }

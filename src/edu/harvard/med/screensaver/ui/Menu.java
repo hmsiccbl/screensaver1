@@ -196,12 +196,11 @@ public class Menu extends AbstractBackingBean
     {
       public void runTransaction()
       {
-        List<? extends Study> studies = _dao.findEntitiesByProperty(Screen.class /* TODO: change to Study.class*/,
-                                                                    "studyType", // HACK! just a trick for identifying studies in ICCB-L database
-                                                                    StudyType.IN_SILICO, // HACK! just a trick for identifying studies in ICCB-L database
-                                                                    true,
-                                                                    "labHead",
-                                                                    "leadScreener");
+        List<? extends Study> studies =
+          _dao.findEntitiesByHql(Screen.class, /* TODO: change to Study.class*/
+                                 // HACK! just a trick for identifying studies in ICCB-L database
+                                 "from Screen s left join fetch s.labHead left join fetch s.leadScreener where screen_number >= ?",
+                                 Study.MIN_STUDY_NUMBER);
         for (Iterator<? extends Study> iter = studies.iterator(); iter.hasNext();) {
           Study study = iter.next();
           if (study.isRestricted()) {

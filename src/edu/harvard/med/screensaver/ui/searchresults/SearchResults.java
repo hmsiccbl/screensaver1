@@ -191,6 +191,9 @@ abstract public class SearchResults<E> extends AbstractBackingBean
     if (oldDataTable != null) {
       _dataTable.setDataTableUIComponent(oldDataTable.getDataTableUIComponent());
       _dataTable.setRowsPerPageUIComponent(oldDataTable.getRowsPerPageUIComponent());
+      if (_dataTable.getDataTableUIComponent() != null) {
+        _dataTable.getDataTableUIComponent().setFirst(0);
+      }
     }
 
     initializeCompoundSorts();

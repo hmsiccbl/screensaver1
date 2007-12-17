@@ -23,6 +23,8 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 public abstract class Study extends AbstractEntity
 {
+  public static final Integer MIN_STUDY_NUMBER = 100000;
+
   abstract public Set<ScreeningRoomUser> getCollaborators();
 
   abstract public ScreeningRoomUser getLabHead();
@@ -47,7 +49,7 @@ public abstract class Study extends AbstractEntity
   public boolean isStudyOnly()
   {
     // TODO: this is a total hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
-    return getStudyType().equals(StudyType.IN_SILICO);
+    return getStudyNumber() >= MIN_STUDY_NUMBER;
   }
 
   @Override

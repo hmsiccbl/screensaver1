@@ -70,6 +70,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private static final long serialVersionUID = 2682270079212906959L;
   public static Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
 
+  public static final Well NULL_WELL = new Well();
+
   // constants for well names
   // note that these can be hardcoded for now, since we only support 384 well plates
   public static final int MIN_WELL_COLUMN = 1;
