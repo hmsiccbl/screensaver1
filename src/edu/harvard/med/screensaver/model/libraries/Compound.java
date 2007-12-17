@@ -478,7 +478,7 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   {
     MFAnalyser mfAnalyser = getMFAnalyser();
     try {
-      return mfAnalyser.getCanonicalMass();
+      return mfAnalyser.getMass();
     }
     catch (Exception e) {
       log.error("encountered Exception computing molecular mass!", e);
