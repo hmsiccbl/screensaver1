@@ -19,7 +19,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.util.eutils.PubchemSmilesSearch;
+import edu.harvard.med.screensaver.util.eutils.PubchemSmilesOrInchiSearch;
 
 /**
  * Standalone application for upgrading the PubChem CIDs for the compounds in a given library.
@@ -52,7 +52,7 @@ public class CompoundPubchemCidListUpgrader
   // instance fields
   
   private GenericEntityDAO _dao;
-  private PubchemSmilesSearch pubchemSmilesSearch = new PubchemSmilesSearch();
+  private PubchemSmilesOrInchiSearch pubchemSmilesOrInchiSearch = new PubchemSmilesOrInchiSearch();
   private int _numCompoundsUpgraded = 0;
   
   // constructor and instance methods
@@ -86,7 +86,7 @@ public class CompoundPubchemCidListUpgrader
           while (nonUpgradedCompounds.hasNext() && i < NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION) {
             Compound compound = _dao.reloadEntity(nonUpgradedCompounds.next());
             List<String> pubchemCids =
-              pubchemSmilesSearch.getPubchemCidsForSmiles(compound.getSmiles());
+              pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(compound.getSmiles());
             if (pubchemCids != null) {
               for (String pubchemCid : pubchemCids) {
                 compound.addPubchemCid(pubchemCid);

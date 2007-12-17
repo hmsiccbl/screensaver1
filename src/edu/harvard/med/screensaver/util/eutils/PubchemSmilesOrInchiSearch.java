@@ -20,7 +20,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 /**
- * Uses PUG to do a SMILES structure search on PubChem, returning a list of PubChem
+ * Uses PUG to do a SMILES or InChI structure search on PubChem, returning a list of PubChem
  * CIDs.
  * <p>
  * For details on how the PUG interface works, see the
@@ -34,31 +34,31 @@ import org.w3c.dom.Text;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class PubchemSmilesSearch extends PubchemPugClient
+public class PubchemSmilesOrInchiSearch extends PubchemPugClient
 {
   // static members
 
-  private static Logger log = Logger.getLogger(PubchemSmilesSearch.class);
+  private static Logger log = Logger.getLogger(PubchemSmilesOrInchiSearch.class);
 
 
   // private instance fields
 
-  private String _smiles;
+  private String _smilesOrInchi;
 
   
   // public constructors and methods
 
   /**
-   * Return the list of PubChem CIDs for this SMILES string, as reported by the PubChem PUG
+   * Return the list of PubChem CIDs for this SMILES or InChI string, as reported by the PubChem PUG
    * interface, searching for exact match, with non-conflicting stereoisometry. Report an
    * error to the log and return null on error.
-   * @param smiles the smiles to search for PubChem CIDs with
-   * @return the list of PubChem CIDs for this SMILES string. return null on error.
+   * @param smilesOrInchi the smiles to search for PubChem CIDs with
+   * @return the list of PubChem CIDs for this SMILES or InChI string. return null on error.
    */
-  synchronized public List<String> getPubchemCidsForSmiles(String smiles)
+  synchronized public List<String> getPubchemCidsForSmilesOrInchi(String smilesOrInchi)
   {
-    _smiles = smiles;
-    Document searchDocument = createSearchDocumentForSmiles(smiles);
+    _smilesOrInchi = smilesOrInchi;
+    Document searchDocument = createSearchDocumentForSmilesOrInchi(smilesOrInchi);
     Document outputDocument = getXMLForPugQuery(searchDocument);
     while (! isJobCompleted(outputDocument)) {
       sleep(1000);
@@ -78,18 +78,18 @@ public class PubchemSmilesSearch extends PubchemPugClient
 
   public void reportError(String error)
   {
-    log.error("Error for smiles '" + _smiles + "': " + error);
+    log.error("Error for smiles or inchi '" + _smilesOrInchi + "': " + error);
   }
   
   
   // private methods
 
   /**
-   * Create and return a PUG search request XML document for the SMILES string.
-   * @param smiles the SMILES string to create a PUG search request XML document for
-   * @return the XML document for the SMILES string
+   * Create and return a PUG search request XML document for the SMILES or InChI string.
+   * @param smilesOrInchi the SMILES or InChI string to create a PUG search request XML document for
+   * @return the XML document for the SMILES or InChI string
    */
-  private Document createSearchDocumentForSmiles(String smiles) {
+  private Document createSearchDocumentForSmilesOrInchi(String smilesOrInchi) {
     Document document = _documentBuilder.newDocument();
     
     // every elt has a single child, up to PCT-QueryCompoundCS
@@ -108,7 +108,7 @@ public class PubchemSmilesSearch extends PubchemPugClient
     
     element = createParentedElement(document, queryCompoundCS, "PCT-QueryCompoundCS_query");
     element = createParentedElement(document, element, "PCT-QueryCompoundCS_query_data");
-    createParentedTextNode(document, element, smiles);
+    createParentedTextNode(document, element, smilesOrInchi);
   
     element = createParentedElement(document, queryCompoundCS, "PCT-QueryCompoundCS_type");
     element = createParentedElement(document, element, "PCT-QueryCompoundCS_type_identical");

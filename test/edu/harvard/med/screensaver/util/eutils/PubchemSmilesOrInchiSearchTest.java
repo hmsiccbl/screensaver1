@@ -21,13 +21,13 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class PubchemSmilesSearchTest extends AbstractSpringTest
+public class PubchemSmilesOrInchiSearchTest extends AbstractSpringTest
 {
-  private PubchemSmilesSearch _pubchemSmilesSearch = new PubchemSmilesSearch();
+  private PubchemSmilesOrInchiSearch _pubchemSmilesOrInchiSearch = new PubchemSmilesOrInchiSearch();
 
   public void testGetPubchemCidsForSmiles1()
   {
-    List<String> pubchemCids = _pubchemSmilesSearch.getPubchemCidsForSmiles(
+    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1");
     assertEquals(2, pubchemCids.size());
     assertTrue(pubchemCids.contains("1268921"));
@@ -36,7 +36,7 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
 
   public void testGetPubchemCidsForSmiles2()
   {
-    List<String> pubchemCids = _pubchemSmilesSearch.getPubchemCidsForSmiles(
+    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "N#Cc1c(CN2CCN(C)CC2)n(C)c2ccccc12");
     assertEquals(1, pubchemCids.size());
     assertEquals("607443", pubchemCids.get(0));
@@ -44,7 +44,7 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
 
   public void testGetPubchemCidsForSmiles3()
   {
-    List<String> pubchemCids = _pubchemSmilesSearch.getPubchemCidsForSmiles(
+    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "NC(=S)c1cnc2ccccn2c1=N");
     assertEquals(1, pubchemCids.size());
     assertEquals("687414", pubchemCids.get(0));
@@ -52,7 +52,7 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
   
   public void testGetPubchemCidsForSmiles4()
   {
-    List<String> pubchemCids = _pubchemSmilesSearch.getPubchemCidsForSmiles(
+    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1");
     assertEquals(3, pubchemCids.size());
     assertTrue(pubchemCids.contains("577795"));
@@ -62,7 +62,7 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
   
   public void testGetPubchemCidsForInvalidSmiles()
   {
-    class MockedPubchemSmilesSearch extends PubchemSmilesSearch
+    class MockedPubchemSmilesSearch extends PubchemSmilesOrInchiSearch
     {
       private boolean _gotDataOrServerError = false;
       public boolean gotDataOrServerError()
@@ -77,7 +77,7 @@ public class PubchemSmilesSearchTest extends AbstractSpringTest
       }
     }
     MockedPubchemSmilesSearch mockedSearch = new MockedPubchemSmilesSearch();
-    List<String> pubchemCids = mockedSearch.getPubchemCidsForSmiles(
+    List<String> pubchemCids = mockedSearch.getPubchemCidsForSmilesOrInchi(
       "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1)"); // the dangling ')' is a actual encountered error
     assertNull(pubchemCids);
     assertTrue(mockedSearch.gotDataOrServerError());
