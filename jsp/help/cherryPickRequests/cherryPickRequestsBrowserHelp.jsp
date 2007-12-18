@@ -5,6 +5,6 @@
 
 <f:subview id="cherryPickRequestsBrowserHelpText">
   <f:verbatim escape="false">
-  Coming soon!k
+  Coming soon!
   </f:verbatim>
 </f:subview>
