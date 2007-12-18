@@ -71,9 +71,6 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
   private int _studyReagentCount;
   private List<TableColumn<Reagent,?>> _columns;
 
-  private transient Well _representativeWell;
-
-
 
   // constructors
 
@@ -115,7 +112,6 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
     super.setContents(unsortedResults, null);
     _study = null;
     _studyReagentCount = 0;
-    _representativeWell = null;
   }
 
   public void setContents(Study study,
@@ -127,7 +123,6 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
     super.setContents(null, null);
     _study = study;
     _studyReagentCount = reagentCount;
-    _representativeWell = null;
   }
 
   public void update(Observable observable, Object selections)
@@ -293,16 +288,10 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent> implement
 
   private Well getRepresentativeWell(Reagent reagent)
   {
-    if (_representativeWell == null) {
-      Iterator<Well> iterator = reagent.getWells().iterator();
-      if (iterator.hasNext()) {
-        _representativeWell = iterator.next();
-      }
-      if (_representativeWell == null) {
-        _representativeWell = Well.NULL_WELL;
-      }
+    if (reagent.getWells().size() > 0) {
+      return reagent.getWells().iterator().next();
     }
-    return _representativeWell;
+    return Well.NULL_WELL;
   }
 
   private SortedSet<Compound> getCompounds(Reagent reagent)
