@@ -34,8 +34,8 @@ public class IccbCompoundsStudyCreator
   private static Logger log = Logger.getLogger(IccbCompoundsStudyCreator.class);
 
   private static final int STUDY_NUMBER = 100001;
-  private static final String TITLE = "ICCB Compounds";
-  private static final String SUMMARY = "Annotations for ICCB compounds, heard through the grapevine.";
+  private static final String TITLE = "Annotations on Suitability of Compounds: Miscellaneous Sources";
+  private static final String SUMMARY = "Annotations for ICCB-L compounds, heard through the grapevine.";
 
   public static void main(String[] args)
   {
@@ -59,7 +59,7 @@ public class IccbCompoundsStudyCreator
           study.setSummary(SUMMARY);
 
           AnnotationType undesirableAnnotType = study.createAnnotationType("Undesirable", "Flag indicating whether compound is undesirable for screening.", false);
-          AnnotationType commentAnnotType = study.createAnnotationType("Comment", "Comment explaining why compound is undesirable for screening.", false);
+          AnnotationType commentAnnotType = study.createAnnotationType("Notes on Suitability", "Explanation of why compound may be undesirable for screening.", false);
 
           Reagent reagent = findOrCreateReagent(dao);
           undesirableAnnotType.createAnnotationValue(reagent, "true");

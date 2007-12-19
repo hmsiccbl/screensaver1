@@ -47,16 +47,19 @@ public class MedicinalCompoundsStudyCreator
   private static Logger log = Logger.getLogger(MedicinalCompoundsStudyCreator.class);
 
   private static final int STUDY_NUMBER = 100002;
-  private static final String TITLE = "Medicinal Chemistry Compounds";
-  private static final String SUMMARY = "Annotations for screening suitability of medicinal chemistry compounds.";
+  private static final String TITLE = "Annotations on Suitability of Compounds: G. Cuny & K. Lee";
+  private static final String SUMMARY = "<pending>";
+  private static final String A_NO_SPECIFIC_CONCERNS = "A: No specific concerns";
+  private static final String B_POTENTIAL_LIABILITY = "B: Potential liability";
+  private static final String C_SUBSTANTIAL_LIABILITY = "C: Substantial liability";
   private static final SortedMap<String,String> VALID_MEDCHEM_COMMENT_VALUES = new TreeMap<String,String>();
   static {
-    VALID_MEDCHEM_COMMENT_VALUES.put("A", "A");
-    VALID_MEDCHEM_COMMENT_VALUES.put("a", "A");
-    VALID_MEDCHEM_COMMENT_VALUES.put("B", "B");
-    VALID_MEDCHEM_COMMENT_VALUES.put("b", "B");
-    VALID_MEDCHEM_COMMENT_VALUES.put("C", "C");
-    VALID_MEDCHEM_COMMENT_VALUES.put("c", "C");
+    VALID_MEDCHEM_COMMENT_VALUES.put("A", A_NO_SPECIFIC_CONCERNS);
+    VALID_MEDCHEM_COMMENT_VALUES.put("a", A_NO_SPECIFIC_CONCERNS);
+    VALID_MEDCHEM_COMMENT_VALUES.put("B", B_POTENTIAL_LIABILITY);
+    VALID_MEDCHEM_COMMENT_VALUES.put("b", B_POTENTIAL_LIABILITY);
+    VALID_MEDCHEM_COMMENT_VALUES.put("C", C_SUBSTANTIAL_LIABILITY);
+    VALID_MEDCHEM_COMMENT_VALUES.put("c", C_SUBSTANTIAL_LIABILITY);
     VALID_MEDCHEM_COMMENT_VALUES.put("", null);
   }
 
@@ -76,16 +79,16 @@ public class MedicinalCompoundsStudyCreator
         try {
           deleteExistingStudy(dao);
 
-          ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu");
+          ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu");
           ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu");
 
           Screen study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
 
-          AnnotationType annotType = study.createAnnotationType("Screening Recommendation",
-                                                               "\"A\": No specific concerns. " +
-                                                               "\"B\": Potential Liability. " +
-                                                               "\"C\": Substantial Liability. " +
+          AnnotationType annotType = study.createAnnotationType("Notes on Suitability",
+                                                               A_NO_SPECIFIC_CONCERNS + ". " +
+                                                               B_POTENTIAL_LIABILITY + ". " +
+                                                               C_SUBSTANTIAL_LIABILITY + ". " +
                                                                "No value indicates the compound has not yet been reviewed by this study.",
                                                                false);
           int n = loadAndCreateReagents(app.getCommandLineOptionValue("f", File.class), dao, annotType);
@@ -133,7 +136,7 @@ public class MedicinalCompoundsStudyCreator
     try {
       short iVendorColumn = (short) findColumnForHeader(sheet, "Vendor");
       short iVendorIdColumn = (short) findColumnForHeader(sheet, "Vendor_ID");
-      short iMedChemCommentColumn = (short) findColumnForHeader(sheet, "Mechem comment");
+      short iMedChemCommentColumn = (short) findColumnForHeader(sheet, "Mechem comment" /* "Mechem" [sic] */);
       for (int iRow = 0; iRow < sheet.getRows(); ++iRow) {
         Cell vendorCell = (Cell) cellFactory.getCell(iVendorColumn, iRow, true).clone();
         Cell vendorIdCell = (Cell) cellFactory.getCell(iVendorIdColumn, iRow, true).clone();
