@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.CellVocabularyParser;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
@@ -62,6 +63,9 @@ public class MedicinalCompoundsStudyCreator
     VALID_MEDCHEM_COMMENT_VALUES.put("c", C_SUBSTANTIAL_LIABILITY);
     VALID_MEDCHEM_COMMENT_VALUES.put("", null);
   }
+  private static final String MECHEM_COMMENT_COLUMN_HEADER = "Mechem comment";
+  private static final String VENDOR_ID_COLUMN_HEADER = "Vendor_ID";
+  private static final String VENDOR_COLUMN_HEADER = "Vendor";
 
   public static void main(String[] args)
   {
@@ -84,6 +88,7 @@ public class MedicinalCompoundsStudyCreator
 
           Screen study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
+          study.setShareable(false);
 
           AnnotationType annotType = study.createAnnotationType("Notes on Suitability",
                                                                A_NO_SPECIFIC_CONCERNS + ". " +
@@ -91,9 +96,16 @@ public class MedicinalCompoundsStudyCreator
                                                                C_SUBSTANTIAL_LIABILITY + ". " +
                                                                "No value indicates the compound has not yet been reviewed by this study.",
                                                                false);
-          int n = loadAndCreateReagents(app.getCommandLineOptionValue("f", File.class), dao, annotType);
+          ParseErrorManager errors = new ParseErrorManager();
+          int n = loadAndCreateReagents(app.getCommandLineOptionValue("f", File.class), dao, annotType, errors);
           dao.saveOrUpdateEntity(study);
           log.info("created " + n + " annotations");
+          if (errors.getHasErrors()) {
+            log.error("Encountered " + errors.getErrors().size() + " error(s).");
+            for (WorkbookParseError error : errors.getErrors()) {
+              log.error(error.toString());
+            }
+          }
         }
         catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
@@ -115,10 +127,13 @@ public class MedicinalCompoundsStudyCreator
     log.info("study successfully added to database");
   }
 
-  protected static int loadAndCreateReagents(File workbookFile, GenericEntityDAO dao, AnnotationType annotType) throws FileNotFoundException
+  protected static int loadAndCreateReagents(File workbookFile,
+                                             GenericEntityDAO dao,
+                                             AnnotationType annotType,
+                                             ParseErrorManager errors)
+    throws FileNotFoundException
   {
     int n = 0;
-    ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(workbookFile, errors);
 
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
@@ -134,19 +149,21 @@ public class MedicinalCompoundsStudyCreator
     int n = 0;
     CellVocabularyParser<String> MEDCHEM_COMMENT_CELL_PARSER = new CellVocabularyParser<String>(VALID_MEDCHEM_COMMENT_VALUES, null, errors, "bad annotation value");
     try {
-      short iVendorColumn = (short) findColumnForHeader(sheet, "Vendor");
-      short iVendorIdColumn = (short) findColumnForHeader(sheet, "Vendor_ID");
-      short iMedChemCommentColumn = (short) findColumnForHeader(sheet, "Mechem comment" /* "Mechem" [sic] */);
-      for (int iRow = 0; iRow < sheet.getRows(); ++iRow) {
-        Cell vendorCell = (Cell) cellFactory.getCell(iVendorColumn, iRow, true).clone();
-        Cell vendorIdCell = (Cell) cellFactory.getCell(iVendorIdColumn, iRow, true).clone();
-        Cell medChemCommentCell = (Cell) cellFactory.getCell(iMedChemCommentColumn, iRow, true).clone();
-        ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorCell.getAsString(), vendorIdCell.getAsString());
-        Reagent reagent = findOrCreateReagent(rvi, dao);
-        String value = MEDCHEM_COMMENT_CELL_PARSER.parse(medChemCommentCell);
-        if (value != null) {
-          annotType.createAnnotationValue(reagent, value);
-          ++n;
+      short iVendorColumn = (short) findColumnForHeader(sheet, VENDOR_COLUMN_HEADER);
+      short iVendorIdColumn = (short) findColumnForHeader(sheet, VENDOR_ID_COLUMN_HEADER);
+      short iMedChemCommentColumn = (short) findColumnForHeader(sheet, MECHEM_COMMENT_COLUMN_HEADER);
+      if (iVendorColumn >= 0 && iVendorIdColumn >= 0 && iMedChemCommentColumn >= 0) {
+        for (int iRow = 1; iRow < sheet.getRows(); ++iRow) {
+          Cell vendorCell = (Cell) cellFactory.getCell(iVendorColumn, iRow, true).clone();
+          Cell vendorIdCell = (Cell) cellFactory.getCell(iVendorIdColumn, iRow, true).clone();
+          if (vendorCell != null && vendorIdCell != null) {
+            Cell medChemCommentCell = (Cell) cellFactory.getCell(iMedChemCommentColumn, iRow, false).clone();
+            ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorCell.getAsString(), vendorIdCell.getAsString());
+            Reagent reagent = findOrCreateReagent(rvi, dao);
+            String value = MEDCHEM_COMMENT_CELL_PARSER.parse(medChemCommentCell);
+            annotType.createAnnotationValue(reagent, value);
+            ++n;
+          }
         }
       }
       return n;
@@ -175,6 +192,6 @@ public class MedicinalCompoundsStudyCreator
         return iColumn;
       }
     }
-    throw new FatalParseException("no such column header " + headerName + " on sheet " + sheet.getName());
+    return -1;
   }
 }
