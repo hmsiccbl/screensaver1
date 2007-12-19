@@ -58,11 +58,11 @@ public class IccbCompoundsStudyCreator
           Screen study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
 
-          AnnotationType undesirableAnnotType = study.createAnnotationType("Undesirable", "Flag indicating whether compound is undesirable for screening.", false);
+          AnnotationType unsuitableAnnotType = study.createAnnotationType("Unsuitable", "Flag indicating whether compound is unsuitable for screening.", false);
           AnnotationType commentAnnotType = study.createAnnotationType("Notes on Suitability", "Explanation of why compound may be undesirable for screening.", false);
 
           Reagent reagent = findOrCreateReagent(dao);
-          undesirableAnnotType.createAnnotationValue(reagent, "true");
+          unsuitableAnnotType.createAnnotationValue(reagent, "true");
           commentAnnotType.createAnnotationValue(reagent, "Chelates metal and has shown up in a number of assays");
 
           dao.saveOrUpdateEntity(study);
