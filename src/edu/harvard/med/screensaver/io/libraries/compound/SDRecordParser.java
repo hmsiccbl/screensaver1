@@ -223,15 +223,18 @@ class SDRecordParser
     well.setWellType(WellType.EXPERIMENTAL);
     well.setIccbNumber(_sdRecordData.getIccbNumber());
 
-
     if (well.getReagent() == null) {
-      ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(_library.getVendor(),
-                                                                _sdRecordData.getVendorIdentifier());
-      Reagent reagent = new Reagent(rvi);
-      _dao.saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
-      log.info("created new reagent " + reagent + " for " + well);
+      ReagentVendorIdentifier reagentVendorIdentifier =
+        new ReagentVendorIdentifier(_library.getVendor(), _sdRecordData.getVendorIdentifier());
+      Reagent reagent = _dao.findEntityById(Reagent.class, reagentVendorIdentifier);
+      if (reagent == null) {
+        reagent = new Reagent(reagentVendorIdentifier);
+        _dao.saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
+        log.info("created new reagent " + reagent + " for " + well);
+      }
       well.setReagent(reagent);
     }
+
     if (_molfileToSmiles != null) {
       well.setMolfile(_molfileToSmiles.getMolfile());
       well.setSmiles(_molfileToSmiles.getSmiles());
