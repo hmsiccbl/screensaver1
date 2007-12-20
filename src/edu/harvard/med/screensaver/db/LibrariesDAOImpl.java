@@ -138,7 +138,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     for (Well well : library.getWells()) {
       if (well.getWellType().equals(WellType.EXPERIMENTAL)) {
-        well.setReagent(null);
         well.setGenbankAccessionNumber(null);
         well.setIccbNumber(null);
         well.setMolfile(null);
@@ -146,6 +145,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         well.removeCompounds();
         well.removeSilencingReagents();
         well.setWellType(WellType.EMPTY);
+        well.setReagent(null); // do this after well type, exp well must have reagent!
       }
     }
     log.info("deleted library contents for " + library.getLibraryName());
