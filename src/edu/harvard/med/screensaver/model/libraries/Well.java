@@ -101,7 +101,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private Set<Compound> _compounds = new HashSet<Compound>();
   private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
   private String _iccbNumber;
-  private String _vendorIdentifier;
   private WellType _wellType = WellType.EXPERIMENTAL;
   private String _smiles;
   private List<String> _molfile = new ArrayList<String>();
