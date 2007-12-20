@@ -179,7 +179,7 @@ class SDRecordParser
         else if (header.equals("CAS_Number") || header.equals("CAS_number")) {
           recordData.setCasNumber(line);
         }
-        else if (header.equals("Vendor_ID")) {
+        else if (header.equals("Vendor_ID") || header.equals("Vendor_Identifier")) {
           recordData.setVendorIdentifier(line);
         }
         else if (
