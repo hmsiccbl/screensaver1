@@ -138,6 +138,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     for (Well well : library.getWells()) {
       if (well.getWellType().equals(WellType.EXPERIMENTAL)) {
+        well.setReagent(null);
         well.setGenbankAccessionNumber(null);
         well.setIccbNumber(null);
         well.setMolfile(null);
