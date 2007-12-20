@@ -359,7 +359,7 @@ public class WellsDataExporter implements DataExporter<Well>
     }
     if (well.getReagent() != null) {
       pw.println(">  <Vendor_Identifier>");
-      pw.println(well.getReagent().getEntityId());
+      pw.println(well.getReagent().getReagentId().getVendorIdentifier());
       pw.println();
     }
     Compound compound = well.getPrimaryCompound();
