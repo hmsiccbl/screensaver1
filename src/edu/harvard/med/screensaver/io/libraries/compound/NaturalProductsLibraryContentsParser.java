@@ -167,10 +167,14 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
 
         Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
         if (well.getReagent() == null) {
-          Reagent reagent = new Reagent(new ReagentVendorIdentifier(well.getLibrary().getVendor(),
-                                                                    vendorIdentifier));
-          _dao.saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
-          log.info("created new reagent " + reagent + " for " + well);
+          ReagentVendorIdentifier reagentVendorIdentifier =
+            new ReagentVendorIdentifier(well.getLibrary().getVendor(), vendorIdentifier);
+          Reagent reagent = _dao.findEntityById(Reagent.class, reagentVendorIdentifier);
+          if (reagent == null) {
+            reagent = new Reagent(reagentVendorIdentifier);
+            _dao.saveOrUpdateEntity(reagent); // place into session so it can be found again before flush
+            log.info("created new reagent " + reagent + " for " + well);
+          }
           well.setReagent(reagent);
         }
         well.setIccbNumber(iccbNumber);
