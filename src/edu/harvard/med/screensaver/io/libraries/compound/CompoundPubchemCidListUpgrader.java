@@ -71,7 +71,7 @@ public class CompoundPubchemCidListUpgrader
       Compound.class,
       "from Compound " +
       "where pubchemCidListUpgraderSuccessful = false " +
-      "and pubchemCidListUpgraderFailed = true");
+      "and pubchemCidListUpgraderFailed = false");
     log.info(
       "retrieved " + nonUpgradedCompoundsList.size() +
       " compounds needing an upgrade");
@@ -86,7 +86,7 @@ public class CompoundPubchemCidListUpgrader
           while (nonUpgradedCompounds.hasNext() && i < NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION) {
             Compound compound = _dao.reloadEntity(nonUpgradedCompounds.next());
             List<String> pubchemCids =
-              pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(compound.getSmiles());
+              pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(compound.getInchi());
             if (pubchemCids != null) {
               for (String pubchemCid : pubchemCids) {
                 compound.addPubchemCid(pubchemCid);
