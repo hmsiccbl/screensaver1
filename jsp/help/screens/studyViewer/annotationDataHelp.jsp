@@ -3,7 +3,7 @@
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
-<f:subview id="dataHelpText">
+<f:subview id="annotationDataHelpText">
 	<f:verbatim escape="false">
 		<p>The Annotation Data section of the Study Viewer page allows you
 		to browse all the annotation data in the study. The first column is

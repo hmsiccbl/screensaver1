@@ -395,7 +395,7 @@
           </t:div>
         </f:facet>
         <t:aliasBean alias="#{inHelpViewer}" value="true">
-          <%@ include file="help/screens/cherryPickRequestViewerHelp.jsp" %>
+          <%@ include file="help/cherryPickRequests/cherryPickRequestViewerHelp.jsp" %>
         </t:aliasBean>
 
         <t:div style="margin-left: 30px">
@@ -415,7 +415,7 @@
                 </t:headerLink>
               </t:div>
             </f:facet>
-            <%@ include file="help/screens/cherryPickRequestViewer/screenSummaryHelp.jsp" %>
+            <%@ include file="help/cherryPickRequests/cherryPickRequestViewer/screenSummaryHelp.jsp" %>
           </t:collapsiblePanel>
 
           <t:collapsiblePanel
@@ -433,7 +433,7 @@
                 </t:headerLink>
               </t:div>
             </f:facet>
-            <%@ include file="help/screens/cherryPickRequestViewer/cherryPickRequestDetailsHelp.jsp" %>
+            <%@ include file="help/cherryPickRequests/cherryPickRequestViewer/cherryPickRequestDetailsHelp.jsp" %>
           </t:collapsiblePanel>
 
           <t:collapsiblePanel
@@ -451,7 +451,7 @@
                 </t:headerLink>
               </t:div>
             </f:facet>
-            <%@ include file="help/screens/cherryPickRequestViewer/screenerCherryPicksHelp.jsp" %>
+            <%@ include file="help/cherryPickRequests/cherryPickRequestViewer/screenerCherryPicksHelp.jsp" %>
 					</t:collapsiblePanel>
 
           <t:collapsiblePanel
@@ -469,7 +469,7 @@
                 </t:headerLink>
               </t:div>
             </f:facet>
-            <%@ include file="help/screens/cherryPickRequestViewer/labCherryPicksHelp.jsp" %>
+            <%@ include file="help/cherryPickRequests/cherryPickRequestViewer/labCherryPicksHelp.jsp" %>
           </t:collapsiblePanel>
 
           <t:collapsiblePanel
@@ -487,7 +487,7 @@
                 </t:headerLink>
               </t:div>
             </f:facet>
-            <%@ include file="help/screens/cherryPickRequestViewer/cherryPickPlatesHelp.jsp" %>
+            <%@ include file="help/cherryPickRequests/cherryPickRequestViewer/cherryPickPlatesHelp.jsp" %>
           </t:collapsiblePanel>
         </t:div>
       </t:collapsiblePanel>
@@ -561,9 +561,10 @@
 						</f:facet>
 						<%@ include file="help/screens/studyViewer/annotationDataHelp.jsp"%>
 					</t:collapsiblePanel>
-                
-              </t:collapsiblePanel>
-		</t:panelGrid>
+</t:div>
+					</t:collapsiblePanel>	
+
+	</t:panelGrid>
   </h:form>
 
 </f:subview>
