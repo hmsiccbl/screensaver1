@@ -14,8 +14,7 @@
 /*                                                                            */
 /* Need to generate a SHA1 hashed password?  Try:                             */
 /*   perl -e 'use Digest::SHA1; my $sha1 = Digest::SHA1->new; \               */
-/*            $sha1->add("YOUR_PASSWORD"); print $sha1->hexdigest(), \        */
-/*            "\n";'                                                          */
+/*            $sha1->add("YOUR_PASSWORD"); print $sha1->hexdigest(), "\n";'   */
 /*                                                                            */
 /* The screensaver_user_role_type table is used to specify the roles          */
 /* associated with each user, which control the user's authorizations.        */
