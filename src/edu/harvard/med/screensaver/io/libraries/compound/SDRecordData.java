@@ -23,6 +23,7 @@ class SDRecordData
   private String _molfile;
   private Integer _plateNumber;
   private String _wellName;
+  private String _vendor;
   private String _vendorIdentifier;
   private String _iccbNumber;
   private String _compoundName;
@@ -54,6 +55,12 @@ class SDRecordData
   }
   void setPlateNumber(Integer plateNumber) {
     _plateNumber = plateNumber;
+  }
+  String getVendor() {
+    return _vendor;
+  }
+  void setVendor(String vendor) {
+    _vendor = vendor;
   }
   String getVendorIdentifier() {
     return _vendorIdentifier;

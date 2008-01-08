@@ -179,6 +179,9 @@ class SDRecordParser
         else if (header.equals("CAS_Number") || header.equals("CAS_number")) {
           recordData.setCasNumber(line);
         }
+        else if (header.equals("Vendor")) {
+          recordData.setVendor(line);
+        }
         else if (header.equals("Vendor_ID") || header.equals("Vendor_Identifier")) {
           recordData.setVendorIdentifier(line);
         }
@@ -224,8 +227,12 @@ class SDRecordParser
     well.setIccbNumber(_sdRecordData.getIccbNumber());
 
     if (well.getReagent() == null) {
-      ReagentVendorIdentifier reagentVendorIdentifier =
-        new ReagentVendorIdentifier(_library.getVendor(), _sdRecordData.getVendorIdentifier());
+      String vendor = _sdRecordData.getVendor();
+      if (vendor == null) {
+        _library.getVendor();
+      }
+      String vendorIdentifier = _sdRecordData.getVendorIdentifier();
+      ReagentVendorIdentifier reagentVendorIdentifier = new ReagentVendorIdentifier(vendor, vendorIdentifier);
       Reagent reagent = _dao.findEntityById(Reagent.class, reagentVendorIdentifier);
       if (reagent == null) {
         reagent = new Reagent(reagentVendorIdentifier);
