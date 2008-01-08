@@ -476,29 +476,27 @@
 
 
   <!--
-    @motivation: get applications launched from eclipse application launcher to use the same log4j.properties
-    file as everybody else. to make this work, do the following:
+    @motivation: get applications launched from eclipse application launcher to use the same
+    screensaver.properties file as everybody else. to make this work, do the following:
 
     1. go to project properties
     2. select the Builders tabby in the left pane
     3. click the New... button over on the top right
     4. double-click Ant Build
-    5. choose a cool name for your new builder, such as, "place correct log4j props file in .eclipse.classes"
+    5. choose a cool name for your new builder, such as, "place screensaver properties file in .eclipse.classes"
     6. go to the targets tab
     7. for each of "After a Clean", "Manual Build", and "Auto Build", select the following rule as the target.
        note you will probably have to deselect the default target.
     8. click the "Refresh" tab, check the "Refresh resources upon completion" box, check the "Specific
        resources" radio button, click "Specify resources...", and select the .eclipse.classes dir
+    9. click on the "Properties" tab, and add a value for ${screensaver.properties.file}
 
     it is probably not necessary to do step 7 for "Auto Build", but seems to be necessary for "After a Clean" and
     "Manual Build".
-
-    NOTE: this is still in experimental stages, so feedback on your experiences using it will be useful and
-    inspiring!
   -->
-  <target name="place-correct-log4j-props-file-in-dot-eclipse-dot-classes">
-    <copy file=".eclipse.classes/${log4j.properties.file}"
-          tofile=".eclipse.classes/log4j.properties"
+  <target name="place-screensaver-props-file-in-dot-eclipse-dot-classes">
+    <copy file="${screensaver.properties.file}"
+          tofile=".eclipse.classes/screensaver.properties"
           verbose="${verbose}"
     />
   </target>
