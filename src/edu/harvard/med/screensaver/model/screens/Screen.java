@@ -1453,7 +1453,6 @@ public class Screen extends Study
     name="studyReagentLink",
     joinColumns=@JoinColumn(name="studyId"),
     inverseJoinColumns=@JoinColumn(name="reagentId", nullable=true, updatable=true)
-
   )
   @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
