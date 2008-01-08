@@ -36,7 +36,7 @@ public class DotPgpassFileParser
     String user)
   {
     File pgpassFile = new File(System.getProperty("user.home"), ".pgpass");
-    Pattern pattern = Pattern.compile("(\\S+?):(\\S+?):(\\S+?):(\\S+?):(\\S+)");
+    Pattern pattern = Pattern.compile("(\\S+?):(\\S+?):(\\S+?):(\\S+?):(\\S*)");
     try {
       FileInputStream pgpassInputStream = new FileInputStream(pgpassFile);
       InputStreamReader pgpassInputStreamReader = new InputStreamReader(pgpassInputStream);
