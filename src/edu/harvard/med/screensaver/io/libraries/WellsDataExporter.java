@@ -252,8 +252,8 @@ public class WellsDataExporter implements DataExporter<Well>
     compoundHeaderRow.createCell((short) 7).setCellValue("Compound Names");
     compoundHeaderRow.createCell((short) 8).setCellValue("CAS Numbers");
     compoundHeaderRow.createCell((short) 9).setCellValue("NSC Numbers");
-    compoundHeaderRow.createCell((short) 10).setCellValue("PubChem CID");
-    compoundHeaderRow.createCell((short) 11).setCellValue("ChemBank ID");
+    compoundHeaderRow.createCell((short) 10).setCellValue("PubChem CIDs");
+    compoundHeaderRow.createCell((short) 11).setCellValue("ChemBank IDs");
     for (short i = 0; i < 12; i ++) {
       compoundHeaderRow.getCell(i).setCellStyle(style);
     }
@@ -303,8 +303,9 @@ public class WellsDataExporter implements DataExporter<Well>
     if (pubchemCids.size() > 0) {
       row.createCell((short) 10).setCellValue(StringUtils.makeListString(pubchemCids, LIST_DELIMITER));
     }
-    if (compound.getChembankId() != null) {
-      row.createCell((short) 11).setCellValue(compound.getChembankId());
+    Set<String> chembankIds = compound.getChembankIds();
+    if (chembankIds.size() > 0) {
+      row.createCell((short) 11).setCellValue(StringUtils.makeListString(chembankIds, LIST_DELIMITER));
     }
     return true;
   }
@@ -384,9 +385,9 @@ public class WellsDataExporter implements DataExporter<Well>
         pw.println(pubchemCid);
         pw.println();
       }
-      if (compound.getChembankId() != null) {
+      for (String chembankId : compound.getChembankIds()) {
         pw.println(">  <ChemBank_ID>");
-        pw.println(compound.getChembankId());
+        pw.println(chembankId);
         pw.println();
       }
     }

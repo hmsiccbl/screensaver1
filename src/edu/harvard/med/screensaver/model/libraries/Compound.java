@@ -65,7 +65,7 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   private Set<String> _casNumbers = new HashSet<String>();
   private Set<String> _nscNumbers = new HashSet<String>();
   private Set<String> _pubchemCids = new HashSet<String>();
-  private String _chembankId;
+  private Set<String> _chembankIds = new HashSet<String>();
 
   /** used to compute molecular mass and molecular formula. */
   private MFAnalyser _mfAnalyser;
@@ -407,22 +407,51 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   }
 
   /**
-   * Get the ChemBank ID for the compound.
-   * @return the ChemBank ID for the compound
+   * Get the set of ChemBank IDs for the compound.
+   * @return the set of ChemBank IDs for the compound
    */
+  @org.hibernate.annotations.CollectionOfElements
+  @Column(name="chembankId", nullable=false)
+  @JoinTable(
+    name="compoundChembankId",
+    joinColumns=@JoinColumn(name="compoundId")
+  )
   @org.hibernate.annotations.Type(type="text")
-  public String getChembankId()
+  @org.hibernate.annotations.ForeignKey(name="fk_compound_chembank_id_to_compound")
+  @OrderBy("chembankId")
+  public Set<String> getChembankIds()
   {
-    return _chembankId;
+    return _chembankIds;
   }
 
   /**
-   * Set the ChemBank ID for the compound.
-   * @param chembankId the new ChemBank ID for the compound
+   * Get the number of ChemBank IDs for the compound.
+   * @return the number of ChemBank IDs for the compound
    */
-  public void setChembankId(String chembankId)
+  @Transient
+  public int getNumChembankIds()
   {
-    _chembankId = chembankId;
+    return _chembankIds.size();
+  }
+
+  /**
+   * Add a ChemBank ID to the compound.
+   * @param chembankId the ChemBank ID to add to the compound
+   * @return true iff the compound did not already have the ChemBank ID
+   */
+  public boolean addChembankId(String chembankId)
+  {
+    return _chembankIds.add(chembankId);
+  }
+
+  /**
+   * Remove a ChemBank ID from the compound.
+   * @param chembankId the ChemBank ID to remove from the compound
+   * @return true iff the compound previously had the ChemBank ID
+   */
+  public boolean removeChembankId(String chembankId)
+  {
+    return _chembankIds.remove(chembankId);
   }
 
   /**
@@ -582,6 +611,16 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   private void setPubchemCids(Set<String> pubchemCids)
   {
     _pubchemCids = pubchemCids;
+  }
+
+  /**
+   * Set the set of ChemBank IDs for the compound.
+   * @param chembankIds the new set of ChemBank IDs for the compound
+   * @motivation for hibernate
+   */
+  private void setChembankIds(Set<String> chembankIds)
+  {
+    _chembankIds = chembankIds;
   }
 
   /**

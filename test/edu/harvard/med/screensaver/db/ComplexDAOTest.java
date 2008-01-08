@@ -124,7 +124,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         public void runTransaction()
         {
           Compound compound = new Compound("compound P", "inchi");
-          compound.setChembankId("P");
+          compound.addChembankId("P");
           genericEntityDao.saveOrUpdateEntity(compound);
         }
       });
@@ -139,8 +139,9 @@ public class ComplexDAOTest extends AbstractSpringTest
             "smiles",
             "compound P");
           assertNotNull("compound exists", compound);
-          assertEquals("chembank id", "P", compound.getChembankId());
-          compound.setChembankId("P'");
+          assertEquals("chembank id", "P", compound.getChembankIds().iterator().next());
+          compound.removeChembankId("P");
+          compound.addChembankId("P'");
         }
       });
 
@@ -154,7 +155,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             "smiles",
             "compound P");
           assertNotNull("compound exists", compound);
-          assertEquals("chembank id modified", "P'", compound.getChembankId());
+          assertEquals("chembank id modified", "P'", compound.getChembankIds().iterator().next());
         }
       });
   }
@@ -174,7 +175,6 @@ public class ComplexDAOTest extends AbstractSpringTest
             1,
             2);
           Compound compound = new Compound("compound P", "inchi");
-          compound.setChembankId("P");
           Well well = library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
           well.addCompound(compound);
           genericEntityDao.saveOrUpdateEntity(library);
@@ -235,7 +235,6 @@ public class ComplexDAOTest extends AbstractSpringTest
           Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library Q");
           Well well = library.getWells().iterator().next();
           Compound compound = new Compound("compound P", "inchi");
-          compound.setChembankId("P");
           well.addCompound(compound);
         }
       });

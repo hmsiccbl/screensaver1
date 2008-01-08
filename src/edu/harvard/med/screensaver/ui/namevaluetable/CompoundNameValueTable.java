@@ -47,7 +47,7 @@ public class CompoundNameValueTable extends NameValueTable
   private static final String MOLECULAR_MASS = "Molecular Mass";
   private static final String MOLECULAR_FORMULA = "Molecular Formula";
   private static final String PUBCHEM_CIDS = "PubChem CIDs";
-  private static final String CHEMBANK_IDS = "ChemBank ID";
+  private static final String CHEMBANK_IDS = "ChemBank IDs";
   private static final String IS_SALT = "Is Salt";
   private static final String NSC_NUMBERS = "NSC Numbers";
   private static final String CAS_NUMBERS = "CAS Numbers";
@@ -174,8 +174,8 @@ public class CompoundNameValueTable extends NameValueTable
     if (compound.getNumPubchemCids() > 0) {
       addItem(PUBCHEM_CIDS, compound.getPubchemCids(), ValueType.LINK_LIST, "The PubChem Compound Identifiers");
     }
-    if (compound.getChembankId() != null) {
-      addItem(CHEMBANK_IDS, compound.getChembankId(), ValueType.TEXT, "The ChemBank ID for the compound");
+    if (compound.getNumChembankIds() > 0) {
+      addItem(CHEMBANK_IDS, compound.getChembankIds(), ValueType.LINK_LIST, "The ChemBank IDs for the compound");
     }
     addItem(IS_SALT, compound.isSalt(), ValueType.TEXT, "Typically, this indicates a non-bioactive solvent in the well");
     if (compound.getNumNscNumbers() > 0) {
