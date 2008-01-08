@@ -9,15 +9,11 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 /**
  * Uses PUG to do a SMILES or InChI structure search on PubChem, returning a list of PubChem
@@ -59,22 +55,8 @@ public class PubchemSmilesOrInchiSearch extends PubchemPugClient
   {
     _smilesOrInchi = smilesOrInchi;
     Document searchDocument = createSearchDocumentForSmilesOrInchi(smilesOrInchi);
-    Document outputDocument = getXMLForPugQuery(searchDocument);
-    while (! isJobCompleted(outputDocument)) {
-      sleep(1000);
-      String reqid = getReqidFromOutputDocument(outputDocument);
-      Document pollDocument = createPollDocumentForReqid(reqid);      
-      outputDocument = getXMLForPugQuery(pollDocument);
-    }
-    if (! isJobSuccessfullyCompleted(outputDocument)) {
-      return null;
-    }
-    if (! hasResults(outputDocument)) {
-      return new ArrayList<String>();
-    }
-    return getResultsFromOutputDocument(outputDocument);
+    return getResultsForSearchDocument(searchDocument);
   }
-
 
   public void reportError(String error)
   {
@@ -122,174 +104,6 @@ public class PubchemSmilesOrInchiSearch extends PubchemPugClient
     element = createParentedElement(document, queryCompoundCS, "PCT-QueryCompoundCS_results");
     createParentedTextNode(document, element, "2000000");
     return document;
-  }
-
-
-  private Element createParentedElement(Document document, Node parent, String elementName)
-  {
-    Element element = (Element) document.createElement(elementName);
-    parent.appendChild(element);
-    return element;
-  }
-
-  private Text createParentedTextNode(Document document, Node parent, String text)
-  {
-    Text textNode = (Text) document.createTextNode(text);
-    parent.appendChild(textNode);
-    return textNode;
-  }
-
-  private boolean isJobCompleted(Document outputDocument)
-  {
-    if (outputDocument == null) {
-      // this happens when there was a connection error in one of the handshakes, with the
-      // specified TIMEOUT and NUM_RETRIES. the error has already been reported. the job should
-      // be considered completed in this circumstance
-      return true;
-    }
-    String statusValue = getStatusValueFromOutputDocument(outputDocument); 
-    return ! (statusValue.equals("running") || statusValue.equals("queued"));
-  }
-
-  /**
-   * Get the status value from the non-null output document.
-   */
-  private String getStatusValueFromOutputDocument(Document outputDocument)
-  {
-    NodeList nodes = outputDocument.getElementsByTagName("PCT-Status");
-    if (nodes.getLength() != 1) {
-      throw new RuntimeException("PCT-Status node count in response != 1: " + nodes.getLength());
-    }
-    Element element = (Element) nodes.item(0);
-    return element.getAttribute("value");
-  }
-  
-  /**
-   * Check the output document to see if the job completed successfully. If it has not, and the
-   * error has not previously been reported, then report the error. In any case return true
-   * whenever the job completed successfully.
-   * @param outputDocument the output document to check for successful job completion
-   * @return true whenever the job completed successfully
-   */
-  private boolean isJobSuccessfullyCompleted(Document outputDocument)
-  {
-    if (outputDocument == null) {
-      // this happens when there was a connection error in one of the handshakes, with the
-      // specified TIMEOUT and NUM_RETRIES. the error has already been reported.
-      return false;
-    }
-    String statusValue = getStatusValueFromOutputDocument(outputDocument);
-    if (statusValue.equals("success")) {
-      return true;
-    }
-    NodeList nodes = outputDocument.getElementsByTagName("PCT-Status-Message_message");
-    if (nodes.getLength() != 1) {
-      throw new RuntimeException("PCT-Status-Message_message node count in response != 1: " + nodes.getLength());
-    }
-    String errorMessage = getTextContent(nodes.item(0));
-    reportError(
-      "PUG server reported non-success status '" + statusValue +
-      "' with error message '" + errorMessage + "'");
-    return false;
-  }
-  
-  /**
-   * Check the output document to see if this successfully completed job has any results. Return
-   * true whenever there are results.
-   * @param outputDocument the output document to check to see if there are any results
-   * @return true whenever there are results
-   */
-  private boolean hasResults(Document outputDocument)
-  {
-    NodeList nodes = outputDocument.getElementsByTagName("PCT-Entrez_webenv");
-    return nodes.getLength() != 0;
-  }
-  
-  private List<String> getResultsFromOutputDocument(Document outputDocument) {
-    Document resultsDocument = getXMLForEutilsQuery(
-      "efetch.fcgi",
-      "&db=pccompound" +
-      "&rettype=uilist&" +
-      "WebEnvRq=1&" +
-      "&query_key=" + getQueryKeyFromDocument(outputDocument) +
-      "&WebEnv=" + getWebenvFromDocument(outputDocument));
-
-    if (resultsDocument == null) {
-      // there was a connection error that has already been reported
-      return null;
-    }
-
-    List<String> pubchemCids = new ArrayList<String>();
-    NodeList nodes = resultsDocument.getElementsByTagName("Id");
-    for (int i = 0; i < nodes.getLength(); i++) {
-      Node node = nodes.item(i);
-      pubchemCids.add(getTextContent(node));
-    }
-    return pubchemCids;
-  }
-
-
-  private String getWebenvFromDocument(Document document)
-  {
-    NodeList nodes = document.getElementsByTagName("PCT-Entrez_webenv");
-    if (nodes.getLength() != 1) {
-      throw new RuntimeException("no PCT-Entrez_webenv node in response");      
-    }
-    Element element = (Element) nodes.item(0);
-    return getTextContent(element);
-  }
-  
-  private String getQueryKeyFromDocument(Document document)
-  {
-    NodeList nodes = document.getElementsByTagName("PCT-Entrez_query-key");
-    if (nodes.getLength() != 1) {
-      throw new RuntimeException("no PCT-Entrez_query-key node in response");      
-    }
-    Element element = (Element) nodes.item(0);
-    return getTextContent(element);
-  }
-  
-  private void sleep(long numMillisecondsToSleep) {
-    try {
-      Thread.sleep(numMillisecondsToSleep);
-    }
-    catch (InterruptedException e) {
-    }
-  }
-
-
-  private String getReqidFromOutputDocument(Document outputDocument)
-  {
-    NodeList nodes = outputDocument.getElementsByTagName("PCT-Waiting_reqid");
-    if (nodes.getLength() != 1) {
-      reportError("unexpected count of PCT-Waiting_reqid nodes: " + nodes.getLength());
-      return null;
-    }
-    return getTextContent(nodes.item(0));
-  }
-
-  private Document createPollDocumentForReqid(String reqid)
-  {
-
-    Document document = _documentBuilder.newDocument();
-    
-    // every elt has a single child, up to PCT-Request
-    
-    Element element = createParentedElement(document, document, "PCT-Data");
-    element = createParentedElement(document, element, "PCT-Data_input");
-    element = createParentedElement(document, element, "PCT-InputData");
-    element = createParentedElement(document, element, "PCT-InputData_request");
-    Element pctRequest = createParentedElement(document, element, "PCT-Request");
-  
-    // PCT-Request has two children
-    
-    element = createParentedElement(document, pctRequest, "PCT-Request_reqid");
-    createParentedTextNode(document, element, reqid);
-  
-    element = createParentedElement(document, pctRequest, "PCT-Request_type");
-    element.setAttribute("value", "status");
-
-    return document; 
   }
 }
 
