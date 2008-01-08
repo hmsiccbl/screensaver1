@@ -65,17 +65,13 @@ public class CompoundPubchemCidListUpgrader
   
   public void upgradeAllNonUpgradedCompounds()
   {
-    // once an initial run is complete, we can play around with this HQL to try to rerun
-    // the failed cases, both to see if they might succeed a second time, and to see what is
-    // the cause if they fail consistently
     List<Compound> nonUpgradedCompoundsList = _dao.findEntitiesByHql(
       Compound.class,
-      "from Compound " +
-      "where pubchemCidListUpgraderSuccessful = false " +
-      "and pubchemCidListUpgraderFailed = false");
+      "from Compound where size(pubchemCids) = 0");
     log.info(
       "retrieved " + nonUpgradedCompoundsList.size() +
       " compounds needing an upgrade");
+    System.exit(0);
     final Iterator<Compound> nonUpgradedCompounds =
       nonUpgradedCompoundsList.iterator();
     while (nonUpgradedCompounds.hasNext()) {
@@ -86,7 +82,6 @@ public class CompoundPubchemCidListUpgrader
           int i = 0;
           while (nonUpgradedCompounds.hasNext() && i < NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION) {
             Compound compound = _dao.reloadEntity(nonUpgradedCompounds.next());
-            boolean hasFailures = false;
             for (Well well : compound.getWells()) {
               List<String> pubchemCids =
                 pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(well.getMolfile());
@@ -95,12 +90,7 @@ public class CompoundPubchemCidListUpgrader
                   compound.addPubchemCid(pubchemCid);
                 }
               }
-              else {
-                hasFailures = true;
-              }
             }
-            compound.setPubchemCidListUpgraderFailed(hasFailures);
-            compound.setPubchemCidListUpgraderSuccessful(! hasFailures);
             _dao.saveOrUpdateEntity(compound);
             incrementNumCompoundsUpgraded();
             i ++;
