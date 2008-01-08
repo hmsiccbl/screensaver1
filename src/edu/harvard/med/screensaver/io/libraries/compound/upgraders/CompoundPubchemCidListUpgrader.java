@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.io.libraries.compound;
+package edu.harvard.med.screensaver.io.libraries.compound.upgraders;
 
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.util.eutils.PubchemSmilesOrInchiSearch;
 
 /**
@@ -85,18 +86,21 @@ public class CompoundPubchemCidListUpgrader
           int i = 0;
           while (nonUpgradedCompounds.hasNext() && i < NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION) {
             Compound compound = _dao.reloadEntity(nonUpgradedCompounds.next());
-            List<String> pubchemCids =
-              pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(compound.getInchi());
-            if (pubchemCids != null) {
-              for (String pubchemCid : pubchemCids) {
-                compound.addPubchemCid(pubchemCid);
+            boolean hasFailures = false;
+            for (Well well : compound.getWells()) {
+              List<String> pubchemCids =
+                pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(well.getMolfile());
+              if (pubchemCids != null) {
+                for (String pubchemCid : pubchemCids) {
+                  compound.addPubchemCid(pubchemCid);
+                }
               }
-              compound.setPubchemCidListUpgraderSuccessful(true);
-              compound.setPubchemCidListUpgraderFailed(false);
+              else {
+                hasFailures = true;
+              }
             }
-            else {
-              compound.setPubchemCidListUpgraderFailed(true);
-            }
+            compound.setPubchemCidListUpgraderFailed(hasFailures);
+            compound.setPubchemCidListUpgraderSuccessful(! hasFailures);
             _dao.saveOrUpdateEntity(compound);
             incrementNumCompoundsUpgraded();
             i ++;
