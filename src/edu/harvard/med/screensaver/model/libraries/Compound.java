@@ -65,8 +65,6 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   private Set<String> _casNumbers = new HashSet<String>();
   private Set<String> _nscNumbers = new HashSet<String>();
   private Set<String> _pubchemCids = new HashSet<String>();
-  private boolean _isPubchemCidListUpgraderSuccessful = false;
-  private boolean _isPubchemCidListUpgraderFailed = false;
   private String _chembankId;
 
   /** used to compute molecular mass and molecular formula. */
@@ -406,48 +404,6 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   public boolean removePubchemCid(String pubchemCid)
   {
     return _pubchemCids.remove(pubchemCid);
-  }
-
-  /**
-   * Get whether the PubChem CID list upgrader has run on this compound and failed.
-   * @return true iff the PubChem CID list upgrader has run on this compound and failed
-   * @see #isPubchemCidListUpgraderSuccessful()
-   */
-  @Column(nullable=false, name="isPubchemCidListUpgraderFailed")
-  public boolean isPubchemCidListUpgraderFailed()
-  {
-    return _isPubchemCidListUpgraderFailed;
-  }
-
-  /**
-   * Set whether the PubChem CID list upgrader has run on this compound and failed.
-   * @param isPubchemCidListUpgraderFailed the new value for whether the upgrader has run
-   * on this compound and failed
-   */
-  public void setPubchemCidListUpgraderFailed(boolean isPubchemCidListUpgraderFailed)
-  {
-    _isPubchemCidListUpgraderFailed = isPubchemCidListUpgraderFailed;
-  }
-
-  /**
-   * Get whether the PubChem CID list upgrader has run on this compound and succeeded.
-   * @return true iff the PubChem CID list upgrader has run on this compound and succeeded
-   * @see #isPubchemCidListUpgraderFailed()
-   */
-  @Column(nullable=false, name="isPubchemCidListUpgraderSuccessful")
-  public boolean isPubchemCidListUpgraderSuccessful()
-  {
-    return _isPubchemCidListUpgraderSuccessful;
-  }
-
-  /**
-   * Set whether the PubChem CID list upgrader has run on this compound and succeeded.
-   * @param isPubchemCidListUpgraderFailed the new value for whether the upgrader has run
-   * on this compound and succeeded
-   */
-  public void setPubchemCidListUpgraderSuccessful(boolean isPubchemCidListUpgraderSuccessful)
-  {
-    _isPubchemCidListUpgraderSuccessful = isPubchemCidListUpgraderSuccessful;
   }
 
   /**
