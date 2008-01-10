@@ -235,7 +235,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
       if (cherryPick.isAllocated()) {
         CherryPickAssayPlate assayPlate = cherryPick.getAssayPlate();
-        if (forPlates == null || forPlateIds.contains(assayPlate.getEntityId())) {
+        if (forPlates == null || (assayPlate != null && forPlateIds.contains(assayPlate.getEntityId()))) {
           Set<PlateType> sourcePlateTypes = (Set<PlateType>) assayPlate2SourcePlateTypes.get(assayPlate.getName());
           String fileName = makeFilename(cherryPick, sourcePlateTypes.size());
           result.put(fileName, cherryPick);
