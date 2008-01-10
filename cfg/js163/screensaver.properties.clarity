@@ -1,12 +1,10 @@
-# screensaver.properties.js163
-# contains properties used at both build-time and run-time
-
+# screensaver.properties.js163.test
 
 ### build-time properties
 
 appserver.dir=/usr/local/jakarta-tomcat
 log4j.properties.file=cfg/js163/log4j.properties.debug
-svnversion.cmd=/usr/local/bin/svnversion
+svnversion.cmd=/usr/bin/svnversion
 
 
 ### run-time properties
@@ -14,12 +12,11 @@ svnversion.cmd=/usr/local/bin/svnversion
 # Open Babel executable `babel` - needed for compound loading
 # get Open Babel here: http://openbabel.sourceforge.net/wiki/Main_Page
 #
-# NOTE: avoid openbabel-2.0.x and DON'T USE openbabel-2.1.0! for details see here:
-# https://wiki.med.harvard.edu/ICCBL/OpenBabelVersions
+# NOTE: be sure to use Open Babel >= 2.1.1!
 babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
-SCREENSAVER_PGSQL_DB=ssu-test-screensaver
+SCREENSAVER_PGSQL_DB=screensaver
 SCREENSAVER_PGSQL_USER=s
 SCREENSAVER_PGSQL_PASSWORD=
