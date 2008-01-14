@@ -454,18 +454,18 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         assertEquals("a05 has 1 sr", 1, a05.getSilencingReagents().size());
 
         // a07 has two srs with same gene
-        assertEquals("a07 has 2 srs", 2, a07.getSilencingReagents().size());
+        assertEquals("a07 has 1 sr", 1, a07.getSilencingReagents().size());
         Iterator<SilencingReagent> srs = a07.getSilencingReagents().iterator();
         SilencingReagent sr1 = srs.next();
-        SilencingReagent sr2 = srs.next();
-        assertSame("a07 srs have same gene", sr1.getGene(), sr2.getGene());
+        SilencingReagent sr2 = null;
+        assertEquals("a07 sr has the sequence from the second lib", sr1.getSequence(), "ACGU");
 
         // a09 has two srs with different genes
-        assertEquals("a09 has 2 srs", 2, a09.getSilencingReagents().size());
+        assertEquals("a09 has 1 sr", 1, a09.getSilencingReagents().size());
         srs = a09.getSilencingReagents().iterator();
         sr1 = srs.next();
-        sr2 = srs.next();
-        assertNotSame("a09 srs have different genes", sr1.getGene(), sr2.getGene());
+        sr2 = null;
+        assertEquals("a09 sr has the sequence from the second lib", sr1.getSequence(), "GAAUUAAGUUUGCCAGAUA");
 
         // a11 and a15 have same sr
         assertEquals("a11 has 1 sr", 1, a11.getSilencingReagents().size());
