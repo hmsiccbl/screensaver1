@@ -24,7 +24,6 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -159,7 +158,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     }
     catch (ParseLibraryContentsException e) {
       List<WorkbookParseError> errors = (List<WorkbookParseError>) e.getErrors();
-      assertEquals("workbook has 11 errors", 11, errors.size());
+      assertEquals("workbook has 8 errors", 8, errors.size());
       WorkbookParseError error;
 
       assertEquals("library has no wells", 0, library.getWells().size());
@@ -221,7 +220,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       error = errors.get(4);
       assertEquals(
                    "error text for error 4",
-                   "value required",
+                   DataRowParser.MISSING_ENTREZ_GENE_SYMBOL_ERROR,
                    error.getErrorMessage());
       assertNotNull("error 4 has cell", error.getCell());
       assertEquals(
@@ -231,9 +230,8 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
 
       // error 5
       error = errors.get(5);
-      assertEquals(
-                   "error text for error 5",
-                   "value required",
+      assertEquals("error text for error 5",
+                   DataRowParser.MISSING_ENTREZ_GENE_ID_ERROR,                
                    error.getErrorMessage());
       assertNotNull("error 5 has cell", error.getCell());
       assertEquals(
@@ -245,7 +243,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       error = errors.get(6);
       assertEquals(
                    "error text for error 6",
-                   "value required",
+                   DataRowParser.MISSING_ENTREZ_GENBANK_ACCESSION_NUMBER_ERROR,
                    error.getErrorMessage());
       assertNotNull("error 6 has cell", error.getCell());
       assertEquals(
@@ -254,14 +252,14 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
                    error.getCell().toString());
 
       // error 7
-      error = errors.get(10);
+      error = errors.get(7);
       assertEquals(
-                   "error text for error 10",
+                   "error text for error 7",
                    "Error querying NCBI for EntrezGene ID 99999999: no such EntrezGene ID",
                    error.getErrorMessage());
-      assertNotNull("error 10 has cell", error.getCell());
+      assertNotNull("error 7 has cell", error.getCell());
       assertEquals(
-                   "cell for error 10",
+                   "cell for error 7",
                    "Human Kinases:(H,9)",
                    error.getCell().toString());
     }

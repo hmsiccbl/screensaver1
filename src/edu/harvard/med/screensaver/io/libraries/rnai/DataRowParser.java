@@ -46,6 +46,12 @@ public class DataRowParser
   private static final Logger log = Logger.getLogger(DataRowParser.class);
   private static final Pattern entrezgeneLocPattern = Pattern.compile("LOC(\\d+)");
 
+  public static final String MISSING_ENTREZ_GENE_SYMBOL_ERROR = "missing EntrezGene Symbol";
+  public static final String MISSING_ENTREZ_GENE_ID_ERROR =
+    "missing or 0 for EntrezGene ID (with no LOC\\d+ EntrezGene Symbol)";
+  public static final String MISSING_ENTREZ_GENBANK_ACCESSION_NUMBER_ERROR =
+    "missing GenBank Accession Number";
+
 
   // private instance data
 
@@ -270,34 +276,32 @@ public class DataRowParser
   private Gene getGene()
   {
 
-    // entrezgeneId
-    Cell entrezgeneIdCell = _cellFactory.getCell(
-      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.ENTREZGENE_ID),
-      _rowIndex,
-      true);
-    Integer entrezgeneId = entrezgeneIdCell.getInteger();
-
     // entrezgeneSymbol
     Cell entrezgeneSymbolCell = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.ENTREZGENE_SYMBOL),
       _rowIndex,
-      true);
+      false);
     String entrezgeneSymbol = entrezgeneSymbolCell.getAsString();
     if (entrezgeneSymbol.equals("")) {
-      _errorManager.addError("missing EntrezGene Symbol", entrezgeneSymbolCell);
+      _errorManager.addError(MISSING_ENTREZ_GENE_SYMBOL_ERROR, entrezgeneSymbolCell);
       return null;
     }
 
+    // entrezgeneId
+    Cell entrezgeneIdCell = _cellFactory.getCell(
+      _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.ENTREZGENE_ID),
+      _rowIndex,
+      false);
+    Integer entrezgeneId = entrezgeneIdCell.getInteger();
+
     // sometimes Locus ID is 0, but Gene Symbol is LOC(\d+) with $1 being the EntrezGene ID
-    if (entrezgeneId == 0) {
+    if (entrezgeneId == null || entrezgeneId == 0) {
       Matcher entrezgeneLocMatcher = entrezgeneLocPattern.matcher(entrezgeneSymbol);
       if (entrezgeneLocMatcher.matches()) {
         entrezgeneId = Integer.parseInt(entrezgeneLocMatcher.group(1));
       }
       else {
-        _errorManager.addError(
-          "missing or 0 for EntrezGene ID (with no LOC\\d+ EntrezGene Symbol)",
-          entrezgeneIdCell);
+        _errorManager.addError(MISSING_ENTREZ_GENE_ID_ERROR, entrezgeneIdCell);
         return null;
       }
     }
@@ -306,10 +310,10 @@ public class DataRowParser
     Cell genbankAccessionNumberCell = _cellFactory.getCell(
       _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.GENBANK_ACCESSION_NUMBER),
       _rowIndex,
-      true);
+      false);
     String genbankAccessionNumber = genbankAccessionNumberCell.getString();
-    if (genbankAccessionNumber.equals("")) {
-      _errorManager.addError("missing GenBank Accession Number", genbankAccessionNumberCell);
+    if (genbankAccessionNumber == null || genbankAccessionNumber.equals("")) {
+      _errorManager.addError(MISSING_ENTREZ_GENBANK_ACCESSION_NUMBER_ERROR, genbankAccessionNumberCell);
       return null;
     }
 
