@@ -58,6 +58,8 @@ public class AssayInfoProducer
 
   private void setAssayCategory(AssayInfo assayInfo, String assayCategoryText)
   {
+    // TODO: the just HAS to be a better way to do this. July!
+    
     // NOTE: assayCategory is a CHAR(30) in NAPIS. some existing values are getting truncated in the
     // ICBG report.
     if (
@@ -126,6 +128,7 @@ public class AssayInfoProducer
       assayCategoryText.contains("YERSINIA PESTIS") ||
       assayCategoryText.contains("AMINOARABINOSE") ||
       assayCategoryText.contains("LEGIONELLA") ||
+      assayCategoryText.contains("SALMONELLA") ||
       assayCategoryText.contains("A SCREEN FOR COMPOUNDS THAT INHIBIT GROWTH OF E. COLI") ||
       assayCategoryText.contains("BACTERI")) {
       assayInfo.setAssayCategory("ANTI-BACTERIAL");
@@ -207,6 +210,10 @@ public class AssayInfoProducer
     else if (
       assayCategoryText.contains("LILY POLLEN TUBES")) {
       assayInfo.setAssayCategory("OTHER: LILY POLLEN TUBES");
+    }
+    else if (
+      assayCategoryText.contains("SIRT1")) {
+      assayInfo.setAssayCategory("OTHER: ANTI-AGING");
     }
     else {
       log.info("assigning assay category OTHER for assay category text: " + assayCategoryText);
