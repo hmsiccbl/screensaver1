@@ -145,68 +145,68 @@ public class AssayInfoProducer
     }
     else if (
       assayCategoryText.contains("INHIBIT THE ATPASE ACTIVITY")) {
-      assayInfo.setAssayCategory("OTHER - INHIBIT THE ATPASE ACTIVITY");
+      assayInfo.setAssayCategory("OTHER: INHIBIT ATPASE ACTIVITY");
     }
     else if (
       assayCategoryText.contains("INHIBIT THE RANGTPASE SYSTEM")) {
-      assayInfo.setAssayCategory("OTHER - INHIBIT THE RANGTPASE SYSTEM");
+      assayInfo.setAssayCategory("OTHER: INHIBIT RANGTPASE SYSTEM");
     }
     else if (
       assayCategoryText.contains("CRYPTOSPORIDIUM PARVUM")) {
-      assayInfo.setAssayCategory("OTHER - ANTI-PROTOZOA");
+      assayInfo.setAssayCategory("OTHER: ANTI-PROTOZOA");
     }
     else if (
       assayCategoryText.contains("INHIBIT TNF-ALPHA-MEDIATED NECROSIS IN JURKAT CELLS")) {
-      assayInfo.setAssayCategory("OTHER - NEURODEGENERATIVE DISEASE");
+      assayInfo.setAssayCategory("OTHER: NEURODEGENERATIVE DISEASE");
     }
     else if (
       assayCategoryText.contains("SHWACHMAN DIAMOND SYNDROME")) {
-      assayInfo.setAssayCategory("OTHER - SHWACHMAN DIAMOND SYNDROME");
+      assayInfo.setAssayCategory("OTHER: SHWACHMAN DIAMOND SYNDROME");
     }
     else if (
       assayCategoryText.contains("DOWN SYNDROME")) {
-      assayInfo.setAssayCategory("OTHER - DOWN SYNDROME");
+      assayInfo.setAssayCategory("OTHER: DOWN SYNDROME");
     }
     else if (
       assayCategoryText.contains("MULLERIAN INHIBITING SUBSTANCE")) {
-      assayInfo.setAssayCategory("OTHER - HUMAN INFERTILITY");
+      assayInfo.setAssayCategory("OTHER: HUMAN INFERTILITY");
     }
     else if (
       assayCategoryText.contains("ADULT ONSET DEAFNESS SYNDROME")) {
-      assayInfo.setAssayCategory("OTHER - ADULT ONSET DEAFNESS SYNDROME");
+      assayInfo.setAssayCategory("OTHER: ADULT ONSET DEAFNESS");
     }
     else if (
       assayCategoryText.contains("S. CEREVISIAE")) {
-      assayInfo.setAssayCategory("OTHER - SACCHAROMYCES CEREVISIAE");
+      assayInfo.setAssayCategory("OTHER: S. CEREVISIAE");
     }
     else if (
       assayCategoryText.contains("SUPPRESS S6 PHOSPHORYLATION") ||
       assayCategoryText.contains("LUCIFERASE")) {
-      assayInfo.setAssayCategory("OTHER - BIOLUMINESCENCE");
+      assayInfo.setAssayCategory("OTHER: BIOLUMINESCENCE");
     }
     else if (
       assayCategoryText.contains("BINUCLEATE CELLS IN DROSOPHILA CELLS")) {
-      assayInfo.setAssayCategory("OTHER - CELL DIVISION");
+      assayInfo.setAssayCategory("OTHER: CELL DIVISION");
     }
     else if (
       assayCategoryText.contains("MITOCHONDRIAL PROLIFERATION")) {
-      assayInfo.setAssayCategory("OTHER - MITOCHONDRIAL PROLIFERATION");
+      assayInfo.setAssayCategory("OTHER: MITOCHONDRIAL PROLIFERATION");
     }
     else if (
       assayCategoryText.contains("INHIBIT DNA REPLICATION")) {
-      assayInfo.setAssayCategory("OTHER - INHIBIT DNA REPLICATION");
+      assayInfo.setAssayCategory("OTHER: INHIBIT DNA REPLICATION");
     }
     else if (
       assayCategoryText.contains("EMBRYONIC STEM (ES) CELL")) {
-      assayInfo.setAssayCategory("OTHER - EMBRYONIC STEM CELLS");
+      assayInfo.setAssayCategory("OTHER: EMBRYONIC STEM CELLS");
     }
     else if (
       assayCategoryText.contains("IRON UPTAKE")) {
-      assayInfo.setAssayCategory("OTHER - ANEMIA");
+      assayInfo.setAssayCategory("OTHER: ANEMIA");
     }
     else if (
       assayCategoryText.contains("LILY POLLEN TUBES")) {
-      assayInfo.setAssayCategory("OTHER - LILY POLLEN TUBES");
+      assayInfo.setAssayCategory("OTHER: LILY POLLEN TUBES");
     }
     else {
       log.info("assigning assay category OTHER for assay category text: " + assayCategoryText);
