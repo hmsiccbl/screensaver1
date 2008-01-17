@@ -42,8 +42,7 @@ public class ICCBLPlateWellToINBioLQMapper
   // static fields
   
   private static Logger log = Logger.getLogger(ICCBLPlateWellToINBioLQMapper.class);
-  private static String _mappingFilename =
-    "icbg-support/ICCB-L Plate-Well to INBio LQ Mapping.xls";
+  private static String _mappingFilename = "ICCB-L Plate-Well to INBio LQ Mapping.xls";
   
   
   // instance fields
