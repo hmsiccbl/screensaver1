@@ -102,6 +102,8 @@ public class ICCBLPlateWellToINBioLQMapper
       HSSFCell wellNameCell = row.getCell((short) 1);
       String wellName = wellNameCell.getStringCellValue();
       
+      // NOTE skipping column 2 which is ss_code
+      
       HSSFCell lqCell = row.getCell((short) 3);
       if (lqCell == null) { continue; }
       String lq;
