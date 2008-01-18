@@ -16,11 +16,15 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.engine.EntityKey;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.util.DateUtil;
 
 public class ScreenTest extends AbstractEntityInstanceTest<Screen>
@@ -79,5 +83,42 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
                  new TreeSet<ScreeningRoomActivity>(Arrays.asList(screening1, screening2, cplt)),
                  activities);
   }
+
+  /**
+   * Test that our Hibernate mapping is set properly to lazy load
+   * Screen->ScreenResult. This is an ancient test that was implemented during
+   * the learning of Hibernate (and before we "trusted" particular mappings were
+   * doing what we expected), but it we might as well keep it around.
+   */
+  public void testScreenToScreenResultIsLazy()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(107);
+        ScreenResult screenResult = screen.createScreenResult(new Date());
+        screenResult.createResultValueType("Luminescence");
+        screenResult.createResultValueType("FI");
+        genericEntityDao.saveOrUpdateEntity(screen);
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
+        assertEquals("session initially empty", 0, session.getStatistics().getEntityCount());
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 107);
+        assertNotNull("screen in session", screen);
+        for (Object key : session.getStatistics().getEntityKeys()) {
+          EntityKey entityKey = (EntityKey) key;
+          assertFalse("no resultValueType entities in session",
+                      entityKey.getEntityName().contains("ResultValueType"));
+        }
+      }
+    });
+  }
+  
 }
 

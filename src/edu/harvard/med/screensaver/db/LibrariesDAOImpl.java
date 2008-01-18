@@ -160,44 +160,47 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   @SuppressWarnings("unchecked")
   public void loadOrCreateWellsForLibrary(Library library)
   {
-    // this might not perform awesome, but:
-    // - is correct, in terms of the "load" part of method contract, since it is
-    // always possible that some but not all of the library's wells have already
-    // been loaded into the session.
-    // - presumably this method is not called in time-critical sections of code
-    // further performance improvements possible by checking if a single well
-    // (or
-    // something like that) was in the session, but this fails to be correct, in
-    // terms of the "load" part of the method contract, although it will not
-    // cause
-    // any errors, just perf problems later when code is forced to get wells one
-    // at
-    // a time.
-    Collection<Well> wells;
-    try {
-      wells = library.getWells();
-    }
-    catch (TransientObjectException e) {
-      wells = getHibernateTemplate().find("from Well where plateNumber >= ? and plateNumber <= ?",
-                                          new Object[] { library.getStartPlate(), library.getEndPlate() });
-    }
-    if (wells.size() > 0) {
-      log.debug("loaded wells for library " + library.getLibraryName());
-      return;
-    }
-    for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
-      for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
-        for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
-          library.createWell(new WellKey(iPlate, iRow, iCol), WellType.EMPTY);
-        }
+    // Cases that must be handled:
+    // 1. Library is transient (not in Hibernate session), and not in database 
+    // 2. Library is managed (in Hibernate session), but not in database
+    // 3. Library is managed (in Hibernate session), and in database
+
+    if (library.getLibraryId() != null) { // case 2 or 3
+      // reload library, fetching all wells; 
+      // if library is already in session, we obtain that instance
+      Library reloadedLibrary = _dao.reloadEntity(library, false, "wells");
+      if (reloadedLibrary == null) { // case 2
+        log.debug("library is Hibernate-managed, but not yet persisted in database");
+        _dao.saveOrUpdateEntity(library);
+      }
+      else { // case 3
+        log.debug("library is Hibernate-managed and persisted in database");
+        // if provided Library is not same instance as the one in the session, this method cannot be called
+        if (reloadedLibrary != library) {
+          throw new IllegalArgumentException("provided Library instance is not the same as the one in the current Hibernate session; cannot load/create wells for that provided library");
+        }           
       }
     }
-    // note: saveUpdateEntity() reattaches library to session, and then
-    // persistEntity() immediately adds new wells to sessions, so that they can
-    // be found within the current transaction, without flushing
-    _dao.saveOrUpdateEntity(library);
-    _dao.persistEntity(library);
-    log.info("created wells for library " + library.getLibraryName());
+    else { // case 1
+      log.debug("library is transient");
+    }
+    
+    // create wells for library, if needed
+    if (library.getWells().size() == 0) {
+      for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
+        for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
+          for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+            library.createWell(new WellKey(iPlate, iRow, iCol), WellType.EMPTY);
+          }
+        }
+      }
+      // persistEntity() call will place all wells in session *now*
+      // (as opposed t saveOrUpdate(), which does upon session flush), so that
+      // subsequent code can find them in the Hibernate session
+      _dao.persistEntity(library);
+      log.info("created wells for library " + library.getLibraryName());
+    }
+
   }
 
   @SuppressWarnings("unchecked")

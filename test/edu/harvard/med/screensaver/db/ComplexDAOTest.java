@@ -420,14 +420,13 @@ public class ComplexDAOTest extends AbstractSpringTest
               "human",
               rvt.getAssayPhenotype());
 
-            Map<Well,ResultValue> resultValues = rvt.getResultValues();
-            for (Well well : resultValues.keySet()) {
-              WellKey wellKey = well.getWellKey();
+            Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+            for (WellKey wellKey : resultValues.keySet()) {
               assertTrue(wellKeys.contains(wellKey));
               // note that our naming scheme is testing the ordering of the
               // ResultValueType and ResultValue entities (within their parent
               // sets)
-              ResultValue rv = resultValues.get(well);
+              ResultValue rv = resultValues.get(wellKey);
               assertEquals("value " + wellKey.getColumn() + "," + iResultValue, rv.getValue());
               assertEquals(wellKey.getColumn() % 2 == 1, rv.isExclude());
             }
@@ -841,6 +840,7 @@ public class ComplexDAOTest extends AbstractSpringTest
             }
           }
         }
+        genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });

@@ -243,16 +243,15 @@ public class ResultValue extends AbstractEntity
   @Id
   @org.hibernate.annotations.GenericGenerator(
     name="result_value_id_seq",
-    strategy="sequence",
+    strategy="seqhilo",
     parameters = {
-      @org.hibernate.annotations.Parameter(name="sequence", value="result_value_id_seq")
+      @org.hibernate.annotations.Parameter(name="sequence", value="result_value_id_seq"),
+      @org.hibernate.annotations.Parameter(name="max_lo", value="384")
     }
   )
-  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="result_value_id_seq")
+  @GeneratedValue(strategy=GenerationType. SEQUENCE, generator="result_value_id_seq")
   public Integer getResultValueId()
   {
-//    if (_resultValueId == null) {
-//      _resultValueId = _resultValueType.getScreenResult().getScreen().getScreenNumber() * 10000000 + _resultValueType.getOrdinal() + _well.getWellKey().getPlateNumber()
     return _resultValueId;
   }
 

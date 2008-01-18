@@ -34,6 +34,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
@@ -75,7 +76,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private Integer _resultValueTypeId;
   private Integer _version;
   private ScreenResult _screenResult;
-  private Map<Well,ResultValue> _resultValues = new HashMap<Well,ResultValue>();
+  private Map<WellKey,ResultValue> _resultValues = new HashMap<WellKey,ResultValue>();
   private String _name;
   private String _description;
   private Integer _ordinal;
@@ -727,11 +728,11 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @OneToMany(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
              mappedBy="resultValueType")
-  @MapKey(name="well")
+  @org.hibernate.annotations.MapKey(columns={ @Column(name="well_id") })
   @OptimisticLock(excluded=true)
   @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
   @org.hibernate.annotations.LazyCollection(LazyCollectionOption.EXTRA)
-  public Map<Well,ResultValue> getResultValues()
+  public Map<WellKey,ResultValue> getResultValues()
   {
     return _resultValues;
   }
@@ -845,7 +846,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * value type
    * @motivation for hibernate
    */
-  private void setResultValues(Map<Well,ResultValue> resultValues)
+  private void setResultValues(Map<WellKey,ResultValue> resultValues)
   {
     _resultValues = resultValues;
   }
@@ -873,7 +874,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     boolean exclude)
   {
     assert (value == null) != (numericValue == null) :  "either numeric or non-numeric value";
-    if (_resultValues.containsKey(well.getWellId())) {
+    if (_resultValues.containsKey(well.getWellKey())) {
       return null;
     }
     // TODO: this fail to set isNumeric=true if first numeric value happens to be null (which is allowed);
@@ -925,7 +926,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
     getScreenResult().addWell(well);
 
-    _resultValues.put(well, resultValue);
+    _resultValues.put(well.getWellKey(), resultValue);
     return resultValue;
   }
 

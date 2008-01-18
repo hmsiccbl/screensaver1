@@ -213,8 +213,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("well count", 4, (int) mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
   }
 
-  // Note: this test cannot pass because the POI/HSSF library is crappy and does
-  // not allow you to read a boolean-typed formula cell value!
+  // Note: this test was added to highlight a failure of the POI/HSSF library
+  // design, which did not allow you to read a boolean-typed formula cell value. 
+  // We now longer use this library, but it can't hurt to retain the test.
   public void testReadBooleanFormulaCellValue() throws Exception
   {
     InputStream xlsInStream =
@@ -533,15 +534,15 @@ public class ScreenResultParserTest extends AbstractSpringTest
         // compare result values
         assertEquals(960, actualRvt.getResultValues().size());
         int iWell = 0;
-        Map<Well,ResultValue> resultValues = actualRvt.getResultValues();
-        for (Well well: new TreeSet<Well>(resultValues.keySet())) {
-          ResultValue rv = resultValues.get(well);
+        Map<WellKey,ResultValue> resultValues = actualRvt.getResultValues();
+        for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
+          ResultValue rv = resultValues.get(wellKey);
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
                        expectedPlateNumbers[iWell],
-                       new Integer(well.getPlateNumber()));
+                       new Integer(wellKey.getPlateNumber()));
           assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
                        expectedWellNames[iWell],
-                       well.getWellName());
+                       wellKey.getWellName());
           assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
                        expectedAssayWellTypes[iWell],
                        rv.getAssayWellType());
@@ -628,7 +629,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     for (int i = 0; i < 30 - 1; ++i) {
       ResultValueType rvt = resultValueTypes.get(i);
       assertEquals("is derived from next", resultValueTypes.get(i+1), rvt.getDerivedTypes().first());
-      Map<Well,ResultValue> resultValues = rvt.getResultValues();
+      Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
       assertEquals(rvt.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
       assertEquals(rvt.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
       assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());

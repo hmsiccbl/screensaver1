@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.util.FileUtils;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
 
 public class ScreenResultImporter
@@ -42,6 +43,9 @@ public class ScreenResultImporter
   public static final String[] SCREEN_OPTION = { "s", "screen" };
   public static final String[] IMPORT_OPTION = { "i", "import" };
   public static final String[] WELLS_OPTION = { "w", "wells" };
+  public static final String[] APPEND_OPTION = { "a", "append" };
+  public static final String[] PLATE_NUMBER_START_OPTION = { "sp", "start-plate" };
+  public static final String[] PLATE_NUMBER_END_OPTION = { "ep", "end-plate" };
 
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
@@ -70,6 +74,19 @@ public class ScreenResultImporter
                                           .withDescription("the number of wells to print out")
                                           .withLongOpt(WELLS_OPTION[LONG_OPTION])
                                           .create(WELLS_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder.withDescription("The first plate number to parse/import")
+                                           .hasArg()
+                                           .withArgName("#")
+                                           .withLongOpt(PLATE_NUMBER_START_OPTION[LONG_OPTION])
+                                           .create(PLATE_NUMBER_START_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder.withDescription("The last plate number to parse/import")
+                                          .hasArg()
+                                          .withArgName("#")
+                                          .withLongOpt(PLATE_NUMBER_END_OPTION[LONG_OPTION])
+                                          .create(PLATE_NUMBER_END_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder.withDescription("Append the specified range of plate numbers to an existing screen result.")
+                                          .withLongOpt(APPEND_OPTION[LONG_OPTION])
+                                          .create(APPEND_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.withDescription("Import screen result into database if parsing is successful.  "
                                                            + "(By default, the parser only validates the input and then exits.)")
                                           .withLongOpt(IMPORT_OPTION[LONG_OPTION])
@@ -97,6 +114,18 @@ public class ScreenResultImporter
 
       final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION[SHORT_OPTION],
                                                                  Integer.class);
+
+      IntRange plateNumberRange = null;
+      if (app.isCommandLineFlagSet(PLATE_NUMBER_START_OPTION[SHORT_OPTION]) &&
+        app.isCommandLineFlagSet(PLATE_NUMBER_END_OPTION[SHORT_OPTION])) {
+        plateNumberRange = 
+          new IntRange(app.getCommandLineOptionValue(PLATE_NUMBER_START_OPTION[SHORT_OPTION], Integer.class),
+                       app.getCommandLineOptionValue(PLATE_NUMBER_END_OPTION[SHORT_OPTION], Integer.class));
+        log.info("will parse/load plates " + plateNumberRange);
+      }
+      final IntRange finalPlateNumberRange = plateNumberRange;
+      final boolean append = app.isCommandLineFlagSet(APPEND_OPTION[SHORT_OPTION]); 
+
       final Screen finalScreen = screen;
       final ScreenResultParser finalScreenResultParser = screenResultParser;
       dao.doInTransaction(new DAOTransaction() {
@@ -105,12 +134,19 @@ public class ScreenResultImporter
           dao.reattachEntity(finalScreen);
 
           if (finalScreen.getScreenResult() != null) {
-            log.info("deleting existing screen result for " + finalScreen);
-            screenResultsDao.deleteScreenResult(finalScreen.getScreenResult());
+            if (append) {
+              log.info("appending existing screen result (loading existing screen result data)");
+              dao.need(finalScreen.getScreenResult(), "resultValueTypes.resultValues");
+            }
+            else {
+              log.info("deleting existing screen result for " + finalScreen);
+              screenResultsDao.deleteScreenResult(finalScreen.getScreenResult());
+            }
           }
 
           ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
-                                                                    inputFile);
+                                                                    inputFile,
+                                                                    finalPlateNumberRange);
           if (finalScreenResultParser.getHasErrors()) {
             log.error("Errors encountered during parse:");
             for (WorkbookParseError error : finalScreenResultParser.getErrors()) {
@@ -153,6 +189,7 @@ public class ScreenResultImporter
       log.error("application error: " + e.getMessage());
       e.printStackTrace();
     }
+    log.info("Exiting.");
   }
 
   private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException

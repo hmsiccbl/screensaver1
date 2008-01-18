@@ -39,11 +39,11 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.CellValueParser;
 import edu.harvard.med.screensaver.io.workbook2.CellVocabularyParser;
-import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook2.WellNameParser;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -60,6 +60,9 @@ import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.math.IntRange;
+import org.apache.commons.lang.math.Range;
 import org.apache.log4j.Logger;
 
 /**
@@ -222,26 +225,36 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
-   *
+   * 
    * @param screen the parent Screen of the Screen Result being parsed
    * @param workbookFile the workbook file to be parsed
+   * @param the range of plate numbers to be parsed, allowing for only a subset
+   *          of the data to be imported. This may be required for resource
+   *          utilization purposes, where the ScreenResult must be imported over
+   *          multiple passes. If null, well data for all plate will be imported.
    * @return a ScreenResult object containing the data parsed from the workbook
    *         file; <code>null</code> if a fatal error occurs (e.g. file not
    *         found)
    * @throws FileNotFoundException
    * @see #getErrors()
    */
-  public ScreenResult parse(Screen screen, File workbookFile)
+  public ScreenResult parse(Screen screen, File workbookFile, IntRange plateNumberRange)
   {
     try {
       return doParse(screen,
                      workbookFile,
-                     new BufferedInputStream(new FileInputStream(workbookFile)));
+                     new BufferedInputStream(new FileInputStream(workbookFile)),
+                     plateNumberRange);
     }
     catch (FileNotFoundException e) {
       _errors.addError("input file not found: " + e.getMessage());
     }
     return null;
+  }
+
+  public ScreenResult parse(Screen screen, File workbookFile)
+  {
+    return parse(screen, workbookFile, null);
   }
 
   /**
@@ -265,16 +278,20 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @motivation For use by the web application UI; the InputStream allows us to
    *             avoid making (another) temporary copy of the file.
    */
-  public ScreenResult parse(Screen screen, String inputSourceName, InputStream inputStream)
+  public ScreenResult parse(Screen screen, 
+                            String inputSourceName, 
+                            InputStream inputStream)
   {
     return doParse(screen,
                    new File(inputSourceName),
-                   inputStream);
+                   inputStream,
+                   null);
   }
 
   private ScreenResult doParse(Screen screen,
                                File workbookFile,
-                               InputStream workbookInputStream)
+                               InputStream workbookInputStream,
+                               IntRange plateNumberRange)
   {
     _screenResult = null;
     _errors = new ParseErrorManager();
@@ -296,17 +313,25 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     try {
       Workbook workbook = new Workbook(workbookFile, workbookInputStream, _errors);
       log.info("parsing " + workbookFile.getAbsolutePath());
-      DataHeadersParseResult dataHeadersParseResult = parseDataHeaders(screen,
-                                                                       workbook);
-      if (_errors.getHasErrors()) {
-        log.info("errors found in data headers, will not attempt to parse data sheets");
+      if (screen.getScreenResult() == null) {
+        DataHeadersParseResult dataHeadersParseResult = parseDataHeaders(screen, workbook);
+        if (_errors.getHasErrors()) {
+          log.info("errors found in data headers, will not attempt to parse data sheets");
+        } else {
+          _screenResult = dataHeadersParseResult.getScreenResult();
+        }
       }
       else {
+        _screenResult = screen.getScreenResult();
+      }
+
+      if (_screenResult != null) {
+        initializeDataHeaders(_screenResult, workbook);
         log.info("parsing data sheets");
         parseData(workbook,
-                  dataHeadersParseResult.getScreenResult());
+                  _screenResult,
+                  plateNumberRange);
       }
-      _screenResult = dataHeadersParseResult.getScreenResult();
     }
     catch (UnrecoverableScreenResultParseException e) {
       _errors.addError("serious parse error encountered (could not continue further parsing): " + e.getMessage());
@@ -317,7 +342,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError(errorMsg);
     }
     finally {
-      // TODO: close workbooks' inputstreams?
+      IOUtils.closeQuietly(workbookInputStream);
     }
     return _screenResult;
   }
@@ -389,7 +414,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _dataHeadersCellParserFactory = new Cell.Factory(workbook,
                                                      dataHeadersSheetIndex,
                                                      _errors);
-    _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
     return dataHeadersSheet;
   }
 
@@ -499,11 +523,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     Sheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
     ParsedScreenInfo parsedScreenInfo = parseScreenInfo(workbook, screen);
 
-    dataHeadersParseResult.setScreenResult(screen.createScreenResult(parsedScreenInfo.getDateCreated()));
+    ScreenResult screenResult = screen.createScreenResult(parsedScreenInfo.getDateCreated());
+    dataHeadersParseResult.setScreenResult(screenResult);
     int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
-      recordDataHeaderColumn(iDataHeader);
-      ResultValueType rvt = dataHeadersParseResult.getScreenResult().createResultValueType(
+      ResultValueType rvt = screenResult.createResultValueType(
         dataHeadersCell(DataHeaderRow.NAME, iDataHeader, true).getString(),
         dataHeadersCell(DataHeaderRow.REPLICATE, iDataHeader).getInteger(),
         _rawOrDerivedParser.parse(dataHeadersCell(DataHeaderRow.RAW_OR_DERIVED, iDataHeader)),
@@ -540,20 +564,28 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return dataHeadersParseResult;
   }
 
-  private void recordDataHeaderColumn(int iDataHeader)
+  private void initializeDataHeaders(ScreenResult screenResult,
+                                     Workbook workbook)
+    throws UnrecoverableScreenResultParseException
   {
-    assert _dataHeaderIndex2DataHeaderColumn != null :
-      "uninitialized _dataHeaderIndex2DataHeaderColumn";
-    Cell cell = dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true);
-    String forColumnInRawDataWorksheet = cell.getString().trim();
-    try {
-      if (forColumnInRawDataWorksheet != null) {
-        _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
-                                              (short) Cell.columnLabelToIndex(forColumnInRawDataWorksheet));
+    Sheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
+    _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
+
+    int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
+    for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
+      Cell cell = dataHeadersCell(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET, iDataHeader, true);
+      String forColumnInRawDataWorksheet = cell.getString().trim();
+      try {
+        if (forColumnInRawDataWorksheet != null) {
+          _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
+                                                (short) Cell.columnLabelToIndex(forColumnInRawDataWorksheet));
+          ResultValueType rvt = screenResult.getResultValueTypesList().get(iDataHeader);
+          _dataTableColumnLabel2RvtMap.put(forColumnInRawDataWorksheet, rvt);
+        }
       }
-    }
-    catch (IllegalArgumentException e) {
-      _errors.addError(e.getMessage(), cell);
+      catch (IllegalArgumentException e) {
+        _errors.addError(e.getMessage(), cell);
+      }
     }
   }
 
@@ -567,11 +599,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @throws IOException
    * @throws UnrecoverableScreenResultParseException
    */
-  void parseData(
+  private void parseData(
     Workbook workbook,
-    ScreenResult screenResult)
+    ScreenResult screenResult,
+    IntRange plateNumberRange)
     throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
   {
+    int wellsWithDataLoaded = 0;
     int dataSheetsParsed = 0;
     int totalSheets = workbook.getWorkbook().getNumberOfSheets();
     int totalDataSheets = totalSheets - FIRST_DATA_SHEET_INDEX;
@@ -588,75 +622,76 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
       while (rowIter.hasNext()) {
         Integer iRow = rowIter.next();
-        Well well = rowIter.getWell();
-
-        // TODO: should verify with Library Well Type, if not specific to AssayWellType
-        AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
-
-        List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
-        iDataHeader = 0;
-        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          Cell cell = dataCell(iRow, iDataHeader);
-          boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
-          try {
-            ResultValue newResultValue = null;
-            if (rvt.isPositiveIndicator()) {
-              String value;
-              if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
-                if (cell.isBoolean()) {
-                  value = cell.getBoolean().toString();
+        WellKey wellKey = rowIter.getWellKey();
+        if (plateNumberRange == null || plateNumberRange.containsInteger(wellKey.getPlateNumber())) { 
+          Well well = rowIter.getWell();
+          AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
+          List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
+          iDataHeader = 0;
+          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+            Cell cell = dataCell(iRow, iDataHeader);
+            boolean isExclude = (wellExcludes != null && wellExcludes.contains(rvt));
+            try {
+              ResultValue newResultValue = null;
+              if (rvt.isPositiveIndicator()) {
+                String value;
+                if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
+                  if (cell.isBoolean()) {
+                    value = cell.getBoolean().toString();
+                  }
+                  else {
+                    value = _booleanParser.parse(cell).toString();
+                  }
+                  newResultValue =
+                    rvt.createResultValue(well,
+                                          assayWellType,
+                                          value,
+                                          isExclude);
+                }
+                else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
+                  newResultValue =
+                    rvt.createResultValue(well,
+                                          assayWellType,
+                                          _partitionedValueParser.parse(cell).toString(),
+                                          isExclude);
+                }
+                else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
+                  newResultValue =
+                    rvt.createResultValue(well,
+                                          assayWellType,
+                                          cell.getDouble(),
+                                          cell.getDoublePrecision(),
+                                          isExclude);
+                }
+              }
+              else { // not assay activity indicator
+                if (rvt.isNumeric()) {
+                  newResultValue =
+                    rvt.createResultValue(well,
+                                          assayWellType,
+                                          cell.getDouble(),
+                                          cell.getDoublePrecision(),
+                                          isExclude);
                 }
                 else {
-                  value = _booleanParser.parse(cell).toString();
+                  newResultValue =
+                    rvt.createResultValue(well,
+                                          assayWellType,
+                                          cell.getString(),
+                                          isExclude);
                 }
-                newResultValue =
-                  rvt.createResultValue(well,
-                                        assayWellType,
-                                        value,
-                                        isExclude);
               }
-              else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
-                newResultValue =
-                  rvt.createResultValue(well,
-                                     assayWellType,
-                                     _partitionedValueParser.parse(cell).toString(),
-                                     isExclude);
-              }
-              else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
-                newResultValue =
-                  rvt.createResultValue(well,
-                                     assayWellType,
-                                     cell.getDouble(),
-                                     cell.getDoublePrecision(),
-                                     isExclude);
+              if (newResultValue == null) {
+                _errors.addError("duplicate well", cell);
               }
             }
-            else { // not assay activity indicator
-              if (rvt.isNumeric()) {
-                newResultValue =
-                  rvt.createResultValue(well,
-                                     assayWellType,
-                                     cell.getDouble(),
-                                     cell.getDoublePrecision(),
-                                     isExclude);
-              }
-              else {
-                newResultValue =
-                  rvt.createResultValue(well,
-                                     assayWellType,
-                                     cell.getString(),
-                                     isExclude);
-              }
+            catch (ResultValueTypeNumericalnessException e) {
+              // inconsistency in numeric or string types in RVT's result values
+              _errors.addError(e.getMessage(), cell);
             }
-            if (newResultValue == null) {
-              _errors.addError("duplicate well", cell);
-            }
+            ++iDataHeader;
           }
-          catch (ResultValueTypeNumericalnessException e) {
-            // inconsistency in numeric or string types in RVT's result values
-            _errors.addError(e.getMessage(), cell);
-          }
-          ++iDataHeader;
+          ++wellsWithDataLoaded;
         }
       }
       ++dataSheetsParsed;
@@ -665,6 +700,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError(NO_DATA_SHEETS_FOUND_ERROR);
     } else {
       log.info("done parsing " + dataSheetsParsed + " data sheet(s) " + workbook.getWorkbookFile().getName());
+      log.info("loaded data for " + wellsWithDataLoaded + " well(s) ");
     }
   }
 
@@ -710,6 +746,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     private Sheet _sheet;
     private int _iRow;
+    private WellKey _wellKey;
     private Well _well;
     private int _lastRowIndex;
 
@@ -725,7 +762,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     {
       _sheet = rowIter._sheet;
       _iRow = rowIter._iRow;
-      _well = rowIter._well;
+      _wellKey = rowIter._wellKey;
       _lastRowIndex = rowIter._lastRowIndex;
     }
 
@@ -739,10 +776,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       int nextRow = findNextRow();
       if (nextRow != _iRow) {
         _iRow = nextRow;
-        _well = findWell(_iRow);
+        _wellKey = parseWellKey(_iRow);
+        _well = null;
         return getRowIndex();
       }
       else {
+        _wellKey = null;
         _well = null;
         return null;
       }
@@ -753,8 +792,27 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return new Integer(_iRow);
     }
 
+    public WellKey getWellKey()
+    {
+      return _wellKey;
+    }
+
     public Well getWell()
     {
+      if (_wellKey != null && _well == null) {
+        Library library = findLibraryWithPlate(_wellKey.getPlateNumber());
+        if (library == null) {
+          _errors.addError(NO_SUCH_LIBRARY_WITH_PLATE + ": " + _wellKey);
+          return null;
+        }
+        preloadLibraryWells(library);
+
+        _well = _librariesDao.findWell(_wellKey);
+        if (_well == null) {
+          _errors.addError(NO_SUCH_WELL + ": " + _wellKey);
+        }
+      }
+
       return _well;
     }
 
@@ -768,7 +826,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       int iRow = _iRow;
       while (++iRow <= _lastRowIndex) {
         if (!ignoreRow(_sheet, iRow)) {
-          if (findWell(iRow) != null) {
+          if (parseWellKey(iRow) != null) {
             return iRow;
           }
         }
@@ -776,7 +834,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return _iRow;
     }
 
-    private Well findWell(int iRow)
+    private WellKey parseWellKey(int iRow) 
     {
       // TODO: dataCell() call assumes initializeDataSheet() has been called before this iterator object is used! (bad!)
       Integer plateNumber = _plateNumberParser.parse(dataCell(iRow,
@@ -789,19 +847,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (wellName.equals("")) {
         return null;
       }
-      Library library = findLibraryWithPlate(plateNumber);
-      if (library == null) {
-        _errors.addError(NO_SUCH_LIBRARY_WITH_PLATE + ": " + plateNumber, wellNameCell);
-        return null;
-      }
-      preloadLibraryWells(library);
-
-      Well well = _librariesDao.findWell(new WellKey(plateNumber, wellName));
-      if (well == null) {
-        _errors.addError(NO_SUCH_WELL + ": " + plateNumber + ":" + wellName, wellNameCell);
-      }
-
-      return well;
+      return new WellKey(plateNumber, wellName);
     }
   }
 

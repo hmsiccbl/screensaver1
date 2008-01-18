@@ -13,6 +13,10 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Transient;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -25,7 +29,8 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class WellKey implements Comparable, Serializable
+@Embeddable
+public class WellKey implements Comparable/*, Serializable*/
 {
   // static members
 
@@ -39,8 +44,7 @@ public class WellKey implements Comparable, Serializable
   // instance data members
 
   private int _plateNumber;
-
-  private transient WellName _wellName;
+  private WellName _wellName;
   private transient int _hashCode = -1;
   private transient String _asString;
 
@@ -73,16 +77,20 @@ public class WellKey implements Comparable, Serializable
     _wellName = wellName;
   }
 
+  @Column(name="well_id")
+  @org.hibernate.annotations.Type(type="text")
   public String getKey()
   {
     return toString();
   }
 
+  @Transient
   public int getColumn()
   {
     return _wellName.getColumnIndex();
   }
 
+  @Transient
   public int getPlateNumber()
   {
     return _plateNumber;
@@ -94,6 +102,7 @@ public class WellKey implements Comparable, Serializable
     resetDerivedValues();
   }
 
+  @Transient
   public int getRow()
   {
     return _wellName.getRowIndex();
@@ -146,6 +155,7 @@ public class WellKey implements Comparable, Serializable
     resetDerivedValues();
   }
 
+  @Transient
   public String getWellName()
   {
     return _wellName.toString();
@@ -156,7 +166,7 @@ public class WellKey implements Comparable, Serializable
   /**
    * @motivation for hibernate and constructor
    */
-  private void setKey(String key)
+  public void setKey(String key)
   {
     Matcher matcher = keyPattern.matcher(key);
     if (matcher.matches()) {

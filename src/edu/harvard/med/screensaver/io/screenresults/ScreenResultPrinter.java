@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.io.screenresults;
 import java.io.PrintWriter;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -68,11 +68,11 @@ public class ScreenResultPrinter
       int n = 0;
       boolean ellipsesOnce = false;
 
-      for (Well well : new TreeSet<Well>(rvt.getResultValues().keySet())) {
+      for (WellKey wellKey : new TreeSet<WellKey>(rvt.getResultValues().keySet())) {
         if (maxResultValuesToPrint != null) {
           if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
-            ResultValue resultValue = rvt.getResultValues().get(well);
-            printer.println("\t\t" + well.getWellKey() +
+            ResultValue resultValue = rvt.getResultValues().get(wellKey);
+            printer.println("\t\t" + wellKey +
                             "\t" + ResultValue.getTypedValue(resultValue, rvt));
           }
           else if (!ellipsesOnce) {

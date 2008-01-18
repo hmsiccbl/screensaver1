@@ -19,7 +19,7 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -111,20 +111,20 @@ public class ScreenResultExporterTest extends AbstractSpringTest
       ResultValueType expectedRvt = (ResultValueType) expectedIter.next();
       ResultValueType actualRvt = (ResultValueType) actualIter.next();
       assertTrue(expectedRvt.isEquivalent(actualRvt));
-      Map<Well,ResultValue> expectedResultValues = new HashMap<Well,ResultValue>(expectedRvt.getResultValues());
-      Map<Well,ResultValue> actualResultValues = new HashMap<Well,ResultValue>(actualRvt.getResultValues());
-      for (Well well : expectedResultValues.keySet()) {
-        ResultValue expectedRv = (ResultValue) expectedResultValues.get(well);
-        ResultValue actualRv = (ResultValue) actualResultValues.get(well);
+      Map<WellKey,ResultValue> expectedResultValues = new HashMap<WellKey,ResultValue>(expectedRvt.getResultValues());
+      Map<WellKey,ResultValue> actualResultValues = new HashMap<WellKey,ResultValue>(actualRvt.getResultValues());
+      for (WellKey wellKey : expectedResultValues.keySet()) {
+        ResultValue expectedRv = (ResultValue) expectedResultValues.get(wellKey);
+        ResultValue actualRv = (ResultValue) actualResultValues.get(wellKey);
         assertNotNull("result value exists", actualRv);
         // TODO: reinstate string value comparison after exporter is made to set the numeric cell style
 //        assertEquals("RVT " + expectedRvt.getName() + " well + " + wellKey + " result value (as string) ",
 //                     expectedRv.getValue(),
 //                     actualRv.getValue());
-        assertEquals("RVT " + expectedRvt.getName() + " well + " + well + " result value (typed value) ",
+        assertEquals("RVT " + expectedRvt.getName() + " well + " + wellKey + " result value (typed value) ",
                      ResultValue.getTypedValue(expectedRv, expectedRvt),
                      ResultValue.getTypedValue(actualRv, expectedRvt));
-        actualResultValues.remove(well);
+        actualResultValues.remove(wellKey);
       }
     }
   }

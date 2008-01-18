@@ -54,11 +54,7 @@ public class HeatMapTest extends AbstractSpringTest
     _screenResult = _parser.parse(screen,
                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "ScreenResultHeatmapTest107.xls"));
     ResultValueType rvt = _screenResult.getResultValueTypes().first();
-    Map<Well,ResultValue> resultValues = rvt.getResultValues();
-    _wellKeyToResultValueMap = new HashMap<WellKey,ResultValue>();
-    for (ResultValue rv : resultValues.values()) {
-      _wellKeyToResultValueMap.put(rv.getWell().getWellKey(), rv);
-    }
+    _wellKeyToResultValueMap = rvt.getResultValues();
     if (_parser.getHasErrors()) {
       System.err.println("Parser errors:\n" + _parser.getErrors());
       fail("could not parse screen results");
