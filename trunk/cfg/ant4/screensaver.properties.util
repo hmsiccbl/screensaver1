@@ -1,0 +1,19 @@
+# screensaver.properties
+
+
+### build-time properties
+
+debug=false
+install.dir=/usr/local/screensaver-util
+log4j.properties.file=cfg/ant4/log4j.properties.util
+
+
+### run-time properties
+
+babel.executable.path=/usr/local/openbabel/bin/babel
+
+# database connection
+SCREENSAVER_PGSQL_SERVER=localhost
+SCREENSAVER_PGSQL_DB=devscreensaver1
+SCREENSAVER_PGSQL_USER=devscreensaver1
+SCREENSAVER_PGSQL_PASSWORD=

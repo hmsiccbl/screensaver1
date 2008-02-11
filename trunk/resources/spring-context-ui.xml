@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+  "http://www.springframework.org/dtd/spring-beans-2.0.dtd"-->
+
+<!--
+   $HeadURL$
+   $Id$
+
+   Copyright 2006 by the President and Fellows of Harvard College.
+
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+   <!-- an aspect to perform user activity logging -->
+   <bean
+     id="userActivityLoggerAspectBean"
+     class="edu.harvard.med.screensaver.ui.aspects.UserActivityLoggerAspect">
+     <!-- execute earlier than other advice (e.g. before the transactional advice) -->
+     <property
+       name="order"
+       value="1" />
+     <property
+       name="currentScreensaverUser"
+       ref="currentScreensaverUser" />
+   </bean>
+
+   <!-- an aspect to handler concurrency failure exceptions -->
+   <bean
+     id="concurrencyFailureExceptionHandlerAspectBean"
+     class="edu.harvard.med.screensaver.ui.aspects.ConcurrencyFailureExceptionHandlerAspect">
+     <!-- execute earlier than other advice (e.g. before the transactional advice) -->
+     <property
+       name="order"
+       value="2" />
+     <property
+       name="messages"
+       ref="messages" />
+   </bean>
+
+   <aop:config>
+    <aop:pointcut
+      id="uiControllerPointcut"
+      expression="@annotation(edu.harvard.med.screensaver.ui.UIControllerMethod)" />
+    <aop:aspect
+      id="userActivityLoggerAspect"
+      ref="userActivityLoggerAspectBean">
+      <aop:before
+        method="logUserActivity"
+        pointcut-ref="uiControllerPointcut" />
+    </aop:aspect>
+    <aop:aspect
+      id="concurrencyFailureExceptionHandlerAspect"
+      ref="concurrencyFailureExceptionHandlerAspectBean">
+      <aop:around
+        method="invoke"
+        pointcut-ref="uiControllerPointcut" />
+    </aop:aspect>
+  </aop:config>
+
+  <bean
+    id="messages"
+    class="edu.harvard.med.screensaver.ui.util.Messages">
+    <property name="messageSource">
+      <bean
+        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <!-- specify the properties (or xml) resource containing the localized messages, without a locale extension and without a file extension -->
+        <property
+          name="basename"
+          value="classpath:messages" />
+      </bean>
+    </property>
+    <!--  TODO property name="locale" value=""/-->
+  </bean>
+
+  <!--  user authentication -->
+
+  <bean
+    id="currentScreensaverUser"
+    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
+    scope="session">
+    <property
+      name="dao"
+      ref="genericEntityDao" />
+    <aop:scoped-proxy />
+  </bean>
+
+
+  <!-- JSF beans -->
+
+  <!-- WARNING: if scope attribute is defined here, it will NOT be inherited!!! -->
+  <!-- WARNING: if <aop:scoped-proxy/> element is defined here, it will NOT make the inheriting bean definition into a scoped proxy! -->
+  <bean
+    id="uiBean"
+    abstract="true">
+    <description>
+      Abstract bean definition for user interface beans.
+    </description>
+    <property
+      name="messages"
+      ref="messages" />
+    <property
+      name="currentScreensaverUser"
+      ref="currentScreensaverUser" />
+  </bean>
+
+
+  <!-- === top-level & misc backing beans === -->
+
+  <bean
+    id="appInfo"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.ApplicationInfo"
+    scope="singleton">
+    <description>
+      A global UI bean that provides basic, static information about the
+      application (e.g., application name). This is the only UI bean
+      that can be accessed by login.jsp.
+    </description>
+  </bean>
+
+  <bean
+    id="exceptionReporter"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.ExceptionReporter">
+    <description>
+      Backing bean for the reportException view, enabling exception
+      stack traces to be viewed in a custom manner.
+    </description>
+    <property
+      name="menu"
+      ref="menu"/>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="menu"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.Menu">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="studiesBrowser" />
+    <constructor-arg ref="cherryPickRequestsBrowser" />
+    <constructor-arg ref="librariesBrowser" />
+    <constructor-arg ref="usersBrowser" />
+    <constructor-arg ref="screeningRoomActivitiesBrowser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="helpViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.HelpViewer">
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="schemaManager"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.SchemaManager">
+    <property name="schemaUtil" ref="schemaUtil" />
+    <property name="dao" ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+
+  <!-- === libraries backing beans === -->
+
+  <bean
+    id="reagentFinder"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.ReagentFinder">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="annotationsDao" />
+    <constructor-arg ref="reagentsBrowser" />
+    <constructor-arg ref="reagentViewer" />
+    <constructor-arg ref="reagentVendorIdentiferListParser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="wellFinder"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.WellFinder">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="wellCopyVolumesBrowser" />
+    <constructor-arg ref="plateWellListParser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="librariesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults">
+    <constructor-arg ref="libraryViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="libraryViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.LibraryViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="wellCopyVolumesBrowser" />
+    <constructor-arg ref="compoundLibraryContentsImporter" />
+    <constructor-arg ref="rnaiLibraryContentsImporter" />
+    <constructor-arg ref="naturalProductsLibraryContentsImporter" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="reagentsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults">
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable"
+        parent="uiBean" />
+    </constructor-arg>
+    <constructor-arg ref="reagentViewer" />
+    <constructor-arg ref="compoundViewer" />
+    <constructor-arg ref="geneViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg>
+      <list />
+    </constructor-arg>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="wellsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.WellSearchResults">
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="compoundViewer" />
+    <constructor-arg ref="geneViewer" />
+    <constructor-arg>
+      <list>
+        <ref bean="sdfWellsDataExporter" />
+        <ref bean="xlsWellsDataExporter" />
+      </list>
+    </constructor-arg>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="wellCopyVolumesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="wellVolumesBrowser" />
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.libraries.WellVolumeAdjustmentSearchResults">
+        <constructor-arg ref="cherryPickRequestViewer" />
+        <constructor-arg ref="genericEntityDao" />
+      </bean>
+    </constructor-arg>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="wellVolumesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="wellViewer" />
+    <constructor-arg ref="cherryPickRequestViewer" />
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.libraries.WellVolumeAdjustmentSearchResults">
+        <constructor-arg ref="cherryPickRequestViewer" />
+        <constructor-arg ref="genericEntityDao" />
+      </bean>
+    </constructor-arg>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="reagentViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.ReagentViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
+    <constructor-arg ref="geneViewer" />
+    <constructor-arg ref="compoundViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="wellViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="geneViewer" />
+    <constructor-arg ref="compoundViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="geneViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.GeneViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="compoundViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.CompoundViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="compoundLibraryContentsImporter"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="compoundLibraryContentsParser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="naturalProductsLibraryContentsImporter"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsImporter">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="naturalProductsLibraryContentsParser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="rnaiLibraryContentsImporter"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="rnaiLibraryContentsParser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+
+  <!-- === studies backing beans === -->
+
+  <bean
+    id="studiesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.StudySearchResults">
+    <constructor-arg ref="studyViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="studyViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.StudyViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
+    <constructor-arg ref="studyDetailViewer" />
+    <constructor-arg ref="reagentsBrowser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+
+  <!-- === screens backing beans === -->
+
+  <bean
+    id="screensBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults">
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="annotationsDao" />
+    <constructor-arg ref="screenDetailViewer" />
+    <constructor-arg ref="reagentsBrowser" />
+    <constructor-arg ref="screenResultsDao" />
+    <constructor-arg ref="screenResultViewer" />
+    <constructor-arg ref="heatMapViewer" />
+    <constructor-arg ref="screenResultImporter" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="studyDetailViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.StudyDetailViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="usersDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenDetailViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="usersDao" />
+    <constructor-arg ref="dataAccessPolicy" />
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="cherryPickRequestViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenResultViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="screenResultsDao" />
+    <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="screenDetailViewer" />
+    <constructor-arg ref="screenResultExporter" />
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypeTable"
+        parent="uiBean" />
+    </constructor-arg>
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.FullScreenResultDataTable"
+        parent="uiBean">
+        <constructor-arg ref="screenResultViewer" />
+        <constructor-arg ref="wellViewer" />
+        <constructor-arg ref="librariesDao" />
+        <constructor-arg ref="genericEntityDao" />
+      </bean>
+    </constructor-arg>
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.PositivesOnlyScreenResultDataTable"
+        parent="uiBean">
+        <constructor-arg ref="screenResultViewer" />
+        <constructor-arg ref="wellViewer" />
+        <constructor-arg ref="librariesDao" />
+        <constructor-arg ref="genericEntityDao" />
+      </bean>
+    </constructor-arg>
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.screenresults.SinglePlateScreenResultDataTable"
+        parent="uiBean">
+        <constructor-arg ref="screenResultViewer" />
+        <constructor-arg ref="wellViewer" />
+        <constructor-arg ref="librariesDao" />
+        <constructor-arg ref="genericEntityDao" />
+      </bean>
+    </constructor-arg>
+    <aop:scoped-proxy />
+  </bean>
+
+  <bean
+    id="screenResultImporter"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="screenResultParser" />
+  </bean>
+
+  <bean
+    id="cherryPickRequestsBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults">
+    <constructor-arg ref="cherryPickRequestViewer" />
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="cherryPickRequestDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="wellCopyVolumesBrowser" />
+    <constructor-arg ref="plateWellListParser" />
+    <constructor-arg ref="cherryPickRequestAllocator" />
+    <constructor-arg ref="cherryPickRequestPlateMapper" />
+    <constructor-arg ref="cherryPickRequestPlateMapFilesBuilder" />
+    <constructor-arg ref="libraryPoolToDuplexWellMapper" />
+    <constructor-arg ref="cherryPickRequestExporter" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenFinder"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.ScreenFinder">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="screenViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestFinder"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestFinder">
+    <constructor-arg ref="cherryPickRequestDao" />
+    <constructor-arg ref="cherryPickRequestViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="heatMapViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="screenResultsDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="wellViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <!-- === users backing beans === -->
+
+  <bean
+    id="usersBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.UserSearchResults">
+    <!-- constructor-arg ref="userViewer" /-->
+    <aop:scoped-proxy/>
+  </bean>
+
+  <!--bean
+    id="userViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.users.UserViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy/>
+  </bean-->
+
+  <!-- === activities backing beans === -->
+
+  <bean
+    id="screeningRoomActivitiesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.ScreeningRoomActivitySearchResults">
+    <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <!-- constructor-arg ref="activityViewer" /-->
+    <aop:scoped-proxy/>
+  </bean>
+
+
+  <!-- converters -->
+
+  <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.table.OperatorConverter" />
+
+  <!-- Development/Debug related beans -->
+
+  <bean
+    id="envInfo"
+    parent="uiBean"
+    class="edu.harvard.med.screensaver.ui.Environment">
+    <property
+      name="host"
+      value="${SCREENSAVER_PGSQL_SERVER}" />
+    <property
+      name="db"
+      value="${SCREENSAVER_PGSQL_DB}" />
+    <property
+      name="user"
+      value="${SCREENSAVER_PGSQL_USER}" />
+    <property
+      name="url"
+      value="jdbc:postgresql://${SCREENSAVER_PGSQL_SERVER}/${SCREENSAVER_PGSQL_DB}" />
+  </bean>
+
+</beans>

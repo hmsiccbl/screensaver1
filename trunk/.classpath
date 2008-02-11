@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="resources"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="web"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.11.jar"/>
+	<classpathentry kind="lib" path="lib/postgresql-8.1-405.jdbc3.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-io-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-lang-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-fileupload-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/hms/eCommonsAuth.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-math-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/cglib-2.2_beta1.jar"/>
+	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-contrib-2.5.1-final-20040804.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-beanutils-1.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-digester-1.6.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-el-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/jstl-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/myfaces-api-1.1.5.jar" sourcepath="/usr/local/myfaces-core-1.1.5/src"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/myfaces-impl-1.1.5.jar"/>
+	<classpathentry kind="lib" path="lib/apache-myfaces-1.1.5/tomahawk-1.1.5.jar" sourcepath="/usr/local/tomahawk-1.1.5/src"/>
+	<classpathentry kind="lib" path="lib/hibernate-3.2.4/hibernate3.jar" sourcepath="/usr/local/hibernate-3.2.4/src"/>
+	<classpathentry kind="lib" path="lib/hibernate-3.2.4/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-3.2.4/ehcache-1.2.3.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-3.2.4/jta.jar"/>
+	<classpathentry kind="lib" path="lib/jexcel-2.6.5/jxl.jar" sourcepath="/usr/local/jexcelapi-2.6.5/src"/>
+	<classpathentry kind="lib" path="lib/poi-2.5.1/poi-2.5.1-final-20040804.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.6/dev/spring-mock.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.6/asm-2.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.6/asm-commons-2.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.6/aspectjrt.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.6/aspectjweaver.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.0.6/spring.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-tools-3.2.0.beta9a/hibernate-tools.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-annotations-3.3.0.GA/hibernate-commons-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-annotations-3.3.0.GA/ejb3-persistence.jar" sourcepath="lib/hibernate-annotations-3.3.0.GA/ejb3-persistence.jar"/>
+	<classpathentry kind="lib" path="lib/jsp-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/junit-3.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-annotations-3.3.0.GA/hibernate-annotations.jar" sourcepath="/usr/local/hibernate-annotations-3.3.0.GA/src"/>
+	<classpathentry kind="lib" path="lib/hibernate-tools-3.2.0.beta9a/freemarker.jar"/>
+	<classpathentry kind="lib" path="lib/hibernate-tools-3.2.0.beta9a/jtidy-r8-20060801.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-dbcp-1.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-pool-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-commons/commons-cli-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/struts-1.2.7.jar"/>
+	<classpathentry kind="lib" path="lib/cdk-1.0.1/cdk-1.0.1-custom.jar"/>
+	<classpathentry kind="output" path=".eclipse.classes"/>
+</classpath>

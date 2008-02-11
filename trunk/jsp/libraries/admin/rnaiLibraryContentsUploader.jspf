@@ -1,0 +1,62 @@
+<%@ taglib uri="http://java.sun.com/jsf/html"        prefix="h"     %>
+<%@ taglib uri="http://java.sun.com/jsf/core"        prefix="f"     %>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk"  prefix="t"     %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+
+<f:subview id="rnaiLibraryContentsUploaderSubview">
+
+  <h:form id="viewLibraryForm">
+	<t:panelGroup>
+      <t:outputText value="Library:" styleClass="spacer" title="The library for which to import contents"/>
+      <t:commandLink
+        action="#{rnaiLibraryContentsImporter.viewLibrary}"
+      	value="#{rnaiLibraryContentsImporter.library.libraryName}"
+        styleClass="spacer"
+      />
+	</t:panelGroup>
+  </h:form>
+
+  <h:form id="uploadLibraryContentsForm" enctype="multipart/form-data">
+    <t:panelGrid columns="2" title="Select the silencing reagent for the library contents to import">
+      <t:outputLabel
+        for="silencingReagentType"
+        value="Silencing reagent type:"
+      />
+      <h:selectOneMenu
+        id="silencingReagentType"
+        value="#{rnaiLibraryContentsImporter.silencingReagentType}"
+        converter="SilencingReagentTypeConverter"
+        styleClass="inputText"
+      >
+        <f:selectItems
+          value="#{rnaiLibraryContentsImporter.silencingReagentTypeSelections}"
+        />
+      </h:selectOneMenu>
+
+      <t:outputLabel
+        for="uploadRNAiLibraryContentsFile"
+        value="Import RNAi Library Contents file:"
+        title="The Excel spreadsheet containing the library contents to import"
+      />
+      <t:inputFileUpload
+        id="uploadRNAiLibraryContentsFile"
+        value="#{rnaiLibraryContentsImporter.uploadedFile}"
+        storage="file"
+        accept="application/vnd.ms-excel"
+        required="true"
+        maxlength="134217728"
+        styleClass="inputText"
+      />
+
+      <t:commandButton
+        id="import"
+        value="Import"
+        action="#{rnaiLibraryContentsImporter.importRNAiLibraryContents}"
+        styleClass="command"
+        title="After selecting an Excel spreadsheet, click this button to start the import"
+      />
+
+    </t:panelGrid>
+  </h:form>
+
+</f:subview>

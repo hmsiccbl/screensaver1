@@ -1,0 +1,187 @@
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+
+<f:subview id="annotationViewer">
+	<h:form id="annotationPanelForm">
+		<t:panelGrid id="annotationPanel"
+			rendered="#{!annotationViewer.study.restricted && !empty annotationViewer.study.annotationTypes}">
+
+			<t:panelGroup>
+				<t:commandButton action="#{annotationViewer.download}"
+					rendered="#{annotationViewer.study.downloadable}" value="Download"
+					styleClass="command"
+					title="Download the annotations in an Excel file format" />
+			</t:panelGroup>
+
+			<t:buffer into="#{showHideAnnotationDialogBuffer}">
+				<t:popup id="showHideAnnotationDialog"
+					closePopupOnExitingPopup="true" closePopupOnExitingElement="false"
+					styleClass="popupDialog">
+					<t:commandLink>
+						<t:outputText value="Show/Hide Annotations >>" styleClass="label" />
+					</t:commandLink>
+					<f:facet name="popup">
+						<t:panelGrid columns="1" styleClass="popupDialog">
+							<t:outputLabel for="annotationsList"
+								value="Show selected annotations:" styleClass="label" />
+							<t:selectManyCheckbox id="annotationsList" layout="lineDirection"
+								layoutWidth="#{annotationViewer.annotationTypeSelections.size}"
+								value="#{annotationViewer.annotationTypeSelections.value}"
+								valueChangeListener="#{annotationViewer.annotationTypesTable.selectionListener}"
+								binding="#{annotationViewer.annotationTypesTable.selectManyUIComponent}"
+								styleClass="label" style="vertical-align: top">
+								<f:selectItems id="annotations"
+									value="#{annotationViewer.annotationTypeSelections.selectItems}" />
+							</t:selectManyCheckbox>
+							<t:panelGroup>
+								<t:commandButton id="updateAnnotationTypesButton" forceId="true"
+									value="Update" styleClass="command"
+									title="Update the annotations selection" />
+								<t:commandButton id="allAnnotationsButton" value="All"
+									action="#{annotationViewer.annotationTypesTable.selectAll}"
+									styleClass="command" title="Show all annotations" />
+								<t:commandButton id="noAnnotationsButton" value="First"
+									action="#{annotationViewer.annotationTypesTable.selectNone}"
+									styleClass="command" title="Show the first annotation" />
+							</t:panelGroup>
+						</t:panelGrid>
+					</f:facet>
+				</t:popup>
+			</t:buffer>
+
+			<t:outputText value="#{showHideAnnotationDialogBuffer}"
+				escape="false"
+				rendered="#{!annotationViewer.isPanelCollapsedMap['annotationTypes'] && !annotationViewer.isPanelCollapsedMap['annotationValues']}" />
+
+			<t:div style="margin-left: 0px">
+
+				<t:collapsiblePanel id="annotationTypesPanel"
+					value="#{annotationViewer.isPanelCollapsedMap['annotationTypes']}"
+					title="Annotation Types" var="isCollapsed" titleVar="title">
+					<f:facet name="header">
+						<t:div styleClass="subsectionHeader">
+							<t:headerLink immediate="true" styleClass="subsectionHeader">
+								<h:graphicImage
+									value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+									styleClass="icon" />
+								<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							</t:headerLink>
+						</t:div>
+					</f:facet>
+
+					<t:outputText value="#{showHideAnnotationDialogBuffer}"
+						escape="false"
+						rendered="#{annotationViewer.isPanelCollapsedMap['annotationValues']}" />
+
+					<t:dataTable id="annotationTypesTable"
+						value="#{annotationViewer.annotationTypesTable.dataModel}"
+						var="row" rendered="#{!isCollapsed}" styleClass="standardTable"
+						headerClass="tableHeader" rowClasses="row1,row2">
+						<t:column styleClass="keyColumn">
+							<f:facet name="header">
+								<t:outputText value="Annotation Name" />
+							</f:facet>
+							<t:outputText value="#{row.rowLabel}" escape="false"
+								title="#{row.rowDescription}" />
+						</t:column>
+						<t:columns
+							value="#{annotationViewer.annotationTypesTable.columnModel}"
+							var="columnName" styleClass="column">
+							<f:facet name="header">
+								<t:outputText value="#{columnName}" />
+							</f:facet>
+							<t:outputText
+								value="#{annotationViewer.annotationTypesTable.cellValue}" />
+						</t:columns>
+					</t:dataTable>
+				</t:collapsiblePanel>
+
+				<t:commandButton id="updateAnnotationValuesButton" forceId="true"
+					styleClass="hiddenCommand" />
+				<t:collapsiblePanel id="annotationValuesPanel"
+					value="#{annotationViewer.isPanelCollapsedMap['annotationValues']}"
+					title="Annotation Data" var="isCollapsed" titleVar="title">
+					<f:facet name="header">
+						<t:div styleClass="subsectionHeader">
+							<t:headerLink immediate="true" styleClass="subsectionHeader">
+								<h:graphicImage
+									value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+									styleClass="icon" />
+								<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							</t:headerLink>
+						</t:div>
+					</f:facet>
+
+					<t:outputText value="#{showHideAnnotationDialogBuffer}"
+						escape="false"
+						rendered="#{annotationViewer.isPanelCollapsedMap['annotationTypes']}" />
+
+					<t:panelGrid columns="1" style="width: 100%"
+						rendered="#{!isCollapsed}">
+
+						<t:buffer into="#{annotationValuesTableBuffer}">
+							<t:dataTable id="annotationValuesTable"
+								binding="#{annotationViewer.annotationValuesTable.dataTableUIComponent}"
+								value="#{annotationViewer.annotationValuesTable.dataModel}"
+								var="row"
+								rows="#{annotationViewer.annotationValuesTable.rowsPerPageSelector.selection}"
+								styleClass="standardTable" headerClass="tableHeader"
+								rowClasses="row1,row2"
+								sortColumn="#{annotationViewer.annotationValuesTable.sortManager.sortColumnName}"
+								sortAscending="#{annotationViewer.annotationValuesTable.sortManager.sortAscending}">
+								<t:columns
+									value="#{annotationViewer.annotationValuesTable.sortManager.columnModel}"
+									var="column"
+									styleClass="#{(column.name==\"Reagent Source ID\") ? \"keyColumn\" : (column.numeric ? \"numericColumn\" : \"textColumn\")}">
+									<f:facet name="header">
+										<t:popup displayAtDistanceY="20">
+											<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
+											<t:commandSortHeader columnName="#{column.name}"
+												arrow="false" immediate="false">
+												<h:outputText value="#{column.name}" />
+												<f:facet name="ascending">
+													<t:graphicImage value="/images/ascending-arrow.gif"
+														rendered="true" border="0" />
+												</f:facet>
+												<f:facet name="descending">
+													<t:graphicImage value="/images/descending-arrow.gif"
+														rendered="true" border="0" />
+												</f:facet>
+											</t:commandSortHeader>
+											<f:facet name="popup">
+												<t:panelGrid styleClass="popupHelp">
+													<t:outputText styleClass="popupText"
+														value="#{annotationViewer.annotationValuesTable.sortManager.currentColumn.description}"
+														escape="false" />
+												</t:panelGrid>
+											</f:facet>
+										</t:popup>
+									</f:facet>
+									<t:outputText value="#{row[column.name]}"
+										rendered="#{!column.isCommandLink}" />
+									<t:commandLink
+										action="#{annotationViewer.annotationValuesTable.cellAction}"
+										rendered="#{column.isCommandLink}">
+										<t:outputText value="#{row[column.name]}" />
+									</t:commandLink>
+								</t:columns>
+							</t:dataTable>
+						</t:buffer>
+
+						<t:aliasBean alias="#{dataTable}" value="#{annotationViewer.annotationValuesTable}">
+							<%@ include file="../dataTableNavigator.jspf"%>
+						</t:aliasBean>
+
+						<t:outputText escape="false"
+							value="#{annotationValuesTableBuffer}" />
+
+					</t:panelGrid>
+				</t:collapsiblePanel>
+
+			</t:div>
+		</t:panelGrid>
+	</h:form>
+
+</f:subview>

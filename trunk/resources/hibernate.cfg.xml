@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+  <session-factory>
+    <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+    <property name="show_sql">false</property>
+    <property name="use_outer_join">false</property>
+    <property name="connection.driver_class">org.postgresql.Driver</property>
+    <property name="generate_statistics">false</property>
+
+    <mapping class="edu.harvard.med.screensaver.model.Activity" />
+    <mapping class="edu.harvard.med.screensaver.model.AdministrativeActivity" />
+
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.LegacyCherryPickAssayPlate" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick" />
+
+    <mapping class="edu.harvard.med.screensaver.model.derivatives.Derivative" />
+    <mapping class="edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult" />
+
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Compound" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Copy" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.CopyAction" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.CopyInfo" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Gene" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Library" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.SilencingReagent" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Reagent" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Well" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity" />
+
+    <mapping class="edu.harvard.med.screensaver.model.screens.AbaseTestset" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.AttachedFile" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.BillingInformation" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.BillingItem" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.EquipmentUsed" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.LetterOfSupport" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.LibraryScreening" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.PlatesUsed" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.Publication" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.Screen" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.Screening" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.StatusItem" />
+
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationType" />
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationValue" />
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.ResultValue" />
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.ResultValueType" />
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.ScreenResult" />
+
+    <mapping class="edu.harvard.med.screensaver.model.users.AdministratorUser" />
+    <mapping class="edu.harvard.med.screensaver.model.users.ChecklistItem" />
+    <mapping class="edu.harvard.med.screensaver.model.users.ChecklistItemType" />
+    <mapping class="edu.harvard.med.screensaver.model.users.LabAffiliation" />
+    <mapping class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser" />
+    <mapping class="edu.harvard.med.screensaver.model.users.ScreensaverUser" />
+	</session-factory>
+</hibernate-configuration>

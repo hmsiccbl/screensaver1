@@ -1,0 +1,22 @@
+# screensaver.properties.orchestra
+# contains properties used at both build-time and run-time
+
+
+### build-time properties
+
+appserver.dir=/www/screensaver.med.harvard.edu/tomcat/
+deploy.dir=/www/screensaver.med.harvard.edu/docroot/screensaver/
+log4j.properties.file=cfg/orchestra/log4j.properties.web.prod
+copy.downloads.dir=true
+
+
+### run-time properties
+
+# Open Babel executable `babel` - needed for compound loading
+# get Open Babel here: http://openbabel.sourceforge.net/wiki/Main_Page
+#
+# NOTE: be sure to use Open Babel >= 2.1.1!
+babel.executable.path=/home/js163/bin/openbabel/bin/babel
+
+# database connection
+orchestra.db.connection.file=/opt/apache/conf/auth/screensaver.med.harvard.edu

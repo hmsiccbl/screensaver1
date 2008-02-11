@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   $HeadURL:svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/web/web.xml $
+   $Id:web.xml 1750 2007-08-30 11:58:57Z ant4 $
+
+   Copyright 2006 by the President and Fellows of Harvard College.
+
+   Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+   at Harvard Medical School. This software is distributed under the terms of
+   the GNU General Public License.
+-->
+
+<web-app
+  version="2.4"
+  xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+  <display-name>Screensaver 1.x</display-name>
+
+  <description>ICCB-L Screensaver 1.x</description>
+
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!-- Configure a handler for exceptions thrown during server-side processing -->
+  <!-- For now, we're handling all exceptions ourselves in ScreensaverServletFilter, and not allowing them propagate to the Servlet container -->
+  <!-- error-page>
+    <error-code>500</error-code>
+    <location>/reportException.jsf</location>
+  </error-page-->
+
+  <!-- Configure a handler for unauthorized access -->
+  <!-- error-page>
+    <error-code>403</error-code>
+    <location>/unauthorizedAccess.jsp</location>
+  </error-page-->
+
+  <!-- Spring initialization -->
+
+  <!-- Specify Spring context configuration files, possibly one per application tier. -->
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath*:spring-context-web.xml</param-value>
+  </context-param>
+
+  <!-- Servlet listener to enable loading the above Spring application context XML files. -->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <!-- Servlet listener to enable access to Spring {request,session}-scoped beans. -->
+  <listener>
+    <listener-class>
+      org.springframework.web.context.request.RequestContextListener
+    </listener-class>
+  </listener>
+
+  <filter>
+    <filter-name>ScreensaverServletFilter</filter-name>
+    <filter-class>edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>ScreensaverServletFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+
+  <!-- JSF/MyFaces configuration -->
+
+  <servlet>
+    <servlet-name>Faces Servlet</servlet-name>
+    <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Faces Servlet</servlet-name>
+    <!-- the types of URLs to handle as JSF pages -->
+    <url-pattern>*.jsf</url-pattern>
+  </servlet-mapping>
+
+  <!-- MyFaces initialization is performed by this servlet context listener -->
+  <listener>
+    <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
+  </listener>
+
+  <context-param>
+    <description>
+      Comma separated list of URIs of (additional) faces config files. (e.g. /WEB-INF/my-config.xml)
+      See JSF 1.0 PRD2, 10.3.2 Attention: You should not put /WEB-INF/faces-config.xml in here.
+      Doing so will force any JSF implementation to load the configuration twice, therefore
+      registering each phase listener twice.
+    </description>
+    <param-name>javax.faces.CONFIG_FILES</param-name>
+    <param-value></param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+     State saving method: "client" or "server" (= default). See JSF
+     Specification 2.5.3. Server performs better. [ant4: saving
+     component tree and UI state to client-side (in HTML) can create
+     huge HTML files, which impacts performance, and in both directions,
+     as the UI state data is also sent back to server as a form field.
+     Also UI state data is repeated for every HTML form on the page. Bad
+     news, all around. I've tested using server-side state saving,
+     and it seems to work just fine. And it creates a considerably
+     faster UI response time, as one would hope.]
+    </description>
+    <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+    <param-value>server</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+     Only applicable if state saving method is "server" (= default).
+     Defines the amount (default = 20) of the latest views are stored in
+     session. [ant4: looking at JspStateManagerImpl, it appears this
+     affects how many serialized views of previous *requests* will be
+     cached (not views); the cache is keyed on the 'jsf_sequence'
+     attribute, which increments with each request. It would appear,
+     then, that this affects how many times the user can use his
+     browser's back command and arrive at a view whose UI state and
+     component tree is still available. Values must >=1, or else
+     defaults to 20. JspStateManagerImpl saves "old" UI states, beyond
+     the size specified here, so this setting is not a hard
+     upper-limit in any case (but the "old" ones are WeakReferences,
+     fortunately). Not sure why *this* project would want to ever save
+     more than the state for the current view, since accessing old views
+     is dangerous due to our highly-stateful backing beans.]
+    </description>
+    <param-name>org.apache.myfaces.NUMBER_OF_VIEWS_IN_SESSION</param-name>
+    <param-value>1</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+     Only applicable if state saving method is "server". If true
+     (default) the state will be serialized to a byte stream before it
+     is written to the session. If false the state will not be
+     serialized to a byte stream. Serializing negatively impacts
+     perfomance. [ant4: I can't quite figure out why this option exists!
+     If set to true, the UI state of the component tree is serialized to
+     a byte stream, and then saved; if false, the component tree and UI
+     state is still saved, but as first-class object network. Why would
+     you ever want the performance hit of serializing this data when
+     this only affects server-side state saving? Why not just always
+     save the object network? For session replication perhaps? Either
+     way, I can't see why *this* project would set to true. Also, the
+     code in JspStateManagerImpl seems a bit off, as they use a
+     SerializedView object to store both serialized and unserialized
+     component trees and UI state! Guessing this option was added later
+     on, and they didn't both to rename the SerializedView class.
+     Beware when code reading!]
+    </description>
+    <param-name>org.apache.myfaces.SERIALIZE_STATE_IN_SESSION</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      Only applicable if state saving method is "server" and if
+      org.apache.myfaces.SERIALIZE_STATE_IN_SESSION is true. If true (default) the serialized state
+      will be compressed before it is written to the session. If false the state will not be
+      compressed.
+    </description>
+    <param-name>org.apache.myfaces.COMPRESS_STATE_IN_SESSION</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      This parameter tells MyFaces if javascript code should be allowed in the rendered HTML output.
+      If javascript is allowed, command_link anchors will have javascript code that submits the
+      corresponding form. If javascript is not allowed, the state saving info and nested parameters
+      will be added as url parameters. Default: "true"
+    </description>
+    <param-name>org.apache.myfaces.ALLOW_JAVASCRIPT</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>org.apache.myfaces.DETECT_JAVASCRIPT</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      If true, rendered HTML code will be formatted, so that it is "human readable". i.e. additional
+      line separators and whitespace will be written, that do not influence the HTML code. Default:
+      "true"
+    </description>
+    <param-name>org.apache.myfaces.PRETTY_HTML</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      If true, a javascript function will be rendered that is able to restore the former vertical
+      scroll on every request. Convenient feature if you have pages with long lists and you do not
+      want the browser page to always jump to the top if you trigger a link or button action that
+      stays on the same page. Default: "false"
+    </description>
+    <param-name>org.apache.myfaces.AUTO_SCROLL</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      Used for encrypting view state. Only relevant for client side state saving. See MyFaces
+      wiki/web site documentation for instructions on how to configure an application for diffenent
+      encryption strengths. see http://wiki.apache.org/myfaces/Secure_Your_Application
+    </description>
+    <param-name>org.apache.myfaces.secret</param-name>
+    <param-value>NzY1NDMyMTA=</param-value>
+  </context-param>
+
+  <context-param>
+    <description>
+      Validate managed beans and navigation rules. See
+      http://wiki.apache.org/myfaces/A_Little_Quality_Assurance
+    </description>
+    <param-name>org.apache.myfaces.validate</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <!-- JSF Apache Tomahawk configuration (MyFaces extended components, w/ "t:" prefix)
+    (see http://myfaces.apache.org/tomahawk/extensionsFilter.html) -->
+
+  <filter>
+    <filter-name>MyFacesExtensionsFilter</filter-name>
+    <filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
+    <init-param>
+      <param-name>maxFileSize</param-name>
+      <param-value>20m</param-value>
+      <!-- description>Set the size limit for uploaded files</description-->
+    </init-param>
+  </filter>
+
+  <!-- extension mapping for adding <script/>, <link/>, and other resource tags to JSF-pages  -->
+  <filter-mapping>
+    <filter-name>MyFacesExtensionsFilter</filter-name>
+    <!-- servlet-name must match the name of our javax.faces.webapp.FacesServlet entry -->
+    <servlet-name>Faces Servlet</servlet-name>
+    <dispatcher>REQUEST</dispatcher>
+    <!-- Also invoke this filter when requests are forwarded -->
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+
+  <!-- extension mapping for serving page-independent resources (javascript, stylesheets, images, etc.)  -->
+  <filter-mapping>
+    <filter-name>MyFacesExtensionsFilter</filter-name>
+    <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
+  </filter-mapping>
+
+
+  <!-- Tiles configuration -->
+
+  <!-- Tiles ViewHandler config file.  The file specified here contains the application's various "tiles" definitions for each page. -->
+  <context-param>
+    <description>
+      Tiles configuration definition files and a listener need to be defined. The listener will
+      initialize JspTilesViewHandlerImpl with our tiles definitions.
+    </description>
+    <param-name>tiles-definitions</param-name>
+    <param-value>/WEB-INF/tiles.xml</param-value>
+  </context-param>
+
+
+  <!-- JSP Configuration -->
+
+  <jsp-config>
+    <jsp-property-group>
+      <display-name>screensaver</display-name>
+      <url-pattern>*.jsp</url-pattern>
+      <el-ignored>false</el-ignored>
+      <scripting-invalid>false</scripting-invalid>
+      <is-xml>false</is-xml>
+      <!-- Can't use these w/MyEclipse JSP editor.
+        See http://www.myeclipseide.com/PNphpBB2+file-viewtopic-t-9223.html
+        <include-prelude>/fragments/header.jspf</include-prelude>
+        <include-coda>/fragments/footer.jspf</include-coda>
+      -->
+    </jsp-property-group>
+  </jsp-config>
+
+
+  <!-- Log4j setup -->
+
+  <!-- This context-param provides explicit path to log4j properties file, but
+    its very declaration also enables periodic refresh -->
+  <context-param>
+    <param-name>log4jConfigLocation</param-name>
+    <param-value>classpath:log4j.properties</param-value>
+  </context-param>
+
+  <listener>
+    <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+  </listener>
+
+
+  <!-- JNDI setup -->
+
+  <resource-env-ref>
+    <description>Mutable capsule that allows us to store a LoginModuleFactory in JNDI, which is instantiated by our web app, and not available at Tomcat initialization time.</description>
+    <resource-env-ref-name>bean/loginModuleFactoryCapsule</resource-env-ref-name>
+    <resource-env-ref-type>edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule</resource-env-ref-type>
+  </resource-env-ref>
+
+
+  <!-- Authentication/Security configuration -->
+
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <form-login-config>
+      <form-login-page>/login.jsf</form-login-page>
+      <form-error-page>/login-error.jsf</form-error-page>
+    </form-login-config>
+  </login-config>
+
+  <!--
+  from the 2.4 Servlet spec (SRV.12.8.1): "A security constraint that
+  does not contain an authorization constraint shall combine with
+  authorization constraints that name or imply roles to allow
+  unauthenticated access. The special case of an authorization
+  constraint that names no roles shall combine with any other
+  constraints to override their affects and cause access to be
+  precluded." so the following constraint combines with any constraint
+  below that has no auth-constraint to allow all access. it will also
+  preclude any possibility of authorized access for any of the HTTP
+  methods listed.
+  -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Precluded Methods</web-resource-name>
+      <description>Disallow HTTP methods, application-wide</description>
+      <url-pattern>/*</url-pattern>
+      <http-method>DELETE</http-method>
+      <http-method>HEAD</http-method>
+      <http-method>PUT</http-method>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint />
+  </security-constraint>
+
+  <security-constraint>
+    <display-name>Public</display-name>
+
+    <web-resource-collection>
+      <web-resource-name>HelloAndGoodbye</web-resource-name>
+      <description>Allow unauthenticated user to request the home URL (i.e., the URL(s) in the welcome-file-list), and the goodbye URL.</description>
+      <url-pattern>/index.jsp</url-pattern>
+      <url-pattern>/goodbye.jsf</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+
+    <web-resource-collection>
+      <web-resource-name>Resources</web-resource-name>
+      <description>Images, stylesheets, etc.  Access via HTTP GET and HEAD methods only.</description>
+      <url-pattern>/css/*</url-pattern>
+      <url-pattern>/images/*</url-pattern>
+      <!-- resources provided by Apache MyFaces and by Apache Tomahawk components -->
+      <url-pattern>/faces/*</url-pattern>
+
+      <http-method>GET</http-method>
+      <http-method>HEAD</http-method>
+    </web-resource-collection>
+
+    <web-resource-collection>
+      <web-resource-name>Error Messages</web-resource-name>
+      <description>Pages that display error messages, which should displayable to everyone, including unauthenticated users.</description>
+      <url-pattern>/reportException.jsf</url-pattern>
+      <url-pattern>/unauthorizedAccess.jsp</url-pattern>
+    </web-resource-collection>
+
+    <!-- Having no auth-constraint element allows all roles, including users not authenticated -->
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>unrestricted</web-resource-name>
+      <url-pattern>/main.jsf</url-pattern>
+      <url-pattern>/login.jsf</url-pattern>
+      <url-pattern>/login-error.jsf</url-pattern>
+      <url-pattern>/newsViewer.jsf</url-pattern>
+      <url-pattern>/downloadsViewer.jsf</url-pattern>
+      <url-pattern>/helpViewer.jsf</url-pattern>
+      <url-pattern>/libraries/*</url-pattern>
+      <url-pattern>/studies/*</url-pattern>
+      <url-pattern>/users/*</url-pattern>
+      <url-pattern>/activities/*</url-pattern>
+      <url-pattern>/help/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>guestUser</role-name>
+      <role-name>compoundScreeningRoomUser</role-name>
+      <role-name>rnaiScreeningRoomUser</role-name>
+      <role-name>readEverythingAdmin</role-name>
+      <role-name>developer</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>screener</web-resource-name>
+      <url-pattern>/screens/*</url-pattern>
+      <url-pattern>/screens/screenresults/*</url-pattern>
+      <url-pattern>/cherryPickRequests/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>compoundScreeningRoomUser</role-name>
+      <role-name>rnaiScreeningRoomUser</role-name>
+      <role-name>readEverythingAdmin</role-name>
+      <role-name>developer</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>librariesAdmin</web-resource-name>
+      <url-pattern>/libraries/admin/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>librariesAdmin</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>cherryPickAdmin</web-resource-name>
+      <url-pattern>/cherryPickRequests/admin/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>cherryPickAdmin</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>screenResultsAdmin</web-resource-name>
+      <url-pattern>/screens/screenresults/admin/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>screenResultsAdmin</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>usersAdmin</web-resource-name>
+      <url-pattern>/users/admin/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>usersAdmin</role-name>
+    </auth-constraint>
+
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+      <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>developer</web-resource-name>
+      <url-pattern>/dev/*</url-pattern>
+    </web-resource-collection>
+
+    <auth-constraint>
+      <role-name>developer</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+</web-app>

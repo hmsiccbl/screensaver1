@@ -1,0 +1,4 @@
+# Restarts the Screensaver Tomcat development server.
+
+ss-restart dev
+

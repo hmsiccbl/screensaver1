@@ -1,0 +1,261 @@
+<%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
+<%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
+<%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+
+<f:subview id="searchResultsSubview">
+	<t:panelGrid id="searchResultsPanel" columns="1" width="100%">
+
+		<t:collapsiblePanel var="isCollapsed">
+			<f:facet name="header">
+				<t:headerLink immediate="true">
+					<t:outputText value="Search #{isCollapsed ? \">>\" : \"<<\"}"
+						escape="true" styleClass="label" />
+				</t:headerLink>
+			</f:facet>
+
+			<%-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field --%>
+			<t:commandButton id="defaultSearchButton" forceId="true"
+				styleClass="hiddenCommand" />
+
+			<t:panelGrid styleClass="groupingPanel" style="margin-top: 2px">
+				<t:dataTable id="queryTable" var="column" styleClass="standardTable"
+					value="#{searchResults.dataTable.sortManager.columns}"
+					rendered="#{!searchResults.tableFilterMode}">
+					<t:column id="columnName" styleClass="keyColumn" style="width: 33%">
+						<t:outputText value="#{column.name}" styleClass="label" />
+					</t:column>
+					<t:column id="fieldOperatorColumn">
+						<t:selectOneMenu id="operator"
+							value="#{column.criterion.operator}"
+							converter="#{operatorConverter}" styleClass="inputText">
+							<f:selectItems value="#{column.columnType.operatorSelections}" />
+						</t:selectOneMenu>
+					</t:column>
+					<t:column id="fieldInputColumn">
+						<t:inputText id="simpleCriterionValue"
+							value="#{column.criterion.value}" converter="#{column.converter}"
+							rendered="#{column.columnType.name == \"TEXT\" || column.columnType.name == \"INTEGER\" || column.columnType.name == \"REAL\" || column.columnType.name == \"FIXED_DECIMAL\"}"
+							size="#{column.columnType.name == \"TEXT\" ? 30 : 8}"
+							styleClass="inputText" />
+						<t:inputDate id="dateCriterionValue" type="date"
+							popupCalendar="true" size="1" value="#{column.criterion.value}"
+							rendered="#{column.columnType.name == \"DATE\"}"
+							styleClass="inputText" />
+						<t:selectOneMenu id="vocabularyCriterionValue"
+							value="#{column.criterion.value}" converter="#{column.converter}"
+							rendered="#{column.columnType.name == \"VOCABULARY\"}"
+							styleClass="inputText">
+							<f:selectItems value="#{column.vocabularySelections}" />
+						</t:selectOneMenu>
+						<t:selectOneMenu id="booleanCriterionValue"
+							value="#{column.criterion.value}" converter="#{column.converter}"
+							rendered="#{column.columnType.name == \"BOOLEAN\"}"
+							styleClass="inputText">
+							<f:selectItems value="#{column.booleanSelections}" />
+						</t:selectOneMenu>
+					</t:column>
+					<t:column>
+						<t:commandButton image="/images/delete.png" immediate="true"
+							action="#{column.criterion.reset}" styleClass="command" />
+					</t:column>
+				</t:dataTable>
+				<t:panelGroup id="searchCommandPanel">
+					<%-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field --%>
+					<t:commandButton id="searchButton" value="Search"
+						styleClass="command" />
+					<t:commandButton value="Reset" immediate="true"
+						action="#{searchResults.resetFilter}" styleClass="command" />
+					<t:selectBooleanCheckbox id="showFiltersInTableOption"
+						value="#{searchResults.tableFilterMode}"
+						onchange="javascript:document.getElementById('defaultSearchButton').click()" />
+					<t:outputLabel for="showFiltersInTableOption"
+						value="Show filters in table" styleClass="label" />
+				</t:panelGroup>
+			</t:panelGrid>
+		</t:collapsiblePanel>
+
+		<t:buffer into="#{dataTableBuffer}">
+			<t:dataTable id="searchResultsTable"
+				binding="#{searchResults.dataTable.dataTableUIComponent}"
+				value="#{searchResults.dataTable.dataModel}" var="row"
+				rows="#{searchResults.dataTable.rowsPerPage}"
+				styleClass="standardTable" headerClass="tableHeader"
+				rowClasses="row1,row2"
+				sortColumn="#{searchResults.dataTable.sortManager.sortColumnName}"
+				sortAscending="#{searchResults.dataTable.sortManager.sortAscending}"
+				width="100%">
+
+				<t:columns id="dataColumns"
+					value="#{searchResults.dataTable.sortManager.columnModel}"
+					var="column"
+					styleClass="#{column.numeric ? \"numericColumn\" : \"column\"}">
+					<f:facet name="header">
+						<t:panelGrid columns="1">
+							<t:popup displayAtDistanceY="20">
+								<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
+								<t:commandSortHeader columnName="#{column.name}" arrow="false"
+									immediate="false">
+									<f:facet name="ascending">
+										<t:graphicImage value="/images/ascending-arrow.gif"
+											rendered="true" border="0" />
+									</f:facet>
+									<f:facet name="descending">
+										<t:graphicImage value="/images/descending-arrow.gif"
+											rendered="true" border="0" />
+									</f:facet>
+									<t:outputText value="#{column.name}" />
+								</t:commandSortHeader>
+								<f:facet name="popup">
+									<t:panelGrid styleClass="popupHelp">
+										<t:outputText styleClass="popupText"
+											value="#{column.description}" escape="false" />
+									</t:panelGrid>
+								</f:facet>
+							</t:popup>
+
+							<t:panelGrid id="tableColumnFilter" columns="1" headerClass="tableFilterPanel">
+								<t:selectOneMenu id="operator"
+									value="#{column.criterion.operator}"
+									converter="#{operatorConverter}" styleClass="inputText"
+									rendered="#{searchResults.tableFilterMode || !column.criterion.undefined}"
+									displayValueOnly="#{!searchResults.tableFilterMode && !column.criterion.undefined}"
+									displayValueOnlyStyleClass="data">
+									<f:selectItems value="#{column.columnType.operatorSelections}" />
+								</t:selectOneMenu>
+								<t:inputText id="simpleCriterionValue"
+									value="#{column.criterion.value}"
+									converter="#{column.converter}"
+									rendered="#{(column.columnType.name == \"TEXT\" || column.columnType.name == \"INTEGER\" || column.columnType.name == \"REAL\" || column.columnType.name == \"FIXED_DECIMAL\") && (searchResults.tableFilterMode || !column.criterion.undefined)}"
+									size="8" styleClass="inputText"
+									displayValueOnly="#{!searchResults.tableFilterMode && !column.criterion.undefined}"
+									displayValueOnlyStyleClass="data"
+									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}" />
+								<t:inputDate id="dateCriterionValue" type="date"
+									popupCalendar="true" size="1" value="#{column.criterion.value}"
+									rendered="#{column.columnType.name == \"DATE\" && searchResults.tableFilterMode}"
+									styleClass="inputText"
+									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}" />
+								<t:outputText id="dateCriterionValueOutput"
+									value="#{column.criterion.value}"
+									rendered="#{column.columnType.name == \"DATE\" && (!searchResults.tableFilterMode && !column.criterion.undefined)}"
+									styleClass="data" />
+								<t:selectOneMenu id="vocabularyCriterionValue"
+									value="#{column.criterion.value}"
+									converter="#{column.converter}"
+									rendered="#{column.columnType.name == \"VOCABULARY\" && (searchResults.tableFilterMode || !column.criterion.undefined)}"
+									styleClass="inputText"
+									displayValueOnly="#{!searchResults.tableFilterMode && !column.criterion.undefined}"
+									displayValueOnlyStyleClass="data"
+									onchange="javascript:document.getElementById('search').click()"
+									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}">
+									<f:selectItems value="#{column.vocabularySelections}" />
+								</t:selectOneMenu>
+								<t:selectOneMenu id="booleanCriterionValue"
+									value="#{column.criterion.value}"
+									converter="#{column.converter}"
+									rendered="#{column.columnType.name == \"BOOLEAN\" && (searchResults.tableFilterMode || !column.criterion.undefined)}"
+									styleClass="inputText"
+									displayValueOnly="#{!searchResults.tableFilterMode && !column.criterion.undefined}"
+									displayValueOnlyStyleClass="data"
+									onchange="javascript:document.getElementById('search').click()">
+									<f:selectItems value="#{column.booleanSelections}" />
+								</t:selectOneMenu>
+								<t:panelGroup>
+									<t:commandButton id="search" forceId="true" value="Search"
+										styleClass="command"
+										rendered="#{searchResults.tableFilterMode}" />
+									<t:commandButton image="/images/delete.png" immediate="true"
+										action="#{column.criterion.reset}" styleClass="command"
+										rendered="#{searchResults.tableFilterMode}" />
+								</t:panelGroup>
+							</t:panelGrid>
+						</t:panelGrid>
+					</f:facet>
+					<t:outputText value="#{searchResults.cellValue}"
+						rendered="#{! (column.isCommandLink || column.isCommandLinkList || (column.editable && searchResults.editMode))}" />
+					<t:inputText value="#{searchResults.cellValue}" converter="#{column.converter}"
+						rendered="#{column.editable && searchResults.editMode}"
+						immediate="true" />
+					<t:commandLink action="#{searchResults.dataTable.cellAction}"
+						value="#{searchResults.cellValue}"
+						rendered="#{column.isCommandLink && (!column.editable || !searchResults.editMode)}">
+						<f:param name="commandValue"
+							value="#{searchResults.escapeBackslashes[searchResults.cellValue]}" />
+					</t:commandLink>
+					<t:dataList id="commandLinkList" var="commandValue"
+						value="#{searchResults.cellValue}" layout="simple"
+						rendered="#{column.isCommandLinkList && (!column.editable || !searchResults.editMode)}"
+						rowIndexVar="rowIndex" rowCountVar="rowCount">
+						<t:commandLink action="#{searchResults.dataTable.cellAction}"
+							value="#{commandValue}">
+							<f:param name="commandValue"
+								value="#{searchResults.escapeBackslashes[commandValue]}" />
+						</t:commandLink>
+						<t:outputText value=";" rendered="#{rowIndex < rowCount - 1}" />
+					</t:dataList>
+				</t:columns>
+			</t:dataTable>
+
+			<t:panelGrid
+				rendered="#{searchResults.capabilities[\"viewRowDetail\"] && searchResults.rowDetailVisible && !searchResults.editMode}"
+				columns="1">
+				<t:outputText value="Row Detail:" styleClass="subsection" />
+				<t:aliasBean alias="#{rowDetail}"
+					value="#{searchResults.capabilities[\"viewRowDetail\"] ? searchResults.rowDetail : null}">
+					<t:outputText value="Coming soon!" />
+				</t:aliasBean>
+				<t:commandButton image="/images/delete.png"
+					action="#{searchResults.hideRowDetail}" />
+			</t:panelGrid>
+
+			<t:outputText value="#{searchResultsFooter}" escape="false" />
+
+			<t:panelGroup id="commandPanel">
+
+				<t:panelGroup rendered="#{searchResults.editable}">
+					<t:commandButton id="editCommand" value="Edit"
+						action="#{searchResults.edit}"
+						rendered="#{searchResults.hasEditableColumns && !searchResults.editMode}" />
+					<t:commandButton id="saveCommand" value="Save"
+						action="#{searchResults.save}"
+						rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
+					<t:commandButton id="cancelCommand" value="Cancel" immediate="true"
+						action="#{searchResults.cancel}"
+						rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
+				</t:panelGroup>
+
+				<t:panelGrid
+					style="margin: 0px; border: 1px solid grey; padding: 1px;"
+					border="0" cellpadding="0" cellspacing="0" columns="1" width="100%"
+					rendered="#{searchResults.capabilities[\"exportData\"] && searchResults.dataExporterSelector.size > 0}"
+					title="Download search results to Excel spreadsheet or SD File">
+					<t:panelGroup style="float: right">
+						<t:outputText value="download search results to: " />
+						<t:selectOneMenu id="downloadFormat"
+							value="#{searchResults.dataExporterSelector.value}">
+							<f:selectItems
+								value="#{searchResults.dataExporterSelector.selectItems}" />
+						</t:selectOneMenu>
+						<t:commandButton id="downloadSearchResultsCommandButton"
+							value="Download" action="#{searchResults.downloadSearchResults}" />
+					</t:panelGroup>
+				</t:panelGrid>
+
+			</t:panelGroup>
+		</t:buffer>
+
+		<t:outputText
+			rendered="#{! empty searchResults.description}"
+			value="#{searchResults.description}"
+			styleClass="sectionHeader" />
+
+		<t:aliasBean alias="#{dataTable}" value="#{searchResults.dataTable}">
+			<%@ include file="dataTableNavigator.jspf"%>
+		</t:aliasBean>
+
+		<t:outputText value="#{dataTableBuffer}" escape="false"
+			rendered="#{!searchResults.capabilities[\"viewEntity\"] || !searchResults.entityView}" />
+
+	</t:panelGrid>
+</f:subview>
