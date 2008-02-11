@@ -1,1 +1,0 @@
-ALTER TABLE publication ALTER COLUMN pubmed_id DROP NOT NULL;

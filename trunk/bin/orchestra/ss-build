@@ -1,7 +1,0 @@
-# Deploys Screensaver to Tomcat server.  
-#
-# SCREENSAVER_ROOT should be set to the directory where screensaver
-# has been checked out (defaults to $HOME/screensaver)
-
-cd ${SCREENSAVER_ROOT:-$HOME/screensaver}
-ant -Dbuild.dir=build -Dscreensaver.properties.file=resources/screensaver.properties.orchestra.standalone -Ddebug=true build

@@ -1,2 +1,0 @@
-ALTER TABLE screening_room_user ADD coms_crhba_permit_number TEXT;
-ALTER TABLE screening_room_user ADD coms_crhba_permit_principal_investigator TEXT;

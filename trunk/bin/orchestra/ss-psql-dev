@@ -1,6 +1,0 @@
-# Invokes psql on Screensaver development database, w/o requiring any
-# database connection arguments from user.
-#
-# Must be run from host 'trumpet'.
-
-~/bin/ss-psql dev
