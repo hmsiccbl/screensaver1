@@ -9,12 +9,11 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.searchresults;
+package edu.harvard.med.screensaver.ui.table;
 
 import java.util.List;
 
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 import org.apache.log4j.Logger;

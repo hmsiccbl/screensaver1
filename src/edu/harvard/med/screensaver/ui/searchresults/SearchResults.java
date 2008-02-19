@@ -19,6 +19,7 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
+import edu.harvard.med.screensaver.ui.table.EditableDataTable;
 import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;

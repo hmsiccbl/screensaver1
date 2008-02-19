@@ -7,10 +7,10 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.searchresults;
+package edu.harvard.med.screensaver.ui.table;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.ui.table.DataTable;
+import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
 
 
 /**
