@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/util/EnumTypeConverter.java $
-// $Id: EnumTypeConverter.java 1723 2007-08-20 20:26:50Z ant4 $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

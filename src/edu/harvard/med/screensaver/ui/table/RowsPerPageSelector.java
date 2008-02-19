@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/search-result-redesign/src/edu/harvard/med/screensaver/ui/table/RowsPerPageSelector.java $
-// $Id: RowsPerPageSelector.java 2152 2008-02-07 16:34:46Z ant4 $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

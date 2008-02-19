@@ -1,7 +1,7 @@
 // $HeadURL:
 // svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/table/TableColumn.java
 // $
-// $Id: TableColumn.java 2152 2008-02-07 16:34:46Z ant4 $
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

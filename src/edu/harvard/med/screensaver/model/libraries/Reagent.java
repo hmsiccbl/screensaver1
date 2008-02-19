@@ -1,7 +1,7 @@
 // $HeadURL:
 // svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/model/libraries/Well.java
 // $
-// $Id: Well.java 1985 2007-10-19 18:27:49Z ant4 $
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/libraries/compound/CompoundPubchemCidListUpgrader.java $
-// $Id: CompoundPubchemCidListUpgrader.java 2060 2007-12-17 01:44:31Z js163 $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 

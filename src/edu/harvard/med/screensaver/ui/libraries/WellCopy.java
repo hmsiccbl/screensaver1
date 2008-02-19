@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/search-result-redesign/src/edu/harvard/med/screensaver/ui/libraries/WellCopy.java $
-// $Id: WellCopy.java 2153 2008-02-07 21:13:53Z ant4 $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

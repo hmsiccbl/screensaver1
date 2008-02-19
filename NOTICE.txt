@@ -1,5 +1,5 @@
 Screensaver
-Copyright 2007 by the President and Fellows of Harvard College
+Copyright 2008 by the President and Fellows of Harvard College
 
 Screensaver is distributed under the GNU General Public License, as described
 in the accompanying licenses/gpl.txt file.  Screensaver also includes works derived

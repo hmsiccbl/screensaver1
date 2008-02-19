@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/searchresults/ScreenSearchResults.java $
-// $Id: ScreenSearchResults.java 1729 2007-08-22 02:42:54Z ant4 $
+// $HeadURL$
+// $Id$
 
 // Copyright 2006 by the President and Fellows of Harvard College.
 
