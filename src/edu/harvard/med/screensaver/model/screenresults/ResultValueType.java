@@ -1,5 +1,6 @@
 // $HeadURL$
 // $Id$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
@@ -25,7 +26,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -36,7 +36,6 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
 import org.apache.log4j.Logger;
@@ -148,7 +147,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @return the parent {@link ScreenResult}
    */
   @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+             cascade={})
   @JoinColumn(name="screenResultId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_type_to_screen_result")
@@ -624,17 +623,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Get the unique data header name for this result value type.
-   * @return the unique data header name for this result value type
-   * @see UniqueDataHeaderNames
-   */
-  @Transient
-  public String getUniqueName()
-  {
-    return getScreenResult().getUniqueDataHeaderNames().get(this);
-  }
-
-  /**
    * Get the time point, indicating the time interval, relative to the time the
    * assay plate was first prepared, at which the {@link ResultValue ResultValues} for this
    * <code>ResultValueType</code> were read. The format and units for the time point is arbitrary.
@@ -944,7 +932,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
   /**
    * Set the set of result value types that this result value type was derived from. The caller
-   * of this method must ensure bi-directionality is perserved.
+   * of this method must ensure bi-directionality is preserved.
    * @param  the set of result value types that this result value type was derived from
    * @motivation for hibernate
    */
@@ -955,7 +943,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
   /**
    * Set the set of result value types that derive from this result value type. The caller of
-   * this method must ensure bi-directionality is perserved.
+   * this method must ensure bi-directionality is preserved.
    * @param  the set of result value types that derive from this result value type
    * @motivation for hibernate
    */

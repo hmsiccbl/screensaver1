@@ -138,6 +138,7 @@ public class AnnotationValue extends AbstractEntity
   @Column(updatable=false)
   @org.hibernate.annotations.Type(type="text")
   @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.Index(name="annotation_value_value_index")
   public String getValue()
   {
     return _value;
@@ -150,6 +151,7 @@ public class AnnotationValue extends AbstractEntity
    */
   @Column(updatable=false)
   @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.Index(name="annotation_value_numeric_value_index")
   public Double getNumericValue()
   {
     return _numericValue;
@@ -189,7 +191,7 @@ public class AnnotationValue extends AbstractEntity
     _reagent = reagent;
     _value = value;
     _numericValue = numericValue;
-    _reagent.getAnnotationValues().add(this);
+    _reagent.getAnnotationValues().put(annotationType, this);
   }
 
 

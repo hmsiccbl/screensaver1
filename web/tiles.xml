@@ -234,10 +234,16 @@
 
   <!-- users tiles -->
 
-  <definition name="/users/usersBrowser.tiles" extends=".base">
-    <put name="pageTitle" value="Users Browser" />
-    <put name="pageHelpURL" value="../help/screens/usersBrowserHelp.jsf" />
-    <put name="body" value="/users/usersBrowser.jsp" />
+  <definition name="/users/staffBrowser.tiles" extends=".base">
+    <put name="pageTitle" value="Staff Browser" />
+    <put name="pageHelpURL" value="../help/screens/staffBrowserHelp.jsf" />
+    <put name="body" value="/users/staffBrowser.jsp" />
+  </definition>
+
+  <definition name="/users/screenersBrowser.tiles" extends=".base">
+    <put name="pageTitle" value="Screeners Browser" />
+    <put name="pageHelpURL" value="../help/screens/screenersBrowserHelp.jsf" />
+    <put name="body" value="/users/screenersBrowser.jsp" />
   </definition>
 
   <!-- definition name="/screens/userViewer.tiles" extends=".base">

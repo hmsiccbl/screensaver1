@@ -21,13 +21,18 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.db.hibernate.HqlUtils;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.type.CollectionType;
@@ -90,11 +95,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 
   public static String makeQueryIdList(List<? extends AbstractEntity> entities)
   {
-    List<Object> ids = new ArrayList<Object>(entities.size());
-    for (AbstractEntity entity : entities) {
-      ids.add(entity.getEntityId());
-    }
-    return StringUtils.makeListString(ids, ", ");
+    return StringUtils.makeListString(CollectionUtils.entityIds(entities), ", ");
   }
 
 
@@ -310,18 +311,16 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    */
   public int relationshipSize(final AbstractEntity entity, final String relationship)
   {
-    Number size = (Number) getHibernateTemplate().execute(new HibernateCallback()
-    {
-      public Object doInHibernate(Session session) throws HibernateException, SQLException
+    return (Integer)
+    runQuery(new edu.harvard.med.screensaver.db.Query() {
+      public List execute(Session session)
       {
-        String entityName = session.getEntityName(entity);
-        String idProperty = session.getSessionFactory().getClassMetadata(entityName).getIdentifierPropertyName();
-        Query query = session.createQuery("select count(*) from " + entityName + " e join e." + relationship + " where e." + idProperty + " = :id");
-        query.setString("id", entity.getEntityId().toString());
-        return query.list().get(0);
+        Criteria criteria = session.createCriteria(entity.getEntityClass()).add(Restrictions.idEq(entity.getEntityId())).createCriteria(relationship);
+        ScrollableResults scroll = criteria.scroll();
+        int size = scroll.last() ? scroll.getRowNumber() + 1: 0;
+        return Arrays.asList(size);
       }
-    });
-    return size.intValue();
+    }).get(0);
   }
 
   public int relationshipSize(
@@ -448,8 +447,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     String entityName = entityClass.getSimpleName();
     final StringBuffer hql = new StringBuffer();
 
-    List<String> relationships = expandRelationships(relationshipsIn);
-    Map<String,String> path2Alias = makeAliases(relationships);
+    List<String> relationships = HqlUtils.expandRelationships(relationshipsIn);
+    Map<String,String> path2Alias = HqlUtils.makeAliases(relationships);
     String entityAlias = "x";
     hql.append("select distinct x from ").append(entityName).append(' ').append(entityAlias);
     for (String relationship : relationships) {
@@ -802,41 +801,6 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");
     }
-  }
-
-  private Map<String,String> makeAliases(List<String> relationships)
-  {
-    int nextAlias = 1;
-    Map<String,String> path2Alias = new HashMap<String,String>();
-    for (String relationship : relationships) {
-      if (!path2Alias.containsKey(relationship)) {
-        path2Alias.put(relationship, "x" + nextAlias++);
-      }
-    }
-    return path2Alias;
-  }
-
-  /**
-   * Returns an ordered set of the relationships, expanded to include all
-   * implicit, intermediate relationships. For example, if input is { "w", "x.y.z", },
-   * output will be { "w", "x", "x.y", "x.y.z" }.
-   */
-  private List<String> expandRelationships(String[] relationships)
-  {
-    LinkedHashSet<String> expandedRelationships = new LinkedHashSet<String>();
-    for (String relationship : relationships) {
-      int pos = -1;
-      do {
-        pos = relationship.indexOf('.', pos + 1);
-        if (pos < 0) {
-          expandedRelationships.add(relationship);
-        }
-        else if (pos > 0 && pos < relationship.length()) {
-          expandedRelationships.add(relationship.substring(0, pos));
-        }
-      } while (pos >= 0);
-    }
-     return new ArrayList<String>(expandedRelationships);
   }
 }
 

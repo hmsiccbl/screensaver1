@@ -20,6 +20,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 
@@ -50,7 +51,9 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(WellVolumeCorrectionActivity.class);
 
+  private static final String ACTIVITY_TYPE_NAME =  "Well Volume Correction";
 
+  
   // private instance datum
 
   private Set<WellVolumeAdjustment> _wellVolumeAdjustments = new HashSet<WellVolumeAdjustment>();
@@ -75,6 +78,13 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
+  }
+
+  @Override
+  @Transient
+  public String getActivityTypeName()
+  {
+    return ACTIVITY_TYPE_NAME;
   }
 
   /**

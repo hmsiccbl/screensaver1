@@ -49,7 +49,9 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(CherryPickLiquidTransfer.class);
 
+  public static final String ACTIVITY_TYPE_NAME =  "Cherry Pick Plate Activity";
 
+  
   // private instance data
 
   private CherryPickLiquidTransferStatus _status;
@@ -95,7 +97,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
   @Transient
   public String getActivityTypeName()
   {
-    return "Fulfill Cherry Pick";
+    return ACTIVITY_TYPE_NAME;
   }
 
   /**

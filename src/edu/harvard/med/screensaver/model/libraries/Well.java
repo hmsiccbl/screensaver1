@@ -40,14 +40,12 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
-import edu.harvard.med.screensaver.model.screenresults.AbstractEntityIdComparator;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.IndexColumn;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.MapKeyManyToMany;
 
 
@@ -99,6 +97,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private Library _library;
   private Reagent _reagent;
   private Set<Compound> _compounds = new HashSet<Compound>();
+  private Gene _gene;
   private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
   private String _iccbNumber;
   private WellType _wellType = WellType.EXPERIMENTAL;
@@ -106,6 +105,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private List<String> _molfile = new ArrayList<String>();
   private String _genbankAccessionNumber;
   private Map<ResultValueType,ResultValue> _resultValues = new HashMap<ResultValueType,ResultValue>();
+  private Set<ScreenResult> _screenResults = new HashSet<ScreenResult>();
 
   private transient WellKey _wellKey;
   private transient Map<Serializable,ResultValue> _resultValueTypeIdToResultValue;
@@ -263,7 +263,11 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public boolean addSilencingReagent(SilencingReagent silencingReagent)
   {
     silencingReagent.getWells().add(this);
-    return _silencingReagents.add(silencingReagent);
+    boolean result = _silencingReagents.add(silencingReagent);
+    if (_silencingReagents.size() == 1) {
+      _gene = silencingReagent.getGene();
+    }
+    return result;
   }
 
   /**
@@ -274,7 +278,11 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public boolean removeSilencingReagent(SilencingReagent silencingReagent)
   {
     silencingReagent.getWells().add(this);
-    return _silencingReagents.remove(silencingReagent);
+    boolean result = _silencingReagents.remove(silencingReagent);
+    if (_silencingReagents.size() == 0) {
+      _gene = null;
+    }
+    return result;
   }
 
   /**
@@ -306,17 +314,19 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * Get the gene that has silencing reagents contained in this well.
    * @return the gene that have silencing reagents contained in this well
    */
-  @Transient
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+             fetch=FetchType.LAZY)
+  @JoinColumn(name="geneId", nullable=true, updatable=true)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.ForeignKey(name="fk_well_to_gene")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE
+  })
+  @org.hibernate.annotations.Index(name="well_gene_id_index", columnNames={"gene_id"})
   public Gene getGene()
   {
-    Set<Gene> genes = getGenes();
-    if (genes.size() > 1) {
-      throw new IndexOutOfBoundsException();
-    }
-    if (genes.size() == 0) {
-      return null;
-    }
-    return genes.iterator().next();
+    return _gene;
   }
 
   /**
@@ -551,34 +561,42 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * @return the set of result values
    */
   @OneToMany(cascade={}, fetch=FetchType.LAZY, mappedBy="well")
-  @LazyCollection(LazyCollectionOption.EXTRA)
   @MapKeyManyToMany(joinColumns={ @JoinColumn(name="resultValueTypeId") }, targetEntity=ResultValueType.class)
   public Map<ResultValueType,ResultValue> getResultValues()
   {
     return _resultValues;
   }
 
-  /**
-   * Set a subset of eagerly fetched result values for this well. Well must be
-   * detached or loaded read-only! Otherwise, Hibernate *might* persist the
-   * limited subset! (untested theory). You probably want Map to be a TreeMap,
-   * with a {@link AbstractEntityIdComparator} comparator, to allow entity
-   * ID-based equality, rather than instance equality.
-   *
-   * The "_" prefix prevents our test code from treating this method as a property
-   * setter method.
-   *
-   * @motivation Allows Well to be used as a DTO, of sorts, allowing a limited
-   *             subset of result values to be loaded efficiently and then later
-   *             accessed via client code, but naturally through the entity
-   *             object model.
-   * @param map
-   */
-  public void _setResultValuesSubset(Map<ResultValueType,ResultValue> resultValues)
+  @ManyToMany(cascade={},
+              targetEntity=ScreenResult.class,
+              mappedBy="wells",
+              fetch=FetchType.LAZY)
+  @JoinColumn(name="screenResultId", nullable=false, updatable=false)
+  @org.hibernate.annotations.ForeignKey(name="fk_well_to_screen_result")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName="screenResult")
+  public Set<ScreenResult> getScreenResults()
   {
-    _resultValues = resultValues;
+    return _screenResults;
   }
 
+  public boolean addScreenResult(ScreenResult screenResult)
+  {
+    if (_screenResults.add(screenResult)) {
+      screenResult.addWell(this);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean removeScreenResult(ScreenResult screenResult)
+  {
+    if (_screenResults.remove(screenResult)) {
+      screenResult.removeWell(this);
+      return true;
+    }
+    return false;
+  }
 
   // package constructors
 
@@ -678,6 +696,11 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     _silencingReagents = silencingReagents;
   }
 
+  private void setGene(Gene gene)
+  {
+    _gene = gene;
+  }
+
   /**
    * Set the plate number for the well.
    * @param plateNumber the new plate number for the well
@@ -743,5 +766,10 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private void setResultValues(Map<ResultValueType,ResultValue> resultValues)
   {
     _resultValues = resultValues;
+  }
+
+  private void setScreenResults(Set<ScreenResult> screenResults)
+  {
+    _screenResults = screenResults;
   }
 }

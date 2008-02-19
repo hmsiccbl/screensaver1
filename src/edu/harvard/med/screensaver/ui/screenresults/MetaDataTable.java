@@ -15,20 +15,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
-import javax.faces.component.UISelectMany;
-import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.HtmlUtils;
-import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
@@ -36,16 +30,14 @@ import org.apache.log4j.Logger;
 /**
  * Backing bean for a "meta data" table, which displays information for a set of
  * data types (e.g. {@link ResultValueType} or {@link AnnotationType}), one data
- * type per column, one row per data type attribute. Manages a "select many"
- * component that allows the user to select the subset of data types that are to
- * be viewed.
+ * type per column, one row per data type attribute.
  *
  * @motivation Encapsulate common functionality for ScreenResultViewer's Data
  *             Headers table and Annotation table.
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBackingBean implements Observer
+public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBackingBean
 {
   // static members
 
@@ -58,15 +50,8 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
   // instance data members
 
   private List<T> _metaDataTypes = Collections.emptyList();
-  private UISelectMany _selectManyUIComponent;
-  private UISelectManyBean<T> _selections;
   private DataModel _columnModel;
   private DataModel _dataModel;
-  /**
-   * @motivation This class can't extend Observable due to Java's
-   *             single-inheritance limitation.
-   */
-  private Observer _observer;
 
 
   // abstract methods
@@ -80,17 +65,11 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
    * Set the meta data types (table columns), along with an observer that will
    * be notified when the set of selected (visible) data types changes. Must be
    * called before other public methods are called.
-   *
-   * @param observer the observer to be notified when the set of visible meta
-   *          data types changes. Can be null. The observer's update() method
-   *          will be passed a UISelectManyBean object in the Observable
-   *          parameter, and a List of MetaDataTypes in the Object parameter.
    */
-  public void initialize(List<T> metaDataTypes, Observer observer)
+  public void initialize(List<T> metaDataTypes)
   {
     reset();
     _metaDataTypes = metaDataTypes;
-    _observer = observer;
   }
 
   public DataModel getDataModel()
@@ -102,43 +81,12 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     return _dataModel;
   }
 
-  public UISelectMany getSelectManyUIComponent()
-  {
-    return _selectManyUIComponent;
-  }
-
-  public void setSelectManyUIComponent(UISelectMany selectManyUIComponent)
-  {
-    _selectManyUIComponent = selectManyUIComponent;
-  }
-
   public DataModel getColumnModel()
   {
     if (_columnModel == null) {
-      _columnModel = new ListDataModel(getSelectedMetaDataTypeNames());
+      _columnModel = new ListDataModel(getMetaDataTypeNames());
     }
     return _columnModel;
-  }
-
-  public UISelectManyBean<T> getSelector()
-  {
-    if (_selections == null) {
-      _selections = new UISelectManyBean<T>(getDataTypes())
-      {
-        protected String getLabel(T dataType)
-        {
-          return dataType.getName();
-        }
-      };
-      // select all meta data types, initially
-      _selections.setSelections(getDataTypes());
-      if (_selectManyUIComponent != null) {
-        _selectManyUIComponent.setValue(_selections.getValue());
-      }
-
-      _selections.addObserver(this);
-    }
-    return _selections;
   }
 
   /**
@@ -157,67 +105,14 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     return null;
   }
 
-  @SuppressWarnings("unchecked")
-  public void update(Observable o, Object selections)
-  {
-    if (log.isDebugEnabled()) {
-      log.debug("meta data selections changed: " + getSelectedMetaDataTypeNames());
-    }
-    _columnModel = null; // force re-initialization
-    if (_observer != null) {
-      _observer.update(o, selections);
-    }
-  }
-
-
-  // JSF event listeners
-
-  @SuppressWarnings("unchecked")
-  public void selectionListener(ValueChangeEvent event)
-  {
-    log.debug("meta data type selections changed to " + event.getNewValue());
-    getSelector().setValue((List<String>) event.getNewValue());
-
-    // enforce minimum of 1 selected meta data type (data table query will break otherwise)
-    if (getSelector().getSelections().size() == 0) {
-      getSelector().setSelections(getDataTypes().subList(0,1));
-      // this call shouldn't be necessary, as I would've expected UIInput component to query its model in render phase, but...
-      _selectManyUIComponent.setValue(getSelector().getValue());
-    }
-
-    // skip "update model" JSF phase, to avoid overwriting model values set above
-    getFacesContext().renderResponse();
-  }
-
-
-  // JSF application methods
-
-  @UIControllerMethod
-  public String selectAll()
-  {
-    getSelector().setSelections(getDataTypes());
-    _selectManyUIComponent.setValue(getSelector().getValue());
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String selectNone()
-  {
-    getSelector().setSelections(getDataTypes().subList(0, 1));
-    _selectManyUIComponent.setValue(getSelector().getValue());
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
 
   // private methods
 
   private void reset()
   {
     _metaDataTypes = Collections.emptyList();
-    _selections = null;
     _columnModel = null;
     _dataModel = null;
-    _selectManyUIComponent = null;
   }
 
   private List<T> getDataTypes()
@@ -228,6 +123,16 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
     return _metaDataTypes;
   }
 
+
+  private List<String> getMetaDataTypeNames()
+  {
+    List<String> names= new ArrayList<String>();
+    for (T metaDataType : _metaDataTypes) {
+      names.add(metaDataType.getName());
+    }
+    return names;
+  }
+  
   private void lazyBuildDataModel()
   {
     if (_dataModel == null) {
@@ -243,22 +148,6 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
       _dataModel = new ListDataModel(tableData);
     }
   }
-
-  private List<String> getSelectedMetaDataTypeNames()
-  {
-    List<String> namesOfSelected = new ArrayList<String>();
-    for (T metaDataType : getSelector().getSelections()) {
-      namesOfSelected.add(metaDataType.getName());
-    }
-    return namesOfSelected;
-  }
-
-//  private void updateColumnModel()
-//  {
-//    log.debug("updating meta data types");
-//    _columnModel = new ListDataModel(getSelectedMetaDataTypeNames());
-//  }
-
 
   // inner classes
 
@@ -322,7 +211,7 @@ public abstract class MetaDataTable<T extends MetaDataType> extends AbstractBack
       _propertyValues = new HashMap<String,Object>();
       for (T metaDataType : metaDataTypes) {
         _propertyValues.put(metaDataType.getName(),
-                               rowDefinition.formatValue(metaDataType));
+                            rowDefinition.formatValue(metaDataType));
       }
     }
 

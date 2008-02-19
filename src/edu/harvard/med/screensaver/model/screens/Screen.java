@@ -37,6 +37,7 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -1431,6 +1432,7 @@ public class Screen extends Study
       String description,
       boolean isNumeric)
   {
+    verifyNameIsUnique(name);
     AnnotationType annotationType = new AnnotationType(
       this,
       name,
@@ -1453,6 +1455,7 @@ public class Screen extends Study
     name="studyReagentLink",
     joinColumns=@JoinColumn(name="studyId"),
     inverseJoinColumns=@JoinColumn(name="reagentId", nullable=true, updatable=true)
+
   )
   @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
@@ -1693,5 +1696,14 @@ public class Screen extends Study
   private void setReagents(Set<Reagent> reagents)
   {
     _reagents = reagents;
+  }
+  
+  private void verifyNameIsUnique(String name)
+  {
+    for (AnnotationType at : getAnnotationTypes()) {
+      if (at.getName().equals(name)) {
+        throw new DuplicateEntityException(this, at);
+      }
+    }
   }
 }

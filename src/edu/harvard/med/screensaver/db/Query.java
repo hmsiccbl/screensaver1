@@ -9,9 +9,11 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.List;
+
 import org.hibernate.Session;
 
-public interface Query
+public interface Query<T>
 {
-  public org.hibernate.Query getQuery(Session session);
+  public List<T> execute(Session session);
 }

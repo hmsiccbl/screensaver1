@@ -17,7 +17,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 
 public class EmptyWellsConverterTest extends TestCase

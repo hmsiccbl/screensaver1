@@ -16,22 +16,20 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-//import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Index;
+
 
 /**
  * A <code>ResultValue</code> holds the actual value of a screen result data
@@ -53,14 +51,18 @@ import org.hibernate.annotations.Index;
 @org.hibernate.annotations.Entity(mutable=false)
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ResultValueType.class)
-public class ResultValue extends AbstractEntity
+@org.hibernate.annotations.Table(appliesTo = "result_value",
+                                 indexes={ @Index(name = "result_value_rvt_and_value_index", columnNames={ "resultValueTypeId", "value" }),
+                                           @Index(name = "result_value_rvt_and_numeric_value_index", columnNames={ "resultValueTypeId", "numericValue" }),
+                                           @Index(name = "result_value_rvt_and_positive_index", columnNames={ "resultValueTypeId", "isPositive" }) })
+public class ResultValue extends SemanticIDAbstractEntity
 {
 
   // private static data
 
   private static final long serialVersionUID = -4066041317098744417L;
   private static final Logger log = Logger.getLogger(ResultValue.class);
-  private static final int DEFAULT_DECIMAL_PRECISION = 3;
+  public static final int DEFAULT_DECIMAL_PRECISION = 3;
   private static final String[] FORMAT_STRINGS = new String[10];
   static {
     FORMAT_STRINGS[0] = "%1.0f";
@@ -128,8 +130,7 @@ public class ResultValue extends AbstractEntity
 
   // private instance data
 
-  private Integer _resultValueId;
-  //private Integer _version;
+  private String _resultValueId;
   private Well _well;
   private ResultValueType _resultValueType;
   private String _value;
@@ -241,17 +242,11 @@ public class ResultValue extends AbstractEntity
    * @return the id for the result value
    */
   @Id
-  @org.hibernate.annotations.GenericGenerator(
-    name="result_value_id_seq",
-    strategy="seqhilo",
-    parameters = {
-      @org.hibernate.annotations.Parameter(name="sequence", value="result_value_id_seq"),
-      @org.hibernate.annotations.Parameter(name="max_lo", value="384")
-    }
-  )
-  @GeneratedValue(strategy=GenerationType. SEQUENCE, generator="result_value_id_seq")
-  public Integer getResultValueId()
+  public String getResultValueId()
   {
+    if (_resultValueId == null) {
+      _resultValueId = _well.getWellId() + ":" + _resultValueType.getResultValueTypeId();
+    }
     return _resultValueId;
   }
 
@@ -306,6 +301,7 @@ public class ResultValue extends AbstractEntity
    *         <code>ResultValue</code>; may return null.
    */
   @org.hibernate.annotations.Type(type="text")
+  //@Index(name="result_value_value_index")
   public String getValue()
   {
     return _value;
@@ -331,6 +327,7 @@ public class ResultValue extends AbstractEntity
    * @return a {@link java.lang.Double} representing the numeric value of this
    *         <code>ResultValue</code>; may return null.
    */
+  //@Index(name="result_value_numeric_value_index")
   public Double getNumericValue()
   {
     return _numericValue;
@@ -506,6 +503,7 @@ public class ResultValue extends AbstractEntity
     if (well == null) {
       throw new DataModelViolationException("well is required for ResultValue");
     }
+
     _resultValueType = rvt;
     _well = well;
     // TODO: HACK! commenting this out, breaking maintenance of bidir rel'n (in memory only)
@@ -559,32 +557,10 @@ public class ResultValue extends AbstractEntity
    * @param resultValueId the new id for the result value
    * @motivation for hibernate
    */
-  private void setResultValueId(Integer resultValueId)
+  private void setResultValueId(String resultValueId)
   {
     _resultValueId = resultValueId;
   }
-
-//  /**
-//   * Get the version number of the result value.
-//   * @return the version number of the <code>ResultValue</code>
-//   * @motivation for hibernate
-//   */
-//  @Column(nullable=false)
-//  @Version
-//  private Integer getVersion()
-//  {
-//    return _version;
-//  }
-//
-//  /**
-//   * Set the version number of the <code>ResultValue</code>
-//   * @param version the new version number for the <code>ResultValue</code>
-//   * @motivation for hibernate
-//   */
-//  private void setVersion(Integer version)
-//  {
-//    _version = version;
-//  }
 
   /**
    * Set the well.

@@ -40,7 +40,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 @Entity
 @PrimaryKeyJoinColumn(name="screensaverUserId")
 @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_screensaver_user")
-@org.hibernate.annotations.Proxy(lazy=false)
+@org.hibernate.annotations.Proxy()//lazy=false)
 public class ScreeningRoomUser extends ScreensaverUser
 {
 

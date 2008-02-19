@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -14,13 +14,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class StringUtils 
+public class StringUtils
 {
 
 	/**
    * Makes a delimited list of items from a Collection, just like Perl's join()
    * function.
-   * 
+   *
    * @param items a <code>Collection</code> of <code>Object</code>s with
    *          appropriate <code>toString</code> methods
    * @param delimiter a <code>String</code>
@@ -31,21 +31,23 @@ public class StringUtils
   /* TODO: overload method signature for default parameters */
   public static String makeListString(Collection items, String delimiter)
   {
-    boolean isFirst = true;
     StringBuilder buf = new StringBuilder();
-    for (Iterator iter = items.iterator(); iter.hasNext();) {
-      Object item = iter.next();
-      String s = "<null>";
-      if (item != null) {
-        s = item.toString();
+    if (items != null) {
+      boolean isFirst = true;
+      for (Iterator iter = items.iterator(); iter.hasNext();) {
+        Object item = iter.next();
+        String s = "<null>";
+        if (item != null) {
+          s = item.toString();
+        }
+        if (isFirst) {
+          isFirst = false;
+        }
+        else {
+          buf.append(delimiter);
+        }
+        buf.append(s);
       }
-      if (isFirst) {
-        isFirst = false;
-      }
-      else {
-        buf.append(delimiter);
-      }
-      buf.append(s);
     }
     return buf.toString();
   }
@@ -81,7 +83,7 @@ public class StringUtils
     }
     return result;
   }
-  
+
   public static String capitalize(String s)
   {
     if (s != null && s.length() > 0) {

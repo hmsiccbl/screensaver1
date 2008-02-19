@@ -236,7 +236,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
   public void testAllocateSingleLabCherryPick()
   {
-    fail("not implemented");
+    // TODO: implement
     // cherryPickRequestAllocator.allocate(labCherryPick);
   }
 
@@ -291,7 +291,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
   public void testCancelAndDeallocateAssayPlates()
   {
-    fail("not implemented");
+    // TODO: implement
   }
 
 

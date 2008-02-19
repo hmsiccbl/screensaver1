@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 public class AbstractEntityTest extends TestCase
 {
   private static Logger log = Logger.getLogger(AbstractEntityTest.class);
-  
+
   private static class LessAbstractEntity extends AbstractEntity
   {
     private static int nextUniqueRelative = 1;
@@ -33,14 +33,14 @@ public class AbstractEntityTest extends TestCase
 
     private String _name;
     private boolean _great;
-    
+
     public LessAbstractEntity(String name,
                               boolean isGreat)
     {
       _name = name;
       _great = isGreat;
     }
-    
+
     public Object acceptVisitor(AbstractEntityVisitor visitor)
     {
       return null;
@@ -53,17 +53,17 @@ public class AbstractEntityTest extends TestCase
     {
       return -1;
     }
-    
+
     public String getName()
     {
       return _name;
     }
-    
+
     public boolean isGreat()
     {
       return _great;
     }
-    
+
     /**
      * @motivation to test that collection-returning methods are NOT considered by AbstractEntity.isEquivalent()
      */
@@ -73,7 +73,7 @@ public class AbstractEntityTest extends TestCase
       relatives.add(nextUniqueRelative++);
       return relatives;
     }
-    
+
     /**
      * @motivation to test that map-returning methods are NOT considered by AbstractEntity.isEquivalent()
      */
@@ -84,7 +84,7 @@ public class AbstractEntityTest extends TestCase
       ++nextUniqueRelative;
       return map;
     }
-    
+
     public int someBehavioralMethod()
     {
       return -1;
@@ -107,25 +107,25 @@ public class AbstractEntityTest extends TestCase
     private static final long serialVersionUID = 1L;
 
     private int _value;
-    
+
     public ConcreteEntity(String name, boolean isGreat, int value) {
       super(name, isGreat);
       _value = value;
     }
-    
-    public int getValue() 
-    { 
+
+    public int getValue()
+    {
       return _value;
     }
   }
-  
+
   public void testIsEquivalent()
   {
     ConcreteEntity entity1 = new ConcreteEntity("1",true,1);
     ConcreteEntity entity2 = new ConcreteEntity("1",true,1);
     assertTrue(entity1.isEquivalent(entity2));
     assertTrue(entity2.isEquivalent(entity1));
-    
+
     List<ConcreteEntity> nonEquivalents = new ArrayList<ConcreteEntity>();
     //nonEquivalents.add(new ConcreteEntity("1",true,1));
     nonEquivalents.add(new ConcreteEntity("1",true,2));
@@ -139,5 +139,14 @@ public class AbstractEntityTest extends TestCase
       ConcreteEntity other = (ConcreteEntity) iter.next();
       assertFalse(entity1.isEquivalent(other));
     }
+  }
+
+  public void testGetProperty()
+  {
+    ConcreteEntity entity = new ConcreteEntity("3",true,3);
+    assertEquals("'value' property", new Integer(3), entity.getPropertyValue("value", Integer.class));
+    assertEquals("'name' property", "3", entity.getPropertyValue("name", String.class));
+    assertEquals("'great' property", Boolean.TRUE, entity.getPropertyValue("great", Boolean.class));
+
   }
 }

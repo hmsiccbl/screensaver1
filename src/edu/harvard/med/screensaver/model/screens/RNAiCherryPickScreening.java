@@ -46,7 +46,9 @@ public class RNAiCherryPickScreening extends Screening
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(RNAiCherryPickScreening.class);
 
+  public static final String ACTIVITY_TYPE_NAME = "RNAi Cherry Pick Screening";
 
+  
   // private instance datum
 
   private RNAiCherryPickRequest _rnaiCherryPickRequest;
@@ -64,7 +66,7 @@ public class RNAiCherryPickScreening extends Screening
   @Transient
   public String getActivityTypeName()
   {
-    return "RNAi Cherry Pick Screening";
+    return ACTIVITY_TYPE_NAME;
   }
 
   /**

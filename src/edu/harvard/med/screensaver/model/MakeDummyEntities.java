@@ -10,18 +10,24 @@
 package edu.harvard.med.screensaver.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
@@ -29,6 +35,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
@@ -89,8 +96,8 @@ public class MakeDummyEntities
     // create ResultValueTypes
 
     screenResult.createResultValueType("numeric_repl1", 1, false, false, false, "phenotype").setNumeric(true);
-    screenResult.createResultValueType("numeric_repl2", 1, false, false, false, "phenotype").setNumeric(true);
-    screenResult.createResultValueType("text_repl1", 2, false, false, false, "phenotype").setNumeric(false);
+    screenResult.createResultValueType("numeric_repl2", 2, false, false, false, "phenotype").setNumeric(true);
+    screenResult.createResultValueType("text_repl1", 1, false, false, false, "phenotype").setNumeric(false);
     screenResult.createResultValueType("text_repl2", 2, false, false, false, "phenotype").setNumeric(false);
 
     ResultValueType positive1Rvt = screenResult.createResultValueType("positive1", 1, true, true, false, "phenotype");
@@ -109,31 +116,41 @@ public class MakeDummyEntities
     positive2Rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
     positive2Rvt.setPositiveIndicatorCutoff(10.0);
 
-    ResultValueType positiveRvt = screenResult.createResultValueType("positive", 2, true, true, false, "phenotype");
+    ResultValueType positiveRvt = screenResult.createResultValueType("positive", null, true, true, false, "phenotype");
     positiveRvt.setHowDerived("from both replicates");
     positiveRvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(4));
     positiveRvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(5));
     positiveRvt.setNumeric(false);
     positiveRvt.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
 
+    ResultValueType commentsRvt = screenResult.createResultValueType("comments");
+    commentsRvt.setNumeric(false);
+    commentsRvt.setDescription("a data header with sparse values (some are null, some are empty strings)");
+
     // create ResultValues
 
     List<Well> wells = new ArrayList<Well>(library.getWells());
+    Collections.sort(wells);
     for (int i = 0; i < wells.size(); ++i) {
       Well well = wells.get(i);
       for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
         if (rvt.isNumeric()) {
-          rvt.createResultValue(well,
-                                Math.random() * 200.0 - 100.0,
-                                3);
+          rvt.createResultValue(well, Math.random() * 200.0 - 100.0, 3);
         }
-
         else if (rvt.isPositiveIndicator() && rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
           rvt.createResultValue(well, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
         }
+        else if (rvt.equals(commentsRvt)) {
+          PartitionedValue pv = PartitionedValue.values()[i % PartitionedValue.values().length];
+          if (pv != PartitionedValue.NONE) { // else, a null test value, by virtue of not creating a RV for this well/rvt
+            rvt.createResultValue(well, pv == PartitionedValue.STRONG ? "what a positive!" :
+              pv == PartitionedValue.MEDIUM ? "so so" :
+                // a "empty string" test value
+                "");
+          }
+        }
         else if (!rvt.isNumeric()) {
-          rvt.createResultValue(well,
-                                Double.toString(Math.random() * 200.0 - 100.0));
+          rvt.createResultValue(well, String.format("text%05d", i));
         }
         else {
           throw new RuntimeException("unhandled rvt type" + rvt);
@@ -142,6 +159,21 @@ public class MakeDummyEntities
     }
 
     return screenResult;
+  }
+
+  public static Screen makeDummyStudy(Library library)
+  {
+    Screen study = MakeDummyEntities.makeDummyScreen(Study.MIN_STUDY_NUMBER, library.getScreenType());
+    AnnotationType annotType1 = new AnnotationType(study, "numeric_annot", "numeric annotation", 0, true);
+    AnnotationType annotType2 = new AnnotationType(study, "text_annot", "text annotation", 1, false);
+    Iterator<Well> wellIter = new TreeSet<Well>(library.getWells()).iterator();
+    Well well = wellIter.next();
+    annotType1.createAnnotationValue(well.getReagent(), "1.01" );
+    annotType2.createAnnotationValue(well.getReagent(), "aaa" );
+    well = wellIter.next();
+    annotType1.createAnnotationValue(well.getReagent(), "-2.02" );
+    annotType2.createAnnotationValue(well.getReagent(), "bbb" );
+    return study;
   }
 
   public static Library makeDummyLibrary(int id, ScreenType screenType, int nPlates)
@@ -173,6 +205,7 @@ public class MakeDummyEntities
                              wellKey.hashCode(),
                              "geneEntrezSym" + wellKey,
                              "species");
+        gene.addGenbankAccessionNumber("GB" + wellKey.hashCode());
         SilencingReagent silencingReagent = gene.createSilencingReagent(SilencingReagentType.SIRNA, "ACTG");
         well.addSilencingReagent(silencingReagent);
       }
@@ -180,6 +213,7 @@ public class MakeDummyEntities
         Compound compound = new Compound("smiles" + wellKey, "inchi" + wellKey);
         well.addCompound(compound);
       }
+      well.setReagent(new Reagent(new ReagentVendorIdentifier("Vendor" + id + ":" + i)));
       wells.add(well);
     }
     return library;

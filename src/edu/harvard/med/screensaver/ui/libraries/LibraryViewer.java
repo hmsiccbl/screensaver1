@@ -9,15 +9,11 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -159,11 +155,11 @@ public class LibraryViewer extends AbstractBackingBean
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Library library = _dao.reloadEntity(_library, true);
-        _dao.needReadOnly(library,
-                          "wells.silencingReagents.gene.genbankAccessionNumbers",
-                          "wells.compounds");
-        _wellsBrowser.setContents(new ArrayList<Well>(library.getWells()));
+//        Library library = _dao.reloadEntity(_library, true);
+//        _dao.needReadOnly(library,
+//                          "wells.silencingReagents.gene.genbankAccessionNumbers",
+//                          "wells.compounds");
+        _wellsBrowser.searchWellsForLibrary(_library);
       }
     });
 
@@ -173,17 +169,8 @@ public class LibraryViewer extends AbstractBackingBean
   @UIControllerMethod
   public String viewLibraryWellCopyVolumes()
   {
-    final String[] result = new String[1];
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(_library);
-        _wellCopyVolumesBrowser.setContents(wellCopyVolumes);
-        result[0] = VIEW_WELL_VOLUME_SEARCH_RESULTS;
-      }
-    });
-
-    return result[0];
+    _wellCopyVolumesBrowser.searchWellsForLibrary(_library);
+    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
   }
 
   @UIControllerMethod

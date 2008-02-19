@@ -219,5 +219,6 @@
 
 			</t:panelGrid>
 		</t:collapsiblePanel>
+	
 	</h:form>
 </f:subview>

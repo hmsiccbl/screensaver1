@@ -59,7 +59,7 @@ public class VocabularlyConverter<V> implements Converter
     }
   }
 
-  public VocabularlyConverter(V[] values)
+  public VocabularlyConverter(V... values)
   {
     for (V value : values) {
       string2Enum.put(new NormalizedString(value.toString()),

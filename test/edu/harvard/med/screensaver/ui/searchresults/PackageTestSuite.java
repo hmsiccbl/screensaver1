@@ -26,6 +26,9 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    addTestSuite(ReagentSearchResults.class);
+    addTestSuite(ReagentsSearchResultTest.class);
+    addTestSuite(UserSearchResultsTest.class);
+    addTestSuite(WellSearchResultsTest.class);
+    addTestSuite(WellVolumeSearchResultsTest.class);
   }
 }

@@ -71,6 +71,17 @@ public class LabCherryPick extends AbstractEntity
   private Integer _assayPlateRow;
   private Integer _assayPlateColumn;
 
+  public enum LabCherryPickStatus {
+    Unfulfilled,
+    Reserved,
+    Mapped,
+    Canceled,
+    Failed,
+    Plated
+  };
+
+
+
 
   // public instance methods
 
@@ -101,6 +112,17 @@ public class LabCherryPick extends AbstractEntity
   public Integer getLabCherryPickId()
   {
     return _labCherryPickId;
+  }
+
+  @Transient
+  public LabCherryPickStatus getStatus()
+  {
+    return isPlated() ? LabCherryPickStatus.Plated :
+      isFailed() ? LabCherryPickStatus.Failed :
+        isCancelled() ? LabCherryPickStatus.Canceled :
+          isMapped() ? LabCherryPickStatus.Mapped :
+            isAllocated() ? LabCherryPickStatus.Reserved :
+              LabCherryPickStatus.Unfulfilled;
   }
 
   /**

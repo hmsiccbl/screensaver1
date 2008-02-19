@@ -35,9 +35,9 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.UniqueDataHeaderNames;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -87,8 +87,6 @@ public class ScreenResult extends AbstractEntity
    */
   private SortedSet<Integer> _plateNumbers = new TreeSet<Integer>();
   private Integer _experimentalWellCount = 0; // can't be null
-
-  private transient UniqueDataHeaderNames _uniqueDataHeaderNames;
 
 
   // public constructor
@@ -272,6 +270,7 @@ public class ScreenResult extends AbstractEntity
     boolean isFollowupData,
     String assayPhenotype)
   {
+    verifyNameIsUnique(name);
     ResultValueType resultValueType = new ResultValueType(
       this,
       name,
@@ -282,20 +281,6 @@ public class ScreenResult extends AbstractEntity
       assayPhenotype);
     _resultValueTypes.add(resultValueType);
     return resultValueType;
-  }
-
-  /**
-   * Get the unique data header names
-   * @return the unique data header names
-   * @see UniqueDataHeaderNames
-   */
-  @Transient
-  public UniqueDataHeaderNames getUniqueDataHeaderNames()
-  {
-    if (_uniqueDataHeaderNames == null) {
-      _uniqueDataHeaderNames = new UniqueDataHeaderNames(this);
-    }
-    return _uniqueDataHeaderNames;
   }
 
   /**
@@ -424,7 +409,26 @@ public class ScreenResult extends AbstractEntity
   public boolean addWell(Well well)
   {
     _plateNumbers.add(well.getPlateNumber());
-    return _wells.add(well);
+    if (_wells.add(well)) {
+      well.addScreenResult(this);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Remove the well.
+   * @param well the well to remove
+   * @return true iff the screen previously had the well
+   */
+  public boolean removeWell(Well well)
+  {
+    // TODO: remove plateNumber if a plate's well count becomes zero
+    if (_wells.remove(well)) {
+      well.removeScreenResult(this);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -570,5 +574,14 @@ public class ScreenResult extends AbstractEntity
   private void setExperimentalWellCount(Integer experimentalWellCount)
   {
     _experimentalWellCount = experimentalWellCount;
+  }
+
+  private void verifyNameIsUnique(String name)
+  {
+    for (ResultValueType rvt : getResultValueTypes()) {
+      if (rvt.getName().equals(name)) {
+        throw new DuplicateEntityException(this, rvt);
+      }
+    }
   }
 }

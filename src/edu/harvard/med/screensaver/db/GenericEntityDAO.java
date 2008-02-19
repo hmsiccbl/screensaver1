@@ -198,8 +198,7 @@ public interface GenericEntityDAO
   public int relationshipSize(final AbstractEntity entity, final String relationship);
 
 
-  public int relationshipSize(
-                              final AbstractEntity entity,
+  public int relationshipSize(final AbstractEntity entity,
                               final String relationship,
                               final String relationshipProperty,
                               final String relationshipPropertyValue);

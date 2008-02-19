@@ -39,7 +39,6 @@ import javax.faces.el.ValueBinding;
  * @author Sylvain Vieujot (latest modification by $Author: cagatay $)
  * @version $Revision: 517689 $ $Date: 2007-03-13 14:26:15 +0100 (Di, 13 Mar 2007) $
  */
-@SuppressWarnings("deprecation")
 public class HtmlInputDate extends UIInput implements UserRoleAware {
     public static final String COMPONENT_TYPE = "org.apache.myfaces.HtmlInputDate";
     public static final String COMPONENT_FAMILY = "javax.faces.Input";
@@ -72,9 +71,9 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
     public UserData getUserData(Locale currentLocale){
         return new UserData((Date) getValue(), currentLocale, getTimeZone(), isAmpm(), getType());
     }
-
+    
     /**
-     * Overriden to support the force id, since the parent is not an extended component
+     * Overriden to support the force id, since the parent is not an extended component 
      */
     public String getClientId(FacesContext context)
     {
@@ -105,7 +104,7 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
     public void setPopupCalendar(boolean popupCalendar){
         this._popupCalendar = Boolean.valueOf(popupCalendar);
     }
-
+    
     public boolean isAmpm(){
    		if (_ampm != null)
    		    return _ampm.booleanValue();
@@ -121,27 +120,27 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
         ValueBinding vb = getValueBinding("timeZone");
         return vb != null ? _ComponentUtils.getStringValue(getFacesContext(), vb) : null;
     }
-
+    
     public void setTimeZone(String timeZone){
         _timeZone = timeZone;
     }
-
+    
 	public String getEmptyMonthSelection() {
 		if (_emptyMonthSelection != null) return _emptyMonthSelection;
 		ValueBinding vb = getValueBinding("emptyMonthSelection");
 		return vb != null ? _ComponentUtils.getStringValue(getFacesContext(), vb) : "";
 	}
-
+	
 	public void setEmptyMonthSelection(String string) {
 		_emptyMonthSelection = string;
 	}
-
+	
 	public String getEmptyAmpmSelection() {
 		if (_emptyAmpmSelection != null) return _emptyAmpmSelection;
 		ValueBinding vb = getValueBinding("emptyAmpmSelection");
 		return vb != null ? _ComponentUtils.getStringValue(getFacesContext(), vb) : "";
 	}
-
+	
 	public void setEmptyAmpmSelection(String string) {
 		_emptyAmpmSelection = string;
 	}
@@ -242,10 +241,10 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
 				timeZone = TimeZone.getTimeZone(_timeZone);
                 calendar.setTimeZone(timeZone);
 			}
-
+            
             if(date == null)
             	return;
-
+          
             calendar.setTime( date );
             day = Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
             month = Integer.toString(calendar.get(Calendar.MONTH)+1);
@@ -275,7 +274,7 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
         		if(!isSubmitValid(uses_ampm, type)) {
         			return null;
         		}
-
+        		
             	if(! (type.equals( "time" ) || type.equals( "short_time" )) ) {
             		tempCalendar.set(Calendar.DAY_OF_MONTH,Integer.parseInt(day));
             		tempCalendar.set(Calendar.MONTH,Integer.parseInt(month)-1);
@@ -283,7 +282,7 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
             	}
 
             	if(! type.equals( "date" )) {
-
+            		
             		if (uses_ampm) {
 	            		int int_hours = Integer.parseInt(hours);
 	            		// ampm hours must be in range 0-11 to be handled right; we have to handle "12" specially
@@ -296,7 +295,7 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
 	            		tempCalendar.set(Calendar.HOUR_OF_DAY,Integer.parseInt(hours));
 	            	}
             		tempCalendar.set(Calendar.MINUTE,Integer.parseInt(minutes));
-
+            		
             		if (type.equals("full") || type.equals("time")) {
 	            		tempCalendar.set(Calendar.SECOND,Integer.parseInt(seconds));
             		}
@@ -307,7 +306,7 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
             	throw new ParseException(e.getMessage(),0);
             } catch (IllegalArgumentException e) {
             	throw new ParseException(e.getMessage(),0);
-            }
+            } 
             return retDate;
         }
 
@@ -325,14 +324,14 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
                 return "0"+i;
             return Integer.toString(i);
         }
-
+        
         private boolean isDateSubmitted(boolean usesAmpm, String type) {
         	boolean isDateSubmitted = ! (StringUtils.isEmpty(getDay()) && ((getMonth() == null) || getMonth().equals("-1")) && StringUtils.isEmpty(getYear()));
         	if(usesAmpm)
         		isDateSubmitted = isDateSubmitted || isAmpmSubmitted();
         	return isDateSubmitted;
         }
-
+        
         private boolean isTimeSubmitted(boolean usesAmpm, String type) {
         	boolean isTimeSubmitted = ! (StringUtils.isEmpty(getHours()) && StringUtils.isEmpty(getMinutes()));
         	if(type.equals("time") || type.equals("full"))
@@ -341,7 +340,7 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
         		isTimeSubmitted = isTimeSubmitted || isAmpmSubmitted();
         	return isTimeSubmitted;
         }
-
+        
         private boolean isSubmitValid(boolean usesAmpm, String type) {
         	if(type.equals("date"))
         		return isDateSubmitted(usesAmpm, type);
@@ -352,7 +351,7 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
         	else
         		return false;
         }
-
+        
         private boolean isAmpmSubmitted() {
         	if(getAmpm() == null)
         		return false;
@@ -400,14 +399,14 @@ public class HtmlInputDate extends UIInput implements UserRoleAware {
         public void setSeconds(String seconds) {
             this.seconds = seconds;
         }
-
+        
         public String getAmpm() {
             return ampm;
         }
         public void setAmpm(String ampm) {
             this.ampm = ampm;
         }
-
+        
         public String getType() {
             return type;
         }

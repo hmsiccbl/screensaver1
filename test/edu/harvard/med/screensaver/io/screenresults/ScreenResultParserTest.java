@@ -38,12 +38,11 @@ import jxl.write.WriteException;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecification.ScreenInfoRow;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
-import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
@@ -59,6 +58,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.DateUtil;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.commons.lang.math.IntRange;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
@@ -264,7 +264,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testErrorAnnotatedWorkbook() throws IOException, BiffException, WriteException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
-    ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
+    mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
     WritableWorkbook errorAnnotatedWorkbook = mockScreenResultParser.getErrorAnnotatedWorkbook();
     File file = File.createTempFile(ERRORS_TEST_WORKBOOK_FILE, ".xls");
     errorAnnotatedWorkbook.setOutputFile(file);
@@ -289,12 +289,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
                    sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_ROW_HEADER_COLUMN_INDEX, i).getContents());
       if (screenInfoRow.equals(ScreenInfoRow.ID)) {
         assertEquals(screenInfoRow.name() + " value",
-                     screenResult.getScreen().getScreenNumber(),
+                     new Integer(115),
                      new Integer((int) ((NumberCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getValue()));
       }
       if (screenInfoRow.equals(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING)) {
         assertEquals(screenInfoRow.name() + " value",
-                     screenResult.getDateCreated(),
+                     DateUtil.makeDate(2006, 1, 1),
                      DateUtils.truncate(Cell.convertGmtDateToLocalTimeZone(((DateCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getDate()), Calendar.DATE));
       }
       ++i;
@@ -345,20 +345,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    ScreenResult result1 = mockScreenResultParser.parse(screen, workbookFile);
+    mockScreenResultParser.parse(screen, workbookFile);
     List<WorkbookParseError> errors1 = mockScreenResultParser.getErrors();
-    assertNotNull("1st parse returns a result", result1);
-    ScreenResult result2 = mockScreenResultParser.parse(screen, workbookFile);
+    /*Screen*/ screen = MakeDummyEntities.makeDummyScreen(115);
+    mockScreenResultParser.parse(screen, workbookFile);
     List<WorkbookParseError> errors2 = mockScreenResultParser.getErrors();
-    assertNotNull("2nd parse returns a result", result2);
-    assertNotSame("parses returned different ScreenResult objects", result1, result2);
     assertTrue(errors1.size() > 0);
     assertTrue(errors2.size() > 0);
     assertEquals("errors not accumulating across multiple parse() calls", errors1, errors2);
-    // allow GC
-    result1 = null;
-    result2 = null;
-    System.gc();
 
     // now test reading yet another spreadsheet, for which we can test the parsed result
     testParseScreenResult();
@@ -408,6 +402,113 @@ public class ScreenResultParserTest extends AbstractSpringTest
                                                              workbookFile);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
+    doTestScreenResult115ParseResult(screenResult);
+  }
+
+  public void testParseScreenResultIncremental() throws Exception
+  {
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
+    Screen screen = MakeDummyEntities.makeDummyScreen(115);
+    mockScreenResultParser.parse(screen,
+                                 workbookFile,
+                                 new IntRange(1, 2));
+    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
+    mockScreenResultParser.parse(screen,
+                                 workbookFile,
+                                 new IntRange(3, 3));
+    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
+    
+    doTestScreenResult115ParseResult(screen.getScreenResult());
+  }
+
+  public void testHitCounts() throws Exception
+  {
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, HIT_COUNT_TEST_WORKBOOK_FILE);
+    ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115),
+                                                             workbookFile);
+    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
+
+    int resultValues = 10;
+    assertEquals("result value count",
+                 resultValues,
+                 screenResult.getResultValueTypesList().get(0).getResultValues().size());
+    int nonExcludedResultValues = resultValues - 1;
+    List<Integer> expectedHitCount = Arrays.asList(4, 6, 3);
+    List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) nonExcludedResultValues,
+                                                  expectedHitCount.get(1) / (double) nonExcludedResultValues,
+                                                  expectedHitCount.get(2) / (double) nonExcludedResultValues);
+
+    int iPositiveIndicatorRvt = 0;
+    for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
+      if (rvt.isPositiveIndicator()) {
+        assertEquals("hit count", expectedHitCount.get(iPositiveIndicatorRvt), rvt.getPositivesCount());
+        assertEquals("hit ratio",
+                     expectedHitRatio.get(iPositiveIndicatorRvt).doubleValue(),
+                     rvt.getPositivesRatio().doubleValue(),
+                     0.01);
+        ++iPositiveIndicatorRvt;
+      }
+    }
+  }
+
+  public void testIllegalScreenNumber()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(999);
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
+    mockScreenResultParser.parse(screen,
+                                 workbookFile);
+    assertEquals("screen result data file is for screen number 115, expected 999",
+                 mockScreenResultParser.getErrors().get(0).getErrorMessage());
+  }
+
+  public void testMultiCharColumnLabels()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(115);
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE);
+    ScreenResult result = mockScreenResultParser.parse(screen,workbookFile);
+    if (mockScreenResultParser.getHasErrors()) {
+      log.debug("parse errors: " + mockScreenResultParser.getErrors());
+    }
+    assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
+    List<ResultValueType> resultValueTypes = result.getResultValueTypesList();
+    assertEquals("ResultValueType count", 30, resultValueTypes.size());
+    for (int i = 0; i < 30 - 1; ++i) {
+      ResultValueType rvt = resultValueTypes.get(i);
+      assertEquals("is derived from next", resultValueTypes.get(i+1), rvt.getDerivedTypes().first());
+      Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+      assertEquals(rvt.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
+      assertEquals(rvt.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
+      assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
+    }
+    assertTrue("last is not derived from any", resultValueTypes.get(30 - 1).getDerivedTypes().isEmpty());
+  }
+
+  private void setDefaultValues(ResultValueType rvt)
+  {
+    if (rvt.getAssayPhenotype() == null) {
+      rvt.setAssayPhenotype("");
+    }
+    if (rvt.getComments() == null) {
+      rvt.setComments("");
+    }
+    if (rvt.getDescription() == null) {
+      rvt.setDescription("");
+    }
+    if (rvt.getHowDerived() == null) {
+      rvt.setHowDerived("");
+    }
+    if (rvt.getName() == null) {
+      rvt.setName("");
+    }
+    if (rvt.getTimePoint() == null) {
+      rvt.setTimePoint("");
+    }
+  }
+  
+  // private methods
+  
+  private void doTestScreenResult115ParseResult(ScreenResult screenResult)
+  {
     Date expectedDate = DateUtil.makeDate(2006, 1, 1);
     ScreenResult expectedScreenResult = makeScreenResult(expectedDate);
     assertEquals("date",
@@ -419,7 +520,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     ResultValueType rvt;
 
-    rvt = expectedScreenResult.createResultValueType("Luminescence");
+    rvt = expectedScreenResult.createResultValueType("Luminescence1");
     rvt.setDescription("Desc1");
     rvt.setReplicateOrdinal(1);
     rvt.setTimePoint("0:10");
@@ -429,7 +530,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(0, rvt);
 
-    rvt = expectedScreenResult.createResultValueType("Luminescence");
+    rvt = expectedScreenResult.createResultValueType("Luminescence2");
     rvt.setDescription("Desc2");
     rvt.setReplicateOrdinal(2);
     rvt.setTimePoint("0:10");
@@ -440,7 +541,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(1, rvt);
 
-    rvt = expectedScreenResult.createResultValueType("FI");
+    rvt = expectedScreenResult.createResultValueType("FI1");
     rvt.setDescription("Fold Induction");
     rvt.setReplicateOrdinal(1);
     rvt.setDerived(true);
@@ -450,7 +551,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setNumeric(true);
     expectedResultValueTypes.put(2, rvt);
 
-    rvt = expectedScreenResult.createResultValueType("FI");
+    rvt = expectedScreenResult.createResultValueType("FI2");
     rvt.setDescription("Fold Induction");
     rvt.setReplicateOrdinal(2);
     rvt.setDerived(true);
@@ -574,91 +675,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       ++iRvt;
     }
   }
-
-  public void testHitCounts() throws Exception
-  {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, HIT_COUNT_TEST_WORKBOOK_FILE);
-    ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115),
-                                                             workbookFile);
-    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
-
-    int resultValues = 10;
-    assertEquals("result value count",
-                 resultValues,
-                 screenResult.getResultValueTypesList().get(0).getResultValues().size());
-    int nonExcludedResultValues = resultValues - 1;
-    List<Integer> expectedHitCount = Arrays.asList(4, 6, 3);
-    List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) nonExcludedResultValues,
-                                                  expectedHitCount.get(1) / (double) nonExcludedResultValues,
-                                                  expectedHitCount.get(2) / (double) nonExcludedResultValues);
-
-    int iPositiveIndicatorRvt = 0;
-    for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
-      if (rvt.isPositiveIndicator()) {
-        assertEquals("hit count", expectedHitCount.get(iPositiveIndicatorRvt), rvt.getPositivesCount());
-        assertEquals("hit ratio",
-                     expectedHitRatio.get(iPositiveIndicatorRvt).doubleValue(),
-                     rvt.getPositivesRatio().doubleValue(),
-                     0.01);
-        ++iPositiveIndicatorRvt;
-      }
-    }
-  }
-
-  public void testIllegalScreenNumber()
-  {
-    Screen screen = MakeDummyEntities.makeDummyScreen(999);
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-    mockScreenResultParser.parse(screen,
-                                 workbookFile);
-    assertEquals("screen result data file is for screen number 115, expected 999",
-                 mockScreenResultParser.getErrors().get(0).getErrorMessage());
-  }
-
-  public void testMultiCharColumnLabels()
-  {
-    Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE);
-    ScreenResult result = mockScreenResultParser.parse(screen,workbookFile);
-    if (mockScreenResultParser.getHasErrors()) {
-      log.debug("parse errors: " + mockScreenResultParser.getErrors());
-    }
-    assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
-    List<ResultValueType> resultValueTypes = result.getResultValueTypesList();
-    assertEquals("ResultValueType count", 30, resultValueTypes.size());
-    for (int i = 0; i < 30 - 1; ++i) {
-      ResultValueType rvt = resultValueTypes.get(i);
-      assertEquals("is derived from next", resultValueTypes.get(i+1), rvt.getDerivedTypes().first());
-      Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
-      assertEquals(rvt.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
-      assertEquals(rvt.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
-      assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
-    }
-    assertTrue("last is not derived from any", resultValueTypes.get(30 - 1).getDerivedTypes().isEmpty());
-  }
-
-  private void setDefaultValues(ResultValueType rvt)
-  {
-    if (rvt.getAssayPhenotype() == null) {
-      rvt.setAssayPhenotype("");
-    }
-    if (rvt.getComments() == null) {
-      rvt.setComments("");
-    }
-    if (rvt.getDescription() == null) {
-      rvt.setDescription("");
-    }
-    if (rvt.getHowDerived() == null) {
-      rvt.setHowDerived("");
-    }
-    if (rvt.getName() == null) {
-      rvt.setName("");
-    }
-    if (rvt.getTimePoint() == null) {
-      rvt.setTimePoint("");
-    }
-  }
-
+  
 
   // testing  utility methods
 

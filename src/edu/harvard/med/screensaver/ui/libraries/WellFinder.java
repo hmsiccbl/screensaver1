@@ -9,9 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -141,19 +140,17 @@ public class WellFinder extends AbstractBackingBean
           showMessage("libraries.plateWellListParseError", error.getSecond());
         }
 
-        List<Well> foundWells = new ArrayList<Well>();
+        Set<WellKey> foundWells = new HashSet<WellKey>();
         for (WellKey wellKey : parseResult.getParsedWellKeys()) {
+          // TODO: eliminate this dao call here; it's wasteful; make this check when loading the data later on
           Well well = _dao.findEntityById(Well.class,
                                           wellKey.toString(),
-                                          true,
-                                          "library",
-                                          "silencingReagents.gene",
-                                          "compounds");
+                                          true);
           if (well == null) {
             showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
           }
           else {
-            foundWells.add(well);
+            foundWells.add(well.getWellKey());
           }
         }
 
@@ -165,7 +162,7 @@ public class WellFinder extends AbstractBackingBean
           result[0] = _wellViewer.viewWell(parseResult.getParsedWellKeys().first());
         }
         else {
-          _wellsBrowser.setContents(foundWells);
+          _wellsBrowser.searchWells(foundWells);
           result[0] = VIEW_WELL_SEARCH_RESULTS;
         }
       }
@@ -177,7 +174,7 @@ public class WellFinder extends AbstractBackingBean
    * Find the volumes for all copies of the wells specified in the plate-well
    * list, and go to the {@link WellSearchResultsViewer} page.
    *
-   * @return the controler code for the next appropriate page
+   * @return the controller code for the next appropriate page
    */
   @UIControllerMethod
   public String findWellVolumes()
@@ -194,17 +191,7 @@ public class WellFinder extends AbstractBackingBean
           showMessage("libraries.plateWellListParseError", error.getSecond());
         }
 
-        List<WellCopyVolume> foundWellCopyVolumes = new ArrayList<WellCopyVolume>();
-        for (WellKey wellKey : parseResult.getParsedWellKeys()) {
-          Collection<WellCopyVolume> wellCopyVolumes = _librariesDao.findWellCopyVolumes(wellKey);
-          if (wellCopyVolumes.size() == 0) {
-            showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
-          }
-          else {
-            foundWellCopyVolumes.addAll(wellCopyVolumes);
-          }
-        }
-        _wellCopyVolumesBrowser.setContents(foundWellCopyVolumes);
+        _wellCopyVolumesBrowser .searchWells(parseResult.getParsedWellKeys());
         result[0] = VIEW_WELL_VOLUME_SEARCH_RESULTS;
       }
     });

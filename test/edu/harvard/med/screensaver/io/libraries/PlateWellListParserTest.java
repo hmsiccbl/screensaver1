@@ -47,11 +47,11 @@ public class PlateWellListParserTest extends AbstractSpringTest
     schemaUtil.truncateTablesOrCreateSchema();
 
     _library1 = new Library("Test Library 1", "testlib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 10);
-    genericEntityDao.saveOrUpdateEntity(_library1);
     librariesDao.loadOrCreateWellsForLibrary(_library1);
+    genericEntityDao.saveOrUpdateEntity(_library1);
     _library2 = new Library("Test Library 2", "testlib2", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 21, 30);
-    genericEntityDao.saveOrUpdateEntity(_library2);
     librariesDao.loadOrCreateWellsForLibrary(_library2);
+    genericEntityDao.saveOrUpdateEntity(_library2);
   }
   
   public void testPlateWelListParserOnSingleLineInput()

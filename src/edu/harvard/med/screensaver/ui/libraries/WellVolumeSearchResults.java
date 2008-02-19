@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/libraries/WellVolumeSearchResults.java
+// $
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -15,33 +17,34 @@ import java.util.Comparator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.searchresults.FixedDecimalColumn;
-import edu.harvard.med.screensaver.ui.searchresults.IntegerColumn;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResultsWithRowDetail;
-import edu.harvard.med.screensaver.ui.searchresults.TextColumn;
-import edu.harvard.med.screensaver.ui.table.TableColumn;
+import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
+import edu.harvard.med.screensaver.ui.table.column.FixedDecimalColumn;
+import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
+import edu.harvard.med.screensaver.ui.table.column.ListColumn;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.TextColumn;
+import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 
 import org.apache.log4j.Logger;
 
-public class WellVolumeSearchResults extends SearchResultsWithRowDetail<WellVolume,WellVolumeAdjustmentSearchResults>
+/**
+ * Aggregates WellVolumeAdjustments into WellVolumes, and provides these
+ * WellVolumes as a SearchResult. Underlying data is set via methods
+ * {@link WellCopyVolumeSearchResults}.
+ * 
+ * @see WellCopyVolumeSearchResults
+ */
+public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,WellKey>
 {
+
   // static members
 
   private static Logger log = Logger.getLogger(WellVolumeSearchResults.class);
-
-  private static final List<Integer[]> COMPOUND_SORTS = new ArrayList<Integer[]>();
-  static {
-    COMPOUND_SORTS.add(new Integer[] {0, 1, 2});
-    COMPOUND_SORTS.add(new Integer[] {1, 2});
-    COMPOUND_SORTS.add(new Integer[] {2, 1});
-    COMPOUND_SORTS.add(new Integer[] {3, 1, 2});
-    COMPOUND_SORTS.add(new Integer[] {4, 1, 2, 3});
-    COMPOUND_SORTS.add(new Integer[] {5, 1, 2, 3});
-    COMPOUND_SORTS.add(new Integer[] {6, 1, 2, 3});
-    COMPOUND_SORTS.add(new Integer[] {7, 1, 2, 3});
-  }
 
 
   // instance data members
@@ -50,8 +53,7 @@ public class WellVolumeSearchResults extends SearchResultsWithRowDetail<WellVolu
   private LibraryViewer _libraryViewer;
   private WellViewer _wellViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
-  private ArrayList<TableColumn<WellVolume,?>> _columns;
-  private TableColumn<WellVolume,?> _maxRemainingVolumeColumn;
+  private TextColumn<Well> _maxRemainingVolumeColumn;
 
 
   // constructors
@@ -59,10 +61,8 @@ public class WellVolumeSearchResults extends SearchResultsWithRowDetail<WellVolu
   /**
    * @motivation for CGLIB2
    */
-  protected WellVolumeSearchResults()
-  {
-  }
-
+  protected WellVolumeSearchResults() {}
+    
   public WellVolumeSearchResults(GenericEntityDAO dao,
                                  LibraryViewer libraryViewer,
                                  WellViewer wellViewer,
@@ -73,127 +73,209 @@ public class WellVolumeSearchResults extends SearchResultsWithRowDetail<WellVolu
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
-    setRowDetail(rowDetail);
+    // setRowDetail(rowDetail);
   }
 
   // public methods
 
   @Override
-  protected List<TableColumn<WellVolume,?>> getColumns()
+  protected DataTableModel<WellVolume> buildDataTableModel(DataFetcher<WellVolume,WellKey,Object> dataFetcher,
+                                                           List<? extends TableColumn<WellVolume,?>> columns)
   {
-    if (_columns == null) {
-      _columns = new ArrayList<TableColumn<WellVolume,?>>();
-      _columns.add(new TextColumn<WellVolume>("Library", "The library containing the well") {
-        @Override
-        public String getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getLibrary().getLibraryName(); }
-
-        @Override
-        public boolean isCommandLink() { return true; }
-
-        @Override
-        public Object cellAction(WellVolume wellVolume) { return _libraryViewer.viewLibrary(wellVolume.getWell().getLibrary()); }
-      });
-      _columns.add(new IntegerColumn<WellVolume>("Plate", "The number of the plate the well is located on") {
-        @Override
-        public Integer getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getPlateNumber(); }
-      });
-      _columns.add(new TextColumn<WellVolume>("Well", "The plate coordinates of the well") {
-        @Override
-        public String getCellValue(WellVolume wellVolume) { return wellVolume.getWell().getWellName(); }
-
-        @Override
-        public boolean isCommandLink() { return true; }
-
-        @Override
-        public Object cellAction(WellVolume wellVolume) { return _wellViewer.viewWell(wellVolume.getWell()); }
-      });
-      _columns.add(new TextColumn<WellVolume>("Copies", "The copies of this well") {
-        @Override
-        public String getCellValue(WellVolume wellVolume) { return wellVolume.getCopiesList(); }
-      });
-      _columns.add(new FixedDecimalColumn<WellVolume>("Initial Volume", "The initial volume of this well") {
-        @Override
-        public BigDecimal getCellValue(WellVolume wellVolume) { return wellVolume.getInitialMicroliterVolume(); }
-      });
-      _columns.add(new FixedDecimalColumn<WellVolume>("Consumed Volume", "The cumulative volume already used from this well (for all copies)") {
-        @Override
-        public BigDecimal getCellValue(WellVolume wellVolume) { return wellVolume.getConsumedMicroliterVolume(); }
-      });
-      _maxRemainingVolumeColumn = new TextColumn<WellVolume>("Max Remaining Volume", "The maximum remaining volume of this well (for all copies)") {
-        @Override
-        public String getCellValue(WellVolume wellVolume) { return wellVolume.getMaxWellCopyVolume().getRemainingMicroliterVolume() + " ("  + wellVolume.getMaxWellCopyVolume().getCopy().getName() + ")"; }
-
-        @Override
-        protected Comparator<WellVolume> getAscendingComparator()
-        {
-          return new Comparator<WellVolume>() {
-            public int compare(WellVolume o1, WellVolume o2)
-            {
-              return o1.getMaxWellCopyVolume().getRemainingMicroliterVolume().compareTo(o2.getMaxWellCopyVolume().getRemainingMicroliterVolume());
-            }
-          };
-        }
-      };
-      _columns.add(_maxRemainingVolumeColumn);
-      _columns.add(new TextColumn<WellVolume>("Min Remaining Volume", "The minimum remaining volume of this well (for all copies)") {
-        @Override
-        public String getCellValue(WellVolume wellVolume) { return wellVolume.getMinWellCopyVolume().getRemainingMicroliterVolume() + " ("  + wellVolume.getMinWellCopyVolume().getCopy().getName() + ")"; }
-
-        @Override
-        protected Comparator<WellVolume> getAscendingComparator()
-        {
-          return new Comparator<WellVolume>() {
-            public int compare(WellVolume o1, WellVolume o2)
-            {
-              return o1.getMinWellCopyVolume().getRemainingMicroliterVolume().compareTo(o2.getMinWellCopyVolume().getRemainingMicroliterVolume());
-            }
-          };
-        }
-      });
-      _columns.add(new IntegerColumn<WellVolume>("Withdrawals/Adjustments", "The number of withdrawals and administrative adjustments made from this well (for all copies)") {
-        @Override
-        public Integer getCellValue(WellVolume wellVolume) { return wellVolume.getWellVolumeAdjustments().size(); }
-
-        @Override
-        public boolean isCommandLink() { return getRowData().getWellVolumeAdjustments().size() > 0; }
-
-        @Override
-        public Object cellAction(WellVolume wellVolume)
-        {
-          return showRowDetail();
-        }
-      });
-    }
-    return _columns;
+    return new InMemoryDataModel<WellVolume>(dataFetcher);
   }
 
   @Override
-  protected List<Integer[]> getCompoundSorts()
+  protected List<? extends TableColumn<WellVolume,?>> buildColumns()
   {
-    return COMPOUND_SORTS;
+    List<TableColumn<WellVolume,?>> columns = new ArrayList<TableColumn<WellVolume,?>>();
+    columns.add(new TextColumn<WellVolume>("Library",
+                                           "The library containing the well", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getWell().getLibrary().getLibraryName();
+      }
+
+      @Override
+      public boolean isCommandLink()
+      {
+        return true;
+      }
+
+      @Override
+      public Object cellAction(WellVolume wellVolume)
+      {
+        return _libraryViewer.viewLibrary(wellVolume.getWell().getLibrary());
+      }
+    });
+    columns.add(new IntegerColumn<WellVolume>("Plate",
+                                              "The number of the plate the well is located on", TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getWell().getPlateNumber();
+      }
+    });
+    columns.add(new TextColumn<WellVolume>("Well",
+                                           "The plate coordinates of the well", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getWell().getWellName();
+      }
+
+      @Override
+      public boolean isCommandLink()
+      {
+        return true;
+      }
+
+      @Override
+      public Object cellAction(WellVolume wellVolume)
+      {
+        return _wellViewer.viewWell(wellVolume.getWell());
+      }
+    });
+    columns.add(new ListColumn<WellVolume>("Copies", "The copies of this well", TableColumn.UNGROUPED) {
+      @Override
+      public List<String> getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getCopiesList();
+      }
+    });
+    columns.add(new FixedDecimalColumn<WellVolume>("Total Initial Copy Volume",
+                                                   "The sum of initial volumes from all copies of this well", TableColumn.UNGROUPED) {
+      @Override
+      public BigDecimal getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getTotalInitialMicroliterVolume();
+      }
+    });
+    columns.add(new FixedDecimalColumn<WellVolume>("Consumed Volume",
+                                                   "The cumulative volume already used from this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public BigDecimal getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getConsumedMicroliterVolume();
+      }
+    });
+    columns.add(new TextColumn<WellVolume>("Max Remaining Volume",
+                                           "The maximum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getMaxWellCopyVolume().getRemainingMicroliterVolume() + " (" +
+               wellVolume.getMaxWellCopyVolume().getCopy().getName() + ")";
+      }
+
+      @Override
+      protected Comparator<WellVolume> getAscendingComparator()
+      {
+        return new Comparator<WellVolume>() {
+          public int compare(WellVolume wv1, WellVolume wv2)
+          {
+            return wv1.getMaxWellCopyVolume()
+                      .getRemainingMicroliterVolume()
+                      .compareTo(wv2.getMaxWellCopyVolume()
+                                    .getRemainingMicroliterVolume());
+          }
+        };
+      }
+    });
+    columns.add(new TextColumn<WellVolume>("Min Remaining Volume",
+                                           "The minimum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getMinWellCopyVolume()
+                         .getRemainingMicroliterVolume() + " (" +
+               wellVolume.getMinWellCopyVolume().getCopy().getName() + ")";
+      }
+
+      @Override
+      protected Comparator<WellVolume> getAscendingComparator()
+      {
+        return new Comparator<WellVolume>() {
+          public int compare(WellVolume wv1, WellVolume wv2)
+          {
+            return wv1.getMinWellCopyVolume()
+                      .getRemainingMicroliterVolume()
+                      .compareTo(wv2.getMinWellCopyVolume()
+                                    .getRemainingMicroliterVolume());
+          }
+        };
+      }
+    });
+    columns.add(new IntegerColumn<WellVolume>("Withdrawals/Adjustments",
+                                              "The number of withdrawals and administrative adjustments made from this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getWellVolumeAdjustments().size();
+      }
+
+      @Override
+      public boolean isCommandLink()
+      {
+        return getRowData().getWellVolumeAdjustments().size() > 0;
+      }
+
+      @Override
+      public Object cellAction(WellVolume wellVolume)
+      {
+        return null;
+        // return showRowDetail();
+      }
+    });
+
+// TableColumnManager<Well> columnManager = getColumnManager();
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Library"),
+// columnManager.getColumn("Plate"), columnManager.getColumn("Well"));
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Plate"),
+// columnManager.getColumn("Well"));
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Well"),
+// columnManager.getColumn("Plate"));
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Copies"),
+// columnManager.getColumn("Plate"), columnManager.getColumn("Well"),
+// columnManager.getColumn("Copies"));
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Initial
+// Volume"), columnManager.getColumn("Plate"), columnManager.getColumn("Well"),
+// columnManager.getColumn("Copies"));
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Consumed
+// Volume"), columnManager.getColumn("Plate"), columnManager.getColumn("Well"),
+// columnManager.getColumn("Copies"));
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Max Remaining
+// Volume"), columnManager.getColumn("Plate"), columnManager.getColumn("Well"),
+// columnManager.getColumn("Copies"));
+// columnManager.addCompoundSortColumns(columnManager.getColumn("Min Remaining
+// Volume"), columnManager.getColumn("Plate"), columnManager.getColumn("Well"),
+// columnManager.getColumn("Copies"));
+
+    return columns;
   }
 
-  @Override
-  protected void makeRowDetail(WellVolume wv)
-  {
-    List<WellVolumeAdjustment> wvas = new ArrayList<WellVolumeAdjustment>(wv.getWellVolumeAdjustments().size());
-    for (WellVolumeAdjustment wva : wv.getWellVolumeAdjustments()) {
-      WellVolumeAdjustment wva2 = _dao.reloadEntity(wva,
-                                                    true,
-                                                    "well",
-                                                    "copy",
-                                                    "labCherryPick.wellVolumeAdjustments",
-                                                    "labCherryPick.cherryPickRequest",
-                                                    "labCherryPick.assayPlate.cherryPickLiquidTransfer",
-                                                    "wellVolumeCorrectionActivity.performedBy");
-      wvas.add(wva2);
-    }
-    getRowDetail().setContents(wvas);
-
-  }
+// @Override
+// protected void makeRowDetail(WellVolume wv)
+// {
+// List<WellVolumeAdjustment> wvas = new
+// ArrayList<WellVolumeAdjustment>(wv.getWellVolumeAdjustments().size());
+// for (WellVolumeAdjustment wva : wv.getWellVolumeAdjustments()) {
+// WellVolumeAdjustment wva2 = _dao.reloadEntity(wva,
+// true,
+// "well",
+// "copy",
+// "labCherryPick.wellVolumeAdjustments",
+// "labCherryPick.cherryPickRequest",
+// "labCherryPick.assayPlate.cherryPickLiquidTransfer",
+// "wellVolumeCorrectionActivity.performedBy");
+// wvas.add(wva2);
+// }
+// getRowDetail().setContents(wvas);
+//
+// }
 
 
   // private methods
 
 }
-

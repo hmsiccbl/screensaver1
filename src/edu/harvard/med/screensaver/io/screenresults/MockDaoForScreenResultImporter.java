@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
+import edu.harvard.med.screensaver.ui.libraries.WellCopy;
 
 import org.apache.log4j.Logger;
 
@@ -300,32 +300,32 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public List<WellCopyVolume> findWellCopyVolumes(Library library)
+  public List<WellCopy> findWellCopyVolumes(Library library)
   {
     return null;
   }
 
-  public List<WellCopyVolume> findWellCopyVolumes(Copy copy)
+  public List<WellCopy> findWellCopyVolumes(Copy copy)
   {
     return null;
   }
 
-  public List<WellCopyVolume> findWellCopyVolumes(Integer plateNumber)
+  public List<WellCopy> findWellCopyVolumes(Integer plateNumber)
   {
     return null;
   }
 
-  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber)
+  public Collection<WellCopy> findWellCopyVolumes(Copy copy, Integer plateNumber)
   {
     return null;
   }
 
-  public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey)
+  public Collection<WellCopy> findWellCopyVolumes(WellKey wellKey)
   {
     return null;
   }
 
-  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
+  public Collection<WellCopy> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
                                                         boolean forUnfufilledLabCherryPicksOnly)
   {
     return null;

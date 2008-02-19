@@ -10,17 +10,10 @@
 package edu.harvard.med.screensaver.db;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -30,13 +23,10 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
-import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
-import org.hibernate.TransientObjectException;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
 public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
@@ -157,32 +147,49 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return new TreeSet<Well>(getHibernateTemplate().find("from Well where plateNumber = ?", plate));
   }
 
+  /**
+   * Efficiently loads all wells for the specified library into the current
+   * Hibernate session, avoiding database accesses when any of the library's
+   * wells are subsequently accessed. If the library has not had its wells
+   * created yet, they will be created. Created wells will be in the Hibernate
+   * session after invoking this method, but will not yet be flushed to the
+   * database (HQL queries will fail to find them). If the library is transient
+   * (i.e., never persisted, and thus not in the Hibernate session), it will be
+   * persisted (entity ID will be assigned, it will be managed by the Hibernate
+   * session, but not flushed to the database). If the library is detached, it
+   * will be reattached to the session.
+   * 
+   * @throws IllegalArgumentException if the provided library instance is not
+   *           the same as the one in the current Hibernate session.
+   */
   @SuppressWarnings("unchecked")
   public void loadOrCreateWellsForLibrary(Library library)
   {
     // Cases that must be handled:
-    // 1. Library is transient (not in Hibernate session), and not in database 
-    // 2. Library is managed (in Hibernate session), but not in database
-    // 3. Library is managed (in Hibernate session), and in database
+    // 1. Library instance is transient (not in Hibernate session), and not in database
+    // 2. Library instance is detached (not in Hibernate session), but is in database
+    // 3. Library instance is managed (in Hibernate session), but not in database (awaiting flush)
+    // 4. Library instance is managed (in Hibernate session), and in database
 
-    if (library.getLibraryId() != null) { // case 2 or 3
+    if (library.getLibraryId() == null) { // case 1
+      log.debug("library is transient");
+    }
+    else { // case 2, 3, or 4
       // reload library, fetching all wells; 
-      // if library is already in session, we obtain that instance
+      // if library instance is detached (case 2), we load it from the database
+      // if library instance is already in session (case 3 or 4), we obtain that instance
       Library reloadedLibrary = _dao.reloadEntity(library, false, "wells");
       if (reloadedLibrary == null) { // case 2
         log.debug("library is Hibernate-managed, but not yet persisted in database");
         _dao.saveOrUpdateEntity(library);
       }
-      else { // case 3
+      else { // case 4
         log.debug("library is Hibernate-managed and persisted in database");
-        // if provided Library is not same instance as the one in the session, this method cannot be called
+        // if library instance is not same instance as the one in the session, this method cannot be called
         if (reloadedLibrary != library) {
           throw new IllegalArgumentException("provided Library instance is not the same as the one in the current Hibernate session; cannot load/create wells for that provided library");
         }           
       }
-    }
-    else { // case 1
-      log.debug("library is transient");
     }
     
     // create wells for library, if needed
@@ -200,7 +207,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       _dao.persistEntity(library);
       log.info("created wells for library " + library.getLibraryName());
     }
-
   }
 
   @SuppressWarnings("unchecked")
@@ -238,193 +244,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return initialMicroliterVolume.add(deltaMicroliterVolume).setScale(Well.VOLUME_SCALE);
   }
 
-  @SuppressWarnings("unchecked")
-  public Collection<WellCopyVolume> findWellCopyVolumes(Library libraryIn)
-  {
-    Library library = _dao.reloadEntity(libraryIn, true, "wells");
-    _dao.needReadOnly(library, "copies.copyInfos");
-    String hql = "from WellVolumeAdjustment wva where wva.copy.library = ?";
-    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { library });
-    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
-    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(library, result), wellVolumeAdjustments);
-  }
-
-  @SuppressWarnings("unchecked")
-  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy)
-  {
-    // TODO: eager fetch copies and wells
-    String hql = "from WellVolumeAdjustment wva where wva.copy = ?";
-    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy });
-    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
-    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(copy, result), wellVolumeAdjustments);
-  }
-
-  @SuppressWarnings("unchecked")
-  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber)
-  {
-    // TODO: eager fetch copies and wells
-    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.copyInfos ci where wva.copy = ? and ci.plateNumber = ?";
-    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { copy, plateNumber });
-    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
-    if (wellVolumeAdjustments.size() == 0) {
-      return result;
-    }
-    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(copy, plateNumber, result), wellVolumeAdjustments);
-  }
-
-  @SuppressWarnings("unchecked")
-  public Collection<WellCopyVolume> findWellCopyVolumes(Integer plateNumber)
-  {
-    // TODO: eager fetch copies and wells
-    String hql = "select wva from WellVolumeAdjustment wva join wva.copy c join c.copyInfos ci where ci.plateNumber = ?";
-    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { plateNumber });
-    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
-    if (wellVolumeAdjustments.size() == 0) {
-      return result;
-    }
-    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(wellVolumeAdjustments.get(0).getCopy(), plateNumber, result), wellVolumeAdjustments);
-  }
-
-  @SuppressWarnings("unchecked")
-  public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey)
-  {
-    String hql = "select distinct wva from WellVolumeAdjustment wva left join fetch wva.copy left join fetch wva.well w left join fetch w.library l left join fetch l.copies where w.id = ?";
-    List<WellVolumeAdjustment> wellVolumeAdjustments = getHibernateTemplate().find(hql, new Object[] { wellKey.toString() });
-    List<WellCopyVolume> result = new ArrayList<WellCopyVolume>();
-    Well well = null;
-    if (wellVolumeAdjustments.size() == 0) {
-      well = findWell(wellKey);
-      if (well == null) {
-        // no such well
-        return result;
-      }
-      // well exists, but just doesn't have any wellVolumeAdjustments (which is
-      // valid); in this case we still want to return a collection that contains
-      // an element for each copy of the well's library
-    }
-    else {
-      // wel exists, and has wellVolumeAdjustments
-      well = wellVolumeAdjustments.get(0).getWell();
-    }
-    return aggregateWellVolumeAdjustments(makeEmptyWellVolumes(well, result), wellVolumeAdjustments);
-  }
-
-  @SuppressWarnings("unchecked")
-  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
-                                                        boolean forUnfufilledLabCherryPicksOnly)
-  {
-    cherryPickRequest = _dao.reloadEntity(cherryPickRequest,
-                                          true,
-                                          "labCherryPicks.sourceWell.library");
-    _dao.needReadOnly(cherryPickRequest,
-                      "labCherryPicks.wellVolumeAdjustments");
-    if (forUnfufilledLabCherryPicksOnly) {
-      // if filtering unfulfilled lab cherry picks, we need to fetch more relationships, to be efficient
-      _dao.needReadOnly(cherryPickRequest,
-                        "labCherryPicks.assayPlate.cherryPickLiquidTransfer");
-    }
-    List<WellVolumeAdjustment> wellVolumeAdjustments = new ArrayList<WellVolumeAdjustment>();
-    for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
-      if (!forUnfufilledLabCherryPicksOnly || labCherryPick.isUnfulfilled()) {
-        wellVolumeAdjustments.addAll(labCherryPick.getWellVolumeAdjustments());
-      }
-    }
-
-    List<WellCopyVolume> emptyWellVolumes = makeEmptyWellVolumes(cherryPickRequest,
-                                                                 new ArrayList<WellCopyVolume>(),
-                                                                 forUnfufilledLabCherryPicksOnly);
-    return aggregateWellVolumeAdjustments(emptyWellVolumes, wellVolumeAdjustments);
-  }
-
-
   // private methods
 
-  private List<WellCopyVolume> makeEmptyWellVolumes(Library library, List<WellCopyVolume> wellVolumes)
-  {
-    for (Copy copy : library.getCopies()) {
-      makeEmptyWellVolumes(copy, wellVolumes);
-    }
-    return wellVolumes;
-  }
-
-  private List<WellCopyVolume> makeEmptyWellVolumes(Copy copy, List<WellCopyVolume> wellVolumes)
-  {
-    for (int plateNumber = copy.getLibrary().getStartPlate(); plateNumber <= copy.getLibrary().getEndPlate(); ++plateNumber) {
-      makeEmptyWellVolumes(copy, plateNumber, wellVolumes);
-    }
-    return wellVolumes;
-  }
-
-  private List<WellCopyVolume> makeEmptyWellVolumes(Copy copy, int plateNumber, List<WellCopyVolume> wellVolumes)
-  {
-    for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
-      for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
-        wellVolumes.add(new WellCopyVolume(findWell(new WellKey(plateNumber, iRow, iCol)), copy));
-      }
-    }
-    return wellVolumes;
-  }
-
-  private List<WellCopyVolume> makeEmptyWellVolumes(Well well, List<WellCopyVolume> result)
-  {
-    for (Copy copy : well.getLibrary().getCopies()) {
-      result.add(new WellCopyVolume(well, copy));
-    }
-    return result;
-  }
-
-  private List<WellCopyVolume> makeEmptyWellVolumes(CherryPickRequest cherryPickRequest,
-                                                    List<WellCopyVolume> result,
-                                                    boolean forUnfufilledLabCherryPicksOnly)
-  {
-    for (LabCherryPick lcp : cherryPickRequest.getLabCherryPicks()) {
-      if (!forUnfufilledLabCherryPicksOnly || lcp.isUnfulfilled()) {
-        makeEmptyWellVolumes(lcp.getSourceWell(), result);
-      }
-    }
-    return result;
-  }
-
-  private Collection<WellCopyVolume> aggregateWellVolumeAdjustments(List<WellCopyVolume> wellCopyVolumes,
-                                                                    List<WellVolumeAdjustment> wellVolumeAdjustments)
-  {
-    Collections.sort(wellCopyVolumes, new Comparator<WellCopyVolume>() {
-      public int compare(WellCopyVolume wcv1, WellCopyVolume wcv2)
-      {
-        int result = wcv1.getWell().compareTo(wcv2.getWell());
-        if (result == 0) {
-          result = wcv1.getCopy().getName().compareTo(wcv2.getCopy().getName());
-        }
-        return result;
-      }
-    });
-    Collections.sort(wellVolumeAdjustments, new Comparator<WellVolumeAdjustment>() {
-      public int compare(WellVolumeAdjustment wva1, WellVolumeAdjustment wva2)
-      {
-        int result = wva1.getWell().compareTo(wva2.getWell());
-        if (result == 0) {
-          result = wva1.getCopy().getName().compareTo(wva2.getCopy().getName());
-        }
-        return result;
-      }
-    });
-    Iterator<WellCopyVolume> wcvIter = wellCopyVolumes.iterator();
-    Iterator<WellVolumeAdjustment> wvaIter = wellVolumeAdjustments.iterator();
-    if (wcvIter.hasNext()) {
-      WellCopyVolume wellCopyVolume = wcvIter.next();
-      while (wvaIter.hasNext()) {
-        WellVolumeAdjustment wellVolumeAdjustment = wvaIter.next();
-        while (!wellCopyVolume.getWell().equals(wellVolumeAdjustment.getWell()) ||
-          !wellCopyVolume.getCopy().equals(wellVolumeAdjustment.getCopy())) {
-          if (!wcvIter.hasNext()) {
-            throw new IllegalArgumentException("wellVolumeAdjustments exist for wells that were not in wellCopyVolumes: " +
-                                               wellVolumeAdjustment.getWell() + ":" + wellVolumeAdjustment.getCopy().getName());
-          }
-          wellCopyVolume = wcvIter.next();
-        }
-        wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
-      }
-    }
-    return wellCopyVolumes;
-  }
 }

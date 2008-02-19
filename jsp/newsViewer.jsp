@@ -8,6 +8,47 @@
 		<p>Check back here regularly for the latest Screensaver news and
 		gossip!</p>
 		<dl>
+
+      <dt><span class="newsDate">2008.Feb.11, v1.5.0</span></dt>
+      <dd><p>The implementation of Search Result data tables has been entirely
+			re-designed, providing the following benefits:
+			<ul>
+			<li>Improved performance and scalability for large data sets. In
+				particular, sorting and filtering of large data sets is performed by
+				the database, not by Screensaver. Near minimal sets of database
+				operations are performed in response to user actions (open,
+				scroll, sort, add/remove columns, etc.).</li>
+      <li>Supports search results composed of columns across related
+				entity types (e.g., Library, Well, Gene, Silencing Reagent), with
+				user-configurable column selections, via a hierarchical column selection
+				interface.</li>
+		  <li>For developers, simplified definition of Search Result pages,
+				with nearly-declarative implementation (simply provide a name and an
+				entity property binding for each column). Dynamically configurable
+				data access strategy ("load all" or "virtual scrolling/paging"). No
+				data access code required (i.e., no Hibernate queries).</li>
+			</ul>
+			</p>
+			<p>
+			Users should note:
+			<ul>
+			<li>Screen Viewer's "Data" panel now has a full search interface,
+				replacing the old "Show All, Show Plate, Show Positives" interface.</li>
+      <li>Screen Viewer's "Data" panel now supports combining data
+				columns from multiple screen results (data headers) and studies
+				(annotations).</li>
+      <li>Well Search Results pages should load faster for large data
+				sets. For example, when viewing all wells for a library (accessed
+				from the Library Viewer page).</li>
+      <li>Creative use of the Search and Column selection features
+				provide a basic level of custom reporting throughout
+				Screensaver.</li>
+      </ul>
+      </p>
+
+			<p/>
+      </dd>
+
 			<dt><span class="newsDate">2007.Dec.07, v1.4.2</span></dt>
 			<dd><p>Cherry Pick Requests now allow an arbitrary set of
 			screener-requested empty wells to be specified (rather than entire
@@ -30,11 +71,11 @@
 			PubChem entries for each compound. PubChem provides information on
 			the biological activities of small molecules.</p>
 			<p>Search results can be filtered by specifying criterion for each
-			column in the search result data table. (beta)</p>
+			column in the search result data table.</p>
 			<p>Screeners can now browse (and filter) all of their screening room
 			activities in a search result page. Administrators can now browse
 			(and filter) screening room users and staff in a search result page.
-			(beta)<p>
+			<p>
 			</p>
 			</dd>
 

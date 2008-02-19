@@ -9,17 +9,23 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import edu.harvard.med.screensaver.db.AnnotationsDAO;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable;
 import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
+
 
 public class StudyViewer extends AbstractBackingBean
 {
@@ -31,12 +37,12 @@ public class StudyViewer extends AbstractBackingBean
   // instance data members
 
   private GenericEntityDAO _dao;
-  private AnnotationsDAO _annotationsDao;
   private StudyDetailViewer _studyDetailViewer;
+  private AnnotationTypesTable _annotationTypesTable;
   private ReagentSearchResults _reagentSearchResults;
 
-
   private Study _study;
+  private Map<String,Boolean> _isPanelCollapsedMap;
 
   // constructors
 
@@ -48,14 +54,17 @@ public class StudyViewer extends AbstractBackingBean
   }
 
   public StudyViewer(GenericEntityDAO dao,
-                     AnnotationsDAO annotationsDao,
                      StudyDetailViewer studyDetailViewer,
+                     AnnotationTypesTable annotationTypesTable,
                      ReagentSearchResults reagentSearchResults)
   {
     _dao = dao;
-    _annotationsDao = annotationsDao;
+    _annotationTypesTable = annotationTypesTable;
     _studyDetailViewer = studyDetailViewer;
     _reagentSearchResults = reagentSearchResults;
+
+    _isPanelCollapsedMap = new HashMap<String,Boolean>();
+    _isPanelCollapsedMap.put("reagentsData", false);
   }
 
 
@@ -71,6 +80,15 @@ public class StudyViewer extends AbstractBackingBean
     return _reagentSearchResults;
   }
 
+  public AnnotationTypesTable getAnnotationTypesTable()
+  {
+    return _annotationTypesTable;
+  }
+
+  public Map<?,?> getIsPanelCollapsedMap()
+  {
+    return _isPanelCollapsedMap;
+  }
 
   /* JSF Application methods */
 
@@ -96,8 +114,7 @@ public class StudyViewer extends AbstractBackingBean
           _dao.needReadOnly((Screen) study, "collaborators");
           _dao.needReadOnly((Screen) study, "publications");
           _dao.needReadOnly((Screen) study, "annotationTypes");
-          int reagentCount = _dao.relationshipSize((Screen) study, "reagents");
-          setStudy(study, reagentCount);
+          setStudy(study);
         }
       });
     }
@@ -111,11 +128,14 @@ public class StudyViewer extends AbstractBackingBean
 
   // protected methods
 
-  protected void setStudy(Study study, int reagentCount)
+  protected void setStudy(Study study)
   {
     _study = study;
     _studyDetailViewer.setStudy(study);
-    _reagentSearchResults.setContents(study, reagentCount);
+    if (_study.isStudyOnly()) {
+      _annotationTypesTable.initialize(new ArrayList<AnnotationType>(study.getAnnotationTypes()));
+      _reagentSearchResults.searchReagentsForStudy(study);
+    }
   }
 }
 

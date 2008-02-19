@@ -41,6 +41,7 @@ import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
+@SuppressWarnings("deprecation")
 public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
 {
 

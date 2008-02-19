@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,7 +36,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -285,6 +283,15 @@ public abstract class CherryPickRequest extends AbstractEntity
       return _legacyCherryPickRequestNumber;
     }
     return _cherryPickRequestId;
+  }
+
+  /**
+   * Get the legacy cherry pick request number.
+   * @return the legacy cherry pick request number
+   */
+  public Integer getLegacyCherryPickRequestNumber()
+  {
+    return _legacyCherryPickRequestNumber;
   }
 
   /**
@@ -933,15 +940,6 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setVersion(Integer version)
   {
     _version = version;
-  }
-
-  /**
-   * Get the legacy cherry pick request number.
-   * @return the legacy cherry pick request number
-   */
-  private Integer getLegacyCherryPickRequestNumber()
-  {
-    return _legacyCherryPickRequestNumber;
   }
 
   /**

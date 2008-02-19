@@ -153,7 +153,8 @@
     <constructor-arg ref="studiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
     <constructor-arg ref="librariesBrowser" />
-    <constructor-arg ref="usersBrowser" />
+    <constructor-arg ref="screenersBrowser" />
+    <constructor-arg ref="staffBrowser" />
     <constructor-arg ref="screeningRoomActivitiesBrowser" />
     <aop:scoped-proxy/>
   </bean>
@@ -186,7 +187,6 @@
     class="edu.harvard.med.screensaver.ui.libraries.ReagentFinder">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
-    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="reagentsBrowser" />
     <constructor-arg ref="reagentViewer" />
     <constructor-arg ref="reagentVendorIdentiferListParser" />
@@ -212,6 +212,7 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults">
+    <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="libraryViewer" />
     <aop:scoped-proxy/>
   </bean>
@@ -236,11 +237,6 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults">
-    <constructor-arg>
-      <bean
-        class="edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable"
-        parent="uiBean" />
-    </constructor-arg>
     <constructor-arg ref="reagentViewer" />
     <constructor-arg ref="compoundViewer" />
     <constructor-arg ref="geneViewer" />
@@ -256,6 +252,7 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.WellSearchResults">
+    <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="wellViewer" />
     <constructor-arg ref="compoundViewer" />
@@ -313,7 +310,6 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.ReagentViewer">
     <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="geneViewer" />
     <constructor-arg ref="compoundViewer" />
     <aop:scoped-proxy/>
@@ -325,7 +321,6 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
     <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="geneViewer" />
     <constructor-arg ref="compoundViewer" />
@@ -402,9 +397,23 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.StudyViewer">
     <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="studyDetailViewer" />
+    <constructor-arg>
+      <bean
+        class="edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable"
+        parent="uiBean" />
+    </constructor-arg>
     <constructor-arg ref="reagentsBrowser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="studyDetailViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.screens.StudyDetailViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="usersDao" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -427,23 +436,12 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
     <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="annotationsDao" />
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="reagentsBrowser" />
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />
     <constructor-arg ref="screenResultImporter" />
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="studyDetailViewer"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.screens.StudyDetailViewer">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="usersDao" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -471,42 +469,13 @@
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="screenDetailViewer" />
-    <constructor-arg ref="screenResultExporter" />
     <constructor-arg>
       <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypeTable"
+        class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypesTable"
         parent="uiBean" />
     </constructor-arg>
-    <constructor-arg>
-      <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.FullScreenResultDataTable"
-        parent="uiBean">
-        <constructor-arg ref="screenResultViewer" />
-        <constructor-arg ref="wellViewer" />
-        <constructor-arg ref="librariesDao" />
-        <constructor-arg ref="genericEntityDao" />
-      </bean>
-    </constructor-arg>
-    <constructor-arg>
-      <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.PositivesOnlyScreenResultDataTable"
-        parent="uiBean">
-        <constructor-arg ref="screenResultViewer" />
-        <constructor-arg ref="wellViewer" />
-        <constructor-arg ref="librariesDao" />
-        <constructor-arg ref="genericEntityDao" />
-      </bean>
-    </constructor-arg>
-    <constructor-arg>
-      <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.SinglePlateScreenResultDataTable"
-        parent="uiBean">
-        <constructor-arg ref="screenResultViewer" />
-        <constructor-arg ref="wellViewer" />
-        <constructor-arg ref="librariesDao" />
-        <constructor-arg ref="genericEntityDao" />
-      </bean>
-    </constructor-arg>
+    <constructor-arg ref="screenResultExporter" />
+    <constructor-arg ref="wellsBrowser" />
     <aop:scoped-proxy />
   </bean>
 
@@ -586,10 +555,21 @@
   <!-- === users backing beans === -->
 
   <bean
-    id="usersBrowser"
+    id="staffBrowser"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.searchresults.UserSearchResults">
+    class="edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <!-- constructor-arg ref="userViewer" /-->
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="screenersBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults">
+    <constructor-arg ref="genericEntityDao" />
     <!-- constructor-arg ref="userViewer" /-->
     <aop:scoped-proxy/>
   </bean>

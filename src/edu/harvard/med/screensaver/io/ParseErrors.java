@@ -11,8 +11,6 @@ package edu.harvard.med.screensaver.io;
 
 import java.util.List;
 
-import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
-
 public interface ParseErrors
 {
 

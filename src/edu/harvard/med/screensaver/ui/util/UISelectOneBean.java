@@ -28,6 +28,7 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   private T _selection;
   private String _selectionKey;
   private int _selectionIndex;
+  private T _defaultSelection;
 
 
   // public constructors and methods
@@ -35,16 +36,31 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   public UISelectOneBean(Collection<T> objects)
   {
     super(objects);
-    // set default selection
-    if (objects.size() > 0) {
-      setValue(getKey(objects.iterator().next()));
+  }
+  
+  @Override
+  public void setDomain(Collection<T> objects)
+  {
+    super.setDomain(objects);
+    // set or restore selection
+    if (objects.size() == 0) {
+      _selection = null;
+      _selectionKey = null;
+      _selectionIndex = 0;
+    }
+    else {
+      _defaultSelection = objects.iterator().next();
+      if (_selectionKey == null || !_key2Obj.containsKey(_selectionKey)) {
+        setSelection(_defaultSelection);
+      }
     }
   }
 
   public UISelectOneBean(Collection<T> objects, T defaultSelection)
   {
     this(objects);
-    setSelection(defaultSelection);
+    _defaultSelection = defaultSelection;
+    setSelection(_defaultSelection);
   }
 
   public UISelectOneBean()
@@ -57,30 +73,27 @@ public class UISelectOneBean<T> extends UISelectBean<T>
    * this method corresponds to the JSF UISelect component's "value" attribute.
    * @throws IllegalArgumentException if selectionKey is unknown
    */
-  public void setValue(String selectionKey)
+  public void setValue(String newSelectionKey)
   {
-    if (selectionKey != null && !_key2Obj.containsKey(selectionKey))
+    if (newSelectionKey != null && !_key2Obj.containsKey(newSelectionKey))
     {
-      throw new IllegalArgumentException("unknown selection key " + selectionKey);
+      return;
+      //throw new IllegalArgumentException("unknown selection key " + newSelectionKey);
     }
 
-    _selectionKey = selectionKey;
-    _selection = _key2Obj.get(selectionKey);
-
-    int newSelectionIndex = -1;
-
-    // TODO: linear search! yuck!
-    int i = 0;
-    for (SelectItem selectItem : getSelectItems()) {
-      if ((selectItem.getValue() == null && selectionKey == null) ||
-        selectItem.getValue().equals(selectionKey)) {
-        newSelectionIndex = i;
-        break;
+    if ((_selectionKey == null && newSelectionKey != null) || 
+      (_selectionKey != null && !_selectionKey.equals(newSelectionKey))) {
+      _selectionKey = newSelectionKey;
+      _selection = _key2Obj.get(newSelectionKey);
+      // TODO: linear search! yuck!
+      int i = 0;
+      for (SelectItem selectItem : getSelectItems()) {
+        if ((selectItem.getValue() == null && newSelectionKey == null) ||
+          selectItem.getValue().equals(newSelectionKey)) {
+          _selectionIndex = i++;
+          break;
+        }
       }
-      ++i;
-    }
-    if (newSelectionIndex != _selectionIndex) {
-      _selectionIndex = newSelectionIndex;
       setChanged();
       notifyObservers(_selection);
     }
@@ -106,6 +119,11 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   public T getSelection()
   {
     return _selection;
+  }
+  
+  public T getDefaultSelection()
+  {
+    return _defaultSelection;
   }
 
   public void setSelectionIndex(int index)

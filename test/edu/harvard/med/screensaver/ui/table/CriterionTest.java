@@ -9,9 +9,14 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+
 import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.util.DateUtil;
 
 import org.apache.log4j.Logger;
 
@@ -26,6 +31,57 @@ public class CriterionTest extends TestCase
   @Override
   protected void setUp() throws Exception
   {
+  }
+  
+  public void testEqualityOperators()
+  {
+    for (Operator operator : Arrays.asList(Operator.EQUAL, Operator.NOT_EQUAL)) {
+      boolean expectedMatch = operator == Operator.EQUAL;
+      assertMatches(operator, "text", "text", expectedMatch); 
+      assertMatches(operator, "text", "txet", !expectedMatch);
+      assertMatches(operator, new Integer(1), new Integer(1), expectedMatch); 
+      assertMatches(operator, new Integer(0), new Integer(1), !expectedMatch); 
+      assertMatches(operator, new BigDecimal("1.0"), new BigDecimal("1.0"), expectedMatch); 
+      assertMatches(operator, new BigDecimal("0.0"), new BigDecimal("1.0"), !expectedMatch);
+      assertMatches(operator, new Double("1.0"), new Double("1.0"), expectedMatch);
+      assertMatches(operator, new Double("0.0"), new Double("1.0"), !expectedMatch);
+      assertMatches(operator, Boolean.TRUE, Boolean.TRUE, expectedMatch);
+      assertMatches(operator, Boolean.TRUE, Boolean.FALSE, !expectedMatch);
+      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 1), expectedMatch);
+      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 2), !expectedMatch);
+      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedMatch); 
+      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(0), new Integer(2)), !expectedMatch);
+    }
+  }
+
+  public void testRankingOperators()
+  {
+    for (Operator operator : Arrays.asList(Operator.GREATER_THAN, Operator.GREATER_THAN_EQUAL, Operator.LESS_THAN, Operator.LESS_THAN_EQUAL)) {
+      boolean expectedEqualityMatches = operator.name().contains("EQUAL");
+      boolean expectedGreaterThanMatches = operator.name().contains("GREATER");
+      boolean expectedLessThanMatches = operator.name().contains("LESS");
+      assertMatches(operator, "text1", "text1", expectedEqualityMatches); 
+      assertMatches(operator, "text2", "text1", expectedLessThanMatches);
+      assertMatches(operator, "text1", "text2", expectedGreaterThanMatches);
+      assertMatches(operator, new Integer(1), new Integer(1), expectedEqualityMatches); 
+      assertMatches(operator, new Integer(1), new Integer(0), expectedLessThanMatches); 
+      assertMatches(operator, new Integer(0), new Integer(1), expectedGreaterThanMatches); 
+      assertMatches(operator, new BigDecimal("1.0"), new BigDecimal("1.0"), expectedEqualityMatches); 
+      assertMatches(operator, new BigDecimal("1.0"), new BigDecimal("0.0"), expectedLessThanMatches);
+      assertMatches(operator, new BigDecimal("0.0"), new BigDecimal("1.0"), expectedGreaterThanMatches);
+      assertMatches(operator, new Double("1.0"), new Double("1.0"), expectedEqualityMatches);
+      assertMatches(operator, new Double("1.0"), new Double("0.0"), expectedLessThanMatches);
+      assertMatches(operator, new Double("0.0"), new Double("1.0"), expectedGreaterThanMatches);
+      assertMatches(operator, Boolean.TRUE, Boolean.TRUE, expectedEqualityMatches);
+      assertMatches(operator, Boolean.TRUE, Boolean.FALSE, expectedLessThanMatches);
+      assertMatches(operator, Boolean.FALSE, Boolean.TRUE, expectedGreaterThanMatches);
+      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 1), expectedEqualityMatches);
+      assertMatches(operator, DateUtil.makeDate(2000, 1, 2), DateUtil.makeDate(2000, 1, 1), expectedLessThanMatches);
+      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 2), expectedGreaterThanMatches);
+      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedEqualityMatches); 
+      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(0), new Integer(2)), expectedLessThanMatches);
+      assertMatches(operator, Arrays.asList(new Integer(0), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedGreaterThanMatches);
+    }
   }
 
   public void testLikeOperator()
@@ -124,7 +180,18 @@ public class CriterionTest extends TestCase
     assertMatches(Operator.TEXT_LIKE, "\\\\x\\?", "\\x?");
   }
 
-  public void testEmptyOperator()
+  public void testAnyOperator()
+  {
+    Operator operator = Operator.ANY;
+    assertMatches(operator, null, null);
+    assertMatches(operator, null, "");
+    assertMatches(operator, null, "x");
+    assertMatches(operator, "", "x");
+    assertMatches(operator, "x", null);
+    assertMatches(operator, "x", "");
+  }
+
+  public void testEmptyOperators()
   {
     Operator operator = Operator.EMPTY;
     assertMatches(operator, null, null);
@@ -133,6 +200,28 @@ public class CriterionTest extends TestCase
     assertNotMatches(operator, "", "x");
     assertMatches(operator, "x", null);
     assertMatches(operator, "x", "");
+    
+    operator = Operator.NOT_EMPTY;
+    assertNotMatches(operator, null, null);
+    assertNotMatches(operator, null, "");
+    assertMatches(operator, null, "x");
+    assertMatches(operator, "", "x");
+    assertNotMatches(operator, "x", null);
+    assertNotMatches(operator, "x", "");
+  }
+
+  public void testListValue()
+  {
+    Operator operator = Operator.TEXT_CONTAINS;
+    assertMatches(operator, null, Arrays.asList("x", "y", "z"));
+    assertMatches(operator, Collections.emptyList(), Arrays.asList("x", "y", "z"));
+    assertMatches(operator, "x", Arrays.asList("x", "y", "z"));
+    assertNotMatches(operator, Arrays.asList("x", "y", "z"), null);
+    assertNotMatches(operator, Arrays.asList("x", "y", "z"), Collections.emptyList());
+    assertMatches(operator, Arrays.asList("x", "y", "z"), Arrays.asList("x", "y", "z"));
+    assertNotMatches(operator, Arrays.asList("x", "y", "z"), Arrays.asList("x", "y"));
+    assertMatches(operator, Arrays.asList("x", "y"), Arrays.asList("x", "y", "z"));
+    assertNotMatches(operator, Arrays.asList("x", "z"), Arrays.asList("x", "y", "z"));
   }
 
   private void doTestEmptyAndNullCasesWithOperator(Operator operator)

@@ -17,7 +17,6 @@ import edu.harvard.med.screensaver.ui.screenresults.MetaDataTable;
 
 import org.apache.log4j.Logger;
 
-@SuppressWarnings("unchecked")
 public class AnnotationTypesTable extends MetaDataTable<AnnotationType>
 {
   // static members
@@ -25,6 +24,7 @@ public class AnnotationTypesTable extends MetaDataTable<AnnotationType>
   private static Logger log = Logger.getLogger(AnnotationTypesTable.class);
 
   // TODO: consider replacing DataHeaderRowDefinition with TableColumn<AnnotationType>
+  @SuppressWarnings("unchecked")
   private final List<MetaDataTableRowDefinition<AnnotationType>> ANNOTATION_TYPE_ROW_DEFINTIIONS =
     Arrays.asList
     (

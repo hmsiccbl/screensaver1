@@ -19,7 +19,6 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;

@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -25,7 +24,6 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 
 public interface LibrariesDAO
 {
@@ -89,19 +87,6 @@ public interface LibrariesDAO
   public void loadOrCreateWellsForLibrary(Library library);
 
   public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy);
-
-  public Collection<WellCopyVolume> findWellCopyVolumes(Library library);
-
-  public Collection<WellCopyVolume> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
-                                                        boolean forUnfufilledLabCherryPicksOnly);
-
-  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy);
-
-  public Collection<WellCopyVolume> findWellCopyVolumes(Integer plateNumber);
-
-  public Collection<WellCopyVolume> findWellCopyVolumes(Copy copy, Integer plateNumber);
-
-  public Collection<WellCopyVolume> findWellCopyVolumes(WellKey wellKey);
 
   public Collection<String> findAllVendorNames();
 

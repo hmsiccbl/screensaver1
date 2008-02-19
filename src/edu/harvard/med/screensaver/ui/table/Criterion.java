@@ -10,20 +10,18 @@
 package edu.harvard.med.screensaver.ui.table;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Observable;
-
-import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
-
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Pattern;
-import com.sun.org.apache.xerces.internal.impl.xs.identity.Selector.Matcher;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -35,25 +33,32 @@ public class Criterion<T> extends Observable
 
   private static Logger log = Logger.getLogger(Criterion.class);
 
+  public enum OperatorClass {
+    EXTANT,
+    EQUALITY,
+    RANKING,
+    TEXT
+  };
+
   public enum Operator {
-    ANY(""),
+    ANY("", OperatorClass.EXTANT, 1),
     // equality operators
-    EQUAL("="),
-    NOT_EQUAL("<>"),
+    EQUAL("=", OperatorClass.EQUALITY),
+    NOT_EQUAL("<>", OperatorClass.EQUALITY),
     // ranking operators
-    LESS_THAN("<"),
-    LESS_THAN_EQUAL("<="),
-    GREATER_THAN(">"),
-    GREATER_THAN_EQUAL(">="),
+    LESS_THAN("<", OperatorClass.RANKING),
+    LESS_THAN_EQUAL("<=", OperatorClass.RANKING),
+    GREATER_THAN(">", OperatorClass.RANKING),
+    GREATER_THAN_EQUAL(">=", OperatorClass.RANKING),
     // text operators
-    TEXT_STARTS_WITH("starts with"),
-    TEXT_CONTAINS("contains"),
-    TEXT_NOT_CONTAINS("doesn't contain"),
-    TEXT_LIKE("matches"),
-    TEXT_NOT_LIKE("doesn't match"),
+    TEXT_STARTS_WITH("starts with", OperatorClass.TEXT),
+    TEXT_CONTAINS("contains", OperatorClass.TEXT),
+    TEXT_NOT_CONTAINS("doesn't contain", OperatorClass.TEXT),
+    TEXT_LIKE("matches", OperatorClass.TEXT),
+    TEXT_NOT_LIKE("doesn't match", OperatorClass.TEXT),
     // empty operators
-    EMPTY("blank"),
-    NOT_EMPTY("not blank");
+    EMPTY("blank", OperatorClass.EXTANT, 1),
+    NOT_EMPTY("not blank", OperatorClass.EXTANT, 1);
 
     public static List<Operator> ALL_OPERATORS = new ArrayList<Operator>();
     public static List<Operator> COMPARABLE_OPERATORS = new ArrayList<Operator>();
@@ -61,7 +66,7 @@ public class Criterion<T> extends Observable
     static {
       for (Operator operator : Operator.values()) {
         ALL_OPERATORS.add(operator);
-        if (!operator.name().startsWith("TEXT")) {
+        if (operator.getOperatorClass() != OperatorClass.TEXT) {
           COMPARABLE_OPERATORS.add(operator);
         }
       }
@@ -70,10 +75,19 @@ public class Criterion<T> extends Observable
     }
 
     private String _symbol;
+    private OperatorClass _opClass;
+    private int _argumentCount = 2; // operator is binary, by default
 
-    private Operator(String symbol)
+    private Operator(String symbol, OperatorClass opClass)
+    {
+      this(symbol, opClass, 2);
+    }
+
+    private Operator(String symbol, OperatorClass opClass, int argumentCount)
     {
       _symbol = symbol;
+      _opClass = opClass;
+      _argumentCount = argumentCount;
     }
 
     public String getSymbol()
@@ -82,6 +96,10 @@ public class Criterion<T> extends Observable
     }
 
     public String getName() { return name(); }
+
+    public boolean isUnary() { return _argumentCount == 1; }
+
+    public OperatorClass getOperatorClass() { return _opClass; }
   }
 
 
@@ -98,6 +116,20 @@ public class Criterion<T> extends Observable
   {
   }
 
+
+  public Criterion(Operator operator, T value)
+  {
+    _operator = operator;
+    _value = value;
+  }
+
+  public Criterion<T> setOperatorAndValue(Operator operator, T value)
+  {
+    setOperator(operator);
+    setValue(value);
+    return this;
+  }
+
   public Operator getOperator()
   {
     return _operator;
@@ -109,8 +141,7 @@ public class Criterion<T> extends Observable
       return;
     }
     _operator = operator;
-    _regex = null;
-    if (_operator == Operator.EMPTY) {
+    if (_operator.isUnary()) {
       _value = null;
     }
     setChanged();
@@ -124,18 +155,23 @@ public class Criterion<T> extends Observable
 
   public void setValue(T value)
   {
-    if (NullSafeUtils.nullSafeEquals(_value, value)) {
-      return;
-    }
     // to reduce user-confusion, we'll treat empty strings as undefined criterion
     if (value instanceof String) {
       if (value == "") {
         value = null;
       }
     }
+    
+    // HACK: handle Date values without time portion.  forced to do this here, since can't figure out a way of controlling MyFaces's InputDate's handling of dates (ignores Converter) 
+    if (value instanceof Date) {
+      value = (T) DateUtils.truncate((Date) value, Calendar.DATE);
+    }
+    
+    if (NullSafeUtils.nullSafeEquals(_value, value)) {
+      return;
+    }
     _value = value;
     _regex = null;
-
     setChanged();
     notifyObservers();
   }
@@ -143,7 +179,9 @@ public class Criterion<T> extends Observable
   @UIControllerMethod
   public void reset()
   {
-    //_operator = null;
+   if (_operator.isUnary()) {
+     _operator = Operator.EQUAL;
+   }
     setValue(null);
   }
 
@@ -153,14 +191,24 @@ public class Criterion<T> extends Observable
    */
   public boolean isUndefined()
   {
-    return _operator == null || (_operator != Operator.EMPTY && _value == null);
+    return _operator == null ||
+    (!_operator.isUnary() && _value == null) ||
+    _operator == Operator.ANY;
   }
 
   @SuppressWarnings("unchecked")
-  public boolean matches(Object inputValue)
+  public boolean matches(Object datum)
   {
     Object criterionValue = getValue();
     Operator operator = getOperator();
+
+    // handle collections as flattened string representations
+    if (criterionValue instanceof Collection) {
+      criterionValue = StringUtils.makeListString((Collection) criterionValue, " ");
+    }
+    if (datum instanceof Collection) {
+      datum = StringUtils.makeListString((Collection) datum, " ");
+    }
 
     boolean result;
     if (isUndefined()) {
@@ -168,32 +216,29 @@ public class Criterion<T> extends Observable
       // operator negation is not considered
       return true;
     }
-    if (operator == Operator.ANY) {
-      return true;
-    }
     if (operator == Operator.EMPTY || operator == Operator.NOT_EMPTY) {
-      result = inputValue == null || inputValue.toString().length() == 0;
+      result = datum == null || datum.toString().length() == 0;
       if (operator == Operator.NOT_EMPTY) {
         result = !result;
       }
     }
-    else if (inputValue == null) {
+    else if (datum == null) {
       // null data value can only match with the EMPTY operator;
       // operator negation is not considered
       return false;
     }
     else if (operator == Operator.EQUAL || operator == Operator.NOT_EQUAL) {
-      result = NullSafeUtils.nullSafeEquals(criterionValue, inputValue);
+      result = NullSafeUtils.nullSafeEquals(criterionValue, datum);
       if (operator == Operator.NOT_EQUAL) {
         result = !result;
       }
     }
     else if (operator == Operator.GREATER_THAN || operator == Operator.LESS_THAN_EQUAL ||
       operator == Operator.LESS_THAN || operator == Operator.GREATER_THAN_EQUAL) {
-      if (! (inputValue instanceof Comparable)) {
+      if (! (datum instanceof Comparable)) {
         throw new CriterionMatchException("expecting Comparable value", this);
       }
-      int cmpResult = ((Comparable) inputValue).compareTo(criterionValue);
+      int cmpResult = ((Comparable) datum).compareTo(criterionValue);
       result = operator == Operator.GREATER_THAN ? cmpResult > 0 :
         operator == Operator.LESS_THAN ? cmpResult < 0 :
           operator == Operator.GREATER_THAN_EQUAL ? cmpResult >= 0 :
@@ -205,7 +250,7 @@ public class Criterion<T> extends Observable
       if (! (criterionValue instanceof String)) {
         throw new CriterionMatchException("expecting String criterion value", this);
       }
-      result = ((String) inputValue).matches(getRegex());
+      result = ((String) datum).matches(getRegex((String) criterionValue));
       if (operator == Operator.TEXT_NOT_LIKE || operator == Operator.TEXT_NOT_CONTAINS) {
         result = !result;
       }
@@ -216,18 +261,17 @@ public class Criterion<T> extends Observable
     return result;
   }
 
-  private String getRegex()
+  private String getRegex(String expr)
   {
     if (_regex == null) {
-      String expr = (String) _value;
-      assert _value != null;
-      if (_operator == Operator.TEXT_STARTS_WITH) {
+      Operator textOperator = getOperator();
+      if (textOperator == Operator.TEXT_STARTS_WITH) {
         expr = expr + "*";
       }
-      else if (_operator == Operator.TEXT_LIKE || _operator == Operator.TEXT_NOT_LIKE) {
+      else if (textOperator == Operator.TEXT_LIKE || textOperator == Operator.TEXT_NOT_LIKE) {
         // use expression exactly as provided
       }
-      else if (_operator == Operator.TEXT_CONTAINS || _operator == Operator.TEXT_NOT_CONTAINS) {
+      else if (textOperator == Operator.TEXT_CONTAINS || textOperator == Operator.TEXT_NOT_CONTAINS) {
         expr = "*" + expr + "*";
       }
       _regex = convertToRegex(expr);
@@ -263,5 +307,24 @@ public class Criterion<T> extends Observable
     regex = "(?i)(?s)" + regex; // case insensitive, single-line mode (i.e., match across all lines)
     log.debug("regex=" + regex);
     return regex;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj instanceof Criterion) {
+      Criterion<T> that = (Criterion<T>) obj;
+      return this._operator == that._operator &&
+      (this._value == null ? that._value == null : this._value.equals(that._value));
+    }
+    return false;
+  }
+
+  public String toString()
+  {
+    return "[" + _operator + " " + getValue() + "]";
   }
 }

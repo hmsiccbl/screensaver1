@@ -1,6 +1,7 @@
 BEGIN;
-CREATE TABLE screensaver_revision (
-  screensaver_revision int4 not null
+CREATE TABLE schema_history (
+    screensaver_revision integer NOT NULL,
+    date_updated timestamp without time zone,
+    "comment" text
 );
-INSERT INTO screensaver_revision (screensaver_revision) VALUES (1);
 COMMIT;

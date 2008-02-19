@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -215,6 +216,33 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   {
     return _currentScreensaverUser;
   }
+
+
+  public Map<String,String> getEscapeBackslashes()
+  {
+    return _backslashEscaper;
+  }
+
+  /**
+   * Workaround for JSF suckiness. Two things: first, I need to use the
+   * returning a Map trick to get around the problem that JSF EL doesn't allow
+   * parameterized methods. Second, I gotta escape the backslashes in the
+   * f:param, since the JSF EL is evaluating that backslash as an escape
+   * character somewhere.
+   */
+  private final Map<String,String> _backslashEscaper = new HashMap<String,String>() {
+    private static final long serialVersionUID = 1L;
+
+    public String get(Object key)
+    {
+      if (key instanceof String) {
+        return ((String) key).replace("\\", "\\\\");
+      }
+      else {
+        return key.toString();
+      }
+    }
+  };
 
 
   // protected methods

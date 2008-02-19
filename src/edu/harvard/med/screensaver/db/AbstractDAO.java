@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
@@ -75,8 +74,7 @@ public class AbstractDAO extends HibernateDaoSupport
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
       {
-        Query hibQuery = query.getQuery(session);
-        return hibQuery.list();
+        return query.execute(session);
       }
     });
   }

@@ -9,27 +9,36 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
-import junit.framework.TestCase;
+import java.beans.IntrospectionException;
+import java.util.Date;
 
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
 
-public class ResultValueTest extends TestCase
+public class ResultValueTest extends AbstractEntityInstanceTest<ResultValue>
 {
   private static Logger log = Logger.getLogger(ResultValueTest.class);
+
+  public ResultValueTest() throws IntrospectionException
+  {
+    super(ResultValue.class);
+  }
 
   public void testResultValueNumericPrecision()
   {
     ScreenResult screenResult =
-      MakeDummyEntities.makeDummyScreenResult(MakeDummyEntities.makeDummyScreen(1),
-                                              MakeDummyEntities.makeDummyLibrary(1,
-                                                                                 ScreenType.SMALL_MOLECULE,
-                                                                                 1));
-    Well well = screenResult.getWells().first();
-    ResultValue rv = screenResult.getResultValueTypes().first().createResultValue(well, AssayWellType.EXPERIMENTAL, 5.0123, 3, true);
+      MakeDummyEntities.makeDummyScreen(1).createScreenResult(new Date());
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+    Well well = library.createWell(new WellKey("00001:A01"), WellType.EXPERIMENTAL);
+    ResultValueType rvt = screenResult.createResultValueType("rvt");
+    ResultValue rv = rvt.createResultValue(well, AssayWellType.EXPERIMENTAL, 5.0123, 3, true);
     assertEquals("default decimal precision formatted string", "5.012", rv.getValue());
     assertEquals("default decimal precision formatted string", "5.0123", rv.formatNumericValue(4));
     assertEquals("default decimal precision formatted string", "5", rv.formatNumericValue(0));

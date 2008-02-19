@@ -16,18 +16,21 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.PropertyPath;
+import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.searchresults.DateColumn;
-import edu.harvard.med.screensaver.ui.searchresults.FixedDecimalColumn;
-import edu.harvard.med.screensaver.ui.searchresults.IntegerColumn;
-import edu.harvard.med.screensaver.ui.searchresults.SearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.TextColumn;
-import edu.harvard.med.screensaver.ui.searchresults.UserNameColumn;
-import edu.harvard.med.screensaver.ui.table.TableColumn;
+import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.FixedDecimalEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 
-public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeAdjustment>
+public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellVolumeAdjustment,Integer>
 {
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private GenericEntityDAO _dao;
@@ -47,10 +50,12 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
   }
 
   @Override
-  protected List<TableColumn<WellVolumeAdjustment,?>> getColumns()
+  protected List<? extends TableColumn<WellVolumeAdjustment,?>> buildColumns()
   {
-    List<TableColumn<WellVolumeAdjustment,?>> columns = new ArrayList<TableColumn<WellVolumeAdjustment,?>>();
-    columns.add(new DateColumn<WellVolumeAdjustment>("Date", "The date the volume adjustment was made") {
+    List<EntityColumn<WellVolumeAdjustment,?>> columns = new ArrayList<EntityColumn<WellVolumeAdjustment,?>>();
+    columns.add(new DateEntityColumn<WellVolumeAdjustment>(
+      new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "activity", "dateOfActivity"),
+      "Date", "The date the volume adjustment was made", TableColumn.UNGROUPED) {
       @Override
       protected Date getDate(WellVolumeAdjustment wva)
       {
@@ -65,7 +70,12 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
         return null;
       }
     });
-    columns.add(new UserNameColumn<WellVolumeAdjustment>("Performed By", "The person that performed the volume adjustment") {
+    List<PropertyPath<WellVolumeAdjustment>> performedByPropertyPaths = new ArrayList<PropertyPath<WellVolumeAdjustment>>();
+    performedByPropertyPaths.add(new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "activity.performedBy", "lastName"));
+    performedByPropertyPaths.add(new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "activity.performedBy", "firstName"));
+    columns.add(new UserNameColumn<WellVolumeAdjustment>(
+      new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "activity.performedBy"),
+      "Performed By", "The person that performed the volume adjustment", TableColumn.UNGROUPED) {
       @Override
       protected ScreensaverUser getUser(WellVolumeAdjustment wva)
       {
@@ -76,15 +86,21 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
         return null;
       }
     });
-    columns.add(new TextColumn<WellVolumeAdjustment>("Copy", "The name of the library plate copy") {
+    columns.add(new TextEntityColumn<WellVolumeAdjustment>(
+      new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "copy", "name"),
+      "Copy", "The name of the library plate copy", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(WellVolumeAdjustment wva) { return wva.getCopy().getName(); }
     });
-    columns.add(new FixedDecimalColumn<WellVolumeAdjustment>("Volume", "The volume adjustment amount") {
+    columns.add(new FixedDecimalEntityColumn<WellVolumeAdjustment>(
+      new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "microliterVolume"),
+      "Volume", "The volume adjustment amount", TableColumn.UNGROUPED) {
       @Override
       public BigDecimal getCellValue(WellVolumeAdjustment wva) { return wva.getMicroliterVolume(); }
     });
-    columns.add(new IntegerColumn<WellVolumeAdjustment>("Cherry Pick Request", "The cherry pick request that made the volume adjustment") {
+    columns.add(new IntegerEntityColumn<WellVolumeAdjustment>(
+      new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "labCherryPick.cherryPickRequest", "cherryPickRequestNumber"),
+      "Cherry Pick Request", "The cherry pick request that made the volume adjustment", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(WellVolumeAdjustment wva) { return wva.getLabCherryPick() == null ? null : wva.getLabCherryPick().getCherryPickRequest().getCherryPickRequestNumber(); }
 
@@ -94,10 +110,17 @@ public class WellVolumeAdjustmentSearchResults extends SearchResults<WellVolumeA
       @Override
       public Object cellAction(WellVolumeAdjustment entity) { return _cherryPickRequestViewer.viewCherryPickRequest(entity.getLabCherryPick().getCherryPickRequest()); }
     });
-    columns.add(new IntegerColumn<WellVolumeAdjustment>("Admin Adjustment", "The well volume correction activity that made the volume adjustment") {
+    columns.add(new IntegerEntityColumn<WellVolumeAdjustment>(new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "wellVolumeCorrectionActivity", "activityId"),
+      "Admin Adjustment", "The well volume correction activity that made the volume adjustment", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(WellVolumeAdjustment wva) { return wva.getWellVolumeCorrectionActivity() == null ? null : wva.getWellVolumeCorrectionActivity().getEntityId(); }
     });
     return columns;
+  }
+
+  @Override
+  protected void setEntityToView(WellVolumeAdjustment entity)
+  {
+    // TODO Auto-generated method stub
   }
 }

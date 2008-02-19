@@ -14,32 +14,32 @@ import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
-import edu.harvard.med.screensaver.ui.table.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 
 import org.apache.log4j.Logger;
 
-public class ScreeningRoomActivitySearchResults extends ActivitySearchResults
+public class ScreeningRoomActivitySearchResults extends ActivitySearchResults<ScreeningRoomActivity>
 {
   // static members
 
   private static final Set<String> ACTIVITY_TYPES = new HashSet<String>();
   static {
-    // TODO: automate this w/reflection
-    // TODO: use activityTypeName, not class name!
-    ACTIVITY_TYPES.add(CherryPickLiquidTransfer.class.getSimpleName());
-    ACTIVITY_TYPES.add(LibraryScreening.class.getSimpleName());
-    ACTIVITY_TYPES.add(RNAiCherryPickScreening.class.getSimpleName());
+    ACTIVITY_TYPES.add(CherryPickLiquidTransfer.ACTIVITY_TYPE_NAME);
+    ACTIVITY_TYPES.add(LibraryScreening.ACTIVITY_TYPE_NAME);
+    ACTIVITY_TYPES.add(RNAiCherryPickScreening.ACTIVITY_TYPE_NAME);;
   }
 
   private static Logger log = Logger.getLogger(ScreeningRoomActivitySearchResults.class);
-  private List<TableColumn<? extends Activity,?>> _columns;
   private ScreenViewer _screenViewer;
 
   /**
@@ -49,44 +49,54 @@ public class ScreeningRoomActivitySearchResults extends ActivitySearchResults
   {
   }
 
+  public void searchActivitiesForScreen(Screen screen)
+  {
+  }
+
+  public void searchActivitiesForUser(ScreensaverUser user)
+  {
+
+  }
+
   public ScreeningRoomActivitySearchResults(//ActivityViewer activityViewer,
                                             ScreenViewer screenViewer,
                                             GenericEntityDAO dao)
   {
-    super(dao);
+    super(ScreeningRoomActivity.class, dao);
     _screenViewer = screenViewer;
     //_activityViewer = activityViewer;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  protected List getColumns()
+  protected List<? extends TableColumn<ScreeningRoomActivity,?>> buildColumns()
   {
-    if (_columns == null) {
-      _columns = super.getColumns();
-      _columns.add(0, new IntegerColumn<ScreeningRoomActivity>("Screen Number", "The screen number") {
-        @Override
-        public Integer getCellValue(ScreeningRoomActivity activity) { return activity.getScreen().getScreenNumber(); }
+    List<EntityColumn<ScreeningRoomActivity,?>> columns = 
+      (List<EntityColumn<ScreeningRoomActivity,?>>) super.buildColumns();
+    columns.add(0, new IntegerEntityColumn<ScreeningRoomActivity>(
+      new PropertyPath<ScreeningRoomActivity>(ScreeningRoomActivity.class, "screen", "screenNumber"),
+      "Screen Number", "The screen number", TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(ScreeningRoomActivity activity) { return activity.getScreen().getScreenNumber(); }
 
-        @Override
-        public Object cellAction(ScreeningRoomActivity activity) { return _screenViewer.viewScreen(activity.getScreen()); }
+      @Override
+      public Object cellAction(ScreeningRoomActivity activity) { return _screenViewer.viewScreen(activity.getScreen()); }
 
-        @Override
-        public boolean isCommandLink() { return true; }
-      });
-    }
-    return _columns;
+      @Override
+      public boolean isCommandLink() { return true; }
+    });
+    return columns;
   }
 
   @Override
-  protected Set getActivityTypes()
+  protected Set<String> getActivityTypes()
   {
     return ACTIVITY_TYPES;
   }
 
   @Override
-  protected void setEntityToView(AbstractEntity entity)
+  protected void setEntityToView(ScreeningRoomActivity entity)
   {
-
+    // TODO
   }
-
 }

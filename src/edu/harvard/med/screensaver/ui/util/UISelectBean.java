@@ -66,6 +66,15 @@ public abstract class UISelectBean<T> extends Observable
 
   public UISelectBean(Collection<T> objects)
   {
+    setDomain(objects);
+  }
+  
+  /**
+   * Set the domain of items that can be selected from. Allows items to be
+   * changed after UISelectBean is instantiated.
+   */
+  public void setDomain(Collection<T> objects)
+  {
     _selectItems = new ArrayList<SelectItem>();
     _key2Obj = new HashMap<String,T>();
     for (T t : objects) {

@@ -98,9 +98,9 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+        genericEntityDao.persistEntity(library);
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         /*final ScreenResult screenResult = */MakeDummyEntities.makeDummyScreenResult(screen, library);
-        genericEntityDao.persistEntity(library);
         genericEntityDao.persistEntity(screen);
       }
     });

@@ -62,7 +62,6 @@ import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.IntRange;
-import org.apache.commons.lang.math.Range;
 import org.apache.log4j.Logger;
 
 /**
@@ -353,7 +352,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   }
 
   /**
-   * Return all errors the were detected during parsing. This class attempts to
+   * Return all errors that were detected during parsing. This class attempts to
    * parse as much of the workbook as possible, continuing on after finding an
    * error. The hope is that multiple errors will help a user/administrator
    * correct a workbook's errors in a batch fashion, rather than in a piecemeal

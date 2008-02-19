@@ -32,6 +32,7 @@ public abstract class SemanticIDAbstractEntity extends AbstractEntity
 {
   private static Logger log = Logger.getLogger(SemanticIDAbstractEntity.class);
 
+  @Override
   public boolean equals(Object object)
   {
     if (object != null) {
@@ -45,6 +46,7 @@ public abstract class SemanticIDAbstractEntity extends AbstractEntity
     return false;
   }
 
+  @Override
   public int hashCode()
   {
     return getEntityId().hashCode();

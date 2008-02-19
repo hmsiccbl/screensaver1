@@ -14,39 +14,59 @@ package edu.harvard.med.screensaver.ui.searchresults;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.faces.model.DataModel;
 import javax.faces.model.DataModelEvent;
 import javax.faces.model.DataModelListener;
 
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.table.DataTableRowsPerPageUISelectOneBean;
+import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
+import edu.harvard.med.screensaver.ui.table.model.VirtualPagingEntityDataModel;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.util.ValueReference;
 
 import org.apache.log4j.Logger;
 
 /**
- * SearchResults subclass that adds support for:
+ * SearchResults subclass that presents a particular type of domain model
+ * entity. Subclass adds:
  * <ul>
  * <li>"Summary" and "Entity" viewing modes, corresponding to a multi-entity
  * list view and a single-entity full page view, respectively.</li>
+ * <li>Dynamically decides whether to use InMemoryDataModel of
+ * VirtualPagingDataModel, based upon data size and column composition.</li>
+ * <li>Management of "filter mode"</li>
  * <li>Downloading of search results via one or more {@link DataExporter}s.</li>
  * </ul>
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class EntitySearchResults<E extends AbstractEntity> extends SearchResults<E>
+public abstract class EntitySearchResults<E extends AbstractEntity, K> extends SearchResults<E,K,PropertyPath<E>>
 {
   // static members
+
+  /**
+   * The maximum number of entities that can be loaded as a single batch search
+   * result, using InMemoryDataModel. If more than this number is to be loaded,
+   * VirtualPagingDataModel will be used instead.
+   */
+  public static final int ALL_IN_MEMORY_THRESHOLD = 1024;
 
   private static Logger log = Logger.getLogger(EntitySearchResults.class);
 
@@ -56,6 +76,12 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
 
   private List<DataExporter<E>> _dataExporters = Collections.emptyList();
   private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
+  /**
+   * @motivation to prevent redundant calls to setEntityToView
+   */
+  private E entityToView = null;
+
+
 
   // abstract methods
 
@@ -63,47 +89,59 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
 
   // protected methods
 
+  @Override
+  public void initialize(DataFetcher<E,K,PropertyPath<E>> dataFetcher)
+  {
+    super.initialize(dataFetcher);
+
+    // reset to default rows-per-page, if in "entity view" mode
+    if (isEntityView()) {
+      getRowsPerPageSelector().setSelection(getRowsPerPageSelector().getDefaultSelection());
+    }
+  }
+
   /**
    * To be called by a TableColumn.cellAction() method to view the current row's
-   * entity in the "entity view" mode.
+   * entity in the "entity view" mode, or by any other code that wants to switch
+   * to entity view mode. The current row is determined by
+   * getDataTableModel().getRowIndex().
    */
+  @UIControllerMethod
   final protected String viewCurrentEntity()
   {
-    getDataTable().getRowsPerPageSelector().setSelection(1);
-    getDataTable().gotoRowIndex(getDataTable().getDataModel().getRowIndex());
-    updateEntityToView();
+    if (getDataTableModel().getRowCount() == 0 ||
+        !getDataTableModel().isRowAvailable()) {
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    E rowData = (E) getRowData();
+    if (rowData != entityToView && getDataTableUIComponent() != null) {
+      // first, scroll the data table so that the user-selected row is the first on the page,
+      // otherwise rowsPerPageSelector's observer will switch to whatever entity was previously in the first row
+      int rowIndex = getDataTableModel().getRowIndex();
+      log.debug("viewCurrentEntity(): scrolling table to row " + rowIndex);
+      getDataTableUIComponent().setFirst(rowIndex);
+
+      // switch to entity view mode, officially
+      getRowsPerPageSelector().setSelection(1);
+
+      // set the entity to be viewed
+      log.debug("viewCurrentEntity(): setting entity to view: " + rowData);
+      setEntityToView(rowData);
+      entityToView = rowData;
+    }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataModel buildDataModel()
-  {
-    DataModel dataModel = super.buildDataModel();
-    dataModel.addDataModelListener(new DataModelListener()
-    {
-      @SuppressWarnings("unchecked")
-      public void rowSelected(DataModelEvent event)
-      {
-        assert event.getRowData() == getDataTable().getDataModel()
-                                                   .getRowData();
-        updateEntityToView();
-      }
-    });
-    return dataModel;
-  }
-
-  final protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector()
+  final protected RowsPerPageSelector buildRowsPerPageSelector()
   {
     // note: we need a special "single" (1) selection item, for viewing the
     // entity in its full viewer page
-    DataTableRowsPerPageUISelectOneBean rowsPerPageSelector = new DataTableRowsPerPageUISelectOneBean(Arrays.asList(1,
-                                                                                                                    10,
-                                                                                                                    20,
-                                                                                                                    50,
-                                                                                                                    100),
-                                                                                                      20)
-    {
+    RowsPerPageSelector rowsPerPageSelector = new RowsPerPageSelector(Arrays.asList(1,
+                                                                                    10,
+                                                                                    20,
+                                                                                    50,
+                                                                                    100),
+                                                                      20) {
       @Override
       public String getLabel(Integer value)
       {
@@ -116,12 +154,16 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
       }
     };
 
-    rowsPerPageSelector.addObserver(new Observer()
-    {
+    rowsPerPageSelector.addObserver(new Observer() {
       public void update(Observable obs, Object o)
       {
         if (((Integer) o) == 1) {
-          updateEntityToView();
+          if (getDataTableUIComponent() != null) {
+            // this will cause our DataModel listener to set the entity to be viewed
+            log.debug("entering 'entity view' mode; setting data table row to first row on page:" +
+                      getDataTableUIComponent().getFirst());
+            getDataTableModel().setRowIndex(getDataTableUIComponent().getFirst());
+          }
         }
       }
     });
@@ -146,30 +188,30 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
   }
 
   @Override
-  public void setContents(Collection<? extends E> unsortedResults,
-                          String description)
+  public void resort()
   {
-    super.setContents(unsortedResults, description);
+    super.resort();
+    if (isEntityView()) {
+      if (getDataTableUIComponent() != null) {
+        getDataTableModel().setRowIndex(getDataTableUIComponent().getFirst());
+      }
+      viewCurrentEntity();
+    }
+  }
 
-    // intercept re-sorts, to update the entity being viewed in "entity view"
-    // mode
-    getDataTable().addObserver(new Observer()
-                  {
-                    public void update(Observable obs, Object o)
-                    {
-                      updateEntityToView();
-                    }
-                  });
+  public boolean isRowRestricted()
+  {
+    return getRowData().isRestricted();
   }
 
   public boolean isSummaryView()
   {
-    return getDataTable().getRowsPerPage() > 1;
+    return !isEntityView();
   }
 
   public boolean isEntityView()
   {
-    return getDataTable().getRowsPerPage() == 1 && getDataTable().getRowCount() > 0;
+    return getRowsPerPage() == 1 && getRowCount() > 0;
   }
 
   /**
@@ -180,7 +222,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
   @Override
   public boolean isTableFilterMode()
   {
-    return super.isTableFilterMode() && !isEntityView();
+    return super.isTableFilterMode() && isSummaryView();
   }
 
   /**
@@ -207,8 +249,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
   public UISelectOneBean<DataExporter<E>> getDataExporterSelector()
   {
     if (_dataExporterSelector == null) {
-      _dataExporterSelector = new UISelectOneBean<DataExporter<E>>(getDataExporters())
-      {
+      _dataExporterSelector = new UISelectOneBean<DataExporter<E>>(getDataExporters()) {
         @Override
         protected String getLabel(DataExporter<E> dataExporter)
         {
@@ -221,11 +262,12 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
 
   @SuppressWarnings("unchecked")
   @UIControllerMethod
-  /* final (CGLIB2 restriction) */public String downloadSearchResults()
+  /* final (CGLIB2 restriction) */
+  public String downloadSearchResults()
   {
     try {
       DataExporter dataExporter = getDataExporterSelector().getSelection();
-      InputStream inputStream = dataExporter.export(getCurrentSort());
+      InputStream inputStream = dataExporter.export(getDataFetcher().fetchAllData());
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          dataExporter.getFileName(),
@@ -239,30 +281,66 @@ public abstract class EntitySearchResults<E extends AbstractEntity> extends Sear
 
   // private methods
 
-  /**
-   * @motivation to prevent redundant calls to setEntityToView
-   */
-  private E entityToView = null;
+  @Override
+  final protected DataTableModel<E> buildDataTableModel(DataFetcher<E,K,PropertyPath<E>> dataFetcher,
+                                                        List<? extends TableColumn<E,?>> columns)
+  {
+    if (dataFetcher instanceof EntityDataFetcher) {
+      DataTableModel<E> dataTableModel = doBuildDataModel((EntityDataFetcher<E,K>) dataFetcher, columns);
+      dataTableModel.addDataModelListener(new DataModelListener() {
+        public void rowSelected(DataModelEvent event)
+        {
+          if (isEntityView()) {
+            viewCurrentEntity();
+          }
+        }
+      });
+      return dataTableModel;
+    }
+    // for no-op (empty data model)
+    return new InMemoryDataModel<E>(dataFetcher);
+  }
 
   /**
-   * This method should be called whenever the current row changes (due to
-   * re-sort, re-creation of data model, etc.), so that if we're in "entity
-   * view" mode, the current entity can be updated.
+   * Factory method to build the data model, allowing subclasses to determine
+   * customize decision to use in-memory or virtual paging data model (or some
+   * other data access strategy altogether).
+   *
+   * @param dataFetcher the DataFetcher associated with this SearchResults
+   *          object.
+   * @return a DataTableModel
    */
-  @SuppressWarnings("unchecked")
-  private void updateEntityToView()
+  protected DataTableModel<E> doBuildDataModel(EntityDataFetcher<E,K> dataFetcher,
+                                               List<? extends TableColumn<E,?>> columns)
   {
-    if (isEntityView()) {
-      if (getDataTable().getDataModel()
-                        .isRowAvailable()) {
-        E rowData = (E) getRowData();
-        if (rowData != null && rowData != entityToView) {
-          log.debug("setting entity for single-view mode: " + rowData);
-          setEntityToView(rowData);
-          entityToView = rowData;
-        }
+    boolean allColumnsHavePropertyPaths = true;
+    for (TableColumn<E,?> column : columns) {
+      EntityColumn entityColumn = (EntityColumn) column;
+      if (entityColumn.getPropertyPath() == null) {
+        allColumnsHavePropertyPaths = false;
+        break;
       }
     }
+
+    DataTableModel<E> model;
+    if (!allColumnsHavePropertyPaths ||
+        (dataFetcher instanceof EntitySetDataFetcher &&
+          ((EntitySetDataFetcher) dataFetcher).getDomain().size() <= ALL_IN_MEMORY_THRESHOLD)) {
+      if (!allColumnsHavePropertyPaths) {
+        log.debug("using InMemoryDataModel due to having some columns that do not map directly to database fields");
+      }
+      else {
+        log.debug("using InMemoryDataModel due to domain size");
+      }
+      model = new InMemoryEntityDataModel<E>(dataFetcher);
+    }
+    else {
+      log.debug("using VirtualPagingDataModel (sweet!)");
+      model = new VirtualPagingEntityDataModel<K,E>(dataFetcher,
+        new ValueReference<Integer>() { public Integer value() { return getRowsPerPage(); }
+      });
+    }
+    return model;
   }
 
 }

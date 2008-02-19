@@ -13,8 +13,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.model.PropertyPath;
+import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.ui.table.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 
 
 /**
@@ -23,7 +30,7 @@ import edu.harvard.med.screensaver.ui.table.TableColumn;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class UserSearchResults extends EntitySearchResults<ScreensaverUser>
+public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchResults<E,Integer>
 {
 
   // private static final fields
@@ -31,9 +38,9 @@ public class UserSearchResults extends EntitySearchResults<ScreensaverUser>
 
   // instance fields
 
+  private GenericEntityDAO _dao;
+  private Class<E> _type;
   /*private UserViewer _screenViewer;*/
-
-  private ArrayList<TableColumn<ScreensaverUser,?>> _columns;
 
 
   // public constructor
@@ -41,45 +48,54 @@ public class UserSearchResults extends EntitySearchResults<ScreensaverUser>
   /**
    * @motivation for CGLIB2
    */
-//  protected UserSearchResults()
-//  {
-//  }
-
-  public UserSearchResults(/*ScreensaverUserViewer userViewer*/)
+  protected UserSearchResults()
   {
+  }
+
+  public UserSearchResults(Class<E> type,
+                           GenericEntityDAO dao
+                           /*, ScreensaverUserViewer userViewer*/)
+  {
+    _type = type;
+    _dao = dao;
     //_userViewer = userViewer;
+  }
+
+  public void searchUsers()
+  {
+    initialize(new AllEntitiesOfTypeDataFetcher<E,Integer>(_type, _dao));
   }
 
 
   // implementations of the SearchResults abstract methods
 
-  protected List<TableColumn<ScreensaverUser,?>> getColumns()
+   @Override
+  protected List<? extends TableColumn<E,?>> buildColumns()
   {
-    if (_columns == null) {
-      _columns = new ArrayList<TableColumn<ScreensaverUser,?>>();
-      _columns.add(new UserNameColumn<ScreensaverUser>("User", "The name of the user (last, first)") {
-        @Override
-        protected ScreensaverUser getUser(ScreensaverUser user)
-        {
-          return user;
-        }
-      });
-      _columns.add(new DateColumn<ScreensaverUser>("Date Created",
-        "The date the user's account was created") {
-        public Date getDate(ScreensaverUser user) { return user.getDateCreated(); }
-      });
-    }
-    return _columns;
-  }
+    ArrayList<EntityColumn<E,?>> columns = new ArrayList<EntityColumn<E,?>>();
+    columns.add(new UserNameColumn<E>(
+      new RelationshipPath<E>(_type, ""),
+      "User", "The name of the user (last, first)", TableColumn.UNGROUPED) {
+      @Override
+      protected ScreensaverUser getUser(ScreensaverUser user)
+      {
+        return user;
+      }
+    });
+    columns.add(new DateEntityColumn<E>(
+      new PropertyPath<E>(_type, "dateCreated"),
+      "Date Created",
+      "The date the user's account was created", TableColumn.UNGROUPED) {
+      public Date getDate(ScreensaverUser user) { return user.getDateCreated(); }
+    });
 
-  @Override
-  protected List<Integer[]> getCompoundSorts()
-  {
-    List<Integer[]> compoundSorts = super.getCompoundSorts();
-//    compoundSorts.add(new Integer[] {0, 1, 2});
-//    compoundSorts.add(new Integer[] {1, 0, 2});
-//    compoundSorts.add(new Integer[] {2, 1, 2});
-    return compoundSorts;
+//    TableColumnManager<ScreensaverUser> columnManager = getColumnManager();
+//    columnManager.addCompoundSortColumns(columnManager.getColumn("User"),
+//                                         columnManager.getColumn("Date Created"));
+//    columnManager.addCompoundSortColumns(columnManager.getColumn("Date Created"),
+//                                         columnManager.getColumn("User"));
+
+    return columns;
   }
 
   @Override

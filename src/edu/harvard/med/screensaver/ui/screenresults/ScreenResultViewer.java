@@ -12,19 +12,9 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javax.faces.component.UIData;
-import javax.faces.component.UIInput;
-import javax.faces.event.ValueChangeEvent;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -39,8 +29,8 @@ import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 import org.apache.commons.io.IOUtils;
@@ -60,7 +50,7 @@ import org.springframework.dao.DataAccessException;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @SuppressWarnings("unchecked")
-public class ScreenResultViewer extends AbstractBackingBean implements Observer
+public class ScreenResultViewer extends AbstractBackingBean
 {
 
   // static data members
@@ -78,19 +68,16 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
   private ScreenSearchResults _screensBrowser;
   private ScreenViewer _screenViewer;
   private ScreenDetailViewer _screenDetailViewer;
+  private ResultValueTypesTable _resultValueTypesTable;
   private ScreenResultExporter _screenResultExporter;
-  private ScreenResultDataTable _screenResultDataTable;
-  private EmptyScreenResultDataTable _emptyScreenResultDataTable;
-  private FullScreenResultDataTable _fullScreenResultDataTable;
-  private PositivesOnlyScreenResultDataTable _positivesOnlyScreenResultDataTable;
-  private SinglePlateScreenResultDataTable _singlePlateScreenResultDataTable;
+  private WellSearchResults _wellSearchResults;
 
   private ScreenResult _screenResult;
   private Map<String,Boolean> _isPanelCollapsedMap;
 
-  private ResultValueTypeTable _rvtTable;
   private UISelectOneBean<Integer> _dataFilter;
   private UISelectOneBean<ResultValueType> _showPositivesOnlyForDataHeader;
+
 
 
   // constructors
@@ -107,11 +94,9 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
                             ScreenSearchResults screensBrowser,
                             ScreenViewer screenViewer,
                             ScreenDetailViewer screenDetailViewer,
+                            ResultValueTypesTable resultValueTypesTable,
                             ScreenResultExporter screenResultExporter,
-                            ResultValueTypeTable rvtTable,
-                            FullScreenResultDataTable fullScreenResultDataTable,
-                            PositivesOnlyScreenResultDataTable positivesOnlyScreenResultDataTable,
-                            SinglePlateScreenResultDataTable singlePlateScreenResultDataTable)
+                            WellSearchResults wellSearchResults)
 
   {
     _dao = dao;
@@ -119,31 +104,34 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     _screensBrowser = screensBrowser;
     _screenViewer = screenViewer;
     _screenDetailViewer = screenDetailViewer;
+    _resultValueTypesTable = resultValueTypesTable;
     _screenResultExporter = screenResultExporter;
-    _rvtTable = rvtTable;
-    _fullScreenResultDataTable = fullScreenResultDataTable;
-    _positivesOnlyScreenResultDataTable = positivesOnlyScreenResultDataTable;
-    _singlePlateScreenResultDataTable = singlePlateScreenResultDataTable;
-    _emptyScreenResultDataTable = new EmptyScreenResultDataTable(this);
-    _screenResultDataTable = _emptyScreenResultDataTable;
+    _wellSearchResults = wellSearchResults;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenResultSummary", false);
     _isPanelCollapsedMap.put("dataHeadersTable", true);
-    _isPanelCollapsedMap.put("dataTable", true);
     _isPanelCollapsedMap.put("heatMaps", true);
   }
 
 
   // public methods
 
+  /**
+   * @param screenResult can be null
+   */
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
     _dataFilter = null;
     _showPositivesOnlyForDataHeader = null;
-    getDataHeadersTable().initialize(getResultValueTypes(), this);
-    updateDataTable();
+    _wellSearchResults.searchWellsForScreenResult(screenResult);
+    if (screenResult == null) {
+      _resultValueTypesTable.initialize(Collections.<ResultValueType>emptyList());
+    } 
+    else {
+      _resultValueTypesTable.initialize(screenResult.getResultValueTypesList());
+    }
   }
 
   public ScreenResult getScreenResult()
@@ -156,74 +144,14 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
     return _isPanelCollapsedMap;
   }
 
-  /**
-   * @motivation Each of 3 backing bean objects need a reference to the
-   *             UIComponent, but the active one will only be swapped in after
-   *             JSF binds the reference (i.e. calls the
-   *             DataTable.setRowsPerPageUIComponent() method), allowing only
-   *             the previous active backing bean to have the correct reference
-   *             to the UIComponent
-   */
-  public void setSharedRowsPerPageUIComponent(UIInput rowsPerPageUIComponent)
+  public ResultValueTypesTable getDataHeadersTable()
   {
-    _emptyScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
-    _fullScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
-    _positivesOnlyScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
-    _singlePlateScreenResultDataTable.setRowsPerPageUIComponent(rowsPerPageUIComponent);
+    return _resultValueTypesTable;
   }
 
-  public UIInput getSharedRowsPerPageUIComponent()
+  public WellSearchResults getResultValueTable()
   {
-    assert _fullScreenResultDataTable.getRowsPerPageUIComponent() == _emptyScreenResultDataTable.getRowsPerPageUIComponent() &&
-    _fullScreenResultDataTable.getRowsPerPageUIComponent() == _positivesOnlyScreenResultDataTable.getRowsPerPageUIComponent() &&
-    _fullScreenResultDataTable.getRowsPerPageUIComponent() == _singlePlateScreenResultDataTable.getRowsPerPageUIComponent();
-    return _fullScreenResultDataTable.getRowsPerPageUIComponent();
-  }
-
-  /**
-   * @motivation Each of 3 backing bean objects need a reference to the
-   *             UIComponent, but the active one will only be swapped in after
-   *             JSF binds the reference (i.e. calls the
-   *             DataTable.setDataTableUIComponent() method), allowing only the
-   *             previous active backing bean to have the correct reference to
-   *             the UIComponent
-   */
-  public void setSharedDataTableUIComponent(UIData dataTableUIComponent)
-  {
-    _emptyScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
-    _fullScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
-    _positivesOnlyScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
-    _singlePlateScreenResultDataTable.setDataTableUIComponent(dataTableUIComponent);
-  }
-
-  public UIData getSharedDataTableUIComponent()
-  {
-    assert _fullScreenResultDataTable.getDataTableUIComponent() == _emptyScreenResultDataTable.getDataTableUIComponent() &&
-    _fullScreenResultDataTable.getDataTableUIComponent() == _positivesOnlyScreenResultDataTable.getDataTableUIComponent() &&
-    _fullScreenResultDataTable.getDataTableUIComponent() == _singlePlateScreenResultDataTable.getDataTableUIComponent();
-    return _fullScreenResultDataTable.getDataTableUIComponent();
-  }
-
-  public UISelectManyBean<ResultValueType> getDataHeaderSelections()
-  {
-    return getDataHeadersTable().getSelector();
-  }
-
-  public ResultValueTypeTable getDataHeadersTable()
-  {
-    return _rvtTable;
-  }
-
-  public ScreenResultDataTable getResultValueTable()
-  {
-    return _screenResultDataTable;
-  }
-
-  public void update(Observable observable, Object o)
-  {
-    // data header selections changed
-    // TODO: make use of TableSortManager.getColumnModel().updateVisibleColumns(), instead of rebuilding data table backing bean wholesale
-    updateDataTable();
+    return _wellSearchResults;
   }
 
 
@@ -291,7 +219,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
           public void runTransaction() {
             ScreenResult screenResult = _dao.reattachEntity(_screenResult);
             _screenResultsDao.deleteScreenResult(screenResult);
-            _screensBrowser.invalidateSearchResult();
+            _screensBrowser.refetch();
           }
         });
         return _screenViewer.viewScreen(_screenResult.getScreen());
@@ -318,66 +246,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
   // result value data table filtering methods
 
-  public UISelectOneBean<ResultValueType> getShowPositivesOnlyForDataHeader()
-  {
-    if (_showPositivesOnlyForDataHeader == null) {
-      updateDataHeaderSelectionsForShowPositives();
-    }
-    return _showPositivesOnlyForDataHeader;
-  }
-
-  private void updateDataHeaderSelectionsForShowPositives()
-  {
-    log.debug("updating data header selections for show positives");
-    List<ResultValueType> resultValueTypes = new ArrayList<ResultValueType>();
-    resultValueTypes.addAll(getResultValueTypes());
-    for (Iterator<ResultValueType> iter = resultValueTypes.iterator(); iter.hasNext();) {
-      ResultValueType rvt = iter.next();
-      if (!rvt.isPositiveIndicator()) {
-        iter.remove();
-      }
-    }
-    _showPositivesOnlyForDataHeader = new UISelectOneBean<ResultValueType>(resultValueTypes) {
-      @Override
-      protected String getLabel(ResultValueType t)
-      {
-        return t.getName();
-      }
-    };
-  }
-
-  // result value data table methods
-
-  public UISelectOneBean<Integer> getDataFilter/*TODO: Selections*/()
-  {
-    if (_dataFilter == null) {
-      lazyBuildDataFilterSelections();
-    }
-    return _dataFilter;
-  }
-
-  /**
-   * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
-   */
-  public void dataTableFilterListener(ValueChangeEvent event)
-  {
-    log.debug("dataTableFilter changed to " + event.getNewValue());
-    getDataFilter().setValue((String) event.getNewValue());
-    updateDataTable();
-    getFacesContext().renderResponse();
-  }
-
-  /**
-   * Called when the set of rows to be displayed in the table needs to be changed (row filtering).
-   */
-  public void showPositivesForDataHeaderListener(ValueChangeEvent event)
-  {
-    log.debug("showPositivesForDataHeader changed to " + event.getNewValue());
-    getShowPositivesOnlyForDataHeader().setValue((String) event.getNewValue());
-    updateDataTable();
-    getFacesContext().renderResponse();
-  }
-
   // protected methods
 
   protected ScreensaverUserRole getEditableAdminRole()
@@ -387,69 +255,5 @@ public class ScreenResultViewer extends AbstractBackingBean implements Observer
 
 
   // private methods
-
-  /**
-   * Get ResultValueTypes set, safely, handling case that no screen result
-   * exists.
-   */
-  private List<ResultValueType> getResultValueTypes()
-  {
-    List<ResultValueType> rvts = new ArrayList<ResultValueType>();
-    if (getScreenResult() != null) {
-      rvts.addAll(getScreenResult().getResultValueTypes());
-    }
-    return rvts;
-  }
-
-  private void updateDataTable()
-  {
-    log.debug("updating data table content");
-    if (_screenResult == null) {
-      _screenResultDataTable = new EmptyScreenResultDataTable(this);
-    }
-    else if (getDataFilter().getSelection().equals(DATA_TABLE_FILTER_SHOW_ALL)) {
-      _screenResultDataTable = _fullScreenResultDataTable;
-    }
-    else if (getDataFilter().getSelection().equals(DATA_TABLE_FILTER_SHOW_POSITIVES)) {
-      _positivesOnlyScreenResultDataTable.setPositivesDataHeader(getShowPositivesOnlyForDataHeader().getSelection());
-      _screenResultDataTable = _positivesOnlyScreenResultDataTable;
-    }
-    else {
-      _singlePlateScreenResultDataTable.setPlateNumber(getDataFilter().getSelection());
-      _screenResultDataTable = _singlePlateScreenResultDataTable;
-    }
-    _screenResultDataTable.setScreenResult(getScreenResult());
-    _screenResultDataTable.setResultValueTypes(getDataHeaderSelections().getSelections());
-  }
-
-  private void lazyBuildDataFilterSelections()
-  {
-    if (_screenResult == null) {
-      _dataFilter = new UISelectOneBean<Integer>();
-      return;
-    }
-
-    log.debug("updating data table filter selections");
-
-    SortedSet<Integer> filters = new TreeSet<Integer>(_screenResult.getPlateNumbers());
-    filters.add(DATA_TABLE_FILTER_SHOW_ALL);
-    if (getShowPositivesOnlyForDataHeader().getSize() > 0) {
-      filters.add(DATA_TABLE_FILTER_SHOW_POSITIVES);
-    }
-    _dataFilter =
-      new UISelectOneBean<Integer>(filters, DATA_TABLE_FILTER_SHOW_ALL) {
-      @Override
-      protected String getLabel(Integer val)
-      {
-        if (val == DATA_TABLE_FILTER_SHOW_ALL) {
-          return "All";
-        }
-        if (val == DATA_TABLE_FILTER_SHOW_POSITIVES) {
-          return "Positives";
-        }
-        return super.getLabel(val);
-      }
-    };
-  }
 
 }

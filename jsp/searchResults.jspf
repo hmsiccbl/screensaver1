@@ -4,6 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <f:subview id="searchResultsSubview">
+
 	<t:panelGrid id="searchResultsPanel" columns="1" width="100%">
 
 		<t:collapsiblePanel var="isCollapsed">
@@ -20,7 +21,7 @@
 
 			<t:panelGrid styleClass="groupingPanel" style="margin-top: 2px">
 				<t:dataTable id="queryTable" var="column" styleClass="standardTable"
-					value="#{searchResults.dataTable.sortManager.columns}"
+					value="#{searchResults.columnManager.visibleColumns}"
 					rendered="#{!searchResults.tableFilterMode}">
 					<t:column id="columnName" styleClass="keyColumn" style="width: 33%">
 						<t:outputText value="#{column.name}" styleClass="label" />
@@ -35,7 +36,7 @@
 					<t:column id="fieldInputColumn">
 						<t:inputText id="simpleCriterionValue"
 							value="#{column.criterion.value}" converter="#{column.converter}"
-							rendered="#{column.columnType.name == \"TEXT\" || column.columnType.name == \"INTEGER\" || column.columnType.name == \"REAL\" || column.columnType.name == \"FIXED_DECIMAL\"}"
+							rendered="#{column.columnType.name == \"TEXT\" || column.columnType.name == \"LIST\" || column.columnType.name == \"INTEGER\" || column.columnType.name == \"REAL\" || column.columnType.name == \"FIXED_DECIMAL\"}"
 							size="#{column.columnType.name == \"TEXT\" ? 30 : 8}"
 							styleClass="inputText" />
 						<t:inputDate id="dateCriterionValue" type="date"
@@ -77,17 +78,17 @@
 
 		<t:buffer into="#{dataTableBuffer}">
 			<t:dataTable id="searchResultsTable"
-				binding="#{searchResults.dataTable.dataTableUIComponent}"
-				value="#{searchResults.dataTable.dataModel}" var="row"
-				rows="#{searchResults.dataTable.rowsPerPage}"
+				binding="#{searchResults.dataTableUIComponent}"
+				value="#{searchResults.dataTableModel}" var="row"
+				rows="#{searchResults.rowsPerPage}"
 				styleClass="standardTable" headerClass="tableHeader"
 				rowClasses="row1,row2"
-				sortColumn="#{searchResults.dataTable.sortManager.sortColumnName}"
-				sortAscending="#{searchResults.dataTable.sortManager.sortAscending}"
+				sortColumn="#{searchResults.columnManager.sortColumnName}"
+				sortAscending="#{searchResults.columnManager.sortAscending}"
 				width="100%">
 
 				<t:columns id="dataColumns"
-					value="#{searchResults.dataTable.sortManager.columnModel}"
+					value="#{searchResults.columnManager.visibleColumnModel}"
 					var="column"
 					styleClass="#{column.numeric ? \"numericColumn\" : \"column\"}">
 					<f:facet name="header">
@@ -130,12 +131,12 @@
 									size="8" styleClass="inputText"
 									displayValueOnly="#{!searchResults.tableFilterMode && !column.criterion.undefined}"
 									displayValueOnlyStyleClass="data"
-									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}" />
+									tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
 								<t:inputDate id="dateCriterionValue" type="date"
 									popupCalendar="true" size="1" value="#{column.criterion.value}"
 									rendered="#{column.columnType.name == \"DATE\" && searchResults.tableFilterMode}"
 									styleClass="inputText"
-									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}" />
+									tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
 								<t:outputText id="dateCriterionValueOutput"
 									value="#{column.criterion.value}"
 									rendered="#{column.columnType.name == \"DATE\" && (!searchResults.tableFilterMode && !column.criterion.undefined)}"
@@ -148,7 +149,7 @@
 									displayValueOnly="#{!searchResults.tableFilterMode && !column.criterion.undefined}"
 									displayValueOnlyStyleClass="data"
 									onchange="javascript:document.getElementById('search').click()"
-									tabindex="#{searchResults.dataTable.sortManager.currentColumnIndex + 1}">
+									tabindex="#{searchResults.columnManager.currentColumnIndex + 1}">
 									<f:selectItems value="#{column.vocabularySelections}" />
 								</t:selectOneMenu>
 								<t:selectOneMenu id="booleanCriterionValue"
@@ -172,28 +173,23 @@
 							</t:panelGrid>
 						</t:panelGrid>
 					</f:facet>
-					<t:outputText value="#{searchResults.cellValue}"
-						rendered="#{! (column.isCommandLink || column.isCommandLinkList || (column.editable && searchResults.editMode))}" />
-					<t:inputText value="#{searchResults.cellValue}" converter="#{column.converter}"
-						rendered="#{column.editable && searchResults.editMode}"
-						immediate="true" />
-					<t:commandLink action="#{searchResults.dataTable.cellAction}"
-						value="#{searchResults.cellValue}"
-						rendered="#{column.isCommandLink && (!column.editable || !searchResults.editMode)}">
-						<f:param name="commandValue"
-							value="#{searchResults.escapeBackslashes[searchResults.cellValue]}" />
-					</t:commandLink>
-					<t:dataList id="commandLinkList" var="commandValue"
-						value="#{searchResults.cellValue}" layout="simple"
-						rendered="#{column.isCommandLinkList && (!column.editable || !searchResults.editMode)}"
-						rowIndexVar="rowIndex" rowCountVar="rowCount">
-						<t:commandLink action="#{searchResults.dataTable.cellAction}"
-							value="#{commandValue}">
-							<f:param name="commandValue"
-								value="#{searchResults.escapeBackslashes[commandValue]}" />
-						</t:commandLink>
-						<t:outputText value=";" rendered="#{rowIndex < rowCount - 1}" />
-					</t:dataList>
+          <t:panelStack selectedPanel="#{searchResults.rowRestricted ? \"restricted\" : column.editable && searchResults.editMode ? \"input\" : \"output\"}" >
+						<t:outputText id="restricted" value="---" />
+						<t:inputText id="input" value="#{searchResults.cellValue}"
+							immediate="true" converter="#{column.converter}" />
+					  <%-- both scalar and collection column types are displayed in dataList --%>
+						<t:dataList id="output" var="item"
+							value="#{searchResults.cellValue}" layout="simple"
+							rowIndexVar="rowIndex" rowCountVar="rowCount">
+							<t:commandLink disabled="#{! column.commandLink}"
+								action="#{searchResults.cellAction}">
+								<f:param name="commandValue"
+									value="#{searchResults.escapeBackslashes[item]}" />
+								<t:outputText id="text" value="#{item}" />
+							</t:commandLink>
+							<t:outputText value=";" rendered="#{rowIndex < rowCount - 1}" />
+						</t:dataList>
+					</t:panelStack>
 				</t:columns>
 			</t:dataTable>
 
@@ -213,16 +209,16 @@
 
 			<t:panelGroup id="commandPanel">
 
-				<t:panelGroup rendered="#{searchResults.editable}">
+				<t:panelGroup rendered="#{searchResults.capabilities[\"editable\"]}">
 					<t:commandButton id="editCommand" value="Edit"
 						action="#{searchResults.edit}"
-						rendered="#{searchResults.hasEditableColumns && !searchResults.editMode}" />
+						rendered="#{searchResults.capabilities[\"editable\"] && searchResults.hasEditableColumns && !searchResults.editMode}" />
 					<t:commandButton id="saveCommand" value="Save"
 						action="#{searchResults.save}"
-						rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
+						rendered="#{searchResults.capabilities[\"editable\"] && searchResults.hasEditableColumns && searchResults.editMode}" />
 					<t:commandButton id="cancelCommand" value="Cancel" immediate="true"
 						action="#{searchResults.cancel}"
-						rendered="#{searchResults.hasEditableColumns && searchResults.editMode}" />
+						rendered="#{searchResults.capabilities[\"editable\"] && searchResults.hasEditableColumns && searchResults.editMode}" />
 				</t:panelGroup>
 
 				<t:panelGrid
@@ -245,17 +241,50 @@
 			</t:panelGroup>
 		</t:buffer>
 
-		<t:outputText
-			rendered="#{! empty searchResults.description}"
-			value="#{searchResults.description}"
-			styleClass="sectionHeader" />
+		<t:collapsiblePanel id="columnsSelectionPanel" var="isCollapsed"
+			rendered="#{!searchResults.capabilities[\"viewEntity\"] || searchResults.summaryView}">
+			<f:facet name="header">
+				<t:headerLink immediate="true">
+					<t:outputText value="Columns #{isCollapsed ? \">>\" : \"<<\"}"
+						escape="true" styleClass="label" />
+				</t:headerLink>
+			</f:facet>
+			<t:panelGrid id="columnsSelectionPanelInternal" columns="1">
+				<t:commandButton id="updateColumnsButton" forceId="true"
+				action="#{searchResults.columnManager.updateColumnSelections}"
+				value="Update" styleClass="command"
+				title="Update the columns selection" />
+				<t:tree2 id="columnsSelectorTree"
+				value="#{searchResults.columnManager.columnsTreeModel}" var="node"
+				varNodeToggler="t" clientSideToggle="true" showRootNode="false">
+				<f:facet name="root">
+					<h:panelGroup>
+						<h:outputText value="Columns" styleClass="label" />
+					</h:panelGroup>
+				</f:facet>
+				<f:facet name="group">
+					<h:panelGroup
+						rendered="#{searchResults.readAdmin || !node.description != \"Adminstrative\"}">
+						<h:outputText value="#{node.description}" styleClass="label" />
+					</h:panelGroup>
+				</f:facet>
+				<f:facet name="column">
+					<h:panelGroup>
+						<t:selectBooleanCheckbox id="columnSelector"
+							value="#{node.checked}" styleClass="command" />
+						<t:outputLabel for="columnSelector" value="#{node.description}"
+							styleClass="label" />
+					</h:panelGroup>
+				</f:facet>
+			</t:tree2></t:panelGrid>
+		</t:collapsiblePanel>
 
-		<t:aliasBean alias="#{dataTable}" value="#{searchResults.dataTable}">
-			<%@ include file="dataTableNavigator.jspf"%>
-		</t:aliasBean>
 
-		<t:outputText value="#{dataTableBuffer}" escape="false"
-			rendered="#{!searchResults.capabilities[\"viewEntity\"] || !searchResults.entityView}" />
+		<t:aliasBean alias="#{dataTable}" value="#{searchResults}">
+				<%@ include file="dataTableNavigator.jspf"%>
+			</t:aliasBean>
 
+			<t:outputText value="#{dataTableBuffer}" escape="false"
+				rendered="#{!searchResults.capabilities[\"viewEntity\"] || !searchResults.entityView}" />
 	</t:panelGrid>
 </f:subview>

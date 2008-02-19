@@ -1,4 +1,4 @@
-// $HeadURL$
+
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -14,7 +14,7 @@ public interface ScreensaverConstants
   // static data members
 
   public static final String APPLICATION_NAME = "Screensaver";
-  public static final String APPLICATION_VERSION = "1.4.2";
+  public static final String APPLICATION_VERSION = "1.5.0";
   public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
   public static final String FEEDBACK_URL = "mailto:screensaver-feedback@hms.harvard.edu";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
@@ -54,6 +54,7 @@ public interface ScreensaverConstants
   public static final String VIEW_STUDIES = "viewStudies";
   public static final String VIEW_STUDY = "viewStudy";
   public static final String BROWSE_SCREENS = "browseScreens";
+  public static final String BROWSE_MY_SCREENS = "browseScreens";
   public static final String VIEW_SCREEN = "viewScreen";
   public static final String VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT = "viewScreeningRoomActivity";
   public static final String BROWSE_CHERRY_PICK_REQUESTS = "browseCherryPickRequests";
@@ -61,6 +62,7 @@ public interface ScreensaverConstants
   public static final String VIEW_BILLING_INFORMATION_ACTION_RESULT = "viewBillingInformation";
   public static final String VIEW_ATTACHED_FILE_ACTION_RESULT = "viewAttachedFile";
   public static final String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
-  public static final String BROWSE_USERS = "browseUsers";
   public static final String BROWSE_ACTIVITIES = "browseActivities";
+  public static final String BROWSE_SCREENERS = "browseScreeners";
+  public static final String BROWSE_STAFF = "browseStaff";
 }

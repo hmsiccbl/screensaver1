@@ -50,7 +50,9 @@ public class LibraryScreening extends Screening
   private static final long serialVersionUID = 0L;
   private static final Logger log = Logger.getLogger(LibraryScreening.class);
 
+  public static final String ACTIVITY_TYPE_NAME = "Library Screening";
 
+  
   // private instance data
 
   private Set<PlatesUsed> _platesUsed = new HashSet<PlatesUsed>();
@@ -70,7 +72,7 @@ public class LibraryScreening extends Screening
   @Transient
   public String getActivityTypeName()
   {
-    return "Library Screening";
+    return ACTIVITY_TYPE_NAME;
   }
 
   /**

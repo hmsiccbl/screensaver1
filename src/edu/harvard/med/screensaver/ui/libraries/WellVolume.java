@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -22,7 +24,7 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 
 import org.apache.log4j.Logger;
 
-public class WellVolume
+public class WellVolume implements Comparable<WellVolume>
 {
   // static members
 
@@ -32,44 +34,39 @@ public class WellVolume
   // instance data members
   
   private Well _well;
-  private List<WellCopyVolume> _wellCopyVolumes;
-  private BigDecimal _initialMicroliterVolume;
+  private List<WellCopy> _wellCopyVolumes;
+  private BigDecimal _totalInitialMicroliterVolume;
   private BigDecimal _consumedMicroliterVolume;
-  private WellCopyVolume _maxWellCopyVolume;
-  private WellCopyVolume _minWellCopyVolume;
+  private WellCopy _maxWellCopyVolume;
+  private WellCopy _minWellCopyVolume;
   private List<WellVolumeAdjustment> _volumeAdjustments;
-  private String _copies;
+  private List<String> _copyNames;
 
 
   // public constructors and methods
   
   public WellVolume(Well well,
-                    Collection<WellCopyVolume> wellCopyVolumes)
+                    Collection<WellCopy> wellCopies)
   {
     _well = well;
-    _initialMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);  
-    if (wellCopyVolumes.size() > 0) {
-      CopyInfo copyInfo = wellCopyVolumes.iterator().next().getCopy().getCopyInfo(_well.getPlateNumber());
-      if (copyInfo != null) {
-        _initialMicroliterVolume = copyInfo.getMicroliterWellVolume();
-      }
-    }
 
-    _wellCopyVolumes = new ArrayList<WellCopyVolume>(wellCopyVolumes);
+    _totalInitialMicroliterVolume = calcTotalInitialMicroliterVolume(wellCopies);
+
+    _wellCopyVolumes = new ArrayList<WellCopy>(wellCopies);
     Collections.sort(_wellCopyVolumes, 
-                     new Comparator<WellCopyVolume>() {
-      public int compare(WellCopyVolume wcv1, WellCopyVolume wcv2) 
+                     new Comparator<WellCopy>() {
+      public int compare(WellCopy wcv1, WellCopy wcv2) 
       {
         return wcv1.getCopy().getName().compareTo(wcv2.getCopy().getName());
       }
     });
 
     _consumedMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
-    if (wellCopyVolumes.size() > 0) {
-      _minWellCopyVolume = _maxWellCopyVolume = wellCopyVolumes.iterator().next();
+    if (wellCopies.size() > 0) {
+      _minWellCopyVolume = _maxWellCopyVolume = wellCopies.iterator().next();
     }
     _volumeAdjustments = new ArrayList<WellVolumeAdjustment>();
-    for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
+    for (WellCopy wellCopyVolume : wellCopies) {
       assert wellCopyVolume.getWell().equals(_well) : "all wellCopyVolumes must be for same well";
       _consumedMicroliterVolume = _consumedMicroliterVolume.add(wellCopyVolume.getConsumedMicroliterVolume());
       if (wellCopyVolume.getRemainingMicroliterVolume().compareTo(_minWellCopyVolume.getRemainingMicroliterVolume()) < 0) {
@@ -80,12 +77,13 @@ public class WellVolume
       }
       _volumeAdjustments.addAll(wellCopyVolume.getWellVolumeAdjustments());
     }
-    _copies = makeCopyNames(_wellCopyVolumes);
+    
+    _copyNames = makeCopyNames(_wellCopyVolumes);
   }
-  
-  public BigDecimal getInitialMicroliterVolume()
+
+  public BigDecimal getTotalInitialMicroliterVolume()
   {
-    return _initialMicroliterVolume;
+    return _totalInitialMicroliterVolume;
   }
 
   public BigDecimal getConsumedMicroliterVolume()
@@ -93,12 +91,12 @@ public class WellVolume
     return _consumedMicroliterVolume;
   }
 
-  public WellCopyVolume getMaxWellCopyVolume()
+  public WellCopy getMaxWellCopyVolume()
   {
     return _maxWellCopyVolume;
   }
 
-  public WellCopyVolume getMinWellCopyVolume()
+  public WellCopy getMinWellCopyVolume()
   {
     return _minWellCopyVolume;
   }
@@ -108,14 +106,14 @@ public class WellVolume
     return _well;
   }
 
-  public List<WellCopyVolume> getWellCopyVolumes()
+  public List<WellCopy> getWellCopyVolumes()
   {
     return _wellCopyVolumes;
   }
   
-  public String getCopiesList()
+  public List<String> getCopiesList()
   {
-    return _copies;
+    return _copyNames;
   }
   
   public List<WellVolumeAdjustment> getWellVolumeAdjustments()
@@ -147,16 +145,34 @@ public class WellVolume
     return _well.getWellKey().toString(); 
   }
 
+  public int compareTo(WellVolume that)
+  {
+    return this.getWell().compareTo(that.getWell());
+  }
 
   // private methods
 
-  private String makeCopyNames(List<WellCopyVolume> wellCopyVolumes)
+  private BigDecimal calcTotalInitialMicroliterVolume(Collection<WellCopy> wellCopies)
   {
-    StringBuilder s = new StringBuilder();
-    for (WellCopyVolume volume : wellCopyVolumes) {
-      s.append(volume.getCopy().getName()).append(' ');
+    BigDecimal totalInitialMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);  
+    if (wellCopies.size() > 0) {
+      for (WellCopy wellCopy : wellCopies) {
+        CopyInfo copyInfoForWell = wellCopy.getCopy().getCopyInfo(_well.getPlateNumber());
+        if (copyInfoForWell != null) {
+          totalInitialMicroliterVolume = totalInitialMicroliterVolume.add(copyInfoForWell.getMicroliterWellVolume());
+        }
+      }
     }
-    return s.toString();
+    return totalInitialMicroliterVolume;
+  }
+  
+  private List<String> makeCopyNames(List<WellCopy> wellCopyVolumes)
+  {
+    Set<String> names = new TreeSet<String>();
+    for (WellCopy volume : wellCopyVolumes) {
+      names.add(volume.getCopy().getName());
+    }
+    return new ArrayList<String>(names);
   }
 
 }

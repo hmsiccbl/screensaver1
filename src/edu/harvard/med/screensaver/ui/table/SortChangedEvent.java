@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.table;
 
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 import org.apache.log4j.Logger;
 

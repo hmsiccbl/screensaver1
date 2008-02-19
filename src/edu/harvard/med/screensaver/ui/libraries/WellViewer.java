@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
@@ -50,12 +49,11 @@ public class WellViewer extends ReagentViewer
   }
 
   public WellViewer(GenericEntityDAO dao,
-                    AnnotationsDAO annotationsDao,
                     LibraryViewer libraryViewer,
                     GeneViewer geneViewer,
                     CompoundViewer compoundViewer)
   {
-    super(dao, annotationsDao, geneViewer, compoundViewer);
+    super(dao, geneViewer, compoundViewer);
     _libraryViewer = libraryViewer;
   }
 
@@ -68,6 +66,11 @@ public class WellViewer extends ReagentViewer
     setReagent(_well.getReagent(),
                _well.getGenes(),
                _well.getCompounds());
+  }
+  
+  public Well getWell()
+  {
+    return _well;
   }
 
   @UIControllerMethod

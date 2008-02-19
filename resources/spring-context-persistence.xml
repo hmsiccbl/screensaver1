@@ -73,6 +73,7 @@
     <constructor-arg ref="dataAccessPolicy" />
   </bean>
 
+
   <bean
     id="hibernateSessionFactory"
     class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
@@ -186,14 +187,6 @@
   <bean
     id="screenResultsDao"
     class="edu.harvard.med.screensaver.db.ScreenResultsDAOImpl">
-    <property
-      name="hibernateTemplate"
-      ref="hibernateTemplate" />
-  </bean>
-
-  <bean
-    id="annotationsDao"
-    class="edu.harvard.med.screensaver.db.AnnotationsDAO">
     <property
       name="hibernateTemplate"
       ref="hibernateTemplate" />

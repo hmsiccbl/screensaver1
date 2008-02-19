@@ -13,10 +13,11 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrors;
-import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 
 public class ParseLibraryContentsException extends RuntimeException
 {
+  private static final long serialVersionUID = 1L;
+
   private ParseErrors _errors;
 
   public ParseLibraryContentsException(ParseErrors errors)

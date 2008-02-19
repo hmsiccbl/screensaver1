@@ -27,6 +27,5 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(HeatMapCellTest.class);
-    addTestSuite(ScreenResultDataModelTest.class);
   }
 }

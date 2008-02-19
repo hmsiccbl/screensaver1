@@ -9,18 +9,16 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.ReagentVendorIdentifierListParser;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
@@ -50,14 +48,11 @@ public class ReagentFinder extends AbstractBackingBean
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
-  private AnnotationsDAO _annotationsDao;
   private ReagentVendorIdentifierListParser _reagentVendorIdentifierListParser;
   private ReagentSearchResults _reagentsBrowser;
   private ReagentViewer _reagentViewer;
 
-
   private ReagentVendorIdentifier _reagentVendorIdentifier;
-
   private UISelectOneBean<String> _vendorSelector;
   private String _reagentVendorIdentifierList;
 
@@ -73,14 +68,12 @@ public class ReagentFinder extends AbstractBackingBean
 
   public ReagentFinder(GenericEntityDAO dao,
                        LibrariesDAO librariesDao,
-                       AnnotationsDAO annotationsDao,
                        ReagentSearchResults reagentsBrowser,
                        ReagentViewer reagentViewer,
                        ReagentVendorIdentifierListParser reagentVendorIdentifierListParser)
   {
     _dao = dao;
     _librariesDao = librariesDao;
-    _annotationsDao = annotationsDao;
     _reagentsBrowser = reagentsBrowser;
     _reagentViewer = reagentViewer;
     _reagentVendorIdentifierListParser = reagentVendorIdentifierListParser;
@@ -162,31 +155,25 @@ public class ReagentFinder extends AbstractBackingBean
           showMessage("libraries.reagentVendorIdentifierListParseError", error.getSecond());
         }
 
-        List<Reagent> foundReagents = new ArrayList<Reagent>();
+        Set<ReagentVendorIdentifier> foundReagentIds = new HashSet<ReagentVendorIdentifier>();
         for (ReagentVendorIdentifier reagentVendorIdentifier : parseResult.getParsedReagentVendorIdentifiers()) {
+          // TODO: eliminate this dao call here; it's wasteful; make this check when loading the data later on
           Reagent reagent = _dao.findEntityById(Reagent.class,
                                                 reagentVendorIdentifier,
-                                                true,
-                                                "wells.silencingReagents.gene",
-                                                "wells.compounds");
+                                                true);
           if (reagent != null) {
-            foundReagents.add(reagent);
+            foundReagentIds.add(reagentVendorIdentifier);
           }
           if (reagent == null) {
             showMessage("libraries.noSuchReagent", reagentVendorIdentifier);
           }
         }
 
-        if (foundReagents.size() == 0) {
+        if (foundReagentIds.size() == 0) {
           result[0] = REDISPLAY_PAGE_ACTION_RESULT;
         }
-        // show in reagent viewer, iff the user entered exactly 1 reagent (counting erroneous reagent identifiers)
-        else if (parseResult.getParsedReagentVendorIdentifiers().size() == 1 && parseResult.getErrors().size() == 0) {
-          result[0] = _reagentViewer.viewReagent(foundReagents.get(0));
-        }
         else {
-          List<AnnotationType> annotationTypes = _annotationsDao.findAllAnnotationTypes();
-          _reagentsBrowser.setContents(foundReagents, annotationTypes);
+          _reagentsBrowser.searchReagents(foundReagentIds);
           result[0] = VIEW_REAGENT_SEARCH_RESULTS;
         }
       }

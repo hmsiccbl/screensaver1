@@ -463,7 +463,10 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   {
     MFAnalyser mfAnalyser = getMFAnalyser();
     try {
-      return mfAnalyser.getMass();
+      if (mfAnalyser != null) {
+        return mfAnalyser.getMass();
+      }
+      return -1;
     }
     catch (Exception e) {
       log.error("encountered Exception computing molecular mass!", e);
@@ -481,7 +484,10 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   {
     MFAnalyser mfAnalyser = getMFAnalyser();
     try {
-      return mfAnalyser.getHTMLMolecularFormulaWithCharge();
+      if (mfAnalyser != null) {
+        return mfAnalyser.getHTMLMolecularFormulaWithCharge();
+      }
+      return null;
     }
     catch (Exception e) {
       log.error("encountered Exception computing molecular mass!", e);
@@ -646,7 +652,14 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
       return null;
     }
     IMolecule molecule = moleculeSet.getMolecule(0);
+    if (molecule == null) {
+      log.error("could not determine molecule for " + this);
+      return null;
+    }
     _mfAnalyser = new MFAnalyser(molecule);
+    if (_mfAnalyser == null) {
+      log.error("MFAnalyser creation failed");
+    }
     return _mfAnalyser;
   }
 }

@@ -391,7 +391,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
       showMessage("databaseOperationFailed", e.getMessage());
       _screenViewer.viewLastScreen();
     }
-    _screensBrowser.invalidateSearchResult();
+    _screensBrowser.refetch();
     return VIEW_SCREEN;
   }
 

@@ -5,6 +5,10 @@
 
 <f:subview id="dataTableNavigationSubview">
 
+  <%-- save navigation state to allow browser "back" actions to work intuitively --%>
+  <t:saveState value="#{dataTable.rowsPerPageSelector.value}"/>
+  <%--t:saveState value="#{dataTable.dataTableModel.rowIndex}"/--%>
+
 	<t:panelGrid id="dataTableNavPanel" columns="5"
 		styleClass="searchResultsCommandPanel" width="100%"
 		rendered="#{dataTable.rowCount > 0}">
@@ -62,18 +66,18 @@
 			<t:outputLabel for="sortColumnMenu" value="Sort by" styleClass="label" />
 			<t:panelGroup>
 				<t:selectOneMenu id="sortColumnMenu"
-					value="#{dataTable.sortManager.sortColumnSelector.value}"
+					value="#{dataTable.columnManager.sortColumnSelector.value}"
 					onchange="javascript:this.nextSibling.nextSibling.click();"
 					styleClass="command">
 					<f:selectItems
-						value="#{dataTable.sortManager.sortColumnSelector.selectItems}" />
+						value="#{dataTable.columnManager.sortColumnSelector.selectItems}" />
 				</t:selectOneMenu>
 				<t:selectOneMenu id="sortDirection"
-					value="#{dataTable.sortManager.sortDirectionSelector.value}"
+					value="#{dataTable.columnManager.sortDirectionSelector.value}"
 					onchange="javascript:this.nextSibling.click();"
 					styleClass="command">
 					<f:selectItems
-						value="#{dataTable.sortManager.sortDirectionSelector.selectItems}" />
+						value="#{dataTable.columnManager.sortDirectionSelector.selectItems}" />
 				</t:selectOneMenu>
 				<t:commandButton id="updateSortButton"
 					styleClass="hiddenCommand" />

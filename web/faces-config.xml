@@ -249,8 +249,13 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
 
     <!-- === users navigation rules === -->
     <navigation-case>
-      <from-outcome>browseUsers</from-outcome>
-      <to-view-id>/users/usersBrowser</to-view-id>
+      <from-outcome>browseStaff</from-outcome>
+      <to-view-id>/users/staffBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>browseScreeners</from-outcome>
+      <to-view-id>/users/screenersBrowser</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

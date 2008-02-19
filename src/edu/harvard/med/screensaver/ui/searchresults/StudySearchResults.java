@@ -11,15 +11,27 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
+import edu.harvard.med.screensaver.model.PropertyPath;
+import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
-import edu.harvard.med.screensaver.ui.table.TableColumn;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 
 
 /**
@@ -28,7 +40,7 @@ import edu.harvard.med.screensaver.ui.table.TableColumn;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class StudySearchResults extends EntitySearchResults<Study>
+public class StudySearchResults extends EntitySearchResults<Screen,Integer>
 {
 
   // private static final fields
@@ -38,9 +50,6 @@ public class StudySearchResults extends EntitySearchResults<Study>
 
   private StudyViewer _studyViewer;
   private GenericEntityDAO _dao;
-
-  private ArrayList<TableColumn<Study,?>> _columns;
-
 
 
   // public constructor
@@ -58,55 +67,80 @@ public class StudySearchResults extends EntitySearchResults<Study>
     _dao = dao;
   }
 
+  public void searchStudies()
+  {
+    initialize(new AllEntitiesOfTypeDataFetcher<Screen,Integer>(Screen.class, _dao) {
+      @Override
+      protected void addDomainRestrictions(HqlBuilder hql,
+                                           Map<RelationshipPath<Screen>,String> path2Alias)
+      {
+        super.addDomainRestrictions(hql, path2Alias);
+        hql.where(getRootAlias(), "screenNumber", Operator.GREATER_THAN_EQUAL, Study.MIN_STUDY_NUMBER);
+      }
+    });
+  }
+
 
   // implementations of the SearchResults abstract methods
 
-  protected List<TableColumn<Study,?>> getColumns()
-  {
-    if (_columns == null) {
-      _columns = new ArrayList<TableColumn<Study,?>>();
-      _columns.add(new IntegerColumn<Study>("Study Number", "The study number") {
-        @Override
-        public Integer getCellValue(Study study) { return study.getStudyNumber(); }
-
-        @Override
-        public Object cellAction(Study study) { return viewCurrentEntity(); }
-
-        @Override
-        public boolean isCommandLink() { return true; }
-      });
-      _columns.add(new TextColumn<Study>("Title", "The title of the study") {
-        @Override
-        public String getCellValue(Study study) { return study.getTitle(); }
-      });
-      _columns.add(new UserNameColumn<Study>("Lab Head", "The head of the lab performing the study") {
-        @Override
-        public ScreensaverUser getUser(Study study) { return study.getLabHead(); }
-      });
-      _columns.add(new UserNameColumn<Study>("Study Head", "The scientist primarily responsible for running the study") {
-        @Override
-        public ScreensaverUser getUser(Study study) { return study.getLeadScreener(); }
-      });
-      _columns.add(new EnumColumn<Study,StudyType>("Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'",
-        StudyType.values()) {
-        @Override
-        public StudyType getCellValue(Study study) { return study.getStudyType(); }
-      });
-      _columns.add(new EnumColumn<Study,ScreenType>("Library Screen Type", "'RNAi' or 'Small Molecule'", ScreenType.values()) {
-        @Override
-        public ScreenType getCellValue(Study study) { return study.getScreenType(); }
-      });
-    }
-    return _columns;
-  }
-
+  @SuppressWarnings("unchecked")
   @Override
-  protected List<Integer[]> getCompoundSorts()
+  protected List<? extends TableColumn<Screen,?>> buildColumns()
   {
-    List<Integer[]> compoundSorts = super.getCompoundSorts();
-    compoundSorts.add(new Integer[] {2, 3, 0});
-    compoundSorts.add(new Integer[] {3, 2, 0});
-    return compoundSorts;
+    List<EntityColumn<Screen,?>> columns = new ArrayList<EntityColumn<Screen,?>>();
+    columns.add(new IntegerEntityColumn<Screen>(
+      new PropertyPath(Screen.class, "screenNumber"),
+      "Study Number", "The study number", TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Screen study) { return study.getStudyNumber(); }
+
+      @Override
+      public Object cellAction(Screen study) { return viewCurrentEntity(); }
+
+      @Override
+      public boolean isCommandLink() { return true; }
+    });
+    columns.add(new TextEntityColumn<Screen>(
+      new PropertyPath(Screen.class, "title"),
+      "Title", "The title of the study", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen study) { return study.getTitle(); }
+    });
+    columns.add(new UserNameColumn<Screen>(
+      new RelationshipPath(Screen.class, "labHead"),
+      "Lab Head", "The head of the lab performing the study", TableColumn.UNGROUPED) {
+      @Override
+      public ScreensaverUser getUser(Screen study) { return study.getLabHead(); }
+    });
+    columns.add(new UserNameColumn<Screen>(
+      new RelationshipPath(Screen.class, "leadScreener"),
+      "Study Head", "The scientist primarily responsible for running the study", TableColumn.UNGROUPED) {
+      @Override
+      public ScreensaverUser getUser(Screen study) { return study.getLeadScreener(); }
+    });
+    columns.add(new EnumEntityColumn<Screen,StudyType>(
+      new PropertyPath(Screen.class, "studyType"),
+      "Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'",
+      TableColumn.UNGROUPED, StudyType.values()) {
+      @Override
+      public StudyType getCellValue(Screen study) { return study.getStudyType(); }
+    });
+    columns.add(new EnumEntityColumn<Screen,ScreenType>(
+      new PropertyPath(Screen.class, "screenType"),
+      "Library Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
+      @Override
+      public ScreenType getCellValue(Screen study) { return study.getScreenType(); }
+    });
+
+//  TableColumnManager<Screen> columnManager = getColumnManager();
+//  columnManager.addCompoundSortColumns(columnManager.getColumn("Lab Head"),
+//  columnManager.getColumn("Lead Screener"),
+//  columnManager.getColumn("Screen Number"));
+//  columnManager.addCompoundSortColumns(columnManager.getColumn("Lead Screener"),
+//  columnManager.getColumn("Lab Head"),
+//  columnManager.getColumn("Screen Number"));
+
+    return columns;
   }
 
   private boolean showStatusFields()
@@ -116,7 +150,7 @@ public class StudySearchResults extends EntitySearchResults<Study>
   }
 
   @Override
-  protected void setEntityToView(Study study)
+  protected void setEntityToView(Screen study)
   {
     _studyViewer.viewStudy(study);
   }

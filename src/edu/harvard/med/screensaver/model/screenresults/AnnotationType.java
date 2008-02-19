@@ -10,8 +10,8 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,6 +22,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -35,6 +36,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.annotations.OptimisticLock;
 
 /**
  * Annotation type on a library member (e.g., a compound or silencing reagent).
@@ -64,7 +67,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
   private String _description;
   private Integer _ordinal;
   private boolean _isNumeric;
-  private Set<AnnotationValue> _values = new HashSet<AnnotationValue>();
+  private Map<Reagent,AnnotationValue> _values = new HashMap<Reagent,AnnotationValue>();
 
 
   // constructors
@@ -120,11 +123,11 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     return getOrdinal().compareTo(that.getOrdinal());
   }
 
-  @Override
-  public String toString()
-  {
-    return _study.getScreenNumber() + ":" + _name;
-  }
+//  @Override
+//  public String toString()
+//  {
+//    return _study.getScreenNumber() + ":" + _name;
+//  }
 
   /**
    * Get the id for the annotation.
@@ -163,16 +166,23 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
    * Get the set of annotation values for this annotation type
    * @return the set of annotation values for this annotation type
    */
-  @OneToMany(
-    mappedBy="annotationType",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
-  public Set<AnnotationValue> getAnnotationValues()
+//  @OneToMany(
+//    mappedBy="annotationType",
+//    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+//    fetch=FetchType.LAZY
+//  )
+//  @org.hibernate.annotations.Cascade(value={
+//    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+//    org.hibernate.annotations.CascadeType.DELETE
+//  })
+  @OneToMany(fetch=FetchType.LAZY,
+             cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+             mappedBy="annotationType")
+  @MapKey(name="reagent")
+  @OptimisticLock(excluded=true)
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
+  @org.hibernate.annotations.LazyCollection(LazyCollectionOption.EXTRA)
+  public Map<Reagent,AnnotationValue> getAnnotationValues()
   {
     return _values;
   }
@@ -194,12 +204,10 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
       value,
       _isNumeric && value != null ? new Double(value) : null);
     getStudy().addReagent(reagent);
-    if (_values.contains(annotationValue)) {
+    if (_values.containsKey(reagent)) {
       return null;
     }
-    boolean wasAdded = _values.add(annotationValue);
-    wasAdded &= reagent.getAnnotationValues().contains(annotationValue);
-    assert wasAdded;
+    _values.put(reagent, annotationValue);
     return annotationValue;
   }
 
@@ -322,7 +330,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
    * Set the annotation values.
    * @param values the new set of annotation values
    */
-  private void setAnnotationValues(Set<AnnotationValue> values)
+  private void setAnnotationValues(Map<Reagent,AnnotationValue> values)
   {
     _values = values;
   }

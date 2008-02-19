@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -53,7 +52,6 @@ public class ScreenViewer extends StudyViewer
   }
 
   public ScreenViewer(GenericEntityDAO dao,
-                      AnnotationsDAO annotationsDao,
                       ScreenDetailViewer screenDetailViewer,
                       ReagentSearchResults reagentSearchResults,
                       ScreenResultsDAO screenResultsDao,
@@ -61,7 +59,7 @@ public class ScreenViewer extends StudyViewer
                       HeatMapViewer heatMapViewer,
                       ScreenResultImporter screenResultImporter)
   {
-    super(dao, annotationsDao, screenDetailViewer, reagentSearchResults);
+    super(dao, screenDetailViewer, null, reagentSearchResults);
     _dao = dao;
     _screenResultsDao = screenResultsDao;
     _screenDetailViewer = screenDetailViewer;
@@ -80,7 +78,7 @@ public class ScreenViewer extends StudyViewer
 
   public void setScreen(Screen screen)
   {
-    setStudy(screen, -1 /*not yet showing reagents in screen viewer*/);
+    setStudy(screen);
     _screen = screen;
     _screenDetailViewer.setScreen(screen);
     _screenResultImporter.setScreen(screen);

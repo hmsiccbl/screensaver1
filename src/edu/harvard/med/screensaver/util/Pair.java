@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.util;
 
+import java.util.Comparator;
+
 /**
  * A 2-tuple.
  *
@@ -94,4 +96,15 @@ public class Pair<F,S>
   {
     return _first.toString() + ":" + _second.toString();
   }
+  
+  public static class PairComparator<F extends Comparable,S extends Comparable> implements Comparator<Pair<F,S>> {
+    public int compare(Pair<F,S> o1, Pair<F,S> o2)
+    {
+      int result = o1.getFirst().compareTo(o2.getFirst());
+      if (result == 0) {
+        result = o1.getSecond().compareTo(o2.getSecond());
+      }
+      return result;
+    }
+  }  
 }

@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -38,15 +37,12 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
@@ -60,9 +56,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
-import edu.harvard.med.screensaver.ui.libraries.WellCopyVolume;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 import org.hibernate.LazyInitializationException;
@@ -95,7 +89,6 @@ public class ComplexDAOTest extends AbstractSpringTest
    */
   protected GenericEntityDAO genericEntityDao;
   protected ScreenResultsDAO screenResultsDao;
-  protected AnnotationsDAO annotationsDao;
   protected CherryPickRequestDAO cherryPickRequestDao;
   protected UsersDAO usersDao;
   protected LibrariesDAO librariesDao;
@@ -613,10 +606,10 @@ public class ComplexDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
-        MakeDummyEntities.makeDummyScreenResult(screen1, library);
         genericEntityDao.saveOrUpdateEntity(library);
+        Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
+        MakeDummyEntities.makeDummyScreenResult(screen1, library);
         genericEntityDao.saveOrUpdateEntity(screen1);
       }
     });
@@ -935,41 +928,6 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertTrue(librariesDao.isPlateRangeAvailable(11, 100000));
   }
 
-  // TODO: rename
-  public void testFindAnnotationValuesAndAnnotationsTypes()
-  {
-    final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    final AnnotationType at1 = screen.createAnnotationType("annot1", "desc1", false);
-    final AnnotationType at2 = screen.createAnnotationType("annot2", "desc2", true);
-    final AnnotationType at3 = screen.createAnnotationType("annot3", "desc3", true);
-    for (int i = 0; i < 20; ++i) {
-      Reagent reagent = new Reagent(new ReagentVendorIdentifier("vendor",
-                                                                String.format("vendorId%02d", i)));
-      genericEntityDao.persistEntity(reagent);
-      at1.createAnnotationValue(reagent,
-                                String.format("value%02d", i));
-      at2.createAnnotationValue(reagent,
-                                Integer.toString(i));
-    }
-    genericEntityDao.saveOrUpdateEntity(screen);
-    //genericEntityDao.persistEntity(screen);
-
-    // this transaction may seem unnecessary, but if any of the assertions fail, they lead
-    // to calling toString() on the annotationsDao method result, which causes LazyInitE
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        assertEquals("all annotation types",
-          new TreeSet<AnnotationType>(Arrays.asList(at1, at2, at3)),
-          new TreeSet<AnnotationType>(annotationsDao.findAllAnnotationTypes()));
-        assertEquals("reagent's annotation types",
-          new TreeSet<AnnotationType>(Arrays.asList(at1, at2)),
-          new TreeSet<AnnotationType>(annotationsDao.findAllAnnotationTypesForReagent(new ReagentVendorIdentifier("vendor", "vendorId02"))));
-      }
-    });
-  }
-
   public void testEntityInflation()
   {
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -1096,8 +1054,13 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-        assertEquals("keywords size", 2, genericEntityDao.relationshipSize(screen, "publications"));
+        assertEquals("publications size", 2, genericEntityDao.relationshipSize(screen.getPublications()));
         assertEquals("collaborators size", 2, genericEntityDao.relationshipSize(screen.getCollaborators()));
+        // TODO: test that this relationshipSize() method is invocable outside of a Hibernate session
+        assertEquals("publications size", 2, genericEntityDao.relationshipSize(screen, "publications"));
+        assertEquals("collaborators size w/criteria",
+                     1,
+                     genericEntityDao.relationshipSize(screen, "collaborators", "lastName", "Laborator2"));
       }
     });
   }
@@ -1205,160 +1168,4 @@ public class ComplexDAOTest extends AbstractSpringTest
     assertEquals("G:C03", new BigDecimal("0.00"),  librariesDao.findRemainingVolumeInWellCopy(wellC03, copyG));
   }
 
-  public void testFindWellVolumes()
-  {
-    initializeWellCopyVolumes();
-    Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library");
-    Copy copyC = genericEntityDao.findEntityById(Copy.class, "library:C");
-    Copy copyD = genericEntityDao.findEntityById(Copy.class, "library:D");
-    Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
-    Well plate2WellB02 = genericEntityDao.findEntityById(Well.class, "00002:B02");
-
-    Map<Pair<WellKey,String>,BigDecimal> expectedWellVolumes = new HashMap<Pair<WellKey,String>,BigDecimal>();
-
-    Collection<WellCopyVolume> wellCopyVolumes = librariesDao.findWellCopyVolumes(library);
-    assertEquals(Well.PLATE_ROWS * Well.PLATE_COLUMNS * 2 /*plates*/ * 2 /*copies*/, wellCopyVolumes.size());
-    expectedWellVolumes.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), copyC.getName()), new BigDecimal("9.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), copyD.getName()), new BigDecimal("20.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(plate2WellB02.getWellKey(), copyC.getName()), new BigDecimal("10.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(plate2WellB02.getWellKey(), copyD.getName()), new BigDecimal("19.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(new WellKey(1, "B02"), copyC.getName()), new BigDecimal("10.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(new WellKey(1, "B02"), copyD.getName()), new BigDecimal("20.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(new WellKey(2, "A01"), copyC.getName()), new BigDecimal("10.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(new WellKey(2, "A01"), copyD.getName()), new BigDecimal("20.00"));
-    for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
-      BigDecimal expectedRemainingVolume = expectedWellVolumes.get(new Pair<WellKey,String>(wellCopyVolume.getWell().getWellKey(), wellCopyVolume.getCopy().getName()));
-      if (expectedRemainingVolume != null) {
-        assertEquals(wellCopyVolume.getWell() + ":" + wellCopyVolume.getCopy().getName() + " volume",
-                     expectedRemainingVolume,
-                     wellCopyVolume.getRemainingMicroliterVolume());
-      }
-    }
-
-    wellCopyVolumes = librariesDao.findWellCopyVolumes(new WellKey(1, "A01"));
-    assertEquals("findWellVolumes(wellKey)", 1 /*plates*/ * 2 /*copies*/, wellCopyVolumes.size());
-    expectedWellVolumes.clear();
-    expectedWellVolumes.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), copyC.getName()), new BigDecimal("9.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), copyD.getName()), new BigDecimal("20.00"));
-    for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
-      BigDecimal expectedRemainingVolume = expectedWellVolumes.get(new Pair<WellKey,String>(wellCopyVolume.getWell().getWellKey(), wellCopyVolume.getCopy().getName()));
-      assertEquals(wellCopyVolume.getWell() + ":" + wellCopyVolume.getCopy().getName() + " volume",
-                   expectedRemainingVolume,
-                   wellCopyVolume.getRemainingMicroliterVolume());
-    }
-
-    wellCopyVolumes = librariesDao.findWellCopyVolumes(new WellKey(2, "A01"));
-    assertEquals("findWellVolumes(wellKey)", 1 /*plates*/ * 2 /*copies*/, wellCopyVolumes.size());
-    expectedWellVolumes.clear();
-    expectedWellVolumes.put(new Pair<WellKey,String>(new WellKey(2, "A01"), copyC.getName()), new BigDecimal("10.00"));
-    expectedWellVolumes.put(new Pair<WellKey,String>(new WellKey(2, "A01"), copyD.getName()), new BigDecimal("20.00"));
-    for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
-      BigDecimal expectedRemainingVolume = expectedWellVolumes.get(new Pair<WellKey,String>(wellCopyVolume.getWell().getWellKey(), wellCopyVolume.getCopy().getName()));
-      assertEquals(wellCopyVolume.getWell() + ":" + wellCopyVolume.getCopy().getName() + " volume",
-                   expectedRemainingVolume,
-                   wellCopyVolume.getRemainingMicroliterVolume());
-    }
-
-    wellCopyVolumes = librariesDao.findWellCopyVolumes(new WellKey(3, "A01"));
-    assertEquals("findWellVolumes(wellKey)", 0, wellCopyVolumes.size());
-  }
-
-  public void testFindWellVolumesForCherryPickRequest()
-  {
-    initializeWellCopyVolumes();
-    Copy copyC = genericEntityDao.findEntityById(Copy.class, "library:C");
-    Copy copyD = genericEntityDao.findEntityById(Copy.class, "library:D");
-    Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
-    //Well plate2WellB02 =
-    genericEntityDao.findEntityById(Well.class, "00002:B02");
-
-    Screen screen = MakeDummyEntities.makeDummyScreen(2, ScreenType.RNAI);
-
-    {
-      CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-      cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal("1.0"));
-      ScreenerCherryPick dummyScreenCherryPick = cherryPickRequest.createScreenerCherryPick(plate1WellA01);
-      Well sourceWell1 = librariesDao.findWell(new WellKey(1, "P23"), true);
-      Well sourceWell2 = librariesDao.findWell(new WellKey(2, "P23"), true);
-      Well sourceWell3 = librariesDao.findWell(new WellKey(2, "P24"), true);
-      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell1);
-      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell2);
-      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell3);
-      genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
-
-      Collection<WellCopyVolume> wellCopyVolumes = librariesDao.findWellCopyVolumes(cherryPickRequest, false);
-      assertEquals("cherryPickRequest well volumes count", 2 /*copies*/ * 3 /*lab cherry picks*/, wellCopyVolumes.size());
-      Map<Pair<WellKey,String>,BigDecimal> expectedWellVolumes = new HashMap<Pair<WellKey,String>,BigDecimal>();
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell1.getWellKey(), copyC.getName()), new BigDecimal("10.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell1.getWellKey(), copyD.getName()), new BigDecimal("20.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell2.getWellKey(), copyC.getName()), new BigDecimal("10.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell2.getWellKey(), copyD.getName()), new BigDecimal("20.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell3.getWellKey(), copyC.getName()), new BigDecimal("10.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell3.getWellKey(), copyD.getName()), new BigDecimal("20.00"));
-      for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
-        BigDecimal expectedRemainingVolume = expectedWellVolumes.get(new Pair<WellKey,String>(wellCopyVolume.getWell().getWellKey(), wellCopyVolume.getCopy().getName()));
-        assertEquals(wellCopyVolume.getWell() + ":" + wellCopyVolume.getCopy().getName() + " volume",
-                     expectedRemainingVolume,
-                     wellCopyVolume.getRemainingMicroliterVolume());
-      }
-    }
-
-    screen = genericEntityDao.reloadEntity(screen, false, "cherryPickRequests");
-
-    {
-      CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-      cherryPickRequest.setMicroliterTransferVolumePerWellApproved(new BigDecimal("1.0"));
-      ScreenerCherryPick dummyScreenCherryPick = cherryPickRequest.createScreenerCherryPick(plate1WellA01);
-      Well sourceWell1 = librariesDao.findWell(new WellKey(1, "P23"), true);
-      Well sourceWell2 = librariesDao.findWell(new WellKey(2, "P23"), true);
-      Well sourceWell3 = librariesDao.findWell(new WellKey(2, "P24"), true);
-      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell1);
-      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell2);
-      cherryPickRequest.createLabCherryPick(dummyScreenCherryPick, sourceWell3).setAllocated(copyC);
-      genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
-
-      Collection<WellCopyVolume> wellCopyVolumes = librariesDao.findWellCopyVolumes(cherryPickRequest, true);
-      assertEquals("cherryPickRequest well volumes count for unfulfilled lab cherry picks", 2 /*copies*/ * 2 /*unfulfilled lab cherry picks*/, wellCopyVolumes.size());
-      Map<Pair<WellKey,String>,BigDecimal> expectedWellVolumes = new HashMap<Pair<WellKey,String>,BigDecimal>();
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell1.getWellKey(), copyC.getName()), new BigDecimal("10.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell1.getWellKey(), copyD.getName()), new BigDecimal("20.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell2.getWellKey(), copyC.getName()), new BigDecimal("10.00"));
-      expectedWellVolumes.put(new Pair<WellKey,String>(sourceWell2.getWellKey(), copyD.getName()), new BigDecimal("20.00"));
-      for (WellCopyVolume wellCopyVolume : wellCopyVolumes) {
-        BigDecimal expectedRemainingVolume = expectedWellVolumes.get(new Pair<WellKey,String>(wellCopyVolume.getWell().getWellKey(), wellCopyVolume.getCopy().getName()));
-        assertEquals(wellCopyVolume.getWell() + ":" + wellCopyVolume.getCopy().getName() + " volume",
-                     expectedRemainingVolume,
-                     wellCopyVolume.getRemainingMicroliterVolume());
-      }
-    }
-  }
-
-    // private methods
-
-
-    private void initializeWellCopyVolumes()
-    {
-      genericEntityDao.doInTransaction(new DAOTransaction() {
-        public void runTransaction() {
-          Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
-          Copy copyC = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-          Copy copyD = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-          copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-          copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-          copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
-          copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
-          genericEntityDao.saveOrUpdateEntity(library);
-
-          Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
-          Well plate2WellB02 = genericEntityDao.findEntityById(Well.class, "00002:B02");
-          RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 1);
-          ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(plate1WellA01);
-          LabCherryPick labCherryPick1 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate1WellA01);
-          labCherryPick1.setAllocated(copyC);
-          LabCherryPick labCherryPick2 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate2WellB02);
-          labCherryPick2.setAllocated(copyD);
-          genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
-        }
-      });
-    }
 }

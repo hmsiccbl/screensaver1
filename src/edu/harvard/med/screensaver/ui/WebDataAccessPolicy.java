@@ -224,7 +224,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(ResultValueType entity)
   {
-    return true;
+    return visit(entity.getScreenResult());
   }
 
   public boolean visit(RNAiKnockdownConfirmation entity)

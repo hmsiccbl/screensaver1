@@ -1,4 +1,6 @@
-// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+// $HeadURL:
+// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml
+// $
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -9,7 +11,7 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -17,30 +19,32 @@ import java.util.Observer;
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
 import javax.faces.event.ValueChangeEvent;
-import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
+import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
 import org.apache.log4j.Logger;
 
 /**
- * Provide the following common functionality for backing beans of JSF data
- * tables:
+ * JSF backing bean for data tables. Provides the following functionality:
  * <ul>
- * <li>maintains DataModel, UIData, and TableSortManager objects
- * <li>manages (re)sorting in response to notifications from its TableSortManager</li>
- * <li>handles "rows per page" command (via JSF listener)</li>
- * <li>handles "goto row" command (via JSF listener)</li>
- * <li>reports whether the "current" column is numeric {@link #isNumericColumn()}</li>
+ * <li>manages DataModel, UIData, and {@link TableColumnManager} objects
+ * <li>handles (re)sorting, (re)filtering, and changes to column composition,
+ * in response to notifications from its {@link TableColumnManager}</li>
+ * <li>handles "rows per page" command (via JSF listener method)</li>
+ * <li>handles "goto row" command (via JSF listener method)</li>
+ * <li>reports whether the "current" column is numeric
+ * {@link #isNumericColumn()}</li>
  * </ul>
  *
- * @param E the type of the data object associated with each row
- *
+ * @param R the type of the data object associated with each row
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class DataTable<E> extends AbstractBackingBean implements Observer
+public class DataTable<R> extends AbstractBackingBean implements Observer
 {
   // static members
 
@@ -49,34 +53,41 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
 
   // instance data members
 
-  private /*Sortable*/DataModel _dataModel;
+  private DataTableModelLazyUpdateDecorator<R> _dataTableModel;
   private UIData _dataTableUIComponent;
-  private TableSortManager<E> _sortManager;
+  private TableColumnManager<R> _columnManager;
   private UIInput _rowsPerPageUIComponent;
-  private DataTableRowsPerPageUISelectOneBean _rowsPerPageSelector;
-  private List<Observer> _observers = new ArrayList<Observer>();
-
-
-  // abstract & template methods
-
-  abstract protected List<TableColumn<E,?>> buildColumns();
-
+  private RowsPerPageSelector _rowsPerPageSelector = new RowsPerPageSelector(Collections.<Integer>emptyList());
+  private boolean _isTableFilterMode;
   /**
-   * Template method that must build a DataModel for the data table. Data must
-   * be sorted. Method implementation will probably want to make use of
-   * {@link SortManager#getSortColumnComparator getSortManager().getSortColumnComparator()}.
-   * This method will be called whenever
-   * {@link DataTable#rebuildRows() is called}, which in turn is called
-   * whenever the sort column or direction is changed.
-   *
-   * @return sorted DataModel
+   * @motivation for unit tests
    */
-  abstract protected /*Sortable*/DataModel buildDataModel();
+  private DataTableModel<R> _baseDataTableModel;
 
-  abstract protected DataTableRowsPerPageUISelectOneBean buildRowsPerPageSelector();
 
 
   // public constructors and methods
+
+  /**
+   * @motivation for CGLIB2
+   */
+  public DataTable()
+  {}
+
+  public void initialize(DataTableModel<R> dataTableModel,
+                         List<? extends TableColumn<R,?>> columns,
+                         RowsPerPageSelector rowsPerPageSelector)
+  {
+    _columnManager = new TableColumnManager<R>(columns);
+    _columnManager.addObserver(this);
+    _rowsPerPageSelector = rowsPerPageSelector;
+
+    _baseDataTableModel = dataTableModel;
+    _dataTableModel = new DataTableModelLazyUpdateDecorator<R>(_baseDataTableModel);
+    refetch();
+    refilter();
+    resort();
+  }
 
   public UIData getDataTableUIComponent()
   {
@@ -101,22 +112,32 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
     return null;
   }
 
-  public DataModel getDataModel()
+  /**
+   * Get the DataTableModel. Lazy instantiate, re-sort, and re-filter, as
+   * necessary.
+   *
+   * @return the table's DataTableModel, sorted and filtered according to the
+   *         latest column settings
+   */
+  public DataTableModel<R> getDataTableModel()
   {
-    if (_dataModel == null) {
-      _dataModel = buildDataModel();
-    }
-    return _dataModel;
+    verifyIsInitialized();
+    return _dataTableModel;
   }
 
-  public TableSortManager<E> getSortManager()
+  /**
+   * @motivation for unit tests
+   */
+  public DataTableModel<R> getBaseDataTableModel()
   {
-    if (_sortManager == null) {
-      List<TableColumn<E,?>> columns = buildColumns();
-      _sortManager = new TableSortManager<E>(columns);
-      _sortManager.addObserver(this);
-    }
-    return _sortManager;
+    verifyIsInitialized();
+    return _baseDataTableModel;
+  }
+
+  public TableColumnManager<R> getColumnManager()
+  {
+    verifyIsInitialized();
+    return _columnManager;
   }
 
   public UIInput getRowsPerPageUIComponent()
@@ -129,6 +150,16 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
     _rowsPerPageUIComponent = rowsPerPageUIComponent;
   }
 
+  public boolean isTableFilterMode()
+  {
+    return _isTableFilterMode;
+  }
+
+  public void setTableFilterMode(boolean isTableFilterMode)
+  {
+    _isTableFilterMode = isTableFilterMode;
+  }
+
   /**
    * Convenience method that invokes the JSF action for the "current" row and
    * column (as set by JSF during the invoke application phase). Equivalent to
@@ -138,7 +169,7 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
   @UIControllerMethod
   public String cellAction()
   {
-    return (String) getSortManager().getCurrentColumn().cellAction((E) getDataModel().getRowData());
+    return (String) getColumnManager().getCurrentColumn().cellAction(getRowData());
   }
 
   /**
@@ -149,7 +180,7 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
    */
   public Object getCellValue()
   {
-    return getSortManager().getCurrentColumn().getCellValue(getRowData());
+    return getColumnManager().getCurrentColumn().getCellValue(getRowData());
   }
 
   /**
@@ -157,9 +188,9 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
    * at render time).
    */
   @SuppressWarnings("unchecked")
-  final protected E getRowData()
+  final protected R getRowData()
   {
-    return (E) getDataModel().getRowData();
+    return (R) getDataTableModel().getRowData();
   }
 
   public int getRowsPerPage()
@@ -167,21 +198,21 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
     return getRowsPerPageSelector().getSelection();
   }
 
-  public DataTableRowsPerPageUISelectOneBean getRowsPerPageSelector()
+  public RowsPerPageSelector getRowsPerPageSelector()
   {
-    if (_rowsPerPageSelector == null) {
-      _rowsPerPageSelector = buildRowsPerPageSelector();
-    }
+    verifyIsInitialized();
     return _rowsPerPageSelector;
   }
 
   public void pageNumberListener(ValueChangeEvent event)
   {
-    if (event.getNewValue() != null && event.getNewValue().toString().trim().length() > 0) {
+    if (event.getNewValue() != null &&
+      event.getNewValue().toString().trim().length() > 0) {
       log.debug("page number changed to " + event.getNewValue());
-      gotoPageIndex(Integer.parseInt(event.getNewValue().toString()) - 1);
-//      _rowsPerPageUIComponent.setSubmittedValue(null); // clear
-//      _rowsPerPageUIComponent.setValue(null); // clear
+      gotoPageIndex(Integer.parseInt(event.getNewValue()
+                                          .toString()) - 1);
+// _rowsPerPageUIComponent.setSubmittedValue(null); // clear
+// _rowsPerPageUIComponent.setValue(null); // clear
       getFacesContext().renderResponse();
     }
   }
@@ -194,35 +225,40 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
   public void gotoRowIndex(int rowIndex)
   {
     if (_dataTableUIComponent != null) {
-      // ensure value is within valid range, and in particular that we never show
-      // less than the table's configured row count (unless it's more than the
-      // total number of rows)
-      rowIndex = Math.max(0,
-                          Math.min(rowIndex,
-                                   getRowCount() - getDataTableUIComponent().getRows()));
+      log.debug("gotoRowIndex(): requested row: " + rowIndex);
+      // ensure value is within valid range, and in particular that we never
+      // show less than the table's configured row count (unless it's more than
+      // the total number of rows)
+      rowIndex = Math.max(0, Math.min(rowIndex,
+                                      getRowCount() -
+                                        getDataTableUIComponent().getRows()));
       _dataTableUIComponent.setFirst(rowIndex);
+      log.debug("gotoRowIndex(): actual row: " + rowIndex);
     }
   }
 
   public boolean isNumericColumn()
   {
-    return getSortManager().getCurrentColumn().isNumeric();
+    return getColumnManager().getCurrentColumn().isNumeric();
   }
 
   public int getRowCount()
   {
-    return getDataModel().getRowCount();
+    return getDataTableModel().getRowCount();
   }
 
   public void rowsPerPageListener(ValueChangeEvent event)
   {
-    log.debug("rowsPerPage changed to " + event.getNewValue());
-    getRowsPerPageSelector().setValue((String) event.getNewValue());
-    if (!isMultiPaged()) {
-      gotoRowIndex(0);
-    }
-    if (getDataModel() instanceof VirtualPagingDataModel) {
-      ((VirtualPagingDataModel<?,?>) getDataModel()).setRowsToFetch(getRowsPerPageSelector().getSelection());
+    String rowsPerPageValue = (String) event.getNewValue();
+    log.debug("rowsPerPage changed to " + rowsPerPageValue);
+    getRowsPerPageSelector().setValue(rowsPerPageValue);
+    // scroll to a page boundary, to ensure that first/next do not have problems moving to first/last page
+    int rowIndex = _dataTableUIComponent.getFirst();
+    int rowsPerPage = getRowsPerPage();
+    if (rowIndex % rowsPerPage != 0) {
+      int pageBoundaryRowIndex = rowsPerPage * (rowIndex / rowsPerPage);
+      log.debug("scrolling to page boundary row: " + pageBoundaryRowIndex);
+      gotoRowIndex(pageBoundaryRowIndex);
     }
     getFacesContext().renderResponse();
   }
@@ -232,62 +268,105 @@ public abstract class DataTable<E> extends AbstractBackingBean implements Observ
     return getRowCount() > getRowsPerPage();
   }
 
-  @SuppressWarnings("unchecked")
-  public void update(Observable o, Object obj)
+  /**
+   * Resets each column's criteria to a single, non-restricting criterion. This
+   * is useful for a user interface that wants to present a single criterion per
+   * column, that can be edited by the user (without having to explicitly add a
+   * criterion first).
+   */
+  @UIControllerMethod
+  public String resetFilter()
   {
-    if (o == getSortManager()) {
-      if (obj instanceof SortChangedEvent) {
+    for (TableColumn<R,?> column : getColumnManager().getAllColumns()) {
+      column.resetCriteria();
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  /**
+   * Delete all criteria from each column.
+   */
+  @UIControllerMethod
+  public String clearFilter()
+  {
+    for (TableColumn<R,?> column : getColumnManager().getAllColumns()) {
+      column.clearCriteria();
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @SuppressWarnings("unchecked")
+  public void update(Observable o, Object arg)
+  {
+    if (o == getColumnManager()) {
+      if (arg instanceof SortChangedEvent) {
+        log.debug("DataTable notified of sort column change: " + arg);
         resort();
       }
-      else if (obj instanceof Criterion) {
-        rebuildRows();
+      else if (arg instanceof Criterion) {
+        log.debug("DataTable notified of criterion change: " + arg);
+        refilter();
       }
-      for (Observer observer : _observers) {
-        observer.update(o, obj);
+      else if (arg instanceof ColumnVisibilityChangedEvent) {
+        log.debug("DataTable notified of column visibility change: " + arg);
+        ColumnVisibilityChangedEvent event = (ColumnVisibilityChangedEvent) arg;
+        if (event.getColumnsAdded().size() > 0) {
+          // TODO: only refetch if the added columns add new RelationshipPaths! (we may already have fetched the data for this column)
+          refetch();
+          for (TableColumn<?,?> addedColumn : event.getColumnsAdded()) {
+            if (addedColumn.hasCriteria()) {
+              refilter();
+              break;
+            }
+          }
+        }
+        if (event.getColumnsRemoved().size() > 0) {
+          for (TableColumn<?,?> removedColumn : event.getColumnsRemoved()) {
+            if (removedColumn.hasCriteria()) {
+              refilter();
+              break;
+            }
+          }
+          // note: if removedColumn is also a sort column, TableColumnManager
+          // will handle issuing the event that forces a resort(), as necessary
+        }
       }
     }
   }
 
-  public void resort()
+  public void refetch()
   {
-    // TODO:
-//    if (getDataModel() instanceof VirtualPagingDataModel) {
-//      ((VirtualPagingDataModel) getDataModel()).sort(getSortManager().getSortColumnName(),
-//                                                     getSortManager().getSortDirection());
-//    }
-//    else {
-      rebuildRows();
-//    }
+    getDataTableModel().fetch(getColumnManager().getVisibleColumns());
   }
 
-  public void rebuildColumnsAndRows()
+  public void refilter()
   {
-    _sortManager = null;
-    rebuildRows();
-  }
-
-  public void rebuildRows()
-  {
-    _dataModel = null; // force rebuild
+    getDataTableModel().filter(getColumnManager().getVisibleColumns());
+    // note: we cannot call gotoRowIndex(), as this will cause DTMLUD to trigger
     if (_dataTableUIComponent != null) {
       _dataTableUIComponent.setFirst(0);
     }
   }
 
+  public void resort()
+  {
+    getDataTableModel().sort(getColumnManager().getSortColumns(),
+                             getColumnManager().getSortDirection());
+    // note: we cannot call gotoRowIndex(), as this will cause DTMLUD to trigger
+    if (_dataTableUIComponent != null) {
+      _dataTableUIComponent.setFirst(0);
+    }
+  }
 
   // private methods
 
-  private void reset()
+  private void verifyIsInitialized()
   {
-    _dataTableUIComponent = null;
-    _rowsPerPageUIComponent = null;
-    _rowsPerPageSelector = null;
-    _dataModel = null;
-    _sortManager = null;
+    if (_columnManager == null ||
+      _dataTableModel == null ||
+      _rowsPerPageSelector == null) {
+      throw new IllegalStateException("DataTable not initialized");
+    }
   }
 
-  public void addObserver(Observer observer)
-  {
-    _observers.add(observer);
-  }
 }

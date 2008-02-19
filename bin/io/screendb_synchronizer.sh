@@ -2,12 +2,14 @@
 #
 # run this proggie something like this:
 #
-# bsub /home/js163/screensaver/bin/screendbsynchronizer.sh
+# bsub $SCREENSAVER/bin/io/screendbsynchronizer.sh
 #
 # TODO: improve placement of output and error files:
 #   - some place secure?
 #   - put a timestamp or something in the filenames so they dont overwrite
 #   - check for existence of files before overwriting?
+#
+# Configure database connection arguments in $SCREENSAVER/classes/screensaver.properties
 
 SCREENSAVER=`dirname $0`/../..
 cd $SCREENSAVER

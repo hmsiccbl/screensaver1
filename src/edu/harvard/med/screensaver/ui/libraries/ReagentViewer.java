@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.db.AnnotationsDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
@@ -42,7 +41,6 @@ public class ReagentViewer extends AbstractBackingBean
   // private instance fields
 
   protected GenericEntityDAO _dao;
-  private AnnotationsDAO _annotationsDao;
   protected GeneViewer _geneViewer;
   protected CompoundViewer _compoundViewer;
 
@@ -63,12 +61,10 @@ public class ReagentViewer extends AbstractBackingBean
   }
 
   public ReagentViewer(GenericEntityDAO dao,
-                       AnnotationsDAO annotationsDao,
                        GeneViewer geneViewer,
                        CompoundViewer compoundViewer)
   {
     _dao = dao;
-    _annotationsDao = annotationsDao;
     _geneViewer = geneViewer;
     _compoundViewer = compoundViewer;
   }
@@ -87,7 +83,7 @@ public class ReagentViewer extends AbstractBackingBean
   {
     List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
     if (reagent != null) { // note: reagent can be null when used in the context of WellViewer subclass
-      annotationValues.addAll(reagent.getAnnotationValues());
+      annotationValues.addAll(reagent.getAnnotationValues().values());
       for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
         AnnotationValue annotationValue = (AnnotationValue) iterator.next();
         if (annotationValue.isRestricted()) {

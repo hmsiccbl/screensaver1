@@ -11,7 +11,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +24,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -34,10 +33,9 @@ import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.util.CollectionUtils;
 
-import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.MapKeyManyToMany;
 
 
 /**
@@ -62,9 +60,8 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
   private ReagentVendorIdentifier _reagentId;
   private Integer _version;
   private Set<Well> _wells = new HashSet<Well>();
-  private Set<AnnotationValue> _annotationValues = new HashSet<AnnotationValue>();
+  private Map<AnnotationType,AnnotationValue> _annotationValues = new HashMap<AnnotationType,AnnotationValue>();
   private Set<Screen> _studies = new HashSet<Screen>();
-  private transient Map<AnnotationType,AnnotationValue> _annotationTypeIdToAnnotationValue;
 // TODO: implement
   //private Set<Reagent> _reagents = new HashSet<Reagent>();
 
@@ -118,7 +115,6 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
     cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     fetch=FetchType.LAZY
   )
-  @OrderBy("wellId")
   @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   public Set<Well> getWells()
   {
@@ -157,34 +153,13 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
    * Get the set of annotation values.
    * @return the set of annotation values
    */
-  @OneToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-             mappedBy="reagent",
-             fetch=FetchType.LAZY)
+  @OneToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE }, fetch=FetchType.LAZY, mappedBy="reagent")
+  /*@LazyCollection(LazyCollectionOption.EXTRA)*/
   @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-  public Set<AnnotationValue> getAnnotationValues()
+  @MapKeyManyToMany(joinColumns={ @JoinColumn(name="annotationTypeId") }, targetEntity=AnnotationType.class)
+  public Map<AnnotationType,AnnotationValue> getAnnotationValues()
   {
     return _annotationValues;
-  }
-
-  @Transient
-  public AnnotationValue getAnnotationValue(AnnotationType annotationType)
-  {
-    if (_annotationTypeIdToAnnotationValue == null) {
-      _annotationTypeIdToAnnotationValue =
-        CollectionUtils.indexCollection(_annotationValues,
-                                        new Transformer() {
-          public Object transform(Object annotationValue) {
-            Serializable entityId = ((AnnotationValue) annotationValue).getAnnotationType().getEntityId();
-            if (entityId == null) {
-              throw new IllegalStateException("cannot call getAnnotationValue() unless annotationTypes are persisted");
-            }
-            return entityId;
-          }
-        },
-        AnnotationType.class,
-        AnnotationValue.class);
-    }
-    return _annotationTypeIdToAnnotationValue.get(annotationType.getAnnotationTypeId());
   }
 
   @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
@@ -278,7 +253,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
    * @param annotationValues the new set of annotation values
    * @motivation for hibernate
    */
-  private void setAnnotationValues(Set<AnnotationValue> annotationValues)
+  private void setAnnotationValues(Map<AnnotationType,AnnotationValue> annotationValues)
   {
     _annotationValues = annotationValues;
   }

@@ -56,14 +56,4 @@ extends AbstractDependencyInjectionSpringContextTests
   protected String[] getConfigLocations() {
     return SPRING_CONFIG_FILES;
   }
-
-  @Override
-  /**
-   * <i>If overriding this method in a subclass, remember to call <code>super.onSetUp()</code>!</i>
-   */
-  protected void onSetUp() throws Exception
-  {
-    // setup debug-level logging
-    logConfigurer.setLogPropertiesResource("classpath:log4j.properties.debug");
-  }
 }

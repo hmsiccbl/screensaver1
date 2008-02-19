@@ -17,7 +17,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -52,13 +51,6 @@ abstract public class AdministrativeActivity extends Activity
 
 
   // public instance methods
-
-  @Override
-  @Transient
-  public String getActivityTypeName()
-  {
-    return "Administrative";
-  }
 
   /**
    * Get the administrator user that approved the activity.

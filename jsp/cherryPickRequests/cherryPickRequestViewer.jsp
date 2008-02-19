@@ -67,7 +67,7 @@ TODO:
 		</t:collapsiblePanel>
 
 		<t:collapsiblePanel id="cherryPickRequestDetailsPanel"
-			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickRequestDetails']}"
+			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickRequest']}"
 			title="Cherry Pick Request Details" var="isCollapsed"
 			titleVar="title">
 			<f:facet name="header">
@@ -111,7 +111,7 @@ TODO:
 					<t:commandButton id="downloadCherryPickRequestCommand"
 						value="Download"
 						action="#{cherryPickRequestViewer.downloadCherryPickRequest}"
-						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
+						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
 						styleClass="command"
 						title="Download the cherry pick request to a file" />
 				</t:panelGroup>
@@ -302,11 +302,11 @@ TODO:
 
 			<t:outputText value="Cherry picks have not yet been specified."
 				styleClass="label"
-				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && !cherryPickRequestViewer.editable}" />
+				rendered="#{cherryPickRequestViewer.screenerCherryPickCount == 0 && !cherryPickRequestViewer.editable}" />
 
 			<t:panelGrid id="addCherryPicksAndHelpPanels" columns="2"
 				columnClasses="column"
-				rendered="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks && cherryPickRequestViewer.editable}">
+				rendered="#{cherryPickRequestViewer.screenerCherryPickCount == 0 && cherryPickRequestViewer.editable}">
 				<t:panelGrid id="addCherryPicksPanel" columns="1">
 					<t:outputLabel for="cherryPicksInput"
 						value="Specify cherry picks as plate/well pairs:"
@@ -330,7 +330,7 @@ TODO:
 			</t:panelGrid>
 
 			<t:panelGrid id="viewScreenerCherryPicks" columns="1"
-				rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}">
+				rendered="#{cherryPickRequestViewer.screenerCherryPickCount > 0}">
 
 				<t:outputText
 					value="WARNING: Cherry pick allowance has been exceeded! (#{cherryPickRequestViewer.cherryPickRequest.cherryPickAllowanceUsed} > #{cherryPickRequestViewer.cherryPickRequest.cherryPickAllowance})"
@@ -351,14 +351,14 @@ TODO:
 				<t:buffer into="#{screenerCherryPicksTableRenderBuffer}">
 					<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
 						binding="#{cherryPickRequestViewer.screenerCherryPicksDataTable.dataTableUIComponent}"
-						value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.dataModel}"
+						value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.dataTableModel}"
 						styleClass="standardTable" columnClasses="column"
 						rows="#{cherryPickRequestViewer.screenerCherryPicksDataTable.rowsPerPageSelector.selection}"
 						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.sortColumnName}"
-						sortAscending="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.sortAscending}">
+						sortColumn="#{cherryPickRequestViewer.screenerCherryPicksDataTable.columnManager.sortColumnName}"
+						sortAscending="#{cherryPickRequestViewer.screenerCherryPicksDataTable.columnManager.sortAscending}">
 						<t:columns
-							value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.sortManager.columnModel}"
+							value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.columnManager.visibleColumnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
 								<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>
@@ -417,28 +417,28 @@ TODO:
 
 				<t:outputText value="Cherry picks have not yet been specified."
 					styleClass="label"
-					rendered="#{empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}" />
+					rendered="#{cherryPickRequestViewer.labCherryPickCount == 0}" />
 
 				<t:panelGroup id="labCherryPicksCommandPanel"
 					styleClass="commandPanel"
-					rendered="#{cherryPickRequestViewer.editable && !empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
+					rendered="#{cherryPickRequestViewer.editable && cherryPickRequestViewer.labCherryPickCount > 0}">
 					<t:commandButton id="viewCherryPickRequestWellVolumes"
 						value="View Well Volumes"
 						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumes}"
-						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
+						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
 						styleClass="command"
 						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the cherry picks on the cherry pick copy plates" />
 					<t:commandButton
 						id="viewCherryPickRequestWellVolumesForUnfulfilled"
 						value="View Unfulfilled Well Volumes"
 						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumesForUnfulfilled}"
-						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
+						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
 						styleClass="command"
 						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the unfulfilled cherry picks on the cherry pick copy plates" />
 					<t:commandButton id="allocateCherryPicks"
 						value="Reserve #{cherryPickRequestViewer.liquidTerm}"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"
-						disabled="#{empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks || cherryPickRequestViewer.cherryPickRequest.allocated}"
+						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0 || cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command"
 						title="Reserve #{cherryPickRequestViewer.liquidTerm} for the cherry picks from the cherry pick copy plates" />
 					<t:commandButton id="deallocateCherryPicks"
@@ -476,15 +476,15 @@ TODO:
 					<t:dataTable id="labCherryPicksTable"
 						binding="#{cherryPickRequestViewer.labCherryPicksDataTable.dataTableUIComponent}"
 						var="row"
-						value="#{cherryPickRequestViewer.labCherryPicksDataTable.dataModel}"
+						value="#{cherryPickRequestViewer.labCherryPicksDataTable.dataTableModel}"
 						styleClass="standardTable" columnClasses="column"
 						rows="#{cherryPickRequestViewer.labCherryPicksDataTable.rowsPerPageSelector.selection}"
 						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.sortColumnName}"
-						sortAscending="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.sortAscending}"
-						rendered="#{!empty cherryPickRequestViewer.cherryPickRequest.labCherryPicks}">
+						sortColumn="#{cherryPickRequestViewer.labCherryPicksDataTable.columnManager.sortColumnName}"
+						sortAscending="#{cherryPickRequestViewer.labCherryPicksDataTable.columnManager.sortAscending}"
+						rendered="#{cherryPickRequestViewer.labCherryPickCount > 0}">
 						<t:columns
-							value="#{cherryPickRequestViewer.labCherryPicksDataTable.sortManager.columnModel}"
+							value="#{cherryPickRequestViewer.labCherryPicksDataTable.columnManager.visibleColumnModel}"
 							var="column" styleClass="column">
 							<f:facet name="header">
 								<%-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header --%>

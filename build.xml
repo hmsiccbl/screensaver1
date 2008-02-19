@@ -68,7 +68,7 @@
     <istrue value="${profile}" />
   </condition>
   <condition property="appserver.java.opts"
-             value="-Xmx800M -XX:MaxPermSize=256M"
+             value="-Xmx800M -XX:MaxPermSize=256M -ea"
              else="-Xmx800M"
   >
     <istrue value="${debug}" />
