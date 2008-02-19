@@ -18,9 +18,9 @@ log4j.rootLogger=info, fileLog
 
 log4j.logger.edu.harvard.med.screensaver=info
 log4j.logger.edu.harvard.med.screensaver.ui=debug
-log4j.logger.org.apache.myfaces.lifecycle.LifecycleImpl=debug
 log4j.logger.org.hibernate=warn
 log4j.logger.org.springframework=warn
+#log4j.logger.org.apache.myfaces.lifecycle.LifecycleImpl=debug
 #log4j.logger.org.springframework.transaction=debug
 #log4j.logger.org.springframework.aop=debug
 #log4j.logger.org.springframework.aop.Cglib2AopProxy=warn
@@ -46,5 +46,5 @@ log4j.logger.org.hibernate.proxy=debug
 #log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl=debug
 #log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl.EntityInflator=debug
 
-log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
-log4j.logger.org.hibernate.SQL=debug
+#log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
+

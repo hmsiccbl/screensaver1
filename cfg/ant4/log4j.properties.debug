@@ -120,7 +120,7 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 
 # log just the SQL - set this to "debug" to get all the SQL stmts
-log4j.logger.org.hibernate.SQL=debug
+#log4j.logger.org.hibernate.SQL=debug
 
 # log transaction activity (should set these all at once to same log level)
 #log4j.logger.org.hibernate.transaction=debug
