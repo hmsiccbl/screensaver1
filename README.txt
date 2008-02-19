@@ -74,7 +74,7 @@ web/               Web application-specific files, used to generate a WAR file.
 
 build.xml          Ant build file.
 
-INSTALL.html       Installation instructions for the Screensaver web application.
+INSTALL.txt        Link to installation instructions for the Screensaver web application.
 
 LICENSE.txt        GNU General Public License, under which the Screensaver
                    application is distributed.
