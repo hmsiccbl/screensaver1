@@ -22,10 +22,17 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
- * A screening room activity representing a screener screening various assay plates. These
- * assay plates could be plated from a library, as with a {@link LibraryScreening}, or from
- * a set of cherry picks, as with a {@link RnaiCherryPickScreening}.
- *
+ * A screening room activity representing a screener screening various assay
+ * plates. These assay plates could be plated from a library, as with a
+ * {@link LibraryScreening}, or from a set of cherry picks, as with a
+ * {@link RnaiCherryPickScreening}).
+ * <p>
+ * <small>Note that at ICCB-L, RNAi cherry pick plates are screened at the
+ * ICCB-L facility, explaining why we have an explicit
+ * RNAiCherryPickScreeningActivity entity, as compared to small molecule cherry
+ * pick plates, which are screened off-site, explaining the absence of a
+ * "parallel" SmallMoleculeCharryPickScreening entity type.</small>
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
