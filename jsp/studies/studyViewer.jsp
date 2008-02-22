@@ -45,12 +45,32 @@
 					</t:columns>
 				</t:dataTable>
 			</t:collapsiblePanel>
+
+			<t:collapsiblePanel id="reagentsDataPanel"
+				value="#{studyViewer.isPanelCollapsedMap['reagentsData']}"
+				title="Reagents" var="isCollapsed" titleVar="title">
+				<f:facet name="header">
+					<t:div styleClass="subsectionHeader">
+						<t:headerLink immediate="true" styleClass="subsectionHeader">
+							<h:graphicImage
+								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								styleClass="icon" />
+							<h:outputText value="#{title}" styleClass="subsectionHeader" />
+						</t:headerLink>
+					</t:div>
+				</f:facet>
+			</t:collapsiblePanel>
+
 		</h:form>
 
-		<t:aliasBean alias="#{reagentsBrowser}"
-			value="#{studyViewer.reagentSearchResults}">
-			<%@include file="../libraries/reagentSearchResults.jsp"%>
-		</t:aliasBean>
+		<t:div
+			rendered="#{! empty studyViewer.study && ! studyViewer.isPanelCollapsedMap['reagentsData']}">
+			<t:aliasBean alias="#{reagentsBrowser}"
+				value="#{studyViewer.reagentSearchResults}">
+				<%@include file="../libraries/reagentSearchResults.jsp"%>
+			</t:aliasBean>
+		</t:div>
+		
 	</t:panelGrid>
 
 </f:subview>

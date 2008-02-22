@@ -14,10 +14,8 @@ package edu.harvard.med.screensaver.ui.searchresults;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -98,7 +96,6 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
 
-  private Map<String,Boolean> _isPanelCollapsedMap;
   private Library _library;
   private ScreenResult _screenResult;
   private Set<Integer> _plateNumbers;
@@ -128,9 +125,6 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     _wellViewer = wellViewer;
     _compoundViewer = compoundViewer;
     _geneViewer = geneViewer;
-
-    _isPanelCollapsedMap = new HashMap<String,Boolean>();
-    _isPanelCollapsedMap.put("dataTable", true);
   }
 
   public void searchAllWells()
@@ -141,9 +135,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     initialize(new AllEntitiesOfTypeDataFetcher<Well,String>(Well.class, _dao));
     updateColumnVisibilityForScreenType(true, true);
 
-    // start with search panel open, and results panel closed
+    // start with search panel open
     setTableFilterMode(true);
-    _isPanelCollapsedMap.put("dataTable", true);
   }
 
   public void searchWellsForLibrary(Library library)
@@ -158,9 +151,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     updateColumnVisibilityForScreenType(library.getScreenType() == ScreenType.SMALL_MOLECULE,
                                         library.getScreenType() == ScreenType.RNAI);
 
-    // start with search panel closed, and results panel open
+    // start with search panel closed
     setTableFilterMode(false);
-    _isPanelCollapsedMap.put("dataTable", false);
   }
 
   public void searchWellsForScreenResult(ScreenResult screenResult)
@@ -186,9 +178,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         }
       }
 
-      // start with search panel closed, and results panel closed
+      // start with search panel closed
       setTableFilterMode(false);
-      _isPanelCollapsedMap.put("dataTable", true);
     }
   }
 
@@ -207,16 +198,9 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
                                                          _dao));
     updateColumnVisibilityForScreenType(true, true);
 
-    // start with search panel closed, and results panel open
+    // start with search panel closed
     setTableFilterMode(false);
-    _isPanelCollapsedMap.put("dataTable", false);
   }
-
-  public Map<?,?> getIsPanelCollapsedMap()
-  {
-    return _isPanelCollapsedMap;
-  }
-
 
   // SearchResults abstract method implementations
 

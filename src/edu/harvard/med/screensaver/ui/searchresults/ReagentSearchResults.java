@@ -11,9 +11,7 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Observer;
 import java.util.Set;
 
@@ -73,7 +71,6 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
 
   // instance fields
 
-  private Map<String,Boolean> _isPanelCollapsedMap;
   private ReagentViewer _reagentViewer;
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
@@ -106,14 +103,6 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
     _compoundViewer = compoundViewer;
     _geneViewer = geneViewer;
     _dao = dao;
-
-    _isPanelCollapsedMap = new HashMap<String,Boolean>();
-    _isPanelCollapsedMap.put("reagentsData", false);
-  }
-
-  public Map<?,?> getIsPanelCollapsedMap()
-  {
-    return _isPanelCollapsedMap;
   }
 
   public void searchAllReagents()

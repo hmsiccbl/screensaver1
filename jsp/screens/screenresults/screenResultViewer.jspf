@@ -124,12 +124,27 @@
 					</t:columns>
 				</t:dataTable>
 			</t:collapsiblePanel>
+
+			<t:collapsiblePanel id="dataTablePanel"
+				value="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
+				title="Data" var="isCollapsed" titleVar="title">
+				<f:facet name="header">
+					<t:div styleClass="subsectionHeader">
+						<t:headerLink immediate="true" styleClass="subsectionHeader">
+							<h:graphicImage
+								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
+								styleClass="icon" />
+							<h:outputText value="#{title}" styleClass="subsectionHeader" />
+						</t:headerLink>
+					</t:div>
+				</f:facet>
+			</t:collapsiblePanel>
 		</t:div>
 	</h:form>
 
 	<%-- Warning: wellSearchResults.jspf must be included outside of h:form elements --%>
 	<t:div
-		rendered="#{!empty screenResultViewer.screenResult && ! screenResultViewer.isPanelCollapsedMap['screenResultSummary']}">
+		rendered="#{!empty screenResultViewer.screenResult && ! screenResultViewer.isPanelCollapsedMap['screenResultSummary'] && ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
 		<t:aliasBean alias="#{wellsBrowser}"
 			value="#{screenResultViewer.resultValueTable}">
 			<%@include file="../../libraries/wellSearchResults.jsp"%>

@@ -111,6 +111,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenResultSummary", false);
     _isPanelCollapsedMap.put("dataHeadersTable", true);
+    _isPanelCollapsedMap.put("dataTable", true);
     _isPanelCollapsedMap.put("heatMaps", true);
   }
 
