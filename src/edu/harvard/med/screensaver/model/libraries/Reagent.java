@@ -107,6 +107,33 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
   }
 
   /**
+   * Get the reagent ID as a string. Note that this Hibernate property mapping
+   * is an alias for the reagentId property (they map to the same schema field).
+   * 
+   * @motivation We cannot directly use the reagentId property (a
+   *             ReagentVendorIdentifier type) in a PropertyPath, since if such
+   *             as PropertyPath is passed to
+   *             EntityDataFetcher.buildFetchKeysQuery() to create a Hibernate
+   *             filter query, it needs a String type argument for the query
+   *             parameter, not a ReagentVendorIdentifier object (and not sure
+   *             if we can make Hibernate perform the necessary implicit cast
+   *             when setting this query argument). See
+   *             ReagentSearchResults.buildReagentPropertyColumns(), "Reagent
+   *             Source ID" column.
+   * @return reagent ID as a String
+   */
+  @Column(name="reagentId", updatable=false, insertable=false)
+  public String getReagentIdString()
+  {
+    return _reagentId.getReagentId();
+  }
+  
+  public void setReagentIdString(String reagentIdString)
+  {
+    // do nothing; set by setReagentId()
+  }
+
+  /**
    * Get the set of wells.
    * @return the set of wells
    */

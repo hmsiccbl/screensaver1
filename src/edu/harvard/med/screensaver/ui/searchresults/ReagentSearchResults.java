@@ -181,7 +181,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
   private void buildReagentPropertyColumns(List<EntityColumn<Reagent,?>> columns)
   {
     columns.add(new TextEntityColumn<Reagent>(
-      new PropertyPath<Reagent>(Reagent.class, "reagentId"),
+      new PropertyPath<Reagent>(Reagent.class, "reagentIdString"),
       "Reagent Source ID",
       "The vendor-assigned identifier for the reagent.", REAGENT_COLUMNS_GROUP) {
       @Override

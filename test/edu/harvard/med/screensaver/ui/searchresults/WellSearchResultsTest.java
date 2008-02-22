@@ -60,6 +60,10 @@ import edu.harvard.med.screensaver.ui.table.model.VirtualPagingEntityDataModel;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+/**
+ * High-level test covering DataTable, TableColumnManager, SearchResults, and
+ * WellSearchResults.
+ */
 public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 {
   // static members

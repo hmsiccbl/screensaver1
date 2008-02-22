@@ -369,23 +369,13 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   private void buildReagentPropertyColumns(List<EntityColumn<Well,?>> columns)
   {
-//    columns.add(new TextEntityColumn<Well>(
-//      new PropertyPath<Well>(Well.class, "reagent", "reagentId"),
-//      "Reagent Source ID",
-//      "The vendor-assigned identifier for the reagent.",
-//      TableColumn.UNGROUPED) {
-//      @Override
-//      public String getCellValue(Well well) { return well.getReagent().getKey().getReagentId(); }
-//
-//      @Override
-//      public boolean isCommandLink() { return true; }
-//
-//      @Override
-//      public Object cellAction(Reagent reagent)
-//      {
-//        return viewCurrentEntity();
-//      }
-//    });
+    columns.add(new TextEntityColumn<Well>(
+      new PropertyPath<Well>(Well.class, "reagentIdString"),
+      "Reagent Source ID",
+      "The vendor-assigned identifier for the reagent in this well.", WELL_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Well well) { return well.getReagent().getEntityId().getReagentId(); }
+    });
   }
 
   private void buildWellPropertyColumns(List<EntityColumn<Well,?>> columns)
