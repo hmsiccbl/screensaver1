@@ -440,13 +440,13 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     _labCherryPicksDataTable = new DataTable<LabCherryPick>();
     _labCherryPicksDataTable.initialize(buildLabCherryPicksDataTableModel(),
                                         LAB_CHERRY_PICKS_TABLE_COLUMNS,
-                                        buildRowsPerPageSelector());
+                                        buildRowsPerPageSelector(0));
     _labCherryPicksDataTable.getColumnManager().addAllCompoundSorts(LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS);
 
     _screenerCherryPicksDataTable = new DataTable<ScreenerCherryPick>();
     _screenerCherryPicksDataTable.initialize(buildScreenerCherryPicksDataTableModel(),
                                              SCREENER_CHERRY_PICKS_TABLE_COLUMNS,
-                                             buildRowsPerPageSelector());
+                                             buildRowsPerPageSelector(0));
     _screenerCherryPicksDataTable.getColumnManager().addAllCompoundSorts(SCREENER_CHERRY_PICKS_TABLE_COMPOUND_SORTS);
   }
 
@@ -479,11 +479,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
   }
 
-  private RowsPerPageSelector buildRowsPerPageSelector()
+  private RowsPerPageSelector buildRowsPerPageSelector(final int totalRowCount)
   {
     return new RowsPerPageSelector(Arrays.asList(10, 20, 50, 100, RowsPerPageSelector.SHOW_ALL_VALUE)) {
       @Override
-      protected Integer getAllRowsValue() { return 500 /*TODO: getRowCount()*/; }
+      protected Integer getAllRowsValue() { return totalRowCount; }
     };
   }
 
@@ -524,10 +524,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     _emptyWellsConverter = new EmptyWellsConverter();
     _screenerCherryPicksDataTable.initialize(buildScreenerCherryPicksDataTableModel(),
                                              SCREENER_CHERRY_PICKS_TABLE_COLUMNS,
-                                             buildRowsPerPageSelector());
+                                             buildRowsPerPageSelector(cherryPickRequest.getScreenerCherryPicks().size()));
     _labCherryPicksDataTable.initialize(buildLabCherryPicksDataTableModel(),
                                         LAB_CHERRY_PICKS_TABLE_COLUMNS,
-                                        buildRowsPerPageSelector());
+                                        buildRowsPerPageSelector(cherryPickRequest.getLabCherryPicks().size()));
     _assayPlatesColumnModel = new ArrayDataModel(AssayPlateRow.ASSAY_PLATES_TABLE_COLUMNS);
     _assayPlatesDataModel = null;
 
