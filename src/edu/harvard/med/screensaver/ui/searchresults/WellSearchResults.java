@@ -370,11 +370,15 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private void buildReagentPropertyColumns(List<EntityColumn<Well,?>> columns)
   {
     columns.add(new TextEntityColumn<Well>(
-      new PropertyPath<Well>(Well.class, "reagentIdString"),
+      new PropertyPath<Well>(Well.class, "reagent", "reagentIdString"),
       "Reagent Source ID",
       "The vendor-assigned identifier for the reagent in this well.", WELL_COLUMNS_GROUP) {
       @Override
-      public String getCellValue(Well well) { return well.getReagent().getEntityId().getReagentId(); }
+      public String getCellValue(Well well)
+      {
+        Reagent reagent = well.getReagent();
+        return reagent == null ? null : reagent.getEntityId().getReagentId();
+      }
     });
   }
 
@@ -774,7 +778,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   private void updateColumnVisibilityForScreenType(boolean showCompounds, boolean showGenes)
   {
-    for (TableColumn<Well,?> column : getColumnManager().getAllColumns()) {
+    for (TableColumn<Well,?> s : getColumnManager().getAllColumns()) {
 //      if (column.getGroup().equals(COMPOUND_COLUMNS_GROUP)) {
 //        column.setVisible(showCompounds);
 //      }
