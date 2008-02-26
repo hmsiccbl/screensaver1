@@ -1,6 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/sandbox" prefix="s"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <f:subview id="studyViewer" rendered="#{! empty studyViewer.study}">
@@ -13,14 +14,15 @@
 				value="#{studyViewer.isPanelCollapsedMap['annotationTypes']}"
 				title="Annotation Types" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<t:div styleClass="subsectionHeader">
-						<t:headerLink immediate="true" styleClass="subsectionHeader">
+					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+						styleClass="transparentSubsectionHeader">
+						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
 						</t:headerLink>
-					</t:div>
+						</s:roundedDiv>
 				</f:facet>
 
 				<t:dataTable id="annotationTypesTable"
@@ -50,14 +52,15 @@
 				value="#{studyViewer.isPanelCollapsedMap['reagentsData']}"
 				title="Reagents" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<t:div styleClass="subsectionHeader">
-						<t:headerLink immediate="true" styleClass="subsectionHeader">
+					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+						styleClass="transparentSubsectionHeader">
+						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
 						</t:headerLink>
-					</t:div>
+					</s:roundedDiv>
 				</f:facet>
 			</t:collapsiblePanel>
 

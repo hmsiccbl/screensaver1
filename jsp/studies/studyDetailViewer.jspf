@@ -1,6 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/sandbox" prefix="s"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <%-- TODO: share common code with screenDetailViewer --%>
@@ -11,17 +12,18 @@
 			value="#{studyDetailViewer.panelCollapsed}"
 			title="Study Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+					styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="Study Summary"
-							styleClass="sectionHeader" rendered="#{isCollapsed}" />
-						<h:outputText value="Study Details"
-							styleClass="sectionHeader" rendered="#{!isCollapsed}" />
+						<h:outputText value="Study Summary" styleClass="transparentSectionHeader"
+							rendered="#{isCollapsed}" />
+						<h:outputText value="Study Details" styleClass="transparentSectionHeader"
+							rendered="#{!isCollapsed}" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<f:facet name="closedContent">

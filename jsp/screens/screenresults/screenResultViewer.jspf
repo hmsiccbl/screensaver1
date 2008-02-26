@@ -11,13 +11,13 @@
 			title="Screen Result Summary" var="isCollapsed" titleVar="title"
 			rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 			<f:facet name="header">
-        <s:roundedDiv borderWidth="4" color="#0000FF" radius="4"  styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+        <s:roundedDiv borderWidth="4" color="#0000FF" radius="4"  styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<h:outputText value="Screen Result Summary"
-							styleClass="sectionHeader" />
+							styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>
@@ -94,12 +94,12 @@
 				title="Data Headers" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
 					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4" 
-						styleClass="subsectionHeader">
-						<t:headerLink immediate="true" styleClass="subsectionHeader">
+						styleClass="transparentSubsectionHeader">
+						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
 						</t:headerLink>
 					</s:roundedDiv>
 				</f:facet>
@@ -132,12 +132,12 @@
 				title="Data" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
 					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
-						styleClass="subsectionHeader">
-						<t:headerLink immediate="true" styleClass="subsectionHeader">
+						styleClass="transparentSubsectionHeader">
+						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
 						</t:headerLink>
 					</s:roundedDiv>
 				</f:facet>
@@ -163,12 +163,12 @@
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
 					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
-						styleClass="subsectionHeader">
-						<t:headerLink immediate="true" styleClass="subsectionHeader">
+						styleClass="transparentSubsectionHeader">
+						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="subsectionHeader" />
+							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
 						</t:headerLink>
 					</s:roundedDiv>
 				</f:facet>
@@ -183,7 +183,7 @@
 	<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
 		rendered="#{empty screenResultViewer.screenResult}">
 		<t:outputText value="Screen result not available"
-			styleClass="sectionHeader" />
+			styleClass="transparentSectionHeader" />
 	</s:roundedDiv>
 	<t:panelGroup
 			rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">

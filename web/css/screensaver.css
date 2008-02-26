@@ -19,12 +19,11 @@ h1,.title {
 	font-weight: bold;
 }
 
-h2,.sectionHeader {
+.transparentSectionHeader,h2,.sectionHeader {
 	font-weight: bold;
 	font-variant: small-caps;
 	font-size: large;
 	color: white;
-	/*background-color: blue;*/
 	text-decoration: none;
 	width: 100%;
 	padding: 0px;
@@ -35,17 +34,24 @@ h2,.sectionHeader {
 	padding-left: 1px;
 }
 
+h2,.sectionHeader {
+  background-color: blue;
+}
+
+.transparentSubsectionHeader,h3,.subsectionHeader {
+  font-weight: normal;
+  font-variant: small-caps;
+  font-size: medium;
+  color: white;
+  text-decoration: none;
+  width: 100%;
+  padding: 2px 2px 2px 2px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
 h3,.subsectionHeader {
-	font-weight: normal;
-	font-variant: small-caps;
-	font-size: medium;
-	color: white;
-	/*background-color: blue;*/
-	text-decoration: none;
-	width: 100%;
-	padding: 2px 2px 2px 2px;
-	margin-top: 2px;
-	margin-bottom: 2px;
+  background-color: blue;
 }
 
 form {

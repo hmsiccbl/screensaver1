@@ -24,12 +24,12 @@ TODO:
 			title="Screen Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
-					styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+					styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<t:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>
@@ -74,12 +74,12 @@ TODO:
 			titleVar="title">
 			<f:facet name="header">
 				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
-					styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+					styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<t:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>
@@ -294,12 +294,12 @@ TODO:
 			title="Screener Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
-					styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+					styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<t:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>
@@ -408,12 +408,12 @@ TODO:
 			title="Lab Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
-					styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+					styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<t:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>
@@ -531,12 +531,12 @@ TODO:
 			title="Cherry Pick Plates" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
 				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
-					styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+					styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<t:outputText value="#{title}" styleClass="sectionHeader" />
+						<t:outputText value="#{title}" styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>

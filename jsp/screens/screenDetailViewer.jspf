@@ -20,14 +20,14 @@ TODO:
 			value="#{screenDetailViewer.panelCollapsed}"
 			title="Screen Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-        <s:roundedDiv borderWidth="4" color="#0000FF" radius="4"  styleClass="sectionHeader">
-					<t:headerLink immediate="true" styleClass="sectionHeader">
+        <s:roundedDiv borderWidth="4" color="#0000FF" radius="4"  styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
-						<h:outputText value="Screen Summary" styleClass="sectionHeader"
+						<h:outputText value="Screen Summary" styleClass="transparentSectionHeader"
 							rendered="#{isCollapsed}" />
-						<h:outputText value="Screen Details" styleClass="sectionHeader"
+						<h:outputText value="Screen Details" styleClass="transparentSectionHeader"
 							rendered="#{!isCollapsed}" />
 					</t:headerLink>
 				</s:roundedDiv>
