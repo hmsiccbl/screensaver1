@@ -53,10 +53,6 @@ public class Messages extends AbstractBackingBean implements PhaseListener
   private static final Object [] EMPTY_ARGS = new Object[] {};
   private static final String DEFAULT_MESSAGE = "<UNKNOWN MESSAGE>";
   private static final String QUEUED_FACES_MESSAGES_PARAM = "QUEUED_FACES_MESSAGES";
-  /**
-   * Note: must match HtmlRendererUtils.SKIP_AUTO_SCROLL_PARAM value
-   */
-  private static final String SKIP_AUTO_SCROLL_PARAM = "skipAutoScroll";
   
   
   // private instance fields
@@ -178,11 +174,6 @@ public class Messages extends AbstractBackingBean implements PhaseListener
     if (queuedFacesMessages == null) {
       return;
     }
-    
-    // communicate to MyFaces that we do not want to autoscroll the page if
-    // messages exist, since these messages may be overlooked by the user if we
-    // scroll them off the top of browser window
-    getRequestMap().put(SKIP_AUTO_SCROLL_PARAM, Boolean.TRUE);
     
     FacesContext facesContext = getFacesContext();
     for (Pair<String,FacesMessage> queuedFacesMessage : queuedFacesMessages) {
