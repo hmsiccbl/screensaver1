@@ -20,13 +20,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.faces.application.Application;
-import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
-import javax.faces.component.UIData;
-import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
-import javax.faces.el.ValueBinding;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletResponse;
 
@@ -94,50 +89,6 @@ public class JSFUtils
   }
 
 
-  /**
-   * Dynamically add a column to a JSF UIData (table) component.
-   * 
-   * @param facesCtx
-   * @param table
-   * @param columnId the ID to assign to the JSF UIColumn component (corresponds
-   *          to the "id" attribute when defining via XML)
-   * @param columnDisplayName the name to be displayed in the column header
-   * @param bindingExpression an EL deferred expression specifying the property
-   *          that the column's values will be bound to. For example,
-   *          "${rowBean.aColumnValue}", where "rowBean" is the value of the
-   *          UIData component's "var" property, and "aColumnValue" is a
-   *          property of "rowBean".
-   */
-  @SuppressWarnings("unchecked")
-  public static void addTableColumn(
-    FacesContext facesCtx,
-    UIData table,
-    String columnId,
-    String columnDisplayName,
-    String bindingExpression)
-  {
-    Application facesAppl = facesCtx.getApplication();
-    UIColumn newColumn = (UIColumn) facesAppl.createComponent("javax.faces.Column");
-    newColumn.setId(columnId);
-    newColumn.setParent(table);
-    table.getChildren().add(newColumn);
-
-    UIOutput newColumnOutputText = (UIOutput) facesAppl.createComponent("javax.faces.HtmlOutputText");
-    newColumnOutputText.setParent(newColumn);
-    newColumn.getChildren().add(newColumnOutputText);
-    ValueBinding valueBinding = FacesContext.getCurrentInstance()
-                                            .getApplication()
-                                            .createValueBinding(bindingExpression);
-    newColumnOutputText.setValueBinding("value", valueBinding);
-    
-    UIOutput facetOutputText = (UIOutput) facesAppl.createComponent("javax.faces.HtmlOutputText");
-    facetOutputText.setValue(columnDisplayName);
-    facetOutputText.setParent(newColumn);
-    newColumn.getFacets().put("header",
-                              facetOutputText);
-
-    log.debug("add new UIColumn '" + newColumn.getId() + "' to table '" + table.getId() + "' with header '" + facetOutputText.getValue().toString() + "'");
-  }
   
   /**
    * Creates a UISelectItems object that can be assigned to the "value"

@@ -6,6 +6,7 @@
 <%--@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" --%>
 <%-- The Apache Tomahawk JSF components --%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/sandbox" prefix="s"%>
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
@@ -18,17 +19,19 @@
  --%>
 
 <f:subview id="menu">
-  <t:panelGrid columns="1">
+	<s:roundedDiv borderWidth="8" color="#0000FF" radius="8" style="height: 300px">
+		<t:panelGrid columns="1">
 
-		<h:form id="titleForm">
-			<t:outputText id="menuTitle" value="#{appInfo.applicationName}"
-				styleClass="menuItem title" />
-			<t:htmlTag value="br"/>
-			<t:outputText id="version" value="#{appInfo.applicationVersion}"
-				styleClass="menuItem label"
-				title="The current version of Screensaver" />
-		</h:form>
+			<h:form id="titleForm">
+				<t:outputText id="menuTitle" value="#{appInfo.applicationName}"
+					styleClass="menuItem title" />
+				<t:htmlTag value="br" />
+				<t:outputText id="version" value="#{appInfo.applicationVersion}"
+					styleClass="menuItem label"
+					title="The current version of Screensaver" />
+			</h:form>
 
-  </t:panelGrid>
+		</t:panelGrid>
+	</s:roundedDiv>
 </f:subview>
 

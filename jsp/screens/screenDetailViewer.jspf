@@ -1,6 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/sandbox" prefix="s"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <%--
@@ -19,7 +20,7 @@ TODO:
 			value="#{screenDetailViewer.panelCollapsed}"
 			title="Screen Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
+        <s:roundedDiv borderWidth="4" color="#0000FF" radius="4"  styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
@@ -29,7 +30,7 @@ TODO:
 						<h:outputText value="Screen Details" styleClass="sectionHeader"
 							rendered="#{!isCollapsed}" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<f:facet name="closedContent">
@@ -176,7 +177,7 @@ TODO:
 				<t:outputLabel for="dateCreatedEditable" value="Created"
 					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 					title="The date the screen was originally created in the database (either ScreenDB or Screensaver)" />
-				<t:inputDate id="dateCreatedEditable"
+				<t:inputDate id="dateCreatedEditable" style=""
 					value="#{screenDetailViewer.screen.dateCreated}" popupCalendar="true"
 					rendered="#{screenDetailViewer.editMode}" styleClass="inputText" />
 				<t:outputText id="dateCreated"

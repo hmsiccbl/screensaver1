@@ -1,6 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsf/html" prefix="h"%>
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/sandbox" prefix="s"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
 <f:subview id="screenResultViewer">
@@ -10,7 +11,7 @@
 			title="Screen Result Summary" var="isCollapsed" titleVar="title"
 			rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
+        <s:roundedDiv borderWidth="4" color="#0000FF" radius="4"  styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
@@ -18,7 +19,7 @@
 						<h:outputText value="Screen Result Summary"
 							styleClass="sectionHeader" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<t:panelGroup
@@ -92,14 +93,15 @@
 				value="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
 				title="Data Headers" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<t:div styleClass="subsectionHeader">
+					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4" 
+						styleClass="subsectionHeader">
 						<t:headerLink immediate="true" styleClass="subsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="#{title}" styleClass="subsectionHeader" />
 						</t:headerLink>
-					</t:div>
+					</s:roundedDiv>
 				</f:facet>
 
 				<t:dataTable id="dataHeadersTable"
@@ -129,14 +131,15 @@
 				value="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
 				title="Data" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<t:div styleClass="subsectionHeader">
+					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+						styleClass="subsectionHeader">
 						<t:headerLink immediate="true" styleClass="subsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="#{title}" styleClass="subsectionHeader" />
 						</t:headerLink>
-					</t:div>
+					</s:roundedDiv>
 				</f:facet>
 			</t:collapsiblePanel>
 		</t:div>
@@ -159,14 +162,15 @@
 				title="Heat Maps" var="isCollapsed" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult && !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
-					<t:div styleClass="subsectionHeader">
+					<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+						styleClass="subsectionHeader">
 						<t:headerLink immediate="true" styleClass="subsectionHeader">
 							<h:graphicImage
 								value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 								styleClass="icon" />
 							<h:outputText value="#{title}" styleClass="subsectionHeader" />
 						</t:headerLink>
-					</t:div>
+					</s:roundedDiv>
 				</f:facet>
 				<t:panelGroup rendered="#{!isCollapsed}">
 					<%@ include file="heatMapViewer.jspf"%>
@@ -176,12 +180,13 @@
 	</h:form>
 
 	<%-- Warning: screenResultUploader.jspf must be included outside of h:form elements --%>
-	<t:panelGroup rendered="#{empty screenResultViewer.screenResult}">
+	<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+		rendered="#{empty screenResultViewer.screenResult}">
 		<t:outputText value="Screen result not available"
 			styleClass="sectionHeader" />
-	</t:panelGroup>
+	</s:roundedDiv>
 	<t:panelGroup
-		rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
-		<%@include file="admin/screenResultUploader.jspf"%>
-	</t:panelGroup>
+			rendered="#{!screenResultViewer.readOnly && empty screenResultViewer.screenResult}">
+			<%@include file="admin/screenResultUploader.jspf"%>
+		</t:panelGroup>
 </f:subview>

@@ -4,6 +4,7 @@
 <%@ taglib uri="http://java.sun.com/jsf/core" prefix="f"%>
 <%-- The Apache Tomahawk JSF components --%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/sandbox" prefix="s"%>
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
@@ -22,14 +23,15 @@ TODO:
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['screenSummary']}"
 			title="Screen Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
+				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+					styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<t:panelGrid id="screenSummaryTable" columns="2"
@@ -71,14 +73,15 @@ TODO:
 			title="Cherry Pick Request Details" var="isCollapsed"
 			titleVar="title">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
+				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+					styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<t:panelGrid columns="1">
@@ -290,14 +293,15 @@ TODO:
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['screenerCherryPicks']}"
 			title="Screener Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
+				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+					styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<t:outputText value="Cherry picks have not yet been specified."
@@ -403,14 +407,15 @@ TODO:
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['labCherryPicks']}"
 			title="Lab Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
+				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+					styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<t:panelGrid columns="1">
@@ -525,14 +530,15 @@ TODO:
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickPlates']}"
 			title="Cherry Pick Plates" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<t:div styleClass="sectionHeader">
+				<s:roundedDiv borderWidth="4" color="#0000FF" radius="4"
+					styleClass="sectionHeader">
 					<t:headerLink immediate="true" styleClass="sectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? \"/images/collapsed.png\" : \"/images/expanded.png\"}"
 							styleClass="icon" />
 						<t:outputText value="#{title}" styleClass="sectionHeader" />
 					</t:headerLink>
-				</t:div>
+				</s:roundedDiv>
 			</f:facet>
 
 			<t:panelGrid columns="1">

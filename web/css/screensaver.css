@@ -24,12 +24,12 @@ h2,.sectionHeader {
 	font-variant: small-caps;
 	font-size: large;
 	color: white;
-	background-color: blue;
+	/*background-color: blue;*/
 	text-decoration: none;
 	width: 100%;
 	padding: 0px;
-	margin-top: 2px;
-	margin-bottom: 2px;
+	margin-top: 0px;
+	margin-bottom: 0px;
 	margin-left: 0px;
 	margin-right: 0px;
 	padding-left: 1px;
@@ -40,7 +40,7 @@ h3,.subsectionHeader {
 	font-variant: small-caps;
 	font-size: medium;
 	color: white;
-	background-color: blue;
+	/*background-color: blue;*/
 	text-decoration: none;
 	width: 100%;
 	padding: 2px 2px 2px 2px;
@@ -112,7 +112,7 @@ hr {
 }
 
 /* groupingPanel is for panelGrid that is being used to visually associate a set of related components */
-.groupingPanel, .searchResultsCommandPanel {
+.groupingPanel {
 	padding: 1px;
 	border-width: 1px;
 	border-style: solid;
@@ -258,7 +258,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .menuColumn {
-	background-color: blue;
+/*	background-color: blue;*/
+	background: transparent;
 	color: white;
 	font-size: small;
 	/* prevents menu from consuming 50% width (with content panel consuming other 50%) on IE */

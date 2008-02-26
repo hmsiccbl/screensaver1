@@ -129,9 +129,9 @@ public class Environment extends AbstractBackingBean
   public DataModel getCookiesTableModel()
   {
     List<Row> cookies = new ArrayList<Row>();
-    Map<String,Cookie> cookieMap = (Map<String,Cookie>) getExternalContext().getRequestCookieMap();
+    Map<String,Object> cookieMap =  getExternalContext().getRequestCookieMap();
     for (String cookieName : cookieMap.keySet()) {
-      cookies.add(new Row(cookieName, cookieMap.get(cookieName).getValue()));
+      cookies.add(new Row(cookieName, ((Cookie) cookieMap.get(cookieName)).getValue()));
     }
     return new ListDataModel(cookies);
   }
