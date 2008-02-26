@@ -5,6 +5,7 @@
 <%--@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" --%>
 <%-- The Apache Tomahawk JSF components --%>
 <%@ taglib uri="http://myfaces.apache.org/tomahawk" prefix="t"%>
+<%@ taglib uri="http://myfaces.apache.org/sandbox" prefix="s"%>
 <%-- Tiles --%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 
@@ -22,6 +23,7 @@
         title="Enter your password here"
       />
       <t:inputSecret id="j_password" forceId="true" styleClass="inputText" />
+			<s:focus id="focuser" for="j_username" />
     </t:panelGrid>
     <t:div/>
     <f:verbatim>
@@ -42,6 +44,7 @@
       <%--t:commandLink value="Forgot your ID or password?" immediate="true"
         action="#{menu.forgotIdOrPassword}" styleClass="command" /--%>
     </t:panelGroup>
+    
   </h:form>
   
 </f:subview>

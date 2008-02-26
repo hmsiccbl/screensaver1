@@ -30,9 +30,6 @@
     <put name="menu" value="/menu.jsp" />
     <put name="header" value="/header.jsp" />
     <put name="footer" value="/footer.jsp" />
-    <!-- the JSF ID of the input component that should have initial focus
-         (specify forceId="true" in the JSF component definition) -->
-    <put name="inputFocusId" value="" />
   </definition>
 
   <definition name=".unauthenticatedBase" extends=".base" path="/template.jsp">
@@ -59,7 +56,6 @@
   <definition name="/login.tiles" extends=".unauthenticatedBase">
     <put name="pageTitle" value="Screensaver kindly requests that you identify yourself as an authorized user." />
     <put name="body" value="/login.jsp" />
-    <put name="inputFocusId" value="j_username" />
   </definition>
 
   <definition name="/goodbye.tiles" extends=".unauthenticatedBase">
