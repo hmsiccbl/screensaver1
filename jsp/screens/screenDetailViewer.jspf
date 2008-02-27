@@ -248,6 +248,7 @@ TODO:
 					displayValueOnly="#{screenDetailViewer.adminViewMode}"
 					styleClass="inputText" displayValueOnlyStyleClass="dataText" />
 
+<%-- Disabling Screening Room Activities, since it takes up too much screen real estate.  Will revise when ScreenViewer is overhauled during ScreenDB migration effort
 				<t:outputLabel for="activityItems" value="Screening Room Activities"
 					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 					title="Activities carried out in the screening room, such as performing an assay or using a plate reader" />
@@ -283,8 +284,8 @@ TODO:
 								value="#{activityItem.performedBy.fullNameLastFirst}"
 								styleClass="dataText" />
 						</t:column>
-						<%-- not rendering until we implement a ScreeningRoomActivity Viewer --%>
-						<%--
+						<%- - not rendering until we implement a ScreeningRoomActivity Viewer - -%>
+						<%- -
 				<t:column>
 					<t:commandButton id="viewActivity"
 						action="#{screenDetailViewer.viewScreeningRoomActivity}"
@@ -294,7 +295,7 @@ TODO:
 						rendered="#{screenDetailViewer.editMode}" value="#{\"Copy...\"}"
 						styleClass="command" title="Copy to another screen" - -%>
 				</t:column>
-				--%>
+				- -%>
 					</t:dataTable>
 					<t:panelGroup>
 						<t:commandButton value="Add Screening Room Activity..."
@@ -302,6 +303,7 @@ TODO:
 							styleClass="command" rendered="#{screenDetailViewer.editMode}" />
 					</t:panelGroup>
 				</t:panelGrid>
+        --%>
 
 				<t:outputLabel for="cherryPickRequests" value="Cherry Pick Requests"
 					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
