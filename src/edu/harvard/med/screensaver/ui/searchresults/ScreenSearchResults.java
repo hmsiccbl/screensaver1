@@ -215,7 +215,9 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     });
     columns.add(new EnumEntityColumn<Screen,StatusValue>(
       new PropertyPath(Screen.class, "statusItems", "statusValue"),
-      "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.", TableColumn.UNGROUPED, StatusValue.values()) {
+      "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
+      TableColumn.ADMIN_COLUMN_GROUP,
+      StatusValue.values()) {
       @Override
       public StatusValue getCellValue(Screen screen)
       {
@@ -227,17 +229,16 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
         return statusItem.getStatusValue();
       }
     });
-    columns.get(columns.size() - 1).setVisible(showStatusFields());
     columns.add(new DateEntityColumn<Screen>(
       new PropertyPath(Screen.class, "statusItems", "statusDate"),
-      "Status Date", "The date of the most recent change of status for the screen", TableColumn.UNGROUPED) {
+      "Status Date", "The date of the most recent change of status for the screen",
+      TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
       protected Date getDate(Screen screen) {
         SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
         return statusItems.size() == 0 ? null : statusItems.last().getStatusDate();
       }
     });
-    columns.get(columns.size() - 1).setVisible(showStatusFields());
 
 //    TableColumnManager<Screen> columnManager = getColumnManager();
 //    columnManager.addCompoundSortColumns(columnManager.getColumn("Lab Head"),
@@ -254,11 +255,5 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
   protected void setEntityToView(Screen screen)
   {
     _screenViewer.viewScreen(screen);
-  }
-
-  private boolean showStatusFields()
-  {
-    return isUserInRole(ScreensaverUserRole.SCREENS_ADMIN) ||
-      isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 }

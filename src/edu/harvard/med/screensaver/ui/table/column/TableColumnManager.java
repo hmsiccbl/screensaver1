@@ -43,16 +43,19 @@ import org.apache.myfaces.custom.tree2.TreeNodeBase;
 /**
  * Notifies observers when set of available columns are changed, either from
  * setColumns() being called, or a column's setVisible() being called.
- * 
+ *
  * @author drew
  */
 public class TableColumnManager<R> extends Observable implements Observer
 {
+  public static final String GROUP_NODE_DELIMITER = "::";
+
+
   // static members
 
   private static Logger log = Logger.getLogger(TableColumnManager.class);
-  
-  
+
+
   // instance data
 
   private List<TableColumn<R,?>> _columns = new ArrayList<TableColumn<R,?>>();
@@ -74,7 +77,7 @@ public class TableColumnManager<R> extends Observable implements Observer
 
   /**
    * Get the current sort column.
-   * 
+   *
    * @motivation allow sort column to be set from a drop-down list UI component
    *             (in addition to clicking on table column headers)
    * @return the current sort column
@@ -119,21 +122,21 @@ public class TableColumnManager<R> extends Observable implements Observer
   {
     if (_columnsSelectionTree == null) {
       TreeNodeBase root = new TreeNodeBase("root", "Columns", false);
-      Map<String,TreeNode> groups = new HashMap<String,TreeNode>(); 
+      Map<String,TreeNode> groups = new HashMap<String,TreeNode>();
       for (TableColumn<R,?> column : _columns) {
         TreeNode groupNode = getOrCreateGroupNode(root, groups, column.getGroup());
         groupNode.getChildren().add(new SelectableColumnTreeNode<R>(column));
       }
-      _columnsSelectionTree = new TreeModelBase(root); 
+      _columnsSelectionTree = new TreeModelBase(root);
     }
     return _columnsSelectionTree;
   }
-  
+
   public boolean isColumnsTreeOpen()
   {
     return getColumnsTreeModel().getTreeState().isNodeExpanded("0");
   }
-  
+
   public int getSortColumnIndex()
   {
     return getSortColumnSelector().getSelectionIndex();
@@ -171,7 +174,7 @@ public class TableColumnManager<R> extends Observable implements Observer
 
   /**
    * Set the current sort column.
-   * 
+   *
    * @motivation allow sort column to be set from a drop-down list UI component
    *             (in addition to clicking on table column headers)
    * @param currentSortColumn the new current sort column
@@ -237,7 +240,7 @@ public class TableColumnManager<R> extends Observable implements Observer
 
   /**
    * Get the current sort direction.
-   * 
+   *
    * @motivation allow sort direction to be set from a drop-down list UI
    *             component (in addition to clicking on table column headers)
    * @return the current sort column name
@@ -249,7 +252,7 @@ public class TableColumnManager<R> extends Observable implements Observer
 
   /**
    * Set the current sort direction.
-   * 
+   *
    * @motivation allow sort direction to be set from a drop-down list UI
    *             component (in addition to clicking on table column headers)
    * @param currentSortDirection the new current sort direction
@@ -262,8 +265,8 @@ public class TableColumnManager<R> extends Observable implements Observer
   }
 
   /**
-   * Get the JSF column model, containing visible columns. 
-   * 
+   * Get the JSF column model, containing visible columns.
+   *
    * @return the data header column model
    */
   public ListDataModel getVisibleColumnModel()
@@ -274,11 +277,11 @@ public class TableColumnManager<R> extends Observable implements Observer
   public void setColumns(List<? extends TableColumn<R,?>> columns)
   {
     Set<TableColumn<R,?>> oldColumns = new HashSet<TableColumn<R,?>>(_columns);
-    
+
     _columns.clear();
     _columns.addAll(columns);
     _columnsSelectionTree = null; // force re-create
-    
+
     _name2Column.clear();
     for (TableColumn<R,?> column : columns) {
       column.addObserver(this);
@@ -327,7 +330,7 @@ public class TableColumnManager<R> extends Observable implements Observer
     return _sortDirectionSelector;
   }
 
-  
+
   // JSF application methods
 
   @UIControllerMethod
@@ -336,7 +339,7 @@ public class TableColumnManager<R> extends Observable implements Observer
     getColumnsTreeModel().getTreeState().collapsePath(new String[] { "0" });
     return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   @UIControllerMethod
   public String selectAllColumns()
   {
@@ -350,7 +353,7 @@ public class TableColumnManager<R> extends Observable implements Observer
     // TODO
     return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
 
   // Observer methods
 
@@ -364,7 +367,7 @@ public class TableColumnManager<R> extends Observable implements Observer
       setChanged();
       notifyObservers(new SortChangedEvent<R>(getSortDirection()));
     }
-    else if (o instanceof TableColumn) { 
+    else if (o instanceof TableColumn) {
       if (arg instanceof ColumnVisibilityChangedEvent) {
         log.debug("TableColumnManager notified of column visibility change: " + o);
         updateVisibleColumns((ColumnVisibilityChangedEvent) arg);
@@ -386,7 +389,7 @@ public class TableColumnManager<R> extends Observable implements Observer
       if (log.isDebugEnabled()) {
         log.debug("column selections changed: " + event);
       }
-      
+
       // rebuild _visibleColumns, maintaining the fixed order of the columns
       // we ignore the event's take on added & removed columns, since we can determine this reliably by inspecting each column
       _visibleColumns.clear();
@@ -394,8 +397,8 @@ public class TableColumnManager<R> extends Observable implements Observer
         if (column.isVisible()) {
           _visibleColumns.add(column);
         }
-      }      
-      
+      }
+
       getSortColumnSelector().setDomain(_visibleColumns);
       _columnModel = new ListDataModel(_visibleColumns);
       setChanged();
@@ -414,16 +417,18 @@ public class TableColumnManager<R> extends Observable implements Observer
       }
       TreeNode parent;
       String groupName;
-      int lastPathDelimPos = groupPath.lastIndexOf(':');
+      int lastPathDelimPos = groupPath.lastIndexOf(GROUP_NODE_DELIMITER);
       if (lastPathDelimPos < 0) {
+        // leaf group node
         parent = root;
         groupName = groupPath;
       }
       else {
-        parent = getOrCreateGroupNode(root, 
-                                      groups, 
+        // internal group node
+        parent = getOrCreateGroupNode(root,
+                                      groups,
                                       groupPath.substring(0, lastPathDelimPos));
-        groupName = groupPath.substring(lastPathDelimPos + 1);
+        groupName = groupPath.substring(lastPathDelimPos + GROUP_NODE_DELIMITER.length());
       }
       groupNode = new TreeNodeBase("group", groupName, false);
       parent.getChildren().add(groupNode);

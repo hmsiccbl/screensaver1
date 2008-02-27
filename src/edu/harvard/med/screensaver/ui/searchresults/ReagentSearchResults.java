@@ -40,6 +40,7 @@ import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.RealEntityColumn;
@@ -53,7 +54,7 @@ import org.hibernate.Session;
 /**
  * A {@link SearchResults} for {@link Reagents Reagents}. Provides
  * user-selectable annotation type columns.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -127,7 +128,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
     getColumnManager().getColumn("Compounds").setVisible(study.getScreenType() == ScreenType.SMALL_MOLECULE);
     // show columns for this screenResult's data headers
     for (AnnotationType at : study.getAnnotationTypes()) {
-      getColumnManager().getColumn(makeColumnName(at, _study.getStudyNumber())).setVisible(true);
+      getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getStudyNumber())).setVisible(true);
     }
   }
 
@@ -137,7 +138,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
     _reagentIds = reagentIds;
     /*new HashSet<String>();
     for (ReagentVendorIdentifier rvi : reagentIds) {
-      _reagentIds.add(rvi.getReagentId()); 
+      _reagentIds.add(rvi.getReagentId());
     }*/
     initialize(new EntitySetDataFetcher<Reagent,ReagentVendorIdentifier>(Reagent.class, reagentIds, _dao));
     getColumnManager().getColumn("Silencing Reagents").setVisible(true);
@@ -266,23 +267,15 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
       String studyTitle = atAndStudyNumberAndTitle.getThird();
       EntityColumn<Reagent,?> column;
 
-      String columnGroup;
-      if (_study != null && studyNumber.equals(_study.getStudyNumber())) {
-        columnGroup = OUR_ANNOTATION_TYPES_COLUMN_GROUP;
-      }
-      else {
-        columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + ":" + studyNumber + " (" + studyTitle + ")";
-      }
-            
       if (annotationType.isNumeric()) {
         column = new RealEntityColumn<Reagent>(
           new PropertyPath<Reagent>(Reagent.class,
             "annotationValues[annotationType]",
             "numericValue",
             annotationType),
-            makeColumnName(annotationType, studyNumber),
-            annotationType.getDescription(),
-            columnGroup) {
+            WellSearchResults.makeColumnName(annotationType, studyNumber),
+            WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
+            makeColumnGroup(studyNumber, studyTitle)) {
           @Override
           public Double getCellValue(Reagent reagent)
           {
@@ -300,9 +293,9 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
             "annotationValues[annotationType]",
             "value",
             annotationType),
-            makeColumnName(annotationType, studyNumber),
-            annotationType.getDescription(),
-            columnGroup) {
+            WellSearchResults.makeColumnName(annotationType, studyNumber),
+            WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
+            makeColumnGroup(studyNumber, studyTitle)) {
           @Override
           public String getCellValue(Reagent reagent)
           {
@@ -315,7 +308,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
         };
       }
 
-      // request eager fetching of annotationType, since Hibernate will otherwise fetch these with individual SELECTs 
+      // request eager fetching of annotationType, since Hibernate will otherwise fetch these with individual SELECTs
       column.addRelationshipPath(new RelationshipPath<Reagent>(Reagent.class, "annotationValues.annotationType"));
 
       if (column.getName().equals(OUR_ANNOTATION_TYPES_COLUMN_GROUP)) {
@@ -330,6 +323,18 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
     columns.addAll(otherColumns);
   }
 
+  private String makeColumnGroup(Integer studyNumber, String studyTitle)
+  {
+    String columnGroup;
+    if (_study != null && studyNumber.equals(_study.getStudyNumber())) {
+      columnGroup = OUR_ANNOTATION_TYPES_COLUMN_GROUP;
+    }
+    else {
+      columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + studyNumber + " (" + studyTitle + ")";
+    }
+    return columnGroup;
+  }
+
   private List<Triple<AnnotationType,Integer,String>> findValidAnnotationTypes()
   {
     return _dao.runQuery(new Query() {
@@ -340,7 +345,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
         hql.from(AnnotationType.class, "at").from("at", "study", "s", JoinType.INNER);
         hql.select("at").select("s", "screenNumber").select("s", "title");
         hql.orderBy("s", "screenNumber").orderBy("at", "ordinal");
-          
+
         if ( _study != null) {
           hql.where("s", "screenType", Operator.EQUAL, _study.getScreenType());
         }
@@ -351,7 +356,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
           // select annotation types for studies that have same screenType of the libraries containing the set of reagents in this search result
           hql.from(Library.class, "l").from("l", "wells", "w", JoinType.INNER).from("w", "reagent", "r", JoinType.INNER);
           hql.whereIn("r", "id", _reagentIds);
-          hql.where("l", "screenType", Operator.EQUAL, "s", "screenType"); 
+          hql.where("l", "screenType", Operator.EQUAL, "s", "screenType");
         }
         else {
           // find all annotation types; no additional HQL needed
@@ -365,10 +370,5 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
         return result;
       }
     });
-  }
-
-  public static String makeColumnName(AnnotationType at, Integer studyNumber)
-  {
-    return String.format("#%d: %s", studyNumber, at.getName());
   }
 }

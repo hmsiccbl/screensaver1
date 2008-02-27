@@ -51,6 +51,7 @@ import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
@@ -475,14 +476,6 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       Integer screenNumber = rvtAndScreenNumberAndTitle.getSecond();
       String screenTitle = rvtAndScreenNumberAndTitle.getThird();
 
-      String columnGroup;
-      if (_screenResult != null && _screenResult.getScreen().getScreenNumber().equals(screenNumber)) {
-        columnGroup = OUR_DATA_HEADERS_COLUMNS_GROUP;
-      }
-      else {
-        columnGroup = OTHER_DATA_HEADERS_COLUMNS_GROUP + ":" + screenNumber + " (" + screenTitle + ")";
-      }
-
       EntityColumn<Well,?> column;
 //      if (rvt.isPositiveIndicator() &&
 //        rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
@@ -551,8 +544,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         column = new RealEntityColumn<Well>(
           new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "numericValue", rvt),
           makeColumnName(rvt, screenNumber),
-          rvt.getDescription(),
-          columnGroup) {
+          makeColumnDescription(rvt, screenNumber, screenTitle),
+          makeColumnGroup(screenNumber, screenTitle)) {
           @Override
           public Double getCellValue(Well well)
           {
@@ -565,8 +558,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         column = new TextEntityColumn<Well>(
           new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "value", rvt),
           makeColumnName(rvt, screenNumber),
-          rvt.getDescription(),
-          columnGroup) {
+          makeColumnDescription(rvt, screenNumber, screenTitle),
+          makeColumnGroup(screenNumber, screenTitle)) {
           @Override
           public String getCellValue(Well well)
           {
@@ -579,7 +572,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       // request eager fetching of resultValueType, since Hibernate will otherwise fetch these with individual SELECTs
       column.addRelationshipPath(new RelationshipPath<Well>(Well.class, "resultValues.resultValueType"));
 
-      if (columnGroup.equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
+      if (column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
         columns.add(column);
         column.setVisible(true);
       }
@@ -589,6 +582,18 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     }
     columns.addAll(otherColumns);
+  }
+
+  private String makeColumnGroup(Integer screenNumber, String screenTitle)
+  {
+    String columnGroup;
+    if (_screenResult != null && _screenResult.getScreen().getScreenNumber().equals(screenNumber)) {
+      columnGroup = OUR_DATA_HEADERS_COLUMNS_GROUP;
+    }
+    else {
+      columnGroup = OTHER_DATA_HEADERS_COLUMNS_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + screenNumber + " (" + screenTitle + ")";
+    }
+    return columnGroup;
   }
 
   /**
@@ -650,7 +655,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         columnGroup = OUR_ANNOTATION_TYPES_COLUMN_GROUP;
       }
       else {
-        columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + ":" + studyNumber + " (" + studyTitle + ")";
+        columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + studyNumber + " (" + studyTitle + ")";
       }
 
       if (annotationType.isNumeric()) {
@@ -660,7 +665,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
             "numericValue",
             annotationType),
             makeColumnName(annotationType, studyNumber),
-            annotationType.getDescription(),
+            WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
             columnGroup) {
           @Override
           public Double getCellValue(Well well)
@@ -683,7 +688,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
             "value",
             annotationType),
             makeColumnName(annotationType, studyNumber),
-            annotationType.getDescription(),
+            WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
             columnGroup) {
           @Override
           public String getCellValue(Well well)
@@ -771,9 +776,21 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   // private instance methods
 
-  public static String makeColumnName(MetaDataType mdt, Integer screenNumber)
+  public static String makeColumnName(MetaDataType mdt, Integer parentIdentifier)
   {
-    return String.format("#%d: %s", screenNumber, mdt.getName());
+    // note: replacing "_" with white space allows column headers to wrap, creating narrower columns
+    return String.format("%s [%d]", mdt.getName().replaceAll("_", " "), parentIdentifier);
+  }
+
+  public static String makeColumnDescription(MetaDataType mdt, Integer parentIdentifier, String parentTitle)
+  {
+    StringBuilder columnDescription = new StringBuilder();
+    columnDescription.append("<i>").append(parentIdentifier).append(": ").append(parentTitle).
+    append("</i><br/><b>").append(mdt.getName()).append("</b>");
+    if (mdt.getDescription() != null) {
+      columnDescription.append(": ").append(mdt.getDescription());
+    }
+    return columnDescription.toString();
   }
 
   private void updateColumnVisibilityForScreenType(boolean showCompounds, boolean showGenes)

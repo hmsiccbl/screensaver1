@@ -40,6 +40,8 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   private static Logger log = Logger.getLogger(TableColumn.class);
 
   public static final String UNGROUPED = "";
+  /** The Administrative group of columns is available only to readAdmin role.  Enforced in searchResults.jspf. */
+  public static final String ADMIN_COLUMN_GROUP = "Administrative";
 
 
   // instance data members

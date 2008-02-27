@@ -54,13 +54,12 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
   // private static final fields
 
   private static final Logger log = Logger.getLogger(LibrarySearchResults.class);
-  private static final Set<LibraryType> LIBRARY_TYPES_TO_DISPLAY = 
-    new HashSet<LibraryType>(Arrays.asList(LibraryType.COMMERCIAL, 
-                                           LibraryType.KNOWN_BIOACTIVES, 
-                                           LibraryType.NATURAL_PRODUCTS, 
-                                           LibraryType.SIRNA, 
+  private static final Set<LibraryType> LIBRARY_TYPES_TO_DISPLAY =
+    new HashSet<LibraryType>(Arrays.asList(LibraryType.COMMERCIAL,
+                                           LibraryType.KNOWN_BIOACTIVES,
+                                           LibraryType.NATURAL_PRODUCTS,
+                                           LibraryType.SIRNA,
                                            LibraryType.OTHER));
-  private static final String ADMIN_COLUMN_GROUP = "Administrative";
 
 
   // instance fields
@@ -151,14 +150,14 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
       getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN)) {
       columns.add(new TextEntityColumn<Library>(new PropertyPath(Library.class, "vendor"),
         "Vendor/Source", "The vendor or source that produced the library",
-        ADMIN_COLUMN_GROUP) {
+        TableColumn.ADMIN_COLUMN_GROUP) {
         @Override
         public String getCellValue(Library library) { return library.getVendor(); }
       });
       columns.add(new ListEntityColumn<Library>(new PropertyPath(Library.class, "copies", "name"),
         "Copies",
         "The copies that have been made of this library",
-        ADMIN_COLUMN_GROUP) {
+        TableColumn.ADMIN_COLUMN_GROUP) {
         @Override
         public List<String> getCellValue(Library library)
         {
@@ -167,14 +166,6 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
               public Object transform(Object e) { return ((Copy) e).getName(); }
             }));
         }
-      });
-      columns.add(new EnumEntityColumn<Library,IsScreenable>(new PropertyPath(Library.class, "isScreenable"),
-        "Screenable",
-        "Whether the library is approved for use in screening",
-        ADMIN_COLUMN_GROUP,
-        IsScreenable.values()) {
-        @Override
-        public IsScreenable getCellValue(Library library) { return library.getIsScreenable(); }
       });
     }
 
