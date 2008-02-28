@@ -174,10 +174,14 @@
 						</t:panelGrid>
 					</f:facet>
           <t:panelStack selectedPanel="#{searchResults.rowRestricted ? \"restricted\" : column.editable && searchResults.editMode ? \"input\" : \"output\"}" >
+						<%-- this restricted field is a "last line of defense" against displaying data 
+						     that should not be viewable by the user; in general, a search result should
+						     never contain restricted data to begin with --%>
 						<t:outputText id="restricted" value="---" />
 						<t:inputText id="input" value="#{searchResults.cellValue}"
+							rendered="#{column.editable && searchResults.editMode}"
 							immediate="true" converter="#{column.converter}" />
-					  <%-- both scalar and collection column types are displayed in dataList --%>
+						<%-- both single-valued and collection column types are displayed in dataList --%>
 						<t:dataList id="output" var="item"
 							value="#{searchResults.cellValue}" layout="simple"
 							rowIndexVar="rowIndex" rowCountVar="rowCount">
