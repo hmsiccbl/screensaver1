@@ -38,6 +38,8 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
+import net.sf.cglib.transform.impl.AddDelegateTransformer;
+
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.OptimisticLock;
@@ -394,10 +396,19 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Add the result value type to the types derived from.
+   * Add the result value type to the types derived from. Updates the 'derived'
+   * property and 'derived types' collection accordingly.
+   * 
    * @param typeDerivedFrom the result value type to add
-   * @return true iff the result value type was not already contained in the
-   * set of types derived from this type
+   * @return true iff the result value type was not already contained in the set
+   *         of types derived from this type
+   * @see #isDerived
+   * @see #getDerivedTypes()
+   * @see #getTypesDerivedFrom()
+   * @see #setDerived(boolean)
+   * @see #addDerivedType(ResultValueType)
+   * @see #removeDerivedType(ResultValueType)
+   * @see #removeTypeDerivedFrom(ResultValueType)
    */
   public boolean addTypeDerivedFrom(ResultValueType typeDerivedFrom) {
     assert !(typeDerivedFrom.getDerivedTypes().contains(this) ^ getTypesDerivedFrom().contains(typeDerivedFrom)) :
@@ -410,10 +421,19 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Remove the result value type from the types derived from.
+   * Remove the result value type from the types derived from. Updates the
+   * 'derived' property and 'derived types' collection accordingly.
+   * 
    * @param typeDerivedFrom the result value type to remove
-   * @return true iff the result value type was previously contained in
-   * the set of types derived from this type
+   * @return true iff the result value type was previously contained in the set
+   *         of types derived from this type
+   * @see #isDerived
+   * @see #getDerivedTypes()
+   * @see #getTypesDerivedFrom()
+   * @see #setDerived(boolean)
+   * @see #addDerivedType(ResultValueType)
+   * @see #removeDerivedType(ResultValueType)
+   * @see #addTypeDerivedFrom(ResultValueType)
    */
   public boolean removeTypeDerivedFrom(ResultValueType typeDerivedFrom) {
     assert ! (typeDerivedFrom.getDerivedTypes().contains(this) ^ getTypesDerivedFrom().contains(typeDerivedFrom)) :
@@ -428,6 +448,13 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   /**
    * Get the set of result value types that derive from this result value type.
    * @return the set of result value types that derive from this result value type
+   * @see #isDerived()
+   * @see #getDerivedTypes()
+   * @see #getTypesDerivedFrom()
+   * @see #setDerived(boolean)
+   * @see #addDerivedTypes()
+   * @see #addDerivedTypeFrom(ResultValueType)
+   * @see #removeDerivedTypeFrom(ResultValueType)
    */
   @ManyToMany(
     cascade={ CascadeType.PERSIST, CascadeType.MERGE },
@@ -446,10 +473,19 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Add the result value type to the derived types.
+   * Add the result value type to the derived types. Updates the 'derived'
+   * property and 'types derived from' collection accordingly.
+   * 
    * @param derivedType the result value type to add
-   * @return true iff the result value type was not already contained in the
-   * set of derived types
+   * @return true iff the result value type was not already contained in the set
+   *         of derived types
+   * @see #isDerived
+   * @see #getDerivedTypes()
+   * @see #getTypesDerivedFrom()
+   * @see #setDerived(boolean)
+   * @see #removeDerivedType(ResultValueType)
+   * @see #addTypeDerivedFrom(ResultValueType)
+   * @see #removeTypeDerivedFrom(ResultValueType)
    */
   public boolean addDerivedType(ResultValueType derivedType) {
     assert ! (derivedType.getTypesDerivedFrom().contains(this) ^ getDerivedTypes().contains(derivedType)) :
@@ -463,10 +499,19 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Remove the result value type from the derived types.
+   * Remove the result value type from the derived types. Updates the 'derived'
+   * property and 'types derived from' collection accordingly.
+   * 
    * @param derivedType the result value type to remove
-   * @return true iff the result value type was previously contained in
-   * the set of derived types
+   * @return true iff the result value type was previously contained in the set
+   *         of derived types
+   * @see #isDerived
+   * @see #getDerivedTypes()
+   * @see #getTypesDerivedFrom()
+   * @see #setDerived(boolean)
+   * @see #addDerivedType(ResultValueType)
+   * @see #addTypeDerivedFrom(ResultValueType)
+   * @see #removeTypeDerivedFrom(ResultValueType)
    */
   public boolean removeDerivedType(ResultValueType derivedType) {
     assert ! (derivedType.getTypesDerivedFrom().contains(this) ^ getDerivedTypes().contains(derivedType)) :
@@ -646,9 +691,19 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Get whether this result value type is derived from other result value types.
-   * @return true iff this result value type is derived from other result value types
-   * @see #setTypesDerivedFrom(SortedSet)
+   * Get whether this result value type is derived from other result value
+   * types. Due to legacy screen result data, it is allowed that an RVT be
+   * derived, but have an empty set of "derived from" RVTs.
+   * 
+   * @return true iff this result value type is derived from other result value
+   *         types
+   * @see #setDerived(boolean)
+   * @see #getDerivedTypes()
+   * @see #getTypesDerivedFrom()
+   * @see #addDerivedTypeFrom(ResultValueType)
+   * @see #removeDerivedTypeFrom(ResultValueType)
+   * @see #addTypeDerivedFrom(ResultValueType)
+   * @see #removeTypeDerivedFrom(ResultValueType)
    */
   @Column(nullable=false, name="isDerived")
   public boolean isDerived()
@@ -658,10 +713,19 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
   /**
    * Set whether this <code>ResultValueType</code> is derived from other
-   * <code>ResultValueType</code>s.
+   * <code>ResultValueType</code>s. Due to legacy screen result data, it is
+   * allowed that an RVT be derived, but have an empty set of "derived from"
+   * RVTs.
+   * 
    * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
    *          is derived from other <code>ResultValueType</code>s.
-   * @see #setTypesDerivedFrom(SortedSet)
+   * @see #isDerived
+   * @see #getDerivedTypes()
+   * @see #getTypesDerivedFrom()
+   * @see #addDerivedType(ResultValueType)
+   * @see #removeDerivedType(ResultValueType)
+   * @see #addTypeDerivedFrom(ResultValueType)
+   * @see #removeTypeDerivedFrom(ResultValueType)
    */
   public void setDerived(boolean isDerived)
   {

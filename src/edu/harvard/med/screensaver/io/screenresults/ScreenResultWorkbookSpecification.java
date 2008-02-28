@@ -138,7 +138,8 @@ public interface ScreenResultWorkbookSpecification
 
   public static final String RAW_VALUE = "raw";
   public static final String DERIVED_VALUE = "derived";
-
+  public static final String DERIVED_FROM_MISSING = "n/a";
+  
   public static final String PRIMARY_VALUE = "primary";
   public static final String FOLLOWUP_VALUE = "follow up";
 

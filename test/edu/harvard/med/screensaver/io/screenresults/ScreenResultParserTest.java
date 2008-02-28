@@ -36,6 +36,7 @@ import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecification.ScreenInfoRow;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
@@ -74,10 +75,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
   public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
   public static final String SCREEN_RESULT_115_NO_DATE_TEST_WORKBOOK_FILE = "ScreenResultTest115-no-date.xls";
+  public static final String SCREEN_RESULT_MISSING_DERIVED_FROM_WORKBOOK_FILE = "ScreenResultTest115-missing-derived-from.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "ScreenResultErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
   public static final String BLANK_ROWS_TEST_WORKBOOK_FILE = "ScreenResultTest115_blank_rows.xls";
   public static final String HIT_COUNT_TEST_WORKBOOK_FILE = "ScreenResultHitCountTest.xls";
+
 
   protected ScreenResultParser mockScreenResultParser;
 
@@ -503,6 +506,25 @@ public class ScreenResultParserTest extends AbstractSpringTest
     if (rvt.getTimePoint() == null) {
       rvt.setTimePoint("");
     }
+  }
+  
+  public void testMissingDerivedFrom()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(115);
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_MISSING_DERIVED_FROM_WORKBOOK_FILE);
+    ScreenResult screenResult = mockScreenResultParser.parse(screen, workbookFile);
+    assertEquals("screen result had no errors", 
+                 Collections.<ParseError>emptyList(),
+                 mockScreenResultParser.getErrors());
+    ResultValueType rvt0 = screenResult.getResultValueTypesList().get(0);
+    assertTrue("rvt 0 is derived", rvt0.isDerived());
+    assertEquals("rvt 0 'derived from' is empty", 0, rvt0.getTypesDerivedFrom().size());
+    
+    // regression test that normal derived from values work as expected
+    ResultValueType rvt1 = screenResult.getResultValueTypesList().get(1);
+    assertTrue("rvt 1 is derived", rvt1.isDerived());
+    assertTrue("rvt 1 'types derived from' is not empty", rvt1.getTypesDerivedFrom().contains(rvt0));
+    assertTrue("rvt 0 'derived types' is not empty", rvt0.getDerivedTypes().contains(rvt1));
   }
   
   // private methods

@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -182,7 +183,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private ParseErrorManager _errors = new ParseErrorManager(); // init at instantiation, to avoid NPE from various method calls before parse() is called
   private SortedMap<String,ResultValueType> _dataTableColumnLabel2RvtMap;
 
-  private ColumnLabelsParser _columnsDerivedFromParser;
+  private DerivedFromParser _columnsDerivedFromParser;
   private ExcludeParser _excludeParser;
   private CellVocabularyParser<AssayReadoutType> _assayReadoutTypeParser;
   private CellVocabularyParser<PositiveIndicatorDirection> _indicatorDirectionParser;
@@ -298,7 +299,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _lastLibrary = null;
     _assayReadoutTypeParser = new CellVocabularyParser<AssayReadoutType>(assayReadoutTypeMap, _errors);
     _dataTableColumnLabel2RvtMap = new TreeMap<String,ResultValueType>();
-    _columnsDerivedFromParser = new ColumnLabelsParser(_dataTableColumnLabel2RvtMap, _errors);
+    _columnsDerivedFromParser = new DerivedFromParser(_dataTableColumnLabel2RvtMap, _errors);
     _excludeParser = new ExcludeParser(_dataTableColumnLabel2RvtMap, _errors);
     _indicatorDirectionParser = new CellVocabularyParser<PositiveIndicatorDirection>(indicatorDirectionMap, _errors);
     _activityIndicatorTypeParser = new CellVocabularyParser<PositiveIndicatorType>(activityIndicatorTypeMap, PositiveIndicatorType.NUMERICAL, _errors);
@@ -539,7 +540,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         for (ResultValueType resultValueType : _columnsDerivedFromParser.parseList(dataHeadersCell(DataHeaderRow.COLUMNS_DERIVED_FROM,
                                                                                                    iDataHeader,
                                                                                                    true))) {
-          if (resultValueType != null) { // can be null if unparsable value is encountered in list
+          if (resultValueType != null) { // can be null if values is "missing" (which is valid) or unparsable value is encountered in list (which will generate an error)
             rvt.addTypeDerivedFrom(resultValueType);
           }
         }
@@ -1029,9 +1030,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
 
 
-    // private methods
+    // protected methods
 
-    private ResultValueType doParseSingleValue(String value, Cell cell)
+    protected ResultValueType doParseSingleValue(String value, Cell cell)
     {
       Matcher matcher = columnIdPattern.matcher(value);
       if (!matcher.matches()) {
@@ -1039,6 +1040,25 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
       String columnLabel = matcher.group(0);
       return _columnLabel2RvtMap.get(columnLabel);
+    }
+  }
+  
+  private class DerivedFromParser extends ColumnLabelsParser
+  {
+    
+    public DerivedFromParser(Map<String,ResultValueType> columnLabel2RvtMap, 
+                             ParseErrorManager errors)
+    {
+      super(columnLabel2RvtMap, errors);
+    }
+
+    @Override
+    public List<ResultValueType> parseList(Cell cell)
+    {
+      if (DERIVED_FROM_MISSING.equalsIgnoreCase(cell.getString().trim())) {
+        return Collections.emptyList();
+      }
+      return super.parseList(cell);
     }
   }
 
