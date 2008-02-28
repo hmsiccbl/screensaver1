@@ -298,6 +298,7 @@ public class HqlBuilder
     if (_isDistinctRootEntities) {
       query.setResultTransformer(new DistinctRootEntityResultTransformer());
     }
+    query.setReadOnly(isReadOnly);
     return query;
   }
 

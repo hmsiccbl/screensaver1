@@ -52,6 +52,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
     List<RelationshipPath<E>> newRelationshipsToFetch = VirtualPagingEntityDataModel.getRelationshipPaths(columns);
     ((EntityDataFetcher<E,K>) _dataFetcher).setRelationshipsToFetch(newRelationshipsToFetch);
     _fetchedRows.clear();
+    log.debug("cleared sorted/filtered row data (forces future re-query of row data)");
   }
   
   public void sort(List<? extends TableColumn<E,?>> sortColumns,
@@ -63,7 +64,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
       ((EntityDataFetcher<E,K>) _dataFetcher).setOrderBy(newOrderByProperties);
       _sortedKeys = null; // force re-fetch
       _lastOrderByProperties = new ArrayList<PropertyPath<E>>(newOrderByProperties);
-      log.debug("cleared sort order (forces re-query)");
+      log.debug("cleared sort order (forces future re-query of sorted/filtered keys)");
     }
     _sortDirection = sortDirection;
     _rowIndex = -1;
@@ -74,7 +75,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
     Map<PropertyPath<E>,List<? extends Criterion<?>>> newFilterCriteria = VirtualPagingEntityDataModel.getFilteringCriteria(columns);
     ((EntityDataFetcher<E,K>) _dataFetcher).setFilteringCriteria(newFilterCriteria);
     _sortedKeys = null; // force re-fetch
-    log.debug("cleared filter (forces re-query)");
+    log.debug("cleared filter (forces future re-query of sorted/filtered keys)");
     _rowIndex = -1;
   }
 
