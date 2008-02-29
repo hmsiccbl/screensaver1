@@ -13,7 +13,7 @@
 
 <f:subview id="menu">
 
-	<s:roundedDiv borderWidth="8" color="#0000FF" radius="8">
+	<s:roundedDiv borderWidth="8" color="#0000FF" radius="8" style="height: 100%">
 
 		<t:panelGrid columns="1" style="background-color: #0000FF">
 
