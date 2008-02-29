@@ -15,7 +15,7 @@
 
 	<s:roundedDiv borderWidth="8" color="#0000FF" radius="8">
 
-		<t:panelGrid columns="1">
+		<t:panelGrid columns="1" style="background-color: #0000FF">
 
 			<h:form id="titleForm">
 				<t:commandLink id="menuTitle" action="#{menu.viewMain}"
