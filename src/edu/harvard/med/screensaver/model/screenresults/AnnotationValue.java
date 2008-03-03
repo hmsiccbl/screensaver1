@@ -20,7 +20,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -45,6 +47,7 @@ import org.hibernate.annotations.Immutable;
 @Entity
 @Immutable
 @org.hibernate.annotations.Proxy
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "annotationTypeId", "reagent_id" }) })
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=AnnotationType.class)
 public class AnnotationValue extends AbstractEntity
 {

@@ -198,15 +198,15 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     Reagent reagent,
     String value)
   {
+    if (_values.containsKey(reagent)) {
+      return null;
+    }
     AnnotationValue annotationValue = new AnnotationValue(
       this,
       reagent,
       value,
       _isNumeric && value != null ? new Double(value) : null);
     getStudy().addReagent(reagent);
-    if (_values.containsKey(reagent)) {
-      return null;
-    }
     _values.put(reagent, annotationValue);
     return annotationValue;
   }

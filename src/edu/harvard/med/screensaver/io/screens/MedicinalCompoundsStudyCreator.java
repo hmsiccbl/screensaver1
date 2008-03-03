@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.io.FatalParseException;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.CellVocabularyParser;
@@ -49,7 +50,14 @@ public class MedicinalCompoundsStudyCreator
 
   private static final int STUDY_NUMBER = 100002;
   private static final String TITLE = "Annotations on Suitability of Compounds: G. Cuny & K. Lee";
-  private static final String SUMMARY = "<pending>";
+  private static final String SUMMARY =
+    "Note for screeners regarding medchem annotation:\n" +
+    "For historical reasons, the screening libraries contain many compounds that may be unsuitable for further study.  These include compounds that are unstable and/or reactive, the very properties that may have contributed to apparent activity upon screening.  Although experiments are needed to establish definitively whether compounds are false (or physiologically uninteresting) positives in a given screen, some compounds have obvious, chemically offensive functionalities from a structural point of view.  Those compounds can be de-prioritized, so that attention can be directed to compounds that are more likely to be true positives.  " +
+    "The medicinal chemistry group evaluates the structures of library compounds on an ongoing basis, and the following annotations are applied:\n" +
+    "'A': Compounds that have no obvious liabilities and that are deemed acceptable for initial follow-up work.\n" +
+    "'B': Compounds that are deemed risky for follow-up and, if resources are limiting, should probably be given lower priority than Category A compounds.\n" +
+    "'C': Compounds that are not recommended for follow-up, and, if resources are limiting, should be given lower priority than Category A and B compounds.\n" +
+    "No flag: Compounds that have not yet been evaluated by the medicinal chemistry group.";
   private static final String A_NO_SPECIFIC_CONCERNS = "A: No specific concerns";
   private static final String B_POTENTIAL_LIABILITY = "B: Potential liability";
   private static final String C_SUBSTANTIAL_LIABILITY = "C: Substantial liability";
@@ -63,7 +71,7 @@ public class MedicinalCompoundsStudyCreator
     VALID_MEDCHEM_COMMENT_VALUES.put("c", C_SUBSTANTIAL_LIABILITY);
     VALID_MEDCHEM_COMMENT_VALUES.put("", null);
   }
-  private static final String MECHEM_COMMENT_COLUMN_HEADER = "Mechem comment";
+  private static final String MECHEM_COMMENT_COLUMN_HEADER = "Medchem comment";
   private static final String VENDOR_ID_COLUMN_HEADER = "Vendor_ID";
   private static final String VENDOR_COLUMN_HEADER = "Vendor";
 
@@ -78,15 +86,19 @@ public class MedicinalCompoundsStudyCreator
       System.exit(1);
     }
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         try {
-          deleteExistingStudy(dao);
+          Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
+          if (study != null) {
+            screenDao.deleteStudy(study);
+          }
 
           ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu");
           ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu");
 
-          Screen study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
+          study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
           study.setShareable(false);
 
@@ -109,18 +121,6 @@ public class MedicinalCompoundsStudyCreator
         }
         catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
-        }
-      }
-
-       private void deleteExistingStudy(GenericEntityDAO dao)
-      {
-        Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
-        if (study != null) {
-          //dao.deleteEntity(study.getLeadScreener());
-          //dao.deleteEntity(study.getLabHead());
-          dao.deleteEntity(study);
-          dao.flush();
-          log.info("deleted existing study");
         }
       }
     });
@@ -159,10 +159,19 @@ public class MedicinalCompoundsStudyCreator
           if (vendorCell != null && vendorIdCell != null) {
             Cell medChemCommentCell = (Cell) cellFactory.getCell(iMedChemCommentColumn, iRow, false).clone();
             ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorCell.getAsString(), vendorIdCell.getAsString());
-            Reagent reagent = findOrCreateReagent(rvi, dao);
-            String value = MEDCHEM_COMMENT_CELL_PARSER.parse(medChemCommentCell);
-            annotType.createAnnotationValue(reagent, value);
-            ++n;
+            Reagent reagent = dao.findEntityById(Reagent.class, rvi);
+            if (reagent == null) {
+              log.error("no reagent exists for " + rvi + "; skipping");
+            }
+            else {
+              String value = MEDCHEM_COMMENT_CELL_PARSER.parse(medChemCommentCell);
+              if (annotType.createAnnotationValue(reagent, value) == null) {
+                log.error("duplicate annotation for " + reagent + "; skipping");
+              }
+              else {
+                ++n;
+              }
+            }
           }
         }
       }
@@ -172,17 +181,6 @@ public class MedicinalCompoundsStudyCreator
       errors.addError(e.getMessage());
       return 0;
     }
-  }
-
-  private static Reagent findOrCreateReagent(ReagentVendorIdentifier rvi, GenericEntityDAO dao)
-  {
-    Reagent reagent = dao.findEntityById(Reagent.class, rvi);
-    if (reagent == null) {
-      reagent = new Reagent(rvi);
-      dao.persistEntity(reagent);
-      log.info("created new reagent " + reagent);
-    }
-    return reagent;
   }
 
   private static int findColumnForHeader(Sheet sheet, String headerName)

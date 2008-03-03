@@ -15,6 +15,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -35,8 +36,7 @@ public class IccbCompoundsStudyCreator
 
   private static final int STUDY_NUMBER = 100001;
   private static final String TITLE = "Annotations on Suitability of Compounds: Miscellaneous Sources";
-  private static final String SUMMARY = "Annotations for ICCB-L compounds, heard through the grapevine.";
-
+  private static final String SUMMARY = "Annotations for ICCB-L compounds, from sources other than Kyungae Lee and Greg Cuny";
   public static void main(String[] args)
   {
     CommandLineApplication app = new CommandLineApplication(args);
@@ -47,15 +47,19 @@ public class IccbCompoundsStudyCreator
       System.exit(1);
     }
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         try {
-          deleteExistingStudy(dao);
+          Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
+          if (study != null) {
+            screenDao.deleteStudy(study);
+          }
 
           ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu");
           ScreeningRoomUser leadScreener = labHead;
 
-          Screen study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
+          study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
 
           AnnotationType unsuitableAnnotType = study.createAnnotationType("Unsuitable", "Flag indicating whether compound is unsuitable for screening.", false);
@@ -63,7 +67,7 @@ public class IccbCompoundsStudyCreator
 
           Reagent reagent = findOrCreateReagent(dao);
           unsuitableAnnotType.createAnnotationValue(reagent, "true");
-          commentAnnotType.createAnnotationValue(reagent, "Chelates metal and has shown up in a number of assays");
+          commentAnnotType.createAnnotationValue(reagent, "Chelates metal and has shown up in a number of assays; from Rez Halese (Novartis), December 2007.");
 
           dao.saveOrUpdateEntity(study);
         }
@@ -80,18 +84,6 @@ public class IccbCompoundsStudyCreator
           reagent = new Reagent(rvi);
         }
         return reagent;
-      }
-
-      private void deleteExistingStudy(GenericEntityDAO dao)
-      {
-        Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
-        if (study != null) {
-          //dao.deleteEntity(study.getLeadScreener());
-          //dao.deleteEntity(study.getLabHead());
-          dao.deleteEntity(study);
-          dao.flush();
-          log.info("deleted existing study");
-        }
       }
     });
     log.info("study successfully added to database");

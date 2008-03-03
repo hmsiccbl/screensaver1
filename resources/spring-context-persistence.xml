@@ -185,6 +185,15 @@
   </bean>
 
   <bean
+    id="screenDao"
+    class="edu.harvard.med.screensaver.db.ScreenDAOImpl">
+    <constructor-arg ref="genericEntityDao" />
+    <property
+      name="hibernateTemplate"
+      ref="hibernateTemplate" />
+  </bean>
+
+  <bean
     id="screenResultsDao"
     class="edu.harvard.med.screensaver.db.ScreenResultsDAOImpl">
     <property
