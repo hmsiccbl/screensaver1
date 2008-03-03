@@ -339,7 +339,22 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
           "select count(*) from " + entityName + " e join e." + relationship + " r " +
           "where e." + idProperty + " = :id " +
           "and r." + relationshipProperty + " = :propValue");
-        query.setString("id", entity.getEntityId().toString());
+        
+        // the following block used to be just <code>query.setString("id", entity.getEntityId().toString());</code>.
+        // this starting failing in Postgres somewhere between versions 8.1.11 and 8.3.0 with a
+        // "ERROR: operator does not exist: integer = character varying", for entities with Integer primary keys.
+        // the fix below is kind of a hack, since it only special-cases for Integer, instead of applying a more
+        // generic solution. But should be okay since all our primary keys are either Integer or String. -s
+        {
+          Object entityId = entity.getEntityId();
+          if (entityId instanceof Integer) {
+            query.setInteger("id", (Integer) entityId);
+          }
+          else {
+            query.setString("id", entityId.toString());
+          }
+        }
+        
         query.setString("propValue", relationshipPropertyValue);
         return query.list().get(0);
       }
