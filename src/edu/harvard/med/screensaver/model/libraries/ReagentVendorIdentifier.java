@@ -15,6 +15,8 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -24,6 +26,8 @@ import javax.persistence.Transient;
 public class ReagentVendorIdentifier implements Serializable, Comparable<ReagentVendorIdentifier>
 {
   private static final long serialVersionUID = 1L;
+
+  private static final String COMPOUND_KEY_DELIMITER = ":";
 
 
   // instance data members
@@ -44,9 +48,8 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
 
   public ReagentVendorIdentifier(String vendorName, String reagentIdentifier)
   {
-    // convert nulls to empty strings, for safety and db constraints
-    _vendorName = vendorName == null ? "" : vendorName;
-    _vendorIdentifier = reagentIdentifier == null ? "" : reagentIdentifier;
+    setVendorName(vendorName);
+    setVendorIdentifier(reagentIdentifier);
   }
 
   @Column
@@ -54,16 +57,9 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
   public String getReagentId()
   {
     if (_id == null) {
-      _id = _vendorName + ":" + _vendorIdentifier;
+      _id = _vendorName + COMPOUND_KEY_DELIMITER + _vendorIdentifier;
     }
     return _id;
-  }
-
-  public void setReagentId(String id)
-  {
-    String[] parts = id.split(":");
-    _vendorName = parts[0];
-    _vendorIdentifier = parts[1];
   }
 
   /**
@@ -106,13 +102,54 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
     return _asString;
   }
 
+  public int compareTo(ReagentVendorIdentifier other)
+  {
+    int result = _vendorName.compareTo(other._vendorName);
+    if (result == 0) {
+      result = _vendorIdentifier.compareTo(other._vendorIdentifier);
+    }
+    return result;
+  }
+
+
+  // private methods
+
+  /**
+   * Set the value for this ReagentVendorIdentifier via a string that contains
+   * both the vendor name and a reagent identifier (assigned by the vendor).
+   *
+   * @param id compound key value for reagent, in format "<vendor name>::<vendor
+   *          reagent identifier>"
+   */
+  private void setReagentId(String id)
+  {
+    int delimPos = id.indexOf(COMPOUND_KEY_DELIMITER);
+    if (delimPos < 0) {
+      throw new DataModelViolationException("illegal reagent ID '" + id +
+                                            "': expected format '<vendor name>" +
+                                            COMPOUND_KEY_DELIMITER + "<vendor reagent identifier>'");
+    }
+    setVendorName(id.substring(0, delimPos));
+    setVendorIdentifier(id.substring(delimPos + 1));
+  }
+
   private void setVendorName(String vendorName)
   {
+    if (vendorName == null) {
+      // convert nulls to empty strings, for safety and db constraints
+      vendorName = "";
+    }
+    if (vendorName.contains(COMPOUND_KEY_DELIMITER)) {
+      throw new DataModelViolationException("vendorName '" + vendorName + "' may not contain '" + COMPOUND_KEY_DELIMITER + "'");
+    }
     _vendorName = vendorName;
   }
 
   private void setVendorIdentifier(String vendorIdentifier)
   {
+    if (vendorIdentifier == null || vendorIdentifier.length() == 0) {
+      throw new DataModelViolationException("vendorIdentifier may not be null or empty");
+    }
     _vendorIdentifier = vendorIdentifier;
   }
 
@@ -121,14 +158,5 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
    */
   private ReagentVendorIdentifier()
   {
-  }
-
-  public int compareTo(ReagentVendorIdentifier other)
-  {
-    int result = _vendorName.compareTo(other._vendorName);
-    if (result == 0) {
-      result = _vendorIdentifier.compareTo(other._vendorIdentifier);
-    }
-    return result;
   }
 }
