@@ -128,12 +128,15 @@ extends PropertyPlaceholderConfigurer
 
   private void readPasswordFromDotPgpassFile()
   {
-    _properties.setProperty(
-      "SCREENSAVER_PGSQL_PASSWORD",
-      new DotPgpassFileParser().getPasswordFromDotPgpassFile(
-        _properties.getProperty("SCREENSAVER_PGSQL_SERVER"),
-        null,
-        _properties.getProperty("SCREENSAVER_PGSQL_DB"),
-        _properties.getProperty("SCREENSAVER_PGSQL_USER")));
+    String passwd = new DotPgpassFileParser().
+    getPasswordFromDotPgpassFile(_properties.getProperty("SCREENSAVER_PGSQL_SERVER"),
+                                 null,
+                                 _properties.getProperty("SCREENSAVER_PGSQL_DB"),
+                                 _properties.getProperty("SCREENSAVER_PGSQL_USER"));
+    if (passwd == null) {
+      log.warn("no password found in .pgass file: using empty string for password");
+      passwd = "";
+    }
+    _properties.setProperty("SCREENSAVER_PGSQL_PASSWORD", passwd);
   }
 }
