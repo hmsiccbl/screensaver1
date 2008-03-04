@@ -159,6 +159,9 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
    */
   public void dropSchema() throws DataAccessException
   {
+    if (isFullyLoadedDatabase()) {
+      throw new RuntimeException("Attempt to drop fully loaded database");
+    }
     log.info("dropping schema for " + makeDataSourceString());
     getLocalSessionFactoryBean().dropDatabaseSchema();
   }
@@ -180,7 +183,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     log.info("initializing database for " + makeDataSourceString());
     Session session = getSession();
     Connection connection = session.connection();
-
+    
     try {
       URL url = getClass().getResource(INITIALIZE_DATABASE_DIR);
       File directory = new File(url.getFile().replace("%20", " "));
@@ -258,6 +261,9 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   @SuppressWarnings("unchecked")
   public void truncateTablesOrCreateSchema()
   {
+    if (isFullyLoadedDatabase()) {
+      throw new RuntimeException("Attempt to truncate fully loaded database");
+    }
     log.info("truncating tables for " + makeDataSourceString());
     Session session = getSession();
     Connection connection = session.connection();
@@ -379,6 +385,29 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     catch (SQLException e) {
       log.error("could not determine connection properties");
       return "<unknown database connection>";
+    }
+    finally {
+      releaseSession(session);
+    }
+  }
+
+  /**
+   * Return true iff the database is fully loaded. Used to prevent dropping fully loaded databases, or truncating
+   * their tables, since this is a costly mistake. (This happened to me one to many times while mixing ui testing
+   * against a fully database with unit testing.) This could probably be improved upon but I use just include
+   * the string "fully-loaded" in the name of the database to indicate a fully loaded database.
+   */
+  private boolean isFullyLoadedDatabase()
+  {
+    Session session = getSession();
+    try {
+      Connection connection = session.connection();
+      String connectionUrl = connection.getMetaData().getURL();
+      return connectionUrl.contains("fully-loaded");
+    }
+    catch (SQLException e) {
+      log.error("could not determine connection properties");
+      return false;
     }
     finally {
       releaseSession(session);
