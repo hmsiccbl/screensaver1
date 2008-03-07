@@ -14,7 +14,7 @@ public interface ScreensaverConstants
   // static data members
 
   public static final String APPLICATION_NAME = "Screensaver";
-  public static final String APPLICATION_VERSION = "1.5.0";
+  public static final String APPLICATION_VERSION = "1.5.1";
   public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
   public static final String FEEDBACK_URL = "mailto:screensaver-feedback@hms.harvard.edu";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
@@ -40,7 +40,7 @@ public interface ScreensaverConstants
   public static final String VIEW_REAGENT_SEARCH_RESULTS = "viewReagentSearchResults";
   public static final String VIEW_WELL_SEARCH_RESULTS = "viewWellSearchResults";
   public static final String VIEW_WELL_VOLUME_SEARCH_RESULTS = "viewWellVolumeSearchResults";
-  public static final String VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES = "viewCherryPickRequestWellVolumeSearchResults";
+  public static final String VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS = "viewWellCopyVolumeSearchResults";
   public static final String VIEW_REAGENT = "viewReagent";
   public static final String VIEW_WELL = "viewWell";
   public static final String VIEW_GENE = "viewGene";

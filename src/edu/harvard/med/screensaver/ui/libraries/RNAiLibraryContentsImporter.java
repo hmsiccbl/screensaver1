@@ -153,7 +153,7 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
    * @return the control code for the appropriate next page
    */
   @UIControllerMethod
-  public String importRNAiLibraryContents()
+  public String importLibraryContents()
   {
     try {
       if (_uploadedFile == null || _uploadedFile.getInputStream().available() == 0) {

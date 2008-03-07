@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition template="/main/template.xhtml">
+
+	<ui:param name="pageTitle" value="Reagent Finder" />
+    <ui:param name="pageHelpURL" value="libraries/reagentFinderHelp.jsf" />
+
+	<ui:define name="body">
+		<h:form id="reagentFinderForm">
+
+			<t:buffer into="#{commandsBuffer}">
+				<t:panelGroup id="commandPanel">
+					<t:commandButton action="#{reagentFinder.findReagents}"
+						id="findReagentsSubmit" value="Find Reagents" styleClass="command" />
+				</t:panelGroup>
+			</t:buffer>
+
+			<t:panelGrid columns="2" rowClasses="topAlignedPanelRow">
+				<t:panelGrid columns="1">
+					<t:panelGroup>
+						<t:outputLabel for="vendorMenu" value="Source/Vendor:"
+							styleClass="label" />
+						<t:selectOneMenu id="vendorMenu"
+							value="#{reagentFinder.vendorSelector.value}"
+							styleClass="inputText">
+							<f:selectItems
+								value="#{reagentFinder.vendorSelector.selectItems}" />
+						</t:selectOneMenu>
+					</t:panelGroup>
+					<t:outputText value="#{commandsBuffer}" escape="false" />
+					<t:inputTextarea id="reagentVendorIdentifierList"
+						value="#{reagentFinder.reagentVendorIdentifierList}"
+						styleClass="inputText" cols="50" rows="40" forceId="true" />
+					<t:outputText value="#{commandsBuffer}" escape="false" />
+				</t:panelGrid>
+				<ui:include src="/help/libraries/reagentFinderInputHelp.xhtml" />
+			</t:panelGrid>
+		</h:form>
+
+
+	</ui:define>
+</ui:composition>
+
+</html>

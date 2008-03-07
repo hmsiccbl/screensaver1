@@ -55,6 +55,11 @@ public class WorkbookParseError implements ParseError
   {
     return _message;
   }
+  
+  public String getErrorLocation()
+  {
+    return getCell() == null ? "" : getCell().toString();
+  }
 
   public Cell getCell()
   {

@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+    <p>
+      The Screen Viewer page is divided into five sections that you can collapse or expand by
+      clicking on their headers.
+      The final three sections are only shown when screen results are available for the screen.
+    </p>
+
+  <t:panelGroup rendered="#{empty inHelpViewer}">
+      <p>
+        The five sections are:
+        <ul>
+          <li><a href="screenViewer/screenDetailsHelp.jsf">Screen Details</a></li>
+          <li><a href="screenViewer/screenResultsSummaryHelp.jsf">Screen Results Summary</a></li>
+          <li><a href="screenViewer/dataHeadersHelp.jsf">Data Headers</a></li>
+          <li><a href="screenViewer/dataHelp.jsf">Data</a></li>
+          <li><a href="screenViewer/heatMapsHelp.jsf">Heat Maps</a></li>
+        </ul>
+        Click on a section name in the above list for help on that particular section.
+      </p>
+  </t:panelGroup>
+
+</ui:composition>
+
+</html>

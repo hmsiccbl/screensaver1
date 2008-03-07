@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+
+    <p>
+      The Screen Details section of the Screen Viewer page contains a variety of basic
+      information about a screen, including who was involved in the screen, what is being
+      screened for, and the protocol that was used. Position your mouse over any of the
+      headers in the left-hand column for a description of what that field contains.
+    </p>
+    <p>
+      Some screen details, such as Screening Room Activities, (e.g., screening library plates
+      in the screening room), or Cherry Pick Requests, are too large too display in the same
+      page. They are summarized here, and "View" buttons are provided to view these items
+      in a separate page. However, <span class="helpNB">please note</span> that viewing any Screening Room
+      Activities, as well as Cherry Pick Requests for Small Molecule screens, is currently
+      not implemented. We intend to provide these views in a later release.
+    </p>
+    <p>
+      Also note that some information available for screens that you are associated with (i.e.,
+      lab head, lead screener, or collaborator) is not shown for screens that you are not
+      associated with.
+    </p>
+
+  <t:panelGroup visibleOnUserRole="readEverythingAdmin">
+      <p>
+        As a <i>Read-everything Administrator</i>, you are also able to view administrative
+        information about the screen by clicking the "Show Admin" button at the top of the
+        panel. You can hide it again by clicking "Hide Admin". Administrative information
+        administrator comments, as well as important dates such as the original application
+        date. <span class="helpNB">Please note</span> that a variety of administrator fields, such as
+        attached files and billing information, are not yet implemented.
+      </p>
+  </t:panelGroup>
+  <!-- TODO: until ScreensAdmins are allowed to edit Screens (once ScreenDB is replaced), we will defer to the security policy of ScreenViewer itself to decide who can see this help; currently just developers! -->
+  <t:panelGroup rendered="#{screenViewer.editable}">
+      <p>
+        As a <i>Screens Administrator</i>, you can make various screen details editable by
+        clicking the "Edit" button. <span class="helpNB">Please note</span> that any changes you make here
+        will not be permanent. This data is periodically reloaded from the <tt>ScreenDB</tt>
+        database, and any changes you make here will be overwritten the next time this reload
+        occurs. These editing capabilities are an experimental feature. For the time being,
+        changes to screen details information should be made in <tt>ScreenDB</tt>.
+      </p>
+  </t:panelGroup>
+
+</ui:composition>
+
+</html>

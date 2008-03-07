@@ -120,7 +120,7 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
    * @return the control code for the appropriate next page
    */
   @UIControllerMethod
-  public String importCompoundLibraryContents()
+  public String importLibraryContents()
   {
     try {
       if (_uploadedFile == null || _uploadedFile.getInputStream().available() == 0) {

@@ -89,6 +89,17 @@ log4j.logger.org.apache.myfaces.lifecycle.LifecycleImpl=warn
 #log4j.logger.org.apache.myfaces.share_tomahawk.taglib=error
 #log4j.logger.org.apache.myfaces.tomahawk.application.jsp.JspTilesViewHandlerImpl=warn
 
+# Facelets
+
+# For outputting debug information about the compilation process. This would include namespace resolution for TagLibraries and XML events. Most of the output will be FINE.
+log4j.facelets.compiler=debug
+# Information about the inner workings of the FaceletFactory.
+log4j.facelets.factory=info
+# Debug information that helps with component lifecycles in relation to Facelets.
+log4j.facelets.tag.component=info
+# Output view-id mapping/resolution and the states of your views.
+log4j.facelets.viewhandler=info
+
 # Show navigation processing
 #log4j.logger.org.apache.myfaces.application.NavigationHandlerImpl=debug
 
@@ -120,7 +131,7 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 
 # log just the SQL - set this to "debug" to get all the SQL stmts
-#log4j.logger.org.hibernate.SQL=debug
+log4j.logger.org.hibernate.SQL=debug
 
 # log transaction activity (should set these all at once to same log level)
 #log4j.logger.org.hibernate.transaction=debug

@@ -179,20 +179,20 @@
   </target>
 
 
-  <target name="deploy-jsp">
-    <description>Deploy just the web JSP files, for quick testing of JSP edits during development cycle.</description>
-    <antcall target="copy-jsp">
+  <target name="deploy-ui">
+    <description>Deploy just the web UI definition files, for quick testing of UI edits during development cycle.</description>
+    <antcall target="copy-ui">
       <param name="exploded.war.dir" location="${deploy.dir}" />
     </antcall>
   </target>
 
-  <target name="copy-jsp">
-    <description>Internal target to copy JSP pages, and related resources (css stylesheets, images),
+  <target name="copy-ui">
+    <description>Internal target to copy UI definition files (*.xhtml), and related resources (css stylesheets, images),
       to directory specified by 'exploded.war.dir'</description>
-    <!-- if we were to copy jsp files below WEB-INF we have to map each of them in our web.xml file,
+    <!-- if we were to copy UI files below WEB-INF we have to map each of them in our web.xml file,
     to allow them to be accessed -->
     <copy todir="${exploded.war.dir}" overwrite="true" verbose="${verbose}">
-      <fileset dir="jsp" includes="**/*" />
+      <fileset dir="ui" includes="**/*" />
     </copy>
 
     <copy todir="${exploded.war.dir}/css" verbose="${verbose}">
@@ -239,7 +239,7 @@
           verbose="${verbose}"
     />
 
-    <antcall target="copy-jsp" />
+    <antcall target="copy-ui" />
 
     <copy todir="${webinf.dir}" verbose="${verbose}">
       <!-- we have to copy taglibs directly into the WEB-INF directory, if we want to avoid having
@@ -248,8 +248,8 @@
       <fileset dir="web">
         <include name="*.dtd" />
         <include name="web.xml" />
-        <include name="tiles.xml" />
         <include name="faces-config.xml" />
+        <include name="*.taglib.xml" />
       </fileset>
     </copy>
 

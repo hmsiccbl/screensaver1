@@ -11,5 +11,6 @@ package edu.harvard.med.screensaver.io;
 
 public interface ParseError
 {
+  public String getErrorLocation();
   public String getErrorMessage();
 }

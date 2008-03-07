@@ -67,9 +67,9 @@ public class FileParseError implements ParseError
     return _file;
   }
   
-  public int getRecordNumber()
+  public String getErrorLocation()
   {
-    return _recordNumber;
+    return Integer.toString(_recordNumber);
   }
   
   /**

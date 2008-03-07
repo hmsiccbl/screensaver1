@@ -11,11 +11,9 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.ArrayList;
 
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.Study;
 
 import org.apache.log4j.Logger;
 

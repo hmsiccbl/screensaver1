@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition template="/main/template.xhtml">
+
+	<ui:param name="pageTitle" value="Well Finder" />
+	<ui:param name="pageHelpURL" value="libraries/wellFinderHelp.jsf" />
+
+	<ui:define name="body">
+
+		<h:form id="wellFinderForm">
+
+			<t:buffer into="#{commandsBuffer}">
+				<t:panelGroup id="commandPanel">
+					<t:commandButton action="#{wellFinder.findWells}"
+						id="findWellsSubmit" value="Find Wells" styleClass="command" />
+					<t:commandButton action="#{wellFinder.findWellVolumes}"
+						id="findWellVolumes" value="Find Well Volumes"
+						rendered="#{wellCopyVolumesBrowser.editable || wellCopyVolumesBrowser.readAdmin}"
+						styleClass="command" />
+				</t:panelGroup>
+			</t:buffer>
+
+			<t:panelGrid columns="2" rowClasses="topAlignedPanelRow">
+				<t:panelGrid columns="1">
+					<t:outputText value="#{commandsBuffer}" escape="false" />
+					<t:inputTextarea id="plateWellList"
+						value="#{wellFinder.plateWellList}" styleClass="inputText"
+						cols="50" rows="40" forceId="true"></t:inputTextarea>
+					<t:outputText value="#{commandsBuffer}" escape="false" />
+				</t:panelGrid>
+				<ui:include src="/help/libraries/wellFinderInputHelp.xhtml" />
+			</t:panelGrid>
+		</h:form>
+	</ui:define>
+
+</ui:composition>
+</html>

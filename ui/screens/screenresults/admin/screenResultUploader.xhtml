@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+	<h:form id="uploadScreenResultFileForm" enctype="multipart/form-data"
+		rendered="#{!screenResultViewer.readOnly}">
+		<t:outputLabel for="uploadScreenResultFile"
+			value="Import Screen Result file:" styleClass="label" />
+		<t:inputFileUpload id="uploadScreenResultFile"
+			value="#{screenResultImporter.uploadedFile}" storage="file"
+			accept="application/vnd.ms-excel" required="true"
+			maxlength="134217728" styleClass="inputText" />
+		<t:commandButton
+			value="#{empty screenResultViewer.screenResult ? &quot;Load&quot; : &quot;Reload&quot;}"
+			action="#{screenResultImporter.doImport}" styleClass="command" />
+	</h:form>
+
+</ui:composition>
+
+</html>
+

@@ -29,12 +29,10 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     <!-- user interface text messages -->
     <message-bundle>org.springframework.context.support.ReloadableResourcebundleMessagesource</message-bundle>
 
-    <!-- Tiles support.  This ViewHandler takes requests for *.jsp JSF views and processes them with their
-         corresponding *.tiles definition (found in /WEB-INF/tiles.xml, or whatever the 'tiles-definition'
-         context param defines in web.xml) -->
-    <view-handler>org.apache.myfaces.tomahawk.application.jsp.JspTilesViewHandlerImpl</view-handler>
-
+    <!-- Servlet for Facelets support. -->
+    <view-handler>com.sun.facelets.FaceletViewHandler</view-handler>
   </application>
+
 
 
   <!-- === === Phase Listeners === === -->
@@ -64,12 +62,6 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
 
   <!-- Navigation rules -->
 
-  <!-- Note: We are able to leave off the extension for the view defined in each <to-view-id>,
-       since Tiles accepts and handles missing extensions.  This is kind of nice. Unfortunately,
-       the <from-view-id> views require a ".jsp" extension, although intuitively one would like
-       to use ".jsf".
-  -->
-
   <!-- define navigation rules that are applicable from *all* views (e.g. those that contain a navigation panel) -->
   <navigation-rule>
     <from-view-id>*</from-view-id>
@@ -77,37 +69,32 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     <!-- === top-level navigation rules === -->
     <navigation-case>
       <from-outcome>viewMain</from-outcome>
-      <to-view-id>/main</to-view-id>
+      <to-view-id>/main/main.jsf</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>goodbye</from-outcome>
-      <to-view-id>/goodbye</to-view-id>
+      <to-view-id>/main/goodbye.jsf</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>viewNews</from-outcome>
-      <to-view-id>/newsViewer</to-view-id>
+      <to-view-id>/main/newsViewer.jsf</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>viewDownloads</from-outcome>
-      <to-view-id>/downloadsViewer</to-view-id>
+      <to-view-id>/main/downloadsViewer.jsf</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>viewHelp</from-outcome>
-      <to-view-id>/helpViewer</to-view-id>
+      <to-view-id>/help/helpViewer.jsf</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>goEnvironmentInfo</from-outcome>
       <to-view-id>/dev/env</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>goSchemaManager</from-outcome>
-      <to-view-id>/dev/schemaManager</to-view-id>
       <redirect/>
     </navigation-case>
 
@@ -143,8 +130,8 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewCherryPickRequestWellVolumeSearchResults</from-outcome>
-      <to-view-id>/cherryPickRequests/admin/cherryPickRequestWellVolumeSearchResults</to-view-id>
+      <from-outcome>viewWellCopyVolumeSearchResults</from-outcome>
+      <to-view-id>/libraries/admin/wellCopyVolumeSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

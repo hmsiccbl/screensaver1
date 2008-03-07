@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<body>
+
+<f:view>
+	<t:document>
+		<t:documentHead>
+			<t:stylesheet path="/css/screensaver.css" />
+			<t:htmlTag value="title">
+				<t:outputText value="#{appInfo.applicationTitle}" />
+				<t:outputText value=" - #{pageTitle}" rendered="#{! empty pageTitle}" />
+			</t:htmlTag>
+		</t:documentHead>
+
+		<t:documentBody>
+			<t:panelGrid id="menuAndBodyPanel" columns="2"
+				styleClass="menuAndContent" columnClasses="menuColumn,contentColumn">
+				<ui:insert name="menu" >
+				  <ui:include src="/main/menu.xhtml" />
+				</ui:insert>
+				<t:panelGrid id="bodyPanel" columns="1" style="width: 100%">
+					<ui:insert name="header" >
+					  <ui:include src="/main/header.xhtml" />
+					</ui:insert>
+					<t:div>
+						<ui:insert name="body">
+						Dude, your body is missing!
+						</ui:insert>
+					</t:div>
+				</t:panelGrid>
+			</t:panelGrid>
+			<ui:insert name="footer" >
+				<ui:include src="/main/footer.xhtml" />
+			</ui:insert>
+		</t:documentBody>
+
+	</t:document>
+</f:view>
+
+</body>
+
+</html>

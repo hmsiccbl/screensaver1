@@ -23,7 +23,7 @@
   <description>ICCB-L Screensaver 1.x</description>
 
   <welcome-file-list>
-    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
 
   <!-- Configure a handler for exceptions thrown during server-side processing -->
@@ -38,6 +38,30 @@
     <error-code>403</error-code>
     <location>/unauthorizedAccess.jsp</location>
   </error-page-->
+
+  <!-- Facelets -->
+
+  <context-param>
+    <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+    <param-value>.xhtml</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>facelets.LIBRARIES</param-name>
+    <param-value>/WEB-INF/screensaver.taglib.xml;/WEB-INF/tomahawk-amended.taglib.xml;/WEB-INF/tomahawk-sandbox-amended.taglib.xml</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>facelets.SKIP_COMMENTS</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
+  <!-- Special Debug Output for Development -->
+  <context-param>
+    <param-name>facelets.DEVELOPMENT</param-name>
+    <param-value>true</param-value>
+  </context-param>
+
 
   <!-- Spring initialization -->
 
@@ -259,37 +283,6 @@
   </filter-mapping>
 
 
-  <!-- Tiles configuration -->
-
-  <!-- Tiles ViewHandler config file.  The file specified here contains the application's various "tiles" definitions for each page. -->
-  <context-param>
-    <description>
-      Tiles configuration definition files and a listener need to be defined. The listener will
-      initialize JspTilesViewHandlerImpl with our tiles definitions.
-    </description>
-    <param-name>tiles-definitions</param-name>
-    <param-value>/WEB-INF/tiles.xml</param-value>
-  </context-param>
-
-
-  <!-- JSP Configuration -->
-
-  <jsp-config>
-    <jsp-property-group>
-      <display-name>screensaver</display-name>
-      <url-pattern>*.jsp</url-pattern>
-      <el-ignored>false</el-ignored>
-      <scripting-invalid>false</scripting-invalid>
-      <is-xml>false</is-xml>
-      <!-- Can't use these w/MyEclipse JSP editor.
-        See http://www.myeclipseide.com/PNphpBB2+file-viewtopic-t-9223.html
-        <include-prelude>/fragments/header.jspf</include-prelude>
-        <include-coda>/fragments/footer.jspf</include-coda>
-      -->
-    </jsp-property-group>
-  </jsp-config>
-
-
   <!-- Log4j setup -->
 
   <!-- This context-param provides explicit path to log4j properties file, but
@@ -318,8 +311,8 @@
   <login-config>
     <auth-method>FORM</auth-method>
     <form-login-config>
-      <form-login-page>/login.jsf</form-login-page>
-      <form-error-page>/login-error.jsf</form-error-page>
+      <form-login-page>/main/login.jsf</form-login-page>
+      <form-error-page>/main/login-error.jsf</form-error-page>
     </form-login-config>
   </login-config>
 
@@ -354,8 +347,8 @@
     <web-resource-collection>
       <web-resource-name>HelloAndGoodbye</web-resource-name>
       <description>Allow unauthenticated user to request the home URL (i.e., the URL(s) in the welcome-file-list), and the goodbye URL.</description>
-      <url-pattern>/index.jsp</url-pattern>
-      <url-pattern>/goodbye.jsf</url-pattern>
+      <url-pattern>/index.html</url-pattern>
+      <url-pattern>/main/goodbye.jsf</url-pattern>
       <http-method>GET</http-method>
     </web-resource-collection>
 
@@ -372,10 +365,10 @@
     </web-resource-collection>
 
     <web-resource-collection>
-      <web-resource-name>Error Messages</web-resource-name>
+      <web-resource-name>error messages</web-resource-name>
       <description>Pages that display error messages, which should displayable to everyone, including unauthenticated users.</description>
-      <url-pattern>/reportException.jsf</url-pattern>
-      <url-pattern>/unauthorizedAccess.jsp</url-pattern>
+      <url-pattern>/main/reportException.jsf</url-pattern>
+      <url-pattern>/main/unauthorizedAccess.jsf</url-pattern>
     </web-resource-collection>
 
     <!-- Having no auth-constraint element allows all roles, including users not authenticated -->
@@ -387,13 +380,11 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>unrestricted</web-resource-name>
-      <url-pattern>/main.jsf</url-pattern>
-      <url-pattern>/login.jsf</url-pattern>
-      <url-pattern>/login-error.jsf</url-pattern>
-      <url-pattern>/newsViewer.jsf</url-pattern>
-      <url-pattern>/downloadsViewer.jsf</url-pattern>
-      <url-pattern>/helpViewer.jsf</url-pattern>
+      <web-resource-name>authenticated users</web-resource-name>
+      <url-pattern>/main/*</url-pattern>
+      <url-pattern>/util/*</url-pattern>
+      <url-pattern>/help/*</url-pattern>
+      <url-pattern>/searchresults/*</url-pattern>
       <url-pattern>/libraries/*</url-pattern>
       <url-pattern>/studies/*</url-pattern>
       <url-pattern>/users/*</url-pattern>

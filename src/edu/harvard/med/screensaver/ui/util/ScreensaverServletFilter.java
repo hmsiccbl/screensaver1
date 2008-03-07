@@ -40,8 +40,8 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
   public static final String CLOSE_HTTP_SESSION = "closeHttpSession";
   public static final String SYSTEM_ERROR_ENCOUNTERED = "systemError";
   private static final String CONCURRENT_MODIFICATION_MESSAGE = "concurrentModificationConflict";
-  private static final String REPORT_EXCEPTION_URL = "/screensaver/reportException.jsf";
-  private static final String LOGIN_URL = "/screensaver/login.jsf";
+  private static final String REPORT_EXCEPTION_URL = "/screensaver/main/reportException.jsf";
+  private static final String LOGIN_URL = "/screensaver/main/login.jsf";
 
   private static final String RELOAD_VIEW_ENTITIES_SESSION_PARAM = "reloadViewEntities";
 

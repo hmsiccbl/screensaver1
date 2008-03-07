@@ -1435,6 +1435,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           if (arePoolWells) {
             _libraryPoolToDuplexWellMapper.createDuplexLabCherryPicksforPoolScreenerCherryPicks((RNAiCherryPickRequest) cherryPickRequest);
           }
+
+
         }
       });
 
@@ -1472,10 +1474,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
         CherryPickLiquidTransfer liquidTransfer = cherryPickRequest.getScreen().createCherryPickLiquidTransfer(
           performedBy,
-          new Date(),
-          dateOfLiquidTransfer,
-          cherryPickRequest,
-          success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
+                                                                               new Date(),
+                                                                               dateOfLiquidTransfer,
+                                                                               cherryPickRequest,
+                                                                               success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
         liquidTransfer.setComments(comments);
         for (CherryPickAssayPlate assayPlate : selectedAssayPlates) {
           if (!assayPlate.getCherryPickRequest().equals(cherryPickRequest)) {
@@ -1523,9 +1525,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private String doViewCherryPickRequestWellVolumes(boolean forUnfulfilledOnly)
   {
     _wellCopyVolumesBrowser.searchWellsForCherryPickRequest(_cherryPickRequest, forUnfulfilledOnly);
-    // use the special wellVolumeSearchResult page that the cherryPickAdmin role
-    // can access (the normal wellVolumeSearchResult is restricted to the
-    // librariesAdmin role)
-    return VIEW_CHERRY_PICK_REQUEST_WELL_VOLUMES;
+    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
   }
 }

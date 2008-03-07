@@ -10,6 +10,8 @@
 package edu.harvard.med.screensaver.ui;
 
 
+import java.awt.Dimension;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -76,7 +78,6 @@ public class Menu extends AbstractBackingBean
     _screenersBrowser = screenersBrowser;
     _activitiesBrowser = activitiesBrowser;
   }
-
 
   // JSF application methods
 

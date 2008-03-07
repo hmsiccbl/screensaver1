@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+		<ui:include src="/util/nameValueTable.xhtml">
+			<ui:param name="nameValueTable"
+				value="#{libraryViewer.libraryNameValueTable}" />
+		</ui:include>
+
+		<t:panelGroup>
+			<h:form id="libraryCommandsForm">
+				<h:commandButton value="View Library Contents"
+					action="#{libraryViewer.viewLibraryContents}" styleClass="command"
+					title="View a list of all the wells in the library" />
+
+				<h:commandButton value="View Well Volumes"
+					action="#{libraryViewer.viewLibraryWellCopyVolumes}"
+					rendered="#{libraryViewer.editable}" styleClass="command"
+					title="View volume information for all the wells in the library" />
+
+				<h:commandButton value="Import Library Contents"
+					action="#{libraryViewer.viewLibraryContentsImporter}"
+					rendered="#{libraryViewer.editable}" styleClass="command"
+					title="Import the contents of library wells." />
+
+				<h:commandButton value="Unload Library Contents"
+					action="#{libraryViewer.unloadLibraryContents}"
+					onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
+					rendered="#{libraryViewer.editable &amp;&amp; libraryViewer.librarySize &gt; 0}"
+					styleClass="command"
+					title="Mostly useful for reloading data if a problem occurred on a previous load" />
+			</h:form>
+		</t:panelGroup>
+
+		<t:panelGroup rendered="#{libraryViewer.isCompoundLibrary}">
+			<h:form id="viewDownloadsForm" style="margin-top: 10px">
+				<t:outputText value="Visit the " />
+				<t:commandLink action="#{menu.viewDownloads}"
+					value="Data Downloads page" />
+				<t:outputText
+					value=" to download SD Files for the ICCB-L compound libraries." />
+			</h:form>
+		</t:panelGroup>
+
+</ui:composition>
+
+</html>

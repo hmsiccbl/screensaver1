@@ -39,7 +39,8 @@ cfg/               Configuration files for build- and run-time settings.
 flotsam+jetsam/    Files that have been kept around for posterity, but are no longer
                    directly used by the project.  
                   
-jsp/               JavaServer Pages files.  Defines web application user interface.                  
+ui/                User interface definition files.  Defines web application user interface.  
+                   Currently using Facelets view technology.                  
 
 lib/               Java JAR (library) files.  Subdirectories reflect origins of
                    related JAR files.  JAR files at the top level of this directory 

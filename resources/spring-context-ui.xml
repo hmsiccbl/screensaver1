@@ -167,16 +167,6 @@
     <aop:scoped-proxy/>
   </bean>
 
-  <bean
-    id="schemaManager"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.SchemaManager">
-    <property name="schemaUtil" ref="schemaUtil" />
-    <property name="dao" ref="genericEntityDao" />
-    <aop:scoped-proxy/>
-  </bean>
-
 
   <!-- === libraries backing beans === -->
 

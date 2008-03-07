@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition template="/main/template.xhtml">
+
+	<ui:param name="pageTitle" value="Screen Viewer" />
+
+	<ui:define name="body">
+
+		<h:form id="errorsTableForm"
+			rendered="#{screenResultImporter.hasErrors}">
+
+			<h:outputText
+				value="Import of screen result file &quot;#{screenResultImporter.uploadedFile.name}&quot; failed for screen #{screenResultImporter.screen.screenNumber}"
+				styleClass="errorMessage" />
+
+			<t:div />
+
+			<t:dataTable id="importErrorsTable"
+				value="#{screenResultImporter.importErrors}" var="row" rows="20"
+				styleClass="standardTable" headerClass="tableHeader"
+				rowClasses="row1,row2">
+				<t:column styleClass="column">
+					<f:facet name="header">
+						<h:outputText value="Where" />
+					</f:facet>
+					<h:outputText
+						value="#{row.cell.sheetName}:#{row.cell.formattedRowAndColumn}"
+						rendered="#{! empty row.cell.sheetName}" />
+					<h:outputText value="&lt;workbook&gt;"
+						rendered="#{empty row.cell.sheetName}" />
+				</t:column>
+				<t:column styleClass="column">
+					<f:facet name="header">
+						<h:outputText value="Error" />
+					</f:facet>
+					<h:outputText value="#{row.errorMessage}" />
+				</t:column>
+			</t:dataTable>
+
+			<t:dataScroller id="errorsScroller" for="importErrorsTable"
+				firstRowIndexVar="fromRow" lastRowIndexVar="toRow"
+				rowsCountVar="rowCount" paginator="true" paginatorMaxPages="10"
+				fastStep="10" renderFacetsIfSinglePage="true" styleClass="scroller"
+				paginatorActiveColumnClass="scroller_activePage">
+				<f:facet name="first">
+					<t:graphicImage url="/images/arrow-first.png" border="0"
+						title="First page" />
+				</f:facet>
+				<f:facet name="last">
+					<t:graphicImage url="/images/arrow-last.png" border="0"
+						title="Last page" />
+				</f:facet>
+				<f:facet name="previous">
+					<t:graphicImage url="/images/arrow-previous.png" border="0"
+						title="Previous page" />
+				</f:facet>
+				<f:facet name="next">
+					<t:graphicImage url="/images/arrow-next.png" border="0"
+						title="Next page" />
+				</f:facet>
+				<f:facet name="fastforward">
+					<t:graphicImage url="/images/arrow-fastforward.png" border="0"
+						title="Forward 10 pages" />
+				</f:facet>
+				<f:facet name="fastrewind">
+					<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
+						title="Back 10 pages" />
+				</f:facet>
+				<t:outputText
+					value="Showing error #{fromRow}..#{toRow} of #{rowCount}"
+					styleClass="label" />
+			</t:dataScroller>
+
+		</h:form>
+
+		<h:form id="commandForm">
+			<h:commandButton id="cancel" action="#{screenResultImporter.cancel}"
+				immediate="true" value="Cancel" styleClass="command" />
+			<h:commandButton id="downloadCommand"
+				actionListener="#{screenResultImporter.downloadErrorAnnotatedWorkbookListener}"
+				value="View Error-Annotated Workbook"
+				rendered="#{screenResultImporter.hasErrors}" styleClass="command" />
+		</h:form>
+
+		<t:div />
+
+		<h:panelGroup>
+			<ui:include src="screenResultUploader.xhtml" />
+		</h:panelGroup>
+	</ui:define>
+
+</ui:composition>
+
+</html>
+
