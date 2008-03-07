@@ -28,7 +28,7 @@ log4j.logger.userActivity=info
 
 ### Screensaver application
 
-log4j.logger.edu.harvard.med.screensaver=info
+log4j.logger.edu.harvard.med.screensaver=debug
 #log4j.logger.edu.harvard.med.screensaver.db=debug
 log4j.logger.edu.harvard.med.screensaver.ui.screenresults=debug
 

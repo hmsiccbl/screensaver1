@@ -1,8 +1,8 @@
-# screensaver.properties.js163.test
+# screensaver.properties.clarity
 
 ### build-time properties
 
-appserver.dir=/usr/local/jakarta-tomcat
+appserver.dir=/usr/local/tomcat
 log4j.properties.file=cfg/js163/log4j.properties.debug
 svnversion.cmd=/usr/bin/svnversion
 
@@ -17,6 +17,7 @@ babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
-SCREENSAVER_PGSQL_DB=screensaver
+SCREENSAVER_PGSQL_DB=screensaver-fully-loaded-old-rv
+#SCREENSAVER_PGSQL_DB=screensaver
 SCREENSAVER_PGSQL_USER=s
 SCREENSAVER_PGSQL_PASSWORD=
