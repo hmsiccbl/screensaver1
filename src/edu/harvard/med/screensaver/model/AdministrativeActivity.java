@@ -56,12 +56,10 @@ abstract public class AdministrativeActivity extends Activity
    * Get the administrator user that approved the activity.
    * @return the administrator user that approved the activity
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="approvedById")
   @org.hibernate.annotations.ForeignKey(name="fk_activity_to_administrator_user")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="activitiesApproved")
   public AdministratorUser getApprovedBy()
   {

@@ -118,14 +118,12 @@ public class SilencingReagent extends SemanticIDAbstractEntity
    * @return the set of wells
    */
   @ManyToMany(
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     mappedBy="silencingReagents",
     targetEntity=Well.class,
     fetch=FetchType.LAZY
   )
   @org.hibernate.annotations.ForeignKey(name="fk_well_silencing_reagent_link_to_silencing_reagent")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   public Set<Well> getWells()
   {
     return _wells;

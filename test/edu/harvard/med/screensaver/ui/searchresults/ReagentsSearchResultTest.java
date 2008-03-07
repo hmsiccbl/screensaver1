@@ -60,6 +60,8 @@ public class ReagentsSearchResultTest extends AbstractSpringPersistenceTest
         genericEntityDao.persistEntity(library);
         
         Screen study = MakeDummyEntities.makeDummyStudy(library);
+        genericEntityDao.persistEntity(study.getLeadScreener());
+        genericEntityDao.persistEntity(study.getLabHead());
         genericEntityDao.persistEntity(study);
       }
     });

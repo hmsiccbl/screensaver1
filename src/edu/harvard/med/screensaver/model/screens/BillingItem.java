@@ -94,8 +94,7 @@ public class BillingItem extends AbstractEntity
    * Get the billing information.
    * @return the billing information
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="billingInformationId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_billing_item_to_billing_information")

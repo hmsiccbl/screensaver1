@@ -121,14 +121,10 @@ public class ScreeningRoomUser extends ScreensaverUser
    * is the lab head, return this user.
    * @return the lab head; null if this user is the head of her own lab.
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="labHeadId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE
-  })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="labMembers")
   public ScreeningRoomUser getLabHead()
   {
@@ -190,12 +186,8 @@ public class ScreeningRoomUser extends ScreensaverUser
    */
   @OneToMany(
     mappedBy="labHead",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     fetch=FetchType.LAZY
   )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE
-  })
   public Set<ScreeningRoomUser> getLabMembers()
   {
     return _labMembers;
@@ -404,7 +396,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   )
   @org.hibernate.annotations.ForeignKey(name="fk_collaborator_link_to_screening_room_user")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName="screenCollaborated")
   public Set<Screen> getScreensCollaborated()
   {

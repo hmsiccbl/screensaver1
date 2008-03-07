@@ -66,6 +66,12 @@ public class CherryPickRequestPlateMapper
       public void runTransaction()
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
+//        CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reloadEntity(
+//          cherryPickRequestIn,
+//          false,
+//          "cherryPickAssayPlates",
+//          "labCherryPicks.sourceWell",
+//          "labCherryPicks.wellVolumeAdjustments.copy");
         doGeneratePlateMapping(cherryPickRequest);
       }
     });
@@ -151,6 +157,7 @@ public class CherryPickRequestPlateMapper
       if (log.isDebugEnabled()) {
         log.debug(cherryPick + " mapped to " + cherryPick.getAssayPlate().getPlateOrdinal() + ":" + cherryPick.getAssayPlateWellName());
       }
+      genericEntityDao.saveOrUpdateEntity(cherryPick);
     }
     return plateWellMapping;
   }

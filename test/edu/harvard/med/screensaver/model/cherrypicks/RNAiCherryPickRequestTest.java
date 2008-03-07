@@ -52,8 +52,9 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        cherryPickRequest.setRequestedEmptyWellsOnAssayPlate(requestedEmptyWells);
-        genericEntityDao.saveOrUpdateEntity(cherryPickRequest); // why do we need this, if we're also persisting the screen?!
+        cherryPickRequest.addRequestedEmptyWellsOnAssayPlate(requestedEmptyWells);
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
@@ -92,8 +93,9 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
             }
           }
         }
-        genericEntityDao.saveOrUpdateEntity(cherryPickRequest); // avoid hib errors on flush
-        genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
+        genericEntityDao.saveOrUpdateEntity(screen);
 
         assertEquals("cherry pick allowance used", 384 * 6, cherryPickRequest.getCherryPickAllowanceUsed());
       }

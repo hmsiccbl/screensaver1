@@ -281,12 +281,10 @@ public class Screen extends Study
    * Get the lead screener.
    * @return the lead screener
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="leadScreenerId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lead_screener")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensLed")
   public ScreeningRoomUser getLeadScreener()
   {
@@ -315,12 +313,10 @@ public class Screen extends Study
    * Get the lab head.
    * @return the lab head
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="labHeadId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensHeaded")
   public ScreeningRoomUser getLabHead()
   {
@@ -352,8 +348,7 @@ public class Screen extends Study
    * Get the set of collaborators.
    * @return the set of collaborators
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-              fetch=FetchType.LAZY)
+  @ManyToMany(fetch=FetchType.LAZY)
   @JoinTable(
     name="collaboratorLink",
     joinColumns=@JoinColumn(name="screenId"),
@@ -361,7 +356,6 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.ForeignKey(name="fk_collaborator_link_to_screen")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="screensCollaborated")
   public Set<ScreeningRoomUser> getCollaborators()
   {
@@ -639,6 +633,7 @@ public class Screen extends Study
     CherryPickLiquidTransferStatus status)
   {
     CherryPickLiquidTransfer cherryPickLiquidTransfer = new CherryPickLiquidTransfer(
+      this,
       performedBy,
       dateCreated,
       dateOfActivity,
@@ -684,7 +679,8 @@ public class Screen extends Study
   @OrderBy("dateRequested")
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<CherryPickRequest> getCherryPickRequests()
   {
@@ -1413,7 +1409,8 @@ public class Screen extends Study
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public SortedSet<AnnotationType> getAnnotationTypes()
   {
@@ -1449,8 +1446,7 @@ public class Screen extends Study
    * @motivation efficiently find all reagent-related data for a study (w/o reading annotationTypes.annotationValues.reagents)
    * @return the set of reagents associated with this screen result
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-              fetch=FetchType.LAZY)
+  @ManyToMany(fetch=FetchType.LAZY)
   @JoinTable(
     name="studyReagentLink",
     joinColumns=@JoinColumn(name="studyId"),
@@ -1459,7 +1455,6 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="studies")
   public Set<Reagent> getReagents()
   {

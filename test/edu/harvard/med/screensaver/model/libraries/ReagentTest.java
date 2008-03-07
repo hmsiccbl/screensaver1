@@ -39,16 +39,22 @@ public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+        genericEntityDao.persistEntity(library);
+
+        Reagent reagent1 = new Reagent(new ReagentVendorIdentifier("Vendor:1"));
+        Reagent reagent2 = new Reagent(new ReagentVendorIdentifier("Vendor:2"));
+        genericEntityDao.persistEntity(reagent1);
+        genericEntityDao.persistEntity(reagent2);
+
         Screen study = MakeDummyEntities.makeDummyScreen(Study.MIN_STUDY_NUMBER);
         AnnotationType annotType1 = study.createAnnotationType("annotType1", "", false);
         AnnotationType annotType2 = study.createAnnotationType("annotType2", "", false);
-        Reagent reagent1 = new Reagent(new ReagentVendorIdentifier("Vendor:1"));
-        Reagent reagent2 = new Reagent(new ReagentVendorIdentifier("Vendor:2"));
         annotType1.createAnnotationValue(reagent1, "annotType1_annotValue1");
         annotType1.createAnnotationValue(reagent2, "annotType1_annotValue2");
         annotType2.createAnnotationValue(reagent1, "annotType2_annotValue1");
         annotType2.createAnnotationValue(reagent2, "annotType2_annotValue2");
-        genericEntityDao.persistEntity(library);
+        genericEntityDao.saveOrUpdateEntity(study.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(study.getLabHead());
         genericEntityDao.persistEntity(study);
       }
     });

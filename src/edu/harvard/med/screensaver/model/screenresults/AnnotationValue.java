@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,12 +24,12 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 
 /**
  * Annotation value on a particular library member (e.g. a compound or silencing
@@ -105,13 +104,11 @@ public class AnnotationValue extends AbstractEntity
    * Get the annotation type.
    * @return the annotation type
   */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-             fetch=FetchType.LAZY)
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="annotationTypeId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_annotation_type")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   public AnnotationType getAnnotationType()
   {
     return _annotationType;
@@ -121,13 +118,11 @@ public class AnnotationValue extends AbstractEntity
    * Get the reagent the well is in.
    * @return the reagent the well is in.
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-             fetch=FetchType.LAZY)
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(nullable=false, updatable=false, name="reagent_id")
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_reagent")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @org.hibernate.annotations.Index(name="annotation_value_reagent_id_index", columnNames={"reagent_id"})
   public Reagent getReagent()
   {

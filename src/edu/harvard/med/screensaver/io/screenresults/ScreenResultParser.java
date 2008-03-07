@@ -718,7 +718,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     if (!rvt.isNumericalnessDetermined()) {
       if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
-        rvt.setNumeric(true);
+        rvt.detemineNumericalness(true);
       }
       else {
         DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
@@ -728,13 +728,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
             continue;
           }
           if (cell.isNumeric()) {
-            rvt.setNumeric(true);
+            rvt.detemineNumericalness(true);
           }
           else if (cell.isBoolean()) {
-            rvt.setNumeric(false);
+            rvt.detemineNumericalness(false);
           }
           else {
-            rvt.setNumeric(false);
+            rvt.detemineNumericalness(false);
           }
           break;
         }

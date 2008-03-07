@@ -84,6 +84,7 @@ public class CherryPickRequestAllocator
   @Transactional
   public Set<LabCherryPick> allocate(final CherryPickRequest cherryPickRequestIn) throws DataAccessException
   {
+    log.debug("hi from CPRAllocator.allocate: " + cherryPickRequestIn);
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
     final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
 
@@ -118,6 +119,7 @@ public class CherryPickRequestAllocator
       }
       if (labCherryPick.isAllocated()) {
         labCherryPick.setAllocated(null);
+        _dao.saveOrUpdateEntity(labCherryPick);
       }
     }
   }
@@ -131,12 +133,15 @@ public class CherryPickRequestAllocator
   {
     CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
     ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
-    CherryPickLiquidTransfer cplt = new CherryPickLiquidTransfer(performedBy,
+    CherryPickLiquidTransfer cplt =
+      cherryPickRequest.getScreen().createCherryPickLiquidTransfer(performedBy,
                                                                  new Date(),
                                                                  dateOfLiquidTransfer,
                                                                  cherryPickRequest,
                                                                  CherryPickLiquidTransferStatus.CANCELED);
     cplt.setComments(comments);
+    _dao.saveOrUpdateEntity(cplt);
+    
     // note: by iterating through cherryPickRequest's active assay plates, rather than the
     // method assayPlates method arg, we are manipulating Hibernate-managed persistent entities,
     // rather than deatch entities
@@ -214,6 +219,7 @@ public class CherryPickRequestAllocator
     }
     else {
       labCherryPick.setAllocated(copy);
+      _dao.saveOrUpdateEntity(labCherryPick);
     }
     return true;
   }

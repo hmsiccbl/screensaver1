@@ -31,10 +31,16 @@ import java.util.Set;
 
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.time.DateUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
+import org.springframework.orm.hibernate3.HibernateTemplate;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.model.EntityNetworkPersister.EntityNetworkPersisterException;
 import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
@@ -57,12 +63,14 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.propertytesters.CollectionPropertiesInitialCardinalityTester;
 import edu.harvard.med.screensaver.model.propertytesters.PropertiesGetterAndSetterTester;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
@@ -71,14 +79,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
 {
@@ -122,20 +122,29 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     Set<E> set = new HashSet<E>();
     set.add(transientEntity);
     assertTrue(set.contains(transientEntity));
-    genericEntityDao.persistEntity(transientEntity);
+
+    log.debug("transient entity " + transientEntity);
+    log.debug("transient entity hashcode " + transientEntity.hashCode());
+    persistEntityNetwork(transientEntity);
     E detachedEntity = transientEntity;
     transientEntity = null; // no longer transient!
     E reloadedEntity = genericEntityDao.reloadEntity(detachedEntity);
     assertNotSame(reloadedEntity, detachedEntity);
     assertTrue(set.contains(detachedEntity));
     boolean isSemanticId = SemanticIDAbstractEntity.class.isAssignableFrom(_entityClass);
+    log.debug("detached = " + detachedEntity);
+    log.debug("reloaded = " + reloadedEntity);
     if (isSemanticId) {
       assertEquals(reloadedEntity, detachedEntity);
       assertEquals(reloadedEntity.hashCode(), detachedEntity.hashCode());
       assertTrue(set.contains(reloadedEntity));
     }
     else {
-      assertFalse(reloadedEntity.equals(detachedEntity));
+      log.debug("reloaded entity " + reloadedEntity);
+      log.debug("reloaded entity hashcode " + reloadedEntity.hashCode());
+      log.debug("detached entity " + detachedEntity);
+      log.debug("detached entity hashcode " + detachedEntity.hashCode());
+      assertFalse("reloaded entity " + reloadedEntity + " does not equal " + detachedEntity, reloadedEntity.equals(detachedEntity));
       assertFalse(reloadedEntity.hashCode() == detachedEntity.hashCode());
       assertFalse(set.contains(reloadedEntity));
     }
@@ -290,7 +299,8 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       // currently, only two cases fall here:
       // WellVolumeAdjustment.{labCherryPick,wellVolumeCorrectionActivity}.
       // WVA is strange in that exactly one of these two properties is non-null
-      if (! bean.getClass().equals(WellVolumeAdjustment.class)) {
+      if (! (bean.getClass().equals(WellVolumeAdjustment.class) ||
+            (bean.getClass().equals(Well.class) && propertyDescriptor.getName().equals("gene")))) {
         fail(
           "non-WVA property with a nullable immutable property. (probably fine but you should check it out): " +
           bean.getClass().getSimpleName() + "." + propertyDescriptor.getName());
@@ -398,7 +408,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 //              }
 //              else {
               if (testValue instanceof AbstractEntity) {
-                persistEntity((AbstractEntity) testValue, new HashSet<AbstractEntity>());
+                persistEntityNetwork((AbstractEntity) testValue);
               }
               assertEquals("getter returns what setter set for " +
                            bean.getClass() + "." + propertyDescriptor.getName(),
@@ -561,7 +571,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
           {
             testValue = getTestValueForType(propertyType);
             if (testValue instanceof AbstractEntity) {
-              persistEntity((AbstractEntity) testValue, new HashSet<AbstractEntity>());
+              persistEntityNetwork((AbstractEntity) testValue);
             }
           }
         }
@@ -575,12 +585,12 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       {
         public void testBean(AbstractEntity bean)
         {
-          log.info("calling add method " + addMethodName + " on bean " + bean);
+          log.info("calling add method " + addMethodName + " on bean " + bean + " with test value " + testValue);
           try {
             Boolean result = (Boolean) addMethod.invoke(bean, testValue);
             assertTrue("adding to empty collection prop returns true: " + fullPropName,
                        result.booleanValue());
-            persistEntity(bean, new HashSet<AbstractEntity>());
+            persistEntityNetwork(bean);
           }
           catch (Exception e) {
             e.printStackTrace();
@@ -725,7 +735,6 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   protected void createPersistentBeanForTest()
   {
     schemaUtil.truncateTablesOrCreateSchema();
-    //persistEntity(_bean, new HashSet<AbstractEntity>());
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -735,84 +744,15 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     });
   }
 
-  protected void persistEntity(final AbstractEntity entity, final Set<AbstractEntity> alreadyPersisted)
+  protected void persistEntityNetwork(final AbstractEntity root)
   {
-    if (alreadyPersisted.contains(entity)) {
-      return;
-    }
-    alreadyPersisted.add(entity);
-
-    Class<? extends AbstractEntity> entityClass = entity.getClass();
-    BeanInfo beanInfo = null;
     try {
-      beanInfo = Introspector.getBeanInfo(entityClass);
+      new EntityNetworkPersister(genericEntityDao, root).persistEntityNetwork();
     }
-    catch (IntrospectionException e) {
-      fail("got an introspection exception: " + e.getMessage());
+    catch (EntityNetworkPersisterException e) {
+      e.printStackTrace();
+      fail(e.getMessage());
     }
-
-    // TODO: refactor copied code from #exercizePropertyDescriptors
-    for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
-      String propertyName = propertyDescriptor.getName();
-      //String propFullName = entityClass.getSimpleName() + "." + propertyName;
-      if (propertyName.equals("class")) {
-        //log.debug("skipping \"class\" property " + propFullName);
-        continue;
-      }
-
-      // skip what appears to be an entity's property, but that has been
-      // explicitly annotated as a non-property
-      if (propertyDescriptor.getReadMethod().isAnnotationPresent(Transient.class)) {
-        //log.info("skipping @Transient property " + propFullName);
-        continue;
-      }
-
-      Method getter = propertyDescriptor.getReadMethod();
-
-      if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
-        org.hibernate.annotations.Cascade cascade = getter.getAnnotation(Cascade.class);
-        Set<CascadeType> cascadeTypes = new HashSet<CascadeType>();
-        if (cascade != null) {
-          CollectionUtils.addAll(cascadeTypes, cascade.value());
-        }
-        if (cascade == null || ! cascadeTypes.contains(CascadeType.SAVE_UPDATE)) {
-          try {
-            AbstractEntity relatedEntity = (AbstractEntity) getter.invoke(entity);
-            if (relatedEntity != null) {
-              persistEntity(relatedEntity, alreadyPersisted);
-            }
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-            fail("calling getter " + getter + " on " + entity + " caused exception: " + e);
-          }
-        }
-      }
-
-      if (Collection.class.isAssignableFrom(getter.getReturnType())) {
-        org.hibernate.annotations.Cascade cascade = getter.getAnnotation(Cascade.class);
-        Set<CascadeType> cascadeTypes = new HashSet<CascadeType>();
-        if (cascade != null) {
-          CollectionUtils.addAll(cascadeTypes, cascade.value());
-        }
-        if (cascade == null || ! cascadeTypes.contains(CascadeType.SAVE_UPDATE)) {
-          try {
-            Collection relatedCollection = (Collection) getter.invoke(entity);
-            for (Object relatedCollectionMember : relatedCollection) {
-              if (relatedCollectionMember instanceof AbstractEntity) {
-                persistEntity((AbstractEntity) relatedCollectionMember, alreadyPersisted);
-              }
-            }
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-            fail("calling getter " + getter + " on " + entity + " caused exception: " + e);
-          }
-        }
-      }
-    }
-
-    genericEntityDao.saveOrUpdateEntity(entity);
   }
 
   private void doTestBidirectionalityOfOneSideOfRelationship(AbstractEntity bean,
@@ -829,6 +769,8 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       return;
     }
 
+    log.debug("testBidirectionalityOfOneSideOfRelationship: " + propFullName);
+    
     final RelatedProperty relatedProperty = new RelatedProperty(bean.getClass(), propertyDescriptor);
 
     assertNotNull("related _bean " + relatedProperty.getBeanClass().getSimpleName() +
@@ -886,6 +828,13 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
                 " contains this _bean",
                 ((Collection) relatedProperty.invokeGetter(relatedBean)).contains(bean));
             }
+            else if (relatedProperty.otherSideIsMappedToMany()) {
+              log.debug("mapped many to many");
+              assertTrue(
+                "getter for property " + relatedProperty.getFullName() +
+                " contains bean " + bean + " as a mapped value",
+                ((Map) relatedProperty.invokeGetter(relatedBean)).containsValue(bean));
+            }
             else {
               Object beanFromRelatedGetter = relatedProperty.invokeGetter(relatedBean);
               assertEquals("related getter, " + relatedProperty.getFullName() + ", returns this _bean",
@@ -932,6 +881,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
             e.printStackTrace();
             fail("setter threw exception: " + propFullName);
           }
+          persistEntityNetwork(bean);
         }
       });
 
@@ -991,11 +941,13 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     if (!relatedProperty.exists()) {
       return;
     }
-
+    
     // get basic objects related to the _bean
     Class<? extends AbstractEntity> beanClass = bean.getClass();
     String propertyName = propertyDescriptor.getName();
     final String propFullName = beanClass.getSimpleName() + "." + propertyName;
+
+    log.debug("testBidirectionalityOfManySideOfRelationship: " + propFullName);
 
     // determine the add method of this _bean (that adds the related _bean)
     Method readMethod = propertyDescriptor.getReadMethod();
@@ -1155,7 +1107,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
   // private methods
 
-  private static String STRING_TEST_VALUE_PREFIX = "test:";
+  private static String STRING_TEST_VALUE_PREFIX = "test-";
   private static int STRING_TEST_VALUE_RADIX = 36;
 
   private Integer _integerTestValue = 77;
@@ -1232,7 +1184,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
         return AssayWellType.EXPERIMENTAL;
       }
       if (type.equals(WellType.class)) {
-        return WellType.EXPERIMENTAL;
+        return WellType.LIBRARY_CONTROL;
       }
       try {
         Method valuesMethod = type.getMethod("values");
@@ -1248,6 +1200,9 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     }
     if (WellKey.class.isAssignableFrom(type)) {
       return nextWellKey();
+    }
+    if (WellName.class.isAssignableFrom(type)) {
+      return new WellName(nextWellKey().getWellName());
     }
     if (ReagentVendorIdentifier.class.isAssignableFrom(type)) {
       return new ReagentVendorIdentifier(getStringTestValue(), getStringTestValue());
@@ -1343,8 +1298,8 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
           screenerCherryPick,
           well);
         if (persistEntities) {
-          genericEntityDao.saveOrUpdateEntity(well);
-          genericEntityDao.saveOrUpdateEntity(labCherryPick);
+          genericEntityDao.saveOrUpdateEntity(well.getLibrary());
+          genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
         }
         return labCherryPick;
       }
@@ -1792,11 +1747,13 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
   protected boolean isImmutableProperty(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
   {
-    Method getter = propertyDescriptor.getReadMethod();
-    if (getter.isAnnotationPresent(org.hibernate.annotations.Immutable.class)) {
+    org.hibernate.annotations.Entity entityAnnotation =
+      beanClass.getAnnotation(org.hibernate.annotations.Entity.class);
+    if (entityAnnotation != null && ! entityAnnotation.mutable()) {
       return true;
     }
-    return false;
+    Method getter = propertyDescriptor.getReadMethod();
+    return getter.isAnnotationPresent(org.hibernate.annotations.Immutable.class);
   }
 
   private boolean isUnidirectionalRelationshipMethod(Method getter)
@@ -1870,7 +1827,8 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     if (hibernateTemplate.contains(bean)) {
       return bean;
     }
-    persistEntity(bean, new HashSet<AbstractEntity>());
+    persistEntityNetwork(bean);
+    log.info("bean.getEntityId() = " + bean.getEntityId());
     return (AbstractEntity) hibernateTemplate.get(bean.getClass(), bean.getEntityId());
   }
 }

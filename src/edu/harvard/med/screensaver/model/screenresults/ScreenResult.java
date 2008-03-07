@@ -374,8 +374,7 @@ public class ScreenResult extends AbstractEntity
    * the returned collection.</i> To add a well, call {@link #addWell}.
    * @return the set of wells associated with this screen result
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-              fetch=FetchType.LAZY)
+  @ManyToMany(fetch=FetchType.LAZY)
   @JoinTable(
     name="screenResultWellLink",
     joinColumns=@JoinColumn(name="screenResultId"),
@@ -383,7 +382,6 @@ public class ScreenResult extends AbstractEntity
   )
   @org.hibernate.annotations.ForeignKey(name="fk_screen_result_well_link_to_screen_result")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   public SortedSet<Well> getWells()
   {

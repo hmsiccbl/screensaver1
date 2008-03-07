@@ -109,16 +109,11 @@ public class CopyInfo extends AbstractEntity
    * Get the copy.
    * @return the copy
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-             fetch=FetchType.LAZY)
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="copyId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_copy_info_to_copy")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
   public Copy getCopy()
   {
     return _copy;

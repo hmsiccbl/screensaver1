@@ -146,13 +146,11 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * Get the library the well is in.
    * @return the library the well is in.
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-             fetch=FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name="libraryId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_to_library")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   public Library getLibrary()
   {
     return _library;
@@ -560,7 +558,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * Get the set of result values.
    * @return the set of result values
    */
-  @OneToMany(cascade={}, fetch=FetchType.LAZY, mappedBy="well")
+  @OneToMany(fetch=FetchType.LAZY, mappedBy="well")
   @MapKeyManyToMany(joinColumns={ @JoinColumn(name="resultValueTypeId") }, targetEntity=ResultValueType.class)
   public Map<ResultValueType,ResultValue> getResultValues()
   {

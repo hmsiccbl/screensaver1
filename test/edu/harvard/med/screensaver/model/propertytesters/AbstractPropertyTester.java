@@ -106,7 +106,7 @@ abstract public class AbstractPropertyTester<E extends AbstractEntity>
 
   protected boolean isTransientProperty()
   {
-    return getReadMethod().isAnnotationPresent(Transient.class);
+    return getReadMethod().isAnnotationPresent(Transient.class);  
   }
   
   protected boolean isPropertyWithNonconventionalSetterMethod()
@@ -117,6 +117,11 @@ abstract public class AbstractPropertyTester<E extends AbstractEntity>
 
   protected boolean isImmutableProperty()
   {
+    org.hibernate.annotations.Entity entityAnnotation =
+      getBeanClass().getAnnotation(org.hibernate.annotations.Entity.class);
+    if (entityAnnotation != null && ! entityAnnotation.mutable()) {
+      return true;
+    }
     return getReadMethod().isAnnotationPresent(org.hibernate.annotations.Immutable.class);
   }
 

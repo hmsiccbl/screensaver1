@@ -549,7 +549,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setComments("None");
-    rvt.setNumeric(true);
+    rvt.detemineNumericalness(true);
     expectedResultValueTypes.put(0, rvt);
 
     rvt = expectedScreenResult.createResultValueType("Luminescence2");
@@ -560,7 +560,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setFollowUpData(true);
     rvt.setComments("None");
-    rvt.setNumeric(true);
+    rvt.detemineNumericalness(true);
     expectedResultValueTypes.put(1, rvt);
 
     rvt = expectedScreenResult.createResultValueType("FI1");
@@ -570,7 +570,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setHowDerived("Divide compound well by plate median");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(0));
     rvt.setAssayPhenotype("Phenotype1");
-    rvt.setNumeric(true);
+    rvt.detemineNumericalness(true);
     expectedResultValueTypes.put(2, rvt);
 
     rvt = expectedScreenResult.createResultValueType("FI2");
@@ -581,7 +581,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(1));
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setFollowUpData(true);
-    rvt.setNumeric(true);
+    rvt.detemineNumericalness(true);
     expectedResultValueTypes.put(3, rvt);
 
     rvt = expectedScreenResult.createResultValueType("AssayIndicator1", null, true, true, false, "Phenotype1");
@@ -591,21 +591,21 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
     rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
     rvt.setPositiveIndicatorCutoff(1.5);
-    rvt.setNumeric(true);
+    rvt.detemineNumericalness(true);
     expectedResultValueTypes.put(4, rvt);
 
     rvt = expectedScreenResult.createResultValueType("AssayIndicator2", null, true, true, false, "Phenotype1");
     rvt.setHowDerived("W<=1.6, M<=1.7, S<=1.8");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(4));
     rvt.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
-    rvt.setNumeric(false);
+    rvt.detemineNumericalness(false);
     expectedResultValueTypes.put(5, rvt);
 
     rvt = expectedScreenResult.createResultValueType("AssayIndicator3", null, true, true, false, "Phenotype1");
     rvt.setHowDerived("AssayIndicator2 is S");
     rvt.addTypeDerivedFrom(expectedResultValueTypes.get(5));
     rvt.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
-    rvt.setNumeric(false);
+    rvt.detemineNumericalness(false);
     expectedResultValueTypes.put(6, rvt);
 
 

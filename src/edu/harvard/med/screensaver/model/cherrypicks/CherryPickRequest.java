@@ -39,6 +39,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -47,12 +50,10 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorOrderingComparator;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -289,6 +290,8 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Get the legacy cherry pick request number.
    * @return the legacy cherry pick request number
    */
+  @Column(updatable=false)
+  @org.hibernate.annotations.Immutable
   public Integer getLegacyCherryPickRequestNumber()
   {
     return _legacyCherryPickRequestNumber;
@@ -317,12 +320,11 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Get the screen.
    * @return the screen
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne
   @JoinColumn(name="screenId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   public Screen getScreen()
   {
     return _screen;
@@ -367,14 +369,8 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   @OneToMany(
     mappedBy="cherryPickRequest",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
   public Set<LabCherryPick> getLabCherryPicks()
   {
     return _labCherryPicks;
@@ -519,6 +515,10 @@ public abstract class CherryPickRequest extends AbstractEntity
       plateOrdinal,
       attemptOrdinal,
       plateType);
+    log.debug("created cpap " + cherryPickAssayPlate);
+    for (CherryPickAssayPlate plate : _cherryPickAssayPlates) {
+      log.debug("existing cpap: " + plate);
+    }
     _cherryPickAssayPlates.add(cherryPickAssayPlate);
     return cherryPickAssayPlate;
   }
@@ -722,14 +722,29 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Set the set of empty wells requested by the screener.
-   * @param requestedEmptyWellsOnAssayPlate wells that screener has requested be
-   * left empty on each cherry pick assay plate
-   * @motivation for hibernate
+   * Add the well to the set of requested empty wells.
+   * @param wellName the well to add to the set of requested empty wells
    */
-  public void setRequestedEmptyWellsOnAssayPlate(Set<WellName> requestedEmptyWellsOnAssayPlate)
+  public boolean addRequestedEmptyWellOnAssayPlate(WellName wellName)
   {
-    _requestedEmptyWellsOnAssayPlate = requestedEmptyWellsOnAssayPlate;
+    return _requestedEmptyWellsOnAssayPlate.add(wellName);
+  }
+
+  /**
+   * Add the wells to the set of requested empty wells.
+   * @param wellNames the wells to add
+   */
+  public void addRequestedEmptyWellsOnAssayPlate(Set<WellName> wellNames)
+  {
+    _requestedEmptyWellsOnAssayPlate.addAll(wellNames);
+  }
+
+  /**
+   * Clear the set of requested empty wells.
+   */
+  public void clearRequestedEmptyWellsOnAssayPlate()
+  {
+    _requestedEmptyWellsOnAssayPlate.clear();
   }
 
   /**
@@ -999,5 +1014,16 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setCherryPickAssayPlates(SortedSet<CherryPickAssayPlate> cherryPickAssayPlates)
   {
     _cherryPickAssayPlates = cherryPickAssayPlates;
+  }
+
+  /**
+   * Set the set of empty wells requested by the screener.
+   * @param requestedEmptyWellsOnAssayPlate wells that screener has requested be
+   * left empty on each cherry pick assay plate
+   * @motivation for hibernate
+   */
+  private void setRequestedEmptyWellsOnAssayPlate(Set<WellName> requestedEmptyWellsOnAssayPlate)
+  {
+    _requestedEmptyWellsOnAssayPlate = requestedEmptyWellsOnAssayPlate;
   }
 }

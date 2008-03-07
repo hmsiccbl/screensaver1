@@ -234,7 +234,7 @@ TODO:
 						title="The wells the screener requested to be left empty" />
 					<t:panelGroup>
 						<t:inputText id="emptyWells"
-							value="#{cherryPickRequestViewer.cherryPickRequest.requestedEmptyWellsOnAssayPlate}"
+							value="#{cherryPickRequestViewer.requestedEmptyWellsOnAssayPlate}"
 							converter="#{cherryPickRequestViewer.emptyWellsConverter}"
 							displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
 							displayValueOnlyStyleClass="dataText" styleClass="inputText"

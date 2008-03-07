@@ -158,10 +158,13 @@ public class ScreenerCherryPick extends AbstractEntity
    */
   @OneToMany(
     mappedBy="screenerCherryPick",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  // TODO: this is actually a bidirectional relationship; correct, then run model tests to verify change
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(unidirectional=true)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   public Set<LabCherryPick> getLabCherryPicks()
   {
     return _labCherryPicks;

@@ -12,17 +12,19 @@ package edu.harvard.med.screensaver.model.screenresults;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.engine.EntityKey;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -32,10 +34,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.engine.EntityKey;
 
 public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueType>
 {
@@ -83,7 +81,7 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
         screenResultParser.parse(screen, workbookFile);
         log.debug(screenResultParser.getErrors());
         assertFalse("screen result had no errors", screenResultParser.getHasErrors());
-        persistEntity(screen, new HashSet<AbstractEntity>());
+        persistEntityNetwork(screen);
       }
     });
 
@@ -100,72 +98,5 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
       }
     });
   }
-  
-  /**
-   * Test that our Hibernate mapping is set properly to extra-lazy load
-   * RVT->ResultValues. This is an ancient test that was implemented during the
-   * learning of Hibernate (and before we "trusted" particular mappings were
-   * doing what we expected), but it we might as well keep it around.
-   */
-  public void testResultValueTypeResultValuesAreExtraLazy()
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        Screen screen = MakeDummyEntities.makeDummyScreen(107);
-        ScreenResult screenResult = screen.createScreenResult(new Date());
-        ResultValueType rvt = screenResult.createResultValueType("Luminescence");
-        Library library = new Library(
-          "library 1",
-          "lib1",
-          ScreenType.SMALL_MOLECULE,
-          LibraryType.COMMERCIAL,
-          1,
-          1);
-        for (int i = 1; i < 10; ++i) {
-          Well well = library.createWell(new WellKey(i, "A01"), WellType.EMPTY);
-          genericEntityDao.saveOrUpdateEntity(well);
-          rvt.createResultValue(well, Integer.toString(i));
-        }
-        genericEntityDao.saveOrUpdateEntity(screen);
-      }
-    });
-
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
-        assertEquals("session initially empty", 0, session.getStatistics().getEntityCount());
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 107);
-        List<ResultValueType> rvts = screen.getScreenResult().getResultValueTypesList();
-        ResultValueType rvt = rvts.get(0);
-
-        for (Object key : session.getStatistics().getEntityKeys()) {
-          EntityKey entityKey = (EntityKey) key;
-          log.debug(entityKey);
-          assertFalse("no resultValue entities in session",
-                      entityKey.getEntityName().endsWith("ResultValue"));
-        }
-
-        Set<Well> wells = rvt.getScreenResult().getWells();
-        Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
-        log.debug("resultValue count=" + resultValues.size());
-        Iterator<Well> iter = wells.iterator();
-        int n = session.getStatistics().getEntityKeys().size();
-        log.debug("entity key count (pre-iteration)=" + n);
-        while (iter.hasNext()) {
-          WellKey wellKey = (WellKey) iter.next().getWellKey();
-          ResultValue rv = resultValues.get(wellKey);
-          rv.getValue();
-          log.debug("entity key count=" + session.getStatistics().getEntityKeys().size());
-          assertEquals("Hibernate session cache did not grow in size",
-                       n,
-                       session.getStatistics().getEntityKeys().size());
-        }
-      }
-    });
-  }
-  
 }
 

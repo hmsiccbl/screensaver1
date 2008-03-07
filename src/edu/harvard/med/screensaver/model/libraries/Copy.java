@@ -99,15 +99,11 @@ public class Copy extends SemanticIDAbstractEntity
    * Get the library.
    * @return the library
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+  @ManyToOne
   @JoinColumn(name="libraryId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_copy_to_library")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="copies")
   public Library getLibrary()
   {

@@ -372,6 +372,8 @@ public class ComplexDAOTest extends AbstractSpringTest
           expectedPlateNumbers.add(2);
           assertEquals(expectedPlateNumbers, screenResult.getPlateNumbers());
 
+          genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLabHead());
           genericEntityDao.saveOrUpdateEntity(screenResult.getScreen());
         }
 
@@ -475,6 +477,8 @@ public class ComplexDAOTest extends AbstractSpringTest
             derivedRvt2.addTypeDerivedFrom(resultValueType);
           }
 
+          genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLabHead());
           genericEntityDao.saveOrUpdateEntity(screenResult.getScreen());
       }
     });
@@ -610,6 +614,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         genericEntityDao.saveOrUpdateEntity(library);
         Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
         MakeDummyEntities.makeDummyScreenResult(screen1, library);
+        genericEntityDao.saveOrUpdateEntity(screen1.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen1.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen1);
       }
     });
@@ -705,6 +711,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
         cherryPickRequest.createLabCherryPick(cherryPickRequest.createScreenerCherryPick(poolWell1), pool1DuplexWells.iterator().next());
         cherryPickRequest.createLabCherryPick(cherryPickRequest.createScreenerCherryPick(poolWell2), pool2DuplexWells.iterator().next());
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
         result[0] = cherryPickRequest;
       }
@@ -834,6 +842,8 @@ public class ComplexDAOTest extends AbstractSpringTest
           }
         }
         genericEntityDao.saveOrUpdateEntity(library);
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
@@ -874,6 +884,8 @@ public class ComplexDAOTest extends AbstractSpringTest
       }
     }
     genericEntityDao.saveOrUpdateEntity(library);
+    genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+    genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(screen);
 
     // test findResultValuesByPlate(Integer, RVT)
@@ -949,7 +961,9 @@ public class ComplexDAOTest extends AbstractSpringTest
         screen.getLabHead().addLabMember(labMember);
         screen.addKeyword("keyword1");
         screen.addKeyword("keyword2");
-        genericEntityDao.saveOrUpdateEntity(labMember); // required due to Hibernate bug; see ScreeningRoomUser.getLabMembers()
+        genericEntityDao.saveOrUpdateEntity(labMember);
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
@@ -1045,6 +1059,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         genericEntityDao.saveOrUpdateEntity(collab2);
         screen.addCollaborator(collab1);
         screen.addCollaborator(collab2);
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });
@@ -1138,6 +1154,8 @@ public class ComplexDAOTest extends AbstractSpringTest
         labCherryPick1.setAllocated(copyE);
         LabCherryPick labCherryPick2 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, wellB02);
         labCherryPick2.setAllocated(copyF);
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
       }
     });

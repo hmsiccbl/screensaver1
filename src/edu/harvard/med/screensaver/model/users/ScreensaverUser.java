@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -285,14 +284,9 @@ abstract public class ScreensaverUser extends AbstractEntity
    */
   @OneToMany(
     mappedBy="performedBy",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
   @OrderBy("dateOfActivity")
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="activityPerformed")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public Set<Activity> getActivitiesPerformed()

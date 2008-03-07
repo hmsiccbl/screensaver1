@@ -143,11 +143,10 @@ public class LabCherryPick extends AbstractEntity
    * Get the screener cherry pick for this lab cherry pick.
    * @return the screener cherry pick for this lab cherry pick
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne
   @JoinColumn(name="screenerCherryPickId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_lab_cherry_pick_to_screener_cherry_pick")
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public ScreenerCherryPick getScreenerCherryPick()
   {
@@ -162,8 +161,8 @@ public class LabCherryPick extends AbstractEntity
    * map to a set of source wells (to accommodate pool-to-duplex mapping).
    * <p>
    * Note: Since we must allow a LabCherryPick to be plate mapped after
-   * instantation time, we instantiate it with only a sourceWell, but not with a
-   * sourceCopy. This means we cannot create an assocation with a
+   * instantiation time, we instantiate it with only a sourceWell, but not with a
+   * sourceCopy. This means we cannot create an association with a
    * WellVolumeAdjustment until the sourceCopy is specified via
    * {@link #setAllocated}. So we must redundantly store the sourceWell in both
    * the LabCherryPick and, later on, in the related wellVolumeAdjustment
@@ -334,11 +333,17 @@ public class LabCherryPick extends AbstractEntity
    * {@link #setMapped(CherryPickAssayPlate, int, int)}.
    * @return the cherry pick assay plate
    */
-  @ManyToOne
+  @ManyToOne(
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }
+  )
   @JoinColumn(name="cherryPickAssayPlateId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_lab_cherry_pick_to_cherry_pick_assay_plate")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   public CherryPickAssayPlate getAssayPlate()
   {
     return _assayPlate;

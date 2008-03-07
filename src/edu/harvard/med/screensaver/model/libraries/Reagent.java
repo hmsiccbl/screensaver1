@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,14 +27,14 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.MapKeyManyToMany;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.MapKeyManyToMany;
 
 
 /**
@@ -62,8 +61,6 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
   private Set<Well> _wells = new HashSet<Well>();
   private Map<AnnotationType,AnnotationValue> _annotationValues = new HashMap<AnnotationType,AnnotationValue>();
   private Set<Screen> _studies = new HashSet<Screen>();
-// TODO: implement
-  //private Set<Reagent> _reagents = new HashSet<Reagent>();
 
 
   // public instance methods
@@ -139,10 +136,8 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
    */
   @OneToMany(
     mappedBy="reagent",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     fetch=FetchType.LAZY
   )
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   public Set<Well> getWells()
   {
     return _wells;
@@ -180,20 +175,17 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
    * Get the set of annotation values.
    * @return the set of annotation values
    */
-  @OneToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE }, fetch=FetchType.LAZY, mappedBy="reagent")
+  @OneToMany(fetch=FetchType.LAZY, mappedBy="reagent")
   /*@LazyCollection(LazyCollectionOption.EXTRA)*/
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @MapKeyManyToMany(joinColumns={ @JoinColumn(name="annotationTypeId") }, targetEntity=AnnotationType.class)
   public Map<AnnotationType,AnnotationValue> getAnnotationValues()
   {
     return _annotationValues;
   }
 
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-              targetEntity=Screen.class,
+  @ManyToMany(targetEntity=Screen.class,
               mappedBy="reagents",
               fetch=FetchType.LAZY)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @JoinColumn(name="studyId", nullable=false, updatable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_reagent_to_study")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)

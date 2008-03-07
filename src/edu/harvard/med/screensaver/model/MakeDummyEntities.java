@@ -95,10 +95,10 @@ public class MakeDummyEntities
 
     // create ResultValueTypes
 
-    screenResult.createResultValueType("numeric_repl1", 1, false, false, false, "phenotype").setNumeric(true);
-    screenResult.createResultValueType("numeric_repl2", 2, false, false, false, "phenotype").setNumeric(true);
-    screenResult.createResultValueType("text_repl1", 1, false, false, false, "phenotype").setNumeric(false);
-    screenResult.createResultValueType("text_repl2", 2, false, false, false, "phenotype").setNumeric(false);
+    screenResult.createResultValueType("numeric_repl1", 1, false, false, false, "phenotype").detemineNumericalness(true);
+    screenResult.createResultValueType("numeric_repl2", 2, false, false, false, "phenotype").detemineNumericalness(true);
+    screenResult.createResultValueType("text_repl1", 1, false, false, false, "phenotype").detemineNumericalness(false);
+    screenResult.createResultValueType("text_repl2", 2, false, false, false, "phenotype").detemineNumericalness(false);
 
     ResultValueType positive1Rvt = screenResult.createResultValueType("positive1", 1, true, true, false, "phenotype");
     positive1Rvt.setHowDerived("from replicate 1");
@@ -120,11 +120,11 @@ public class MakeDummyEntities
     positiveRvt.setHowDerived("from both replicates");
     positiveRvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(4));
     positiveRvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(5));
-    positiveRvt.setNumeric(false);
+    positiveRvt.detemineNumericalness(false);
     positiveRvt.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
 
     ResultValueType commentsRvt = screenResult.createResultValueType("comments");
-    commentsRvt.setNumeric(false);
+    commentsRvt.detemineNumericalness(false);
     commentsRvt.setDescription("a data header with sparse values (some are null, some are empty strings)");
 
     // create ResultValues

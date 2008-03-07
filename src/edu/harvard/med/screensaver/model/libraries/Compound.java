@@ -13,7 +13,6 @@ import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -137,13 +136,13 @@ public class Compound extends SemanticIDAbstractEntity implements Comparable<Com
   * Get the set of wells that contain this compound.
   * @return the set of wells that contain this compound
   */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-              mappedBy="compounds",
-              targetEntity=Well.class,
-              fetch=FetchType.LAZY)
+  @ManyToMany(
+    mappedBy="compounds",
+    targetEntity=Well.class,
+    fetch=FetchType.LAZY
+  )
   @org.hibernate.annotations.ForeignKey(name="fk_well_compound_link_to_compound")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   public Set<Well> getWells()
   {
     return _wells;

@@ -173,7 +173,12 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
     rnaiScreen.addCollaborator(compoundRnaiUser);
     compoundScreen.addCollaborator(compoundRnaiUser);
     
+    genericEntityDao.saveOrUpdateEntity(rnaiUser);
+    genericEntityDao.saveOrUpdateEntity(compoundUser);
+    genericEntityDao.saveOrUpdateEntity(compoundRnaiUser);
+    genericEntityDao.saveOrUpdateEntity(rnaiScreen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(rnaiScreen);
+    genericEntityDao.saveOrUpdateEntity(compoundScreen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(compoundScreen);
 
     List<Screen> screens = genericEntityDao.findAllEntitiesOfType(Screen.class);
@@ -274,8 +279,13 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         screen117.createScreenResult(new Date());
         screen117.setLeadScreener(users[6]);
         
+        for (int i = 0; i < users.length; i ++) {
+          genericEntityDao.saveOrUpdateEntity(users[i]);          
+        }
         genericEntityDao.saveOrUpdateEntity(screen115);
+        genericEntityDao.saveOrUpdateEntity(screen116.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen116);
+        genericEntityDao.saveOrUpdateEntity(screen117.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen117);
         
       }

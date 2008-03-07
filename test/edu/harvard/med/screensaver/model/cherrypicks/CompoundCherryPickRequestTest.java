@@ -52,6 +52,7 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest<Co
   
   public void testCherryPickAllowance()
   {
+    schemaUtil.truncateTablesOrCreateSchema();
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -87,8 +88,9 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest<Co
 
         assertEquals((int) ((10 * 384) / 2 * 0.003), cherryPickRequest.getCherryPickAllowance());
         assertEquals(200, cherryPickRequest.getCherryPickAllowanceUsed());
-        
-        genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
+
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });

@@ -377,6 +377,8 @@ public class ScreenDetailViewer extends StudyDetailViewer
         public void runTransaction()
         {
           _dao.reattachEntity(getScreen());
+          _dao.reattachEntity(getScreen().getLeadScreener());
+          _dao.reattachEntity(getScreen().getLabHead());
           getScreen().setLabHead(getLabName().getSelection());
           getScreen().setLeadScreener(getLeadScreener().getSelection());
           getScreen().setCollaboratorsList(getCollaborators().getSelections());

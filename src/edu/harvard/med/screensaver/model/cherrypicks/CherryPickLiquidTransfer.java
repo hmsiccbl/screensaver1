@@ -64,6 +64,7 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
    * Construct an initialized <code>CherryPickLiquidTransfer</code>. Intended only for use
    * with {@link Screen#createCherryPickLiquidTransfer(ScreensaverUser, Date, Date,
    * CherryPickRequest, CherryPickLiquidTransferStatus)}.
+   * @param screen the screen
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
    * @param dateOfActivity the date the screening room activity took place
@@ -71,13 +72,15 @@ public class CherryPickLiquidTransfer extends ScreeningRoomActivity
    * @param status the status of the cherry pick liquid transfer
    */
   public CherryPickLiquidTransfer(
+    Screen screen,
     ScreensaverUser performedBy,
     Date dateCreated,
     Date dateOfActivity,
     CherryPickRequest cherryPickRequest,
     CherryPickLiquidTransferStatus status)
   {
-    super(cherryPickRequest.getScreen(), performedBy, dateCreated, dateOfActivity);
+    // TODO: business logic to test that cherryPickRequest.getScreen().equals(screen)
+    super(screen, performedBy, dateCreated, dateOfActivity);
     if (status == null) {
       throw new NullPointerException("status is required");
     }

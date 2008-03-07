@@ -41,6 +41,12 @@ extends AbstractEntityTester<E>
    */
   private void testIsVersioned()
   {
+    org.hibernate.annotations.Entity entityAnnotation =
+      _entityClass.getAnnotation(org.hibernate.annotations.Entity.class);
+    if (entityAnnotation != null && ! entityAnnotation.mutable()) {
+      return;
+    }
+      
     ClassMetadata classMetadata = _sessionFactory.getClassMetadata(_entityClass);
     String entityName = classMetadata.getEntityName();
     assertTrue(

@@ -170,6 +170,8 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
 
@@ -191,6 +193,8 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D04"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
 
@@ -207,6 +211,8 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(5, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
 
@@ -223,6 +229,8 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
           expectedDuplexCherryPickWellKeys.add(new WellKey(10, "D05"));
 
           assertEquals(expectedDuplexCherryPickWellKeys, actualDuplexCherryPickWellKeys);
+          genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
           genericEntityDao.saveOrUpdateEntity(screen); // avoid hib errors on flush
         }
 

@@ -100,6 +100,8 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
         ScreenResult screenResult = screen.createScreenResult(new Date());
         screenResult.createResultValueType("Luminescence");
         screenResult.createResultValueType("FI");
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });

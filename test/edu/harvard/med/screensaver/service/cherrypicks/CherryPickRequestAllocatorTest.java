@@ -111,6 +111,8 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         LabCherryPick cherryPick4 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(4, "A01")));
         LabCherryPick cherryPick5 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A01")));
         LabCherryPick cherryPick6 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A01")));
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
 
         Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
@@ -382,6 +384,8 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
             expectedUnfulfillableCherryPicks.add(labCherryPick);
           }
         }
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
         Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
         assertEquals("unfulfillable cherry picks for requested " + Arrays.asList(cherryPickWellNames),

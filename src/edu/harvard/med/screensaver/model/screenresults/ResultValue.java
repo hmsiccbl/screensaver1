@@ -16,19 +16,21 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellType;
-
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Index;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 
 
 /**
@@ -55,7 +57,7 @@ import org.hibernate.annotations.Index;
                                  indexes={ @Index(name = "result_value_rvt_and_value_index", columnNames={ "resultValueTypeId", "value" }),
                                            @Index(name = "result_value_rvt_and_numeric_value_index", columnNames={ "resultValueTypeId", "numericValue" }),
                                            @Index(name = "result_value_rvt_and_positive_index", columnNames={ "resultValueTypeId", "isPositive" }) })
-public class ResultValue extends SemanticIDAbstractEntity
+public class ResultValue extends AbstractEntity
 {
 
   // private static data
@@ -130,7 +132,7 @@ public class ResultValue extends SemanticIDAbstractEntity
 
   // private instance data
 
-  private String _resultValueId;
+  private Integer _resultValueId;
   private Well _well;
   private ResultValueType _resultValueType;
   private String _value;
@@ -237,31 +239,19 @@ public class ResultValue extends SemanticIDAbstractEntity
     return getResultValueId();
   }
 
-  /**
-   * Get the id for the result value.
-   * @return the id for the result value
-   */
   @Id
-  public String getResultValueId()
-  {
-    if (_resultValueId == null) {
-      _resultValueId = _well.getWellId() + ":" + _resultValueType.getResultValueTypeId();
+  @org.hibernate.annotations.GenericGenerator(
+    name="result_value_id_seq",
+    strategy="seqhilo",
+    parameters = {
+      @org.hibernate.annotations.Parameter(name="sequence", value="result_value_id_seq"),
+      @org.hibernate.annotations.Parameter(name="max_lo", value="384")
     }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="result_value_id_seq")
+  public Integer getResultValueId()
+  {
     return _resultValueId;
-  }
-
-  @Override
-  public boolean equals(Object o)
-  {
-    if (!(o instanceof ResultValue)) {
-      return false;
-    }
-    ResultValue other = (ResultValue) o;
-    return
-    ((_value == null && other._value == null) ||
-      (_value != null && other._value != null && _value.equals(other._value))) &&
-      _assayWellType.equals(other._assayWellType) &&
-      _isExclude == other._isExclude;
   }
 
   /**
@@ -283,7 +273,7 @@ public class ResultValue extends SemanticIDAbstractEntity
    * Get the well.
    * @return the well
    */
-  @ManyToOne(cascade={}, fetch=FetchType.LAZY)
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="well_id", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_well")
@@ -503,12 +493,10 @@ public class ResultValue extends SemanticIDAbstractEntity
     if (well == null) {
       throw new DataModelViolationException("well is required for ResultValue");
     }
-
     _resultValueType = rvt;
     _well = well;
-    // TODO: HACK! commenting this out, breaking maintenance of bidir rel'n (in memory only)
-    // adding a non-persisted RVT key to well.resultValues map causes Hibernate exception!
-    // _well.getResultValues().put(rvt, this);
+    _well.getResultValues().put(rvt, this);
+    log.debug("creating RV for " + well + " and " + _resultValueType.getName());
 
     setAssayWellType(assayWellType);
     if (value != null) {
@@ -557,7 +545,7 @@ public class ResultValue extends SemanticIDAbstractEntity
    * @param resultValueId the new id for the result value
    * @motivation for hibernate
    */
-  private void setResultValueId(String resultValueId)
+  private void setResultValueId(Integer resultValueId)
   {
     _resultValueId = resultValueId;
   }
@@ -643,7 +631,7 @@ public class ResultValue extends SemanticIDAbstractEntity
    */
   private void setAssayWellType(AssayWellType assayWellType)
   {
-    if (!isHibernateCaller()) {
+    if (! isHibernateCaller()) {
       validateAssayWellType(assayWellType);
     }
 

@@ -70,6 +70,8 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
           System.out.println("error: " + error);
         }
         assertFalse(screenResultParser.getHasErrors());
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
       }
     });

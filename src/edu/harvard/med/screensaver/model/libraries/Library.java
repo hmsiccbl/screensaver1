@@ -177,6 +177,7 @@ public class Library extends AbstractEntity
    * @return the wells
    */
   @OneToMany(
+    targetEntity=Well.class,
     mappedBy="library",
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
@@ -184,7 +185,8 @@ public class Library extends AbstractEntity
   @OrderBy("wellId")
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public Set<Well> getWells()
   {

@@ -101,6 +101,8 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         genericEntityDao.persistEntity(library);
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         /*final ScreenResult screenResult = */MakeDummyEntities.makeDummyScreenResult(screen, library);
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.persistEntity(screen);
       }
     });

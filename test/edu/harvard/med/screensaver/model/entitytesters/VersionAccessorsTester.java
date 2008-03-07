@@ -56,6 +56,12 @@ extends AbstractEntityTester<E>
     if (! _entityClass.getSuperclass().equals(AbstractEntity.class)) {
       return;
     }
+
+    org.hibernate.annotations.Entity entityAnnotation =
+      _entityClass.getAnnotation(org.hibernate.annotations.Entity.class);
+    if (entityAnnotation != null && ! entityAnnotation.mutable()) {
+      return;
+    }
   
     // getVersion
     try {

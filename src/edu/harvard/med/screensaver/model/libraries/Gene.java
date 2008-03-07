@@ -136,13 +136,8 @@ public class Gene extends SemanticIDAbstractEntity
    */
   @OneToMany(
     mappedBy="gene",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
   public Set<SilencingReagent> getSilencingReagents()
   {
     return _silencingReagents;

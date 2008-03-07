@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.model.annotations.ManyToOne;
 import edu.harvard.med.screensaver.model.annotations.ManyToMany;
@@ -43,6 +44,7 @@ public class RelatedProperty
   private Class _relatedBeanClass;
   private BeanInfo _relatedBeanInfo;
   private boolean _relatedSideIsToMany;
+  private boolean _relatedSideIsMappedToMany;
 
   
   // public constructors and methods
@@ -110,7 +112,7 @@ public class RelatedProperty
       _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
     }
     else {
-      _relatedPropertyName = StringUtils.uncapitalize(_beanClass.getSimpleName());
+      _relatedPropertyName = StringUtils.uncapitalize(_propertyDescriptor.getReadMethod().getDeclaringClass().getSimpleName());
       _relatedPropertyDescriptor = findRelatedPropertyDescriptor(_relatedBeanInfo, _relatedPropertyName);
       if (_relatedPropertyDescriptor == null) {
         _relatedPropertyName = _relatedPropertyName + "s";
@@ -119,10 +121,11 @@ public class RelatedProperty
     }
 
     if (_relatedPropertyDescriptor != null) {
-      ManyToMany relatedManyToMany = _relatedPropertyDescriptor.getReadMethod().getAnnotation(ManyToMany.class);
-      if (relatedManyToMany != null ||
-        Collection.class.isAssignableFrom(_relatedPropertyDescriptor.getReadMethod().getReturnType())) {
+      if (Collection.class.isAssignableFrom(_relatedPropertyDescriptor.getReadMethod().getReturnType())) {
         _relatedSideIsToMany = true;
+      }
+      else if (Map.class.isAssignableFrom(_relatedPropertyDescriptor.getReadMethod().getReturnType())) {
+        _relatedSideIsMappedToMany = true;
       }
     }
   }
@@ -164,6 +167,11 @@ public class RelatedProperty
   public boolean otherSideIsToMany()
   {
     return _relatedSideIsToMany;
+  }
+
+  public boolean otherSideIsMappedToMany()
+  {
+    return _relatedSideIsMappedToMany;
   }
 
   public Class getBeanClass()

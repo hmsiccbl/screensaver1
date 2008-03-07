@@ -100,7 +100,7 @@ public abstract class Activity extends AbstractEntity implements Comparable
    * @return the user that performed the activity
    */
   @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="performedById", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_activity_to_screensaver_user")

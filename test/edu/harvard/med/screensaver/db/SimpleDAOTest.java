@@ -131,6 +131,8 @@ public class SimpleDAOTest extends AbstractSpringTest
         rvts[3] = screenResult.createResultValueType("rvt3");
         rvts[3].setDerived(true);
         rvts[3].setAssayPhenotype("Human");
+        genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(screenResult.getScreen());
         genericEntityDao.saveOrUpdateEntity(rvts[0]);
       }

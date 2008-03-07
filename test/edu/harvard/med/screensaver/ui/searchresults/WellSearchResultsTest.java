@@ -125,6 +125,8 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
           genericEntityDao.persistEntity(rnaiLibrary);
           Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(3, ScreenType.RNAI);
           MakeDummyEntities.makeDummyScreenResult(rnaiScreen, rnaiLibrary);
+          genericEntityDao.saveOrUpdateEntity(rnaiScreen.getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(rnaiScreen.getLabHead());
           genericEntityDao.persistEntity(rnaiScreen);
 
           for (Well well : rnaiLibrary.getWells()) {
@@ -482,6 +484,8 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                                         "wells.screenResults");
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
         MakeDummyEntities.makeDummyScreenResult(screen, library);
+        genericEntityDao.persistEntity(screen.getLeadScreener());
+        genericEntityDao.persistEntity(screen.getLabHead());
         genericEntityDao.persistEntity(screen);
         return Arrays.asList(screen.getScreenResult());
       } });
@@ -505,6 +509,8 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                                         true,
                                                         "wells");
         Study study = MakeDummyEntities.makeDummyStudy(library);
+        genericEntityDao.persistEntity(study.getLeadScreener());
+        genericEntityDao.persistEntity(study.getLabHead());
         genericEntityDao.persistEntity(study);
         return Arrays.asList(study);
       } });

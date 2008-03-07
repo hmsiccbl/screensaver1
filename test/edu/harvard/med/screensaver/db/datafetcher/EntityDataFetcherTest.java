@@ -88,10 +88,14 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
           genericEntityDao.saveOrUpdateEntity(_rnaiLibrary);
           _screenResult = MakeDummyEntities.makeDummyScreenResult(_rnaiScreen,
                                                                   _rnaiLibrary);
+          genericEntityDao.saveOrUpdateEntity(_rnaiScreen.getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(_rnaiScreen.getLabHead());
           genericEntityDao.saveOrUpdateEntity(_rnaiScreen);
 
           // make a study, for its annotations
           _study = MakeDummyEntities.makeDummyStudy(_rnaiLibrary);
+          genericEntityDao.persistEntity(_study.getLeadScreener());
+          genericEntityDao.persistEntity(_study.getLabHead());
           genericEntityDao.persistEntity(_study);
 
           // make another screen result, to ensure tests that are looking for
@@ -100,6 +104,8 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
           Screen otherRnaiScreen = MakeDummyEntities.makeDummyScreen(3,
                                                                      ScreenType.RNAI);
           MakeDummyEntities.makeDummyScreenResult(otherRnaiScreen, _rnaiLibrary);
+          genericEntityDao.saveOrUpdateEntity(otherRnaiScreen.getLeadScreener());
+          genericEntityDao.saveOrUpdateEntity(otherRnaiScreen.getLabHead());
           genericEntityDao.saveOrUpdateEntity(otherRnaiScreen);
         }
       });

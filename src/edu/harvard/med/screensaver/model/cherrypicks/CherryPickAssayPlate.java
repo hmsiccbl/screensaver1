@@ -13,7 +13,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -114,11 +113,14 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
 
   public int compareTo(CherryPickAssayPlate that)
   {
-    return this._plateOrdinal < that._plateOrdinal ? -1 :
-      this._plateOrdinal > that._plateOrdinal ? 1 :
-        this._attemptOrdinal < that._attemptOrdinal ? -1 :
-          this._attemptOrdinal > that._attemptOrdinal ? 1 : 0;
+    int plateOrdinalDifference = getPlateOrdinal() - that.getPlateOrdinal();
+    if (plateOrdinalDifference != 0) {
+      return plateOrdinalDifference;
+    }
+    return getAttemptOrdinal() - that.getAttemptOrdinal();
   }
+  
+  public String toString() { return super.toString() + ":" + _plateOrdinal + ":" + _attemptOrdinal; }
 
   /**
    * Get the id for the cherry pick assay plate.
@@ -264,11 +266,10 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
    * Get the cherry pick liquid transfer that marks that this plate has been created.
    * @return a CherryPickLiquidTransfer
    */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne
   @JoinColumn(name="cherryPickLiquidTransferId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_assay_plate_to_cherry_pick_liquid_transfer")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   public CherryPickLiquidTransfer getCherryPickLiquidTransfer()
   {
     return _cherryPickLiquidTransfer;

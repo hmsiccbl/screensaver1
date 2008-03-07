@@ -30,6 +30,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.OptimisticLock;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -37,13 +40,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
-
-import net.sf.cglib.transform.impl.AddDelegateTransformer;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.annotations.OptimisticLock;
-
 
 /**
  * Provides the metadata for a subset of a
@@ -229,11 +225,20 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
+   * Set the numericalness of this result value type.
+   * @param isNumeric the new numericalness of this result value type
+   */
+  public void setNumeric(boolean isNumeric)
+  {
+    _isNumeric = isNumeric;
+  }
+  
+  /**
    * Set the numericalness of this result value type. Set the transient property
    * {@link #isNumericalnessDetermined() numericalnessDetermined} to true.
    * @param isNumeric the new numericalness of this result value type
    */
-  public void setNumeric(boolean isNumeric)
+  public void detemineNumericalness(boolean isNumeric)
   {
     _isNumeric = isNumeric;
     _isNumericalnessDetermined = true;
@@ -242,7 +247,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   /**
    * Return true iff the numericalness of this result value type has been determined.
    * @return true iff the numericalness of this result value type has been determined
-   * @see #setNumeric(boolean)
+   * @see #detemineNumericalness(boolean)
    */
   @Transient
   public boolean isNumericalnessDetermined()
@@ -375,8 +380,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * {@link #setHowDerived}.
    * @return the set of result value types that this result value type was derived from
    */
-  @ManyToMany(fetch=FetchType.LAZY,
-              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToMany(fetch=FetchType.LAZY)
   @JoinTable(
     name="resultValueTypeDerivedFromLink",
     joinColumns=@JoinColumn(name="derivedFromResultValueTypeId"),
@@ -385,7 +389,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @org.hibernate.annotations.ForeignKey(name="fk_derived_from_result_value_type")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @edu.harvard.med.screensaver.model.annotations.ManyToMany(
     inverseProperty="derivedTypes",
     singularPropertyName="typeDerivedFrom"
@@ -457,7 +460,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @see #removeDerivedTypeFrom(ResultValueType)
    */
   @ManyToMany(
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     mappedBy="typesDerivedFrom",
     targetEntity=ResultValueType.class,
     fetch=FetchType.LAZY
@@ -465,7 +467,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @org.hibernate.annotations.ForeignKey(name="fk_derived_result_value_type")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
   @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="typesDerivedFrom")
   public SortedSet<ResultValueType> getDerivedTypes()
   {
@@ -783,7 +784,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @org.hibernate.annotations.MapKey(columns={ @Column(name="well_id") })
   @OptimisticLock(excluded=true)
   @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
-  @org.hibernate.annotations.LazyCollection(LazyCollectionOption.EXTRA)
   public Map<WellKey,ResultValue> getResultValues()
   {
     return _resultValues;
@@ -925,6 +925,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     Integer decimalPrecision,
     boolean exclude)
   {
+    // TODO: this assert seems to contradict the statement below that null numericValues are allowed for numeric data
     assert (value == null) != (numericValue == null) :  "either numeric or non-numeric value";
     if (_resultValues.containsKey(well.getWellKey())) {
       return null;
@@ -933,14 +934,14 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     // we really shouldn't use data values to determine a RVT's numerical-ness
     if (!_isNumericalnessDetermined) {
       if (value == null && numericValue != null) {
-        setNumeric(true);
+        detemineNumericalness(true);
       }
       else if (value != null && numericValue == null) {
-        setNumeric(false);
+        detemineNumericalness(false);
       }
       else if (value == null && numericValue == null) {
         log.warn("setting " + this + ".isNumeric=false since both value and numericValue are null");
-        setNumeric(false);
+        detemineNumericalness(false);
       }
       else {
         throw new IllegalArgumentException("either value or numericValue must be null");

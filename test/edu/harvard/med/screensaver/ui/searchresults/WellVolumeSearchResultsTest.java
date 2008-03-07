@@ -248,6 +248,8 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate1WellA01).setAllocated(copyD);
         _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate2WellA01).setAllocated(copyC);
         _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate2WellB01).setAllocated(copyD);
+        genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen().getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen());
         
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new BigDecimal("-1.00"), null));

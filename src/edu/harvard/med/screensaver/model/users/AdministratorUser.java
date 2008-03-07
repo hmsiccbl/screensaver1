@@ -97,11 +97,9 @@ public class AdministratorUser extends ScreensaverUser
    */
   @OneToMany(
     mappedBy="approvedBy",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
     fetch=FetchType.LAZY
   )
   @OrderBy("dateApproved")
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="activityApproved")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public Set<AdministrativeActivity> getActivitiesApproved()

@@ -125,17 +125,11 @@ public class BillingInformation extends AbstractEntity
    * Get the screen.
    * @return the screen
    */
-  @OneToOne(
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-    optional=false
-  )
+  @OneToOne(optional=false)
   @JoinColumn(name="screenId", nullable=false, updatable=false)
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_billing_information_to_screen")
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE }
-  )
   public Screen getScreen()
   {
     return _screen;

@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -19,11 +18,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a library screening performed on set of
@@ -73,13 +72,11 @@ public class RNAiCherryPickScreening extends Screening
    * Get the RNAi cherry pick request.
    * @return the RNAi cherry pick request
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="cherryPickRequestId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_rnai_cherry_pick_screening_to_rnai_cherry_pick_request")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
   public RNAiCherryPickRequest getRnaiCherryPickRequest()
   {
