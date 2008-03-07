@@ -2,7 +2,7 @@ BEGIN;
 
 INSERT INTO schema_history (screensaver_revision, date_updated, comment)
 SELECT
-2219,
+2220,
 current_timestamp,
 'revert result_value primary key to int with sequence';
 
