@@ -112,15 +112,11 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
       protected void addDomainRestrictions(HqlBuilder hql,
                                            Map<RelationshipPath<WellVolumeAdjustment>,String> path2Alias)
       {
-        String alias = getOrCreateJoin(hql,
-                                       new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "well"),
-                                       path2Alias,
-                                       JoinType.INNER);
         Set<String> wellKeyStrings = new HashSet<String>();
         for (WellKey wellKey : wellKeys) {
           wellKeyStrings.add(wellKey.toString());
         }
-        hql.whereIn(alias, "id", wellKeyStrings);
+        hql.whereIn(getRootAlias(), "well.id", wellKeyStrings);
       }
     };
     addRelationshipsToFetch(wvaFetcher);
