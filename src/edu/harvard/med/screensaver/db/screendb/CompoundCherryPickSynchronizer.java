@@ -155,6 +155,12 @@ public class CompoundCherryPickSynchronizer
 //    request.getLabCherryPicks().clear();
 //    request.getScreenerCherryPicks().clear();
 //    request.getCherryPickAssayPlates().clear();
+      for (CherryPickAssayPlate plate : request.getCherryPickAssayPlates()) {
+        CherryPickLiquidTransfer transfer = plate.getCherryPickLiquidTransfer();
+        if (transfer != null) {
+          _dao.deleteEntity(transfer);
+        }
+      }
       _dao.deleteEntity(request);
       _dao.flush(); // delete now, to avoid Hibernate delete/insert ordering problems later on
       log.debug("deleted " + request);
