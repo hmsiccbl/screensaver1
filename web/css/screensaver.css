@@ -250,8 +250,14 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .scroller_activePage {
-	font-weight: bold;
+  font-weight: bold;
+  color: white;
 }
+
+.scroller_inactivePage {
+  color: gray;
+}
+
 
 .menuAndContent {
 	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */

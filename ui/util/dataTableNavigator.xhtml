@@ -12,8 +12,7 @@
 	<t:saveState value="#{dataTable.rowsPerPageSelector.value}" />
 	<!--t:saveState value="#{dataTable.dataTableModel.rowIndex}"/-->
 
-	<s:roundedDiv color="255,255,255" borderColor="0,0,0" radius="8"
-		borderWidth="1">
+	<s:roundedDiv color="#{appInfo.screensaverThemeColor}" radius="8" borderWidth="1">
 		<t:panelGrid id="dataTableNavPanel" columns="5" width="100%"
 			rendered="#{dataTable.rowCount > 0}">
 
@@ -22,13 +21,15 @@
 				lastRowIndexVar="toRow" rowsCountVar="rowCount">
 				<t:outputText
 					value="Page #{page}&#160;of&#160;#{pages} (#{rowCount}&#160;#{rowCount == 1 ? &quot;row&quot; : &quot;rows&quot;})"
+					style="color: white"
 					escape="false" styleClass="searchResultNavPanelStatus" />
 			</t:dataScroller>
 
 			<t:dataScroller id="dataTableScroller" for=":#{dataTable.clientId}"
 				firstRowIndexVar="fromRow" lastRowIndexVar="toRow"
 				rowsCountVar="rowCount" paginator="true" paginatorMaxPages="10"
-				fastStep="10" renderFacetsIfSinglePage="false" styleClass="scroller"
+				fastStep="10" renderFacetsIfSinglePage="false" styleClass="scroller" 
+				paginatorColumnClass="scroller_inactivePage"
 				paginatorActiveColumnClass="scroller_activePage">
 				<f:facet name="first">
 					<t:graphicImage url="/images/arrow-first.png" border="0"
@@ -66,8 +67,8 @@
 			</t:panelGroup>
 
 			<t:panelGrid columns="2" title="The sort column and direction">
-				<t:outputLabel for="sortColumnMenu" value="Sort by"
-					styleClass="label" />
+				<t:outputLabel for="sortColumnMenu" value="Sort by" 
+					styleClass="label" style="color: white" />
 				<t:panelGroup>
 					<t:selectOneMenu id="sortColumnMenu"
 						value="#{dataTable.columnManager.sortColumnSelector.value}"
@@ -94,10 +95,10 @@
 					binding="#{dataTable.rowsPerPageUIComponent}"
 					valueChangeListener="#{dataTable.rowsPerPageListener}"
 					onchange="javascript:this.nextSibling.nextSibling.click();"
-					styleClass="data" title="Number of rows to display per page">
+					styleClass="data" title="Number of rows to display per page" > 
 					<f:selectItems value="#{dataTable.rowsPerPageSelector.selectItems}" />
 				</t:selectOneMenu>
-				<t:outputText id="rowsPerPageLabel" value=" per page" styleClass="label" />
+				<t:outputText id="rowsPerPageLabel" value=" per page" styleClass="label" style="color: white" />
 				<t:commandButton id="updateRowsPerPageButton" value="Go"
 					styleClass="hiddenCommand" />
 			</t:panelGroup>
