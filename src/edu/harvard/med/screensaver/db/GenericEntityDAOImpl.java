@@ -50,11 +50,12 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * The relationships specify what related data should be loaded from the
  * database at the same time the entity itself is being loaded (i.e., within a
  * single SQL call). This is useful in cases where the returned entity (or
- * entities) will be used outside of a Hibernate session (i.e., "detached").
- * This is also useful for minimizing the number of SQL calls that are used to
+ * entities) will be used outside of a Hibernate session (i.e., "detached") and
+ * therefore must have all needed relationships eagerly fetched. This is also
+ * useful for minimizing (optimizing) the number of SQL calls that are used to
  * fetch data for each of the relationships that will be traversed while using
- * the entity within an active Hibernate session. This or reduce or eliminate
- * the "N+1 selects" performance problem, as discussed in Hibernate
+ * the entity within an active Hibernate session. This also reduces or
+ * eliminates the "N+1 selects" performance problem, as discussed in Hibernate
  * documentation. Each relationship is specified as a dot-separated path of
  * relationship property names, relative to the root entity. For example, if
  * loading a Parent entity, one might specify the following (hypothetical)
@@ -63,14 +64,13 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * need to be specified independently, so that, for example,
  * <code>"children.friends.toys"</code> is sufficient and <code>{"children",
  * "children.friends", "children.friends.toys"}</code>
- * is unnecessary. relationships that are more than 1 level deep, all
- * intermediate relationships will be loaded (as one would expect). <i>Warning</i>:
- * specifying more than a single to-many relationship will generate an SQL query
- * whose result will be the cross-product of all the relationships' entities.
- * This can grow quite large, quickly! Unless you are sure that the multiple
- * to-many relationships only contain a small number of entities, you should
- * retrieve each of the root entity's additional to-many relationships via
- * subsequent calls to {@link #need} or {@link #needReadOnly}.
+ * is unnecessary. <i>Warning</i>: specifying more than a single to-many
+ * relationship will generate an SQL query whose result will be the
+ * cross-product of all the relationships' entities. This can grow quite large,
+ * quickly! Unless you are sure that the multiple to-many relationships only
+ * contain a small number of entities, you should retrieve each of the root
+ * entity's additional to-many relationships via subsequent calls to
+ * {@link #need} or {@link #needReadOnly}.
  * <p>
  * If <code>readOnly</code> is true, the entities that are loaded by Hibernate
  * will not be "managed". This means that they will not be dirty-checked at
@@ -82,7 +82,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * Hibernate session as managed (read-write) entities, changes to them <i>will</i>
  * be persisted! So the best practice is for the client code to never modify
  * entities loaded as read-only.
- *
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -194,11 +194,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * uninitialized relationships cannot be navigated.
    * <p>
    * Any relationships that may have been initialized in the passed-in entity
-   * (network) will <i>not</i> be pre-initialized in the new instance of the
-   * returned entity, so consider the potential performance impact of navigating
-   * through previously initialized lazy relationships.
+   * (network) <i>cannot</i> be expected to be pre-initialized (eagerly
+   * fetched) in the new, returned entity instance, so consider carefully the
+   * potential performance impact of accessing relationships on this entity
+   * instance. If you need to eagerly fetch relationships on this entity
+   * instance, use {@link #reloadEntity(AbstractEntity, boolean, String...)}
+   * and/or {@link #need(AbstractEntity, String...)} and/or
+   * {@link #needReadOnly(AbstractEntity, String...)}.
    * </p>
-   *
+   * 
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
@@ -220,12 +224,19 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * uninitialized relationships cannot be navigated.
    * <p>
    * Any relationships that may have been initialized in the passed-in entity
-   * (network) will <i>not</i> be pre-initialized in the new instance of the
-   * returned entity, so consider the potential performance impact of navigating
-   * through previously initialized lazy relationships, except for those
-   * requested via the <code>relationships</code> argument.
+   * (network) <i>cannot</i> be expected to be pre-initialized (eagerly
+   * fetched) in the new, returned entity instance. However, you may specify the
+   * relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager fetch additional
+   * collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem.
    * </p>
-   *
+   * 
    * @param <E>
    * @param entity the entity to be reloaded
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -248,8 +259,16 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   /**
    * Loads the specified relationships of a given entity, allowing these
    * relationships to be navigated after the entity is detached from the
-   * Hibernate session.
-   *
+   * Hibernate session. You may specify the relationships that need to be
+   * eagerly fetched via the <code>relationships</code> varargs. To avoid the
+   * eager fetching cross-product problem (see Hibernate docs), you should only
+   * eager fetch a single <i>collection</i> (to-many) relationship in this
+   * method call; eager fetch additional collection relationships by making
+   * subsequent calls to {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem.
+   * 
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -269,7 +288,16 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * relationships to be navigated after the entity is detached from the
    * Hibernate session. See class-level documentation of
    * {@link GenericEntityDAO} for issues related to loading read-only entities.
-   *
+   * You may specify the relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager
+   * fetch additional collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem.
+   * 
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -381,6 +409,16 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
+   * You may specify any relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager
+   * fetch additional collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem. *
+   * 
    * @param <E>
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
@@ -411,7 +449,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * See @{@link #findEntityById(Class, Serializable)}.
+   * You may specify any relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager
+   * fetch additional collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem. * See @{@link #findEntityById(Class, Serializable)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -445,7 +491,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * See @{@link #findEntitiesByProperties(Class, Map)}.
+   * You may specify any relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager
+   * fetch additional collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem. * See @{@link #findEntitiesByProperties(Class, Map)}.
    * @param name2Value a <code>Map</code> containing entries for each
    *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -550,7 +604,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * See @{@link #findEntityByProperties(Class, Map)}.
+   * You may specify any relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager
+   * fetch additional collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem. * See @{@link #findEntityByProperties(Class, Map)}.
    * @param name2Value a <code>Map</code> containing entries for each
    *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -597,7 +659,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * See @{@link #findEntitiesByProperty(Class, String, Object)}.
+   * You may specify any relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager
+   * fetch additional collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem. * See @{@link #findEntitiesByProperty(Class, String, Object)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -640,7 +710,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * See @{@link #findEntityByProperty(Class, String, Object)}.
+   * You may specify any relationships that need to be eagerly fetched via the
+   * <code>relationships</code> varargs. To avoid the eager fetching
+   * cross-product problem (see Hibernate docs), you should only eager fetch a
+   * single <i>collection</i> (to-many) relationship in this method call; eager
+   * fetch additional collection relationships by making subsequent calls to
+   * {@link #need(AbstractEntity, String...)} or
+   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * fetch as many to-one relationships as needed in a single call to this
+   * method, without creating a performance problem. * See @{@link #findEntityByProperty(Class, String, Object)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
