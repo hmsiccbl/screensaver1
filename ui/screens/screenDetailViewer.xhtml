@@ -24,7 +24,7 @@ TODO:
 			value="#{screenDetailViewer.panelCollapsed}"
 			title="Screen Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-        <s:roundedDiv borderWidth="4" color="0,0,255" radius="4"  styleClass="transparentSectionHeader">
+        <s:roundedDiv borderWidth="4" color="#{menu.screensaverThemeColor}" radius="4"  styleClass="transparentSectionHeader">
 					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,14 +25,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.BuildNumber;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
+
+import org.apache.log4j.Logger;
 
 /**
  * A base class for JSF backing beans. A backing bean is responsible for
@@ -107,6 +108,14 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return FEEDBACK_URL;
   }
 
+  public static Color SCREENSAVER_THEME_COLOR = new Color(0, 0, 255);
+  
+  public Color getScreensaverThemeColor() 
+  { 
+      return SCREENSAVER_THEME_COLOR; 
+  } 
+
+  
   /**
    * Get the group of messages that was injected into this backing bean.
    *
