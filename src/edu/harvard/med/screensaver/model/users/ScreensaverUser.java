@@ -84,6 +84,7 @@ abstract public class ScreensaverUser extends AbstractEntity
   private String _digestedPassword;
   private String _eCommonsId;
   private String _harvardId;
+  private Date _harvardIdExpirationDate;
 
 
   // public constructors
@@ -562,6 +563,24 @@ abstract public class ScreensaverUser extends AbstractEntity
   public void setHarvardId(String harvardId)
   {
     _harvardId = harvardId;
+  }
+
+  /**
+   * Get the harvard id expiration date.
+   * @return the harvard id expiration date
+   */
+  public Date getHarvardIdExpirationDate()
+  {
+    return _harvardIdExpirationDate;
+  }
+
+  /**
+   * Set the harvard id expiration date.
+   * @param harvardIdExpirationDate the new harvard id expiration date
+   */
+  public void setHarvardIdExpirationDate(Date harvardIdExpirationDate)
+  {
+    _harvardIdExpirationDate = truncateDate(harvardIdExpirationDate);
   }
 
 

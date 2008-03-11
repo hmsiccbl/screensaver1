@@ -169,6 +169,7 @@ public class UserSynchronizer
       ecommonsId = null;
     }
     String harvardId = resultSet.getString("harvard_id");
+    Date harvardIdExpirationDate = resultSet.getDate("harvard_id_exp_date");
     String affiliationName = resultSet.getString("lab_affiliation");
     ScreeningRoomUserClassification classification = getClassification(resultSet);
     boolean isNonScreeningUser = resultSet.getBoolean("non_user");
@@ -208,6 +209,7 @@ public class UserSynchronizer
 
     user.setComsCrhbaPermitNumber(comsCrhbaPermitNumber);
     user.setComsCrhbaPermitPrincipalInvestigator(comsCrhbaPermitPrincipalInvestigator);
+    user.setHarvardIdExpirationDate(harvardIdExpirationDate);
 
     return user;
   }
