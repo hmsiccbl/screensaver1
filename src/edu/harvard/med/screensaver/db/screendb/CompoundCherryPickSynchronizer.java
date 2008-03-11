@@ -341,7 +341,7 @@ public class CompoundCherryPickSynchronizer
         destinationWellName.getColumnIndex());
     }
       catch (DuplicateEntityException e) {
-        log.error("ignoring duplicate cherry pick: " + e.getMessage());
+        log.error("ignoring duplicate cherry pick for visit id " + visitId + ": " + e.getMessage());
       }
 
     }
