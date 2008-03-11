@@ -15,7 +15,7 @@
 			title="Screen Result Summary" var="isCollapsed" titleVar="title"
 			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
 			<f:facet name="header">
-        <s:roundedDiv borderWidth="4" color="#{menu.screensaverThemeColor}" radius="4"  styleClass="transparentSectionHeader">
+        <s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"  styleClass="transparentSectionHeader">
 					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
@@ -97,7 +97,7 @@
 				value="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
 				title="Data Headers" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{menu.screensaverThemeColor}" radius="4" 
+					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4" 
 						styleClass="transparentSubsectionHeader">
 						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
@@ -135,7 +135,7 @@
 				value="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
 				title="Data" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{menu.screensaverThemeColor}" radius="4"
+					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
 						styleClass="transparentSubsectionHeader">
 						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
@@ -166,7 +166,7 @@
 				title="Heat Maps" var="isCollapsed" titleVar="title"
 				rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
 				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{menu.screensaverThemeColor}" radius="4"
+					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
 						styleClass="transparentSubsectionHeader">
 						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
 							<h:graphicImage
@@ -184,7 +184,7 @@
 	</h:form>
 
 	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
-	<s:roundedDiv borderWidth="4" color="#{menu.screensaverThemeColor}" radius="4"
+	<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
 		rendered="#{empty screenResultViewer.screenResult}">
 		<t:outputText value="Screen result not available"
 			styleClass="transparentSectionHeader" />

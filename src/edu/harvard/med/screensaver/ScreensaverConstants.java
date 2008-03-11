@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver;
 
+import java.awt.Color;
+
 public interface ScreensaverConstants
 {
   // static data members
@@ -18,7 +20,8 @@ public interface ScreensaverConstants
   public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
   public static final String FEEDBACK_URL = "mailto:screensaver-feedback@hms.harvard.edu";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
-
+  public static Color SCREENSAVER_THEME_COLOR = new Color(0, 0, 255);
+  
   // JSF Action Results
   // these values are returned by backing beans' action methods and are used to
   // define navigation rules in faces-config.xml

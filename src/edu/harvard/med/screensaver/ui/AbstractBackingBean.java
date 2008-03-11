@@ -108,13 +108,10 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return FEEDBACK_URL;
   }
 
-  public static Color SCREENSAVER_THEME_COLOR = new Color(0, 0, 255);
-  
   public Color getScreensaverThemeColor() 
   { 
-      return SCREENSAVER_THEME_COLOR; 
+    return SCREENSAVER_THEME_COLOR;
   } 
-
   
   /**
    * Get the group of messages that was injected into this backing bean.
