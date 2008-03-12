@@ -12,7 +12,7 @@
 use DBI;
 
 my $screendb_dbh = DBI->connect
-    ("dbi:Pg:dbname=screendb", "js163", "dugtedent3",
+    ("dbi:Pg:dbname=screendb", "js163", "xxxxxx",
      { RaiseError => 1,
        AutoCommit => 0,
        LongReadLen => 1000000,
@@ -23,7 +23,7 @@ my $screendb_dbh = DBI->connect
 $screendb_dbh->do("set datestyle to SQL, MDY");
 
 my $screensaver_dbh = DBI->connect
-    ("dbi:Pg:dbname=screensaver", "js163", "dugtedent3",
+    ("dbi:Pg:dbname=screensaver", "js163", "xxxxxx",
      { RaiseError => 1,
        AutoCommit => 1,
        LongReadLen => 1000000,
