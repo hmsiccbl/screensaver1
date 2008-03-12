@@ -198,6 +198,13 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     String value)
   {
     if (_values.containsKey(reagent)) {
+      AnnotationValue extantAnnotValue = _values.get(reagent);
+      if (extantAnnotValue.getValue().equals(value)) {
+        log.warn("duplicate annotation for " + reagent + " (ignoring duplicate)");
+      }
+      else {
+        log.error("conflicting annotations exist for " + reagent + " (fix this!)");
+      }
       return null;
     }
     AnnotationValue annotationValue = new AnnotationValue(

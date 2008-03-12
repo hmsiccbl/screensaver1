@@ -31,6 +31,8 @@ import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -74,6 +76,8 @@ public class MedicinalCompoundsStudyCreator
   private static final String MECHEM_COMMENT_COLUMN_HEADER = "Medchem comment";
   private static final String VENDOR_ID_COLUMN_HEADER = "Vendor_ID";
   private static final String VENDOR_COLUMN_HEADER = "Vendor";
+  private static final String PLATE_COLUMN_HEADER = "Plate";
+  private static final String WELL_COLUMN_HEADER = "Well";
 
   public static void main(String[] args)
   {
@@ -152,23 +156,24 @@ public class MedicinalCompoundsStudyCreator
       short iVendorColumn = (short) findColumnForHeader(sheet, VENDOR_COLUMN_HEADER);
       short iVendorIdColumn = (short) findColumnForHeader(sheet, VENDOR_ID_COLUMN_HEADER);
       short iMedChemCommentColumn = (short) findColumnForHeader(sheet, MECHEM_COMMENT_COLUMN_HEADER);
+      short iPlateColumn = (short) findColumnForHeader(sheet, PLATE_COLUMN_HEADER);
+      short iWellColumn = (short) findColumnForHeader(sheet, WELL_COLUMN_HEADER);
       if (iVendorColumn >= 0 && iVendorIdColumn >= 0 && iMedChemCommentColumn >= 0) {
         for (int iRow = 1; iRow < sheet.getRows(); ++iRow) {
           Cell vendorCell = (Cell) cellFactory.getCell(iVendorColumn, iRow, true).clone();
           Cell vendorIdCell = (Cell) cellFactory.getCell(iVendorIdColumn, iRow, true).clone();
           if (vendorCell != null && vendorIdCell != null) {
             Cell medChemCommentCell = (Cell) cellFactory.getCell(iMedChemCommentColumn, iRow, false).clone();
-            ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorCell.getAsString(), vendorIdCell.getAsString());
-            Reagent reagent = dao.findEntityById(Reagent.class, rvi);
-            if (reagent == null) {
-              log.error("no reagent exists for " + rvi + "; skipping");
-            }
-            else {
+            Reagent reagent = findReagent(cellFactory,
+                                          dao,
+                                          iPlateColumn,
+                                          iWellColumn,
+                                          iRow,
+                                          vendorCell,
+                                          vendorIdCell);
+            if (reagent != null) {
               String value = MEDCHEM_COMMENT_CELL_PARSER.parse(medChemCommentCell);
-              if (annotType.createAnnotationValue(reagent, value) == null) {
-                log.error("duplicate annotation for " + reagent + "; skipping");
-              }
-              else {
+              if (annotType.createAnnotationValue(reagent, value) != null) {
                 ++n;
               }
             }
@@ -181,6 +186,35 @@ public class MedicinalCompoundsStudyCreator
       errors.addError(e.getMessage());
       return 0;
     }
+  }
+
+  private static Reagent findReagent(Factory cellFactory,
+                                     GenericEntityDAO dao,
+                                     short iPlateColumn,
+                                     short iWellColumn,
+                                     int iRow,
+                                     Cell vendorCell,
+                                     Cell vendorIdCell)
+  {
+    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorCell.getAsString(), vendorIdCell.getAsString());
+    Reagent reagent = dao.findEntityById(Reagent.class, rvi);
+    if (reagent == null) {
+      Cell plateCell = (Cell) cellFactory.getCell(iPlateColumn, iRow, true).clone();
+      Cell wellCell = (Cell) cellFactory.getCell(iWellColumn, iRow, true).clone();
+      WellKey wellKey = new WellKey(plateCell.getInteger(), wellCell.getString());
+      //log.warn("reagent does not exist with ID " + rvi);
+      Well well = dao.findEntityById(Well.class, wellKey.toString());
+      if (well == null) { 
+        log.error("unknown reagent " + rvi + "; looking for reagent in well, but no such well " + wellKey);
+      }
+      else {
+        reagent = well.getReagent();
+        if (reagent == null) {
+          log.error("unknown reagent " + rvi + " and no reagent in well " + wellKey);
+        }
+      }
+    }
+    return reagent;
   }
 
   private static int findColumnForHeader(Sheet sheet, String headerName)
