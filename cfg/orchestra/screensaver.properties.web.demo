@@ -6,7 +6,7 @@
 
 appserver.dir=/www/demo.screensaver.med.harvard.edu/tomcat/
 deploy.dir=/www/demo.screensaver.med.harvard.edu/docroot/screensaver/
-log4j.properties.file=cfg/orchestra/log4j.properties.web.prod
+log4j.properties.file=cfg/orchestra/log4j.properties.web.demo
 copy.downloads.dir=true
 
 
