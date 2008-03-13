@@ -381,6 +381,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>authenticated users</web-resource-name>
+      <url-pattern>/main.jsf</url-pattern>
       <url-pattern>/main/*</url-pattern>
       <url-pattern>/util/*</url-pattern>
       <url-pattern>/help/*</url-pattern>

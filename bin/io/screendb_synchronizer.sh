@@ -15,8 +15,9 @@ SCREENSAVER=`dirname $0`/../..
 cd $SCREENSAVER
 SCREENSAVER=`pwd -P`
 
-LIBS=`for s in $SCREENSAVER/lib/*.jar ; do printf ":$s" ; done`
-CLASSPATH="$SCREENSAVER/classes$LIBS"
+JARS=`find $SCREENSAVER/lib \( -name unused -prune \) -or -name "*.jar" -print`
+LIBS=`for s in $JARS ; do printf ":$s" ; done`
+CLASSPATH="$SCREENSAVER/build/classes$LIBS"
 JAVA=/opt/java/jdk1.5/bin/java
 
 $JAVA -Xmx1500m -cp $CLASSPATH edu.harvard.med.screensaver.db.screendb.OrchestraStandaloneScreenDBSynchronizer -S pgsql.cl.med.harvard.edu -D screendb -U $USER 2>&1 | tee screendb_synchronizer.out
