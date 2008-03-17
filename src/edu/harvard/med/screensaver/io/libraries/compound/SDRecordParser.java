@@ -157,7 +157,7 @@ class SDRecordParser
 
       if (line.matches("^>  <.*>(\\s+\\(.*\\))?")) {
         String header = line.substring(4, line.indexOf('>', 4));
-        line = readNextLine();
+        line = readNextLine().trim();
 
         if (header.equals("Plate")) {
           try {
