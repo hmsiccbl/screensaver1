@@ -89,7 +89,7 @@ public class BioactivesSubmissionCompoundNameGrabber
     _documentBuilder = documentBuilderFactory.newDocumentBuilder();
   }
   
-  public void grabCompoundNamesFromBioactivesSubmission() throws FileNotFoundException, SAXException, IOException
+  public void grabCompoundNamesFromBioactivesSubmission()
   {
     _dao.doInTransaction(new DAOTransaction()
     {
@@ -124,19 +124,19 @@ public class BioactivesSubmissionCompoundNameGrabber
         continue;
       }
       String vendorIdentifier = getTextContent(vendorElement);
-      
-      // HACKS
-      if (vendorName.equals("Biomol")) {
-        vendorName = "BIOMOL";
+      if (vendorIdentifier.equals("")) {
+        log.error("empty text content in Vendor element");
+        continue;
       }
       
-      
+      ReagentVendorIdentifier reagentVendorIdentifier =
+        new ReagentVendorIdentifier(vendorName, vendorIdentifier);
       List<Well> wellsForVendorInfo = _dao.findEntitiesByHql(
         Well.class,
         "from Well where reagent.reagentId = ?",
-        new ReagentVendorIdentifier(vendorName, vendorIdentifier));
+        reagentVendorIdentifier);
       if (wellsForVendorInfo.size() == 0) {
-        log.error("could not find well for vendor info: " + vendorName + ", " + vendorIdentifier);
+        log.error("could not find well for reagent_id \"" + reagentVendorIdentifier + "\"");
         continue;
       }
       
@@ -151,9 +151,11 @@ public class BioactivesSubmissionCompoundNameGrabber
         for (int j = 0; j < nameElements.getLength(); j ++) {
           Element nameElement = (Element) nameElements.item(j);
           String name = getTextContent(nameElement);
-//          log.info(
-//            "add name \"" + name + "\" to compound " + compound + " based on vendor info " +
-//            vendorName + ", " + vendorIdentifier);
+          log.info(
+            "add name \"" + name + "\" to compound " + compound + " in well " + well +
+            " based on reagent_id \"" + reagentVendorIdentifier + "\"");
+          compound.addCompoundName(name);
+          _dao.persistEntity(compound);
         }
       }
     }
