@@ -150,7 +150,7 @@ public class BioactivesSubmissionCompoundNameGrabber
         NodeList nameElements = identifiersElement.getElementsByTagName("Name");
         for (int j = 0; j < nameElements.getLength(); j ++) {
           Element nameElement = (Element) nameElements.item(j);
-          String name = getTextContent(nameElement);
+          String name = getTextContent(nameElement).trim();
           log.info(
             "add name \"" + name + "\" to compound " + compound + " in well " + well +
             " based on reagent_id \"" + reagentVendorIdentifier + "\"");
