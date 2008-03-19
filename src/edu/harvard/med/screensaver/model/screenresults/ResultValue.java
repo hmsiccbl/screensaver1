@@ -495,8 +495,18 @@ public class ResultValue extends AbstractEntity
     }
     _resultValueType = rvt;
     _well = well;
-    _well.getResultValues().put(rvt, this);
-    log.debug("creating RV for " + well + " and " + _resultValueType.getName());
+
+    // TODO: HACK! commenting this out, but for a different reason than the reason why it was commented out before:
+    //
+    // // TODO: HACK! commenting this out, breaking maintenance of bidir rel'n (in memory only)
+    // // adding a non-persisted RVT key to well.resultValues map causes Hibernate exception!
+    //
+    // the problem with the old comment has been resolved. the new problem is that this line just kills
+    // memory/performance of import screen result. i will investigate potential changes to Hibernate configuration
+    // to better address this problem. for now, a fix needs to get up on prod so dave and jenn can load screen results.
+    // since commenting this out is a known entity, the only negative effect is that it breaks some unit tests.
+    //
+    // _well.getResultValues().put(rvt, this);
 
     setAssayWellType(assayWellType);
     if (value != null) {
