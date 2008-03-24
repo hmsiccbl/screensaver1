@@ -6,8 +6,23 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
+			<name>org.rubypeople.rdt.core.rubybuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
+			<triggers>auto,full,incremental,</triggers>
+			<arguments>
+				<dictionary>
+					<key>LaunchConfigHandle</key>
+					<value>&lt;project&gt;/.externalToolBuilders/place screensaver properties file in .eclipse.classes.launch</value>
+				</dictionary>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
@@ -18,5 +33,6 @@
 		<nature>com.genuitec.eclipse.springframework.springnature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.genuitec.eclipse.jsf.jsfnature</nature>
+		<nature>org.rubypeople.rdt.core.rubynature</nature>
 	</natures>
 </projectDescription>

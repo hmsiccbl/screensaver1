@@ -485,7 +485,19 @@
   >
     <delete dir="${build.dir}" />
   </target>
-
+	
+	<target name="chembank-wsimport">
+    <taskdef name="wsimport"
+             classname="com.sun.tools.ws.ant.WsImport2"
+             classpathref="build.library.path"
+    />
+    <wsimport
+	    wsdl="http://chembank.broad.harvard.edu/webservices/MoleculeWebService?wsdl"
+    	sourcedestdir="src"
+	    destdir=".eclipse.classes"
+	    package="edu.mit.broad.chembank.shared.mda.webservices.service"
+		/>
+	</target>
 
   <!--
     @motivation: get applications launched from eclipse application launcher to use the same
