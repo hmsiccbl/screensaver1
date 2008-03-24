@@ -233,23 +233,23 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     // test with VirtualPagingDataModel
     _wellSearchResults.searchWellsForScreenResult(_screenResult);
     Map<TableColumn<?,?>,Getter<Well,?>> columnsAndValueGetters = new HashMap<TableColumn<?,?>,Getter<Well,?>>();
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#1: numeric_repl1"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt1.getResultValues().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#1: text_repl1"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt2.getResultValues().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#1: comments"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt3.getResultValues().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#100000: text_annot"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType2.getAnnotationValues().get(well.getReagent());
                                  return av == null ? null : av.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#100000: numeric_annot"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType1.getAnnotationValues().get(well.getReagent());
                                  return av == null ? av : new BigDecimal(av.getNumericValue()).setScale(3, RoundingMode.HALF_UP); }; });
@@ -262,23 +262,23 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     SortedSet<WellKey> expectedWellKeys = _bigWellKeys.headSet(new WellKey("01001:A01"));
     _wellSearchResults.searchWells(expectedWellKeys);
     columnsAndValueGetters.clear();
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#1: numeric_repl1"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt1.getResultValues().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#1: text_repl1"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt2.getResultValues().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#1: comments"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt3.getResultValues().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#100000: text_annot"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType2.getAnnotationValues().get(well.getReagent());
                                  return av == null ? null : av.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("#100000: numeric_annot"),
+    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType1.getAnnotationValues().get(well.getReagent());
                                  return av == null ? av : new BigDecimal(av.getNumericValue()).setScale(3, RoundingMode.HALF_UP); }; });
@@ -346,10 +346,10 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     _expectedKeys.add(well2.getWellKey());
 
     TableColumn<Well,String> filterColumn1 =
-      (TableColumn<Well,String>) _wellSearchResults.getColumnManager().getColumn("#1: text_repl1");
+      (TableColumn<Well,String>) _wellSearchResults.getColumnManager().getColumn("text repl1 [1]");
     filterColumn1.clearCriteria().addCriterion(new Criterion<String>(Operator.LESS_THAN, "text00008"));
     TableColumn<Well,String> filterColumn2 =
-      (TableColumn<Well,String>) _wellSearchResults.getColumnManager().getColumn("#1: positive");
+      (TableColumn<Well,String>) _wellSearchResults.getColumnManager().getColumn("positive [1]");
     filterColumn2.clearCriteria().addCriterion(new Criterion<String>(Operator.EQUAL, PartitionedValue.STRONG.getValue()));
     // TODO: also test a numeric ResultValueType column
 

@@ -88,13 +88,13 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
     catch (DataModelViolationException e) {}
   }
 
-  /**
-   * Test the service.libraries.LibraryCreator.createLibrary does not suffer
-   * from a race condition on library plate range allocation
-   */
-  public void testConcurrentLibraryCreate()
-  {
-    // TODO: implement
-    fail("not yet implemented");
-  }
+  // TODO: implement
+//  /**
+//   * Test the service.libraries.LibraryCreator.createLibrary does not suffer
+//   * from a race condition on library plate range allocation
+//   */
+//  public void testConcurrentLibraryCreate()
+//  {
+//    fail("not yet implemented");
+//  }
 }
