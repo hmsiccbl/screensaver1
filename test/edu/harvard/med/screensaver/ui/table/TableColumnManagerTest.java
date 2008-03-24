@@ -38,7 +38,7 @@ public class TableColumnManagerTest extends TestCase
 
   private static final String BASIC_COLUMNS_GROUP = "Basic Columns";
   private static final String ADVANCED_COLUMNS_GROUP = "Advanced Columns";
-  private static final String ADVANCED_SPECIAL_COLUMNS_GROUP = "Advanced Columns:Special";
+  private static final String ADVANCED_SPECIAL_COLUMNS_GROUP = "Advanced Columns::Special";
 
 
   private static Logger log = Logger.getLogger(TableColumnManagerTest.class);
