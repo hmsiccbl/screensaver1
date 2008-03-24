@@ -34,6 +34,10 @@
             description="controls whether tasks should be 'debug-aware'; provides a short-hand command-line option for setting all *.debug options appropriately"
             value="false"
   />
+  <!-- property name="test-ui"
+            description="controls whether JSFUnit unit test classes should be compiled and deployed with the web application"
+            value="false"
+  / -->
   <property name="javac.debug"
             description="controls whether Java compilation generates debug information in class files"
             value="${debug}"
@@ -80,6 +84,7 @@
     <istrue value="${debug}" />
   </condition>
   <property name="src.dir" location="src" />
+  <property name="test.src.dir" location="test" />
   <property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml" />
   <property name="build.dir" location="build" />
   <property name="javadoc.dir" location="${build.dir}/api" />
@@ -135,6 +140,7 @@
   >
     <srcfiles file="${dev.loginmodule.config.file}" />
   </uptodate>
+
 
   <!-- classpaths -->
 
@@ -420,8 +426,26 @@
       <arg value="${basedir}" />
     </exec>
 
-  </target>
+    <antcall target="build-ui-test" />
 
+    </target>
+
+  <target name="build-ui-test" if="test-ui">
+    <description>Build the unit test classes for testing the web user interface via JSFUnit.
+    </description>
+    <property name="classes.dir" value="${build.dir}/classes" />
+    <!-- 'sourcepath=""' required to selectively compile only *JsfTest.java files. See http://ant.apache.org/manual/CoreTasks/javac.html#srcdirnote -->
+    <javac srcdir="${test.src.dir}"
+           sourcepath=""
+           destdir="${classes.dir}"
+           classpathref="build.library.path"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           listfiles="${verbose}"
+    >
+      <include name="**/*JsfUnitTest.java"/>
+    </javac>
+   </target>
 
   <target name="install"
           description="Create an Screensaver Utilities installation in ${install.dir}"
