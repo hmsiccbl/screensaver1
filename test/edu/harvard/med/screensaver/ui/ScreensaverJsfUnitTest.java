@@ -9,14 +9,18 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import javax.servlet.http.HttpSession;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -70,22 +74,7 @@ public class ScreensaverJsfUnitTest extends org.apache.cactus.ServletTestCase
     _schemaUtil.truncateTablesOrCreateSchema();
     log.debug("truncated database tables");
 
-    _testUser = new AdministratorUser("Test",
-                                      "User",
-                                      "test_user@hms.harvard.edu",
-                                      "",
-                                      "",
-                                      "for jsfunit testing",
-                                      "testuser",
-                                      TEST_USER_PASSWORD);
-    _testUser.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-    _testUser.addScreensaverUserRole(ScreensaverUserRole.DEVELOPER);
-    _testUser.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
-    _testUser.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
-    _testUser.addScreensaverUserRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
-    _testUser.addScreensaverUserRole(ScreensaverUserRole.CHERRY_PICK_ADMIN);
-    _dao.persistEntity(_testUser);
-    log.debug("created test user");
+    _testUser = createTestUser("Test", "User");
 
     // We assume BASIC servlet authentication mechanism is in use, and so we
     // specify authentication credentials in this way; all unit tests here can
@@ -97,6 +86,28 @@ public class ScreensaverJsfUnitTest extends org.apache.cactus.ServletTestCase
     JSFServerSession server = new JSFServerSession(client);
     assertEquals("testscreensaver1",
                  server.getManagedBeanValue("#{envInfo.db}"));
+  }
+
+  private AdministratorUser createTestUser(String first, String last)
+  {
+    AdministratorUser user = 
+      new AdministratorUser(first,
+                            last,
+                            first.toLowerCase() + "_" + last.toLowerCase() + "@hms.harvard.edu",
+                            "",
+                            "",
+                            "for jsfunit testing",
+                            (first + last).toLowerCase(),
+                            (first + last).toLowerCase());
+    user.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+    user.addScreensaverUserRole(ScreensaverUserRole.DEVELOPER);
+    user.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
+    user.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
+    user.addScreensaverUserRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
+    user.addScreensaverUserRole(ScreensaverUserRole.CHERRY_PICK_ADMIN);
+    _dao.persistEntity(user);
+    log.debug("created test user " + user);
+    return user;
   }
   
 //  public void testLogin() throws IOException, SAXException
@@ -165,6 +176,45 @@ public class ScreensaverJsfUnitTest extends org.apache.cactus.ServletTestCase
     
     DataTableModel model = (DataTableModel) server.getManagedBeanValue("#{wellsBrowser.dataTableModel}");
     assertEquals("row count", 2, model.getRowCount());
+  }
+  
+  public void testUIControllerMethodExceptionHandlerAspect() throws Exception
+  {
+    Integer screenNumber = 1;
+    final Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber);
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() 
+      {
+        _dao.persistEntity(screen.getLeadScreener());
+        _dao.persistEntity(screen.getLabHead());
+        _dao.persistEntity(screen);
+      }
+    });
+    
+    JSFClientSession client1 = new JSFClientSession(_webConv, "/main/main.jsf");
+    JSFServerSession server1 = new JSFServerSession(client1);
+    client1.setParameter("quickFindScreenForm:screenNumber", Integer.toString(screenNumber));
+    client1.submit("quickFindScreenSubmit");
+    assertEquals("/screens/screenViewer.xhtml", server1.getCurrentViewID());
+    assertEquals(screenNumber, (Integer) server1.getManagedBeanValue("#{screenViewer.screen.screenNumber}"));
+    log.debug("viewing screen #1 in session " + ((HttpSession) server1.getFacesContext().getExternalContext().getSession(false)).getId());
+    
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() 
+      {
+        Screen screen2 = _dao.reloadEntity(screen);
+        screen2.setComments("screen edited!");
+      }
+    });
+    log.debug("edited screen in separate Hibernate session");
+    
+    client1.submit("screenDetailPanelForm:editCommand");
+    log.debug("invoked Edit command on Screen Detail Viewer");
+    assertTrue("screen viewer entity is out-of-date", server1.getFacesMessages().hasNext());
+    assertTrue("screen viewer entity is out-of-date", server1.getFacesMessages().next().getSummary().startsWith("Other users have already modified the data that you are attempting to update"));
+    assertEquals("screen updated to lastest version",
+                 "screen edited!",
+                 (String) server1.getManagedBeanValue("#{screenViewer.screen.comments}"));
   }
   
 }

@@ -87,7 +87,7 @@ public class ScreenViewer extends StudyViewer
     _screenResultViewer.setScreenResult(screenResult);
     resetView();
   }
-
+  
 
   /* JSF Application methods */
 

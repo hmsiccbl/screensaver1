@@ -22,10 +22,6 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DataAccessException;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
@@ -49,6 +45,9 @@ import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 public class ScreenDetailViewer extends StudyDetailViewer
 {
@@ -115,6 +114,13 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public Screen getScreen()
   {
     return _screen;
+  }
+
+  @Override
+  public String reload()
+  {
+    log.debug("in ScreenViewer.reload()");
+    return _screenViewer.viewScreen(_screen);
   }
 
   public boolean isEditMode()
@@ -325,24 +331,15 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public String editScreen()
   {
     _isEditMode = true;
-    try {
-      _dao.doInTransaction(new DAOTransaction()
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
       {
-        public void runTransaction()
-        {
-          _dao.reattachEntity(getScreen()); // checks if up-to-date
-          _dao.need(getScreen(), "labHead.labMembers");
-        }
-      });
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
-    return _screenViewer.viewLastScreen(); // on error, reload (and not in edit mode)
+        _dao.reattachEntity(getScreen()); // checks if up-to-date, generating error if not
+        _dao.need(getScreen(), "labHead.labMembers");
+      }
+    });
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod
@@ -372,28 +369,18 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public String saveScreen()
   {
     _isEditMode = false;
-    try {
-      _dao.doInTransaction(new DAOTransaction()
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
       {
-        public void runTransaction()
-        {
-          _dao.reattachEntity(getScreen());
-          _dao.reattachEntity(getScreen().getLeadScreener());
-          _dao.reattachEntity(getScreen().getLabHead());
-          getScreen().setLabHead(getLabName().getSelection());
-          getScreen().setLeadScreener(getLeadScreener().getSelection());
-          getScreen().setCollaboratorsList(getCollaborators().getSelections());
-        }
-      });
-    }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-      _screenViewer.viewLastScreen();
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-      _screenViewer.viewLastScreen();
-    }
+        _dao.reattachEntity(getScreen());
+        _dao.reattachEntity(getScreen().getLeadScreener());
+        _dao.reattachEntity(getScreen().getLabHead());
+        getScreen().setLabHead(getLabName().getSelection());
+        getScreen().setLeadScreener(getLeadScreener().getSelection());
+        getScreen().setCollaboratorsList(getCollaborators().getSelections());
+      }
+    });
     _screensBrowser.refetch();
     return VIEW_SCREEN;
   }

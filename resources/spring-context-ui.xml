@@ -33,10 +33,10 @@
        ref="currentScreensaverUser" />
    </bean>
 
-   <!-- an aspect to handler concurrency failure exceptions -->
+   <!-- aspect to handle exceptions thrown from methods annotated with @UIControllerMethods -->
    <bean
      id="concurrencyFailureExceptionHandlerAspectBean"
-     class="edu.harvard.med.screensaver.ui.aspects.ConcurrencyFailureExceptionHandlerAspect">
+     class="edu.harvard.med.screensaver.ui.aspects.UIControllerMethodExceptionHandlerAspect">
      <!-- execute earlier than other advice (e.g. before the transactional advice) -->
      <property
        name="order"
