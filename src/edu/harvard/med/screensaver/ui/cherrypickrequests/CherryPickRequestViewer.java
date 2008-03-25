@@ -31,10 +31,6 @@ import javax.faces.model.ArrayDataModel;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DataAccessException;
-
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -93,6 +89,9 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 public class CherryPickRequestViewer extends AbstractBackingBean
 {
@@ -834,16 +833,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public String deleteCherryPickRequest()
   {
     if (_cherryPickRequest != null) {
-      try {
-        _cherryPickRequestDao.deleteCherryPickRequest(_cherryPickRequest);
-        return _screenViewer.viewScreen(_cherryPickRequest.getScreen());
-      }
-      catch (ConcurrencyFailureException e) {
-        showMessage("concurrentModificationConflict");
-      }
-      catch (DataAccessException e) {
-        showMessage("databaseOperationFailed", e.getMessage());
-      }
+      _cherryPickRequestDao.deleteCherryPickRequest(_cherryPickRequest);
+      return _screenViewer.viewScreen(_cherryPickRequest.getScreen());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -875,20 +866,12 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
-    try {
-      Set<LabCherryPick> unfulfillable = _cherryPickRequestAllocator.allocate(_cherryPickRequest);
-      if (unfulfillable.size() == _cherryPickRequest.getLabCherryPicks().size()) {
-        showMessage("cherryPicks.allCherryPicksUnfulfillable");
-      }
-      else if (unfulfillable.size() > 0) {
-        showMessage("cherryPicks.someCherryPicksUnfulfillable");
-      }
+    Set<LabCherryPick> unfulfillable = _cherryPickRequestAllocator.allocate(_cherryPickRequest);
+    if (unfulfillable.size() == _cherryPickRequest.getLabCherryPicks().size()) {
+      showMessage("cherryPicks.allCherryPicksUnfulfillable");
     }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
+    else if (unfulfillable.size() > 0) {
+      showMessage("cherryPicks.someCherryPicksUnfulfillable");
     }
     return viewCherryPickRequest(_cherryPickRequest);
   }
@@ -896,15 +879,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   @UIControllerMethod
   public String deallocateCherryPicks()
   {
-    try {
-      _cherryPickRequestAllocator.deallocate(_cherryPickRequest);
-    }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
+    _cherryPickRequestAllocator.deallocate(_cherryPickRequest);
     return viewCherryPickRequest(_cherryPickRequest);
   }
 
@@ -914,34 +889,18 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     if (!validateSelectedAssayPlates(VALIDATE_SELECTED_PLATES_FOR_DEALLOCATION)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    try {
-      _cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(_cherryPickRequest,
-                                                                 getSelectedAssayPlates(),
-                                                                 getLiquidTransferPerformedBy().getSelection(),
-                                                                 getDateOfLiquidTransfer(),
-                                                                 getLiquidTransferComments());
-    }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
+    _cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(_cherryPickRequest,
+                                                               getSelectedAssayPlates(),
+                                                               getLiquidTransferPerformedBy().getSelection(),
+                                                               getDateOfLiquidTransfer(),
+                                                               getLiquidTransferComments());
     return viewCherryPickRequest(_cherryPickRequest);
   }
 
   @UIControllerMethod
   public String plateMapCherryPicks()
   {
-    try {
-      _cherryPickRequestPlateMapper.generatePlateMapping(_cherryPickRequest);
-    }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
+    _cherryPickRequestPlateMapper.generatePlateMapping(_cherryPickRequest);
     return viewCherryPickRequest(_cherryPickRequest);
   }
 
@@ -1164,25 +1123,15 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public String setEditMode()
   {
     _isEditMode = true;
-    try {
-      _dao.doInTransaction(new DAOTransaction()
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
       {
-        public void runTransaction()
-        {
-          _dao.reattachEntity(_cherryPickRequest); // checks if up-to-date
-          //_dao.need(cherryPickRequest, "");
-        }
-      });
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
-    // on error, reload
-    return viewCherryPickRequest(_cherryPickRequest);
+        _dao.reattachEntity(_cherryPickRequest); // checks if up-to-date
+        //_dao.need(cherryPickRequest, "");
+      }
+    });
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod
@@ -1195,25 +1144,15 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   public String save() {
     _isEditMode = false;
 
-    try {
-      _dao.doInTransaction(new DAOTransaction()
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
       {
-        public void runTransaction()
-        {
-          _dao.reattachEntity(_cherryPickRequest);
-          _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
-          _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
-        }
-      });
-    }
-    catch (ConcurrencyFailureException e) {
-      showMessage("concurrentModificationConflict");
-      viewCherryPickRequest(_cherryPickRequest);
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-      viewCherryPickRequest(_cherryPickRequest);
-    }
+        _dao.reattachEntity(_cherryPickRequest);
+        _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
+        _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
+      }
+    });
     return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
   }
 

@@ -215,22 +215,14 @@ public class ScreenResultViewer extends AbstractBackingBean
   public String delete()
   {
     if (_screenResult != null) {
-      try {
-        _dao.doInTransaction(new DAOTransaction() {
-          public void runTransaction() {
-            ScreenResult screenResult = _dao.reattachEntity(_screenResult);
-            _screenResultsDao.deleteScreenResult(screenResult);
-            _screensBrowser.refetch();
-          }
-        });
-        return _screenViewer.viewScreen(_screenResult.getScreen());
-      }
-      catch (ConcurrencyFailureException e) {
-        showMessage("concurrentModificationConflict");
-      }
-      catch (DataAccessException e) {
-        showMessage("databaseOperationFailed", e.getMessage());
-      }
+      _dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction() {
+          ScreenResult screenResult = _dao.reattachEntity(_screenResult);
+          _screenResultsDao.deleteScreenResult(screenResult);
+          _screensBrowser.refetch();
+        }
+      });
+      return _screenViewer.viewScreen(_screenResult.getScreen());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
