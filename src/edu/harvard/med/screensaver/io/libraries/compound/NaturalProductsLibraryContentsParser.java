@@ -162,7 +162,7 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        log.info("processing small molecule file: " + libraryContentsFile.getName());
+        log.info("processing natural products file: " + libraryContentsFile.getName());
         Library library = _dao.findEntityByProperty(Library.class, "shortName", libraryShortName);
         if (library == null) {
           log.error("couldn't find library with shortName \"" + libraryShortName + "\"");
@@ -183,7 +183,7 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
           }
         }
         _dao.saveOrUpdateEntity(library);
-        log.info("finished processing small molecule File: " + libraryContentsFile.getName());
+        log.info("finished processing natural products File: " + libraryContentsFile.getName());
       }
     });
   }
