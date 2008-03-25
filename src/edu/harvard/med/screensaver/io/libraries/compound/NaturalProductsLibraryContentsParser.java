@@ -10,6 +10,8 @@
 package edu.harvard.med.screensaver.io.libraries.compound;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -18,6 +20,11 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -30,8 +37,6 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -61,6 +66,69 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
     private static final long serialVersionUID = -6789546240931907100L;
   }
 
+  public static final int SHORT_OPTION_INDEX = 0;
+  public static final int LONG_OPTION_INDEX = 1;
+  public static final int DESCRIPTION_INDEX = 2;
+
+  public static final String[] INPUT_FILE_OPTION = {
+    "f",
+    "input-file",
+    "the file to load library contents from"
+  };
+  public static final String[] LIBRARY_SHORT_NAME_OPTION = {
+    "l",
+    "library-short-name",
+    "the short name of the library to load contents for"
+  };
+  
+  
+  // static methods
+
+  @SuppressWarnings("static-access")
+  public static void main(String[] args)
+  {
+    CommandLineApplication application = new CommandLineApplication(args);
+    application.addCommandLineOption(
+      OptionBuilder
+      .hasArg()
+      .withArgName(LIBRARY_SHORT_NAME_OPTION[SHORT_OPTION_INDEX])
+      .isRequired()
+      .withDescription(LIBRARY_SHORT_NAME_OPTION[DESCRIPTION_INDEX])
+      .withLongOpt(LIBRARY_SHORT_NAME_OPTION[LONG_OPTION_INDEX])
+      .create(LIBRARY_SHORT_NAME_OPTION[SHORT_OPTION_INDEX]));
+    application.addCommandLineOption(
+      OptionBuilder
+      .hasArg()
+      .withArgName(INPUT_FILE_OPTION[SHORT_OPTION_INDEX])
+      .isRequired()
+      .withDescription(INPUT_FILE_OPTION[DESCRIPTION_INDEX])
+      .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION_INDEX])
+      .create(INPUT_FILE_OPTION[SHORT_OPTION_INDEX]));
+    try {
+      if (! application.processOptions(true, true)) {
+        return;
+      }
+      String libraryShortName =
+        application.getCommandLineOptionValue(LIBRARY_SHORT_NAME_OPTION[SHORT_OPTION_INDEX]);
+      File libraryContentsFile =
+        application.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION_INDEX], File.class);
+
+      GenericEntityDAO genericEntityDao = (GenericEntityDAO) application.getSpringBean("genericEntityDao");
+      LibrariesDAO librariesDao = (LibrariesDAO) application.getSpringBean("librariesDao");
+      NaturalProductsLibraryContentsParser parser =
+        new NaturalProductsLibraryContentsParser(genericEntityDao, librariesDao);
+
+      parser.parseLibraryContents(libraryShortName, libraryContentsFile);
+    }
+    catch (ParseException e) {
+      log.error("error processing command line options", e);
+    }
+    catch (Exception e) {
+      log.error("application exception", e);
+    }
+  }
+
+  
 
   // private instance data
 
@@ -82,6 +150,42 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
   {
     _dao = dao;
     _librariesDao = librariesDao;
+  }
+
+  /**
+   * Parse the library contents from a file in a command-line application context. Report errors to the logger.
+   * @param libraryShortName
+   * @param libraryContentsFile
+   */
+  public void parseLibraryContents(final String libraryShortName, final File libraryContentsFile)
+  {
+    _dao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        log.info("processing small molecule file: " + libraryContentsFile.getName());
+        Library library = _dao.findEntityByProperty(Library.class, "shortName", libraryShortName);
+        if (library == null) {
+          log.error("couldn't find library with shortName \"" + libraryShortName + "\"");
+          return;
+        }
+        try {
+          parseLibraryContents(
+            library,
+            libraryContentsFile,
+            new FileInputStream(libraryContentsFile));
+        }
+        catch (FileNotFoundException e) {
+          throw new InternalError("braindamage: " + e.getMessage());
+        }
+        if (getHasErrors()) {
+          for (ParseError error : getErrors()) {
+            log.error(error.toString());
+          }
+        }
+        _dao.saveOrUpdateEntity(library);
+        log.info("finished processing small molecule File: " + libraryContentsFile.getName());
+      }
+    });
   }
 
   /**
