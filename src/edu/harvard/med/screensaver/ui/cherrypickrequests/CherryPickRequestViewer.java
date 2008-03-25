@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screens;
+package edu.harvard.med.screensaver.ui.cherrypickrequests;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,6 +75,7 @@ import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWel
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
@@ -95,8 +96,6 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 public class CherryPickRequestViewer extends AbstractBackingBean
 {
-
-
   // static members
 
   private static Logger log = Logger.getLogger(CherryPickRequestViewer.class);
@@ -348,18 +347,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS.get(11).add(LAB_CHERRY_PICKS_TABLE_COLUMNS.get(10));
   }
 
-  private static final Collection<Integer> PLATE_COLUMNS_LIST = new ArrayList<Integer>();
-  private static final Collection<Character> PLATE_ROWS_LIST = new ArrayList<Character>();
-
-  static {
-    for (int i = Well.MIN_WELL_COLUMN; i <= Well.MAX_WELL_COLUMN; i++) {
-      PLATE_COLUMNS_LIST.add(i);
-    }
-    for (char i = Well.MIN_WELL_ROW; i <= Well.MAX_WELL_ROW; i++) {
-      PLATE_ROWS_LIST.add(i);
-    }
-  }
-
 
   // instance data members
 
@@ -397,7 +384,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   private EmptyWellsConverter _emptyWellsConverter;
 
-
+  
   // public constructors and methods
 
   /**
@@ -598,7 +585,13 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-
+  
+  @Override
+  public String reload()
+  {
+    return viewCherryPickRequest(_cherryPickRequest);
+  }
+ 
   public boolean isEditMode()
   {
     return _isEditMode;
@@ -858,34 +851,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   @UIControllerMethod
   public String deleteAllCherryPicks()
   {
-    try {
-      _dao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          CherryPickRequest cherryPickRequest = _dao.reloadEntity(_cherryPickRequest,
-                                                                  false,
-                                                                  "labCherryPicks.sourceWell");
-          _dao.need(cherryPickRequest,
-                    "screenerCherryPicks.screenedWell",
-                    "screenerCherryPicks.rnaiKnockdownConfirmation");
-          if (cherryPickRequest.isAllocated()) {
-            throw new BusinessRuleViolationException("cherry picks cannot be deleted once a cherry pick request has been allocated");
-          }
-          Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
-          for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
-            _cherryPickRequestDao.deleteScreenerCherryPick(cherryPick);
-          }
-        }
-      });
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
-
+    _cherryPickRequestDao.deleteAllCherryPicks(_cherryPickRequest);
     return viewCherryPickRequest(_cherryPickRequest);
   }
-
 
   @UIControllerMethod
   public String viewCherryPickRequestWellVolumes()
@@ -1396,9 +1364,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
         }
       });
-
-//      _screenerCherryPickCount = _cherryPickRequest.getScreenerCherryPicks().size();
-//      _labCherryPickCount = _cherryPickRequest.getLabCherryPicks().size();
 
       doWarnOnInvalidPoolWellScreenerCherryPicks(_cherryPickRequest);
       doWarnOnDuplicateScreenerCherryPicks(_cherryPickRequest);

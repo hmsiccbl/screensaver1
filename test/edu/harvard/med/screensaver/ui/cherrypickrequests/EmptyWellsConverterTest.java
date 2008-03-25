@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.screens;
+package edu.harvard.med.screensaver.ui.cherrypickrequests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +18,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.ui.cherrypickrequests.EmptyWellsConverter;
 
 public class EmptyWellsConverterTest extends TestCase
 {

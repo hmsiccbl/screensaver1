@@ -495,7 +495,7 @@
     id="cherryPickRequestViewer"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer">
+    class="edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="cherryPickRequestDao" />
     <constructor-arg ref="librariesDao" />
@@ -524,7 +524,7 @@
     id="cherryPickRequestFinder"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.screens.CherryPickRequestFinder">
+    class="edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestFinder">
     <constructor-arg ref="cherryPickRequestDao" />
     <constructor-arg ref="cherryPickRequestViewer" />
     <aop:scoped-proxy/>

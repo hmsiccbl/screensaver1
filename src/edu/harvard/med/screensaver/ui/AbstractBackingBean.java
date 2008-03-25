@@ -223,6 +223,15 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     return _currentScreensaverUser;
   }
 
+  /**
+   * Override this method to allow the backing bean to recover from an operation
+   * that threw an exception that requires reloading of the data.
+   * @see ConcurrencyFailureException
+   */
+  public String reload()
+  {
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
 
   public Map<String,String> getEscapeBackslashes()
   {

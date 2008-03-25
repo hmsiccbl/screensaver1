@@ -13,6 +13,8 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -83,6 +85,24 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * The number of decimal places used when recording volume values.
    */
   public static final int VOLUME_SCALE = 2;
+  
+  public static final Collection<Integer> PLATE_COLUMNS_LIST;
+
+  static {
+    ArrayList<Integer> plateColumnsList = new ArrayList<Integer>();
+    for (int i = Well.MIN_WELL_COLUMN; i <= Well.MAX_WELL_COLUMN; i++) {
+      plateColumnsList.add(i);
+    }
+    PLATE_COLUMNS_LIST = Collections.unmodifiableList(plateColumnsList);
+  }
+  public static final Collection<Character> PLATE_ROWS_LIST;
+  static {
+    ArrayList<Character> plateRowsList = new ArrayList<Character>();
+    for (char i = Well.MIN_WELL_ROW; i <= Well.MAX_WELL_ROW; i++) {
+      plateRowsList.add(i);
+    }
+    PLATE_ROWS_LIST = Collections.unmodifiableList(plateRowsList);
+  }
 
   public static boolean isValidWellName(String wellName)
   {

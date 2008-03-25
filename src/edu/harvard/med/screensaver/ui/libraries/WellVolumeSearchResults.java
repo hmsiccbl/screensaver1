@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.ui.screens.CherryPickRequestViewer;
+import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.FixedDecimalColumn;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;

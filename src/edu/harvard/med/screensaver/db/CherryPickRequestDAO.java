@@ -89,6 +89,23 @@ public class CherryPickRequestDAO extends AbstractDAO
 
     getHibernateTemplate().delete(labCherryPick);
   }
+  
+  public void deleteAllCherryPicks(CherryPickRequest cherryPickRequest)
+  {
+   cherryPickRequest = _dao.reattachEntity(cherryPickRequest);
+   _dao.need(cherryPickRequest, 
+             "labCherryPicks.sourceWell");
+    if (cherryPickRequest.isAllocated()) {
+      throw new BusinessRuleViolationException("cherry picks cannot be deleted once a cherry pick request has been allocated");
+    }
+    _dao.need(cherryPickRequest,
+              "screenerCherryPicks.screenedWell",
+              "screenerCherryPicks.rnaiKnockdownConfirmation");
+    Set<ScreenerCherryPick> cherryPicksToDelete = new HashSet<ScreenerCherryPick>(cherryPickRequest.getScreenerCherryPicks());
+    for (ScreenerCherryPick cherryPick : cherryPicksToDelete) {
+      deleteScreenerCherryPick(cherryPick);
+    }
+  }
 
   public void deleteCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
   {

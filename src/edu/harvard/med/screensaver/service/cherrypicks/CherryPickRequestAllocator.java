@@ -84,7 +84,6 @@ public class CherryPickRequestAllocator
   @Transactional
   public Set<LabCherryPick> allocate(final CherryPickRequest cherryPickRequestIn) throws DataAccessException
   {
-    log.debug("hi from CPRAllocator.allocate: " + cherryPickRequestIn);
     // TODO: handle concurrency; perform appropriate locking to prevent race conditions (overdrawing well) among multiple allocate() calls
     final Set<LabCherryPick> unfulfillableLabCherryPicks = new HashSet<LabCherryPick>();
 
