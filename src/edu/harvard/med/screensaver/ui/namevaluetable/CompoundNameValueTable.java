@@ -38,6 +38,8 @@ public class CompoundNameValueTable extends NameValueTable
     "http://screensaver.med.harvard.edu/render_molecule.png?smiles=";
   private static final String PUBCHEM_CID_LOOKUP_URL_PREFIX =
     "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=";
+  private static final String CHEMBANK_ID_LOOKUP_URL_PREFIX =
+    "http://chembank.broad.harvard.edu/chemistry/viewMolecule.htm?cbid=";
 
   // the row names
   private static final String STRUCTURE = "Structure";
@@ -135,6 +137,9 @@ public class CompoundNameValueTable extends NameValueTable
     String name = getName(index);
     if (name.equals(PUBCHEM_CIDS)) {
       return PUBCHEM_CID_LOOKUP_URL_PREFIX + value;
+    }
+    if (name.equals(CHEMBANK_IDS)) {
+      return CHEMBANK_ID_LOOKUP_URL_PREFIX + value;
     }
     if (name.equals(STRUCTURE)) {
       try {
