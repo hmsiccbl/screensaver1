@@ -51,7 +51,7 @@ public class BoutrosAnnotationImporter
 
   private static final int STUDY_NUMBER = 100000;
   private static final String STUDY_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
-  private static final String STUDY_SUMMARY = "In-silico analysis of SMARTPool siRNA gene targets.";
+  private static final String STUDY_SUMMARY = "In-silico analysis of SMARTPool siRNA gene targets, using RefSeq release 23";
   private static final String STUDY_URL = "http://www.dkfz.de/signaling2/siGENOME/";
   private static final Date STUDY_DATE = DateUtil.makeDate(2007, 6, 14);
   private static final String LAB_AFFILIATION_NAME = "DKFZ German Cancer Research Center";
