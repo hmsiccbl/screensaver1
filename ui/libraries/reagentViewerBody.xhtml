@@ -21,6 +21,12 @@
 					title="Download the contents of the reagent as an SD File" />
 			</h:form>
 		</t:panelGroup>
+    <t:panelGroup
+      rendered="#{! empty wellViewerSpecialMessage}"
+      style="color: fuchsia; font-size: small; margin-top: 10px;"
+    >
+      <t:outputText value="#{wellViewerSpecialMessage}" />
+    </t:panelGroup>
 	</t:panelGrid>
 
 	<t:panelGroup rendered="#{! empty reagentViewer.compounds}">

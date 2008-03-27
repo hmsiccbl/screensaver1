@@ -14,22 +14,27 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
 import edu.harvard.med.screensaver.io.libraries.WellsDataExporterFormat;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-
-import org.apache.log4j.Logger;
 
 public class WellViewer extends ReagentViewer
 {
 
   private static final Logger log = Logger.getLogger(WellViewer.class);
+  
+  private static final String SPECIAL_NOVARTIS_LIBRARY_NAME = "Novartis1";
 
 
   // private instance fields
@@ -73,6 +78,27 @@ public class WellViewer extends ReagentViewer
     return _well;
   }
 
+  /**
+   * Compounds in certain libraries are to be treated specially - we need to display a special message to give some
+   * idea to the user why there are no structures for these compounds. Returns a non-null, non-empty message
+   * explaining why there is no structure, when such a message is applicable to the library that contains this well.
+   */
+  public String getSpecialMessage()
+  {
+    if (! _well.getWellType().equals(WellType.EXPERIMENTAL)) {
+      return null;
+    }
+    Library library = _well.getLibrary();
+    if (library.getLibraryType().equals(LibraryType.NATURAL_PRODUCTS)) {
+      return "Structure information is unavailable for compounds in natural products libraries.";
+    }
+    if (library.getLibraryName().equals(SPECIAL_NOVARTIS_LIBRARY_NAME)) {
+      return "Structure information for compounds in the " + SPECIAL_NOVARTIS_LIBRARY_NAME +
+        " library are available via ICCB-L staff.";
+    }
+    return null;
+  }
+  
   @UIControllerMethod
   public String viewWell()
   {
