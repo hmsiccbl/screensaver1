@@ -11,13 +11,15 @@ package edu.harvard.med.screensaver.io;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 
-public interface DataExporter<T>
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.model.AbstractEntity;
+
+public interface DataExporter<T extends AbstractEntity,K>
 {
   public String getFormatName();
   public String getMimeType();
   public String getFileName();
-  public InputStream export(Collection<T> data) throws IOException;
+  public InputStream export(EntityDataFetcher<T,K> dataFetcher) throws IOException;
 }
 

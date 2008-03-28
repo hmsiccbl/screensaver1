@@ -186,5 +186,21 @@ public class PropertyPathTest extends TestCase
     assertTrue("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child[id].siblings", 1).hasRestrictions());
     assertFalse("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child.siblings").hasRestrictions());
   }
+  
+  /**
+   * Test that PropertyPath allows an empty string the property name value,
+   * since this usage is required for collections of elements, which have no
+   * properties other than their immediate value (as opposed to collections of
+   * entities, which are comprised of one or more properties).
+   */
+  public void testCollectionOfElementsUsage()
+  {
+    PropertyPath propertyPath1 = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings.nicknames", "");
+    assertEquals("", propertyPath1.getPropertyName());
+    
+    PropertyPath propertyPath2 = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings.nicknames", "");
+    assertEquals(propertyPath1, propertyPath2);
+    
+  }
 
 }

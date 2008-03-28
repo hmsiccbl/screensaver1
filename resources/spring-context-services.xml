@@ -175,18 +175,10 @@
 
   <bean
     id="sdfWellsDataExporter"
-    class="edu.harvard.med.screensaver.io.libraries.WellsDataExporter"
+    class="edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter"
     scope="singleton">
     <constructor-arg ref="genericEntityDao" />
-    <constructor-arg><value>SDF</value></constructor-arg>
   </bean>
 
-  <bean
-    id="xlsWellsDataExporter"
-    class="edu.harvard.med.screensaver.io.libraries.WellsDataExporter"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg><value>XLS</value></constructor-arg>
-  </bean>
 
 </beans>

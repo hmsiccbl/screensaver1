@@ -250,7 +250,6 @@
     <constructor-arg>
       <list>
         <ref bean="sdfWellsDataExporter" />
-        <ref bean="xlsWellsDataExporter" />
       </list>
     </constructor-arg>
     <aop:scoped-proxy/>

@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Mechanism for specifying an entity property within an entity object
- * network. Allows for selection of a single property value in a path that
+ * network. Optionally, allows for selection of a single entity in a path that
  * traverses a to-many relationships by allowing a single element in the to-many
  * relationship to be selected via its entity ID.
  *
@@ -48,6 +48,11 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
     _propertyName = propertyName;
   }
 
+  /**
+   * @propertyName the name of the property. Can be null if the leaf of the path
+   *               is a collection of values (which have no further properties
+   *               except the values themselves).
+   */
   public PropertyPath(Class<E> rootEntityClass,
                       String path,
                       String propertyName,
@@ -59,6 +64,11 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
     _propertyName = propertyName;
   }
 
+  /**
+   * @propertyName the name of the property. Can be null if the leaf of the path
+   *               is a collection of values (which have no further properties
+   *               except the values themselves).
+   */
   public PropertyPath(RelationshipPath<E> path,
                       String propertyName)
   {

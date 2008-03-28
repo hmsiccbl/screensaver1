@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -70,7 +71,7 @@ public class ReagentsSearchResultTest extends AbstractSpringPersistenceTest
                                                      null,
                                                      null,
                                                      genericEntityDao,
-                                                     Collections.<DataExporter<Reagent>>emptyList());
+                                                     Collections.<DataExporter<Reagent,ReagentVendorIdentifier>>emptyList());
   }
   
   public void testFilterOnColumns()

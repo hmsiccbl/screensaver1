@@ -29,7 +29,7 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(PlateWellListParserTest.class);
-    addTestSuite(WellsDataExporterTest.class);
+    addTestSuite(WellsSdfDataExporterTest.class);
     addTest(edu.harvard.med.screensaver.io.libraries.rnai.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.io.libraries.compound.PackageTestSuite.suite());
   }

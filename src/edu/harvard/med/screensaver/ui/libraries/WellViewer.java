@@ -14,12 +14,10 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.libraries.WellsDataExporter;
-import edu.harvard.med.screensaver.io.libraries.WellsDataExporterFormat;
+import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
+import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -28,6 +26,8 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+
+import org.apache.log4j.Logger;
 
 public class WellViewer extends ReagentViewer
 {
@@ -85,6 +85,9 @@ public class WellViewer extends ReagentViewer
    */
   public String getSpecialMessage()
   {
+    if (_well == null) {
+      return null;
+    }
     if (! _well.getWellType().equals(WellType.EXPERIMENTAL)) {
       return null;
     }
@@ -160,10 +163,10 @@ public class WellViewer extends ReagentViewer
   public String downloadSDFile()
   {
     try {
-      WellsDataExporter dataExporter = new WellsDataExporter(_dao, WellsDataExporterFormat.SDF);
-      Set<Well> wells = new HashSet<Well>(1, 2.0f);
-      wells.add(_well);
-      InputStream inputStream = dataExporter.export(wells);
+      WellsSdfDataExporter dataExporter = new WellsSdfDataExporter(_dao);
+      Set<String> wellKeys = new HashSet<String>();
+      wellKeys.add(_well.getWellId());
+      InputStream inputStream = dataExporter.export(new EntitySetDataFetcher<Well,String>(Well.class, wellKeys, _dao));
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          dataExporter.getFileName(),

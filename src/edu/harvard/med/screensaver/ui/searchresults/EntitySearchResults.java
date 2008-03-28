@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,7 @@ import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
+import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
@@ -74,8 +76,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
 
   // instance data members
 
-  private List<DataExporter<E>> _dataExporters = Collections.emptyList();
-  private UISelectOneBean<DataExporter<E>> _dataExporterSelector;
+  private List<DataExporter<E,K>> _dataExporters = new ArrayList<DataExporter<E,K>>();
+  private UISelectOneBean<DataExporter<E,K>> _dataExporterSelector;
   /**
    * @motivation to prevent redundant calls to setEntityToView
    */
@@ -178,13 +180,14 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    */
   protected EntitySearchResults()
   {
-    super(CAPABILITIES);
+    this(Collections.<DataExporter<E,K>>emptyList());
   }
 
-  public EntitySearchResults(List<DataExporter<E>> dataExporters)
+  public EntitySearchResults(List<DataExporter<E,K>> dataExporters)
   {
     super(CAPABILITIES);
-    _dataExporters = dataExporters;
+    _dataExporters.add(new GenericDataExporter<E,K>("searchResult"));
+    _dataExporters.addAll(dataExporters);
   }
 
   @Override
@@ -241,17 +244,26 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
   }
 
-  public List<DataExporter<E>> getDataExporters()
+  /**
+   * @motivation type safety of return type
+   */
+  @Override
+  public EntityDataFetcher<E,K> getDataFetcher() 
+  {
+    return (EntityDataFetcher<E,K>) super.getDataFetcher();
+  }
+
+  public List<DataExporter<E,K>> getDataExporters()
   {
     return _dataExporters;
   }
 
-  public UISelectOneBean<DataExporter<E>> getDataExporterSelector()
+  public UISelectOneBean<DataExporter<E,K>> getDataExporterSelector()
   {
     if (_dataExporterSelector == null) {
-      _dataExporterSelector = new UISelectOneBean<DataExporter<E>>(getDataExporters()) {
+      _dataExporterSelector = new UISelectOneBean<DataExporter<E,K>>(getDataExporters()) {
         @Override
-        protected String getLabel(DataExporter<E> dataExporter)
+        protected String getLabel(DataExporter<E,K> dataExporter)
         {
           return dataExporter.getFormatName();
         }
@@ -267,7 +279,10 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   {
     try {
       DataExporter dataExporter = getDataExporterSelector().getSelection();
-      InputStream inputStream = dataExporter.export(getDataFetcher().fetchAllData());
+      if (dataExporter instanceof TableDataExporter) {
+        ((TableDataExporter) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
+      }
+      InputStream inputStream = dataExporter.export(getDataFetcher());
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          dataExporter.getFileName(),

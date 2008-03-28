@@ -563,6 +563,23 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
   }
 
 
+  /**
+   * Tests that collection of elements can be filtered, using an empty string
+   * for PropertyPath.propertyName.
+   */
+  public void testFilterCollectionOfElements()
+  {
+    PropertyPath<Well> propertyPath = new PropertyPath<Well>(Well.class, "gene.genbankAccessionNumbers", "");
+    _wellSetFetcher.setRelationshipsToFetch(Arrays.asList(propertyPath.getRelationshipPath()));
+    Map<PropertyPath<Well>,List<? extends Criterion<?>>> filteringCriteria = new HashMap<PropertyPath<Well>,List<? extends Criterion<?>>>();
+    filteringCriteria.put(propertyPath, Arrays.asList(new Criterion<String>(Operator.EQUAL, "GB768767")));
+    _wellSetFetcher.setFilteringCriteria(filteringCriteria);
+    List<String> keys = _wellSetFetcher.findAllKeys();
+    assertEquals("result size", 1, keys.size());
+    assertEquals("filtered result", "02001:P24", keys.get(0));
+  }
+
+
   // private methods
 
   private void doTestFilterOperator(PropertyPath<Well> propertyPath,

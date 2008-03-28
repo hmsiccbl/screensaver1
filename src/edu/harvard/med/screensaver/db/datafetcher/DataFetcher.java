@@ -33,7 +33,7 @@ import edu.harvard.med.screensaver.ui.table.Criterion;
  * the client code needs to be provided an ordered, filtered list of keys, since
  * it cannot possibly perform a total ordering and filtering on only a subset of
  * the data.
- *
+ * 
  * @param R the row type of the data to be fetched and returned
  * @param K the key type used to uniquely identify the root objects
  * @param P type used to identify "properties" to be filtered and ordered
@@ -47,7 +47,7 @@ public interface DataFetcher<R, K, P>
 {
   void setFilteringCriteria(Map<P,List<? extends Criterion<?>>> criteria);
 
-  void setOrderBy(List<P> orderByProperties);
+  void setOrderBy(List<P> orderByProperties /* TODO: , List<SortDirection> orderByDirections */);
 
   List<K> findAllKeys();
 

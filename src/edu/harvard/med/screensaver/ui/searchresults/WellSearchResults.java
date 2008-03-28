@@ -118,7 +118,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
                            WellViewer wellViewer,
                            CompoundViewer compoundViewer,
                            GeneViewer geneViewer,
-                           List<DataExporter<Well>> dataExporters)
+                           List<DataExporter<Well,String>> dataExporters)
   {
     super(dataExporters);
     _dao = dao;
@@ -287,10 +287,22 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
+    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "gene.genbankAccessionNumbers", ""),
+    "Genbank Accession Numbers",
+    "The Genbank Accession Numbers for the gene targeted by silencing reagent in the well",
+    GENE_COLUMNS_GROUP) {
+      @Override
+      public List<String> getCellValue(Well well)
+      {
+        return well.getGene() == null ? null : new ArrayList<String>(well.getGene().getGenbankAccessionNumbers());
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
   }
 
   private void buildCompoundPropertyColumns(List<EntityColumn<Well,?>> columns)
   {
+
     columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class,
       "compounds",
     "smiles"),
@@ -363,6 +375,66 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           return _compoundViewer.viewCompound(compound);
         }
         return REDISPLAY_PAGE_ACTION_RESULT;
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.compoundNames", ""),
+      "Primary Compound Names",
+      "The names of the primary compound in the well", 
+      COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public List<String> getCellValue(Well well)
+      {
+        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getCompoundNames());
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.casNumbers", ""),
+      "CAS Numbers",
+      "The CAS Numbers of the primary compound in the well", 
+      COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public List<String> getCellValue(Well well)
+      {
+        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getCasNumbers());
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.nscNumbers", ""),
+      "NSC Numbers",
+      "The NSC Numbers of the primary compound in the well", 
+      COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public List<String> getCellValue(Well well)
+      {
+        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getNscNumbers());
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.pubchemCids", ""),
+      "PubChem CIDs",
+      "The PubChem CIDs of the primary compound in the well", 
+      COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public List<String> getCellValue(Well well)
+      {
+        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getPubchemCids());
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.chembankIds", ""),
+      "ChemBank IDs",
+      "The ChemBank IDs of the primary compound in the well", 
+      COMPOUND_COLUMNS_GROUP) {
+      @Override
+      public List<String> getCellValue(Well well)
+      {
+        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getChembankIds());
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
@@ -466,6 +538,20 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         return well.getWellType();
       }
     });
+    
+    columns.add(new TextEntityColumn<Well>(new PropertyPath<Well>(Well.class,
+      "iccbNumber"),
+      "ICCB Number",
+      "The identifier assigned by ICCB-L to the contents of this well",
+      WELL_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Well well)
+      {
+        return well.getIccbNumber();
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
   }
 
   private void buildResultValueTypeColumns(List<EntityColumn<Well,?>> columns)

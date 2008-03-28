@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 import jxl.Workbook;
 import jxl.biff.EmptyCell;
@@ -24,6 +25,8 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
+
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 
@@ -57,6 +60,9 @@ public class Workbook2Utils
     }
     else if (fieldValue instanceof Number) {
       cell = new Number(iCol, iRow, ((java.lang.Number) fieldValue).doubleValue());
+    }
+    else if (fieldValue instanceof Collection) {
+      cell = new Label(iCol, iRow, StringUtils.makeListString((Collection<?>) fieldValue, "; "));
     }
     else {
       cell = new Label(iCol, iRow, fieldValue.toString());

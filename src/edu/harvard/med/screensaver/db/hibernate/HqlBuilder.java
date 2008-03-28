@@ -127,46 +127,47 @@ public class HqlBuilder
   public HqlBuilder restrictFrom(String alias, String property, Operator operator, Object value)
   {
     checkAliasExists(alias);
-    _from.append(" with ").append(new Predicate(this, alias + "." + property, operator, value).toHql());
+    _from.append(" with ").append(new Predicate(this, makeRef(alias, property), operator, value).toHql());
     return this;
   }
 
   public HqlBuilder where(String alias, String property, Operator operator, Object value)
   {
     checkAliasExists(alias);
-    _where.add(predicate(alias + "." + property, operator, value));
+    _where.add(predicate(makeRef(alias, property), operator, value));
     return this;
   }
 
   /**
-   * For value collections
+   * Use when lhs of where expression is a collection of values (which
+   * themselves have no internal property other than the value itself).
    */
   public HqlBuilder where(String alias, Operator operator, Object value)
   {
-    checkAliasExists(alias);
-    _where.add(predicate(alias, operator, value));
-    return this;
+    return where(alias, null, operator, value);
   }
 
   public HqlBuilder where(String alias1, String property1, Operator operator, String alias2, String property2)
   {
     checkAliasExists(alias1);
     checkAliasExists(alias2);
-    _where.add(predicate(alias1 + "." + property1, alias2 + "." + property2, operator));
+    _where.add(predicate(makeRef(alias1, property1), makeRef(alias2, property2), operator));
     return this;
   }
 
   /**
-   * For value collections
+   * Use when lhs and rhs of where expression is a collection of values (which
+   * themselves have no internal property other than the value itself).
    */
   public HqlBuilder where(String alias1, Operator operator, String alias2)
   {
-    checkAliasExists(alias1);
-    checkAliasExists(alias2);
-    _where.add(predicate(alias1, alias2, operator));
-    return this;
+    return where(alias1, null, operator, alias2, null);
   }
 
+  /**
+   * Use when the rhs of where expression is an entity object, in which case
+   * Hibernate will use the entity's ID.
+   */
   public HqlBuilder where(String alias, edu.harvard.med.screensaver.model.AbstractEntity entity)
   {
     checkAliasExists(alias);
@@ -178,21 +179,18 @@ public class HqlBuilder
   {
     checkAliasExists(alias);
     if (values.size() > 0) {
-      _where.add(new Predicate(this, alias + "." + property, values));
+      _where.add(new Predicate(this, makeRef(alias, property), values));
     }
     return this;
   }
 
   /**
-   * For value collections
+   * Use when the lhs of where..in expression is a collection of values (which
+   * themselves have no internal property other than the value itself).
    */
   public HqlBuilder whereIn(String alias, Set<?> values)
   {
-    checkAliasExists(alias);
-    if (values.size() > 0) {
-      _where.add(new Predicate(this, alias, values));
-    }
-    return this;
+    return whereIn(alias, null, values);
   }
 
   public HqlBuilder where(Clause clause)
@@ -225,8 +223,16 @@ public class HqlBuilder
 
   public HqlBuilder orderBy(String alias, String property)
   {
-    checkAliasExists(alias);
     return orderBy(alias, property, SortDirection.ASCENDING);
+  }
+
+  /**
+   * Use when you need to order by a collection of values (which
+   * themselves have no internal property other than the value itself).
+   */
+  public HqlBuilder orderBy(String alias, SortDirection sortDirection)
+  {
+    return orderBy(alias, null, sortDirection);
   }
 
   public HqlBuilder orderBy(String alias, String property, SortDirection sortDirection)
@@ -235,7 +241,10 @@ public class HqlBuilder
     if (_orderBy.length() > 0) {
       _orderBy.append(", ");
     }
-    _orderBy.append(alias).append('.').append(property);
+    _orderBy.append(alias);
+    if (isDefined(property)) {
+      _orderBy.append('.').append(property);
+    }
     if (sortDirection == SortDirection.DESCENDING) {
       _orderBy.append(" desc");
     }
@@ -329,4 +338,19 @@ public class HqlBuilder
       throw new IllegalArgumentException("alias " + alias + " already used");
     }
   }
+  
+  private boolean isDefined(String property)
+  {
+    return property != null && property.length() > 0;
+  }
+  
+  private String makeRef(String alias, String property)
+  {
+    if (isDefined(property)) {
+      return alias + "." + property;
+    }
+    return alias;
+  }
+
+  
 }

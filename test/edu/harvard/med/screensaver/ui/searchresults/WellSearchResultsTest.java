@@ -142,7 +142,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                                _wellViewer,
                                                null,
                                                null,
-                                               Collections.<DataExporter<Well>> emptyList());
+                                               Collections.<DataExporter<Well,String>> emptyList());
     _wellSearchResults.setDataTableUIComponent(new UIData());
   }
 

@@ -97,7 +97,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
                               CompoundViewer compoundViewer,
                               GeneViewer geneViewer,
                               GenericEntityDAO dao,
-                              List<DataExporter<Reagent>> dataExporters)
+                              List<DataExporter<Reagent,ReagentVendorIdentifier>> dataExporters)
   {
     super(dataExporters);
     _reagentViewer = reagentViewer;
