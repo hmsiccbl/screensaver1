@@ -83,7 +83,10 @@ class SDRecordParser
 
     String molfile = _sdRecordData.getMolfile();
     if (molfile == null) {
-      reportError("encountered an SD record with an empty MDL molfile specification");
+      // TODO: it would be nice if it showed up on the ui that this error occurred. but calling logError() here
+      // causes the whole file load to fail, and this should not be a fatal error. probably should configure the
+      // ErrorMgr to handle both fatal and non-fatal errors.
+      log.warn("encountered an SD record with an empty MDL molfile specification");
       _molfileToSmiles = null;
     }
     else {
