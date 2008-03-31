@@ -16,7 +16,7 @@ public interface ScreensaverConstants
   // static data members
 
   public static final String APPLICATION_NAME = "Screensaver";
-  public static final String APPLICATION_VERSION = "1.5.1";
+  public static final String APPLICATION_VERSION = "1.5.2";
   public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
   public static final String FEEDBACK_URL = "mailto:screensaver-feedback@hms.harvard.edu";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
