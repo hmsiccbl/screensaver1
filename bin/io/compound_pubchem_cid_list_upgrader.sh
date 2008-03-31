@@ -1,4 +1,4 @@
-# run bin/orchestra/ss-build first!
+# first, run 'ant -Dscreensaver.properties.file=<file> -Dinstall.dir install'
 #
 # run this proggie something like this:
 #

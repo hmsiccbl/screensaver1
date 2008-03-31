@@ -1,3 +1,5 @@
+# first, run 'ant -Dscreensaver.properties.file=<file> -Dinstall.dir install'
+#
 # usage:
 # bsub $SCREENSAVER/bin/io/library_copy_generator.sh <args>
 #

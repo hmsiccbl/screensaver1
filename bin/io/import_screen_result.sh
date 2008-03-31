@@ -1,4 +1,4 @@
-# run bin/orchestra/ss-build first!
+# first, run 'ant -Dscreensaver.properties.file=<file> -Dinstall.dir install'
 #
 # usage:
 # bsub $SCREENSAVER/bin/io/import_screen_result.sh <screen#> [<start plate #> <end plate #> [<'append'>]]

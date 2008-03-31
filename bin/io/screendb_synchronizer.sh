@@ -1,4 +1,4 @@
-# run bin/orchestra/ss-build first!
+# first, run 'ant -Dscreensaver.properties.file=<file> -Dinstall.dir install'
 #
 # run this proggie something like this:
 #
@@ -17,7 +17,7 @@ SCREENSAVER=`pwd -P`
 
 JARS=`find $SCREENSAVER/lib \( -name unused -prune \) -or -name "*.jar" -print`
 LIBS=`for s in $JARS ; do printf ":$s" ; done`
-CLASSPATH="$SCREENSAVER/build/classes$LIBS"
+CLASSPATH="$SCREENSAVER/classes$LIBS"
 JAVA=/opt/java/jdk1.5/bin/java
 
 $JAVA -Xmx1500m -cp $CLASSPATH edu.harvard.med.screensaver.db.screendb.OrchestraStandaloneScreenDBSynchronizer -S pgsql.cl.med.harvard.edu -D screendb -U $USER 2>&1 | tee screendb_synchronizer.out
