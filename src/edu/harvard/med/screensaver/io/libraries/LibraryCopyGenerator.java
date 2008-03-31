@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 import jxl.Cell;
+import jxl.CellType;
 import jxl.NumberCell;
 import jxl.Sheet;
 import jxl.Workbook;
@@ -71,8 +72,10 @@ public class LibraryCopyGenerator
       Cell[] column = sheet.getColumn(0);
       List<Integer> plateNumbers = new ArrayList<Integer>();
       for (Cell cell : column) {
-        int plateNumber = (int) ((NumberCell) cell).getValue();
-        plateNumbers.add(plateNumber);
+        if (cell.getType() != CellType.EMPTY) {
+          int plateNumber = (int) ((NumberCell) cell).getValue();
+          plateNumbers.add(plateNumber);
+        }
       }
       log.info("creating RNAi cherry pick library copy " + copyName +
                " with volume " + volume +

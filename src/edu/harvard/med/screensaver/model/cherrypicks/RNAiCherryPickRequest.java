@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -56,6 +57,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
   public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
   private static final int CHERRY_PICK_SILENCING_AGENT_ALLOWANCE = 500 * 4;
+  private static final BigDecimal DEFAULT_MICROLITER_TRANSFER_VOLUME = null;
 
 
   // private instance datum
@@ -94,9 +96,16 @@ public class RNAiCherryPickRequest extends CherryPickRequest
 
   @Override
   @Transient
-  public PlateType getAssayPlateType()
+  public PlateType getDefaultAssayPlateType()
   {
     return RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE;
+  }
+  
+  @Override
+  @Transient
+  public BigDecimal getDefaultMicroliterTransferVolume()
+  {
+    return DEFAULT_MICROLITER_TRANSFER_VOLUME;
   }
 
   @Override

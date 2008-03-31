@@ -46,6 +46,7 @@ public class CompoundCherryPickRequest extends CherryPickRequest
   private static Logger log = Logger.getLogger(CompoundCherryPickRequest.class);
   private static final PlateType COMPOUND_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.ABGENE;
   private static final BigDecimal SOURCE_WELL_COUNT_PCT_LIMIT = new BigDecimal("0.003");
+  private static final BigDecimal DEFAULT_MICROLITER_TRANSFER_VOLUME = new BigDecimal("1.20");
 
 
   // public constructor
@@ -79,9 +80,16 @@ public class CompoundCherryPickRequest extends CherryPickRequest
 
   @Override
   @Transient
-  public PlateType getAssayPlateType()
+  public PlateType getDefaultAssayPlateType()
   {
     return COMPOUND_CHERRY_PICK_ASSAY_PLATE_TYPE;
+  }
+
+  @Override
+  @Transient
+  public BigDecimal getDefaultMicroliterTransferVolume()
+  {
+    return DEFAULT_MICROLITER_TRANSFER_VOLUME;
   }
 
   /**
@@ -93,11 +101,14 @@ public class CompoundCherryPickRequest extends CherryPickRequest
   @Transient
   public int getCherryPickAllowance()
   {
-    Set<Compound> distinctCompounds = new HashSet<Compound>(getScreenerCherryPicks().size());
-    for (Well well : getScreen().getScreenResult().getWells()) {
-      distinctCompounds.add(well.getPrimaryCompound());
+    if (getScreen().getScreenResult() != null) {
+      Set<Compound> distinctCompounds = new HashSet<Compound>(getScreenerCherryPicks().size());
+      for (Well well : getScreen().getScreenResult().getWells()) {
+        distinctCompounds.add(well.getPrimaryCompound());
+      }
+      return SOURCE_WELL_COUNT_PCT_LIMIT.multiply(new BigDecimal(distinctCompounds.size())).intValue();
     }
-    return SOURCE_WELL_COUNT_PCT_LIMIT.multiply(new BigDecimal(distinctCompounds.size())).intValue();
+    return 0;
   }
 
   @Override

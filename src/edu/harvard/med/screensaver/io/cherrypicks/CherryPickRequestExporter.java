@@ -14,6 +14,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import jxl.Workbook;
@@ -36,6 +38,8 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.cli.OptionBuilder;
@@ -63,6 +67,41 @@ public class CherryPickRequestExporter
   private static final int SCREENER_CHERRY_PICKS_SHEET_INDEX = 0;
   private static final int LAB_CHERRY_PICKS_SHEET_INDEX = 1;
 
+  private static final String[][] SCREENER_CHERRY_PICK_HEADERS = new String[2][];
+  {
+    SCREENER_CHERRY_PICK_HEADERS[ScreenType.RNAI.ordinal()] = new String[] {
+      "Entrez Gene Symbol",
+      "Entrez Gene ID",
+      "Genbank Acc. No.",
+      "Gene Name",
+      "Sequences",
+      "Vendor IDs"
+    };
+    SCREENER_CHERRY_PICK_HEADERS[ScreenType.SMALL_MOLECULE.ordinal()] = new String[] {
+      "ICCB Number",
+      "Vendor ID"
+    };
+  };
+  private static final String[][] LAB_CHERRY_PICK_HEADERS = new String[2][];
+  {
+    LAB_CHERRY_PICK_HEADERS[ScreenType.RNAI.ordinal()] = new String[] { 
+      "Cherry Pick Plate #",
+      "Cherry Pick Plate Well",
+      "Entrez Gene Symbol",
+      "Entrez Gene ID",
+      "Genbank Acc. No.",
+      "Gene Name",
+      "Sequence",
+      "Vendor ID" 
+    };
+    LAB_CHERRY_PICK_HEADERS[ScreenType.SMALL_MOLECULE.ordinal()] = new String[] { 
+      "Cherry Pick Plate #",
+      "Cherry Pick Plate Well",
+      "ICCB Number",
+      "Vendor ID"
+    }; 
+  }
+
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws Exception
   {
@@ -87,7 +126,7 @@ public class CherryPickRequestExporter
         throw new IllegalArgumentException("no such cherry pick request number " + cherryPickRequestNumber);
       }
     }
-    Workbook workbook = exporter.exportRNAiCherryPickRequest(rnaiCherryPickRequest);
+    Workbook workbook = exporter.exportCherryPickRequest(rnaiCherryPickRequest);
     File file = app.getCommandLineOptionValue("f", File.class);
     WritableWorkbook workbook2 = Workbook.createWorkbook(file, workbook);
     workbook2.write();
@@ -114,10 +153,11 @@ public class CherryPickRequestExporter
   }
 
   @Transactional(readOnly=true)
-  public Workbook exportRNAiCherryPickRequest(final RNAiCherryPickRequest cherryPickRequestIn)
+  public Workbook exportCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
   {
+    
     try {
-      RNAiCherryPickRequest cherryPickRequest =
+      CherryPickRequest cherryPickRequest =
         _dao.reloadEntity(cherryPickRequestIn,
                           true,
                           "screen.screenResult.resultValueTypes");
@@ -162,10 +202,8 @@ public class CherryPickRequestExporter
 
   private void writeLabCherryPicks(WritableWorkbook workbook, CherryPickRequest cherryPickRequest) throws RowsExceededException, WriteException
   {
-    // TODO: this sheet is not always representing duplexes (it could be representing cherry picked pool wells, e.g.),
-    // but there is no *easy* way to determine if this is the case, so we'll just default to naming this sheet "Duplexes"
-    WritableSheet sheet = workbook.createSheet("Duplexes", LAB_CHERRY_PICKS_SHEET_INDEX);
-    writeLabCherryPicksHeaders(sheet);
+    WritableSheet sheet = workbook.createSheet("Lab Cherry Picks", LAB_CHERRY_PICKS_SHEET_INDEX);
+    writeLabCherryPicksHeaders(sheet, cherryPickRequest.getScreen().getScreenType());
 
     int iRow = 0;
     for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
@@ -177,34 +215,44 @@ public class CherryPickRequestExporter
 
   private void writeLabCherryPick(LabCherryPick labCherryPick, WritableSheet sheet, int iRow) throws RowsExceededException, WriteException
   {
-    Well sourceWell = labCherryPick.getSourceWell();
-    Gene gene = sourceWell.getGene();
     Workbook2Utils.writeRow(sheet,
                             iRow,
-                            (labCherryPick.getAssayPlate() == null ? null : labCherryPick.getAssayPlate().getPlateOrdinal() + 1),
-                            (labCherryPick.getAssayPlateWellName() == null ? null : labCherryPick.getAssayPlateWellName()),
-                            (gene == null ? null : gene.getEntrezgeneSymbol()),
-                            (gene == null ? null : gene.getEntrezgeneId()),
-                            (gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), LIST_OF_VALUES_DELIMITER)),
-                            (gene == null ? null : gene.getGeneName()),
-                            StringUtils.makeListString(CollectionUtils.
-                                                       collect(sourceWell.getSilencingReagents(),
-                                                                             new Transformer()
-                                                       {
-                                                         public Object transform(Object silencingReagent)
-                                                         {
-                                                           return ((SilencingReagent) silencingReagent).getSequence();
-                                                         }
-                                                       }), LIST_OF_VALUES_DELIMITER),
-                            sourceWell.getSimpleVendorIdentifier());
+                            getLabCherryPickData(labCherryPick));
+  }
+
+  private Object[] getLabCherryPickData(LabCherryPick labCherryPick)
+  {
+    List<Object> data = new ArrayList<Object>();
+    Well sourceWell = labCherryPick.getSourceWell();
+    data.add(labCherryPick.getAssayPlate() == null ? null : labCherryPick.getAssayPlate().getPlateOrdinal() + 1);
+    data.add(labCherryPick.getAssayPlateWellName() == null ? null : labCherryPick.getAssayPlateWellName());
+    if (labCherryPick.getCherryPickRequest().getScreen().getScreenType() == ScreenType.RNAI) {
+      Gene gene = sourceWell.getGene();
+      data.add(gene == null ? null : gene.getEntrezgeneSymbol());
+      data.add(gene == null ? null : gene.getEntrezgeneId());
+      data.add(gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), LIST_OF_VALUES_DELIMITER));
+      data.add(gene == null ? null : gene.getGeneName());
+      data.add(StringUtils.makeListString(CollectionUtils.
+                                          collect(sourceWell.getSilencingReagents(),
+                                                  new Transformer()
+                                          {
+                                            public Object transform(Object silencingReagent)
+                                            {
+                                              return ((SilencingReagent) silencingReagent).getSequence();
+                                            }
+                                          }), LIST_OF_VALUES_DELIMITER));
+    }
+    else {
+      data.add(sourceWell.getIccbNumber());
+    }
+    data.add(sourceWell.getSimpleVendorIdentifier());
+    return data.toArray();
   }
 
   private void writeScreenerCherryPicks(WritableWorkbook workbook, CherryPickRequest cherryPickRequest) throws RowsExceededException, WriteException
   {
-    // TODO: this sheet is not always representing pools (it could be representing duplex cherry pick wells, e.g.),
-    // but there is no *easy* way to determine if this is the case, so we'll just default to naming this sheet "Pools"
-    WritableSheet sheet = workbook.createSheet("Pools", SCREENER_CHERRY_PICKS_SHEET_INDEX);
-    writeScreenerCherryPicksHeaders(sheet, cherryPickRequest.getScreen().getScreenResult());
+    WritableSheet sheet = workbook.createSheet("Screener Cherry Picks", SCREENER_CHERRY_PICKS_SHEET_INDEX);
+    writeScreenerCherryPicksHeaders(sheet, cherryPickRequest.getScreen());
 
     int iRow = 0;
     for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
@@ -214,25 +262,36 @@ public class CherryPickRequestExporter
 
   private void writeScreenerCherryPick(ScreenerCherryPick screenerCherryPick, WritableSheet sheet, int iRow) throws RowsExceededException, WriteException
   {
-    Well screenedWell = screenerCherryPick.getScreenedWell();
-    Gene gene = screenedWell.getGene();
     Workbook2Utils.writeRow(sheet,
                             iRow,
-                            (gene == null ? null : gene.getEntrezgeneSymbol()),
-                            (gene == null ? null : gene.getEntrezgeneId()),
-                            (gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(),
-                                                                              LIST_OF_VALUES_DELIMITER)),
-                            (gene == null ? null : gene.getGeneName()),
-                            StringUtils.makeListString(CollectionUtils.
-                                                       collect(screenedWell.getSilencingReagents(),
-                                                                             new Transformer()
-                                                       {
-                                                         public Object transform(Object silencingReagent)
-                                                         {
-                                                           return ((SilencingReagent) silencingReagent).getSequence();
-                                                         }
-                                                       }), LIST_OF_VALUES_DELIMITER),
-                            screenedWell.getSimpleVendorIdentifier());
+                            getScreenerCherryPickData(screenerCherryPick));
+  }
+
+  private Object[] getScreenerCherryPickData(ScreenerCherryPick screenerCherryPick)
+  {
+    List<Object> data = new ArrayList<Object>();
+    Well screenedWell = screenerCherryPick.getScreenedWell();
+    if (screenerCherryPick.getCherryPickRequest().getScreen().getScreenType() == ScreenType.RNAI) {
+      Gene gene = screenedWell.getGene();
+      data.add(gene == null ? null : gene.getEntrezgeneSymbol());
+      data.add(gene == null ? null : gene.getEntrezgeneId());
+      data.add(gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), LIST_OF_VALUES_DELIMITER));
+      data.add(gene == null ? null : gene.getGeneName());
+      data.add(StringUtils.makeListString(CollectionUtils.
+                                          collect(screenedWell.getSilencingReagents(),
+                                                  new Transformer()
+                                          {
+                                            public Object transform(Object silencingReagent)
+                                            {
+                                              return ((SilencingReagent) silencingReagent).getSequence();
+                                            }
+                                          }), 
+                                          LIST_OF_VALUES_DELIMITER));
+    }
+    else {
+      data.add(screenedWell.getIccbNumber());
+    }
+    data.add(screenedWell.getSimpleVendorIdentifier());
 
     ScreenResult screenResult = screenerCherryPick.getCherryPickRequest().getScreen().getScreenResult();
     if (screenResult != null) {
@@ -243,41 +302,27 @@ public class CherryPickRequestExporter
         if (rv != null) {
           value = ResultValue.getTypedValue(rv, rvt);
         }
-        Workbook2Utils.writeCell(sheet,
-                                 iRow,
-                                 6 + rvt.getOrdinal(),
-                                 value);
+        data.add(value);
       }
     }
+    return data.toArray();
   }
 
-  private void writeLabCherryPicksHeaders(WritableSheet sheet) throws RowsExceededException, WriteException
+  private void writeLabCherryPicksHeaders(WritableSheet sheet, ScreenType screenType) throws RowsExceededException, WriteException
   {
     Workbook2Utils.writeRow(sheet,
                             0,
-                            "Cherry Pick Plate #",
-                            "Cherry Pick Plate Well",
-                            "Entrez Gene Symbol",
-                            "Entrez Gene ID",
-                            "Genbank Acc. No.",
-                            "Gene Name",
-                            "Sequence",
-                            "Vendor ID");
+                            (Object[]) LAB_CHERRY_PICK_HEADERS[screenType.ordinal()]);
   }
 
-  private void writeScreenerCherryPicksHeaders(WritableSheet sheet, ScreenResult screenResult) throws RowsExceededException, WriteException
+  private void writeScreenerCherryPicksHeaders(WritableSheet sheet, Screen screen) throws RowsExceededException, WriteException
   {
     Workbook2Utils.writeRow(sheet,
                             0,
-                            "Entrez Gene Symbol",
-                            "Entrez Gene ID",
-                            "Genbank Acc. No.",
-                            "Gene Name",
-                            "Sequences",
-                            "Vendor IDs");
+                            (Object[]) SCREENER_CHERRY_PICK_HEADERS[screen.getScreenType().ordinal()]);
     int resultValueCol = 0;
-    if (screenResult != null) {
-      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+    if (screen.getScreenResult() != null) {
+      for (ResultValueType rvt : screen.getScreenResult().getResultValueTypes()) {
         Workbook2Utils.writeCell(sheet,
                                  0,
                                  6 + resultValueCol++,

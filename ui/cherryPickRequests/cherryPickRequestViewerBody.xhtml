@@ -208,10 +208,15 @@
 
 					<t:outputText value="Cherry&#160;Pick&#160;Plate&#160;Type"
 						escape="false"
-						title="The plate type, e.g., 'Eppendorf', 'Genetix', etc." />
-					<t:outputText
-						value="#{cherryPickRequestViewer.cherryPickRequest.assayPlateType}"
-						styleClass="dataText" />
+						title="The plate type, e.g., 'Eppendorf', 'Marsh', etc." />
+					<t:selectOneMenu
+						value="#{cherryPickRequestViewer.assayPlateType.value}"
+						displayValueOnly="#{! cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
+						displayValueOnlyStyleClass="dataText"
+						styleClass="inputText">
+						<f:selectItems
+							value="#{cherryPickRequestViewer.assayPlateType.selectItems}" />
+					</t:selectOneMenu>
 
 					<t:outputText value="Random&#160;plate&#160;well&#160;layout"
 						escape="false"
@@ -425,7 +430,7 @@
 						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumes}"
 						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
 						styleClass="command"
-						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the cherry picks on the cherry pick copy plates" />
+						title="View the  available reagent volumes for the cherry picks on the cherry pick copy plates" />
 					<t:commandButton
 						id="viewCherryPickRequestWellVolumesForUnfulfilled"
 						value="View Unfulfilled Well Volumes"
@@ -433,19 +438,19 @@
 						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumesForUnfulfilled}"
 						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
 						styleClass="command"
-						title="View the  available #{cherryPickRequestViewer.liquidTerm} volumes for the unfulfilled cherry picks on the cherry pick copy plates" />
+						title="View the  available reagent volumes for the unfulfilled cherry picks on the cherry pick copy plates" />
 					<t:commandButton id="allocateCherryPicks"
-						value="Reserve #{cherryPickRequestViewer.liquidTerm}"
+						value="Reserve reagent"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"
 						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0 || cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command"
-						title="Reserve #{cherryPickRequestViewer.liquidTerm} for the cherry picks from the cherry pick copy plates" />
+						title="Reserve reagent for the cherry picks from the cherry pick copy plates" />
 					<t:commandButton id="deallocateCherryPicks"
 						value="Cancel Reservation"
 						action="#{cherryPickRequestViewer.deallocateCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
 						styleClass="command"
-						title="Cancel the #{cherryPickRequestViewer.liquidTerm} reservations from the cherry pick copy plates" />
+						title="Cancel the reagent reservations from the cherry pick copy plates" />
 					<t:commandButton id="plateMapCherryPicks" value="Map to Plates"
 						action="#{cherryPickRequestViewer.plateMapCherryPicks}"
 						disabled="#{!cherryPickRequestViewer.cherryPickRequest.allocated || cherryPickRequestViewer.cherryPickRequest.mapped}"
@@ -607,7 +612,7 @@
 						</t:selectOneMenu>
 						<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
 							styleClass="label"
-							title="The date the #{cherryPickRequestViewer.liquidTerm} transfer took place" />
+							title="The date the reagent transfer took place" />
 						<t:inputDate id="dateOfLiquidTransfer"
 							value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
 							popupCalendar="true"
@@ -615,7 +620,7 @@
 							styleClass="inputText" />
 						<t:outputLabel for="liquidTransferComments" value="Comments:"
 							styleClass="label"
-							title="Screening room staff comments for the #{cherryPickRequestViewer.liquidTerm} transfer" />
+							title="Screening room staff comments for the reagent transfer" />
 						<t:inputText id="liquidTransferComments"
 							value="#{cherryPickRequestViewer.liquidTransferComments}"
 							rendered="#{cherryPickRequestViewer.editable}"
@@ -628,13 +633,13 @@
 							action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							styleClass="command"
-							title="Record successful #{cherryPickRequestViewer.liquidTerm} transfer" />
+							title="Record successful reagent transfer" />
 						<t:commandButton id="recordFailureOfAssayPlates"
 							value="Record Selected Plates as 'Failed'"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
 							styleClass="command"
-							title="Record unsuccessful #{cherryPickRequestViewer.liquidTerm} transfer" />
+							title="Record unsuccessful reagent transfer" />
 						<t:commandButton id="cancelAssayPlates"
 							value="Cancel Selected Plates"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"

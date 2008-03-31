@@ -527,25 +527,16 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public String addCherryPickRequest()
   {
     // TODO: save screen
-    if (!getScreen().getScreenType().equals(ScreenType.RNAI)) {
-      showMessage("applicationError", "Cherry Pick Requests can only be created for RNAi screens, currently");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
 
     final CherryPickRequest[] result = new CherryPickRequest[1];
-    try {
-      _dao.doInTransaction(new DAOTransaction()
+    _dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
       {
-        public void runTransaction()
-        {
-          Screen screen = _dao.reloadEntity(getScreen());
-          result[0] =  screen.createCherryPickRequest();
-        }
-      });
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
+        Screen screen = _dao.reloadEntity(getScreen());
+        result[0] =  screen.createCherryPickRequest();
+      }
+    });
     return _cherryPickRequestViewer.viewCherryPickRequest(result[0]);
   }
 

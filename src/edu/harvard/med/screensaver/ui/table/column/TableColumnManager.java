@@ -306,6 +306,15 @@ public class TableColumnManager<R> extends Observable implements Observer
     return _visibleColumns;
   }
 
+  public void setVisibilityOfColumnsInGroup(String columnGroupName, boolean isVisible)
+  {
+    for (TableColumn<R,?> column : getAllColumns()) {
+      if (column.getGroup().equals(columnGroupName)) {
+        column.setVisible(isVisible);
+      }
+    }
+  }
+
   public UISelectOneBean<TableColumn<R,?>> getSortColumnSelector()
   {
     if (_sortColumnSelector == null) {

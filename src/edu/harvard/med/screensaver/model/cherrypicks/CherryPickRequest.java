@@ -42,6 +42,8 @@ import javax.persistence.Version;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 
+import sun.security.krb5.internal.ccache.as;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -226,6 +228,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   private Integer _legacyCherryPickRequestNumber; // ScreenDB visits.id
   private ScreeningRoomUser _requestedBy;
   private Date _dateRequested;
+  private PlateType _assayPlateType;
   private BigDecimal _microliterTransferVolumePerWellRequested;
   private BigDecimal _microliterTransferVolumePerWellApproved;
   private AdministratorUser _volumeApprovedBy;
@@ -252,11 +255,18 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Get the assay plate type.
-   * @return the assay plate type
+   * Get the default assay plate type.  This value will be used when creating anew CherryPickRequest
+   * @return the default assay plate type; may be null.
    */
   @Transient
-  abstract public PlateType getAssayPlateType();
+  abstract public PlateType getDefaultAssayPlateType();
+  
+  /**
+   * Get the default requested and approved transfer volume, in microliters. This value will be used when creating a new CherryPickRequest.
+   * @return the default approved transfer volume, in microliters; may be null.
+   */
+  @Transient
+  abstract public BigDecimal getDefaultMicroliterTransferVolume();
 
   /**
    * Get the cherry pick allowance.
@@ -616,6 +626,21 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
+   * Get the cherry pick assay plate type that will be assigned to each cherry pick assay plate as they are created.
+   * @return a PlateType
+   */
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.libraries.PlateType$UserType")
+  public PlateType getAssayPlateType()
+  {
+    return _assayPlateType;
+  }
+  
+  public void setAssayPlateType(PlateType assayPlateType)
+  {
+    _assayPlateType = assayPlateType;
+  }
+  
+  /**
    * Get the requested microliterTransferVolumePerWell.
    * @return the microliterTransferVolumePerWell
    */
@@ -910,6 +935,13 @@ public abstract class CherryPickRequest extends AbstractEntity
     _screen = screen;
     _requestedBy = requestedBy;
     _dateRequested = truncateDate(dateRequested);
+    if (getDefaultMicroliterTransferVolume() != null) {
+      setMicroliterTransferVolumePerWellRequested(getDefaultMicroliterTransferVolume());
+      setMicroliterTransferVolumePerWellApproved(getDefaultMicroliterTransferVolume());
+    }
+    if (getDefaultAssayPlateType() != null) {
+      setAssayPlateType(getDefaultAssayPlateType());
+    }
   }
 
   /**
