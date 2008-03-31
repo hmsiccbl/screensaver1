@@ -39,11 +39,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
-import sun.security.krb5.internal.ccache.as;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -56,6 +51,9 @@ import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorOrderingComparator;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 
 /**
