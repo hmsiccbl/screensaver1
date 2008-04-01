@@ -31,7 +31,7 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class NCBIGeneInfoProviderImpl extends EutilsUtils
+public class NCBIGeneInfoProviderImpl extends EutilsUtils implements NCBIGeneInfoProvider
 {
   
   // static and instance fields
@@ -41,23 +41,6 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils
   private Integer _entrezgeneId;
   private Cell _cell;
 
-  
-  public static void main(String [] args)
-  {
-    ParseErrorManager manager = new ParseErrorManager();
-    Workbook workbook = new Workbook(new File(""), manager);
-    Cell.Factory factory = new Cell.Factory(workbook, 0, manager); 
-    NCBIGeneInfoProviderImpl provider = new NCBIGeneInfoProviderImpl(manager);
-    NCBIGeneInfo info = provider.getGeneInfoForEntrezgeneId(400714, factory.getCell((short) 0, 0));
-    
-    for (WorkbookParseError error : manager.getErrors()) {
-      System.out.println("error = " + error);
-    }
-    
-    System.out.println("symbol = " + info.getEntrezgeneSymbol());
-    System.out.println("gene name = " + info.getGeneName());
-    
-  }
   
   // public constructor and instance method
   
@@ -71,12 +54,8 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils
     initializeDocumentBuilder();
   }
   
-  /**
-   * Get the {@link NCBIGeneInfo information needed from NCBI} for a {@link Gene}, based on
-   * the EntrezGene ID. If any errors occur, report the error and return null.
-   * @param entrezgeneId the EntrezGene ID for the Gene.
-   * @param cell the cell to specify when reporting an error
-   * @return the NCBIGeneInfo
+  /* (non-Javadoc)
+   * @see edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProvider#getGeneInfoForEntrezgeneId(java.lang.Integer, edu.harvard.med.screensaver.io.workbook.Cell)
    */
   public synchronized NCBIGeneInfo getGeneInfoForEntrezgeneId(Integer entrezgeneId, Cell cell)
   {
