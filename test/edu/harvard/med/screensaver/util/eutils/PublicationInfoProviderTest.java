@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.util.eutils;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 
 /**
- * Test the {@link NCBIGeneInfoProvider}.
+ * Test the {@link PublicationInfoProvider}.
  * <p>
  * WARNING: this test requires an internet connection.
  *
