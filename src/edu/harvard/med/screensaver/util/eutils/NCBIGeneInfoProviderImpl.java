@@ -31,12 +31,12 @@ import edu.harvard.med.screensaver.model.libraries.Gene;
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class NCBIGeneInfoProvider extends EutilsUtils
+public class NCBIGeneInfoProviderImpl extends EutilsUtils
 {
   
   // static and instance fields
   
-  private static final Logger log = Logger.getLogger(NCBIGeneInfoProvider.class);
+  private static final Logger log = Logger.getLogger(NCBIGeneInfoProviderImpl.class);
   private ParseErrorManager _errorManager;
   private Integer _entrezgeneId;
   private Cell _cell;
@@ -47,7 +47,7 @@ public class NCBIGeneInfoProvider extends EutilsUtils
     ParseErrorManager manager = new ParseErrorManager();
     Workbook workbook = new Workbook(new File(""), manager);
     Cell.Factory factory = new Cell.Factory(workbook, 0, manager); 
-    NCBIGeneInfoProvider provider = new NCBIGeneInfoProvider(manager);
+    NCBIGeneInfoProviderImpl provider = new NCBIGeneInfoProviderImpl(manager);
     NCBIGeneInfo info = provider.getGeneInfoForEntrezgeneId(400714, factory.getCell((short) 0, 0));
     
     for (WorkbookParseError error : manager.getErrors()) {
@@ -65,7 +65,7 @@ public class NCBIGeneInfoProvider extends EutilsUtils
    * Construct a <code>NCBIGeneInfoProvider</code> object.
    * @param errorManager
    */
-  public NCBIGeneInfoProvider(ParseErrorManager errorManager)
+  public NCBIGeneInfoProviderImpl(ParseErrorManager errorManager)
   {
     _errorManager = errorManager;
     initializeDocumentBuilder();

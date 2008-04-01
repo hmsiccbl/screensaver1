@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 
 /**
- * Test the {@link NCBIGeneInfoProvider}.
+ * Test the {@link NCBIGeneInfoProviderImpl}.
  * <p>
  * WARNING: this test requires an internet connection.
  *
@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 public class NCBIGeneInfoProviderTest extends AbstractSpringTest
 {
   private ParseErrorManager _parseErrorManager = new ParseErrorManager();
-  private NCBIGeneInfoProvider _geneInfoProvider = new NCBIGeneInfoProvider(_parseErrorManager);
+  private NCBIGeneInfoProviderImpl _geneInfoProvider = new NCBIGeneInfoProviderImpl(_parseErrorManager);
 
   // Gnb4
   public void testGetGeneInfoForEntrezgeneId()
