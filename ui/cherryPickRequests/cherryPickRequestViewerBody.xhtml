@@ -5,7 +5,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
 
@@ -349,54 +350,16 @@
 						title="Delete all the screener cherry picks, so you can enter them again" />
 				</t:panelGroup>
 
-				<!-- Render table into a buffer, allowing dataScrollers to be positioned above table. See http://wiki.apache.org/myfaces/Buffer. -->
-				<t:buffer into="#{screenerCherryPicksTableRenderBuffer}">
-					<t:dataTable id="screenerCherryPicksTable" var="cherryPickRow"
-						binding="#{cherryPickRequestViewer.screenerCherryPicksDataTable.dataTableUIComponent}"
-						value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.dataTableModel}"
-						styleClass="standardTable" columnClasses="column"
-						rows="#{cherryPickRequestViewer.screenerCherryPicksDataTable.rowsPerPageSelector.selection}"
-						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.screenerCherryPicksDataTable.columnManager.sortColumnName}"
-						sortAscending="#{cherryPickRequestViewer.screenerCherryPicksDataTable.columnManager.sortAscending}">
-						<t:columns
-							value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.columnManager.visibleColumnModel}"
-							var="column" styleClass="column">
-							<f:facet name="header">
-								<!-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header -->
-								<t:commandSortHeader columnName="#{column.name}" arrow="false"
-									immediate="false">
-									<f:facet name="ascending">
-										<t:graphicImage value="/images/ascending-arrow.gif"
-											rendered="true" border="0" />
-									</f:facet>
-									<f:facet name="descending">
-										<t:graphicImage value="/images/descending-arrow.gif"
-											rendered="true" border="0" />
-									</f:facet>
-									<t:outputText value="#{column.name}" />
-								</t:commandSortHeader>
-							</f:facet>
-							<t:outputText
-								value="#{cherryPickRequestViewer.screenerCherryPicksDataTable.cellValue}" />
-						</t:columns>
-					</t:dataTable>
-				</t:buffer>
-
-                <ui:include src="/util/dataTableNavigator.xhtml">
-                    <ui:param name="dataTable" value="#{cherryPickRequestViewer.screenerCherryPicksDataTable}" />
-                </ui:include>
-
-				<t:div>
-					<t:outputText value="#{screenerCherryPicksTableRenderBuffer}"
-						escape="false" />
-				</t:div>
-
 			</t:panelGrid>
-
 		</t:collapsiblePanel>
-
 	</h:form>
+
+  <!-- note: screenerCherryPickSearchResult must outside of above form, since searchResult has its own form -->
+  <t:div rendered="#{! cherryPickRequestViewer.isPanelCollapsedMap['screenerCherryPicks']}">
+		<ss:searchResult
+			searchResults="#{cherryPickRequestViewer.screenerCherryPicksSearchResult}" />
+	</t:div>
+
 
 	<h:form id="labCherryPicksPanelForm">
 
@@ -404,13 +367,16 @@
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['labCherryPicks']}"
 			title="Lab Cherry Picks" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
+				<s:roundedDiv borderWidth="4"
+					color="#{appInfo.screensaverThemeColor}" radius="4"
 					styleClass="transparentSectionHeader">
-					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true"
+						styleClass="transparentSectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
 							styleClass="icon" />
-						<t:outputText value="#{title}" styleClass="transparentSectionHeader" />
+						<t:outputText value="#{title}"
+							styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>
@@ -434,13 +400,12 @@
 					<t:commandButton
 						id="viewCherryPickRequestWellVolumesForUnfulfilled"
 						value="View Unfulfilled Well Volumes"
-            rendered="#{cherryPickRequestViewer.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
+						rendered="#{cherryPickRequestViewer.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
 						action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumesForUnfulfilled}"
 						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
 						styleClass="command"
 						title="View the  available reagent volumes for the unfulfilled cherry picks on the cherry pick copy plates" />
-					<t:commandButton id="allocateCherryPicks"
-						value="Reserve reagent"
+					<t:commandButton id="allocateCherryPicks" value="Reserve reagent"
 						action="#{cherryPickRequestViewer.allocateCherryPicks}"
 						disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0 || cherryPickRequestViewer.cherryPickRequest.allocated}"
 						styleClass="command"
@@ -463,7 +428,8 @@
 						styleClass="command"
 						title="Create a new cherry pick request consisting of the unfulfilled cherry picks" />
 					<t:outputLabel for="showFailedLabCherryPicks" value="Show failed:"
-						styleClass="label" title="Show or hide lab cherry picks on failed assay plate attempts" />
+						styleClass="label"
+						title="Show or hide lab cherry picks on failed assay plate attempts" />
 					<t:selectBooleanCheckbox id="showFailedLabCherryPicks"
 						value="#{cherryPickRequestViewer.showFailedLabCherryPicks}"
 						valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedLabCherryPicks}"
@@ -474,67 +440,34 @@
 						immediate="true" forceId="true" style="display:none" />
 
 				</t:panelGroup>
-
-				<!-- Render table into a buffer, allowing dataScrollers to be positioned above table. See http://wiki.apache.org/myfaces/Buffer. -->
-				<t:buffer into="#{labCherryPicksTableRenderBuffer}">
-					<t:dataTable id="labCherryPicksTable"
-						binding="#{cherryPickRequestViewer.labCherryPicksDataTable.dataTableUIComponent}"
-						var="row"
-						value="#{cherryPickRequestViewer.labCherryPicksDataTable.dataTableModel}"
-						styleClass="standardTable" columnClasses="column"
-						rows="#{cherryPickRequestViewer.labCherryPicksDataTable.rowsPerPageSelector.selection}"
-						rowClasses="row1,row2" headerClass="tableHeader"
-						sortColumn="#{cherryPickRequestViewer.labCherryPicksDataTable.columnManager.sortColumnName}"
-						sortAscending="#{cherryPickRequestViewer.labCherryPicksDataTable.columnManager.sortAscending}"
-						rendered="#{cherryPickRequestViewer.labCherryPickCount > 0}">
-						<t:columns
-							value="#{cherryPickRequestViewer.labCherryPicksDataTable.columnManager.visibleColumnModel}"
-							var="column" styleClass="column">
-							<f:facet name="header">
-								<!-- immediate="false" needed to allow UISelectMany components to be updated when sort is changed via clicking on table header -->
-								<t:commandSortHeader columnName="#{column.name}" arrow="false"
-									immediate="false">
-									<f:facet name="ascending">
-										<t:graphicImage value="/images/ascending-arrow.gif"
-											rendered="true" border="0" />
-									</f:facet>
-									<f:facet name="descending">
-										<t:graphicImage value="/images/descending-arrow.gif"
-											rendered="true" border="0" />
-									</f:facet>
-									<t:outputText value="#{column.name}" />
-								</t:commandSortHeader>
-							</f:facet>
-							<t:outputText
-								value="#{cherryPickRequestViewer.labCherryPicksDataTable.cellValue}" />
-						</t:columns>
-					</t:dataTable>
-				</t:buffer>
-
-                <ui:include src="/util/dataTableNavigator.xhtml">
-                    <ui:param name="dataTable" value="#{cherryPickRequestViewer.labCherryPicksDataTable}" />
-                </ui:include>
-
-				<t:div>
-					<t:outputText value="#{labCherryPicksTableRenderBuffer}"
-						escape="false" />
-				</t:div>
-
 			</t:panelGrid>
-
 		</t:collapsiblePanel>
+	</h:form>
+
+  <!-- note: labCherryPickSearchResult must outside of above form, since searchResult has its own form -->
+	<t:div
+		rendered="#{! cherryPickRequestViewer.isPanelCollapsedMap['labCherryPicks']}">
+		<ss:searchResult
+			searchResults="#{cherryPickRequestViewer.labCherryPicksSearchResult}" />
+	</t:div>
+
+
+	<h:form id="cherryPickPlatesForm">
 
 		<t:collapsiblePanel id="cherryPickPlatesPanel"
 			value="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickPlates']}"
 			title="Cherry Pick Plates" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
+				<s:roundedDiv borderWidth="4"
+					color="#{appInfo.screensaverThemeColor}" radius="4"
 					styleClass="transparentSectionHeader">
-					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
+					<t:headerLink immediate="true"
+						styleClass="transparentSectionHeader">
 						<t:graphicImage
 							value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
 							styleClass="icon" />
-						<t:outputText value="#{title}" styleClass="transparentSectionHeader" />
+						<t:outputText value="#{title}"
+							styleClass="transparentSectionHeader" />
 					</t:headerLink>
 				</s:roundedDiv>
 			</f:facet>
@@ -632,14 +565,12 @@
 							value="Record Selected Plates as 'Plated'"
 							action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-							styleClass="command"
-							title="Record successful reagent transfer" />
+							styleClass="command" title="Record successful reagent transfer" />
 						<t:commandButton id="recordFailureOfAssayPlates"
 							value="Record Selected Plates as 'Failed'"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
-							styleClass="command"
-							title="Record unsuccessful reagent transfer" />
+							styleClass="command" title="Record unsuccessful reagent transfer" />
 						<t:commandButton id="cancelAssayPlates"
 							value="Cancel Selected Plates"
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"

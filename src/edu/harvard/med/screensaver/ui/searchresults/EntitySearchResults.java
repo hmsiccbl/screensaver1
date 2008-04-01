@@ -178,7 +178,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   /**
    * @motivation for CGLIB2
    */
-  protected EntitySearchResults()
+  public EntitySearchResults()
   {
     this(Collections.<DataExporter<E,K>>emptyList());
   }
