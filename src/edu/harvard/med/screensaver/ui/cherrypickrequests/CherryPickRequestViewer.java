@@ -499,7 +499,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     _isEditMode = false;
     _cherryPicksInput = null;
     
-    _assayPlateType = new UISelectOneBean<PlateType>(Arrays.asList(PlateType.values()), _cherryPickRequest.getAssayPlateType());
+    _assayPlateType = new UISelectOneBean<PlateType>(Arrays.asList(PlateType.values()), _cherryPickRequest.getAssayPlateType()) {
+      @Override
+      protected String getLabel(PlateType plateType) { return plateType.getFullName(); }
+    };
 
     SortedSet<ScreeningRoomUser> candidateRequestors = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
     candidateRequestors.add(_cherryPickRequest.getScreen().getLabHead());
