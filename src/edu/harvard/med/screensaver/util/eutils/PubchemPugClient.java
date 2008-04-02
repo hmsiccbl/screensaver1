@@ -57,7 +57,7 @@ public abstract class PubchemPugClient extends EutilsUtils
     }
   }
   
-  protected List<String> getResultsForSearchDocument(Document searchDocument)
+  protected List<String> getResultsForSearchDocument(Document searchDocument) throws EutilsException
   {
     Document outputDocument = getXMLForPugQuery(searchDocument);
     while (! isJobCompleted(outputDocument)) {
@@ -75,7 +75,7 @@ public abstract class PubchemPugClient extends EutilsUtils
     return getResultsFromOutputDocument(outputDocument);
   }
 
-  protected Document getXMLForPugQuery(Document query)
+  protected Document getXMLForPugQuery(Document query) throws EutilsException
   {
     URL url = getUrlForUrlString(PUG_URL);
     for (int i = 0; i < NUM_RETRIES; i ++) {
@@ -192,7 +192,7 @@ public abstract class PubchemPugClient extends EutilsUtils
     return nodes.getLength() != 0;
   }
 
-  protected List<String> getResultsFromOutputDocument(Document outputDocument) {
+  protected List<String> getResultsFromOutputDocument(Document outputDocument) throws EutilsException {
     Document resultsDocument = getXMLForEutilsQuery(
       "efetch.fcgi",
       "&db=pccompound" +

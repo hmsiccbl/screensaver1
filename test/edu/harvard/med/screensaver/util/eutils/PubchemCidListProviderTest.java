@@ -29,48 +29,78 @@ public class PubchemCidListProviderTest extends AbstractSpringTest
 
   public void testGetPubchemCidListForInchi1()
   {
-    String inchi = _openBabelClient.convertSmilesToInchi("CC");
-    List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-    assertEquals(1, pubchemCids.size());
-    assertEquals("6324", pubchemCids.get(0));
+    try {
+      String inchi = _openBabelClient.convertSmilesToInchi("CC");
+      List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
+      assertEquals(1, pubchemCids.size());
+      assertEquals("6324", pubchemCids.get(0));
+    }
+    catch (EutilsException e) {
+      fail("PubchemCidListProvider threw an exception: " + e.getMessage());
+    }
   }
 
   public void testGetPubchemCidListForInchi2()
   {
-    String inchi = _openBabelClient.convertSmilesToInchi("CCC");
-    List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-    assertEquals(1, pubchemCids.size());
-    assertEquals("6334", pubchemCids.get(0));
+    try {
+      String inchi = _openBabelClient.convertSmilesToInchi("CCC");
+      List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
+      assertEquals(1, pubchemCids.size());
+      assertEquals("6334", pubchemCids.get(0));
+    }
+    catch (EutilsException e) {
+      fail("PubchemCidListProvider threw an exception: " + e.getMessage());
+    }
   }
 
   public void testGetPubchemCidListForInchi3()
   {
-    String inchi = _openBabelClient.convertSmilesToInchi("CC(=O)C");
-    List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-    assertEquals(1, pubchemCids.size());
-    assertEquals("180", pubchemCids.get(0));
+    try {
+      String inchi = _openBabelClient.convertSmilesToInchi("CC(=O)C");
+      List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
+      assertEquals(1, pubchemCids.size());
+      assertEquals("180", pubchemCids.get(0));
+    }
+    catch (EutilsException e) {
+      fail("PubchemCidListProvider threw an exception: " + e.getMessage());
+    }
   }
 
   public void testGetPubchemCidListForInchi4()
   {
-    String inchi = _openBabelClient.convertSmilesToInchi("O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3");
-    List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-    assertEquals(0, pubchemCids.size());
-    //assertEquals("3822112", pubchemCids.get(0)); // used to return 3822112
+    try {
+      String inchi = _openBabelClient.convertSmilesToInchi("O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3");
+      List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
+      assertEquals(0, pubchemCids.size());
+      //assertEquals("3822112", pubchemCids.get(0)); // used to return 3822112
+    }
+    catch (EutilsException e) {
+      fail("PubchemCidListProvider threw an exception: " + e.getMessage());
+    }
   }
 
   public void testGetPubchemCidListForInchi5()
   {
-    String inchi = _openBabelClient.convertSmilesToInchi("COc1ccc(cc1)N3N=C(C(=O)Oc2ccccc2)c4ccccc4(C3(=O))");
-    List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-    assertEquals(1, pubchemCids.size());
-    assertEquals("3595539", pubchemCids.get(0));
+    try {
+      String inchi = _openBabelClient.convertSmilesToInchi("COc1ccc(cc1)N3N=C(C(=O)Oc2ccccc2)c4ccccc4(C3(=O))");
+      List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
+      assertEquals(1, pubchemCids.size());
+      assertEquals("3595539", pubchemCids.get(0));
+    }
+    catch (EutilsException e) {
+      fail("PubchemCidListProvider threw an exception: " + e.getMessage());
+    }
   }
   
   public void testGetPubchemCidListForInchi6()
   {
-    String inchi = _openBabelClient.convertSmilesToInchi("CON=CNC(=O)c1cc(ccc1(OCC(F)(F)F))OCC(F)(F)F");
-    List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-    assertEquals(0, pubchemCids.size());
+    try {
+      String inchi = _openBabelClient.convertSmilesToInchi("CON=CNC(=O)c1cc(ccc1(OCC(F)(F)F))OCC(F)(F)F");
+      List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
+      assertEquals(0, pubchemCids.size());
+    }
+    catch (EutilsException e) {
+      fail("PubchemCidListProvider threw an exception: " + e.getMessage());
+    }
   }
 }

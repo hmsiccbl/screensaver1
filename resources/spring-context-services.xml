@@ -58,12 +58,18 @@
   </bean>
 
   <bean
+    id="ncbiGeneInfoProvider"
+    class="edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProviderImpl"
+  />
+    
+  <bean
     id="rnaiLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
     scope="singleton"
   >
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="ncbiGeneInfoProvider"/>
   </bean>
 
   <bean

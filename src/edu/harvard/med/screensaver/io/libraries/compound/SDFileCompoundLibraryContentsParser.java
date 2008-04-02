@@ -67,6 +67,7 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
   private FileParseErrorManager _errorManager;
   private Map<String,Compound> _compoundCache;
 
+
   // public constructor and instance methods
 
   /**
@@ -100,9 +101,10 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
       public void runTransaction()
       {
         initialize(library, file, stream);
-        SDRecordParser sdRecordParser = new SDRecordParser(_dao,
-                                                           _sdFileReader,
-                                                           SDFileCompoundLibraryContentsParser.this);
+        SDRecordParser sdRecordParser = new SDRecordParser(
+          _dao,
+          _sdFileReader,
+          SDFileCompoundLibraryContentsParser.this);
         for (int i = 1; sdRecordParser.sdFileHasMoreRecords(); i++) {
           sdRecordParser.parseSDRecord();
           if ((i % 100) == 0) {

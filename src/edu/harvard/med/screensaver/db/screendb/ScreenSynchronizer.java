@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfo;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
@@ -334,23 +335,20 @@ public class ScreenSynchronizer
       Integer screenNumber = resultSet.getInt("screen_id");
       Screen screen = getScreenFromTable("pub_med", screenNumber);
       String pubmedId = resultSet.getString("pubmed_id");
-      PublicationInfo publicationInfo =
-        _publicationInfoProvider.getPublicationInfoForPubmedId(new Integer(pubmedId));
-      if (publicationInfo == null) {
-        //throw new ScreenDBSynchronizationException("unable to get publication info from pubmed");
+      try {
+        PublicationInfo publicationInfo =
+          _publicationInfoProvider.getPublicationInfoForPubmedId(new Integer(pubmedId));
+        screen.createPublication(pubmedId,
+          publicationInfo.getYearPublished(),
+          publicationInfo.getAuthors(),
+          publicationInfo.getTitle());
+      }
+      catch (EutilsException e) {
         log.error("unable to get publication info from pubmed for " + pubmedId + " for " + screen);
       }
-      else {
-        try {
-          screen.createPublication(pubmedId,
-                                   publicationInfo.getYearPublished(),
-                                   publicationInfo.getAuthors(),
-                                   publicationInfo.getTitle());
-        }
-        catch (DuplicateEntityException e) {
-          throw new ScreenDBSynchronizationException(
-                                                     "duplicate publication for screen number " + screenNumber, e);
-        }
+      catch (DuplicateEntityException e) {
+        throw new ScreenDBSynchronizationException(
+          "duplicate publication for screen number " + screenNumber, e);
       }
     }
     statement.close();

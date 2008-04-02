@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfo;
 
 
@@ -206,10 +207,11 @@ public class DataRowParser
     if (wellName.equals("")) {
       return null;
     }
-    Well well = _parser.getLibrariesDAO().findWell(new WellKey(plateNumber, wellName));
+    WellKey wellKey = new WellKey(plateNumber, wellName);
+    Well well = _parser.getLibrariesDAO().findWell(wellKey);
     if (well == null) {
       throw new DataRowParserException(
-        "specified well does not exist. this is probably due to an erroneous plate number.",
+        "specified well does not exist: " + wellKey + ". this is probably due to an erroneous plate number.",
         _cellFactory.getCell(
           _columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.WELL),
           _rowIndex));
@@ -318,10 +320,12 @@ public class DataRowParser
     }
 
     // gene name and species name
-    NCBIGeneInfo geneInfo =
-      _parser.getGeneInfoProvider().getGeneInfoForEntrezgeneId(entrezgeneId, entrezgeneIdCell);
-    if (geneInfo == null) {
-      // errors in this case are handled by the NCBIGeneInfoProvider
+    NCBIGeneInfo geneInfo;
+    try {
+      geneInfo = _parser.getGeneInfoProvider().getGeneInfoForEntrezgeneId(entrezgeneId);
+    }
+    catch (EutilsException e) {
+      _errorManager.addError(e.getMessage(), entrezgeneIdCell);
       return null;
     }
 

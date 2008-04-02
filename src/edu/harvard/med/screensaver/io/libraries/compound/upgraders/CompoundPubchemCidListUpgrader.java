@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.PubchemSmilesOrInchiSearch;
 
 /**
@@ -83,12 +84,14 @@ public class CompoundPubchemCidListUpgrader
           while (nonUpgradedCompounds.hasNext() && i < NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION) {
             Compound compound = _dao.reloadEntity(nonUpgradedCompounds.next());
             for (Well well : compound.getWells()) {
-              List<String> pubchemCids =
-                pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(well.getMolfile());
-              if (pubchemCids != null) {
+              try {
+                List<String> pubchemCids = pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(well.getMolfile());
                 for (String pubchemCid : pubchemCids) {
                   compound.addPubchemCid(pubchemCid);
                 }
+              }
+              catch (EutilsException e) {
+                log.error("PubchemCidSmilesOrInchiSearch threw an exception: " + e.getMessage());
               }
             }
             _dao.saveOrUpdateEntity(compound);

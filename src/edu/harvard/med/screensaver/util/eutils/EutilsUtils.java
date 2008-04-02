@@ -49,15 +49,13 @@ abstract public class EutilsUtils
 
   protected DocumentBuilder _documentBuilder;
 
-  protected abstract void reportError(String error);
-
   protected void initializeDocumentBuilder() {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
     try {
       _documentBuilder = documentBuilderFactory.newDocumentBuilder();
     }
     catch (ParserConfigurationException e) {
-      reportError(e.getMessage());
+      throw new RuntimeException(new EutilsException(e));
     }
   }
 
@@ -68,8 +66,9 @@ abstract public class EutilsUtils
    * @param attributeValue the attribute value
    * @return the text content of the specified element node. Return null if the specified
    * element node is not found.
+   * @throws EutilsException 
    */
-  protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue)
+  protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue) throws EutilsException
   {
     return getNamedItemFromNodeList(nodes, attributeValue, true);
   }
@@ -81,8 +80,9 @@ abstract public class EutilsUtils
    * @param attributeValue the attribute value
    * @return the text content of the specified element node. Return null if the specified
    * element node is not found.
+   * @throws EutilsException 
    */
-  protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue, boolean reportError)
+  protected String getNamedItemFromNodeList(NodeList nodes, String attributeValue, boolean reportError) throws EutilsException
   {
     for (int i = 0; i < nodes.getLength(); i++) {
       Node node = nodes.item(i);
@@ -90,10 +90,7 @@ abstract public class EutilsUtils
         return getTextContent(node);
       }
     }
-    if (reportError) {
-      reportError("eUtils results did not include a \"" + attributeValue + "\" in the XML response");
-    }
-    return null;
+    throw new EutilsException("eUtils results did not include a \"" + attributeValue + "\" in the XML response");
   }
 
   /**
@@ -132,15 +129,14 @@ abstract public class EutilsUtils
     return textContent;
   }
 
-  protected URL getUrlForUrlString(String urlString)
+  protected URL getUrlForUrlString(String urlString) throws EutilsException
   {
     try {
       return new URL(urlString);
     }
     catch (MalformedURLException e) {
-      reportError(e.getMessage());
+      throw new EutilsException(e);
     }
-    return null;
   }
 
   /**
@@ -149,8 +145,9 @@ abstract public class EutilsUtils
    * @param queryParams any extra query params, starting with '&'. needs to include param for
    * "db".
    * @return the xml document. return null if any errors were encountered.
+   * @throws EutilsException 
    */
-  protected Document getXMLForEutilsQuery(String fcgi, String queryParams)
+  protected Document getXMLForEutilsQuery(String fcgi, String queryParams) throws EutilsException
   {
     String urlString = EUTILS_BASE_URL + fcgi + EUTILS_BASE_PARAMS + queryParams;
     URL url = getUrlForUrlString(urlString);
@@ -161,8 +158,7 @@ abstract public class EutilsUtils
       catch (EutilsConnectionException e) {
       }
     }
-    reportError("couldnt get XML for query after " + NUM_RETRIES + " tries.");
-    return null;
+    throw new EutilsException("couldnt get XML for query after " + NUM_RETRIES + " tries.");
   }
 
   private Document getXMLForEutilsQuery0(URL url) throws EutilsConnectionException

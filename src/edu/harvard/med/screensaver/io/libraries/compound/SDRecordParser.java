@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.PubchemCidListProvider;
 
 class SDRecordParser
@@ -287,9 +288,7 @@ class SDRecordParser
         compound.addCasNumber(casNumber);
       }
       String inchi = _openBabelClient.convertMolfileToInchi(_sdRecordData.getMolfile());
-      for (String pubchemCid : _pubchemCidListProvider.getPubchemCidListForInchi(inchi)) {
-        compound.addPubchemCid(pubchemCid);
-      }
+      addPubchemCidsToCompound(compound, inchi);
     }
     well.addCompound(compound);
   }
@@ -303,9 +302,18 @@ class SDRecordParser
   {
     String inchi = _openBabelClient.convertSmilesToInchi(smiles);
     Compound compound = new Compound(smiles, inchi);
-    for (String pubchemCid : _pubchemCidListProvider.getPubchemCidListForInchi(inchi)) {
-      compound.addPubchemCid(pubchemCid);
-    }
+    addPubchemCidsToCompound(compound, inchi);
     return compound;
+  }
+
+  private void addPubchemCidsToCompound(Compound compound, String inchi) {
+    try {
+      for (String pubchemCid : _pubchemCidListProvider.getPubchemCidListForInchi(inchi)) {
+        compound.addPubchemCid(pubchemCid);
+      }
+    }
+    catch (EutilsException e) {
+      _parser.getErrorManager().addError(e.getMessage(), _parser.getSdFile(), _sdRecordNumber);
+    }
   }
 }

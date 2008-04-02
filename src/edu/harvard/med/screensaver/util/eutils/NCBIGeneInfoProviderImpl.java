@@ -9,16 +9,10 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import java.io.File;
-
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
-import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 
 
@@ -37,9 +31,7 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils implements NCBIGeneInf
   // static and instance fields
   
   private static final Logger log = Logger.getLogger(NCBIGeneInfoProviderImpl.class);
-  private ParseErrorManager _errorManager;
   private Integer _entrezgeneId;
-  private Cell _cell;
 
   
   // public constructor and instance method
@@ -48,27 +40,24 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils implements NCBIGeneInf
    * Construct a <code>NCBIGeneInfoProvider</code> object.
    * @param errorManager
    */
-  public NCBIGeneInfoProviderImpl(ParseErrorManager errorManager)
+  public NCBIGeneInfoProviderImpl()
   {
-    _errorManager = errorManager;
     initializeDocumentBuilder();
   }
   
   /* (non-Javadoc)
    * @see edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProvider#getGeneInfoForEntrezgeneId(java.lang.Integer, edu.harvard.med.screensaver.io.workbook.Cell)
    */
-  public synchronized NCBIGeneInfo getGeneInfoForEntrezgeneId(Integer entrezgeneId, Cell cell)
+  public synchronized NCBIGeneInfo getGeneInfoForEntrezgeneId(Integer entrezgeneId) throws EutilsException
   {
     _entrezgeneId = entrezgeneId;
-    _cell = cell;
     Document efetchDocument = getXMLForEutilsQuery("esummary.fcgi", "&db=gene&id=" + entrezgeneId);
     if (efetchDocument == null) {
       return null;
     }
     NodeList nodes = efetchDocument.getElementsByTagName("Item");
     if (nodes.getLength() == 0) {
-      reportError("no such EntrezGene ID");
-      return null;
+      throw new EutilsException("Error querying NCBI for EntrezGene ID " + _entrezgeneId + ": no such EntrezGene ID");
     }
     String geneName = getGeneNameFromNodeList(nodes);
     String speciesName = getSpeciesNameFromNodeList(nodes);
@@ -80,31 +69,15 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils implements NCBIGeneInf
   }
 
   
-  // protected instance methods
-  
-  protected void reportError(String nestedMessage)
-  {
-    String errorMessage = (_entrezgeneId == null) ?
-      "Error querying NCBI: " + nestedMessage :
-      "Error querying NCBI for EntrezGene ID " + _entrezgeneId + ": " + nestedMessage;      
-    log.error(errorMessage);
-    if (_cell == null) {
-      _errorManager.addError(errorMessage);
-    }
-    else {
-      _errorManager.addError(errorMessage, _cell);      
-    }
-  }
-
-  
   // private instance methods
 
   /**
    * Get the gene name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
    * @return the species name from the list of "Item" element nodes
+   * @throws EutilsException 
    */
-  private String getGeneNameFromNodeList(NodeList nodes)
+  private String getGeneNameFromNodeList(NodeList nodes) throws EutilsException
   {
     return getNamedItemFromNodeList(nodes, "Description");
   }
@@ -113,8 +86,9 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils implements NCBIGeneInf
    * Get the species name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
    * @return the species name from the list of "Item" element nodes
+   * @throws EutilsException 
    */
-  private String getSpeciesNameFromNodeList(NodeList nodes)
+  private String getSpeciesNameFromNodeList(NodeList nodes) throws EutilsException
   {
     return getNamedItemFromNodeList(nodes, "Orgname");
   }
@@ -123,8 +97,9 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils implements NCBIGeneInf
    * Get the species name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
    * @return the species name from the list of "Item" element nodes
+   * @throws EutilsException 
    */
-  private String getEntrezgeneSymbolFromNodeList(NodeList nodes)
+  private String getEntrezgeneSymbolFromNodeList(NodeList nodes) throws EutilsException
   {
     return getNamedItemFromNodeList(nodes, "Name");
   }

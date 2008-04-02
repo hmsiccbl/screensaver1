@@ -50,8 +50,9 @@ public class PubchemSmilesOrInchiSearch extends PubchemPugClient
    * error to the log and return null on error.
    * @param smilesOrInchi the smiles to search for PubChem CIDs with
    * @return the list of PubChem CIDs for this SMILES or InChI string. return null on error.
+   * @throws EutilsException 
    */
-  synchronized public List<String> getPubchemCidsForSmilesOrInchi(String smilesOrInchi)
+  synchronized public List<String> getPubchemCidsForSmilesOrInchi(String smilesOrInchi) throws EutilsException
   {
     _smilesOrInchi = smilesOrInchi;
     Document searchDocument = createSearchDocumentForSmilesOrInchi(smilesOrInchi);

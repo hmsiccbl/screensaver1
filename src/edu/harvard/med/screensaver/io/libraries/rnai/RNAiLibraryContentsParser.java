@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProvider;
 import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProviderImpl;
 
 import org.apache.log4j.Logger;
@@ -61,7 +62,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
   private ParseErrorManager _errorManager;
   private PlateNumberParser _plateNumberParser;
   private WellNameParser _wellNameParser;
-  private NCBIGeneInfoProviderImpl _geneInfoProvider;
+  private NCBIGeneInfoProvider _geneInfoProvider;
   private SilencingReagentType _silencingReagentType = DEFAULT_SILENCING_REAGENT_TYPE;
 
 
@@ -71,10 +72,12 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * Construct a new <code>RNAiLibraryContentsParser</code> object.
    */
   public RNAiLibraryContentsParser(GenericEntityDAO dao,
-                                   LibrariesDAO librariesDao)
+                                   LibrariesDAO librariesDao,
+                                   NCBIGeneInfoProvider ncbiGeneInfoProvider)
   {
     _dao = dao;
     _librariesDao = librariesDao;
+    _geneInfoProvider = ncbiGeneInfoProvider;
   }
 
   /**
@@ -181,7 +184,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * Get the {@link NCBIGeneInfoProviderImpl}.
    * @return the geneInfoProvider.
    */
-  NCBIGeneInfoProviderImpl getGeneInfoProvider()
+  NCBIGeneInfoProvider getGeneInfoProvider()
   {
     return _geneInfoProvider;
   }
@@ -229,7 +232,6 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     _workbook = new Workbook(file, stream, _errorManager);
     _plateNumberParser = new PlateNumberParser(_errorManager);
     _wellNameParser = new WellNameParser(_errorManager);
-    _geneInfoProvider = new NCBIGeneInfoProviderImpl(_errorManager);
 
     // load all of the library's wells in the Hibernate session, which avoids the need
     // to make database queries when checking for existence of wells

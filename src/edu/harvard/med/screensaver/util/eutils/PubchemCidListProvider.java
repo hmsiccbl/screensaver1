@@ -38,7 +38,7 @@ public class PubchemCidListProvider extends EutilsUtils
     initializeDocumentBuilder();
   }
 
-  public List<String> getPubchemCidListForInchi(String inchi)
+  public List<String> getPubchemCidListForInchi(String inchi) throws EutilsException
   {
     List<String> pubchemCids = new ArrayList<String>();
     try {

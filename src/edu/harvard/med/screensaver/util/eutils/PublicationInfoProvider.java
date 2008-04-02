@@ -50,8 +50,9 @@ public class PublicationInfoProvider extends EutilsUtils
    * based on the PubMed ID. If any errors occur, report the error and return null.
    * @param pubmedId the EntrezGene ID for the Gene.
    * @return the publication info
+   * @throws EutilsException 
    */
-  public synchronized PublicationInfo getPublicationInfoForPubmedId(Integer pubmedId)
+  public synchronized PublicationInfo getPublicationInfoForPubmedId(Integer pubmedId) throws EutilsException
   {
     _pubmedId = pubmedId;
     Document esummaryDocument = getXMLForEutilsQuery("esummary.fcgi", "&db=pubmed&id=" + pubmedId);
@@ -86,8 +87,9 @@ public class PublicationInfoProvider extends EutilsUtils
    * Get the gene name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
    * @return the species name from the list of "Item" element nodes
+   * @throws EutilsException 
    */
-  private String getYearPublishedFromNodeList(NodeList nodes)
+  private String getYearPublishedFromNodeList(NodeList nodes) throws EutilsException
   {
     String date = getNamedItemFromNodeList(nodes, "PubDate");
     if (date == null) {
@@ -117,8 +119,9 @@ public class PublicationInfoProvider extends EutilsUtils
    * Get the species name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
    * @return the species name from the list of "Item" element nodes
+   * @throws EutilsException 
    */
-  private String getTitleFromNodeList(NodeList nodes)
+  private String getTitleFromNodeList(NodeList nodes) throws EutilsException
   {
     return getNamedItemFromNodeList(nodes, "Title");
   }

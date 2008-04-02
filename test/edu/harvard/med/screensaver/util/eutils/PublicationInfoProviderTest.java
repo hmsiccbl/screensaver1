@@ -26,10 +26,15 @@ public class PublicationInfoProviderTest extends AbstractSpringTest
   // Watts DC
   public void testGetGeneInfoForEntrezgeneId()
   {
-    PublicationInfo publicationInfo = _publicationInfoProvider.getPublicationInfoForPubmedId(77);
-    assertNotNull(publicationInfo);
-    assertEquals(publicationInfo.getYearPublished(), "1975");
-    assertEquals(publicationInfo.getAuthors(), "Chegwidden WR, Watts DC");
-    assertEquals(publicationInfo.getTitle(), "Kinetic studies and effects of anions on creatine phosphokinase from skeletal muscle of rhesus monkey (Macaca mulatta).");
+    try {
+      PublicationInfo publicationInfo = _publicationInfoProvider.getPublicationInfoForPubmedId(77);
+      assertNotNull(publicationInfo);
+      assertEquals(publicationInfo.getYearPublished(), "1975");
+      assertEquals(publicationInfo.getAuthors(), "Chegwidden WR, Watts DC");
+      assertEquals(publicationInfo.getTitle(), "Kinetic studies and effects of anions on creatine phosphokinase from skeletal muscle of rhesus monkey (Macaca mulatta).");
+    }
+    catch (EutilsException e) {
+      fail("PublicationInforProvider threw an exception: " + e.getMessage());
+    }
   }
 }

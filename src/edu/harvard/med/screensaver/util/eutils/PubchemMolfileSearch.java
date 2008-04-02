@@ -32,69 +32,6 @@ public class PubchemMolfileSearch extends PubchemPugClient
 
   private static Logger log = Logger.getLogger(PubchemMolfileSearch.class);
 
-
-  // silly little test
-  public static void main(String [] args)
-  {
-    PubchemMolfileSearch pubchemMolfileSearch = new PubchemMolfileSearch();
-    String molfile =
-	"Structure942\n" +
-	"csChFnd70/09300411422D\n" +
-	"\n" +
-	" 23 24  0  0  0  0  0  0  0  0999 V2000\n" +
-	"    9.7074    2.0948    0.0000 N   0  0  3  0  0  0  0  0  0  0  0  0\n" +
-	"   10.9224    1.4024    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"   12.1112    2.0948    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    9.7074    3.4564    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"   10.9224    4.1520    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"   12.1112    3.4564    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    1.2536    4.1243    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    2.4963    3.4564    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    3.6846    1.4024    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    4.9004    2.0948    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    3.6846    4.1520    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    4.9004    3.4564    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    2.4963    2.1213    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"   10.9224    0.0000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    8.4916    4.2188    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    1.9086    5.3928    0.0000 F   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    0.5734    2.8831    0.0000 F   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    0.0000    4.8073    0.0000 F   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    6.0758    1.4024    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"   13.3537    4.1243    0.0000 Cl  0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    8.4916    1.3746    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    6.1273    4.1785    0.0000 Cl  0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"    7.2776    2.0948    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n" +
-	"  2  1  1  0  0  0  0\n" +
-	"  3  2  1  0  0  0  0\n" +
-	"  4  1  1  0  0  0  0\n" +
-	"  5  4  1  0  0  0  0\n" +
-	"  6  5  2  0  0  0  0\n" +
-	"  7  8  1  0  0  0  0\n" +
-	"  8 11  2  0  0  0  0\n" +
-	"  9 10  1  0  0  0  0\n" +
-	" 10 19  1  0  0  0  0\n" +
-	" 11 12  1  0  0  0  0\n" +
-	" 12 10  2  0  0  0  0\n" +
-	" 13  9  2  0  0  0  0\n" +
-	" 14  2  2  0  0  0  0\n" +
-	" 15  4  2  0  0  0  0\n" +
-	" 16  7  1  0  0  0  0\n" +
-	" 17  7  1  0  0  0  0\n" +
-	" 18  7  1  0  0  0  0\n" +
-	" 19 23  1  0  0  0  0\n" +
-	" 20  6  1  0  0  0  0\n" +
-	" 21  1  1  0  0  0  0\n" +
-	" 22 12  1  0  0  0  0\n" +
-	" 23 21  1  0  0  0  0\n" +
-	"  3  6  1  0  0  0  0\n" +
-	"  8 13  1  0  0  0  0\n" +
-	"M  END\n" +
-	"\n";
-    for (String pubchemCid : pubchemMolfileSearch.getPubchemCidsForMolfile(molfile)) {
-      System.out.println("PubChem CID: " + pubchemCid);
-    }
-  }
   
   // private instance fields
 
@@ -109,8 +46,9 @@ public class PubchemMolfileSearch extends PubchemPugClient
    * error to the log and return null on error.
    * @param molfile the molfile to search for PubChem CIDs with
    * @return the list of PubChem CIDs for this molfile string. return null on error.
+   * @throws EutilsException 
    */
-  synchronized public List<String> getPubchemCidsForMolfile(String molfile)
+  synchronized public List<String> getPubchemCidsForMolfile(String molfile) throws EutilsException
   {
     _molfile = molfile;
     try {

@@ -27,37 +27,57 @@ public class PubchemSmilesOrInchiSearchTest extends AbstractSpringTest
 
   public void testGetPubchemCidsForSmiles1()
   {
-    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
+    try {
+      List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1");
-    assertEquals(2, pubchemCids.size());
-    assertTrue(pubchemCids.contains("1268921"));
-    assertTrue(pubchemCids.contains("1268922"));
+      assertEquals(2, pubchemCids.size());
+      assertTrue(pubchemCids.contains("1268921"));
+      assertTrue(pubchemCids.contains("1268922"));
+    }
+    catch (EutilsException e) {
+      fail("PubchemSmilesOrInchiSearch threw an exception: " + e.getMessage());
+    }
   }
 
   public void testGetPubchemCidsForSmiles2()
   {
-    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
+    try {
+      List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "N#Cc1c(CN2CCN(C)CC2)n(C)c2ccccc12");
-    assertEquals(1, pubchemCids.size());
-    assertEquals("607443", pubchemCids.get(0));
+      assertEquals(1, pubchemCids.size());
+      assertEquals("607443", pubchemCids.get(0));
+    }
+    catch (EutilsException e) {
+      fail("PubchemSmilesOrInchiSearch threw an exception: " + e.getMessage());
+    }
   }
 
   public void testGetPubchemCidsForSmiles3()
   {
-    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
+    try {
+      List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "NC(=S)c1cnc2ccccn2c1=N");
-    assertEquals(1, pubchemCids.size());
-    assertEquals("687414", pubchemCids.get(0));
+      assertEquals(1, pubchemCids.size());
+      assertEquals("687414", pubchemCids.get(0));
+    }
+    catch (EutilsException e) {
+      fail("PubchemSmilesOrInchiSearch threw an exception: " + e.getMessage());
+    }
   }
   
   public void testGetPubchemCidsForSmiles4()
   {
-    List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
+    try {
+      List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
       "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1");
-    assertEquals(3, pubchemCids.size());
-    assertTrue(pubchemCids.contains("577795"));
-    assertTrue(pubchemCids.contains("684423"));
-    assertTrue(pubchemCids.contains("684424"));
+      assertEquals(3, pubchemCids.size());
+      assertTrue(pubchemCids.contains("577795"));
+      assertTrue(pubchemCids.contains("684423"));
+      assertTrue(pubchemCids.contains("684424"));
+    }
+    catch (EutilsException e) {
+      fail("PubchemSmilesOrInchiSearch threw an exception: " + e.getMessage());
+    }
   }
   
   public void testGetPubchemCidsForInvalidSmiles()
@@ -76,10 +96,15 @@ public class PubchemSmilesOrInchiSearchTest extends AbstractSpringTest
         }
       }
     }
-    MockedPubchemSmilesSearch mockedSearch = new MockedPubchemSmilesSearch();
-    List<String> pubchemCids = mockedSearch.getPubchemCidsForSmilesOrInchi(
+    try {
+      MockedPubchemSmilesSearch mockedSearch = new MockedPubchemSmilesSearch();
+      List<String> pubchemCids = mockedSearch.getPubchemCidsForSmilesOrInchi(
       "CCOC(=O)C(C#N)C(=O)c1ccc(N)cc1)"); // the dangling ')' is a actual encountered error
-    assertNull(pubchemCids);
-    assertTrue(mockedSearch.gotDataOrServerError());
+      assertNull(pubchemCids);
+      assertTrue(mockedSearch.gotDataOrServerError());
+    }
+    catch (EutilsException e) {
+      fail("PubchemSmilesOrInchiSearch threw an exception: " + e.getMessage());
+    }
   }
 }

@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.util.eutils;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
-import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 
 /**
  * Test the {@link NCBIGeneInfoProviderImpl}.
@@ -22,16 +21,20 @@ import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
  */
 public class NCBIGeneInfoProviderTest extends AbstractSpringTest
 {
-  private ParseErrorManager _parseErrorManager = new ParseErrorManager();
-  private NCBIGeneInfoProviderImpl _geneInfoProvider = new NCBIGeneInfoProviderImpl(_parseErrorManager);
+  private NCBIGeneInfoProvider _geneInfoProvider = new NCBIGeneInfoProviderImpl();
 
   // Gnb4
   public void testGetGeneInfoForEntrezgeneId()
   {
-    NCBIGeneInfo geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(14696, null);
-    assertNotNull(geneInfo);
-    assertEquals(geneInfo.getGeneName(), "guanine nucleotide binding protein (G protein), beta 4");
-    assertEquals(geneInfo.getSpeciesName(), "Mus musculus");
-    assertEquals(geneInfo.getEntrezgeneSymbol(), "Gnb4");
+    try {
+      NCBIGeneInfo geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(14696);
+      assertNotNull(geneInfo);
+      assertEquals(geneInfo.getGeneName(), "guanine nucleotide binding protein (G protein), beta 4");
+      assertEquals(geneInfo.getSpeciesName(), "Mus musculus");
+      assertEquals(geneInfo.getEntrezgeneSymbol(), "Gnb4");
+    }
+    catch (EutilsException e) {
+      fail("NCBIGeneInfoProviderImpl threw exception: " + e.getMessage());
+    }
   }
 }
