@@ -216,7 +216,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     Map<String,Well> data = _screenResultWellFetcher.fetchData(new HashSet<String>(expectedWellKeys));
     assertEquals("size", expectedWellKeys.size(), data.size());
     for (String expectedWellKey : expectedWellKeys) {
-      assertTrue(data.containsKey(expectedWellKey.toString()));
+      assertTrue(data.containsKey(expectedWellKey));
       assertEquals(expectedWellKey, data.get(expectedWellKey.toString()).getWellKey().toString());
     }
   }
@@ -274,7 +274,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     Map<String,Well> data = _screenResultWellFetcher.fetchData(new HashSet<String>(expectedWellKeys));
     assertEquals("size", expectedWellKeys.size(), data.size());
     for (String expectedWellKey : expectedWellKeys) {
-      assertTrue(data.containsKey(expectedWellKey.toString()));
+      assertTrue(data.containsKey(expectedWellKey));
       assertEquals(expectedWellKey,
                    data.get(expectedWellKey.toString()).getWellKey().toString());
     }
@@ -456,7 +456,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     // non-restricted size. We gave up on trying to filter collections when
     // eager fetching; Hibernate does not naturally support this via
     // EntityDataFetcher.getOrCreateFetchJoin()
-    
+
     // this well should have values defined for each property
     Well well = allData.get(0);
     assertEquals("expected well", "02000:A01", well.getWellKey().toString());

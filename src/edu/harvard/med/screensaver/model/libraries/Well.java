@@ -68,7 +68,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   private static final Logger log = Logger.getLogger(Well.class);
   private static final long serialVersionUID = 2682270079212906959L;
-  public static Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
+  public static final Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
 
   public static final Well NULL_WELL = new Well();
 
@@ -85,7 +85,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    * The number of decimal places used when recording volume values.
    */
   public static final int VOLUME_SCALE = 2;
-  
+
   public static final Collection<Integer> PLATE_COLUMNS_LIST;
 
   static {

@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -40,7 +40,7 @@ public class Workbook2Utils
   // instance data members
 
   // public constructors and methods
-  
+
   public static void writeRow(WritableSheet sheet, int iRow, Object... fieldValues) throws RowsExceededException, WriteException
   {
     int iCol = 0;
@@ -58,7 +58,7 @@ public class Workbook2Utils
     else if (fieldValue instanceof Integer) {
       cell = new Number(iCol, iRow, ((java.lang.Number) fieldValue).intValue());
     }
-    else if (fieldValue instanceof Number) {
+    else if (fieldValue instanceof java.lang.Number) {
       cell = new Number(iCol, iRow, ((java.lang.Number) fieldValue).doubleValue());
     }
     else if (fieldValue instanceof Collection) {

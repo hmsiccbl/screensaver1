@@ -90,9 +90,9 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(
           librariesDao.findWell(new WellKey(1, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(false);
-        Set<WellName> emptyWells = new HashSet<WellName>();
-        emptyWells = makeEmptyWellsFromColumnsAndRows(Arrays.asList(/*3,*/ 4, 5, 6, 7, /*8,*/ 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22),
-                                                      Arrays.asList('D'));
+        Set<WellName> emptyWells =
+          makeEmptyWellsFromColumnsAndRows(Arrays.asList(/*3,*/ 4, 5, 6, 7, /*8,*/ 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22),
+                                           Arrays.asList('D'));
         cherryPickRequest.addRequestedEmptyWellsOnAssayPlate(emptyWells);
         // cherry picks intended for plate 1
         addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "A14"); // to assay plate 1, col 3 (fully) and 8 (partially)

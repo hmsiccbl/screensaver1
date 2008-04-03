@@ -565,7 +565,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
             if (items.size() > 0) {
               assertEquals("row " + j + ":Compounds",
                            "smiles" + expectedWellKey,
-                           items.get(0).toString());
+                           items.get(0));
             }
           }
           columnsTested.add(column);

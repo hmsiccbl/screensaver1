@@ -20,7 +20,7 @@ import javax.faces.convert.ConverterException;
  */
 public class NoOpStringConverter implements Converter
 {
-  public static Converter _instance = new NoOpStringConverter();
+  public final static Converter _instance = new NoOpStringConverter();
 
   public Object getAsObject(FacesContext context,
                             UIComponent component,

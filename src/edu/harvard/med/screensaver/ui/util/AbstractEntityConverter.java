@@ -72,7 +72,7 @@ public class AbstractEntityConverter<E extends AbstractEntity> implements Conver
     if (!(_entityType.isInstance(entity))) {
       throw new ConverterException(_entityType.getSimpleName()
                                    + " object expected: cannot convert object of type "
-                                   + (entity == null ? "<null>" : entity.getClass())
+                                   + entity.getClass()
                                    + " to ID string for component "
                                    + arg1.getId());
     }

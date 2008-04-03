@@ -82,7 +82,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
  * Hibernate session as managed (read-write) entities, changes to them <i>will</i>
  * be persisted! So the best practice is for the client code to never modify
  * entities loaded as read-only.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -202,7 +202,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * and/or {@link #need(AbstractEntity, String...)} and/or
    * {@link #needReadOnly(AbstractEntity, String...)}.
    * </p>
-   * 
+   *
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
@@ -236,7 +236,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem.
    * </p>
-   * 
+   *
    * @param <E>
    * @param entity the entity to be reloaded
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -268,7 +268,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem.
-   * 
+   *
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -297,7 +297,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem.
-   * 
+   *
    * @param entity the root entity
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
@@ -367,7 +367,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
           "select count(*) from " + entityName + " e join e." + relationship + " r " +
           "where e." + idProperty + " = :id " +
           "and r." + relationshipProperty + " = :propValue");
-        
+
         // the following block used to be just <code>query.setString("id", entity.getEntityId().toString());</code>.
         // this starting failing in Postgres somewhere between versions 8.1.11 and 8.3.0 with a
         // "ERROR: operator does not exist: integer = character varying", for entities with Integer primary keys.
@@ -382,7 +382,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
             query.setString("id", entityId.toString());
           }
         }
-        
+
         query.setString("propValue", relationshipPropertyValue);
         return query.list().get(0);
       }
@@ -418,7 +418,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem. *
-   * 
+   *
    * @param <E>
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
@@ -887,7 +887,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   {
     long start = 0;
     if (entityInflatorLog.isDebugEnabled()) {
-      entityInflatorLog.debug("inflating " + entity + " for relationships: " + relationships);
+      entityInflatorLog.debug("inflating " + entity + " for relationships: " + Arrays.asList(relationships));
       start = System.currentTimeMillis();
     }
     findEntityById(entity.getEntityClass(), entity.getEntityId(), readOnly, relationships);

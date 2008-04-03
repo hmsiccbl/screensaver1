@@ -73,7 +73,7 @@ public class ReagentVendorIdentifierTest extends TestCase
   public void testInstantiateWithIllegalVendorName()
   {
     try {
-      ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("vendorPart1:vendorPart2", "id");
+      new ReagentVendorIdentifier("vendorPart1:vendorPart2", "id");
       fail("expected DataModelViolationException");
     }
     catch (DataModelViolationException e) {

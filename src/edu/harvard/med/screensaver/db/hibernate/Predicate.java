@@ -149,15 +149,15 @@ class Predicate extends Clause
     String expr = wildcardExpression.replaceAll("\\*", "%");
 
     if (textOperator == Operator.TEXT_STARTS_WITH) {
-      if (!expr.toString().endsWith("%")) {
+      if (!expr.endsWith("%")) {
         expr = expr + "%";
       }
     }
     else if (textOperator == Operator.TEXT_CONTAINS || textOperator == Operator.TEXT_NOT_CONTAINS) {
-      if (!expr.toString().startsWith("%")) {
+      if (!expr.startsWith("%")) {
         expr = "%" + expr;
       }
-      if (!expr.toString().endsWith("%")) {
+      if (!expr.endsWith("%")) {
         expr = expr + "%";
       }
     }

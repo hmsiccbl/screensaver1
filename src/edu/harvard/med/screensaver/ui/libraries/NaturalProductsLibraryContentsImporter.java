@@ -125,7 +125,7 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean
   {
     try {
       if (_uploadedFile == null || _uploadedFile.getInputStream().available() == 0) {
-        showMessage("badUploadedFile", _uploadedFile.getName());
+        showMessage("badUploadedFile", _uploadedFile == null ? "<null>" : _uploadedFile.getName());
         return IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS;
       }
       _dao.doInTransaction(new DAOTransaction()

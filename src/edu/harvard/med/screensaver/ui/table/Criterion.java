@@ -60,9 +60,9 @@ public class Criterion<T> extends Observable
     EMPTY("blank", OperatorClass.EXTANT, 1),
     NOT_EMPTY("not blank", OperatorClass.EXTANT, 1);
 
-    public static List<Operator> ALL_OPERATORS = new ArrayList<Operator>();
-    public static List<Operator> COMPARABLE_OPERATORS = new ArrayList<Operator>();
-    public static List<Operator> EQUALITY_OPERATORS = new ArrayList<Operator>();
+    public final static List<Operator> ALL_OPERATORS = new ArrayList<Operator>();
+    public final static List<Operator> COMPARABLE_OPERATORS = new ArrayList<Operator>();
+    public final static List<Operator> EQUALITY_OPERATORS = new ArrayList<Operator>();
     static {
       for (Operator operator : Operator.values()) {
         ALL_OPERATORS.add(operator);
