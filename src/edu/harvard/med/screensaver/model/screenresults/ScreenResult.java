@@ -461,7 +461,7 @@ public class ScreenResult extends AbstractEntity
   {
     List<ResultValueType> numericResultValueTypes = new ArrayList<ResultValueType>();
     for (ResultValueType rvt : getResultValueTypes()) {
-      if (rvt.isNumericalnessDetermined() && rvt.isNumeric()) {
+      if (rvt.isNumeric()) {
         numericResultValueTypes.add(rvt);
       }
     }

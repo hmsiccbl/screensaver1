@@ -92,7 +92,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private String _assayPhenotype;
   private String _comments;
   private boolean _isNumeric;
-  private boolean _isNumericalnessDetermined = false;
   private Integer _positivesCount;
 
 
@@ -233,28 +232,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     _isNumeric = isNumeric;
   }
   
-  /**
-   * Set the numericalness of this result value type. Set the transient property
-   * {@link #isNumericalnessDetermined() numericalnessDetermined} to true.
-   * @param isNumeric the new numericalness of this result value type
-   */
-  public void detemineNumericalness(boolean isNumeric)
-  {
-    _isNumeric = isNumeric;
-    _isNumericalnessDetermined = true;
-  }
-
-  /**
-   * Return true iff the numericalness of this result value type has been determined.
-   * @return true iff the numericalness of this result value type has been determined
-   * @see #detemineNumericalness(boolean)
-   */
-  @Transient
-  public boolean isNumericalnessDetermined()
-  {
-    return _isNumericalnessDetermined;
-  }
-
   /**
    * Get the ordinal position of this <code>ResultValueType</code> within its
    * parent {@link ScreenResult}.
@@ -925,29 +902,10 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     Integer decimalPrecision,
     boolean exclude)
   {
-    // TODO: this assert seems to contradict the statement below that null numericValues are allowed for numeric data
-    assert (value == null) != (numericValue == null) :  "either numeric or non-numeric value";
     if (_resultValues.containsKey(well.getWellKey())) {
       return null;
     }
-    // TODO: this fail to set isNumeric=true if first numeric value happens to be null (which is allowed);
-    // we really shouldn't use data values to determine a RVT's numerical-ness
-    if (!_isNumericalnessDetermined) {
-      if (value == null && numericValue != null) {
-        detemineNumericalness(true);
-      }
-      else if (value != null && numericValue == null) {
-        detemineNumericalness(false);
-      }
-      else if (value == null && numericValue == null) {
-        log.warn("setting " + this + ".isNumeric=false since both value and numericValue are null");
-        detemineNumericalness(false);
-      }
-      else {
-        throw new IllegalArgumentException("either value or numericValue must be null");
-      }
-    }
-    else if (isNumeric() && value != null) {
+    if (isNumeric() && value != null) {
       throw new DataModelViolationException("cannot add a non-numeric value to a numeric ResultValueType");
     }
     else if (! isNumeric() && numericValue != null) {

@@ -208,7 +208,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private Library _lastLibrary;
 
 
-
   // public methods and constructors
 
   public ScreenResultParser(LibrariesDAO librariesDao)
@@ -616,8 +615,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
 
       int iDataHeader = 0;
-      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-        determineNumericalnessOfDataHeader(rvt, workbook, iSheet, iDataHeader++);
+      if (iSheet == FIRST_DATA_SHEET_INDEX) {
+        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+          determineNumericalnessOfDataHeader(rvt, workbook, iSheet, iDataHeader++);
+        }
       }
 
       while (rowIter.hasNext()) {
@@ -707,38 +708,29 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   /**
    * Determines if a data header contains numeric or non-numeric data, by
    * reading ahead and making the determination based upon the first non-empty
-   * cell in the column for the specified data header. Note that the test may be
-   * inconclusive for a given worksheet (if the entire column contains empty
-   * cells), but that a later worksheet may used to make the determination.
+   * cell in the column for the specified data header. Note that if all cells
+   * for the column are empty, a non-numeric data header will be assumed
+   * (further worksheets of data are not considered).
    */
   private void determineNumericalnessOfDataHeader(ResultValueType rvt,
                                                   Workbook workbook,
                                                   int iSheet,
                                                   int iDataHeader)
   {
-    if (!rvt.isNumericalnessDetermined()) {
-      if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
-        rvt.detemineNumericalness(true);
-      }
-      else {
-        DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
-        while (rowIter.hasNext()) {
-          Cell cell = dataCell(rowIter.next(), iDataHeader);
-          if (cell.isEmpty()) {
-            continue;
-          }
-          if (cell.isNumeric()) {
-            rvt.detemineNumericalness(true);
-          }
-          else if (cell.isBoolean()) {
-            rvt.detemineNumericalness(false);
-          }
-          else {
-            rvt.detemineNumericalness(false);
-          }
-          break;
+    assert rvt.getResultValues().size() == 0 : "should not be attempting to set RVT numeric flag if it already has result values";
+    if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
+      rvt.setNumeric(true);
+    }
+    else {
+      DataRowIterator rowIter = new DataRowIterator(workbook, iSheet);
+      while (rowIter.hasNext()) {
+        Cell cell = dataCell(rowIter.next(), iDataHeader);
+        if (!cell.isEmpty()) {
+          rvt.setNumeric(cell.isNumeric());
+          return;
         }
       }
+      log.warn("all cells for data header " + rvt + " are empty on the first data worksheet; assuming data header is non-numeric");
     }
   }
 
