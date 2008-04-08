@@ -230,7 +230,7 @@ public class ScreensaverJsfUnitTest extends org.apache.cactus.ServletTestCase
     assertEquals("/libraries/wellSearchResults.xhtml", server.getCurrentViewID());
     assertEquals("search result size", new Integer(5), server.getManagedBeanValue("#{wellsBrowser.dataTableModel.rowCount}"));
   
-    DataExporter<?,?> dataExporter = (DataExporter<?,?>) server.getManagedBeanValue("#{wellsBrowser.dataExporters[0]}");
+    DataExporter<?> dataExporter = (DataExporter<?>) server.getManagedBeanValue("#{wellsBrowser.dataExporters[0]}");
     assertNotNull("exporter exists", dataExporter);
     assertEquals("exporter type", GenericDataExporter.FORMAT_NAME, dataExporter.getFormatName());
     client.setParameter("downloadFormat",  Integer.toString(dataExporter.hashCode()));

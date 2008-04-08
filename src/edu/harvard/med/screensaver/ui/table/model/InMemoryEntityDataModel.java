@@ -14,6 +14,7 @@ package edu.harvard.med.screensaver.ui.table.model;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;

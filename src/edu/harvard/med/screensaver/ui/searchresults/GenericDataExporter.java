@@ -13,11 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import jxl.Workbook;
 import jxl.write.WritableSheet;
@@ -25,17 +21,15 @@ import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
-import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-public class GenericDataExporter<T extends AbstractEntity,K> implements TableDataExporter<T,K> 
+public class GenericDataExporter<T> implements TableDataExporter<T> 
 {
   // static members
 
@@ -46,7 +40,6 @@ public class GenericDataExporter<T extends AbstractEntity,K> implements TableDat
   public static final String FILE_EXTENSION = ".xls";
 
   private static final int HEADER_ROW_INDEX = 0;
-  private static final int FETCH_BATCH_SIZE = 256;
 
 
   // instance data members
@@ -67,14 +60,14 @@ public class GenericDataExporter<T extends AbstractEntity,K> implements TableDat
     _columns = columns;
   }
 
-  public InputStream export(EntityDataFetcher<T,K> dataFetcher)
+  public InputStream export(DataTableModel<T> model)
     throws IOException
   {
     assert _columns != null : "must call setTableColumns() first";
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     try {
       WritableWorkbook workbook = Workbook.createWorkbook(out);
-      writeWorkbook(workbook, dataFetcher);
+      writeWorkbook(workbook, model);
       workbook.write();
       workbook.close();
       out.close();
@@ -110,34 +103,24 @@ public class GenericDataExporter<T extends AbstractEntity,K> implements TableDat
   // private methods
   
   private void writeWorkbook(WritableWorkbook workbook, 
-                             DataFetcher<T,K,?> dataFetcher) 
+                             DataTableModel<T> model) 
     throws RowsExceededException, WriteException
   {
     WritableSheet sheet = workbook.createSheet("data", 0);
     writeHeaders(sheet);
-    writeData(sheet, dataFetcher);
+    writeData(sheet, model);
   }
 
   private void writeData(WritableSheet sheet, 
-                         DataFetcher<T,K,?> dataFetcher) throws RowsExceededException, WriteException
+                         DataTableModel<T> model) 
+    throws RowsExceededException, WriteException
   {
-    List<K> keys = dataFetcher.findAllKeys();
-    int i = 0;
-    List<K> batchOfKeysToFetchList = new ArrayList<K>();
-    Set<K> batchOfKeysToFetchSet = new HashSet<K>();
-    while (i < keys.size()) {
-      batchOfKeysToFetchList.clear();
-      batchOfKeysToFetchSet.clear();
-      batchOfKeysToFetchList.addAll(keys.subList(i, Math.min(i + FETCH_BATCH_SIZE, keys.size())));
-      batchOfKeysToFetchSet.addAll(batchOfKeysToFetchList);
-      Map<K,T> entities = dataFetcher.fetchData(batchOfKeysToFetchSet);
-      for (K key : batchOfKeysToFetchList) {
-        T entity = entities.get(key);
-        int colIndex = 0;
-        for (TableColumn<T,?> column : _columns) {
-          Workbook2Utils.writeCell(sheet, i + 1, colIndex++, column.getCellValue(entity));
-        }
-        ++i;
+    for (int i = 0; i < model.getRowCount(); ++i) {
+      model.setRowIndex(i);
+      T entity = (T) model.getRowData();
+      int colIndex = 0;
+      for (TableColumn<T,?> column : _columns) {
+        Workbook2Utils.writeCell(sheet, i + 1, colIndex++, column.getCellValue(entity));
       }
     }
   }

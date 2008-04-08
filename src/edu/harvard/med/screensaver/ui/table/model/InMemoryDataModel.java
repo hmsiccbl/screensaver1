@@ -48,6 +48,7 @@ public class InMemoryDataModel<R> extends DataTableModel<R>
   public void fetch(List<? extends TableColumn<R,?>> columns)
   {
     _unfilteredData = _dataFetcher.fetchAllData();
+    setWrappedData(_unfilteredData);
   }
 
   public void filter(List<? extends TableColumn<R,?>> columns)

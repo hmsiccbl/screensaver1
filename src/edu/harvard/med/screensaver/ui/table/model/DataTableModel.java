@@ -30,11 +30,20 @@ public abstract class DataTableModel<R> extends DataModel
    * already been loaded. For example, this is needed when columns are added
    * (but otherwise do not affect the filter or sort order), when domain
    * restrictions have changed, the database has been updated, etc.
+   * 
+   * @param allColumns tells the DataTableModel <i>what</i> needs to be fetched
+   *          in order to populate a given row.
    */
-  public abstract void fetch(List<? extends TableColumn<R,?>> allColumns);
+  public abstract void fetch(List<? extends TableColumn<R,?>> columns);
 
   public abstract void sort(List<? extends TableColumn<R,?>> sortColumns,
                             SortDirection sortDirection);
   
   public abstract void filter(List<? extends TableColumn<R,?>> filterColumns);
+
+  // TODO
+  // public abstract R getRowData(int rowIndex);
+  
+  // TODO
+  // public abstract Iterator<R> iterator();
 }

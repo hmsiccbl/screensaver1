@@ -17,6 +17,7 @@ import jxl.Sheet;
 import jxl.Workbook;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -46,21 +47,20 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
     final Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     genericEntityDao.persistEntity(library);
   
-    WellSearchResults wellSearchResults = new WellSearchResults(genericEntityDao, null, null, null, null, Collections.<DataExporter<Well,String>>emptyList());
-    GenericDataExporter<Well,String> exporter = (GenericDataExporter<Well,String>) wellSearchResults.getDataExporters().get(0);
+    WellSearchResults wellSearchResults = new WellSearchResults(genericEntityDao, null, null, null, null, Collections.<DataExporter<?>>emptyList());
+    GenericDataExporter<Well> exporter = (GenericDataExporter<Well>) wellSearchResults.getDataExporters().get(0);
     wellSearchResults.searchAllWells();
     
     TableColumn<Well,String> wellColumn = (TableColumn<Well,String>) wellSearchResults.getColumnManager().getColumn("Well");
     wellColumn.addCriterion(new Criterion<String>(Operator.TEXT_STARTS_WITH, "B"));
     wellSearchResults.getColumnManager().setSortColumn(wellColumn);
-    //wellSearchResults.getColumnManager().setSortDirection(SortDirection.DESCENDING); // TODO: descending sort order not yet supported by DataFetcher interface
+    wellSearchResults.getColumnManager().setSortDirection(SortDirection.DESCENDING);
     wellSearchResults.getColumnManager().getColumn("Library").setVisible(false);
     wellSearchResults.getColumnManager().getColumn("Compounds SMILES").setVisible(true);
     wellSearchResults.getColumnManager().getColumn("PubChem CIDs").setVisible(true);
     exporter.setTableColumns(wellSearchResults.getColumnManager().getVisibleColumns());
     wellSearchResults.getRowCount(); // necessary to force dataFetcher to be re-initialized
-    EntityDataFetcher<Well,String> dataFetcher = wellSearchResults.getDataFetcher();
-    InputStream exportedData = exporter.export(dataFetcher);
+    InputStream exportedData = exporter.export(wellSearchResults.getDataTableModel());
     Workbook workbook = Workbook.getWorkbook(exportedData);
     Sheet sheet = workbook.getSheet(0);
     Cell[] row = sheet.getRow(0);
@@ -73,7 +73,7 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
     assertEquals("column 5 header", "PubChem CIDs", row[5].getContents()); 
     for (int rowIndex = 1; rowIndex <= 24; ++rowIndex) {
       assertEquals("filtered, sorted well column desc; rowIndex=" + rowIndex,
-                   String.format("B%02d", rowIndex),
+                   String.format("B%02d", 25 - rowIndex),
                    sheet.getCell(1, rowIndex).getContents());
     }
   }

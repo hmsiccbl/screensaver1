@@ -11,10 +11,10 @@ package edu.harvard.med.screensaver.io;
 
 import java.util.List;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
-public interface TableDataExporter<T extends AbstractEntity,K> extends DataExporter<T,K>
+public interface TableDataExporter<R> extends DataExporter<DataTableModel<R>>
 {
-  void setTableColumns(List<TableColumn<T,?>> columns);
+  void setTableColumns(List<TableColumn<R,?>> columns);
 }

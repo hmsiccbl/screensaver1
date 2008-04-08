@@ -11,13 +11,10 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
-import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
+import edu.harvard.med.screensaver.io.libraries.WellSdfDataExporter;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -163,10 +160,8 @@ public class WellViewer extends ReagentViewer
   public String downloadSDFile()
   {
     try {
-      WellsSdfDataExporter dataExporter = new WellsSdfDataExporter(_dao);
-      Set<String> wellKeys = new HashSet<String>();
-      wellKeys.add(_well.getWellId());
-      InputStream inputStream = dataExporter.export(new EntitySetDataFetcher<Well,String>(Well.class, wellKeys, _dao));
+      WellSdfDataExporter dataExporter = new WellSdfDataExporter(_dao);
+      InputStream inputStream = dataExporter.export(_well);
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          dataExporter.getFileName(),

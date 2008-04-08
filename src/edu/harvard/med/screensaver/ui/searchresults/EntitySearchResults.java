@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
@@ -22,6 +23,8 @@ import java.util.Observer;
 
 import javax.faces.model.DataModelEvent;
 import javax.faces.model.DataModelListener;
+
+import jxl.write.biff.RowsExceededException;
 
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
@@ -76,8 +79,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
 
   // instance data members
 
-  private List<DataExporter<E,K>> _dataExporters = new ArrayList<DataExporter<E,K>>();
-  private UISelectOneBean<DataExporter<E,K>> _dataExporterSelector;
+  private List<DataExporter<?>> _dataExporters = new ArrayList<DataExporter<?>>();
+  private UISelectOneBean<DataExporter<?>> _dataExporterSelector;
   /**
    * @motivation to prevent redundant calls to setEntityToView
    */
@@ -180,13 +183,19 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    */
   public EntitySearchResults()
   {
-    this(Collections.<DataExporter<E,K>>emptyList());
+    this(Collections.<DataExporter<?>>emptyList());
   }
 
-  public EntitySearchResults(List<DataExporter<E,K>> dataExporters)
+  /**
+   * Constructs a EntitySearchResults object.
+   * 
+   * @param dataExporters a List of DataExporters that must be one of the reified
+   *          types DataExporter<DataTableModel<E>> or DataExporter<E>
+   */
+  public EntitySearchResults(List<DataExporter<?>> dataExporters)
   {
     super(CAPABILITIES);
-    _dataExporters.add(new GenericDataExporter<E,K>("searchResult"));
+    _dataExporters.add(new GenericDataExporter<E>("searchResult"));
     _dataExporters.addAll(dataExporters);
   }
 
@@ -253,17 +262,21 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     return (EntityDataFetcher<E,K>) super.getDataFetcher();
   }
 
-  public List<DataExporter<E,K>> getDataExporters()
+  /**
+   * @return a List of DataExporters that will be one of the reified types
+   *         DataExporter<DataTableModel<E>> or DataExporter<E>
+   */
+  public List<DataExporter<?>> getDataExporters()
   {
     return _dataExporters;
   }
 
-  public UISelectOneBean<DataExporter<E,K>> getDataExporterSelector()
+  public UISelectOneBean<DataExporter<?>> getDataExporterSelector()
   {
     if (_dataExporterSelector == null) {
-      _dataExporterSelector = new UISelectOneBean<DataExporter<E,K>>(getDataExporters()) {
+      _dataExporterSelector = new UISelectOneBean<DataExporter<?>>(getDataExporters()) {
         @Override
-        protected String getLabel(DataExporter<E,K> dataExporter)
+        protected String getLabel(DataExporter<?> dataExporter)
         {
           return dataExporter.getFormatName();
         }
@@ -278,11 +291,15 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   public String downloadSearchResults()
   {
     try {
-      DataExporter dataExporter = getDataExporterSelector().getSelection();
+      DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
+      InputStream inputStream;
       if (dataExporter instanceof TableDataExporter) {
-        ((TableDataExporter) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
+        ((TableDataExporter<E>) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
+        inputStream = ((TableDataExporter<E>) dataExporter).export(getDataTableModel());
       }
-      InputStream inputStream = dataExporter.export(getDataFetcher());
+      else {
+        inputStream = ((DataExporter<Collection<K>>) dataExporter).export(getDataFetcher().findAllKeys());
+      }
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          dataExporter.getFileName(),

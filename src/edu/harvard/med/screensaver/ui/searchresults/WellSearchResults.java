@@ -118,7 +118,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
                            WellViewer wellViewer,
                            CompoundViewer compoundViewer,
                            GeneViewer geneViewer,
-                           List<DataExporter<Well,String>> dataExporters)
+                           List<DataExporter<?>> dataExporters)
   {
     super(dataExporters);
     _dao = dao;

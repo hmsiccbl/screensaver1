@@ -18,6 +18,7 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
@@ -97,7 +98,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
                               CompoundViewer compoundViewer,
                               GeneViewer geneViewer,
                               GenericEntityDAO dao,
-                              List<DataExporter<Reagent,ReagentVendorIdentifier>> dataExporters)
+                              List<DataExporter<?>> dataExporters)
   {
     super(dataExporters);
     _reagentViewer = reagentViewer;
