@@ -814,6 +814,7 @@ public class ComplexDAOTest extends AbstractSpringTest
         rvt1.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
         rvt1.setPositiveIndicatorCutoff(indicatorCutoff);
         rvt1.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
+        rvt1.setNumeric(true);
         ResultValueType rvt2 = screenResult.createResultValueType("RVT2", null, false, true, false, "");
         rvt2.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
         Library library = new Library(
@@ -868,6 +869,8 @@ public class ComplexDAOTest extends AbstractSpringTest
     ScreenResult screenResult = screen.createScreenResult(new Date());
     ResultValueType rvt1 = screenResult.createResultValueType("Raw Value");
     ResultValueType rvt2 = screenResult.createResultValueType("Derived Value");
+    rvt1.setNumeric(true);
+    rvt2.setNumeric(true);
     Library library = new Library(
       "library 1",
       "lib1",
