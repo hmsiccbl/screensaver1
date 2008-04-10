@@ -263,8 +263,10 @@ public class CompoundCherryPickSynchronizer
   throws SQLException
   {
     String filename = getCherryPickFilename(visitId);
-    // TODO: is EPPENDORF the correct plate type here?
-    LegacyCherryPickAssayPlate assayPlate = request.createLegacyCherryPickAssayPlate(1, 0, PlateType.EPPENDORF, filename);
+    // note: recent compound cherry picks are plated in ABgene plates; however,
+    // many legacy compound cherry picks were plated in Genetix plates, but
+    // tracking this accurately in Screensaver is not important to us
+    LegacyCherryPickAssayPlate assayPlate = request.createLegacyCherryPickAssayPlate(1, 0, PlateType.ABGENE, filename);
     assayPlate.setCherryPickLiquidTransfer(liquidTransfer);
     return assayPlate;
   }
