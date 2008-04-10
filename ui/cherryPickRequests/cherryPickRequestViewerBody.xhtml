@@ -532,6 +532,15 @@
 					columns="1" styleClass="commandPanel groupingPanel"
 					rendered="#{cherryPickRequestViewer.editable &amp;&amp; cherryPickRequestViewer.cherryPickRequest.mapped}">
 
+          <div class="label">
+            Update the status for a set of plates by selecting them (above), enter a comment (optional), and then click the appropriate button (below). Note:  
+            <ul>
+              <li>'Plated' indicates the cherry pick plate(s) were successfully plated and the requested reagent volume was removed from the library copy source plate(s).</li>
+              <li>'Failed' indicates the cherry pick plate(s) could not be created due to a physical problem, but the requested reagent volume was removed from the library copy source plate(s).  A new set of Lab Cherry Picks will be created for the next attempt at creating the cherry pick plate(s), reserving additional reagent volume from the library copy source plate(s).</li>
+              <li>'Canceled' indicates that the creation of the cherry pick plate(s) was not attempted and will not be attempted.  The requested reagent volume was not removed from the library copy source plate(s) and will be made available for use by other Cherry Pick Requests.</li>
+            </ul>
+          </div>
+
 					<t:panelGroup>
 						<t:outputLabel for="liquidTransferPerformedBy"
 							value="Performed by:" styleClass="label"
@@ -576,7 +585,7 @@
 							disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 							action="#{cherryPickRequestViewer.deallocateCherryPicksByPlate}"
 							styleClass="command"
-							title="Deallocate cherry picks for selected plates" />
+							title="Canceling a plate will undo its reservation of reagent volumes." />
 					</t:panelGroup>
 
 				</t:panelGrid>
