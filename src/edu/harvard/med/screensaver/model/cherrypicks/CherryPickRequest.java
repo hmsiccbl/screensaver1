@@ -57,145 +57,14 @@ import org.hibernate.annotations.Parameter;
 
 
 /**
- * A Hibernate entity bean representing a cherry pick request ("CPR"). A CPR
- * provides an abstraction for managing the workflow of performing a cherry pick
- * {@link Screening screening} for the set of cherry picks ("CP") requested by a
- * screener. Two types of CPs are managed: {@link ScreenerCherryPick}s and
- * {@link LabCherryPick}s. The ScreenerCPs represent the wells from the
- * original screen that are to be screened again (for validation purposes). The
- * LabCPs represent the wells from which "liquid" is physically drawn from and
- * that is transferred to one or more cherry pick assay plates ("assay plates").
- * Note that the source wells of LabCPs are usually different than the
- * ScreenerCP wells, as the lab maintains separate sets of plates ("library
- * copies") for use in the production of {@link CherryPickAssayPlate}s. It is
- * also possible that each ScreenerCP well will be "mapped" to <i>multiple</i>
- * LabCP wells, as is the case with RNAi SMARTPool libraries (from Dharmacon).
- * Finally, LabCPs for a given assay plate may be replicated in cases where the
- * creation of the assay plate failed (in the lab). The lab will need to
- * re-attempt creation of the plate and thus all LabCPs for that plate will be
- * duplicated (LabCPs are instrumental in determining how much liquid volume
- * remains in the wells of a library copy, and therefore the reliable tracking
- * of LabCPs is critical feature of Screensaver.)
- * <p>
- * LabCPs and the associated assay plates each progress through a range of
- * states, as a CPR is processed by the lab. LabCPs can have the following
- * states:
- * <p>
- * <table border="1">
- * <tr>
- * <td>State</td>
- * <td>Description</td>
- * <td>State Type</td>
- * <td>Valid Transition(s)</td>
- * <td>Affected Properties/Relationships</td>
- * </tr>
- * <tr>
- * <td>Unfulfilled</td>
- * <td>Liquid has not yet been allocated for the LabCP</td>
- * <td>Initial</td>
- * <td>Allocated</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>Allocated</td>
- * <td>Liquid has been allocated for the LabCP</td>
- * <td>Intermediate</td>
- * <td>Mapped+Allocated</td>
- * <td>sourceWell</td>
- * </tr>
- * <tr>
- * <td>Mapped+Unallocated</td>
- * <td>The LabCP has been assigned (mapped) to a particular well on a
- * particular assay plate, but has not been allocated. This occurs if a lab
- * cherry pick was created for a subsequent creation attempt of an assay plate,
- * but for which there was insufficient volume in any library copy.</td>
- * <td>Initial</td>
- * <td>Map+Allocated, Canceled</td>
- * <td>assayPlate, assayPlateRow, assayPlateColumn</td>
- * </tr>
- * <tr>
- * <td>Mapped+Allocated</td>
- * <td>The allocated LabCP has been assigned (mapped) to a particular well on a
- * particular assay plate.
- * <td>Intermediate</td>
- * <td>Failed, Canceled, Plated</td>
- * <td>assayPlate, assayPlateRow, assayPlateColumn</td>
- * </tr>
- * <tr>
- * <td>Failed</td>
- * <td>The LabCP was allocated and mapped, but the plate it was assigned to was
- * later marked as failed (workflow rules dictate that LabCPs can only be
- * canceled on a per-plate basis)</td>
- * <td>Terminal</td>
- * <td></td>
- * <td>assayPlate.cherryPickLiquidTransfer.isSuccessful</td>
- * </tr>
- * <tr>
- * <td>Canceled</td>
- * <td>The LabCP was previously allocated and mapped, but the plate it was
- * assigned to was later canceled (workflow rules dictate that LabCPs can only
- * be canceled on a per-plate basis)</td>
- * <td>Terminal</td>
- * <td></td>
- * <td>sourceWell, assayPlate.isCanceled</td>
- * </tr>
- * <tr>
- * <td>Plated</td>
- * <td>The LabCP has been allocated and mapped, and the assay plate it belongs
- * to was marked as "plated"</td>
- * <td>Terminal</td>
- * <td></td>
- * <td>assayPlate.cherryPickLiquidTransfer.isSuccessful</td>
- * </tr>
- * </table>
- * <p>
- * A CP Assay Plate also progresses through a range of states, as a CPR is
- * processed by the lab. CP Assay Plates can have the following states:
- * <p>
- * <table border="1">
- * <tr>
- * <td>State</td>
- * <td>Description</td>
- * <td>State Type</td>
- * <td>Valid Transition(s)</td>
- * <td>Affected Properties/Relationships</td>
- * </tr>
- * <tr>
- * <td>Not Plated</td>
- * <td>The assay plate has not yet been physically created in the lab.</td>
- * <td>Initial</td>
- * <td>Plated, Failed, Canceled</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>Plated</td>
- * <td>The assay plate has been physically created in the lab.</td>
- * <td>Final</td>
- * <td></td>
- * <td>cherryPickAssayPlate</td>
- * </tr>
- * <tr>
- * <td>Failed</td>
- * <td>The physical creation of the assay plate in the lab was attempted, but
- * failed. Liquid for each of its LabCPs was consumed in the failed attempt.</td>
- * <td>Final</td>
- * <td></td>
- * <td>cherryPickAssayPlate</td>
- * </tr>
- * <tr>
- * <td>Canceled</td>
- * <td>The assay plate has not yet been physically created in the lab.</td>
- * <td>Final</td>
- * <td></td>
- * <td>isCanceled</td>
- * </tr>
- * </table>
- * <p>
- * Note that business rules dictate that an assay plate is always created with
- * the set of lab cherry picks that are assigned to it, so there is no need for,
- * say, a "New" status.
- * <p>
+ * A CherryPickRequest ("CPR") provides an abstraction for managing the workflow
+ * of producing a set of {@link CherryPickAssayPlate CherryPickAssayPlates} that
+ * are to be used to perform a validation {@link Screening screening}. The CPR
+ * tracks the set of cherry picks ("CP") that have been requested by a screener.
+ * Two types of CPs are managed: {@link ScreenerCherryPick ScreenerCherryPicks}
+ * ("SCP") and {@link LabCherryPick LabCherryPicks} ("LCP").
  *
+ * @see ScreenerCherryPick, LabCherryPick, CherryPickAssayPlate
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -258,7 +127,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   @Transient
   abstract public PlateType getDefaultAssayPlateType();
-  
+
   /**
    * Get the default requested and approved transfer volume, in microliters. This value will be used when creating a new CherryPickRequest.
    * @return the default approved transfer volume, in microliters; may be null.
@@ -632,12 +501,12 @@ public abstract class CherryPickRequest extends AbstractEntity
   {
     return _assayPlateType;
   }
-  
+
   public void setAssayPlateType(PlateType assayPlateType)
   {
     _assayPlateType = assayPlateType;
   }
-  
+
   /**
    * Get the requested microliterTransferVolumePerWell.
    * @return the microliterTransferVolumePerWell

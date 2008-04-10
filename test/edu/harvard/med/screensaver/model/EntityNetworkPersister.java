@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -39,13 +39,13 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
  * entities in the network persist without persistence errors. Particular care is taken
  * to consider cascading and non-cascading relationships. Entities that are reached by a
  * cascade of another entity are not explicitly persisted. Entities that are reached by a
- * non-cascading relationship must be persisted first, to avoid a "null of transient"
+ * non-cascading relationship must be persisted first, to avoid a "null or transient"
  * persistence error.
- * 
+ *
  * <p>
- * 
+ *
  * I'll have to think this over a bit, but bi-directional cascades seem like a model error.
- * 
+ *
  * @author John Sullivan
  */
 public class EntityNetworkPersister
@@ -67,9 +67,9 @@ public class EntityNetworkPersister
     public EntityNetworkPersisterException(String message) { super(message); }
   };
 
-  
+
   // public constructor
-  
+
   /**
    * Construct an <code>EntityNetworkPersister</code>.
    * @param genericEntityDAO the dao used to persist the individual entities
@@ -81,12 +81,12 @@ public class EntityNetworkPersister
     _rootEntity = rootEntity;
   }
 
-  
+
   // public instance method
-  
+
   /**
    * Persist the entity network.
-   * @throws EntityNetworkPersisterException 
+   * @throws EntityNetworkPersisterException
    */
   public void persistEntityNetwork() throws EntityNetworkPersisterException
   {
@@ -121,14 +121,14 @@ public class EntityNetworkPersister
     _visitedEntities.add(entity);
     new EntityPersister(entity).persistEntity();
   }
-  
+
   private class EntityPersister
   {
     private AbstractEntity _entity;
     private Set<AbstractEntity> _downstreamRelations;
     private AbstractEntity _cascadingUpstreamRelation;
     private Set<AbstractEntity> _upstreamRelations;
-    
+
     public EntityPersister(AbstractEntity entity) throws EntityNetworkPersisterException
     {
       _entity = entity;
@@ -157,13 +157,13 @@ public class EntityNetworkPersister
       }
       log.debug("persistEntity: done persisting " + _entity);
     }
-  
+
     private void initialize() throws EntityNetworkPersisterException
     {
       _downstreamRelations = new HashSet<AbstractEntity>();
       _cascadingUpstreamRelation = null;
       _upstreamRelations =  new HashSet<AbstractEntity>();
-      
+
       BeanInfo beanInfo = getBeanInfo();
       for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
         if (isNonEntityProperty(propertyDescriptor)) {
@@ -188,7 +188,7 @@ public class EntityNetworkPersister
         throw new EntityNetworkPersisterException(e);
       }
     }
-    
+
     private boolean isNonEntityProperty(PropertyDescriptor propertyDescriptor)
     {
       String propertyName = propertyDescriptor.getName();
@@ -200,7 +200,7 @@ public class EntityNetworkPersister
       }
       return false;
     }
-    
+
     private Collection<AbstractEntity> getRelatedEntities(PropertyDescriptor propertyDescriptor, Method getter) throws EntityNetworkPersisterException
     {
       Collection<AbstractEntity> relatedEntities = new ArrayList<AbstractEntity>();
@@ -232,7 +232,7 @@ public class EntityNetworkPersister
       }
       return relatedEntities;
     }
-    
+
     private void initializeForRelatedEntity(PropertyDescriptor propertyDescriptor, Method getter, AbstractEntity relatedEntity) throws EntityNetworkPersisterException
     {
       Method relatedGetter = getRelatedGetter(propertyDescriptor);
@@ -265,7 +265,7 @@ public class EntityNetworkPersister
         _upstreamRelations.add(relatedEntity);
       }
     }
-    
+
     private Method getRelatedGetter(PropertyDescriptor propertyDescriptor)
     {
       // TODO: consider factoring out necessary code from RelatedProperty
@@ -277,7 +277,7 @@ public class EntityNetworkPersister
       }
       return relatedPropertyDescriptor.getReadMethod();
     }
-    
+
     private boolean isCascadingRelationship(Method getter)
     {
       org.hibernate.annotations.Cascade cascade = getter.getAnnotation(Cascade.class);
@@ -288,12 +288,12 @@ public class EntityNetworkPersister
       CollectionUtils.addAll(cascadeTypes, cascade.value());
       return cascadeTypes.contains(CascadeType.SAVE_UPDATE);
     }
-    
-    // NOTE this method must be recipricol - ie, if it returns true for (getter1,getter2)
+
+    // NOTE this method must be reciprocal - ie, if it returns true for (getter1,getter2)
     // then it must return false for (getter2,getter1), and vice-versa
     private boolean isNonCascadingRelationshipDownstream(Method getter, Method relatedGetter) throws EntityNetworkPersisterException
     {
-      // TODO: assumming OneToMany mirros ManyToOne and vice-versa
+      // TODO: assuming OneToMany mirrors ManyToOne and vice-versa
       if (getter.getAnnotation(OneToMany.class) != null) {
         return false;
       }

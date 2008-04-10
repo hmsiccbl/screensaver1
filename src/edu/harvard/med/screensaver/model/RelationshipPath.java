@@ -27,13 +27,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 /**
- * Mechanism for specifying an entity within an entity object network, relative
- * to the root object type. Allows for identification of a single entity in any
- * to-many relationship occurring within the path by restricting the collection
- * via one of its member type's property values (if the provided restriction
- * selects multiple entities in the to-many relationship, behavior is
- * undefined). A restriction should not be specified for a to-one relationship
- * (it's unnecessary).
+ * Defines the path of relationships between a root entity and a related entity
+ * <i>instance<i>. Given a root entity instance, the RelationshipPath can be
+ * used to resolve the related entity instance.
+ * <p>
+ * Since some relationships in the path may be "to-many", a single entity on the
+ * "many" side of the relationship must be selected by restricting the
+ * relationship collection to only one of its elements. To this end,
+ * RelationshipPath supports adding a "restriction" predicate to each of its
+ * "to-many" path node. (Currently, the only type of predicate supported is
+ * entity ID equality.)
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -180,7 +183,7 @@ public class RelationshipPath<E extends AbstractEntity> implements Iterable<Pair
     }
     return _asString;
   }
-  
+
   public boolean hasRestrictions()
   {
     return CollectionUtils.cardinality(null, _restrictions) != _restrictions.size();

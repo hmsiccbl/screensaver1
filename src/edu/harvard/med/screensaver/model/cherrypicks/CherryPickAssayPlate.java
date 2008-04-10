@@ -41,7 +41,54 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 
 /**
- * A Hibernate entity bean representing a cherry pick assay plate.
+ * A CherryPickAssayPlate represents an assay plate that is created as the
+ * result of {@link CherryPickRequest}. It parents the set of
+ * {@link LabCherryPick LabCherryPicks} that define the "plate mapping" from
+ * library copy source plates to the wells on the assay plate. A
+ * CherryPickAssayPlate progresses through a range of states:
+ * <p>
+ * <table border="1">
+ * <tr>
+ * <td>State</td>
+ * <td>Description</td>
+ * <td>State Type</td>
+ * <td>Valid Transition(s)</td>
+ * <td>Affected Properties/Relationships</td>
+ * </tr>
+ * <tr>
+ * <td>Not Plated</td>
+ * <td>The assay plate has not yet been physically created in the lab.</td>
+ * <td>Initial</td>
+ * <td>Plated, Failed, Canceled</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>Plated</td>
+ * <td>The assay plate has been physically created in the lab.</td>
+ * <td>Final</td>
+ * <td></td>
+ * <td>cherryPickAssayPlate</td>
+ * </tr>
+ * <tr>
+ * <td>Failed</td>
+ * <td>The physical creation of the assay plate in the lab was attempted, but
+ * failed. Liquid for each of its LabCPs was consumed in the failed attempt.</td>
+ * <td>Final</td>
+ * <td></td>
+ * <td>cherryPickAssayPlate</td>
+ * </tr>
+ * <tr>
+ * <td>Canceled</td>
+ * <td>The assay plate has not yet been physically created in the lab.</td>
+ * <td>Final</td>
+ * <td></td>
+ * <td>isCanceled</td>
+ * </tr>
+ * </table>
+ * <p>
+ * Note that business rules dictate that an assay plate is always created with
+ * the set of lab cherry picks that are assigned to it, so there is no need for,
+ * say, a "New" status.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -119,7 +166,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
     }
     return getAttemptOrdinal() - that.getAttemptOrdinal();
   }
-  
+
   public String toString() { return super.toString() + ":" + _plateOrdinal + ":" + _attemptOrdinal; }
 
   /**

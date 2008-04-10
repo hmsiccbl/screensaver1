@@ -39,11 +39,13 @@ import edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentatio
 
 
 /**
- * A Hibernate entity bean representing a cherry pick. See
- * {@link #CherryPickRequest} for explanation.
+ * Represents a screener-selected set of wells from a {@link Screen} that are to
+ * be screened again for validation purposes. ScreenerCherryPicks are managed by
+ * a {@link CherryPickRequest}.
  *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * @see LabCherryPick, CherryPickRequest
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "cherryPickRequestId", "screenedWellId" }) })

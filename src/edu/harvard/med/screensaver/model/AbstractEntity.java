@@ -85,11 +85,11 @@ public abstract class AbstractEntity implements Serializable
   abstract public Serializable getEntityId();
 
   /**
-   * Equality is determined by the entity IDs, <i>if <code>this</code> entity
-   * object has already been assigned an entity ID when it becomes "managed" by
-   * the current Hibernate session (i.e., either it is was loaded by Hibernate
-   * from the database or is a {@link SemanticIDAbstractEntity}). Otherwise,
-   * equality is determined by "instance equality".
+   * Equality is determined by the entity IDs, <i>if</i> the entity object has
+   * already been assigned an entity ID when it becomes "managed" by the current
+   * Hibernate session (i.e., either it is was loaded by Hibernate from the
+   * database or is a {@link SemanticIDAbstractEntity}). Otherwise, equality is
+   * determined by "instance equality".
    * <p>
    * Thus, if an entity that is transient is then made persistent within a
    * Hibernate session, it will <i>never</i> be considered equal to an instance
