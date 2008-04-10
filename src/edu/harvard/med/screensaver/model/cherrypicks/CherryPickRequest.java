@@ -86,7 +86,21 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   private static final int CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET = 10000;
 
-
+  private static final Set<WellName> DEFAULT_EMPTY_WELL_NAMES = new HashSet<WellName>();
+  static {
+    for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; ++row) {
+      for (int col = Well.MIN_WELL_COLUMN; col <= Well.MAX_WELL_COLUMN; ++col) {
+        if (row == Well.MIN_WELL_ROW || row == (char) (Well.MIN_WELL_ROW + 1) ||
+          row == Well.MAX_WELL_ROW || row == (char) (Well.MAX_WELL_ROW - 1) ||
+          col == Well.MIN_WELL_COLUMN || col == Well.MIN_WELL_COLUMN + 1 ||
+          col == Well.MAX_WELL_COLUMN || col == Well.MAX_WELL_COLUMN - 1) {
+          DEFAULT_EMPTY_WELL_NAMES.add(new WellName(row, col));
+        }
+      }
+    }
+  }
+  
+  
   // private instance data
 
   private Integer _cherryPickRequestId;
@@ -101,7 +115,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   private AdministratorUser _volumeApprovedBy;
   private Date _dateVolumeApproved;
   private boolean _randomizedAssayPlateLayout;
-  private Set<WellName> _requestedEmptyWellsOnAssayPlate = new HashSet<WellName>();
+  private Set<WellName> _emptyWellsOnAssayPlate = new HashSet<WellName>();
   private String _comments;
   private Set<ScreenerCherryPick> _screenerCherryPicks = new HashSet<ScreenerCherryPick>();
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
@@ -580,73 +594,47 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * The union of this method's result with the result of
-   * {@link #getEmptyColumnsOnAssayPlate()} determines the full set columns that
-   * must left empty.
-   * @return 1-based column numbers that are required to be left empty on cherry pick assay plate
-   * @see #getEmptyRowsOnAssayPlate()
-   */
-  @Transient
-  public Set<Integer> getRequiredEmptyColumnsOnAssayPlate()
-  {
-    return Collections.emptySet();
-  }
-
-  /**
-   * Get the set of empty rows requested by the screener. The union of this
-   * method's result with the result of {@link #getRequiredEmptyColumnsOnAssayPlate()}
-   * and {@link #getRequiredEmptyRowsOnAssayPlate()} determines the full set of wells
-   * that must be left empty on each cherry pick assay plate.
-   *
-   * @return well names that screener has requested be left empty on each cherry
-   *         pick assay plate
+   * @return the set of well names that should be left empty when generating the
+   *         cherry pick plate mapping.
    */
   @org.hibernate.annotations.CollectionOfElements
   @JoinTable(
-    name="cherryPickRequestRequestedEmptyWell",
+    name="cherryPickRequestEmptyWell",
     joinColumns=@JoinColumn(name="cherryPickRequestId")
   )
-  @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_requested_empty_wells_to_cherry_pick_request")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="requestedEmptyWellOnAssayPlate")
-  public Set<WellName> getRequestedEmptyWellsOnAssayPlate()
+  @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_empty_wells_to_cherry_pick_request")
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="emptyWellOnAssayPlate")
+  public Set<WellName> getEmptyWellsOnAssayPlate()
   {
-    return _requestedEmptyWellsOnAssayPlate;
+    return _emptyWellsOnAssayPlate;
   }
 
   /**
-   * Add the well to the set of requested empty wells.
-   * @param wellName the well to add to the set of requested empty wells
+   * Add a well to the set of wells to be left empty when generating the cherry
+   * pick plate mapping.
+   * 
+   * @param wellName the well to add
    */
-  public boolean addRequestedEmptyWellOnAssayPlate(WellName wellName)
+  public boolean addEmptyWellOnAssayPlate(WellName wellName)
   {
-    return _requestedEmptyWellsOnAssayPlate.add(wellName);
+    return _emptyWellsOnAssayPlate.add(wellName);
   }
 
   /**
-   * Add the wells to the set of requested empty wells.
+   * Add the specified wells to the set of requested empty wells.
    * @param wellNames the wells to add
    */
-  public void addRequestedEmptyWellsOnAssayPlate(Set<WellName> wellNames)
+  public void addEmptyWellsOnAssayPlate(Set<WellName> wellNames)
   {
-    _requestedEmptyWellsOnAssayPlate.addAll(wellNames);
+    _emptyWellsOnAssayPlate.addAll(wellNames);
   }
 
   /**
-   * Clear the set of requested empty wells.
+   * Clear the set of empty wells.
    */
-  public void clearRequestedEmptyWellsOnAssayPlate()
+  public void clearEmptyWellsOnAssayPlate()
   {
-    _requestedEmptyWellsOnAssayPlate.clear();
-  }
-
-  /**
-   * @return rows that are required to be left empty on cherry pick assay plate
-   * @see #getEmptyRowsOnAssayPlate()
-   */
-  @Transient
-  public Set<Character> getRequiredEmptyRowsOnAssayPlate()
-  {
-    return Collections.emptySet();
+    _emptyWellsOnAssayPlate.clear();
   }
 
   /**
@@ -809,6 +797,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     if (getDefaultAssayPlateType() != null) {
       setAssayPlateType(getDefaultAssayPlateType());
     }
+    addEmptyWellsOnAssayPlate(DEFAULT_EMPTY_WELL_NAMES);
   }
 
   /**
@@ -916,13 +905,10 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Set the set of empty wells requested by the screener.
-   * @param requestedEmptyWellsOnAssayPlate wells that screener has requested be
-   * left empty on each cherry pick assay plate
    * @motivation for hibernate
    */
-  private void setRequestedEmptyWellsOnAssayPlate(Set<WellName> requestedEmptyWellsOnAssayPlate)
+  private void setEmptyWellsOnAssayPlate(Set<WellName> emptyWellsOnAssayPlate)
   {
-    _requestedEmptyWellsOnAssayPlate = requestedEmptyWellsOnAssayPlate;
+    _emptyWellsOnAssayPlate = emptyWellsOnAssayPlate;
   }
 }

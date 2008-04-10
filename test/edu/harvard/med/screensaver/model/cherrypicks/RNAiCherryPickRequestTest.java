@@ -45,14 +45,14 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
 
     final Set<WellName> requestedEmptyWells= new HashSet<WellName>(Arrays.asList(new WellName("A03"),
                                                                                  new WellName("G07"),
-                                                                                 new WellName("P11")));
+                                                                                 new WellName("E11")));
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        cherryPickRequest.addRequestedEmptyWellsOnAssayPlate(requestedEmptyWells);
+        cherryPickRequest.addEmptyWellsOnAssayPlate(requestedEmptyWells);
         genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
@@ -64,8 +64,8 @@ public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCh
       public void runTransaction()
       {
         Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-        assertEquals(requestedEmptyWells,
-                     screen2.getCherryPickRequests().iterator().next().getRequestedEmptyWellsOnAssayPlate());
+        assertTrue(screen2.getCherryPickRequests().iterator().next().getEmptyWellsOnAssayPlate().size() == 144 + (3 - 1 /* -1 to account for overlap w/edge wells */)); 
+        assertTrue(screen2.getCherryPickRequests().iterator().next().getEmptyWellsOnAssayPlate().containsAll(requestedEmptyWells));
       }
     });
   }

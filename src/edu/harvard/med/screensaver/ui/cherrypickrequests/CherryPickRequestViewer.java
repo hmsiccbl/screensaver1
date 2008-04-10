@@ -569,7 +569,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
           _dao.needReadOnly(cherryPickRequest.getScreen(), "screeningRoomActivities");
           _dao.needReadOnly(cherryPickRequest.getScreen(), "cherryPickRequests");
-          _dao.needReadOnly(cherryPickRequest, "requestedEmptyWellsOnAssayPlate");
+          _dao.needReadOnly(cherryPickRequest, "emptyWellsOnAssayPlate");
           _eagerFetchCpltPerformedByHack(cherryPickRequest);
           _dao.needReadOnly(cherryPickRequest,
                             "cherryPickAssayPlates.cherryPickLiquidTransfer.performedBy");
@@ -1144,7 +1144,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           newCherryPickRequest.setDateVolumeApproved(cherryPickRequest.getDateVolumeApproved());
           newCherryPickRequest.setDateRequested(new Date());
           newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
-          newCherryPickRequest.addRequestedEmptyWellsOnAssayPlate(cherryPickRequest.getRequestedEmptyWellsOnAssayPlate());
+          newCherryPickRequest.addEmptyWellsOnAssayPlate(cherryPickRequest.getEmptyWellsOnAssayPlate());
           newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
           // note: we can only instantiate one new ScreenerCherryPick per *set*
           // of LabCherryPicks from the same screenedWell, otherwise we'll
@@ -1225,23 +1225,22 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   /**
    * Get the set of empty rows requested by the screener.
-   * @return well names that screener has requested be left empty on each cherry
-   *         pick assay plate
+   * @return well names that must be left empty on each cherry pick assay plate
    */
-  public Set<WellName> getRequestedEmptyWellsOnAssayPlate()
+  public Set<WellName> getEmptyWellsOnAssayPlate()
   {
-    return _cherryPickRequest.getRequestedEmptyWellsOnAssayPlate();
+    return _cherryPickRequest.getEmptyWellsOnAssayPlate();
   }
 
   /**
-   * Set the set of empty wells requested by the screener.
-   * @param requestedEmptyWellsOnAssayPlate wells that screener has requested be
+   * Set the set of empty wells.
+   * @param emptyWellsOnAssayPlate wells that screener has requested be
    * left empty on each cherry pick assay plate
    */
-  public void setRequestedEmptyWellsOnAssayPlate(Set<WellName> requestedEmptyWellsOnAssayPlate)
+  public void setEmptyWellsOnAssayPlate(Set<WellName> emptyWellsOnAssayPlate)
   {
-    _cherryPickRequest.clearRequestedEmptyWellsOnAssayPlate();
-    _cherryPickRequest.addRequestedEmptyWellsOnAssayPlate(requestedEmptyWellsOnAssayPlate);
+    _cherryPickRequest.clearEmptyWellsOnAssayPlate();
+    _cherryPickRequest.addEmptyWellsOnAssayPlate(emptyWellsOnAssayPlate);
   }
 
 

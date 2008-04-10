@@ -228,12 +228,12 @@
 						styleClass="command" displayValueOnlyStyleClass="dataText" />
 
 					<t:outputText
-						value="Screener-requested&#160;empty&#160;wells&#160;on&#160;plate"
+						value="Wells&#160;to&#160;leave&#160;empty"
 						escape="false"
-						title="The wells the screener requested to be left empty" />
+						title="The wells that should be left empty on the cherry pick plates" />
 					<t:panelGroup>
 						<t:inputText id="emptyWells"
-							value="#{cherryPickRequestViewer.requestedEmptyWellsOnAssayPlate}"
+							value="#{cherryPickRequestViewer.emptyWellsOnAssayPlate}"
 							converter="#{cherryPickRequestViewer.emptyWellsConverter}"
 							displayValueOnly="#{!cherryPickRequestViewer.editMode || cherryPickRequestViewer.cherryPickRequest.mapped}"
 							displayValueOnlyStyleClass="dataText" styleClass="inputText"

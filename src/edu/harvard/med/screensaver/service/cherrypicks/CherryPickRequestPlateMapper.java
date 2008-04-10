@@ -19,7 +19,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -29,6 +28,7 @@ import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * For a cherry pick request, generates the layout of the cherry picks onto a
@@ -51,6 +51,9 @@ public class CherryPickRequestPlateMapper
 
   // public constructors and methods
 
+  /** @motivation for CGLIB2 */
+  protected CherryPickRequestPlateMapper() {} 
+
   public CherryPickRequestPlateMapper(GenericEntityDAO dao)
   {
     this.genericEntityDao = dao;
@@ -59,22 +62,11 @@ public class CherryPickRequestPlateMapper
 
   // public constructors and methods
 
+  @Transactional
   public void generatePlateMapping(final CherryPickRequest cherryPickRequestIn)
   {
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
-//        CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reloadEntity(
-//          cherryPickRequestIn,
-//          false,
-//          "cherryPickAssayPlates",
-//          "labCherryPicks.sourceWell",
-//          "labCherryPicks.wellVolumeAdjustments.copy");
-        doGeneratePlateMapping(cherryPickRequest);
-      }
-    });
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
+    doGeneratePlateMapping(cherryPickRequest);
   }
 
 
@@ -84,6 +76,9 @@ public class CherryPickRequestPlateMapper
   {
     SortedSet<LabCherryPick> toBeMapped = findLabCherryPicksToBeMapped(cherryPickRequest);
     List<WellName> availableWellNamesMaster = findAvailableWellNames(cherryPickRequest);
+    if (availableWellNamesMaster.size() == 0) {
+      throw new BusinessRuleViolationException("cannot map cherry picks because all cherry pick assay plate wells have been requested to be kept empty"); 
+    }
     List<WellName> availableWellNamesOnCurrentPlate = null;
     int plateIndex = 0;
     CherryPickAssayPlate plate = null;
@@ -187,9 +182,7 @@ public class CherryPickRequestPlateMapper
     List<WellName> availableWellNames = new ArrayList<WellName>();
     for (int column = Well.MIN_WELL_COLUMN; column <= Well.MAX_WELL_COLUMN; column++) {
       for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; row++) {
-        if (!cherryPickRequest.getRequestedEmptyWellsOnAssayPlate().contains(new WellName(row, column)) &&
-          !cherryPickRequest.getRequiredEmptyColumnsOnAssayPlate().contains(column) &&
-          !cherryPickRequest.getRequiredEmptyRowsOnAssayPlate().contains(row)) {
+        if (!cherryPickRequest.getEmptyWellsOnAssayPlate().contains(new WellName(row, column))) {
           availableWellNames.add(new WellName(row, column));
         }
       }
@@ -200,8 +193,7 @@ public class CherryPickRequestPlateMapper
   private SortedSet<LabCherryPick> findLabCherryPicksToBeMapped(CherryPickRequest cherryPickRequest)
   {
     SortedSet<LabCherryPick> toBeMapped = new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance());
-    for (Iterator iter = cherryPickRequest.getLabCherryPicks()
-                                          .iterator(); iter.hasNext();) {
+    for (Iterator iter = cherryPickRequest.getLabCherryPicks().iterator(); iter.hasNext();) {
       LabCherryPick cherryPick = (LabCherryPick) iter.next();
       if (cherryPick.isMapped() || cherryPick.isPlated()) {
         // no cherry picks may be plated at this time

@@ -44,16 +44,6 @@ public class RNAiCherryPickRequest extends CherryPickRequest
 
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(RNAiCherryPickRequest.class);
-  private static final Set<Integer> REQUIRED_EMPTY_COLUMNS =
-    new HashSet<Integer>(Arrays.asList(Well.MIN_WELL_COLUMN,
-                                       Well.MIN_WELL_COLUMN + 1,
-                                       Well.MAX_WELL_COLUMN - 1,
-                                       Well.MAX_WELL_COLUMN ));
-  private static final Set<Character> REQUIRED_EMPTY_ROWS =
-    new HashSet<Character>(Arrays.asList(Well.MIN_WELL_ROW,
-                                         new Character((char) (Well.MIN_WELL_ROW + 1)),
-                                         new Character((char) (Well.MAX_WELL_ROW - 1)),
-                                         Well.MAX_WELL_ROW));
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
   public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
   private static final int CHERRY_PICK_SILENCING_AGENT_ALLOWANCE = 500 * 4;
@@ -124,20 +114,6 @@ public class RNAiCherryPickRequest extends CherryPickRequest
       silencingAgentsUsed += screenerCherryPick.getScreenedWell().getSilencingReagents().size();
     }
     return silencingAgentsUsed;
-  }
-
-  @Override
-  @Transient
-  public Set<Integer> getRequiredEmptyColumnsOnAssayPlate()
-  {
-    return REQUIRED_EMPTY_COLUMNS;
-  }
-
-  @Override
-  @Transient
-  public Set<Character> getRequiredEmptyRowsOnAssayPlate()
-  {
-    return REQUIRED_EMPTY_ROWS;
   }
 
   /**
