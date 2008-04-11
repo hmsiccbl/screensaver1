@@ -177,32 +177,6 @@ public class ReagentViewer extends AbstractBackingBean
     return VIEW_REAGENT;
   }
 
-  public String viewGene()
-  {
-    String geneId = (String) getFacesContext().getExternalContext().getRequestParameterMap().get("geneId");
-    Gene gene = null;
-    for (Gene gene2 : _genes) {
-      if (gene2.getGeneId().equals(geneId)) {
-        gene = gene2;
-        break;
-      }
-    }
-    return _geneViewer.viewGene(gene);
-  }
-
-  public String viewCompound()
-  {
-    String compoundId = (String) getRequestParameter("compoundId");
-    Compound compound = null;
-    for (Compound compound2 : _compounds) {
-      if (compound2.getCompoundId().equals(compoundId)) {
-        compound = compound2;
-        break;
-      }
-    }
-    return _compoundViewer.viewCompound(compound);
-  }
-
   public Collection<Gene> getGenes()
   {
     return _genes;
