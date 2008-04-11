@@ -38,11 +38,11 @@ import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 
 
 /**
- * A Hibernate entity bean representing a copy, which is a set of plates
- * representing a copy of a library's contents. The lab works from library
- * copies, rather than directly from master library plates, in order to reduce
- * freeze/thaw cycles, minimize the impact of loss due to a physical loss, etc.
- *
+ * A set of plates representing a copy of a library's contents. The lab works
+ * from library copies, rather than directly from master library plates, in
+ * order to reduce freeze/thaw cycles, minimize the impact of loss due to a
+ * physical loss, etc.
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
