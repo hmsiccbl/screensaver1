@@ -36,7 +36,6 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessException;
 
 

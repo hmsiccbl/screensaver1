@@ -10,20 +10,12 @@
 package edu.harvard.med.screensaver.io.libraries;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
-
 import org.apache.log4j.Logger;
 
 public class WellSdfDataExporter implements DataExporter<Well>

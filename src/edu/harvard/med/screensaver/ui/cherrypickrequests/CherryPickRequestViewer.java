@@ -77,8 +77,6 @@ import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.DataTable;
-import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;

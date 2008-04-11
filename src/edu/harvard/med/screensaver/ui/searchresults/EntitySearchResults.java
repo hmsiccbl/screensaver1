@@ -24,8 +24,6 @@ import java.util.Observer;
 import javax.faces.model.DataModelEvent;
 import javax.faces.model.DataModelListener;
 
-import jxl.write.biff.RowsExceededException;
-
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;

@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
