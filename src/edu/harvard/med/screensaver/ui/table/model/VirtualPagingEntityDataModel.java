@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.table.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +48,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
   @Override
   public void fetch(List<? extends TableColumn<E,?>> columns)
   {
-    List<RelationshipPath<E>> newRelationshipsToFetch = VirtualPagingEntityDataModel.getRelationshipPaths(columns);
+    List<RelationshipPath<E>> newRelationshipsToFetch = EntityColumn.getRelationshipPaths(columns);
     ((EntityDataFetcher<E,K>) _dataFetcher).setRelationshipsToFetch(newRelationshipsToFetch);
     _fetchedRows.clear();
     log.debug("cleared sorted/filtered row data (forces future re-query of row data)");
@@ -58,7 +57,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
   public void sort(List<? extends TableColumn<E,?>> sortColumns,
                    SortDirection sortDirection)
   {
-    List<PropertyPath<E>> newOrderByProperties = VirtualPagingEntityDataModel.getPropertyPaths(sortColumns);
+    List<PropertyPath<E>> newOrderByProperties = EntityColumn.getPropertyPaths(sortColumns);
     // if only sortDirection has changed do not clear sortKeys, as this does not require a database fetch
     if (!newOrderByProperties.equals(_lastOrderByProperties)) {
       ((EntityDataFetcher<E,K>) _dataFetcher).setOrderBy(newOrderByProperties);
@@ -72,62 +71,11 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
   
   public void filter(List<? extends TableColumn<E,?>> columns)
   {
-    Map<PropertyPath<E>,List<? extends Criterion<?>>> newFilterCriteria = VirtualPagingEntityDataModel.getFilteringCriteria(columns);
+    Map<PropertyPath<E>,List<? extends Criterion<?>>> newFilterCriteria = EntityColumn.getFilteringCriteria(columns);
     ((EntityDataFetcher<E,K>) _dataFetcher).setFilteringCriteria(newFilterCriteria);
     _sortedKeys = null; // force re-fetch
     log.debug("cleared filter (forces future re-query of sorted/filtered keys)");
     _rowIndex = -1;
-  }
-
-  
-  // private methods
-
-  // static methods
-  
-  public static <E extends AbstractEntity> List<RelationshipPath<E>> getRelationshipPaths(List<? extends TableColumn<E,?>> columns)
-  {
-    List<RelationshipPath<E>> relationshipPaths = new ArrayList<RelationshipPath<E>>();
-    for (TableColumn<E,?> column : columns) {
-      if (column instanceof EntityColumn) {
-        if (column.isVisible()) {
-          relationshipPaths.addAll(((EntityColumn) column).getRelationshipPaths());
-        }
-      }
-    }
-    return relationshipPaths;
-  }
-
-  public static <E extends AbstractEntity> Map<PropertyPath<E>,List<? extends Criterion<?>>> getFilteringCriteria(List<? extends TableColumn<E,?>> columns)
-  {
-    Map<PropertyPath<E>,List<? extends Criterion<?>>> criteria = new HashMap<PropertyPath<E>,List<? extends Criterion<?>>>();
-    for (TableColumn<E,?> column : columns) {
-      if (column instanceof EntityColumn) {
-        if (column.isVisible()) {
-          EntityColumn<E,?> entityColumn = (EntityColumn) column;
-          if (entityColumn.getPropertyPath() != null) {
-            criteria.put(entityColumn.getPropertyPath(),
-                         entityColumn.getCriteria());
-          }
-        }
-      }
-    }
-    return criteria;
-  }
-
-  public static <E extends AbstractEntity> List<PropertyPath<E>> getPropertyPaths(List<? extends TableColumn<E,?>> columns)
-  {
-    List<PropertyPath<E>> propertyPaths = new ArrayList<PropertyPath<E>>();
-    for (TableColumn<E,?> column : columns) {
-      if (column instanceof EntityColumn) {
-        if (column.isVisible()) {
-          EntityColumn<E,?> entityColumn = (EntityColumn) column;
-          if (entityColumn.getPropertyPath() != null) {
-            propertyPaths.add(entityColumn.getPropertyPath());
-          }
-        }
-      }
-    }
-    return propertyPaths;
   }
 
 }

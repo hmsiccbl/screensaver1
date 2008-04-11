@@ -9,7 +9,11 @@
 
 package edu.harvard.med.screensaver.ui.table.column.entity;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -112,5 +116,51 @@ public abstract class EntityColumn<E extends AbstractEntity,T> extends TableColu
   public void addRelationshipPath(RelationshipPath<E> path) 
   {
     _relationshipPaths.add(path);
+  }
+
+  public static <E extends AbstractEntity> List<PropertyPath<E>> getPropertyPaths(List<? extends TableColumn<E,?>> columns)
+  {
+    List<PropertyPath<E>> propertyPaths = new ArrayList<PropertyPath<E>>();
+    for (TableColumn<E,?> column : columns) {
+      if (column instanceof EntityColumn) {
+        if (column.isVisible()) {
+          EntityColumn<E,?> entityColumn = (EntityColumn) column;
+          if (entityColumn.getPropertyPath() != null) {
+            propertyPaths.add(entityColumn.getPropertyPath());
+          }
+        }
+      }
+    }
+    return propertyPaths;
+  }
+
+  public static <E extends AbstractEntity> Map<PropertyPath<E>,List<? extends Criterion<?>>> getFilteringCriteria(List<? extends TableColumn<E,?>> columns)
+  {
+    Map<PropertyPath<E>,List<? extends Criterion<?>>> criteria = new HashMap<PropertyPath<E>,List<? extends Criterion<?>>>();
+    for (TableColumn<E,?> column : columns) {
+      if (column instanceof EntityColumn) {
+        if (column.isVisible()) {
+          EntityColumn<E,?> entityColumn = (EntityColumn) column;
+          if (entityColumn.getPropertyPath() != null) {
+            criteria.put(entityColumn.getPropertyPath(),
+                         entityColumn.getCriteria());
+          }
+        }
+      }
+    }
+    return criteria;
+  }
+
+  public static <E extends AbstractEntity> List<RelationshipPath<E>> getRelationshipPaths(List<? extends TableColumn<E,?>> columns)
+  {
+    List<RelationshipPath<E>> relationshipPaths = new ArrayList<RelationshipPath<E>>();
+    for (TableColumn<E,?> column : columns) {
+      if (column instanceof EntityColumn) {
+        if (column.isVisible()) {
+          relationshipPaths.addAll(((EntityColumn) column).getRelationshipPaths());
+        }
+      }
+    }
+    return relationshipPaths;
   }
 }
