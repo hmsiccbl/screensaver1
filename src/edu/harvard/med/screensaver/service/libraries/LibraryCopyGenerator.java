@@ -111,7 +111,7 @@ public class LibraryCopyGenerator
     else {
       if (!(copyInfo.getMicroliterWellVolume().equals(volume) &&
         copyInfo.getPlateType().equals(plateType))) {
-        throw new DataModelViolationException("attempted to create a new plate copy that already exists (and that has different values)"); 
+        throw new DataModelViolationException("attempted to create a new plate copy that already exists (and that has different values for plate type and/or initial volume)"); 
       }
       return null;
     }
