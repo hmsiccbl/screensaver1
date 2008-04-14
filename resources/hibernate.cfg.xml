@@ -49,7 +49,7 @@
     <mapping class="edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Screen" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Screening" />
-    <mapping class="edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.LabActivity" />
     <mapping class="edu.harvard.med.screensaver.model.screens.StatusItem" />
 
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationType" />

@@ -31,23 +31,21 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 
 /**
- * A Hibernate entity bean representing a screening room activity.
- * <p>
- * TODO: consider renaming to <code>ScreenActivity</code>.
+ * An activity that occurs in the screening lab.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity
 @PrimaryKeyJoinColumn(name="activityId")
-@org.hibernate.annotations.ForeignKey(name="fk_screening_room_activity_to_activity")
+@org.hibernate.annotations.ForeignKey(name="fk_lab_activity_to_activity")
 @org.hibernate.annotations.Proxy
-public abstract class ScreeningRoomActivity extends Activity
+public abstract class LabActivity extends Activity
 {
 
   // private static fields
 
-  private static final Logger log = Logger.getLogger(ScreeningRoomActivity.class);
+  private static final Logger log = Logger.getLogger(LabActivity.class);
   private static final long serialVersionUID = 0L;
 
 
@@ -63,8 +61,8 @@ public abstract class ScreeningRoomActivity extends Activity
   @Override
   public int compareTo(Object o)
   {
-    if (o instanceof ScreeningRoomActivity) {
-      ScreeningRoomActivity other = (ScreeningRoomActivity) o;
+    if (o instanceof LabActivity) {
+      LabActivity other = (LabActivity) o;
       return getDateOfActivity().compareTo(other.getDateOfActivity());
     }
     return 0;
@@ -77,9 +75,9 @@ public abstract class ScreeningRoomActivity extends Activity
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="screenId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_screening_room_activity_to_screen")
+  @org.hibernate.annotations.ForeignKey(name="fk_lab_activity_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screeningRoomActivities")
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="labActivities")
   public Screen getScreen()
   {
     return _screen;
@@ -97,7 +95,7 @@ public abstract class ScreeningRoomActivity extends Activity
 
   /**
    * Set the volume transferred per well, in microliters
-   * @param microliterVolumeTransferedPerWell the new volume transferrde per well, in microliters
+   * @param microliterVolumeTransferedPerWell the new volume transferred per well, in microliters
    */
   public void setMicroliterVolumeTransferedPerWell(
     BigDecimal microliterVolumeTransferedPerWell)
@@ -115,7 +113,7 @@ public abstract class ScreeningRoomActivity extends Activity
    * @return the equipment used
    */
   @OneToMany(
-    mappedBy="screeningRoomActivity",
+    mappedBy="labActivity",
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
@@ -126,7 +124,7 @@ public abstract class ScreeningRoomActivity extends Activity
   @edu.harvard.med.screensaver.model.annotations.OneToMany(
     singularPropertyName="equipmentUsed"
       //,
-    //inverseProperty="screeningRoomActivity"
+    //inverseProperty="labActivity"
   )
   public Set<EquipmentUsed> getEquipmentUsed()
   {
@@ -134,11 +132,11 @@ public abstract class ScreeningRoomActivity extends Activity
   }
 
   /**
-   * Create and return a new equipment used for the screening room activity.
+   * Create and return a new equipment used for the lab activity.
    * @param equipment the equipment
    * @param protocol the protocol
    * @param description the description
-   * @return a new equipment used for the screening room activity
+   * @return a new equipment used for the lab activity
    */
   public EquipmentUsed createEquipmentUsed(
     String equipment,
@@ -154,13 +152,13 @@ public abstract class ScreeningRoomActivity extends Activity
   // protected constructors
 
   /**
-   * Construct an initialized <code>ScreeningRoomActivity</code>.
+   * Construct an initialized <code>LabActivity</code>.
    * @param screen the screen
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
-   * @param dateOfActivity the date the screening room activity took place
+   * @param dateOfActivity the date the lab activity took place
    */
-  protected ScreeningRoomActivity(
+  protected LabActivity(
     Screen screen,
     ScreensaverUser performedBy,
     Date dateCreated,
@@ -174,10 +172,10 @@ public abstract class ScreeningRoomActivity extends Activity
   }
 
   /**
-   * Construct an uninitialized <code>ScreeningRoomActivity</code>.
+   * Construct an uninitialized <code>LabActivity</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  protected ScreeningRoomActivity() {}
+  protected LabActivity() {}
 
 
   // private methods

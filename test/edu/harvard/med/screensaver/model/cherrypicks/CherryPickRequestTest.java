@@ -136,7 +136,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
         
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "hbnScreenNumber", screenNumber);
         assertNotNull("screen is not deleted", screen);
-        assertEquals("screen has no activities", 0, screen.getScreeningRoomActivities().size());
+        assertEquals("screen has no activities", 0, screen.getLabActivities().size());
       }
     });
   }

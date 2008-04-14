@@ -40,7 +40,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 @PrimaryKeyJoinColumn(name="activityId")
 @org.hibernate.annotations.ForeignKey(name="fk_screening_to_activity")
 @org.hibernate.annotations.Proxy
-public abstract class Screening extends ScreeningRoomActivity
+public abstract class Screening extends LabActivity
 {
   // private static data
 

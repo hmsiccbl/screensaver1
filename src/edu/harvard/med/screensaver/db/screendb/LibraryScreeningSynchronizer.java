@@ -80,7 +80,7 @@ class LibraryScreeningSynchronizer extends ScreeningSynchronizer
   
   private void deleteOldLibraryScreenings() {
     for (LibraryScreening libraryScreening : _dao.findAllEntitiesOfType(LibraryScreening.class)) {
-      libraryScreening.getScreen().getScreeningRoomActivities().remove(libraryScreening);
+      libraryScreening.getScreen().getLabActivities().remove(libraryScreening);
       libraryScreening.getPerformedBy().getActivitiesPerformed().remove(libraryScreening);
     }
   }

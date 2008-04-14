@@ -45,7 +45,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
   }
   
 
-  public void testGetScreeningRoomActivities() throws Exception
+  public void testGetLabActivities() throws Exception
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
     LibraryScreening screening1 = screen.createLibraryScreening(
@@ -66,21 +66,21 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       cpr);
 
     Set<LibraryScreening> libraryScreenings =
-      screen.getScreeningRoomActivitiesOfType(LibraryScreening.class);
+      screen.getlabActivitiesOfType(LibraryScreening.class);
     assertEquals("library screening activities",
                  new TreeSet<LibraryScreening>(Arrays.asList(screening1, screening2)),
                  libraryScreenings);
 
     Set<CherryPickLiquidTransfer> cherryPickLiquidTransfers =
-      screen.getScreeningRoomActivitiesOfType(CherryPickLiquidTransfer.class);
+      screen.getlabActivitiesOfType(CherryPickLiquidTransfer.class);
     assertEquals("cherry pick liquid transfer activities",
                new TreeSet<CherryPickLiquidTransfer>(Arrays.asList(cplt)),
                cherryPickLiquidTransfers);
 
-    Set<ScreeningRoomActivity> activities =
-      screen.getScreeningRoomActivitiesOfType(ScreeningRoomActivity.class);
+    Set<LabActivity> activities =
+      screen.getlabActivitiesOfType(LabActivity.class);
     assertEquals("cherry pick liquid transfer activities",
-                 new TreeSet<ScreeningRoomActivity>(Arrays.asList(screening1, screening2, cplt)),
+                 new TreeSet<LabActivity>(Arrays.asList(screening1, screening2, cplt)),
                  activities);
   }
 

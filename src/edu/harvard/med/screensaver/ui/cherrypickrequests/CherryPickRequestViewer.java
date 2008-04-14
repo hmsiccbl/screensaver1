@@ -565,7 +565,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                                                                   "screen.leadScreener",
                                                                   "screen.collaborators");
 
-          _dao.needReadOnly(cherryPickRequest.getScreen(), "screeningRoomActivities");
+          _dao.needReadOnly(cherryPickRequest.getScreen(), "labActivities");
           _dao.needReadOnly(cherryPickRequest.getScreen(), "cherryPickRequests");
           _dao.needReadOnly(cherryPickRequest, "emptyWellsOnAssayPlate");
           _eagerFetchCpltPerformedByHack(cherryPickRequest);
@@ -1170,12 +1170,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     }
   }
 
-//  public String createNewCherryPickRequestForSelectedAssayPlates()
-//  {
-//    // TODO
-//    return REDISPLAY_PAGE_ACTION_RESULT;
-//  }
-
   @UIControllerMethod
   public String viewLeadScreener()
   {
@@ -1192,7 +1186,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       public void runTransaction()
       {
         _dao.reattachEntity(_cherryPickRequest); // checks if up-to-date
-        //_dao.need(cherryPickRequest, "");
       }
     });
     return REDISPLAY_PAGE_ACTION_RESULT;

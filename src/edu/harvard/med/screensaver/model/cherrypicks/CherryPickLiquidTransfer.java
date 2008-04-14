@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 /**
@@ -41,7 +41,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_liquid_transfer_to_activity")
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class CherryPickLiquidTransfer extends ScreeningRoomActivity
+public class CherryPickLiquidTransfer extends LabActivity
 {
 
   // private static data

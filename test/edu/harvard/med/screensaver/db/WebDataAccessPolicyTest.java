@@ -358,7 +358,6 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
   
   public void testRNAiCherryPickRequestPermissions()
   {
-    schemaUtil.initializeDatabase(); // required to set the cherryPickRequest sequence start value
     final ScreeningRoomUser[] users = new ScreeningRoomUser[6];
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()

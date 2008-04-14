@@ -28,7 +28,7 @@ public class PackageTestSuite extends TestSuite
   {
     // ignored abstract classes
     // addTestSuite(Screening.class);
-    // addTestSuite(ScreeningRoomActivityTest.class);
+    // addTestSuite(LabActivityTest.class);
     
     // test entity model classes (ignoring abstract classes)
     addTestSuite(AbaseTestsetTest.class);

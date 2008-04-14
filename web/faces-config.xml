@@ -224,7 +224,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
 
     <navigation-case>
       <from-outcome>browseActivities</from-outcome>
-      <to-view-id>/activities/screeningRoomActivitiesBrowser</to-view-id>
+      <to-view-id>/activities/labActivitiesBrowser</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>

@@ -35,7 +35,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreeningRoomActivity.class)
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=LabActivity.class)
 public class EquipmentUsed extends AbstractEntity
 {
 
@@ -49,7 +49,7 @@ public class EquipmentUsed extends AbstractEntity
 
   private Integer _equipmentUsedId;
   private Integer _version;
-  private ScreeningRoomActivity _screeningRoomActivity;
+  private LabActivity _labActivity;
   private String _equipment;
   private String _protocol;
   private String _description;
@@ -86,25 +86,17 @@ public class EquipmentUsed extends AbstractEntity
     return _equipmentUsedId;
   }
 
-  /**
-   * Get the screening room activity.
-   * @return the screening room activity
-   */
   @ManyToOne(fetch=FetchType.LAZY)
-  @JoinColumn(name="screeningRoomActivityId", nullable=false, updatable=false)
+  @JoinColumn(name="labActivityId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_equipment_used_to_screening_room_activity")
+  @org.hibernate.annotations.ForeignKey(name="fk_equipment_used_to_lab_activity")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="equipmentUsed")
-  public ScreeningRoomActivity getScreeningRoomActivity()
+  public LabActivity getLabActivity()
   {
-    return _screeningRoomActivity;
+    return _labActivity;
   }
 
-  /**
-   * Get the equipment.
-   * @return the equipment
-   */
   @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
   public String getEquipment()
@@ -112,48 +104,28 @@ public class EquipmentUsed extends AbstractEntity
     return _equipment;
   }
 
-  /**
-   * Set the equipment.
-   * @param equipment the new equipment
-   */
   public void setEquipment(String equipment)
   {
     _equipment = equipment;
   }
 
-  /**
-   * Get the protocol.
-   * @return the protocol
-   */
   @org.hibernate.annotations.Type(type="text")
   public String getProtocol()
   {
     return _protocol;
   }
 
-  /**
-   * Set the protocol.
-   * @param protocol the new protocol
-   */
   public void setProtocol(String protocol)
   {
     _protocol = protocol;
   }
 
-  /**
-   * Get the description.
-   * @return the description
-   */
   @org.hibernate.annotations.Type(type="text")
   public String getDescription()
   {
     return _description;
   }
 
-  /**
-   * Set the description.
-   * @param description the new description
-   */
   public void setDescription(String description)
   {
     _description = description;
@@ -164,22 +136,22 @@ public class EquipmentUsed extends AbstractEntity
 
   /**
    * Construct an initialized <code>EquipmentUsed</code>. Intended only for use by {@link
-   * ScreeningRoomActivity#createEquipmentUsed(String, String, String)}.
-   * @param screeningRoomActivity the screening room activity
+   * LabActivity#createEquipmentUsed(String, String, String)}.
+   * @param labActivity the screening room activity
    * @param equipment the equipment
    * @param protocol the protocol
    * @param description the description
    */
   EquipmentUsed(
-    ScreeningRoomActivity screeningRoomActivity,
+    LabActivity labActivity,
     String equipment,
     String protocol,
     String description)
   {
-    if (screeningRoomActivity == null) {
+    if (labActivity == null) {
       throw new NullPointerException();
     }
-    _screeningRoomActivity = screeningRoomActivity;
+    _labActivity = labActivity;
     _equipment = equipment;
     _protocol = protocol;
     _description = description;
@@ -189,7 +161,6 @@ public class EquipmentUsed extends AbstractEntity
   // protected constructor
 
   /**
-   * Construct an uninitialized <code>EquipmentUsed</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected EquipmentUsed() {}
@@ -198,18 +169,14 @@ public class EquipmentUsed extends AbstractEntity
   // private constructor and instance methods
 
   /**
-   * Set the screening room activity.
-   * @param screening room activity the new screening room activity
    * @motivation for hibernate
    */
-  private void setScreeningRoomActivity(ScreeningRoomActivity screeningRoomActivity)
+  private void setLabActivity(LabActivity labActivity)
   {
-    _screeningRoomActivity = screeningRoomActivity;
+    _labActivity = labActivity;
   }
 
   /**
-   * Set the id for the equipment used.
-   * @param equipmentUsedId the new id for the equipment used
    * @motivation for hibernate
    */
   private void setEquipmentUsedId(Integer equipmentUsedId)
@@ -218,8 +185,6 @@ public class EquipmentUsed extends AbstractEntity
   }
 
   /**
-   * Get the version for the equipment used.
-   * @return the version for the equipment used
    * @motivation for hibernate
    */
   @Column(nullable=false)
@@ -230,8 +195,6 @@ public class EquipmentUsed extends AbstractEntity
   }
 
   /**
-   * Set the version for the equipment used.
-   * @param version the new version for the equipment used
    * @motivation for hibernate
    */
   private void setVersion(Integer version)

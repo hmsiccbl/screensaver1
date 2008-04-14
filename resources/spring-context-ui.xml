@@ -155,7 +155,7 @@
     <constructor-arg ref="librariesBrowser" />
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="staffBrowser" />
-    <constructor-arg ref="screeningRoomActivitiesBrowser" />
+    <constructor-arg ref="labActivitiesBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -575,10 +575,10 @@
   <!-- === activities backing beans === -->
 
   <bean
-    id="screeningRoomActivitiesBrowser"
+    id="labActivitiesBrowser"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.searchresults.ScreeningRoomActivitySearchResults">
+    class="edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults">
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="genericEntityDao" />
     <!-- constructor-arg ref="activityViewer" /-->

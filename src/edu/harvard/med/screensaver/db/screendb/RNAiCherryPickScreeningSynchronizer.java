@@ -84,7 +84,7 @@ class RNAiCherryPickScreeningSynchronizer extends ScreeningSynchronizer
   private void deleteOldRnaiCherryPickScreenings() {
     for (RNAiCherryPickScreening rnaiCherryPickScreening :
       _dao.findAllEntitiesOfType(RNAiCherryPickScreening.class)) {
-      rnaiCherryPickScreening.getScreen().getScreeningRoomActivities().remove(rnaiCherryPickScreening);
+      rnaiCherryPickScreening.getScreen().getLabActivities().remove(rnaiCherryPickScreening);
       rnaiCherryPickScreening.getPerformedBy().getActivitiesPerformed().remove(rnaiCherryPickScreening);
     }
   }

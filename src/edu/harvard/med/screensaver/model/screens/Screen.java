@@ -107,7 +107,7 @@ public class Screen extends Study
   // iccb screen
 
   private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
-  private Set<ScreeningRoomActivity> _screeningRoomActivities = new HashSet<ScreeningRoomActivity>();
+  private Set<LabActivity> _labActivities = new HashSet<LabActivity>();
   private Date _dataMeetingScheduled;
   private Date _dataMeetingComplete;
   private BillingInformation _billingInformation;
@@ -536,8 +536,8 @@ public class Screen extends Study
   }
 
   /**
-   * Get the screening room activities.
-   * @return the screening room activities
+   * Get the lab activities.
+   * @return the lab activities
    */
   @OneToMany(
     mappedBy="screen",
@@ -551,26 +551,26 @@ public class Screen extends Study
     org.hibernate.annotations.CascadeType.DELETE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="screeningRoomActivity")
-  public Set<ScreeningRoomActivity> getScreeningRoomActivities()
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="labActivity")
+  public Set<LabActivity> getLabActivities()
   {
-    return _screeningRoomActivities;
+    return _labActivities;
   }
 
   /**
-   * Get all the screening room activities for this screen of a particular type.
-   * @param <E> the type of the screening room activities to get
-   * @param clazz the type of the screening room activities to get
-   * @return all the screening room activities for this screen of a particular type.
+   * Get all the lab activities for this screen of a particular type.
+   * @param <E> the type of the lab activities to get
+   * @param clazz the type of the lab activities to get
+   * @return all the lab activities for this screen of a particular type.
    */
   @SuppressWarnings("unchecked")
   @Transient
-  public <E extends ScreeningRoomActivity> Set<E> getScreeningRoomActivitiesOfType(Class<E> clazz)
+  public <E extends LabActivity> Set<E> getlabActivitiesOfType(Class<E> clazz)
   {
     Set<E> result = new TreeSet<E>();
-    for (ScreeningRoomActivity screeningRoomActivity : _screeningRoomActivities) {
-      if (clazz.isAssignableFrom(screeningRoomActivity.getClass())) {
-        result.add((E) screeningRoomActivity);
+    for (LabActivity labActivity : _labActivities) {
+      if (clazz.isAssignableFrom(labActivity.getClass())) {
+        result.add((E) labActivity);
       }
     }
     return result;
@@ -590,7 +590,7 @@ public class Screen extends Study
   {
     LibraryScreening libraryScreening =
       new LibraryScreening(this, performedBy, dateCreated, dateOfActivity);
-    _screeningRoomActivities.add(libraryScreening);
+    _labActivities.add(libraryScreening);
     return libraryScreening;
   }
 
@@ -598,7 +598,7 @@ public class Screen extends Study
    * Create and return a new cherry pick liquid transfer for the screen.
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
-   * @param dateOfActivity the date the screening room activity took place
+   * @param dateOfActivity the date the lab activity took place
    * @param cherryPickRequest the cherry pick request
    * @return the new cherry pick liquid transfer
    */
@@ -620,7 +620,7 @@ public class Screen extends Study
    * Create and return a new cherry pick liquid transfer for the screen.
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
-   * @param dateOfActivity the date the screening room activity took place
+   * @param dateOfActivity the date the lab activity took place
    * @param cherryPickRequest the cherry pick request
    * @param status the status of the cherry pick liquid transfer
    * @return the new cherry pick liquid transfer
@@ -639,7 +639,7 @@ public class Screen extends Study
       dateOfActivity,
       cherryPickRequest,
       status);
-    _screeningRoomActivities.add(cherryPickLiquidTransfer);
+    _labActivities.add(cherryPickLiquidTransfer);
     return cherryPickLiquidTransfer;
   }
 
@@ -663,7 +663,7 @@ public class Screen extends Study
       dateCreated,
       dateOfActivity,
       rnaiCherryPickRequest);
-    _screeningRoomActivities.add(screening);
+    _labActivities.add(screening);
     return screening;
   }
 
@@ -1584,13 +1584,11 @@ public class Screen extends Study
   }
 
   /**
-   * Set the screening room activities.
-   * @param screeningRoomActivities the new screening room activities
    * @motivation for hibernate
    */
-  private void setScreeningRoomActivities(Set<ScreeningRoomActivity> screeningRoomActivities)
+  private void setLabActivities(Set<LabActivity> labActivities)
   {
-    _screeningRoomActivities = screeningRoomActivities;
+    _labActivities = labActivities;
   }
 
   /**

@@ -35,9 +35,12 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
 /**
- * The extents of the object network to be fetched are specified via
- * {@link setRelationshipsToFetch}.
- * <p>
+ * DataFetcher that fetches entities or entity networks from persistent storage.
+ * As entities have relationships, and thus form entity networks, this
+ * DataFetcher allows the network "structure" to be specified via
+ * {@link #setRelationshipsToFetch}. Subclasses can also enforce
+ * additional, implicit filtering constraints on the data set to be fetched via
+ * {@link #addDomainRestrictions(HqlBuilder, Map)}.
  */
 public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements DataFetcher<E,K,PropertyPath<E>>
 {

@@ -195,7 +195,7 @@ public class Menu extends AbstractBackingBean
   }
 
   @UIControllerMethod
-  public String browseScreeningRoomActivities()
+  public String browseLabActivities()
   {
     ScreensaverUser user = getScreensaverUser();
     if (user instanceof AdministratorUser &&

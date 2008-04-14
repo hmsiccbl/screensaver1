@@ -59,7 +59,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericaln
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.IntRange;
@@ -963,10 +963,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                        ", expected " + screen.getScreenNumber());
     }
     if (parsedScreenInfo.getDateCreated() == null) {
-      if (screen.getScreeningRoomActivities().size() > 0) {
-        SortedSet<ScreeningRoomActivity> sortedScreeningRoomActivities =
-          new TreeSet<ScreeningRoomActivity>(screen.getScreeningRoomActivities());
-        parsedScreenInfo.setDate(sortedScreeningRoomActivities.first().getDateOfActivity());
+      if (screen.getLabActivities().size() > 0) {
+        SortedSet<LabActivity> sortedLabActivities =
+          new TreeSet<LabActivity>(screen.getLabActivities());
+        parsedScreenInfo.setDate(sortedLabActivities.first().getDateOfActivity());
       }
       else {
         log.warn("screen result's screen has no library screenings, so screen result's \"date created\" property will be set to today");

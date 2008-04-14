@@ -47,7 +47,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -143,7 +143,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(CherryPickLiquidTransfer entity)
   {
-    return visit((ScreeningRoomActivity) entity);
+    return visit((LabActivity) entity);
   }
 
   public boolean visit(Compound entity)
@@ -318,12 +318,12 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(LibraryScreening entity)
   {
-    return visit((ScreeningRoomActivity) entity);
+    return visit((LabActivity) entity);
   }
 
   public boolean visit(RNAiCherryPickScreening entity)
   {
-    return visit((ScreeningRoomActivity) entity);
+    return visit((LabActivity) entity);
   }
 
   public boolean visit(WellVolumeCorrectionActivity entity)
@@ -379,7 +379,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
   }
 
-  private boolean visit(ScreeningRoomActivity entity)
+  private boolean visit(LabActivity entity)
   {
     return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
   }

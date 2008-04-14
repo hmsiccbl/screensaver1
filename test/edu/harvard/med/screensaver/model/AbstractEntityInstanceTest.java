@@ -73,7 +73,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -1246,7 +1246,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   static {
     _concreteStandinMap.put(ScreensaverUser.class, ScreeningRoomUser.class);
     _concreteStandinMap.put(Screening.class, LibraryScreening.class);
-    _concreteStandinMap.put(ScreeningRoomActivity.class, LibraryScreening.class);
+    _concreteStandinMap.put(LabActivity.class, LibraryScreening.class);
     _concreteStandinMap.put(Activity.class, LibraryScreening.class);
     _concreteStandinMap.put(AdministrativeActivity.class, WellVolumeCorrectionActivity.class);
     _concreteStandinMap.put(CherryPickRequest.class, RNAiCherryPickRequest.class);

@@ -9,17 +9,11 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
@@ -35,6 +29,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
+import com.google.common.base.Join;
+
 /**
  * Utility for manipulating schemas, via Spring+Hibernate.
  *
@@ -48,7 +44,6 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   // static fields
 
   private static Logger log = Logger.getLogger(SchemaUtil.class);
-  private static String INITIALIZE_DATABASE_DIR = "/sql/initialize_database";
 
 
   // static methods
@@ -70,19 +65,12 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     app.addCommandLineOption(OptionBuilder.
                              withArgName("recreate").
                              withLongOpt("recreate").
-                             withDescription("drop, then create and initialize the database schema").
+                             withDescription("drop and create the database schema").
                              create('r'));
-    app.addCommandLineOption(OptionBuilder.
-                             withArgName("initialize").
-                             withLongOpt("initialize").
-                             withDescription("initialize the database by running database initialization scripts (assumes empty database tables)").
-                             create('i'));
     try {
       if (!app.processOptions(/*acceptDatabaseOptions=*/true, /*showHelpOnError=*/true)) {
         return;
       }
-
-      boolean canInitialize = true; // do not allow initialize 'drop' invoked w/o 'create'
 
       if (app.isCommandLineFlagSet("recreate")) {
         app.getSpringBean("schemaUtil", SchemaUtil.class).recreateSchema();
@@ -90,14 +78,9 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
       else {
         if (app.isCommandLineFlagSet("drop")) {
           app.getSpringBean("schemaUtil", SchemaUtil.class).dropSchema();
-          canInitialize = false;
         }
         if (app.isCommandLineFlagSet("create")) {
           app.getSpringBean("schemaUtil", SchemaUtil.class).createSchema();
-          canInitialize = true;
-        }
-        if (app.isCommandLineFlagSet("initialize") && canInitialize) {
-          app.getSpringBean("schemaUtil", SchemaUtil.class).initializeDatabase();
         }
       }
     }
@@ -129,6 +112,8 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
 
   private UsersDAO _usersDao;
 
+  private List<String> _schemaTableNames = new ArrayList<String>();
+
 
   public void setSessionFactoryBeanId(String sessionFactoryBeanId)
   {
@@ -155,14 +140,14 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   }
 
   /**
-   * Drop the schema that is configured for this Spring+Hibernate enabled project.
+   * Drop the schema that is configured for this Spring+Hibernate enabled
+   * project. Will only execute if this is a test database (see
+   * {@link #isTestDatabase()}).
    */
   public void dropSchema() throws DataAccessException
   {
-    if (isFullyLoadedDatabase()) {
-      throw new RuntimeException("Attempt to drop fully loaded database");
-    }
     log.info("dropping schema for " + makeDataSourceString());
+    verifyIsTestDatabase();
     getLocalSessionFactoryBean().dropDatabaseSchema();
   }
 
@@ -176,73 +161,6 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   }
 
   /**
-   * Initialize the database by running SQL initialization scripts
-   */
-  public void initializeDatabase() throws DataAccessException
-  {
-    log.info("initializing database for " + makeDataSourceString());
-    Session session = getSession();
-    Connection connection = session.connection();
-    
-    try {
-      URL url = getClass().getResource(INITIALIZE_DATABASE_DIR);
-      File directory = new File(url.getFile().replace("%20", " "));
-      if (! directory.exists()) {
-        throw new RuntimeException("directory " + directory + " doesn't exist");
-      }
-      String [] filenames = directory.list(new FilenameFilter() {
-        public boolean accept(File file, String filename) {
-          return filename.endsWith(".sql");
-        }
-      });
-      Arrays.sort(filenames);
-      for (String filename : filenames) {
-
-        log.info("processing file = " + filename);
-        File file = new File(directory, filename);
-        BufferedReader reader =
-          new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-
-        Statement statement = connection.createStatement();
-        String line;
-        while ((line = reader.readLine()) != null) {
-          if (isComment(line)) {
-            continue;
-          }
-          if (line.endsWith(";")) {
-            log.debug("executing sql = " + line);
-            statement.execute(line);
-          }
-          else {
-            String longLine = line + " ";
-            while ((line = reader.readLine()) != null) {
-              longLine += line + " ";
-              if (line.endsWith(";")) {
-                log.debug("executing sql = " + longLine);
-                statement.execute(longLine);
-                break;
-              }
-            }
-          }
-        }
-        statement.close();
-      }
-      connection.close();
-    }
-    catch (Exception e) {
-      log.error("couldnt initialize database: " + e.getMessage(), e);
-    }
-    finally {
-      releaseSession(session);
-    }
-  }
-
-  private boolean isComment(String line)
-  {
-    return line.matches("^\\s*(//|/\\*).*");
-  }
-
-  /**
    * Drop and create (in that order) the schema that is configured for this
    * Spring+Hibernate enabled project.
    */
@@ -250,7 +168,6 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   {
     dropSchema();
     createSchema();
-    initializeDatabase();
   }
 
   /**
@@ -261,15 +178,13 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   @SuppressWarnings("unchecked")
   public void truncateTablesOrCreateSchema()
   {
-    if (isFullyLoadedDatabase()) {
-      throw new RuntimeException("Attempt to truncate fully loaded database");
-    }
     log.info("truncating tables for " + makeDataSourceString());
+    verifyIsTestDatabase();
     Session session = getSession();
     Connection connection = session.connection();
 
     try {
-      String sql = "TRUNCATE TABLE " + getCommaSepratedTableList();
+      String sql = "TRUNCATE TABLE " + Join.join(",", getSchemaTableNames());
       if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
         createSchema();
         return;
@@ -310,11 +225,10 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     Connection connection = session.connection();
 
     try {
-      String tableList = getCommaSepratedTableList();
-      if (tableList.equals("")) {
+      if (getSchemaTableNames().isEmpty()) {
         return;
       }
-      String sql = "GRANT ALL ON " + tableList + " TO ";
+      String sql = "GRANT ALL ON " + Join.join(",", getSchemaTableNames()) + " TO ";
       List<String> developerECommonsIds = _usersDao.findDeveloperECommonsIds();
       if (developerECommonsIds.size() == 0) {
         return;
@@ -392,74 +306,65 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   }
 
   /**
-   * Return true iff the database is fully loaded. Used to prevent dropping fully loaded databases, or truncating
-   * their tables, since this is a costly mistake. (This happened to me one to many times while mixing ui testing
-   * against a fully database with unit testing.) This could probably be improved upon but I use just include
-   * the string "fully-loaded" in the name of the database to indicate a fully loaded database.
+   * Return true iff the database is fully loaded.
+   * 
+   * @motviation Prevent dropping fully loaded databases, or truncating their
+   *             tables, since this is a costly mistake.
    */
-  private boolean isFullyLoadedDatabase()
+  private void verifyIsTestDatabase()
   {
     Session session = getSession();
     try {
       Connection connection = session.connection();
       String connectionUrl = connection.getMetaData().getURL();
-      return connectionUrl.contains("fully-loaded");
+      if (!connectionUrl.contains("test")) {
+        throw new RuntimeException("attempted to drop non-test database");
+      }
     }
     catch (SQLException e) {
       log.error("could not determine connection properties");
-      return false;
     }
     finally {
       releaseSession(session);
     }
   }
 
-  /**
-   * Get a list of all the tables in the schema, separated by commas.
-   * @return a list of all the tables in the schema, separated by commas
-   */
   @SuppressWarnings("unchecked")
-  private String getCommaSepratedTableList()
+  private List<String> getSchemaTableNames()
   {
-    Session session = getSession();
-    Connection connection = session.connection();
+    if (_schemaTableNames.isEmpty()) {
+      Session session = getSession();
+      Connection connection = session.connection();
 
-    try {
-      String url = connection.getMetaData().getURL();
-      String schemaName = url.substring(url.lastIndexOf('/') + 1);
+      try {
+        String url = connection.getMetaData().getURL();
+        String schemaName = url.substring(url.lastIndexOf('/') + 1);
 
-      Statement statement = connection.createStatement();
-      statement.execute(
-        "SELECT table_name FROM information_schema.tables\n" +
-        "WHERE\n" +
-        " table_catalog = '" + schemaName + "' AND\n" +
-        " table_schema = 'public'\n");
+        Statement statement = connection.createStatement();
+        statement.execute("SELECT table_name FROM information_schema.tables\n" +
+                          "WHERE\n" +
+                          " table_catalog = '" + schemaName + "' AND\n" +
+                          " table_schema = 'public'\n");
 
-      String tableList = "";
-      ResultSet resultSet = statement.getResultSet();
-      while (resultSet.next()) {
-        tableList += resultSet.getString(1) + ", ";
+        ResultSet resultSet = statement.getResultSet();
+        while (resultSet.next()) {
+          _schemaTableNames.add(resultSet.getString(1));
+        }
+        statement.close();
       }
-      statement.close();
-
-      if (tableList.equals("")) { // no tables in the schema
-        return "";
+      catch (HibernateException e) {
+        throw convertHibernateAccessException(e);
       }
-
-      return tableList.substring(0, tableList.length() - 2);
+      catch (IllegalStateException e) {
+        log.error("bad illegal state exception", e);
+      }
+      catch (SQLException e) {
+        log.error("bad sql exception", e);
+      }
+      finally {
+        releaseSession(session);
+      }
     }
-    catch (HibernateException e) {
-      throw convertHibernateAccessException(e);
-    }
-    catch (IllegalStateException e) {
-      log.error("bad illegal state exception", e);
-    }
-    catch (SQLException e) {
-      log.error("bad sql exception", e);
-    }
-    finally {
-      releaseSession(session);
-    }
-    return "";
+    return _schemaTableNames;
   }
 }

@@ -19,7 +19,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
@@ -28,7 +28,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 
 import org.apache.log4j.Logger;
 
-public class ScreeningRoomActivitySearchResults extends ActivitySearchResults<ScreeningRoomActivity>
+public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
 {
   // static members
 
@@ -39,13 +39,13 @@ public class ScreeningRoomActivitySearchResults extends ActivitySearchResults<Sc
     ACTIVITY_TYPES.add(RNAiCherryPickScreening.ACTIVITY_TYPE_NAME);;
   }
 
-  private static Logger log = Logger.getLogger(ScreeningRoomActivitySearchResults.class);
+  private static Logger log = Logger.getLogger(LabActivitySearchResults.class);
   private ScreenViewer _screenViewer;
 
   /**
    * @motivation for CGLIB2
    */
-  protected ScreeningRoomActivitySearchResults()
+  protected LabActivitySearchResults()
   {
   }
 
@@ -58,29 +58,29 @@ public class ScreeningRoomActivitySearchResults extends ActivitySearchResults<Sc
 
   }
 
-  public ScreeningRoomActivitySearchResults(//ActivityViewer activityViewer,
+  public LabActivitySearchResults(//ActivityViewer activityViewer,
                                             ScreenViewer screenViewer,
                                             GenericEntityDAO dao)
   {
-    super(ScreeningRoomActivity.class, dao);
+    super(LabActivity.class, dao);
     _screenViewer = screenViewer;
     //_activityViewer = activityViewer;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  protected List<? extends TableColumn<ScreeningRoomActivity,?>> buildColumns()
+  protected List<? extends TableColumn<LabActivity,?>> buildColumns()
   {
-    List<EntityColumn<ScreeningRoomActivity,?>> columns = 
-      (List<EntityColumn<ScreeningRoomActivity,?>>) super.buildColumns();
-    columns.add(0, new IntegerEntityColumn<ScreeningRoomActivity>(
-      new PropertyPath<ScreeningRoomActivity>(ScreeningRoomActivity.class, "screen", "screenNumber"),
+    List<EntityColumn<LabActivity,?>> columns = 
+      (List<EntityColumn<LabActivity,?>>) super.buildColumns();
+    columns.add(0, new IntegerEntityColumn<LabActivity>(
+      new PropertyPath<LabActivity>(LabActivity.class, "screen", "screenNumber"),
       "Screen Number", "The screen number", TableColumn.UNGROUPED) {
       @Override
-      public Integer getCellValue(ScreeningRoomActivity activity) { return activity.getScreen().getScreenNumber(); }
+      public Integer getCellValue(LabActivity activity) { return activity.getScreen().getScreenNumber(); }
 
       @Override
-      public Object cellAction(ScreeningRoomActivity activity) { return _screenViewer.viewScreen(activity.getScreen()); }
+      public Object cellAction(LabActivity activity) { return _screenViewer.viewScreen(activity.getScreen()); }
 
       @Override
       public boolean isCommandLink() { return true; }
@@ -95,7 +95,7 @@ public class ScreeningRoomActivitySearchResults extends ActivitySearchResults<Sc
   }
 
   @Override
-  protected void setEntityToView(ScreeningRoomActivity entity)
+  protected void setEntityToView(LabActivity entity)
   {
     // TODO
   }

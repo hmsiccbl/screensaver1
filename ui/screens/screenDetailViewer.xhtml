@@ -260,18 +260,18 @@ TODO:
 				<t:panelGrid columns="1"
 					rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
 					<t:outputText value="&lt;none&gt;" styleClass="dataText"
-						rendered="#{empty screenDetailViewer.screen.screeningRoomActivities}" />
+						rendered="#{empty screenDetailViewer.screen.labActivities}" />
 					<t:dataTable id="activityItems" var="activityItem"
-						value="#{screenDetailViewer.screeningRoomActivitiesDataModel}"
+						value="#{screenDetailViewer.labActivitiesDataModel}"
 						preserveDataModel="false"
-						rendered="#{!empty screenDetailViewer.screen.screeningRoomActivities}"
+						rendered="#{!empty screenDetailViewer.screen.labActivities}"
 						styleClass="standardTable" rowClasses="row1,row2"
 						columnClasses="column" headerClass="tableHeader">
 						<t:column>
 							<f:facet name="header">
 								<t:outputText value="Date" />
 							</f:facet>
-							<t:outputText id="screeningRoomActivityDate"
+							<t:outputText id="labActivityDate"
 								value="#{activityItem.dateOfActivity}" styleClass="dataText" />
 						</t:column>
 						<t:column>
@@ -289,22 +289,22 @@ TODO:
 								value="#{activityItem.performedBy.fullNameLastFirst}"
 								styleClass="dataText" />
 						</t:column>
-						<%- - not rendering until we implement a ScreeningRoomActivity Viewer - -%>
+						<%- - not rendering until we implement a LabActivity Viewer - -%>
 						<%- -
 				<t:column>
 					<t:commandButton id="viewActivity"
-						action="#{screenDetailViewer.viewScreeningRoomActivity}"
+						action="#{screenDetailViewer.viewLabActivity}"
 						value="#{screenDetailViewer.editMode ? &quot;View/Edit...&quot; : &quot;View...&quot;}"
 						styleClass="command" />
-					<%- - t:commandButton id="copyScreeningRoomActivity" action="#{screenDetailViewer.copyScreeningRoomActivity}"
+					<%- - t:commandButton id="copyLabActivity" action="#{screenDetailViewer.copyLabActivity}"
 						rendered="#{screenDetailViewer.editMode}" value="#{&quot;Copy...&quot;}"
 						styleClass="command" title="Copy to another screen" - -%>
 				</t:column>
 				- -%>
 					</t:dataTable>
 					<t:panelGroup>
-						<t:commandButton value="Add Screening Room Activity..."
-							action="#{screenDetailViewer.addScreeningRoomActivity}"
+						<t:commandButton value="Add Lab Activity..."
+							action="#{screenDetailViewer.addLabActivity}"
 							styleClass="command" rendered="#{screenDetailViewer.editMode}" />
 					</t:panelGroup>
 				</t:panelGrid>

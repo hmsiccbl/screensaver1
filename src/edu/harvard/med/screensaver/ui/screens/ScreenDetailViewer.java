@@ -31,10 +31,10 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreeningRoomActivity;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -197,17 +197,17 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return new ListDataModel(statusItems);
   }
 
-  public DataModel getScreeningRoomActivitiesDataModel()
+  public DataModel getLabActivitiesDataModel()
   {
-    ArrayList<ScreeningRoomActivity> screeningRoomActivities = new ArrayList<ScreeningRoomActivity>(getScreen().getScreeningRoomActivities());
-    Collections.sort(screeningRoomActivities,
-                     new Comparator<ScreeningRoomActivity>() {
-      public int compare(ScreeningRoomActivity sra1, ScreeningRoomActivity sra2)
+    ArrayList<LabActivity> labActivities = new ArrayList<LabActivity>(getScreen().getLabActivities());
+    Collections.sort(labActivities,
+                     new Comparator<LabActivity>() {
+      public int compare(LabActivity sra1, LabActivity sra2)
       {
         return sra1.getDateOfActivity().compareTo(sra2.getDateOfActivity());
       }
     });
-    return new ListDataModel(screeningRoomActivities);
+    return new ListDataModel(labActivities);
   }
 
   public DataModel getCherryPickRequestsDataModel()
@@ -502,15 +502,15 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  // TODO: save & go to screening room activity viewer
+  // TODO: save & go to lab activity viewer
   @UIControllerMethod
-  public String addScreeningRoomActivity()
+  public String addLabActivity()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod
-  public String copyScreeningRoomActivity()
+  public String copyLabActivity()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -546,10 +546,10 @@ public class ScreenDetailViewer extends StudyDetailViewer
   }
 
   @UIControllerMethod
-  public String viewScreeningRoomActivity()
+  public String viewLabActivity()
   {
     // TODO: implement
-    return VIEW_SCREENING_ROOM_ACTIVITY_ACTION_RESULT;
+    return VIEW_LAB_ACTIVITY_ACTION_RESULT;
   }
 
   @UIControllerMethod
