@@ -133,6 +133,7 @@ public class HeatMapViewer extends AbstractBackingBean
     _screenResultsDao = screenResultsDao;
     _librariesDao = librariesDao;
     _wellViewer = wellViewer;
+    resetView(); // basically, initialize collections
   }
 
 
@@ -143,13 +144,14 @@ public class HeatMapViewer extends AbstractBackingBean
     _screenResult = screenResult;
     if (_screenResult != null) {
       resetView();
+      _plateNumber.setDomain(_screenResult.getPlateNumbers());      
       addHeatMap();
     }
   }
 
   private void resetView()
   {
-    _plateNumber = new UISelectOneBean<Integer>(_screenResult.getPlateNumbers());
+    _plateNumber = new UISelectOneBean<Integer>();
     _heatMaps = new ArrayList<HeatMap>();
     _heatMapConfigurations = new ArrayList<HeatMapConfiguration>();
     _heatMapConfigurationsDataModel = null;

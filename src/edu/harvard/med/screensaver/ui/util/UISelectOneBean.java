@@ -85,14 +85,14 @@ public class UISelectOneBean<T> extends UISelectBean<T>
       (_selectionKey != null && !_selectionKey.equals(newSelectionKey))) {
       _selectionKey = newSelectionKey;
       _selection = _key2Obj.get(newSelectionKey);
-      // TODO: linear search! yuck!
       int i = 0;
       for (SelectItem selectItem : getSelectItems()) {
         if ((selectItem.getValue() == null && newSelectionKey == null) ||
           selectItem.getValue().equals(newSelectionKey)) {
-          _selectionIndex = i++;
+          _selectionIndex = i;
           break;
         }
+        ++i;
       }
       setChanged();
       notifyObservers(_selection);
@@ -128,7 +128,6 @@ public class UISelectOneBean<T> extends UISelectBean<T>
 
   public void setSelectionIndex(int index)
   {
-    _selectionIndex = index;
     setSelection(_key2Obj.get(getSelectItems().get(index).getValue()));
   }
 
