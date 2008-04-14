@@ -27,6 +27,7 @@ public class StringUtils
    * @return a <code>String</code> containing the string representation of the
    *         Collection elements, delimited by <code>delimiter</code>
    */
+  /* TODO: consider replacing with com.google.common.base.Join method(s)
   /* TODO: provide escaping of specified characters */
   /* TODO: overload method signature for default parameters */
   public static String makeListString(Collection items, String delimiter)

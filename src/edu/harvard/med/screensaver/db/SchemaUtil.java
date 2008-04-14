@@ -311,7 +311,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
    * @motviation Prevent dropping fully loaded databases, or truncating their
    *             tables, since this is a costly mistake.
    */
-  private void verifyIsTestDatabase()
+  public void verifyIsTestDatabase()
   {
     Session session = getSession();
     try {
