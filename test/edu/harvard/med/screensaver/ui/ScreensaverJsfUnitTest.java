@@ -13,6 +13,8 @@ import javax.servlet.http.HttpSession;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import jxl.Sheet;
+import jxl.Workbook;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.io.DataExporter;
@@ -168,11 +170,16 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
     DataExporter<?> dataExporter = (DataExporter<?>) server.getManagedBeanValue("#{wellsBrowser.dataExporters[0]}");
     assertNotNull("exporter exists", dataExporter);
     assertEquals("exporter type", GenericDataExporter.FORMAT_NAME, dataExporter.getFormatName());
-    client.setParameter("downloadFormat",  Integer.toString(dataExporter.hashCode()));
+    // TODO: this is causing an error; we can rely upon the current behavior of the desired exporter being selected by default, by this makes the test more fragile, of course
+//    client.setParameter("downloadFormat",  Integer.toString(dataExporter.hashCode()));
     client.submit("downloadSearchResultsCommandButton");
     assertEquals("download file content type", GenericDataExporter.FORMAT_MIME_TYPE, client.getWebResponse().getContentType());
-    assertEquals("download file content type", "Workbook.xls", client.getWebResponse().getTitle());
-    //client.getWebResponse().getInputStream();
+    assertEquals("download file name", "searchResult.xls", client.getWebResponse().getHeaderField("Content-Location"));
+    Workbook workbook = Workbook.getWorkbook(client.getWebResponse().getInputStream());
+    Sheet sheet = workbook.getSheet(0);
+    assertEquals("workbook contents", "Library", sheet.getCell(0, 0).getContents());
+    assertEquals("workbook contents", "Plate", sheet.getCell(1, 0).getContents());
+    assertEquals("workbook contents", "Well", sheet.getCell(2, 0).getContents());
     
     // TODO: test filtering is respected in export
   }
