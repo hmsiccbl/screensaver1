@@ -51,17 +51,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * <p>
  * It should be noted that this synchronizer may not run correctly against a newly created Screensaver
  * database, or a Screensaver databaase that is out-of-date in relation to the ScreenDB database.
- * There are two places where this kind of issue currently comes up:
+ * There is one place where this kind of issue currently comes up:
  *
  * <ul>
- * <li>For {@link CompoundCherryPickSynchronizer compound cherry picks}, if a cherry pick in ScreenDB
- * goes against a well in Screensaver that is non-experimental, then an error is reported, and the
- * cherry pick is not added to Screensaver. This is appropriate in most circumstances, but can be
- * problematic if the contents for the library have not been loaded yet, since the library wells will
- * appear as {@link WellType#EMPTY} in this situation.
  * <li>The {@link RNAiCherryPickScreeningSynchronizer} assumes that the RNAi cherry pick requests
  * already exist in the Screensaver database, since the ScreenDB records in the RNAi cherry pick
- * screenings refer to the cherry pick request numbers for this request.
+ * screenings refer to the cherry pick request numbers for this request.</li>
  * </ul>
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -122,7 +117,6 @@ public class ScreenDBSynchronizer
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private CherryPickRequestDAO _cherryPickRequestDao;
-  private CompoundCherryPickSynchronizer compoundCherryPickSynchronizer;
 
 
   // public constructors and methods
@@ -192,8 +186,6 @@ public class ScreenDBSynchronizer
       new ScreenSynchronizer(_connection, _dao, userSynchronizer);
     final LibraryScreeningSynchronizer libraryScreeningSynchronizer =
       new LibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
-    final CompoundCherryPickSynchronizer compoundCherryPickSynchronizer =
-      new CompoundCherryPickSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
     final RNAiCherryPickScreeningSynchronizer rnaiCherryPickScreeningSynchronizer =
       new RNAiCherryPickScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
 
@@ -214,13 +206,6 @@ public class ScreenDBSynchronizer
         log.info("synchronizing rnai cherry pick screenings..");
         rnaiCherryPickScreeningSynchronizer.synchronizeRnaiCherryPickScreenings();
         log.info("done synchronizing rnai cherry pick screenings.");
-        // WARNING: for efficiency, the following call has the side-effect of
-        // clearing the Hibernate session cache, so that any subsequent accesses
-        // of previously loaded entities' uninitialized relationships will cause
-        // LazyInitExceptions
-        log.info("synchronizing compound cherry picks..");
-        compoundCherryPickSynchronizer.synchronizeCompoundCherryPicks();
-        log.info("done synchronizing compound cherry picks.");
       }
     });
     log.info("done synchronizing non-libraries.");
