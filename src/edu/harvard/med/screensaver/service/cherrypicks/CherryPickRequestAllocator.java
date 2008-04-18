@@ -149,7 +149,9 @@ public class CherryPickRequestAllocator
           // note: it is okay to cancel a plate that has some (or all) lab cherry
           // picks that are unallocated
           if (labCherryPick.isAllocated()) {
-            labCherryPick.setAllocated(null);
+            // TODO: I cannot determine why explicit reattachment of the LCP is necessary; the unit test passes without it, but when invoked via the web interface, the LCPs' WVAs fail to be deleted in the database 
+            LabCherryPick labCherryPick2 = _dao.reattachEntity(labCherryPick);
+            labCherryPick2.setAllocated(null);
           }
         }
         assayPlate.setCherryPickLiquidTransfer(cplt);

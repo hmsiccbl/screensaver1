@@ -121,6 +121,9 @@ public abstract class CherryPickRequest extends AbstractEntity
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
   private int _numberUnfulfilledLabCherryPicks;
   private SortedSet<CherryPickAssayPlate> _cherryPickAssayPlates = new TreeSet<CherryPickAssayPlate>();
+  private transient List<CherryPickAssayPlate> _activeAssayPlates;
+  private transient HashSet<CherryPickAssayPlate> _pendingAssayPlates;
+  private transient HashSet<CherryPickAssayPlate> _completedAssayPlates;
 
 
   // public instance methods
@@ -333,50 +336,80 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Get the set of active cherry pick assay plates.
-   * @return the set of active cherry pick assay plates
+   * <i>Warning: This method will only return a valid result on its first
+   * invocation, due to caching of the result; if the status of CPAPs change,
+   * you should reload the CPR in a new Hibernate session to obtain an
+   * up-to-date result!</i> Get the set of active cherry pick assay plates.
+   * 
+   * @return the set of active cherry pick assay plates, which excludes any
+   *         assay plates that are failed
    */
   @Transient
   public List<CherryPickAssayPlate> getActiveCherryPickAssayPlates()
   {
-    Map<Integer,CherryPickAssayPlate> plateOrdinalToActiveAssayPlate = new TreeMap<Integer,CherryPickAssayPlate>();
-    for (CherryPickAssayPlate assayPlate : _cherryPickAssayPlates) {
-      if (!plateOrdinalToActiveAssayPlate.containsKey(assayPlate.getPlateOrdinal()) ||
-        assayPlate.getAttemptOrdinal() > plateOrdinalToActiveAssayPlate.get(assayPlate.getPlateOrdinal()).getAttemptOrdinal()) {
-        plateOrdinalToActiveAssayPlate.put(assayPlate.getPlateOrdinal(),
-                                           assayPlate);
+    if (_activeAssayPlates == null) {
+      Map<Integer,CherryPickAssayPlate> plateOrdinalToActiveAssayPlate = new TreeMap<Integer,CherryPickAssayPlate>();
+      for (CherryPickAssayPlate assayPlate : _cherryPickAssayPlates) {
+        if (!plateOrdinalToActiveAssayPlate.containsKey(assayPlate.getPlateOrdinal()) ||
+          assayPlate.getAttemptOrdinal() > plateOrdinalToActiveAssayPlate.get(assayPlate.getPlateOrdinal()).getAttemptOrdinal()) {
+          plateOrdinalToActiveAssayPlate.put(assayPlate.getPlateOrdinal(),
+                                             assayPlate);
+        }
+      }
+      _activeAssayPlates = new ArrayList<CherryPickAssayPlate>();
+      for (Integer plateOrdinal : plateOrdinalToActiveAssayPlate.keySet()) {
+        _activeAssayPlates.add(plateOrdinalToActiveAssayPlate.get(plateOrdinal));
       }
     }
-    ArrayList<CherryPickAssayPlate> activeAssayPlates = new ArrayList<CherryPickAssayPlate>();
-    for (Integer plateOrdinal : plateOrdinalToActiveAssayPlate.keySet()) {
-      activeAssayPlates.add(plateOrdinalToActiveAssayPlate.get(plateOrdinal));
-    }
-    return activeAssayPlates;
+    return _activeAssayPlates;
   }
 
+  /**
+   * <i>Warning: This method will only return a valid result on its first
+   * invocation, due to caching of the result; if the status of CPAPs change,
+   * you should reload the CPR in a new Hibernate session to obtain an
+   * up-to-date result!</i>
+   * 
+   * @return the set of "pending" CherryPickAssayPlates, which means they are
+   *         neither plated, canceled, nor failed; in other words, they need to
+   *         be plated
+   */
   @Transient
   public Set<CherryPickAssayPlate> getPendingCherryPickAssayPlates()
   {
-    HashSet<CherryPickAssayPlate> pendingAssayPlates = new HashSet<CherryPickAssayPlate>();
-    for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
-      if (! (cpap.isCancelled() || cpap.isFailed() || cpap.isPlated())) {
-        pendingAssayPlates.add(cpap);
+    if (_pendingAssayPlates == null) {
+      _pendingAssayPlates = new HashSet<CherryPickAssayPlate>();
+      for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
+        if (! (cpap.isCancelled() || cpap.isFailed() || cpap.isPlated())) {
+          _pendingAssayPlates.add(cpap);
+        }
       }
     }
-    return pendingAssayPlates;
+    return _pendingAssayPlates;
   }
 
+  /**
+   * <i>Warning: This method will only return a valid result on its first
+   * invocation, due to caching of the result; if the status of CPAPs change,
+   * you should reload the CPR in a new Hibernate session to obtain an
+   * up-to-date result!</i>
+   * 
+   * @return the set of "completed" CherryPickAssayPlates, which means they are
+   *         either plated or canceled
+   */
   @Transient
   public Set<CherryPickAssayPlate> getCompletedCherryPickAssayPlates()
   {
-    HashSet<CherryPickAssayPlate> completedAssayPlates = new HashSet<CherryPickAssayPlate>();
-    for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
-      // note: we do not consider 'failed' plates, since they are not "active" (every failed plate will have another active plate created in place of it)
-      if (cpap.isCancelled() || cpap.isPlated()) {
-        completedAssayPlates.add(cpap);
+    if (_completedAssayPlates == null) {
+      _completedAssayPlates = new HashSet<CherryPickAssayPlate>();
+      for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
+        // note: we do not consider 'failed' plates, since they are not "active" (every failed plate will have another active plate created in place of it)
+        if (cpap.isCancelled() || cpap.isPlated()) {
+          _completedAssayPlates.add(cpap);
+        }
       }
     }
-    return completedAssayPlates;
+    return _completedAssayPlates;
   }
 
   /**
@@ -391,6 +424,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     Integer attemptOrdinal,
     PlateType plateType)
   {
+    _activeAssayPlates = null;
     CherryPickAssayPlate cherryPickAssayPlate = new CherryPickAssayPlate(
       this,
       plateOrdinal,
@@ -418,6 +452,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     PlateType plateType,
     String legacyPlateName)
   {
+    _activeAssayPlates = null;
     LegacyCherryPickAssayPlate cherryPickAssayPlate = new LegacyCherryPickAssayPlate(
       this,
       plateOrdinal,
