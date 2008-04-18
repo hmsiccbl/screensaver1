@@ -341,9 +341,12 @@ public class LabCherryPick extends AbstractEntity
   }
 
   /**
-   * Mark the cherry pick as having well volume allocated from a particular source library plate
-   * copy.
-   * @param sourceCopy the source copy from which the well volume was allocated
+   * Mark the cherry pick as having well volume allocated from a particular
+   * source library plate copy.
+   * 
+   * @param sourceCopy the source copy from which the well volume was allocated;
+   *          if null the well volume currently allocated to this lab cherry
+   *          pick will be deallocated
    */
   public void setAllocated(Copy sourceCopy)
   {
@@ -360,7 +363,7 @@ public class LabCherryPick extends AbstractEntity
       throw new BusinessRuleViolationException("cannot allocate or deallocate a cherry pick after it has been plated");
     }
 
-    boolean wasUnfulfilled = isUnfulfilled();
+    boolean wasFulfilled = !isUnfulfilled();
     _wellVolumeAdjustments.clear();
     if (sourceCopy != null) {
       createWellVolumeAdjustment(
@@ -369,12 +372,12 @@ public class LabCherryPick extends AbstractEntity
           getCherryPickRequest().getMicroliterTransferVolumePerWellApproved().negate());
     }
 
-    boolean nowUnfulfilled = isUnfulfilled();
-    if (!wasUnfulfilled && nowUnfulfilled) {
-      _cherryPickRequest.incUnfulfilledLabCherryPicks();
-    }
-    else if (wasUnfulfilled && !nowUnfulfilled) {
+    boolean nowFulfilled = !isUnfulfilled();
+    if (!wasFulfilled && nowFulfilled) {
       _cherryPickRequest.decUnfulfilledLabCherryPicks();
+    }
+    else if (wasFulfilled && !nowFulfilled) {
+      _cherryPickRequest.incUnfulfilledLabCherryPicks();
     }
   }
 

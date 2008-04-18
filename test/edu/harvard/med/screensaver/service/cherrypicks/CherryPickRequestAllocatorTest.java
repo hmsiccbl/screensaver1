@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -57,6 +58,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
   protected LibrariesDAO librariesDao;
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
+  protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
 
 
   // public constructors and methods
@@ -287,13 +289,69 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         List<WellVolumeAdjustment> wellVolumeAdjustments3 = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
         assertFalse("CPR is no longer allocated", cpr.isAllocated());
         assertEquals("wellVolumeAdjustment count after CPR deallocation", 0, wellVolumeAdjustments3.size());
+        assertEquals("number of unfulfilled lcps (persisted value)", 
+                     4,
+                     cpr.getNumberUnfulfilledLabCherryPicks());
       }
     });
   }
 
   public void testCancelAndDeallocateAssayPlates()
   {
-    // TODO: implement
+    final int requestVolume = 10;
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Copy copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
+        copy.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal(requestVolume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        genericEntityDao.saveOrUpdateEntity(library);
+      }
+    });
+    final AdministratorUser adminUser = new AdministratorUser("Test", "Admin", "", "", "", "", "", "");
+    genericEntityDao.persistEntity(adminUser);
+
+    List<WellVolumeAdjustment> wvas = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+    assertTrue("no well volume adjustments, initially", wvas.isEmpty());
+    final RNAiCherryPickRequest cpr = doTestCherryPickRequestAllocation(1,
+                                                                        requestVolume,
+                                                                        new String[] {"A01", "A02", "P23", "P24"},
+                                                                        new String[] {});
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        CherryPickRequest cpr2 = genericEntityDao.reloadEntity(cpr);
+        assertTrue("CPR is allocated", cpr2.isAllocated());
+        cherryPickRequestPlateMapper.generatePlateMapping(cpr2);
+        List<WellVolumeAdjustment> wvas = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+        assertTrue("CPR is mapped", cpr2.isMapped());
+        assertEquals("well volume adjustment counts, after CPR is allocated", 4, wvas.size());
+        assertEquals("number of unfulfilled lcps (persisted value)", 
+                     0,
+                     cpr2.getNumberUnfulfilledLabCherryPicks());
+      }
+    });
+
+    // note: we want detached assay plate entity instances, as the method being test needs to handle this
+    final HashSet<CherryPickAssayPlate> assayPlatesToCancel = new HashSet<CherryPickAssayPlate>(genericEntityDao.reloadEntity(cpr, false, "cherryPickAssayPlates").getActiveCherryPickAssayPlates());
+    assertEquals("assay plates to cancel count", 1, assayPlatesToCancel.size());
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        CherryPickRequest cpr2 = genericEntityDao.reloadEntity(cpr);
+        cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(cpr2, assayPlatesToCancel, adminUser, new Date(), "test comment");
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        CherryPickRequest cpr2 = genericEntityDao.reloadEntity(cpr);
+        assertTrue("CPR is still allocated", cpr2.isAllocated());
+        List<WellVolumeAdjustment> wvas = genericEntityDao.findAllEntitiesOfType(WellVolumeAdjustment.class);
+        assertEquals("well volume adjustment counts, after CPR assay plates are cancelled", 0, wvas.size());
+        assertEquals("number of unfulfilled lcps (persisted value)", 
+                     4,
+                     cpr2.getNumberUnfulfilledLabCherryPicks());
+      }
+    });
   }
 
 
@@ -391,6 +449,9 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         assertEquals("unfulfillable cherry picks for requested " + Arrays.asList(cherryPickWellNames),
                      expectedUnfulfillableCherryPicks,
                      unfulfillableCherryPicks);
+        assertEquals("number of unfulfilled lcps (persisted value)", 
+                     expectedUnfillableCherryPickWellNames.length, 
+                     cherryPickRequest.getNumberUnfulfilledLabCherryPicks());
         result[0] = cherryPickRequest;
       }
     });

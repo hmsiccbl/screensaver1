@@ -1390,12 +1390,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(_cherryPickRequest);
         ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
-        CherryPickLiquidTransfer liquidTransfer = cherryPickRequest.getScreen().createCherryPickLiquidTransfer(
-          performedBy,
-                                                                               new Date(),
-                                                                               dateOfLiquidTransfer,
-                                                                               cherryPickRequest,
-                                                                               success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
+        CherryPickLiquidTransfer liquidTransfer = 
+          cherryPickRequest.getScreen().createCherryPickLiquidTransfer(performedBy,
+                                                                       new Date(),
+                                                                       dateOfLiquidTransfer,
+                                                                       success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
         liquidTransfer.setComments(comments);
         for (CherryPickAssayPlate assayPlate : selectedAssayPlates) {
           if (!assayPlate.getCherryPickRequest().equals(cherryPickRequest)) {

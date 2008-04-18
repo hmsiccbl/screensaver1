@@ -107,7 +107,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
         labCherryPick.setMapped(plate, 0, 0);
         
         CherryPickLiquidTransfer transfer =
-          screen.createCherryPickLiquidTransfer(user, new Date(), new Date(), request);
+          screen.createCherryPickLiquidTransfer(user, new Date(), new Date());
         transfer.addCherryPickAssayPlate(plate);
 
         genericEntityDao.saveOrUpdateEntity(request);

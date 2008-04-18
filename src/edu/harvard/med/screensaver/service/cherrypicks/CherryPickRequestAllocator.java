@@ -134,16 +134,15 @@ public class CherryPickRequestAllocator
     ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
     CherryPickLiquidTransfer cplt =
       cherryPickRequest.getScreen().createCherryPickLiquidTransfer(performedBy,
-                                                                 new Date(),
-                                                                 dateOfLiquidTransfer,
-                                                                 cherryPickRequest,
-                                                                 CherryPickLiquidTransferStatus.CANCELED);
+                                                                   new Date(),
+                                                                   dateOfLiquidTransfer,
+                                                                   CherryPickLiquidTransferStatus.CANCELED);
     cplt.setComments(comments);
     _dao.saveOrUpdateEntity(cplt);
     
     // note: by iterating through cherryPickRequest's active assay plates, rather than the
-    // method assayPlates method arg, we are manipulating Hibernate-managed persistent entities,
-    // rather than deatch entities
+    // assayPlates method arg, we are manipulating Hibernate-managed persistent entities,
+    // rather than detached entities
     for (CherryPickAssayPlate assayPlate : cherryPickRequest.getActiveCherryPickAssayPlates()) {
       if (assayPlates.contains(assayPlate)) {
         for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {

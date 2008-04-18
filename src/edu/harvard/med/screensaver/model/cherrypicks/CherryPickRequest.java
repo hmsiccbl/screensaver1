@@ -121,9 +121,6 @@ public abstract class CherryPickRequest extends AbstractEntity
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
   private int _numberUnfulfilledLabCherryPicks;
   private SortedSet<CherryPickAssayPlate> _cherryPickAssayPlates = new TreeSet<CherryPickAssayPlate>();
-  private transient List<CherryPickAssayPlate> _activeAssayPlates;
-  private transient HashSet<CherryPickAssayPlate> _pendingAssayPlates;
-  private transient HashSet<CherryPickAssayPlate> _completedAssayPlates;
 
 
   // public instance methods
@@ -342,50 +339,44 @@ public abstract class CherryPickRequest extends AbstractEntity
   @Transient
   public List<CherryPickAssayPlate> getActiveCherryPickAssayPlates()
   {
-    if (_activeAssayPlates == null) {
-      Map<Integer,CherryPickAssayPlate> plateOrdinalToActiveAssayPlate = new TreeMap<Integer,CherryPickAssayPlate>();
-      for (CherryPickAssayPlate assayPlate : _cherryPickAssayPlates) {
-        if (!plateOrdinalToActiveAssayPlate.containsKey(assayPlate.getPlateOrdinal()) ||
-          assayPlate.getAttemptOrdinal() > plateOrdinalToActiveAssayPlate.get(assayPlate.getPlateOrdinal()).getAttemptOrdinal()) {
-          plateOrdinalToActiveAssayPlate.put(assayPlate.getPlateOrdinal(),
-                                             assayPlate);
-        }
-      }
-      _activeAssayPlates = new ArrayList<CherryPickAssayPlate>();
-      for (Integer plateOrdinal : plateOrdinalToActiveAssayPlate.keySet()) {
-        _activeAssayPlates.add(plateOrdinalToActiveAssayPlate.get(plateOrdinal));
+    Map<Integer,CherryPickAssayPlate> plateOrdinalToActiveAssayPlate = new TreeMap<Integer,CherryPickAssayPlate>();
+    for (CherryPickAssayPlate assayPlate : _cherryPickAssayPlates) {
+      if (!plateOrdinalToActiveAssayPlate.containsKey(assayPlate.getPlateOrdinal()) ||
+        assayPlate.getAttemptOrdinal() > plateOrdinalToActiveAssayPlate.get(assayPlate.getPlateOrdinal()).getAttemptOrdinal()) {
+        plateOrdinalToActiveAssayPlate.put(assayPlate.getPlateOrdinal(),
+                                           assayPlate);
       }
     }
-    return _activeAssayPlates;
+    ArrayList<CherryPickAssayPlate> activeAssayPlates = new ArrayList<CherryPickAssayPlate>();
+    for (Integer plateOrdinal : plateOrdinalToActiveAssayPlate.keySet()) {
+      activeAssayPlates.add(plateOrdinalToActiveAssayPlate.get(plateOrdinal));
+    }
+    return activeAssayPlates;
   }
 
   @Transient
   public Set<CherryPickAssayPlate> getPendingCherryPickAssayPlates()
   {
-    if (_pendingAssayPlates == null) {
-      _pendingAssayPlates = new HashSet<CherryPickAssayPlate>();
-      for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
-        if (! (cpap.isCancelled() || cpap.isFailed() || cpap.isPlated())) {
-          _pendingAssayPlates.add(cpap);
-        }
+    HashSet<CherryPickAssayPlate> pendingAssayPlates = new HashSet<CherryPickAssayPlate>();
+    for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
+      if (! (cpap.isCancelled() || cpap.isFailed() || cpap.isPlated())) {
+        pendingAssayPlates.add(cpap);
       }
     }
-    return _pendingAssayPlates;
+    return pendingAssayPlates;
   }
 
   @Transient
   public Set<CherryPickAssayPlate> getCompletedCherryPickAssayPlates()
   {
-    if (_completedAssayPlates == null) {
-      _completedAssayPlates = new HashSet<CherryPickAssayPlate>();
-      for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
-        // note: we do not consider 'failed' plates, since they are not "active" (every failed plate will have another active plate created in place of it)
-        if (cpap.isCancelled() || cpap.isPlated()) {
-          _completedAssayPlates.add(cpap);
-        }
+    HashSet<CherryPickAssayPlate> completedAssayPlates = new HashSet<CherryPickAssayPlate>();
+    for (CherryPickAssayPlate cpap : getCherryPickAssayPlates()) {
+      // note: we do not consider 'failed' plates, since they are not "active" (every failed plate will have another active plate created in place of it)
+      if (cpap.isCancelled() || cpap.isPlated()) {
+        completedAssayPlates.add(cpap);
       }
     }
-    return _completedAssayPlates;
+    return completedAssayPlates;
   }
 
   /**
@@ -400,7 +391,6 @@ public abstract class CherryPickRequest extends AbstractEntity
     Integer attemptOrdinal,
     PlateType plateType)
   {
-    _activeAssayPlates = null;
     CherryPickAssayPlate cherryPickAssayPlate = new CherryPickAssayPlate(
       this,
       plateOrdinal,
@@ -428,7 +418,6 @@ public abstract class CherryPickRequest extends AbstractEntity
     PlateType plateType,
     String legacyPlateName)
   {
-    _activeAssayPlates = null;
     LegacyCherryPickAssayPlate cherryPickAssayPlate = new LegacyCherryPickAssayPlate(
       this,
       plateOrdinal,
@@ -677,13 +666,14 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Get whether the lab cherry picks have <i>ever</i> been allocated,
-   * including the case where they were allocated, mapped, and then deallocated
-   * (i.e., canceled). If at least one lab cherry pick has been allocated the
-   * entire cherry pick request is considered allocated.
+   * Get whether the lab cherry picks have been allocated, including the case
+   * where they were canceled (allocated, mapped, and then deallocated). If at
+   * least one lab cherry pick has been allocated the entire cherry pick request
+   * is considered allocated.
    * <p>
-   * TODO: it might be better to rename this method to 'wasAllocated', or something similar to
-   * indicate that it also covers canceled lab cherry picks.
+   * TODO: it might be better to rename this method to 'wasAllocated', or
+   * something similar to indicate that it also covers canceled lab cherry
+   * picks.
    */
   @Transient
   public boolean isAllocated()

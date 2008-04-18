@@ -62,8 +62,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     CherryPickLiquidTransfer cplt = screen.createCherryPickLiquidTransfer(
       MakeDummyEntities.makeDummyUser(1, "Lab", "Guy"),
       DateUtil.makeDate(2007, 1, 1),
-      new Date(),
-      cpr);
+      new Date());
 
     Set<LibraryScreening> libraryScreenings =
       screen.getlabActivitiesOfType(LibraryScreening.class);

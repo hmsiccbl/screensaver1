@@ -63,12 +63,11 @@ public class CherryPickLiquidTransfer extends LabActivity
   /**
    * Construct an initialized <code>CherryPickLiquidTransfer</code>. Intended only for use
    * with {@link Screen#createCherryPickLiquidTransfer(ScreensaverUser, Date, Date,
-   * CherryPickRequest, CherryPickLiquidTransferStatus)}.
+   * CherryPickLiquidTransferStatus)}.
    * @param screen the screen
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
    * @param dateOfActivity the date the screening room activity took place
-   * @param cherryPickRequest the cherry pick request
    * @param status the status of the cherry pick liquid transfer
    */
   public CherryPickLiquidTransfer(
@@ -76,7 +75,6 @@ public class CherryPickLiquidTransfer extends LabActivity
     ScreensaverUser performedBy,
     Date dateCreated,
     Date dateOfActivity,
-    CherryPickRequest cherryPickRequest,
     CherryPickLiquidTransferStatus status)
   {
     // TODO: business logic to test that cherryPickRequest.getScreen().equals(screen)

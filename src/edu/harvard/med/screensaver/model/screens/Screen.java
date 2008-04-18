@@ -599,20 +599,17 @@ public class Screen extends Study
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
    * @param dateOfActivity the date the lab activity took place
-   * @param cherryPickRequest the cherry pick request
    * @return the new cherry pick liquid transfer
    */
   public CherryPickLiquidTransfer createCherryPickLiquidTransfer(
     ScreensaverUser performedBy,
     Date dateCreated,
-    Date dateOfActivity,
-    CherryPickRequest cherryPickRequest)
+    Date dateOfActivity)
   {
     return createCherryPickLiquidTransfer(
       performedBy,
       dateCreated,
       dateOfActivity,
-      cherryPickRequest,
       CherryPickLiquidTransferStatus.SUCCESSFUL);
   }
 
@@ -621,7 +618,6 @@ public class Screen extends Study
    * @param performedBy the user that performed the activity
    * @param dateCreated the date created
    * @param dateOfActivity the date the lab activity took place
-   * @param cherryPickRequest the cherry pick request
    * @param status the status of the cherry pick liquid transfer
    * @return the new cherry pick liquid transfer
    */
@@ -629,7 +625,6 @@ public class Screen extends Study
     ScreensaverUser performedBy,
     Date dateCreated,
     Date dateOfActivity,
-    CherryPickRequest cherryPickRequest,
     CherryPickLiquidTransferStatus status)
   {
     CherryPickLiquidTransfer cherryPickLiquidTransfer = new CherryPickLiquidTransfer(
@@ -637,7 +632,6 @@ public class Screen extends Study
       performedBy,
       dateCreated,
       dateOfActivity,
-      cherryPickRequest,
       status);
     _labActivities.add(cherryPickLiquidTransfer);
     return cherryPickLiquidTransfer;
