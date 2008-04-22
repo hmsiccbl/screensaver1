@@ -568,6 +568,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           _dao.needReadOnly(cherryPickRequest.getScreen(), "labActivities");
           _dao.needReadOnly(cherryPickRequest.getScreen(), "cherryPickRequests");
           _dao.needReadOnly(cherryPickRequest, "emptyWellsOnAssayPlate");
+//          if (cherryPickRequest.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
+//            // for CompoundCherryPickRequest.getCherryPickAllowance()
+//            _dao.needReadOnly(cherryPickRequest, "screenResult.wells");
+//          }
           _eagerFetchCpltPerformedByHack(cherryPickRequest);
           _dao.needReadOnly(cherryPickRequest,
                             "cherryPickAssayPlates.cherryPickLiquidTransfer.performedBy");
