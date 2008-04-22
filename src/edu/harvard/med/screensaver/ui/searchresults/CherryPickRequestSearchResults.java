@@ -12,17 +12,22 @@ package edu.harvard.med.screensaver.ui.searchresults;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
+import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
@@ -77,6 +82,15 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
 
     // default to descending sort order on cherry pick request number
     getColumnManager().setSortAscending(false);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void searchScreenType(ScreenType screenType)
+  {
+    searchAll();
+    EntityColumn<CherryPickRequest,ScreenType> column = (EntityColumn<CherryPickRequest,ScreenType>) getColumnManager().getColumn("Screen Type");
+    column.clearCriteria();
+    column.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, screenType));
   }
 
   public void searchForUser(ScreensaverUser screensaverUser)

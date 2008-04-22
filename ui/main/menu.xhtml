@@ -87,15 +87,28 @@
                                                 styleClass="menuItem"
 						value="Browse Studies" accesskey="T"
 						title="Browse the studies currently available and accessible to you" />
+
 					<t:commandNavigation2 action="#{menu.browseCherryPickRequests}"
                                                 styleClass="menuItem"
 						value="Browse CPRs" accesskey="C"
 						title="Browse the cherry pick requests currently available and accessible to you"
 						rendered="#{menu.readAdmin}" />
-					<t:commandNavigation2
-                                                styleClass="menuItem"
-						action="#{menu.browseLabActivities}"
-						value="Browse Lab Activities" accesskey="A"
+          <t:panelNavigation2 id="cprNavMenu" layout="table"
+            itemClass="submenuItem" openItemClass="submenuItem"
+            activeItemClass="menuItemActive">
+						<t:commandNavigation2
+							action="#{menu.browseRnaiCherryPickRequests}"
+							styleClass="submenuItem" value="RNAi"
+							title="Browse the RNAi Cherry Pick Requests" />
+						<t:commandNavigation2 styleClass="submenuItem"
+							action="#{menu.browseSmallMoleculeCherryPickRequests}"
+							value="Small Molecule"
+							title="Browse the Small Molecule Cherry Pick Requests" />
+					</t:panelNavigation2>
+
+					<t:commandNavigation2 styleClass="menuItem"
+						action="#{menu.browseLabActivities}" value="Browse Lab Activities"
+						accesskey="A"
 						title="Browse the lab  activities currently available and accessible to you" />
 					<t:commandNavigation2 action="#{menu.browseScreeners}"
                                                 styleClass="menuItem"

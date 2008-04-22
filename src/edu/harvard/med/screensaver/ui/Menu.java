@@ -195,6 +195,20 @@ public class Menu extends AbstractBackingBean
   }
 
   @UIControllerMethod
+  public String browseRnaiCherryPickRequests()
+  {
+    _cherryPickRequestsBrowser.searchScreenType(ScreenType.RNAI);
+    return BROWSE_CHERRY_PICK_REQUESTS;
+  }
+
+  @UIControllerMethod
+  public String browseSmallMoleculeCherryPickRequests()
+  {
+    _cherryPickRequestsBrowser.searchScreenType(ScreenType.SMALL_MOLECULE);
+    return BROWSE_CHERRY_PICK_REQUESTS;
+  }
+
+  @UIControllerMethod
   public String browseLabActivities()
   {
     ScreensaverUser user = getScreensaverUser();
