@@ -113,7 +113,7 @@ public class CompoundPubchemCidListUpgrader
                   _dao.clear();
                   log.info("processed " + numCompoundsProcessed + 
                            "; upgraded " + numCompoundsUpgraded + " (" + String.format("%.2f%%", numCompoundsUpgraded / (double) numCompoundsProcessed) + "); " +
-                           "; errors " + numCompoundsUpgraded + " (" + String.format("%.2f%%", numErrors / (double) numCompoundsProcessed) + ") ");
+                           "; errors " + numErrors + " (" + String.format("%.2f%%", numErrors / (double) numCompoundsProcessed) + ") ");
                 }
               }
             }
