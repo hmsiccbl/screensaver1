@@ -177,15 +177,25 @@ public abstract class PubchemPugClient extends EutilsUtils
     if (statusValue.equals("success")) {
       return true;
     }
-    NodeList nodes = outputDocument.getElementsByTagName("PCT-Status-Message_message");
-    if (nodes.getLength() != 1) {
-      throw new RuntimeException("PCT-Status-Message_message node count in response != 1: " + nodes.getLength());
-    }
-    String errorMessage = getTextContent(nodes.item(0));
+    String errorMessage = findErrorMessage(outputDocument);
     reportError(
       "PUG server reported non-success status '" + statusValue +
       "' with error message '" + errorMessage + "'");
     return false;
+  }
+
+  protected String findErrorMessage(Document outputDocument)
+  {
+    String errorMessage;
+    NodeList nodes = outputDocument.getElementsByTagName("PCT-Status-Message_message");
+    if (nodes.getLength() != 1) {
+      nodes = outputDocument.getElementsByTagName("PCT-Status-Message_messages_E");
+      if (nodes.getLength() != 1) {
+        errorMessage = "unknown error message";
+      }
+    }
+    errorMessage = getTextContent(nodes.item(0));
+    return errorMessage;
   }
 
   protected void logDocument(String message, Document outputDocument)
