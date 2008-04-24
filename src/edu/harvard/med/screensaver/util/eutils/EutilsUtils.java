@@ -41,7 +41,7 @@ abstract public class EutilsUtils
   private static final String EUTILS_BASE_PARAMS =
     "?retmode=xml" +
     "&tool=screensaver" +
-    "&email=%7Bjohn_sullivan%2Candrew_tolopko%7D%40hms.harvard.edu";
+    "&email=screensaver-feedback%40hms.harvard.edu";
 
   protected class EutilsConnectionException extends Exception {
     private static final long serialVersionUID = 1L;

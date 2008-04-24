@@ -9,7 +9,10 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+
 
 /**
  * An abstract class providing utility methods for querying PubChem via the
@@ -42,10 +46,13 @@ public abstract class PubchemPugClient extends EutilsUtils
   protected static final int CONNECT_TIMEOUT = 5000;
 
 
-  // protracted and pirate instance methods
+  // protected and private instance methods
   
   abstract protected void reportError(String errorMessage);
-  
+
+  abstract protected List<String> getResultsFromOutputDocument(Document outputDocument) throws EutilsException;
+
+
   protected PubchemPugClient()
   {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -60,9 +67,9 @@ public abstract class PubchemPugClient extends EutilsUtils
   protected List<String> getResultsForSearchDocument(Document searchDocument) throws EutilsException
   {
     Document outputDocument = getXMLForPugQuery(searchDocument);
-    while (! isJobCompleted(outputDocument)) {
+    String reqid;
+    while ((reqid = getReqidFromOutputDocument(outputDocument)) != null) {
       sleep(1000);
-      String reqid = getReqidFromOutputDocument(outputDocument);
       Document pollDocument = createPollDocumentForReqid(reqid);      
       outputDocument = getXMLForPugQuery(pollDocument);
     }
@@ -92,9 +99,12 @@ public abstract class PubchemPugClient extends EutilsUtils
   private Document getXMLForPugQuery0(URL url, Document query)
   throws EutilsConnectionException
   {
+    logDocument("query document", query);
     InputStream esearchContent = getResponseContent(url, query);
     assert(esearchContent != null);
-    return getDocumentFromInputStream(esearchContent);
+    Document response = getDocumentFromInputStream(esearchContent);
+    logDocument("response document", response);
+    return response;
   }
 
   private InputStream getResponseContent(URL url, Document query)
@@ -163,9 +173,6 @@ public abstract class PubchemPugClient extends EutilsUtils
       // specified TIMEOUT and NUM_RETRIES. the error has already been reported.
       return false;
     }
-    // TODO: remove debug code, dont forget!
-    //System.out.println("isJobSuccessfullyCompleted: outputDocument looks like:");
-    //printDocumentToOutputStream(outputDocument, System.out);
     String statusValue = getStatusValueFromOutputDocument(outputDocument);
     if (statusValue.equals("success")) {
       return true;
@@ -181,41 +188,24 @@ public abstract class PubchemPugClient extends EutilsUtils
     return false;
   }
 
+  protected void logDocument(String message, Document outputDocument)
+  {
+    if (log.isDebugEnabled()) {
+      OutputStream out = new ByteArrayOutputStream();
+      printDocumentToOutputStream(outputDocument, out);
+      log.debug(message + ": " + out.toString());
+    }
+  }
+
   /**
    * Check the output document to see if this successfully completed job has any results. Return
    * true whenever there are results.
    * @param outputDocument the output document to check to see if there are any results
    * @return true whenever there are results
    */
-  protected boolean hasResults(Document outputDocument) {
-    NodeList nodes = outputDocument.getElementsByTagName("PCT-Entrez_webenv");
-    return nodes.getLength() != 0;
-  }
-
-  protected List<String> getResultsFromOutputDocument(Document outputDocument) throws EutilsException {
-    Document resultsDocument = getXMLForEutilsQuery(
-      "efetch.fcgi",
-      "&db=pccompound" +
-      "&rettype=uilist&" +
-      "WebEnvRq=1&" +
-      "&query_key=" + getQueryKeyFromDocument(outputDocument) +
-      "&WebEnv=" + getWebenvFromDocument(outputDocument));
+  abstract protected boolean hasResults(Document outputDocument);
   
-    if (resultsDocument == null) {
-      // there was a connection error that has already been reported
-      return null;
-    }
-  
-    List<String> pubchemCids = new ArrayList<String>();
-    NodeList nodes = resultsDocument.getElementsByTagName("Id");
-    for (int i = 0; i < nodes.getLength(); i++) {
-      Node node = nodes.item(i);
-      pubchemCids.add(getTextContent(node));
-    }
-    return pubchemCids;
-  }
-
-  private String getWebenvFromDocument(Document document) {
+  protected String getWebenvFromDocument(Document document) {
     NodeList nodes = document.getElementsByTagName("PCT-Entrez_webenv");
     if (nodes.getLength() != 1) {
       throw new RuntimeException("no PCT-Entrez_webenv node in response");      
@@ -224,7 +214,7 @@ public abstract class PubchemPugClient extends EutilsUtils
     return getTextContent(element);
   }
 
-  private String getQueryKeyFromDocument(Document document) {
+  protected String getQueryKeyFromDocument(Document document) {
     NodeList nodes = document.getElementsByTagName("PCT-Entrez_query-key");
     if (nodes.getLength() != 1) {
       throw new RuntimeException("no PCT-Entrez_query-key node in response");      
@@ -243,8 +233,7 @@ public abstract class PubchemPugClient extends EutilsUtils
 
   protected String getReqidFromOutputDocument(Document outputDocument) {
     NodeList nodes = outputDocument.getElementsByTagName("PCT-Waiting_reqid");
-    if (nodes.getLength() != 1) {
-      reportError("unexpected count of PCT-Waiting_reqid nodes: " + nodes.getLength());
+    if (nodes.getLength() == 0) {
       return null;
     }
     return getTextContent(nodes.item(0));

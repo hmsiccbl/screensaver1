@@ -12,16 +12,18 @@ package edu.harvard.med.screensaver.io.libraries.compound.upgraders;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.util.eutils.CompoundIdType;
 import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.PubchemSmilesOrInchiSearch;
+import edu.harvard.med.screensaver.util.eutils.PubchemSmilesOrInchiStandardizer;
+
+import org.apache.log4j.Logger;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Standalone application for upgrading the PubChem CIDs for the compounds in a given library.
@@ -35,7 +37,7 @@ public class CompoundPubchemCidListUpgrader
   // static fields
   
   private static Logger log = Logger.getLogger(CompoundPubchemCidListUpgrader.class);
-  private static int NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION = 100;
+  private static int NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION = 1;
   
   
   // static methods
@@ -55,7 +57,7 @@ public class CompoundPubchemCidListUpgrader
   
   private GenericEntityDAO _dao;
   private PubchemSmilesOrInchiSearch pubchemSmilesOrInchiSearch = new PubchemSmilesOrInchiSearch();
-  private int _numCompoundsUpgraded = 0;
+  private PubchemSmilesOrInchiStandardizer pubchemSmilesOrInchiStandardizer = new PubchemSmilesOrInchiStandardizer();
   
   // constructor and instance methods
   
@@ -68,11 +70,10 @@ public class CompoundPubchemCidListUpgrader
   {
     List<Compound> nonUpgradedCompoundsList = _dao.findEntitiesByHql(
       Compound.class,
-      "from Compound where size(pubchemCids) = 0");
+      "from Compound c left join c.pubchemCids p where p is null");
     log.info(
       "retrieved " + nonUpgradedCompoundsList.size() +
       " compounds needing an upgrade");
-    System.exit(0);
     final Iterator<Compound> nonUpgradedCompounds =
       nonUpgradedCompoundsList.iterator();
     while (nonUpgradedCompounds.hasNext()) {
@@ -80,37 +81,45 @@ public class CompoundPubchemCidListUpgrader
       {
         public void runTransaction()
         {
-          int i = 0;
-          while (nonUpgradedCompounds.hasNext() && i < NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION) {
+          int numCompoundsProcessed = 0;
+          int numCompoundsUpgraded = 0;
+          int numErrors = 0;
+          while (nonUpgradedCompounds.hasNext()) {
             Compound compound = _dao.reloadEntity(nonUpgradedCompounds.next());
             for (Well well : compound.getWells()) {
               try {
-                List<String> pubchemCids = pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(well.getMolfile());
+                String standardizedSmiles = pubchemSmilesOrInchiStandardizer.getPubchemStandardizedSmilesOrInchi(well.getSmiles(), CompoundIdType.SMILES);
+                if (!standardizedSmiles.equals(well.getSmiles())) {
+                  log.debug("standardized smiles from " + well.getSmiles() + " to " + standardizedSmiles);
+                }
+                List<String> pubchemCids = pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(standardizedSmiles);
                 for (String pubchemCid : pubchemCids) {
+                  log.debug("adding new Pubchem CID " + pubchemCid);
                   compound.addPubchemCid(pubchemCid);
+                }
+                if (pubchemCids.size() > 0) {
+                  ++numCompoundsUpgraded;
                 }
               }
               catch (EutilsException e) {
-                log.error("PubchemCidSmilesOrInchiSearch threw an exception: " + e.getMessage());
+                ++numErrors;
+                log.error(e);
+              }
+              finally {
+                ++numCompoundsProcessed;
+                // save progress in batches, and reduce memory usage
+                if (numCompoundsProcessed % NUM_COMPOUNDS_UPGRADED_PER_TRANSACTION == 0) {
+                  _dao.flush();
+                  _dao.clear();
+                  log.info("processed " + numCompoundsProcessed + 
+                           "; upgraded " + numCompoundsUpgraded + " (" + String.format("%.2f%%", numCompoundsUpgraded / (double) numCompoundsProcessed) + "); " +
+                           "; errors " + numCompoundsUpgraded + " (" + String.format("%.2f%%", numErrors / (double) numCompoundsProcessed) + ") ");
+                }
               }
             }
-            _dao.saveOrUpdateEntity(compound);
-            incrementNumCompoundsUpgraded();
-            i ++;
           }
-          log.info("upgraded " + getNumCompoundsUpgraded() + " compounds so far..");
         }
       });
     }
-  }
-  
-  private int getNumCompoundsUpgraded()
-  {
-    return _numCompoundsUpgraded;
-  }
-  
-  private void incrementNumCompoundsUpgraded()
-  {
-    _numCompoundsUpgraded ++;
   }
 }

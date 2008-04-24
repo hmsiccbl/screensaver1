@@ -9,11 +9,14 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Uses PUG to do a molfile structure search on PubChem, returning a list of PubChem
@@ -61,12 +64,35 @@ public class PubchemMolfileSearch extends PubchemPugClient
     }
   }
 
+  @Override
   public void reportError(String error)
   {
     log.error("Error for molfile '" + _molfile + "': " + error);
   }
   
+  @Override
+  protected List<String> getResultsFromOutputDocument(Document outputDocument) throws EutilsException {
+    Document resultsDocument = getXMLForEutilsQuery(
+      "efetch.fcgi",
+      "&db=pccompound" +
+      "&rettype=uilist&" +
+      "WebEnvRq=1&" +
+      "&query_key=" + getQueryKeyFromDocument(outputDocument) +
+      "&WebEnv=" + getWebenvFromDocument(outputDocument));
   
+    if (resultsDocument == null) {
+      // there was a connection error that has already been reported
+      return null;
+    }
+  
+    return extractResultFromOutputDocument(resultsDocument);
+  }
+
+  protected boolean hasResults(Document outputDocument) {
+    NodeList nodes = outputDocument.getElementsByTagName("PCT-Entrez_webenv");
+    return nodes.getLength() != 0;
+  }
+
   // private methods
 
   /**
@@ -140,5 +166,17 @@ public class PubchemMolfileSearch extends PubchemPugClient
       super(message);
     }
   }
+  
+  private List<String> extractResultFromOutputDocument(Document resultsDocument)
+  {
+    List<String> pubchemCids = new ArrayList<String>();
+    NodeList nodes = resultsDocument.getElementsByTagName("Id");
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node node = nodes.item(i);
+      pubchemCids.add(getTextContent(node));
+    }
+    return pubchemCids;
+  }
+  
 }
 
