@@ -108,6 +108,7 @@ Other	University of Massachusetts Medical School
 Other	University of Massachusetts, Dartmouth
 Other	University of Miami, Department of Microbiology and Immunology
 Other	University of Michigan
+Other	University of Minnesota
 Other	University of Nevada - Las Vegas, Department of Chemistry
 Other	University of Northern Colorado
 Other	University of Pennsylvania
