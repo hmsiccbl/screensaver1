@@ -152,15 +152,6 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
       @Override
       public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getRequestedBy(); }
     });
-    columns.add(new BooleanEntityColumn<CherryPickRequest>(
-      new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickAssayPlates"),
-      "Completed", "Has the cherry pick request been completed, such that all cherry pick plates have been plated", 
-      TableColumn.UNGROUPED) {
-      @Override
-      public Boolean getCellValue(CherryPickRequest cpr) { return cpr.isPlated(); }
-    });
-    columns.get(columns.size() - 1).addRelationshipPath(new RelationshipPath<CherryPickRequest>(CherryPickRequest.class,
-      "cherryPickAssayPlates.cherryPickLiquidTransfer"));
     columns.add(new IntegerEntityColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickAssayPlates"),
       "# Plates", "The total number of cherry pick plates", TableColumn.UNGROUPED) {
@@ -169,31 +160,40 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
     });
     columns.add(new IntegerEntityColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickAssayPlates"),
-      "# Plates Completed", "The number of cherry pick plates that have been plated (completed)", TableColumn.UNGROUPED) {
+      "# Plates Completed", "The number of cherry pick plates that have been plated (completed)", TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
       public Integer getCellValue(CherryPickRequest cpr) { return cpr.getCompletedCherryPickAssayPlates().size(); }
     });
     columns.add(new IntegerEntityColumn<CherryPickRequest>(
       new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "numberUnfulfilledLabCherryPicks"),
-      "# Unfulfilled LCPs", "The number of lab cherry picks that have are unfulfilled.", TableColumn.UNGROUPED) {
+      "# Unfulfilled LCPs", "The number of lab cherry picks that have are unfulfilled.", TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
       public Integer getCellValue(CherryPickRequest cpr) { return cpr.getNumberUnfulfilledLabCherryPicks(); }
     });
+    columns.add(new BooleanEntityColumn<CherryPickRequest>(
+      new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickAssayPlates"),
+      "Completed", "Has the cherry pick request been completed, such that all cherry pick plates have been plated", 
+      TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public Boolean getCellValue(CherryPickRequest cpr) { return cpr.isPlated(); }
+    });
+    columns.get(columns.size() - 1).addRelationshipPath(new RelationshipPath<CherryPickRequest>(CherryPickRequest.class,
+      "cherryPickAssayPlates.cherryPickLiquidTransfer"));
     columns.add(new UserNameColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen.labHead"),
-      "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED) {
+      "Lab Head", "The head of the lab performing the screen", "Screen Info") {
       @Override
       public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLabHead(); }
     });
     columns.add(new UserNameColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen.leadScreener"),
-      "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED) {
+      "Lead Screener", "The scientist primarily responsible for running the screen",  "Screen Info") {
       @Override
       public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLeadScreener(); }
     });
     columns.add(new EnumEntityColumn<CherryPickRequest, ScreenType>(
       new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "screen", "screenType"),
-      "Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
+      "Screen Type", "'RNAi' or 'Small Molecule'",  "Screen Info", ScreenType.values()) {
       @Override
       public ScreenType getCellValue(CherryPickRequest cpr) { return cpr.getScreen().getScreenType(); }
     });

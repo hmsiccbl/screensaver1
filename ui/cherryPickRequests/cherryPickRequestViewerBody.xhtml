@@ -262,22 +262,30 @@
 						value="#{cherryPickRequestViewer.labCherryPickCount}"
 						styleClass="dataText" />
 
-					<t:outputText value="#&#160;Unfulfilled&#160;Lab&#160;Cherry&#160;Picks" escape="false"
-						title="The number of unfulfilled lab cherry picks" />
+					<t:outputText
+						value="#&#160;Unfulfilled&#160;Lab&#160;Cherry&#160;Picks"
+						escape="false" title="The number of unfulfilled lab cherry picks"
+						rendered="#{cherryPickRequestViewer.readAdmin}" />
 					<t:outputText id="unfulfilledLabCherryPicksCount"
 						value="#{cherryPickRequestViewer.cherryPickRequest.numberUnfulfilledLabCherryPicks}"
+						rendered="#{cherryPickRequestViewer.readAdmin}"
 						styleClass="dataText" />
 
-					<t:outputText value="#&#160;Cherry&#160;Pick&#160;Plates&#160;Completed" escape="false"
-						title="The number of completed cherry pick plates" />
+					<t:outputText
+						value="#&#160;Cherry&#160;Pick&#160;Plates&#160;Completed"
+						escape="false" title="The number of completed cherry pick plates"
+						rendered="#{cherryPickRequestViewer.readAdmin}" />
 					<t:outputText id="assayPlatesCompletedCount"
 						value="#{cherryPickRequestViewer.completedCherryPickPlatesCount} of #{cherryPickRequestViewer.activeCherryPickPlatesCount}"
+						rendered="#{cherryPickRequestViewer.readAdmin}"
 						styleClass="dataText" />
 
 					<t:outputText value="Completed" escape="false"
-						title="Has the cherry pick request been completed, such that all cherry pick plates have been plated" />
+						title="Has the cherry pick request been completed, such that all cherry pick plates have been plated"
+						rendered="#{cherryPickRequestViewer.readAdmin}" />
 					<t:outputText id="isCompleted"
 						value="#{cherryPickRequestViewer.cherryPickRequest.plated}"
+						rendered="#{cherryPickRequestViewer.readAdmin}"
 						styleClass="dataText" />
 
 				</t:panelGrid>
