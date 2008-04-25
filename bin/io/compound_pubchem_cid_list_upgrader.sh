@@ -20,7 +20,6 @@ JAVA=/opt/java/jdk1.5/bin/java
 
 $JAVA -Xmx1500m -cp $CLASSPATH \
     edu.harvard.med.screensaver.io.libraries.compound.CompoundPubchemCidListUpgrader \
-    -L ALL \
     > compound_pubchem_cid_list_upgrader.out \
     2> compound_pubchem_cid_list_upgrader.err
 
