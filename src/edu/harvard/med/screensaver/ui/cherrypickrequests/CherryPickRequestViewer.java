@@ -544,6 +544,20 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   }
 
   @UIControllerMethod
+  public String viewCherryPickRequest()
+  {
+    Integer entityId = Integer.parseInt(getRequestParameter("entityId").toString());
+    if (entityId == null) {
+      throw new IllegalArgumentException("missing 'entityId' request parameter");
+    }
+    CherryPickRequest cpr = _dao.findEntityById(CherryPickRequest.class, entityId);
+    if (cpr == null) {
+      throw new IllegalArgumentException(CherryPickRequest.class.getSimpleName() + " " + entityId + " does not exist");
+    }
+    return viewCherryPickRequest(cpr);
+  }
+
+  @UIControllerMethod
   public String viewCherryPickRequest(final CherryPickRequest cherryPickRequestIn)
   {
     // TODO: implement as aspect
@@ -866,12 +880,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
 
   // JSF application methods
-
-  @UIControllerMethod
-  public String viewScreen()
-  {
-    return _screenViewer.viewScreen(_cherryPickRequest.getScreen());
-  }
 
   @UIControllerMethod
   public String addCherryPicksForWells()

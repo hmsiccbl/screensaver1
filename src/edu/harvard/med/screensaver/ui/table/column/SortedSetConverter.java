@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/table/ListConverter.java $
+// $Id: ListConverter.java 2190 2008-02-19 16:07:21Z ant4 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
@@ -9,21 +9,21 @@
 
 package edu.harvard.med.screensaver.ui.table.column;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.ui.util.NoOpStringConverter;
 
-public class ListConverter extends CollectionConverter<List<String>,String>
+public class SortedSetConverter extends CollectionConverter<SortedSet<String>,String>
 {
-  public ListConverter()
+  public SortedSetConverter()
   {
     super(new NoOpStringConverter());
   }
 
   @Override
-  protected List<String> makeCollection()
+  protected SortedSet<String> makeCollection()
   {
-    return new ArrayList<String>();
+    return new TreeSet<String>();
   }
 }

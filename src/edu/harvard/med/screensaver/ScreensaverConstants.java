@@ -21,6 +21,7 @@ public interface ScreensaverConstants
   public static final String FEEDBACK_URL = "mailto:screensaver-feedback@hms.harvard.edu";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
   public static Color SCREENSAVER_THEME_COLOR = new Color(0, 0, 255);
+  public static Color HEADER_COLOR = new Color(0, 128, 196);
   
   // JSF Action Results
   // these values are returned by backing beans' action methods and are used to
@@ -59,13 +60,13 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENS = "browseScreens";
   public static final String BROWSE_MY_SCREENS = "browseScreens";
   public static final String VIEW_SCREEN = "viewScreen";
-  public static final String VIEW_LAB_ACTIVITY_ACTION_RESULT = "viewLabActivity";
   public static final String BROWSE_CHERRY_PICK_REQUESTS = "browseCherryPickRequests";
   public static final String VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT = "viewCherryPickRequest";
   public static final String VIEW_BILLING_INFORMATION_ACTION_RESULT = "viewBillingInformation";
   public static final String VIEW_ATTACHED_FILE_ACTION_RESULT = "viewAttachedFile";
   public static final String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
   public static final String BROWSE_ACTIVITIES = "browseActivities";
+  public static final String VIEW_ACTIVITY = "viewActivity";
   public static final String BROWSE_SCREENERS = "browseScreeners";
   public static final String BROWSE_STAFF = "browseStaff";
 }

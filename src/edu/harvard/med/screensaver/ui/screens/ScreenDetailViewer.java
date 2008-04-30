@@ -42,12 +42,14 @@ import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
-public class ScreenDetailViewer extends StudyDetailViewer
+public class ScreenDetailViewer extends StudyDetailViewer implements EditableViewer
 {
   // TODO: disabling editing until ScreenDB is fully replaced by Screensaver
   // (otherwise changes made to screens will be overwritten when
@@ -59,19 +61,18 @@ public class ScreenDetailViewer extends StudyDetailViewer
 
   // instance data
 
-  private GenericEntityDAO _dao;
+  public GenericEntityDAO _dao;
   private WebDataAccessPolicy _dataAccessPolicy;
-  private ScreenViewer _screenViewer;
-  private ScreenSearchResults _screensBrowser;
+  public ScreenViewer _screenViewer;
+  public ScreenSearchResults _screensBrowser;
   private CherryPickRequestViewer _cherryPickRequestViewer;
 
   private Screen _screen;
-  private boolean _isEditMode = true;
+  public boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
-  private String _newKeyword = "";
 
 
 
@@ -117,7 +118,6 @@ public class ScreenDetailViewer extends StudyDetailViewer
   @Override
   public String reload()
   {
-    log.debug("in ScreenViewer.reload()");
     return _screenViewer.viewScreen(_screen);
   }
 
@@ -143,7 +143,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return isReadAdmin() ||
            _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(getScreen());
   }
-
+  
   public AssayReadoutType getNewAssayReadoutType()
   {
     return _newAssayReadoutType;
@@ -172,16 +172,6 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public void setNewStatusValue(StatusValue newStatusValueController)
   {
     _newStatusValue = newStatusValueController;
-  }
-
-  public String getNewKeyword()
-  {
-    return _newKeyword;
-  }
-
-  public void setNewKeyword(String newKeyword)
-  {
-    _newKeyword = newKeyword;
   }
 
   public DataModel getStatusItemsDataModel()
@@ -285,20 +275,6 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return StringUtils.makeListString(new ArrayList<AbaseTestset>(getScreen().getAbaseTestsets()), ", ");
   }
 
-  public DataModel getKeywordsDataModel()
-  {
-    ArrayList<String> keywords = new ArrayList<String>(getScreen().getKeywords());
-    Collections.sort(keywords);
-    return new ListDataModel(keywords);
-  }
-
-  public String getKeywords()
-  {
-    ArrayList<String> keywords = new ArrayList<String>(getScreen().getKeywords());
-    Collections.sort(keywords);
-    return StringUtils.makeListString(keywords, ", ");
-  }
-
   public List<SelectItem> getNewStatusValueSelectItems()
   {
     Set<StatusValue> candiateStatusValues = new HashSet<StatusValue>(Arrays.asList(StatusValue.values()));
@@ -326,7 +302,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   /* JSF Application methods */
 
   @UIControllerMethod
-  public String editScreen()
+  public String edit()
   {
     _isEditMode = true;
     _dao.doInTransaction(new DAOTransaction()
@@ -356,29 +332,23 @@ public class ScreenDetailViewer extends StudyDetailViewer
   }
 
   @UIControllerMethod
-  public String cancelEdit()
+  public String cancel()
   {
-    // edits are discarded (and edit mode is canceled) by virtue of controller
-    // reloading the screen entity from the database
-    return _screenViewer.viewLastScreen();
+    return reload();
   }
 
   @UIControllerMethod
-  public String saveScreen()
+  @Transactional
+  public String save()
   {
     _isEditMode = false;
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        _dao.reattachEntity(getScreen());
-        _dao.reattachEntity(getScreen().getLeadScreener());
-        _dao.reattachEntity(getScreen().getLabHead());
-        getScreen().setLabHead(getLabName().getSelection());
-        getScreen().setLeadScreener(getLeadScreener().getSelection());
-        getScreen().setCollaboratorsList(getCollaborators().getSelections());
-      }
-    });
+    _dao.reattachEntity(getScreen());
+    _dao.reattachEntity(getScreen().getLeadScreener());
+    _dao.reattachEntity(getScreen().getLabHead());
+    getScreen().setLabHead(getLabName().getSelection());
+    getScreen().setLeadScreener(getLeadScreener().getSelection());
+    // TODO: fix; #128935
+//    getScreen().setCollaboratorsList(getCollaborators().getSelections());
     _screensBrowser.refetch();
     return VIEW_SCREEN;
   }
@@ -483,25 +453,6 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
-  public String addKeyword()
-  {
-    if (! getScreen().addKeyword(_newKeyword)) {
-      showMessage("screens.duplicateEntity", "keyword");
-    }
-    else {
-      setNewKeyword("");
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String deleteKeyword()
-  {
-    getScreen().getKeywords().remove((String) getHttpServletRequest().getAttribute("keyword"));
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
   // TODO: save & go to lab activity viewer
   @UIControllerMethod
   public String addLabActivity()
@@ -543,13 +494,6 @@ public class ScreenDetailViewer extends StudyDetailViewer
   {
     // TODO: can we also use our getSelectedEntityOfType() here?
     return  _cherryPickRequestViewer.viewCherryPickRequest((CherryPickRequest) getRequestMap().get("cherryPickRequest"));
-  }
-
-  @UIControllerMethod
-  public String viewLabActivity()
-  {
-    // TODO: implement
-    return VIEW_LAB_ACTIVITY_ACTION_RESULT;
   }
 
   @UIControllerMethod
@@ -603,7 +547,6 @@ public class ScreenDetailViewer extends StudyDetailViewer
     _isAdminViewMode = false;
     _newFundingSupport = null;
     _newStatusValue = null;
-    _newKeyword = "";
     _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;
   }
 

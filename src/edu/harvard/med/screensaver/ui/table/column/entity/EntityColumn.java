@@ -124,7 +124,7 @@ public abstract class EntityColumn<E extends AbstractEntity,T> extends TableColu
     for (TableColumn<E,?> column : columns) {
       if (column instanceof EntityColumn) {
         if (column.isVisible()) {
-          EntityColumn<E,?> entityColumn = (EntityColumn) column;
+          EntityColumn<E,?> entityColumn = (EntityColumn<E,?>) column;
           if (entityColumn.getPropertyPath() != null) {
             propertyPaths.add(entityColumn.getPropertyPath());
           }
@@ -140,7 +140,7 @@ public abstract class EntityColumn<E extends AbstractEntity,T> extends TableColu
     for (TableColumn<E,?> column : columns) {
       if (column instanceof EntityColumn) {
         if (column.isVisible()) {
-          EntityColumn<E,?> entityColumn = (EntityColumn) column;
+          EntityColumn<E,?> entityColumn = (EntityColumn<E,?>) column;
           if (entityColumn.getPropertyPath() != null) {
             criteria.put(entityColumn.getPropertyPath(),
                          entityColumn.getCriteria());

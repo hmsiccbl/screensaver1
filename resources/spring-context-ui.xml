@@ -581,14 +581,40 @@
     class="edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults">
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="genericEntityDao" />
-    <!-- constructor-arg ref="activityViewer" /-->
+    <constructor-arg ref="activityViewer" />
     <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="activityViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.activities.ActivityViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy />
   </bean>
 
 
   <!-- converters -->
 
-  <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.table.OperatorConverter" />
+  <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.table.column.OperatorConverter" />
+
+  <bean id="screenTypeConverter" class="edu.harvard.med.screensaver.ui.util.ScreenTypeConverter" />
+
+  <bean id="stringConverter" class="edu.harvard.med.screensaver.ui.util.NoOpStringConverter" />
+
+  <bean id="dateConverter" class="edu.harvard.med.screensaver.ui.table.column.ShortDateTimeConverter" />
+
+  <bean id="listConverter" class="edu.harvard.med.screensaver.ui.table.column.ListConverter" />
+
+  <bean id="setConverter" class="edu.harvard.med.screensaver.ui.table.column.SortedSetConverter" />
+
+  <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.util.SilencingReagentTypeConverter" />
+
+  <bean id="statusValueConverter" class="edu.harvard.med.screensaver.ui.util.StatusValueConverter" />
+
+  <bean id="fundingSupportConverter" class="edu.harvard.med.screensaver.ui.util.FundingSupportConverter" />
+
 
   <!-- Development/Debug related beans -->
 

@@ -51,11 +51,7 @@ public class UISelectManyEntityBean<E extends AbstractEntity> extends UISelectMa
     List<E> entities = super.getSelections();
     List<E> attachedEntities = new ArrayList<E>(entities.size());
     for (E entity : entities) {
-      E attachedEntity = (E)
-      // can't do this, cuz entity may have already been loaded into the current session, causing NonUniqueObjectException
-      //_dao.persistEntity(entity); 
-      _dao.findEntityById(entity.getClass(), entity.getEntityId());
-      attachedEntities.add(attachedEntity);
+      attachedEntities.add(_dao.reloadEntity(entity));
     }
     return attachedEntities;
   }

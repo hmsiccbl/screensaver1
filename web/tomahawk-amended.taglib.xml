@@ -17,6 +17,13 @@
         </component>
     </tag>
     <tag>
+        <tag-name>aliasBeansScope</tag-name>
+        <component>
+            <component-type>org.apache.myfaces.AliasBeansScope</component-type>
+            <renderer-type>org.apache.myfaces.custom.aliasbean.AliasBeansScopeTag</renderer-type>
+        </component>
+    </tag>
+    <tag>
         <tag-name>buffer</tag-name>
         <component>
             <component-type>org.apache.myfaces.Buffer</component-type>

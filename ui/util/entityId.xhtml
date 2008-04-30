@@ -7,19 +7,19 @@
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox"
 	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+	
+	<!-- facelet params:
+         - entity: AbstractEntity
+	       - bean: backing bean
+	       - action: action method in bean
+	 -->
 
-<ui:composition template="/main/template.xhtml">
+<ui:composition>
 
-	<ui:param name="pageTitle" value="Screens Browser" />
-  <ui:param name="pageHelpURL" value="screens/screensBrowserHelp.jsf" />
-
-	<ui:define name="body">
-		<ss:searchResult searchResults="#{screensBrowser}">
-			<ui:define name="entityViewer">
-				<ui:include src="screenViewerBody.xhtml" />
-			</ui:define>
-		</ss:searchResult>
-	</ui:define>
+	<t:commandLink action="#{bean[action]}">
+		<f:param name="entityId" value="#{entity.entityId}" />
+		<t:outputText value="#{entity.entityId}" styleClass="dataText" />
+	</t:commandLink>
 
 </ui:composition>
 

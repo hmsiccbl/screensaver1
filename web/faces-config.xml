@@ -256,26 +256,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
 
   <!-- === === Converters === === -->
 
-  <converter>
-    <converter-id>ScreenTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.ScreenTypeConverter</converter-class>
-  </converter>
-
-  <converter>
-    <converter-id>SilencingReagentTypeConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.SilencingReagentTypeConverter</converter-class>
-  </converter>
-
-  <converter>
-    <converter-id>StatusValueConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.StatusValueConverter</converter-class>
-  </converter>
-
-  <converter>
-    <converter-id>FundingSupportConverter</converter-id>
-    <converter-class>edu.harvard.med.screensaver.ui.util.FundingSupportConverter</converter-class>
-  </converter>
-
+     <!-- see spring-context-ui.xml -->
 
   <!-- === === Validators === === -->
 

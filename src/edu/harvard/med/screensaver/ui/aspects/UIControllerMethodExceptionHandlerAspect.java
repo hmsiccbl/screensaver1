@@ -55,6 +55,10 @@ public class UIControllerMethodExceptionHandlerAspect extends OrderedAspect
     catch (DataAccessException e) {
       return handleException(joinPoint, e, "databaseOperationFailed", e.getMessage());
     }
+    catch (Exception e) {
+      log.error(e);
+      return handleException(joinPoint, e, "systemError", e.getMessage());
+    }
   }
 
   private Object handleException(ProceedingJoinPoint joinPoint,

@@ -16,11 +16,12 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
@@ -58,13 +59,12 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
 
   }
 
-  public LabActivitySearchResults(//ActivityViewer activityViewer,
-                                            ScreenViewer screenViewer,
-                                            GenericEntityDAO dao)
+  public LabActivitySearchResults(ActivityViewer activityViewer,
+                                  ScreenViewer screenViewer,
+                                  GenericEntityDAO dao)
   {
-    super(LabActivity.class, dao);
+    super(activityViewer, LabActivity.class, dao);
     _screenViewer = screenViewer;
-    //_activityViewer = activityViewer;
   }
 
   @SuppressWarnings("unchecked")
@@ -73,7 +73,7 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   {
     List<EntityColumn<LabActivity,?>> columns = 
       (List<EntityColumn<LabActivity,?>>) super.buildColumns();
-    columns.add(0, new IntegerEntityColumn<LabActivity>(
+    columns.add(1, new IntegerEntityColumn<LabActivity>(
       new PropertyPath<LabActivity>(LabActivity.class, "screen", "screenNumber"),
       "Screen Number", "The screen number", TableColumn.UNGROUPED) {
       @Override
@@ -95,8 +95,9 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   }
 
   @Override
-  protected void setEntityToView(LabActivity entity)
+  protected void setEntityToView(LabActivity activity)
   {
-    // TODO
+    _activityViewer.viewActivity(activity, VIEW_ACTIVITY);
   }
+
 }

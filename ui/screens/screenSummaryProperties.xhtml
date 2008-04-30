@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+ facelets parameters:
+  - screen: Screen entity
+  - editable: boolean
+  - editableLabHead: UI fragment (required if 'editable' can be true)
+  - editableLeadScreener: UI fragment (required if 'editable' can be true)
+-->
+
+<ui:composition>
+
+	<!--
+	<ss:property id="screenId" label="Screen ID"
+		description="The database ID for the screen. This is an implementation-level detail displayed only for development purposes"
+		value="#{screen.screenId}"
+		rendered="#{appInfo.screensaverUser.isUserInRoleOfNameMap['developer']}" />
+ -->
+
+	<ss:property id="screenNumber" label="Screen Number"
+		description="The number used to uniquely identify the screen"
+		value="#{screen.screenNumber}" editable="false">
+		<ui:define name="data">
+			<ss:entityId entity="#{screen}" bean="#{screenViewer}"
+				action="viewScreen" />
+		</ui:define>
+	</ss:property>
+
+	<ss:property id="screenType" label="Screen Type"
+		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
+		editable="false" converter="#{screenTypeConverter}" />
+
+	<!-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design -->
+	<ss:property id="labName" label="Lab Name"
+		description="The name of the lab carrying out the screen"
+		value="#{screen.labHead}" editable="#{editable}">
+		<ui:define name="data">
+			<ss:user user="#{screen.labHead}" />
+		</ui:define>
+		<ui:define name="editableData">
+		  <ui:insert name="editableLabHead" >
+		  No editableLabHead definition!
+		  </ui:insert>
+		</ui:define>
+	</ss:property>
+
+	<ss:property id="leadScreener" label="Lead Screener"
+		description="The scientist primarily responsible for carrying out the screen"
+		value="#{screen.leadScreener}" editable="#{editable}">
+		<ui:define name="data">
+			<ss:user user="#{screen.leadScreener}" />
+		</ui:define>
+		<ui:define name="editableData">
+      <ui:insert name="editableLeadScreener" />
+		</ui:define>
+	</ss:property>
+
+	<ss:property id="title" label="Title" type="Textarea"
+		description="The title of the screen" value="#{screen.title}"
+		editable="#{editable}" editWidth="80" />
+
+</ui:composition>
+
+</html>

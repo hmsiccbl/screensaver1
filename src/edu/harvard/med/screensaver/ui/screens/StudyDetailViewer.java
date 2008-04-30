@@ -166,7 +166,7 @@ public class StudyDetailViewer extends AbstractBackingBean
     {
       public void runTransaction()
       {
-        ScreeningRoomUser labHead = _labName.getSelection();
+        ScreeningRoomUser labHead = getLabName().getSelection();
         ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
         if (labHead != null) {
           leadScreenerCandidates.add(labHead);

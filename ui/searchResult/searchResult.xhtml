@@ -254,8 +254,7 @@
 										value="#{searchResults.escapeBackslashes[item]}" />
 									<t:outputText id="text" value="#{item}" />
 								</t:commandLink>
-								<t:outputText value=";" rendered="#{itemIndex &lt; itemCount - 1}" />
-
+								<t:outputText value=", " rendered="#{itemIndex &lt; itemCount - 1}" />
 							</t:dataList>
 						</t:panelStack>
 					</t:columns>

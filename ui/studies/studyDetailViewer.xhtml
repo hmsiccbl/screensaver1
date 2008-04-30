@@ -80,7 +80,7 @@
 					title="'Small Molecule' or 'RNAi'" />
 				<t:outputText id="screenType"
 					value="#{studyDetailViewer.study.screenType}"
-					converter="ScreenTypeConverter" styleClass="dataText" />
+					converter="#{screenTypeConverter}" styleClass="dataText" />
 
 				<t:outputLabel for="studyIsShareable" value="Shareable"
 					title="True when the study is shareable with scientists outside the lab" />
@@ -224,7 +224,7 @@
 
 			</t:panelGrid>
 		</t:collapsiblePanel>
-	
+
 	</h:form>
 
 </ui:composition>

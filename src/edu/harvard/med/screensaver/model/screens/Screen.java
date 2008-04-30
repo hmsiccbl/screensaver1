@@ -53,6 +53,8 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 
 
 /**
@@ -99,7 +101,7 @@ public class Screen extends Study
   private Integer _screenNumber;
   private ScreenType _screenType;
   private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
-  private Set<String> _keywords = new HashSet<String>();
+  private SortedSet<String> _keywords = new TreeSet<String>();
   private String _publishableProtocol;
   private String _publishableProtocolComments;
   private ScreenResult _screenResult;
@@ -1120,12 +1122,21 @@ public class Screen extends Study
     name="screenKeyword",
     joinColumns=@JoinColumn(name="screenId")
   )
+  @Sort(type=SortType.NATURAL)
   @org.hibernate.annotations.Type(type="text")
   @org.hibernate.annotations.ForeignKey(name="fk_screen_keyword_to_screen")
-  @OrderBy("keyword")
-  public Set<String> getKeywords()
+  public SortedSet<String> getKeywords()
   {
     return _keywords;
+  }
+
+  /**
+   * Set the keywords.
+   * @param keywords the new keywords
+   */
+  public void setKeywords(SortedSet<String> keywords)
+  {
+    _keywords = keywords;
   }
 
   /**
@@ -1646,16 +1657,6 @@ public class Screen extends Study
   }
 
   /**
-   * Set the keywords.
-   * @param keywords the new keywords
-   * @motivation for hibernate
-   */
-  private void setKeywords(Set<String> keywords)
-  {
-    _keywords = keywords;
-  }
-
-  /**
    * Set the funding supports.
    * @param fundingSupports the new funding supports
    * @motivation for hibernate
@@ -1684,7 +1685,7 @@ public class Screen extends Study
   {
     _reagents = reagents;
   }
-  
+
   private void verifyNameIsUnique(String name)
   {
     for (AnnotationType at : getAnnotationTypes()) {

@@ -7,14 +7,13 @@
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox">
 
-<ui:composition template="/main/template.xhtml">
-
-	<ui:param name="pageTitle" value="Activities Browser" />
-
-	<ui:define name="body">
-		<ui:include src="activitySearchResultsBody.xhtml" />
-	</ui:define>
-
-</ui:composition>
+<ui:component>
+	<t:div styleClass="propertyValue">
+		<t:commandLink id="#{id}User" value="#{user.fullNameLastFirst}"
+			action="xxx" styleClass="entityLink" style="margin-right: 4px" />
+		<t:outputText rendered="#{! empty user.email}"
+			value="&lt;#{user.email}&gt;" />
+	</t:div>
+</ui:component>
 
 </html>

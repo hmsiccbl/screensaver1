@@ -92,6 +92,20 @@ public class ScreenViewer extends StudyViewer
   /* JSF Application methods */
 
   @UIControllerMethod
+  public String viewScreen()
+  {
+    Integer entityId = Integer.parseInt(getRequestParameter("entityId").toString());
+    if (entityId == null) {
+      throw new IllegalArgumentException("missing 'entityId' request parameter");
+    }
+    Screen screen = _dao.findEntityById(Screen.class, entityId);
+    if (screen == null) {
+      throw new IllegalArgumentException(Screen.class.getSimpleName() + " " + entityId + " does not exist");
+    }
+    return viewScreen(screen);
+  }
+
+  @UIControllerMethod
   public String viewScreen(final Screen screenIn)
   {
     // TODO: implement as aspect

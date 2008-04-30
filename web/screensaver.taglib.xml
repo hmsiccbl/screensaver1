@@ -11,4 +11,44 @@
         <source>../searchResult/searchResult.xhtml</source>
     </tag>
 
+    <tag>
+        <tag-name>user</tag-name>
+        <source>../users/user.xhtml</source>
+    </tag>
+
+    <tag>
+      <tag-name>property</tag-name>
+      <source>../util/property.xhtml</source>
+    </tag>
+
+    <tag>
+      <tag-name>collapsiblePanel</tag-name>
+      <source>../util/collapsiblePanel.xhtml</source>
+    </tag>
+
+    <tag>
+      <tag-name>editSaveCancel</tag-name>
+      <source>../util/editSaveCancel.xhtml</source>
+    </tag>
+
+    <tag>
+      <tag-name>propertyGroup</tag-name>
+      <source>../util/propertyGroup.xhtml</source>
+    </tag>
+
+    <tag>
+      <tag-name>screenSummaryProperties</tag-name>
+      <source>../screens/screenSummaryProperties.xhtml</source>
+    </tag>
+    
+    <tag>
+      <tag-name>collectionTable</tag-name>
+      <source>../util/collectionTable.xhtml</source>
+    </tag>
+    
+    <tag>
+      <tag-name>entityId</tag-name>
+      <source>../util/entityId.xhtml</source>
+    </tag>
+
 </facelet-taglib>

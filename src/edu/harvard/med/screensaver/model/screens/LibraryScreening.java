@@ -10,8 +10,8 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,10 +21,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 
 
 /**
@@ -55,7 +57,7 @@ public class LibraryScreening extends Screening
   
   // private instance data
 
-  private Set<PlatesUsed> _platesUsed = new HashSet<PlatesUsed>();
+  private SortedSet<PlatesUsed> _platesUsed = new TreeSet<PlatesUsed>();
   private String _abaseTestsetId;
   private boolean _isSpecial;
 
@@ -84,12 +86,13 @@ public class LibraryScreening extends Screening
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
+  @Sort(type=SortType.NATURAL)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE
   })
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="platesUsed")
-  public Set<PlatesUsed> getPlatesUsed()
+  public SortedSet<PlatesUsed> getPlatesUsed()
   {
     return _platesUsed;
   }
@@ -183,7 +186,7 @@ public class LibraryScreening extends Screening
    * @param platesUsed the new plates used
    * @motivation for hibernate
    */
-  private void setPlatesUsed(Set<PlatesUsed> platesUsed)
+  private void setPlatesUsed(SortedSet<PlatesUsed> platesUsed)
   {
     _platesUsed = platesUsed;
   }

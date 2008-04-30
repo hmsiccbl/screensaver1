@@ -24,9 +24,11 @@ import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn;
 import edu.harvard.med.screensaver.ui.util.VocabularlyConverter;
@@ -51,6 +53,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   // instance fields
 
   private GenericEntityDAO _dao;
+  protected ActivityViewer _activityViewer;
   private Class<A> _type;
 
 
@@ -63,11 +66,11 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   {
   }
 
-  public ActivitySearchResults(//ActivityViewer activityViewer,
+  public ActivitySearchResults(ActivityViewer activityViewer,
                                Class<A> type,
                                GenericEntityDAO dao)
   {
-    //_activityViewer = activityViewer;
+    _activityViewer = activityViewer;
     _type = type;
     _dao = dao;
   }
@@ -105,6 +108,20 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   protected List<? extends TableColumn<A,?>> buildColumns()
   {
     ArrayList<EntityColumn<A,?>> columns = new ArrayList<EntityColumn<A,?>>();
+    columns.add(new IntegerEntityColumn<A>(
+      new PropertyPath<A>(_type, "activityId"),
+      "Activity ID", 
+      "The activity number", 
+      TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(A activity) { return activity.getActivityId(); }
+
+      @Override
+      public Object cellAction(A activity) { return viewCurrentEntity(); }
+
+      @Override
+      public boolean isCommandLink() { return true; }
+    });
     columns.add(new VocabularyEntityColumn<A,String>(
       new PropertyPath<A>(_type, "activityType"),
       "Activity Type",
@@ -144,12 +161,6 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   }
 
   protected abstract Set<String> getActivityTypes();
-
-  @Override
-  protected void setEntityToView(A activity)
-  {
-    //_activityViewer.viewActivity(activity);
-  }
 
   private boolean showAdminStatusFields()
   {

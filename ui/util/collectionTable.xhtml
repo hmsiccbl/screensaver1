@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!-- 
+	   Facelet params:
+	     - id
+	     - dataModel: JSF data model
+	     - columns: UI fragment
+	     - editable: boolean
+	     - actionBean: backing bean containing methods with names provied by addAction and deleteAction attributes (below)
+	     - addAction
+	     - deleteAction
+	     - addProperties: UI fragment (optional) containing UI to be used by addAction
+	 -->
+
+<ui:composition>
+
+	<t:outputText value="&lt;none&gt;" styleClass="dataText"
+		rendered="#{dataModel.rowCount == 0}" />
+	<t:dataTable id="#{id}CollectionTable" var="element"
+		value="#{dataModel}" preserveDataModel="false"
+		rendered="#{dataModel.rowCount > 0}" styleClass="standardTable"
+		rowClasses="row1,row2" columnClasses="column"
+		headerClass="tableHeader">
+		<ui:insert name="columns">
+			<t:column>
+				<f:facet name="header">
+					<t:outputText value="#{id}" />
+				</f:facet>
+				<t:outputText value="#{element}" />
+			</t:column>
+		</ui:insert>
+		<t:column rendered="#{editable}">
+			<t:commandButton value="Delete" image="/images/delete.png"
+				action="#{actionBean[deleteAction]}" styleClass="command" />
+		</t:column>
+	</t:dataTable>
+	<t:div rendered="#{editable}">
+		<ui:insert name="addProperties" />
+		<t:commandButton value="Add" action="#{actionBean[addAction]}"
+			styleClass="command" />
+	</t:div>
+
+</ui:composition>
+
+</html>

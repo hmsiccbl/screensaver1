@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.util.Comparator;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,6 +24,7 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 import org.apache.log4j.Logger;
 
@@ -34,13 +37,20 @@ import org.apache.log4j.Logger;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=LibraryScreening.class)
-public class PlatesUsed extends AbstractEntity
+public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
 {
 
   // private static data
 
   private static final Logger log = Logger.getLogger(PlatesUsed.class);
   private static final long serialVersionUID = 0L;
+  private static final Comparator<Integer> _plateComparator = new NullSafeComparator<Integer>(true) {
+    @Override
+    protected int doCompare(Integer plate1, Integer plate2)
+    {
+      return plate1.compareTo(plate2);
+    }
+  };
 
 
   // private instance data
@@ -59,6 +69,11 @@ public class PlatesUsed extends AbstractEntity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
+  }
+
+  public int compareTo(PlatesUsed that)
+  {
+    return _plateComparator.compare(this.getStartPlate(), that.getStartPlate());
   }
 
   @Override
@@ -189,8 +204,9 @@ public class PlatesUsed extends AbstractEntity
   /**
    * Construct an uninitialized <code>PlatesUsed</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
+   * @motivation for temporary UI storage of PlatesUsed properties (DTO)
    */
-  protected PlatesUsed() {}
+  public PlatesUsed() {}
 
 
   // private constructor and instance methods

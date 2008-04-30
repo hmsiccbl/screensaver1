@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+	
+	<!-- 
+	   facelets parameters:
+	     - id
+	     - label
+	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List'
+	     - description
+	     - value
+	     - editable: boolean, (optional, defaults to false)
+	     - rendered: boolean, (optional, defaults to true)
+	     - editWidth
+	     - editHeight ('Textarea' type only)
+	     - converter (optional)
+	 -->
+
+<ui:composition>
+	<t:div rendered="#{empty rendered ? true : rendered}"
+		styleClass="propertyLabel">
+		<ui:insert name="label">
+			<t:popup>
+				<f:facet name="popup">
+					<t:div styleClass="popupHelp popupText">#{description}</t:div>
+				</f:facet>
+				<t:outputText value="#{label}" styleClass="label" />
+			</t:popup>
+		</ui:insert>
+	</t:div>
+	<t:div rendered="#{empty rendered ? true : rendered}">
+		<t:div rendered="#{!editable}">
+			<ui:insert name="data">
+				<t:outputText id="#{id}#{type}Value" value="#{value}"
+					rendered="#{type != 'Textarea'}" styleClass="propertyValue"
+					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : stringConverter}" />
+				<t:inputTextarea id="#{id}#{type}Value1"
+					rendered="#{type == 'Textarea'}" value="#{value}" readonly="true"
+					cols="#{editWidth}" rows="#{editHeight}" styleClass="propertyValue" />
+			</ui:insert>
+		</t:div>
+		<t:div rendered="#{editable}">
+			<ui:insert name="editableData">
+				<t:inputText id="#{id}#{type}Field"
+					rendered="#{!(type == 'Textarea' || type == 'Date' || type == 'Boolean')}"
+					value="#{value}" size="#{editWidth}" styleClass="inputText"
+					converter="#{!empty converter ? converter : type == 'Set' ? setConverter : type == 'List' ? listConverter : stringConverter}" />
+				<t:inputTextarea id="#{id}#{type}Field1"
+					rendered="#{type == 'Textarea'}" value="#{value}"
+					cols="#{editWidth}" rows="#{editHeight}" styleClass="inputText" />
+				<t:inputDate id="#{id}DateField2" value="#{value}"
+					popupCalendar="true" rendered="#{type == 'Date'}"
+					styleClass="inputText" />
+				<t:selectBooleanCheckbox id="#{id}BooleanField2" value="#{value}"
+					rendered="#{type == 'Boolean'}" />
+			</ui:insert>
+		</t:div>
+	</t:div>
+</ui:composition>
+
+</html>

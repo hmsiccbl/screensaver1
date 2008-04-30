@@ -113,6 +113,15 @@ public abstract class Activity extends AbstractEntity implements Comparable
   }
 
   /**
+   * Set the user that performed the activity.
+   * @param performedBy the new user that performed the activity
+   */
+  public void setPerformedBy(ScreensaverUser performedBy)
+  {
+    _performedBy = performedBy;
+  }
+
+  /**
    * Get the date the activity entity was created.
    * @return the date the activity entity was created
    */
@@ -132,6 +141,15 @@ public abstract class Activity extends AbstractEntity implements Comparable
   public Date getDateOfActivity()
   {
     return _dateOfActivity;
+  }
+
+  /**
+   * Set the date the activity was performed.
+   * @param dateCreated the new date the activity was performed.
+   */
+  public void setDateOfActivity(Date dateOfActivity)
+  {
+    _dateOfActivity = truncateDate(dateOfActivity);
   }
 
   /**
@@ -214,16 +232,6 @@ public abstract class Activity extends AbstractEntity implements Comparable
   }
 
   /**
-   * Set the user that performed the activity.
-   * @param performedBy the new user that performed the activity
-   * @motivation for hibernate
-   */
-  private void setPerformedBy(ScreensaverUser performedBy)
-  {
-    _performedBy = performedBy;
-  }
-
-  /**
    * Set the date the activity entity was created.
    * @param dateCreated the new date the activity entity was created
    * @motivation for hibernate
@@ -231,14 +239,5 @@ public abstract class Activity extends AbstractEntity implements Comparable
   private void setDateCreated(Date dateCreated)
   {
     _dateCreated = truncateDate(dateCreated, Calendar.SECOND);
-  }
-
-  /**
-   * Set the date the activity was performed.
-   * @param dateCreated the new date the activity was performed.
-   */
-  private void setDateOfActivity(Date dateOfActivity)
-  {
-    _dateOfActivity = truncateDate(dateOfActivity);
   }
 }

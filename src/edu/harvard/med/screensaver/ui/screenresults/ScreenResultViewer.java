@@ -26,10 +26,10 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
@@ -66,7 +66,7 @@ public class ScreenResultViewer extends AbstractBackingBean
   private ScreenResultsDAO _screenResultsDao;
   private ScreenSearchResults _screensBrowser;
   private ScreenViewer _screenViewer;
-  private ScreenDetailViewer _screenDetailViewer;
+  private EditableViewer _screenDetailViewer;
   private ResultValueTypesTable _resultValueTypesTable;
   private ScreenResultExporter _screenResultExporter;
   private WellSearchResults _wellSearchResults;
@@ -92,7 +92,7 @@ public class ScreenResultViewer extends AbstractBackingBean
                             ScreenResultsDAO screenResultsDao,
                             ScreenSearchResults screensBrowser,
                             ScreenViewer screenViewer,
-                            ScreenDetailViewer screenDetailViewer,
+                            EditableViewer screenDetailViewer,
                             ResultValueTypesTable resultValueTypesTable,
                             ScreenResultExporter screenResultExporter,
                             WellSearchResults wellSearchResults)
@@ -232,7 +232,7 @@ public class ScreenResultViewer extends AbstractBackingBean
     // note: saving the parent screen will save its screenResult; assumes
     // ScreenViewer and ScreenResultViewer are in sync (showing data for same
     // screen)
-    return _screenDetailViewer.saveScreen();
+    return _screenDetailViewer.save();
   }
 
 
