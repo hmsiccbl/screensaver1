@@ -47,8 +47,8 @@
     </tag>
     
     <tag>
-      <tag-name>entityId</tag-name>
-      <source>../util/entityId.xhtml</source>
+      <tag-name>entityLink</tag-name>
+      <source>../util/entityLink.xhtml</source>
     </tag>
 
 </facelet-taglib>

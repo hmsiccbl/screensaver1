@@ -180,7 +180,7 @@
 					description="The cherry pick request for which this screening was performed"
 					rendered="#{activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}">
 					<ui:define name="data">
-					 <ss:entityId entity="#{activityViewer.activity.rnaiCherryPickRequest}" bean="#{cherryPickRequestViewer}" action="viewCherryPickRequest" />
+					 <ss:entityLink entity="#{activityViewer.activity.rnaiCherryPickRequest}" property="number" bean="#{cherryPickRequestViewer}" action="viewCherryPickRequest" />
 					</ui:define>
 				</ss:property>
 

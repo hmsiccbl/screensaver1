@@ -453,7 +453,7 @@ TODO:
                       <f:facet name="header">
                         <t:outputText value="#" />
                       </f:facet>
-                      <ss:entityId entity="#{activityItem}" bean="#{activityViewer}" action="viewActivity"/>
+                      <ss:entityLink entity="#{activityItem}" bean="#{activityViewer}" action="viewActivity"/>
                     </t:column>
 										<t:column>
 											<f:facet name="header">
@@ -504,8 +504,9 @@ TODO:
 											<f:facet name="header">
 												<t:outputText value="#" />
 											</f:facet>
-											<ss:entityId entity="#{cherryPickRequest}"
+											<ss:entityLink entity="#{cherryPickRequest}"
 												bean="#{cherryPickRequestViewer}"
+												property="cherryPickRequestNumber"
 												action="viewCherryPickRequest" />
 										</t:column>
 										<t:column>
