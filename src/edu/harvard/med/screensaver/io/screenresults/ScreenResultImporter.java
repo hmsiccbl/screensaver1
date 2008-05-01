@@ -136,7 +136,7 @@ public class ScreenResultImporter
           if (finalScreen.getScreenResult() != null) {
             if (append) {
               log.info("appending existing screen result (loading existing screen result data)");
-              dao.need(finalScreen.getScreenResult(), "resultValueTypes.resultValues");
+              dao.need(finalScreen.getScreenResult(), "resultValueTypes");//.resultValues");
             }
             else {
               log.info("deleting existing screen result for " + finalScreen);

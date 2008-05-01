@@ -128,7 +128,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private Set<ScreenResult> _screenResults = new HashSet<ScreenResult>();
 
   private transient WellKey _wellKey;
-  private transient Map<Serializable,ResultValue> _resultValueTypeIdToResultValue;
 
 
   // public instance methods

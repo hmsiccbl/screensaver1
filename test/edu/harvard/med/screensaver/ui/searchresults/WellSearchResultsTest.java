@@ -235,15 +235,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     Map<TableColumn<?,?>,Getter<Well,?>> columnsAndValueGetters = new HashMap<TableColumn<?,?>,Getter<Well,?>>();
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt1.getResultValues().get(well.getWellKey());
+                                 ResultValue rv = rvt1.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt2.getResultValues().get(well.getWellKey());
+                                 ResultValue rv = rvt2.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt3.getResultValues().get(well.getWellKey());
+                                 ResultValue rv = rvt3.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
@@ -264,15 +264,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     columnsAndValueGetters.clear();
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt1.getResultValues().get(well.getWellKey());
+                                 ResultValue rv = rvt1.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt2.getResultValues().get(well.getWellKey());
+                                 ResultValue rv = rvt2.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt3.getResultValues().get(well.getWellKey());
+                                 ResultValue rv = rvt3.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {

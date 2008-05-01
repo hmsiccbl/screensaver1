@@ -259,9 +259,9 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
 
     List<String> expectedWellKeys = new ArrayList<String>();
     for (Well well : _screenResult.getWells()) {
-      if (rvt3.getResultValues().get(well.getWellKey()).isPositive() &&
-        rvt4.getResultValues().get(well.getWellKey()) != null &&
-        rvt4.getResultValues().get(well.getWellKey()).getValue().length() > 0) {
+      if (rvt3.getWellKeyToResultValueMap().get(well.getWellKey()).isPositive() &&
+        rvt4.getWellKeyToResultValueMap().get(well.getWellKey()) != null &&
+        rvt4.getWellKeyToResultValueMap().get(well.getWellKey()).getValue().length() > 0) {
         expectedWellKeys.add(well.getWellKey().toString());
       }
     }

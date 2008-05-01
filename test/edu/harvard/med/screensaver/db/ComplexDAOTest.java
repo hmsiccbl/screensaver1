@@ -415,7 +415,7 @@ public class ComplexDAOTest extends AbstractSpringTest
               "human",
               rvt.getAssayPhenotype());
 
-            Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+            Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
             for (WellKey wellKey : resultValues.keySet()) {
               assertTrue(wellKeys.contains(wellKey));
               // note that our naming scheme is testing the ordering of the

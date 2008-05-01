@@ -10,6 +10,9 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -30,9 +33,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.OptimisticLock;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -40,6 +40,9 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.OptimisticLock;
 
 /**
  * Provides the metadata for a subset of a
@@ -73,7 +76,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private Integer _resultValueTypeId;
   private Integer _version;
   private ScreenResult _screenResult;
-  private Map<WellKey,ResultValue> _resultValues = new HashMap<WellKey,ResultValue>();
+  private Collection<ResultValue> _resultValues = new ArrayList<ResultValue>();
   private String _name;
   private String _description;
   private Integer _ordinal;
@@ -758,12 +761,28 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @OneToMany(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
              mappedBy="resultValueType")
-  @org.hibernate.annotations.MapKey(columns={ @Column(name="well_id") })
+  //@org.hibernate.annotations.MapKey(columns={ @Column(name="well_id") })
   @OptimisticLock(excluded=true)
   @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
-  public Map<WellKey,ResultValue> getResultValues()
+  public Collection<ResultValue> getResultValues()
   {
     return _resultValues;
+  }
+  
+  /**
+   * @deprecated Use HQL to retrieve <code>ResultValueType.resultValues</code>,
+   *             as needed. Not performant for large collection of ResultValues,
+   *             and has excessive memory requirements. For legacy code only.
+   */
+  @Transient
+  @Deprecated
+  public Map<WellKey,ResultValue> getWellKeyToResultValueMap()
+  {
+    HashMap<WellKey,ResultValue> map = new HashMap<WellKey,ResultValue>(_resultValues.size());  
+    for (ResultValue resultValue : _resultValues) {
+      map.put(resultValue.getWell().getWellKey(), resultValue);
+    }
+    return map;
   }
 
 
@@ -870,12 +889,12 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Set the mapping from the well ids to the result values for this result value type.
-   * @param resultValue the new mapping from the well ids to the result values for this result
-   * value type
+   * Set the result values for this result value type.
+   * 
+   * @param resultValue the new result values for this result value type
    * @motivation for hibernate
    */
-  private void setResultValues(Map<WellKey,ResultValue> resultValues)
+  private void setResultValues(Collection<ResultValue> resultValues)
   {
     _resultValues = resultValues;
   }
@@ -902,9 +921,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     Integer decimalPrecision,
     boolean exclude)
   {
-    if (_resultValues.containsKey(well.getWellKey())) {
-      return null;
-    }
     if (isNumeric() && value != null) {
       throw new DataModelViolationException("cannot add a non-numeric value to a numeric ResultValueType");
     }
@@ -937,7 +953,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
     getScreenResult().addWell(well);
 
-    _resultValues.put(well.getWellKey(), resultValue);
+    _resultValues.add(resultValue);
     return resultValue;
   }
 

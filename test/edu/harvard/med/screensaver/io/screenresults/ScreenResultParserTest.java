@@ -478,7 +478,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     for (int i = 0; i < 30 - 1; ++i) {
       ResultValueType rvt = resultValueTypes.get(i);
       assertEquals("is derived from next", resultValueTypes.get(i+1), rvt.getDerivedTypes().first());
-      Map<WellKey,ResultValue> resultValues = rvt.getResultValues();
+      Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
       assertEquals(rvt.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
       assertEquals(rvt.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
       assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
@@ -657,7 +657,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
         // compare result values
         assertEquals(960, actualRvt.getResultValues().size());
         int iWell = 0;
-        Map<WellKey,ResultValue> resultValues = actualRvt.getResultValues();
+        Map<WellKey,ResultValue> resultValues = actualRvt.getWellKeyToResultValueMap();
         for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
           ResultValue rv = resultValues.get(wellKey);
           assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",

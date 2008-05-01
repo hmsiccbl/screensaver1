@@ -68,10 +68,10 @@ public class ScreenResultPrinter
       int n = 0;
       boolean ellipsesOnce = false;
 
-      for (WellKey wellKey : new TreeSet<WellKey>(rvt.getResultValues().keySet())) {
+      for (WellKey wellKey : new TreeSet<WellKey>(rvt.getWellKeyToResultValueMap().keySet())) {
         if (maxResultValuesToPrint != null) {
           if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
-            ResultValue resultValue = rvt.getResultValues().get(wellKey);
+            ResultValue resultValue = rvt.getWellKeyToResultValueMap().get(wellKey);
             printer.println("\t\t" + wellKey +
                             "\t" + ResultValue.getTypedValue(resultValue, rvt));
           }
