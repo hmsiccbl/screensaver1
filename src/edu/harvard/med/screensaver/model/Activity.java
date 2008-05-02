@@ -101,8 +101,7 @@ public abstract class Activity extends AbstractEntity implements Comparable
    */
   @ManyToOne(fetch=FetchType.LAZY,
     cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="performedById", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  @JoinColumn(name="performedById", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_activity_to_screensaver_user")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
@@ -118,7 +117,19 @@ public abstract class Activity extends AbstractEntity implements Comparable
    */
   public void setPerformedBy(ScreensaverUser performedBy)
   {
+    if (isHibernateCaller()) {
+      _performedBy = performedBy;
+      return;
+    }
+    if (performedBy == null) {
+      throw new NullPointerException();
+    }
+    if (performedBy.equals(_performedBy)) {
+      return;
+    }
+    _performedBy.getActivitiesPerformed().remove(this);
     _performedBy = performedBy;
+    _performedBy.getActivitiesPerformed().add(this);
   }
 
   /**
@@ -136,8 +147,7 @@ public abstract class Activity extends AbstractEntity implements Comparable
    * Get the date the activity was performed.
    * @return the date the activity was performed
    */
-  @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  @Column(nullable=false)
   public Date getDateOfActivity()
   {
     return _dateOfActivity;

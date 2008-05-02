@@ -48,7 +48,7 @@
 				<ss:property id="performedBy" label="Performed By"
 					description="The person that is credited with performing the activity"
 					value="#{activityViewer.performedBy}"
-					editable="#{false &amp;&amp; activityViewer.editMode}">
+					editable="#{activityViewer.editMode}">
 					<ui:define name="data">
 						<ss:user user="#{value.selection}" />
 					</ui:define>
@@ -115,6 +115,7 @@
 					label="For screener-provided plates"
 					value="#{activityViewer.activity.special}"
 					description="Whether the library screening was performed on plates provided by the screener"
+					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}"
 					editable="#{activityViewer.editMode &amp;&amp; activityViewer.platesScreenedDataModel.rowCount == 0}" />
 
 				<ss:property id="platesScreened" label="Plates Screened"
@@ -186,7 +187,10 @@
 					description="The cherry pick request for which this screening was performed"
 					rendered="#{activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}">
 					<ui:define name="data">
-					 <ss:entityLink entity="#{activityViewer.activity.rnaiCherryPickRequest}" property="number" bean="#{cherryPickRequestViewer}" action="viewCherryPickRequest" />
+						<ss:entityLink
+							entity="#{activityViewer.activity.rnaiCherryPickRequest}"
+							property="cherryPickRequestNumber"
+							bean="#{cherryPickRequestViewer}" action="viewCherryPickRequest" />
 					</ui:define>
 				</ss:property>
 
