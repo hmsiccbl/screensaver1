@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.ui.aspects;
 
 import java.util.ConcurrentModificationException;
 
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.Messages;
@@ -55,6 +57,12 @@ public class UIControllerMethodExceptionHandlerAspect extends OrderedAspect
     catch (DataAccessException e) {
       return handleException(joinPoint, e, "databaseOperationFailed", e.getMessage());
     }
+    catch (BusinessRuleViolationException e) {
+      return handleException(joinPoint, e, "businessError", e.getMessage());
+    }
+    catch (DataModelViolationException e) {
+      return handleException(joinPoint, e, "businessError", e.getMessage());
+    }
     catch (Exception e) {
       log.error(e);
       return handleException(joinPoint, e, "systemError", e.getMessage());
@@ -70,7 +78,7 @@ public class UIControllerMethodExceptionHandlerAspect extends OrderedAspect
     log.debug("backing bean " + backingBean.getClass().getSimpleName() +
              " method " + joinPoint.getSignature().getName() +
              " threw " + e.getClass().getSimpleName());
-    _messages.setFacesMessageForComponent(errorMessageId, errorMessageArg);
+    _messages.setFacesMessageForComponent(errorMessageId, null, errorMessageArg);
     return backingBean.reload();
   }
 

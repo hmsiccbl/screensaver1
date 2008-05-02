@@ -444,6 +444,7 @@
     <constructor-arg ref="dataAccessPolicy" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="activityViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
     <aop:scoped-proxy/>
   </bean>

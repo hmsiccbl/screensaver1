@@ -479,6 +479,12 @@ TODO:
 												styleClass="dataText" />
 										</t:column>
 									</t:dataTable>
+                  <t:panelGroup styleClass="commandPanel"
+                    rendered="#{screenDetailViewer.editable}">
+                    <t:commandButton value="Add Library Screening..."
+                      action="#{screenDetailViewer.addLibraryScreening}"
+                      styleClass="command" />
+                  </t:panelGroup>
 								</t:panelGrid>
 
 								<t:commandButton value="Add Lab Activity..."
@@ -525,13 +531,18 @@ TODO:
 												value="#{cherryPickRequest.requestedBy.fullNameLastFirst}"
 												styleClass="dataText" />
 										</t:column>
+                    <t:column rendered="#{screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['cherryPickAdmin']}">
+											<t:commandButton value="Add Screening..."
+												action="#{screenDetailViewer.addRNAiCherryPickScreening}"
+												rendered="#{cherryPickRequest.screen.screenType.value == 'RNAi'}"
+												styleClass="command" />
+										</t:column>
 									</t:dataTable>
-									<t:panelGroup>
-										<!-- TODO: 'rendered' expression is a bit of a hack -->
+									<t:panelGroup styleClass="commandPanel"
+										rendered="#{cherryPickRequestViewer.editable}">
 										<t:commandButton value="Add Cherry Pick Request..."
 											action="#{screenDetailViewer.addCherryPickRequest}"
-											styleClass="command"
-											rendered="#{cherryPickRequestViewer.editable}" />
+											styleClass="command" />
 									</t:panelGroup>
 								</t:panelGrid>
 							</ui:define>

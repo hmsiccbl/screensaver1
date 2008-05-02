@@ -32,7 +32,7 @@
 								onclick="javascript: return confirm('Delete this cherry pick request and all of its cherry picks permanently?');"
 								styleClass="command"
 								rendered="#{cherryPickRequestViewer.editable &amp;&amp; !cherryPickRequestViewer.editMode}"
-								disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated}"
+								disabled="#{cherryPickRequestViewer.cherryPickRequest.allocated || (cherryPickRequestViewer.rnaiScreen &amp;&amp; cherryPickRequestViewer.cherryPickRequest.screened)}"
 								title="Delete this cherry pick request" />
 							<t:commandButton id="saveCommand" value="Save"
 								action="#{cherryPickRequestViewer.save}" styleClass="command"

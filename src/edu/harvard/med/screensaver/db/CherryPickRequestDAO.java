@@ -20,6 +20,7 @@ import java.util.Set;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -118,6 +119,10 @@ public class CherryPickRequestDAO extends AbstractDAO
 
     if (cherryPickRequestIn.isAllocated()) {
       throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been allocated");
+    }
+    if (cherryPickRequestIn instanceof RNAiCherryPickRequest &&
+      ((RNAiCherryPickRequest) cherryPickRequestIn).isScreened()) {
+      throw new BusinessRuleViolationException("cannot delete a cherry pick request that has been screened");
     }
 
     // dissociate from related entities

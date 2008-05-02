@@ -546,8 +546,6 @@ public class Screen extends Study
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  // TODO: this @OrderBy breaks hibernasty!
-  //@OrderBy("dateOfActivity")
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE,

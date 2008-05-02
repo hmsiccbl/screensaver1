@@ -600,6 +600,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean
                             "labCherryPicks.wellVolumeAdjustments.copy");
           _dao.needReadOnly(cherryPickRequest,
                             "cherryPickAssayPlates.labCherryPicks");
+          if (cherryPickRequest instanceof RNAiCherryPickRequest) {
+            _dao.needReadOnly(cherryPickRequest,
+                              "RNAiCherryPickScreenings");
+          }
 
           setCherryPickRequest(cherryPickRequest);
         }

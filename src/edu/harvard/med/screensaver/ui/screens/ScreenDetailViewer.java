@@ -25,8 +25,10 @@ import javax.faces.model.SelectItem;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
@@ -40,6 +42,7 @@ import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
+import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
@@ -51,10 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class ScreenDetailViewer extends StudyDetailViewer implements EditableViewer
 {
-  // TODO: disabling editing until ScreenDB is fully replaced by Screensaver
-  // (otherwise changes made to screens will be overwritten when
-  // ScreenDBSynchronizer is run)
-  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole./*SCREENS_ADMIN*/DEVELOPER;
+  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
 
   private static Logger log = Logger.getLogger(ScreenDetailViewer.class);
 
@@ -65,6 +65,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private WebDataAccessPolicy _dataAccessPolicy;
   public ScreenViewer _screenViewer;
   public ScreenSearchResults _screensBrowser;
+  private ActivityViewer _activityViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
 
   private Screen _screen;
@@ -74,6 +75,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
 
+  
 
 
   // constructors
@@ -90,6 +92,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
                             WebDataAccessPolicy dataAccessPolicy,
                             ScreenViewer screenViewer,
                             ScreenSearchResults screensBrowser,
+                            ActivityViewer activityViewer,
                             CherryPickRequestViewer cherryPickRequestViewer)
   {
     super(dao, usersDao);
@@ -97,6 +100,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _dataAccessPolicy = dataAccessPolicy;
     _screenViewer = screenViewer;
     _screensBrowser = screensBrowser;
+    _activityViewer = activityViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
   }
 
@@ -453,11 +457,34 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  // TODO: save & go to lab activity viewer
   @UIControllerMethod
-  public String addLabActivity()
+  @Transactional
+  public String addLibraryScreening()
   {
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    _dao.reattachEntity(_screen);
+    Date now = new Date();
+    Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), now, now);
+    _dao.persistEntity(activity);
+    _dao.flush();
+    return _activityViewer.viewActivity(activity);
+  }
+  
+  @UIControllerMethod
+  @Transactional
+  public String addRNAiCherryPickScreening()
+  {
+    RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) getCherryPickRequestsDataModel().getRowData();
+    if (cpr == null) {
+      reportSystemError("missing CherryPickRequest argument");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    _dao.reattachEntity(_screen);
+    _dao.reattachEntity(cpr);
+    Date now = new Date();
+    Activity activity = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), now, now, cpr);
+    _dao.persistEntity(activity);
+    _dao.flush();
+    return _activityViewer.viewActivity(activity);
   }
 
   @UIControllerMethod

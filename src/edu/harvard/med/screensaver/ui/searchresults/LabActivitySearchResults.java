@@ -97,7 +97,7 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   @Override
   protected void setEntityToView(LabActivity activity)
   {
-    _activityViewer.viewActivity(activity, VIEW_ACTIVITY);
+    _activityViewer.viewActivity(activity);
   }
 
 }

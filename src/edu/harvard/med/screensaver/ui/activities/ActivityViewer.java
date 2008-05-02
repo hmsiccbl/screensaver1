@@ -112,9 +112,6 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   {
     if (_newPlatesScreened == null) {
       _newPlatesScreened = new PlatesUsed();
-      if (_activity instanceof LibraryScreening) {
-       LibraryScreening libraryScreening = (LibraryScreening) _activity;
-      }
     }
     return _newPlatesScreened;
   }
@@ -122,7 +119,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   @Override
   public String reload()
   {
-    return viewActivity(_activity, REDISPLAY_PAGE_ACTION_RESULT);
+    return viewActivity(_activity);
   }
     
   @Override
@@ -192,12 +189,12 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     if (activity == null) {
       throw new IllegalArgumentException(Activity.class.getSimpleName() + " " + entityId + " does not exist");
     }
-    return viewActivity(activity, VIEW_ACTIVITY);
+    return viewActivity(activity);
   }
 
   @UIControllerMethod
   @Transactional
-  public String viewActivity(Activity activity, String actionResult)
+  public String viewActivity(Activity activity)
   {
     // TODO: implement as aspect
     if (activity.isRestricted()) {
@@ -218,7 +215,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
       _dao.need(activity, "rnaiCherryPickRequest");
     }
     setActivity(activity);
-    return actionResult;
+    return VIEW_ACTIVITY;
   }
   
   public String addPlatesScreened()

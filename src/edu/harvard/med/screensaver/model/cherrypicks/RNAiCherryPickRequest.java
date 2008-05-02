@@ -11,16 +11,23 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 /**
  * A hibernate entity representing an RNAi cherry pick request.
@@ -48,6 +55,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   // private instance datum
 
   private String _assayProtocol;
+  private Set<RNAiCherryPickScreening> _rnaiCherryPickScreenings = new HashSet<RNAiCherryPickScreening>();
 
 
   // public constructor
@@ -91,6 +99,32 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   public BigDecimal getDefaultMicroliterTransferVolume()
   {
     return DEFAULT_MICROLITER_TRANSFER_VOLUME;
+  }
+
+
+  /**
+   * Get the RNAiCherryPickScreenings for this RNAiCherryPickRequest.
+   * <p>
+   * Note: This is a non-cascading relationship; RNAiCherryPickScreenings are
+   * cascaded from {@link Screen#getLabActivities()} instead.
+   */
+  @OneToMany(mappedBy="rnaiCherryPickRequest",
+             cascade={},
+             fetch=FetchType.LAZY)
+  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="rnaiCherryPickScreening")
+  public Set<RNAiCherryPickScreening> getRNAiCherryPickScreenings()
+  {
+    return _rnaiCherryPickScreenings;
+  }
+  
+  /**
+   * Get if this RNAiCherryPickRequest has been screened (has at least one
+   * associated RNAiCherryPickScreening activity).
+   */
+  @Transient
+  public boolean isScreened()
+  {
+    return _rnaiCherryPickScreenings.size() > 0;
   }
 
   @Override
@@ -140,5 +174,13 @@ public class RNAiCherryPickRequest extends CherryPickRequest
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected RNAiCherryPickRequest() {}
+  
+
+  // private methods
+  
+  private void setRNAiCherryPickScreenings(Set<RNAiCherryPickScreening> rnaiCherryPickScreenings)
+  {
+    _rnaiCherryPickScreenings = rnaiCherryPickScreenings;
+  }
 }
 

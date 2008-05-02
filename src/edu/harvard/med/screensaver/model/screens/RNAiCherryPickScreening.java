@@ -77,7 +77,7 @@ public class RNAiCherryPickScreening extends Screening
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_rnai_cherry_pick_screening_to_rnai_cherry_pick_request")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="RNAiCherryPickScreenings")
   public RNAiCherryPickRequest getRnaiCherryPickRequest()
   {
     return _rnaiCherryPickRequest;
@@ -115,6 +115,7 @@ public class RNAiCherryPickScreening extends Screening
   {
     super(screen, performedBy, dateCreated, dateOfActivity);
     _rnaiCherryPickRequest = rnaiCherryPickRequest;
+    _rnaiCherryPickRequest.getRNAiCherryPickScreenings().add(this);
   }
 
 
