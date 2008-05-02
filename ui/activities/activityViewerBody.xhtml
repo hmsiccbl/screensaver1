@@ -111,9 +111,15 @@
 						editable="#{activityViewer.editMode}" />
 				</ss:propertyGroup>
 
+				<ss:property id="screenedProvidedPlates" type="Boolean" submitOnChange="true"
+					label="For screener-provided plates"
+					value="#{activityViewer.activity.special}"
+					description="Whether the library screening was performed on plates provided by the screener"
+					editable="#{activityViewer.editMode &amp;&amp; activityViewer.platesScreenedDataModel.rowCount == 0}" />
+
 				<ss:property id="platesScreened" label="Plates Screened"
 					description="Plates screened by this library activity"
-					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}">
+					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.activity.special}">
 					<ui:define name="data">
 						<ss:collectionTable id="platesScreened"
 							editable="#{activityViewer.editMode}"
@@ -173,8 +179,8 @@
 						</ss:collectionTable>
 					</ui:define>
 				</ss:property>
-				
-        <!-- LibraryScreening properties -->
+
+				<!-- LibraryScreening properties -->
 
 				<ss:property id="cherryPickRequest" label="For Cherry Pick Request"
 					description="The cherry pick request for which this screening was performed"

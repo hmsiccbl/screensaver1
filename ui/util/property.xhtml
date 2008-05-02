@@ -19,6 +19,7 @@
 	     - editWidth
 	     - editHeight ('Textarea' type only)
 	     - converter (optional)
+	     - submitOnChange (optional, 'Boolean' type only)
 	 -->
 
 <ui:composition>
@@ -57,7 +58,9 @@
 					popupCalendar="true" rendered="#{type == 'Date'}"
 					styleClass="inputText" />
 				<t:selectBooleanCheckbox id="#{id}BooleanField2" value="#{value}"
-					rendered="#{type == 'Boolean'}" />
+					rendered="#{type == 'Boolean'}"
+					onclick="#{submitOnChange ? 'javascript:submit()' : ''}"
+					immediate="#{submitOnChange}" />
 			</ui:insert>
 		</t:div>
 	</t:div>
