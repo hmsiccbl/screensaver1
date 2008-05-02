@@ -209,10 +209,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     if (event.getNewValue() != null &&
       event.getNewValue().toString().trim().length() > 0) {
       log.debug("page number changed to " + event.getNewValue());
-      gotoPageIndex(Integer.parseInt(event.getNewValue()
-                                          .toString()) - 1);
-// _rowsPerPageUIComponent.setSubmittedValue(null); // clear
-// _rowsPerPageUIComponent.setValue(null); // clear
+      gotoPageIndex(Integer.parseInt(event.getNewValue().toString()) - 1);
       getFacesContext().renderResponse();
     }
   }

@@ -7,6 +7,11 @@
     <namespace>http://screensaver.med.harvard.edu/ui</namespace>
 
     <tag>
+        <tag-name>dataTableNavigator</tag-name>
+        <source>../util/dataTableNavigator.xhtml</source>
+    </tag>
+
+    <tag>
         <tag-name>searchResult</tag-name>
         <source>../searchResult/searchResult.xhtml</source>
     </tag>

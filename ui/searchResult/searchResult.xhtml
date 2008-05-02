@@ -5,7 +5,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:component>
 
@@ -287,30 +288,30 @@
 							immediate="true" action="#{searchResults.cancel}"
 							rendered="#{searchResults.capabilities[&quot;editable&quot;] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; searchResults.editMode}" />
 					</t:panelGroup>
-
-					<t:panelGrid id="downloadPanel"
-						style="margin: 0px; border: 1px solid grey; padding: 1px;"
-						border="0" cellpadding="0" cellspacing="0" columns="1"
-						width="100%"
-						rendered="#{searchResults.capabilities[&quot;exportData&quot;] &amp;&amp; searchResults.dataExporterSelector.size > 0}"
-						title="Download search results to Excel spreadsheet or SD File">
-						<t:panelGroup style="float: right">
-							<t:outputText value="download search results to: " />
-							<t:selectOneMenu id="downloadFormat"
-								value="#{searchResults.dataExporterSelector.value}">
-								<f:selectItems
-									value="#{searchResults.dataExporterSelector.selectItems}" />
-							</t:selectOneMenu>
-							<t:commandButton id="downloadSearchResultsCommandButton"
-								value="Download" action="#{searchResults.downloadSearchResults}" />
-						</t:panelGroup>
-					</t:panelGrid>
 				</t:panelGroup>
 			</t:buffer>
 
-			<ui:include src="/util/dataTableNavigator.xhtml">
-				<ui:param name="dataTable" value="#{searchResults}" />
-			</ui:include>
+      <ss:dataTableNavigator dataTable="#{searchResults}">
+				<ui:define name="custom3">
+					<t:commandButton id="summaryViewerCommand"
+						rendered="#{searchResults.entityView}"
+						value="Back to Search Results"
+						action="#{searchResults.returnToSummaryList}" styleClass="command" />
+				</ui:define>
+
+				<ui:define name="custom4">
+					<t:commandButton id="exportSearchResultsCommandButton"
+						rendered="#{searchResults.summaryView &amp;&amp; searchResults.capabilities[&quot;exportData&quot;] &amp;&amp; searchResults.dataExporterSelector.size > 0}"
+						value="Export" action="#{searchResults.downloadSearchResults}" />
+          <t:selectOneMenu id="downloadFormat"
+            rendered="#{searchResults.summaryView &amp;&amp; searchResults.capabilities[&quot;exportData&quot;] &amp;&amp; searchResults.dataExporterSelector.size > 1}"
+            value="#{searchResults.dataExporterSelector.value}">
+            <f:selectItems
+              value="#{searchResults.dataExporterSelector.selectItems}" />
+          </t:selectOneMenu>
+				</ui:define>
+				
+			</ss:dataTableNavigator>
 
 			<t:outputText value="#{dataTableBuffer}" escape="false"
 				rendered="#{!searchResults.capabilities[&quot;viewEntity&quot;] || !searchResults.entityView}" />

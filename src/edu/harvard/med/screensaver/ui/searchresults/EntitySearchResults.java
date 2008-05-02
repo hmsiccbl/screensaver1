@@ -224,6 +224,13 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     return getRowsPerPage() == 1 && getRowCount() > 0;
   }
 
+  @UIControllerMethod
+  public String returnToSummaryList()
+  {
+    getRowsPerPageSelector().setSelection(getRowsPerPageSelector().getDefaultSelection());
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
   /**
    * Override to ensure that "table filter mode" is always disabled when in
    * "entity view" mode, since search fields would entirely hidden from user in
