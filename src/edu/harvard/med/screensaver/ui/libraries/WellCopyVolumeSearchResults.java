@@ -32,6 +32,8 @@ import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -71,7 +73,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
   private WellViewer _wellViewer;
   private WellVolumeSearchResults _wellVolumeSearchResults;
 
-  private Map<WellCopy,BigDecimal> _newRemainingVolumes = new HashMap<WellCopy,BigDecimal>();
+  private Map<WellCopy,Volume> _newRemainingVolumes = new HashMap<WellCopy,Volume>();
   private String _wellVolumeAdjustmentActivityComments;
   private TableColumn<WellCopy,?> _newRemainingVolumeColumn;
   private TableColumn<WellCopy,?> _withdrawalsAdjustmentsColumn;
@@ -257,17 +259,17 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
     columns.add(new FixedDecimalColumn<WellCopy>(
       "Initial Volume", "The initial volume of this well copy", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getInitialMicroliterVolume(); }
+      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getInitialVolume().getValue(Units.MICROLITERS); }
     });
     columns.add(new FixedDecimalColumn<WellCopy>(
       "Consumed Volume", "The volume already used from this well copy", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getConsumedMicroliterVolume(); }
+      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getConsumedVolume().getValue(Units.MICROLITERS); }
     });
     columns.add(new FixedDecimalColumn<WellCopy>(
       "Remaining Volume", "The remaining volume of this well copy", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getRemainingMicroliterVolume(); }
+      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getRemainingVolume().getValue(Units.MICROLITERS); }
     });
     _withdrawalsAdjustmentsColumn = new IntegerColumn<WellCopy>(
       "Withdrawals/Adjustments", "The number of withdrawals and administrative adjustments made from this well copy", TableColumn.UNGROUPED) {
@@ -288,13 +290,13 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
     _newRemainingVolumeColumn = new FixedDecimalColumn<WellCopy>(
       "New Remaining Volume", "Enter new remaining volume", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return _newRemainingVolumes.get(wellCopy); }
+      public BigDecimal getCellValue(WellCopy wellCopy) { return _newRemainingVolumes.get(wellCopy).getValue(Units.MICROLITERS); }
 
       @Override
       public void setCellValue(WellCopy wellCopy, Object value)
       {
         if (value != null) {
-          _newRemainingVolumes.put(wellCopy, (BigDecimal) value);
+          _newRemainingVolumes.put(wellCopy, (Volume) value);
         }
         else {
           _newRemainingVolumes.remove(wellCopy);
@@ -371,15 +373,15 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
           wellVolumeCorrectionActivity.setComments(getWellVolumeAdjustmentActivityComments());
           // TODO
           //wellVolumeCorrectionActivity.setApprovedBy();
-          for (Map.Entry<WellCopy,BigDecimal> entry : _newRemainingVolumes.entrySet()) {
+          for (Map.Entry<WellCopy,Volume> entry : _newRemainingVolumes.entrySet()) {
             WellCopy wellCopyVolume = entry.getKey();
-            BigDecimal newRemainingVolume = entry.getValue();
+            Volume newRemainingVolume = entry.getValue();
             Copy copy = _dao.reloadEntity(wellCopyVolume.getCopy());
             Well well = _dao.reloadEntity(wellCopyVolume.getWell());
             WellVolumeAdjustment wellVolumeAdjustment =
               wellVolumeCorrectionActivity.createWellVolumeAdjustment(copy,
                                                                       well,
-                                                                      newRemainingVolume.subtract(wellCopyVolume.getRemainingMicroliterVolume()));
+                                                                      newRemainingVolume.subtract(wellCopyVolume.getRemainingVolume()));
             wellCopyVolume.addWellVolumeAdjustment(wellVolumeAdjustment);
             log.debug("added well volume adjustment to well copy " + wellCopyVolume);
           }

@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.service.libraries;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -21,6 +20,7 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.screenresults.ExtantLibraryException;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -61,7 +61,7 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
   public void testCreatePlateCopy() throws ExtantLibraryException
   {
     Date today = new Date();
-    BigDecimal volume = new BigDecimal("22.00");
+    Volume volume = new Volume(22);
 
     try {
       libraryCopyGenerator.createPlateCopies(1, Arrays.asList("A"), volume, PlateType.EPPENDORF, today);
@@ -79,7 +79,7 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
         CopyInfo copyInfo = copyInfoIter.next();
         assertEquals(expectedPlateNumber, copyInfo.getPlateNumber());
         assertEquals(expectedCopyName, copyInfo.getCopy().getName());
-        assertEquals(volume, copyInfo.getMicroliterWellVolume());
+        assertEquals(volume, copyInfo.getWellVolume());
         assertEquals(PlateType.EPPENDORF, copyInfo.getPlateType());
         assertEquals(DateUtils.truncate(today, Calendar.DATE), copyInfo.getDatePlated());
       }

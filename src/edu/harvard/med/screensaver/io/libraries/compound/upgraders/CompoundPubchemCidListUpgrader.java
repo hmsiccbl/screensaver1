@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.io.libraries.compound.upgraders;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,9 +18,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.util.eutils.CompoundIdType;
-import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.PubchemSmilesOrInchiSearch;
 import edu.harvard.med.screensaver.util.eutils.PubchemSmilesOrInchiStandardizer;
 

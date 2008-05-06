@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -43,6 +41,8 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -110,8 +110,8 @@ public abstract class CherryPickRequest extends AbstractEntity
   private ScreeningRoomUser _requestedBy;
   private Date _dateRequested;
   private PlateType _assayPlateType;
-  private BigDecimal _microliterTransferVolumePerWellRequested;
-  private BigDecimal _microliterTransferVolumePerWellApproved;
+  private Volume _transferVolumePerWellRequested;
+  private Volume _transferVolumePerWellApproved;
   private AdministratorUser _volumeApprovedBy;
   private Date _dateVolumeApproved;
   private boolean _randomizedAssayPlateLayout;
@@ -143,11 +143,13 @@ public abstract class CherryPickRequest extends AbstractEntity
   abstract public PlateType getDefaultAssayPlateType();
 
   /**
-   * Get the default requested and approved transfer volume, in microliters. This value will be used when creating a new CherryPickRequest.
-   * @return the default approved transfer volume, in microliters; may be null.
+   * Get the default requested and approved transfer volume. This value will be
+   * used when creating a new CherryPickRequest.
+   * 
+   * @return the default approved transfer volume; may be null.
    */
   @Transient
-  abstract public BigDecimal getDefaultMicroliterTransferVolume();
+  abstract public Volume getDefaultTransferVolume();
 
   /**
    * Get the cherry pick allowance.
@@ -546,57 +548,49 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
   /**
-   * Get the requested microliterTransferVolumePerWell.
-   * @return the microliterTransferVolumePerWell
+   * Get the requested transferVolumePerWell.
+   * @return the transferVolumePerWell
    */
-  @org.hibernate.annotations.Type(type="big_decimal")
-  public BigDecimal getMicroliterTransferVolumePerWellRequested()
+  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  public Volume getTransferVolumePerWellRequested()
   {
-    return _microliterTransferVolumePerWellRequested;
+    return _transferVolumePerWellRequested;
   }
 
   /**
-   * Set the requested microliterTransferVolumePerWell.
-   * @param microliterTransferVolumePerWell the new microliterTransferVolumePerWell
+   * Set the requested transferVolumePerWell.
+   * @param transferVolumePerWell the new transferVolumePerWell
    */
-  public void setMicroliterTransferVolumePerWellRequested(BigDecimal microliterTransferVolumePerWell)
+  public void setTransferVolumePerWellRequested(Volume transferVolumePerWell)
   {
-    if (microliterTransferVolumePerWell == null) {
-      _microliterTransferVolumePerWellRequested = null;
+    if (transferVolumePerWell != null && transferVolumePerWell.compareTo(Volume.ZERO) <= 0) {
+      throw new BusinessRuleViolationException("cherry pick request approved volume must be undefined or > 0");
     }
-    else {
-      if (microliterTransferVolumePerWell.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new BusinessRuleViolationException("cherry pick request requested volume must be undefined or > 0");
-      }
-      _microliterTransferVolumePerWellRequested = microliterTransferVolumePerWell.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
-    }
+    _transferVolumePerWellRequested = transferVolumePerWell;
   }
 
   /**
-   * Get the approved microliterTransferVolumePerWell.
-   * @return the microliterTransferVolumePerWell
+   * Get the approved transferVolumePerWell.
+   * @return the transferVolumePerWell
    */
-  @org.hibernate.annotations.Type(type="big_decimal")
-  public BigDecimal getMicroliterTransferVolumePerWellApproved()
+  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  public Volume getTransferVolumePerWellApproved()
   {
-    return _microliterTransferVolumePerWellApproved;
+    return _transferVolumePerWellApproved;
   }
 
   /**
-   * Set the approved microliterTransferVolumePerWell.
-   * @param microliterTransferVolumePerWell the new microliterTransferVolumePerWell
+   * Set the approved transferVolumePerWell.
+   * @param transferVolumePerWell the new transferVolumePerWell
    */
-  public void setMicroliterTransferVolumePerWellApproved(BigDecimal microliterTransferVolumePerWell)
+  public void setTransferVolumePerWellApproved(Volume transferVolumePerWell)
   {
-    if (microliterTransferVolumePerWell == null) {
-      _microliterTransferVolumePerWellApproved = null;
+    if (transferVolumePerWell != null && transferVolumePerWell.compareTo(Volume.ZERO) <= 0) {
+      throw new BusinessRuleViolationException("cherry pick request approved volume must be undefined or > 0");
     }
-    else {
-      if (microliterTransferVolumePerWell.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new BusinessRuleViolationException("cherry pick request approved volume must be undefined or > 0");
-      }
-      _microliterTransferVolumePerWellApproved = microliterTransferVolumePerWell.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
-    }
+    _transferVolumePerWellApproved = transferVolumePerWell;
   }
 
   /**
@@ -815,9 +809,9 @@ public abstract class CherryPickRequest extends AbstractEntity
     _screen = screen;
     _requestedBy = requestedBy;
     _dateRequested = truncateDate(dateRequested);
-    if (getDefaultMicroliterTransferVolume() != null) {
-      setMicroliterTransferVolumePerWellRequested(getDefaultMicroliterTransferVolume());
-      setMicroliterTransferVolumePerWellApproved(getDefaultMicroliterTransferVolume());
+    if (getDefaultTransferVolume() != null) {
+      setTransferVolumePerWellRequested(getDefaultTransferVolume());
+      setTransferVolumePerWellApproved(getDefaultTransferVolume());
     }
     if (getDefaultAssayPlateType() != null) {
       setAssayPlateType(getDefaultAssayPlateType());

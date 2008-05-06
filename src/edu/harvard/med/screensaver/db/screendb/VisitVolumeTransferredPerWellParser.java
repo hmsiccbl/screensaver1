@@ -13,12 +13,15 @@ import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.Volume.Units;
+
 import org.apache.log4j.Logger;
 
 /**
- * Parses volume transferred per well values from ScreenDB visits into microliter-units
- * BigDecimal values, according to an email group discussion on the matter. relevant quote
- * from the group discussion is here:
+ * Parses volume transferred per well values from ScreenDB visits into 
+ * Volume values, according to an email group discussion on the matter. 
+ * relevant quote from the group discussion is here:
  * 
  * <blockquote>
  * 2. Units for Volume of Compound Transferred: For one RNAi Screen (612), 
@@ -63,41 +66,26 @@ public class VisitVolumeTransferredPerWellParser
   
   // public instance methods
 
-  public BigDecimal getVolumeTransferredPerWell(
+  public Volume getVolumeTransferredPerWell(
     String volumeTransferredString,
     String screenType)
   throws ScreenDBSynchronizationException
   {
-    BigDecimal microliterVolumeTransferedPerWell = null;
+    Volume volumeTransferredPerWell = null;
     if (volumeTransferredString != null &&
       ! volumeTransferredString.equals("") &&
       ! volumeTransferredString.equals("0")) {
-      
-      // get the numerical portion of the volume transferred string
-      float numericalVolumeTransferred =
-        getNumericalVolumeTransferred(volumeTransferredString);
-      
-      // units are either nL or uL - figure out which
-      boolean unitsAreNanoliters = areVolumeTransferredUnitsNanoliters(
-        screenType, volumeTransferredString, numericalVolumeTransferred);
-      
-      if (unitsAreNanoliters) {
-        microliterVolumeTransferedPerWell =
-          new BigDecimal(numericalVolumeTransferred / 1000);
-      }
-      else {
-        microliterVolumeTransferedPerWell = new BigDecimal(numericalVolumeTransferred);
-      }
+      volumeTransferredPerWell = getNumericalVolumeTransferred(volumeTransferredString, screenType);
     }
-    return microliterVolumeTransferedPerWell;
+    return volumeTransferredPerWell;
   }
 
   
   // private instance methods
   
-  private float getNumericalVolumeTransferred(String volumeTransferredString)
+  private Volume getNumericalVolumeTransferred(String volumeTransferredString,
+                                                   String screenType)
   {
-    float numericalVolumeTransferred;
     Matcher numericalVolumeTransferredMatcher =
       _numericalVolumeTransferredPattern.matcher(volumeTransferredString);
     if (! numericalVolumeTransferredMatcher.matches()) {
@@ -108,43 +96,46 @@ public class VisitVolumeTransferredPerWellParser
     String operator = numericalVolumeTransferredMatcher.group(4);
     String rightOperandString = numericalVolumeTransferredMatcher.group(5);
     float leftOperand = Float.parseFloat(leftOperandString);
+    BigDecimal numericalVolumeTransferred;
     if (operator == null) {
-      numericalVolumeTransferred = leftOperand;
+      numericalVolumeTransferred = new BigDecimal(leftOperandString);
     }
     else {
       float rightOperand = Float.parseFloat(rightOperandString);
       if (operator.equalsIgnoreCase("x")) {
-        numericalVolumeTransferred = leftOperand * rightOperand;
+        numericalVolumeTransferred = new BigDecimal(leftOperand).multiply(new BigDecimal(rightOperand));
       }
       else {
         assert(operator.equals("and"));
-        numericalVolumeTransferred = leftOperand + rightOperand;
+        numericalVolumeTransferred = new BigDecimal(leftOperand).add(new BigDecimal(rightOperand));
       }
     }
-    return numericalVolumeTransferred;
+    return new Volume(numericalVolumeTransferred.toString(), 
+                          getVolumeTransferredUnits(screenType, 
+                                                    volumeTransferredString, 
+                                                    numericalVolumeTransferred));
   }
   
-  private boolean areVolumeTransferredUnitsNanoliters(
+  private Units getVolumeTransferredUnits(
     String screenType,
     String volumeTransferredString,
-    float numericalVolumeTransferred)
+    BigDecimal numericalVolumeTransferred)
   {
-    // RNAi screens are always microliters
     if (screenType.equals("RNAi")) {
-      return false;
+      return Units.MICROLITERS;
     }
     if (volumeTransferredString.contains("nl")) {
-      return true;
+      return Units.NANOLITERS;
     }
     if (volumeTransferredString.contains("nL")) {
-      return true;
+      return Units.NANOLITERS;
     }
     if (volumeTransferredString.contains("ul")) {
-      return false;
+      return Units.MICROLITERS;
     }
     if (volumeTransferredString.contains("uL")) {
-      return false;
+      return Units.MICROLITERS;
     }
-    return numericalVolumeTransferred > 10;
+    return numericalVolumeTransferred.compareTo(BigDecimal.TEN) > 1 ? Units.NANOLITERS : Units.MICROLITERS;
   }
 }

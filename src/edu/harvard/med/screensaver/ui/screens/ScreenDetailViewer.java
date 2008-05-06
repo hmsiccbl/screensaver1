@@ -462,6 +462,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String addLibraryScreening()
   {
     _dao.reattachEntity(_screen);
+    _dao.reattachEntity(_screen.getLeadScreener());
     Date now = new Date();
     Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), now, now);
     _dao.persistEntity(activity);

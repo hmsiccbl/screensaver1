@@ -31,16 +31,12 @@ import java.util.Set;
 
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
-import org.springframework.orm.hibernate3.HibernateTemplate;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.EntityNetworkPersister.EntityNetworkPersisterException;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
@@ -70,14 +66,19 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.propertytesters.CollectionPropertiesInitialCardinalityTester;
 import edu.harvard.med.screensaver.model.propertytesters.PropertiesGetterAndSetterTester;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
-import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.commons.lang.time.DateUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
 {
@@ -1148,8 +1149,12 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     }
     if (type.equals(BigDecimal.class)) {
       BigDecimal val = new BigDecimal(((Double) getTestValueForType(Double.class)).doubleValue());
-      // 2 is the default scale used in our Hibernate mapping, not sure how to change it via xdoclet
+      // 2 is the default scale used in our Hibernate mapping
       val = val.setScale(2);
+      return val;
+    }
+    if (type.equals(Volume.class)) {
+      Volume val = new Volume(((Integer) getTestValueForType(Integer.class)).longValue(), Units.MICROLITERS);
       return val;
     }
     if (type.equals(Boolean.TYPE)) {

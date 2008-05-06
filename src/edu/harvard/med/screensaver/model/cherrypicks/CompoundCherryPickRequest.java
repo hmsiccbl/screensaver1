@@ -18,14 +18,16 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 /**
  * A hibernate entity representing a compound cherry pick request.
@@ -46,7 +48,7 @@ public class CompoundCherryPickRequest extends CherryPickRequest
   private static Logger log = Logger.getLogger(CompoundCherryPickRequest.class);
   private static final PlateType COMPOUND_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.ABGENE;
   private static final BigDecimal SOURCE_WELL_COUNT_PCT_LIMIT = new BigDecimal("0.003");
-  private static final BigDecimal DEFAULT_MICROLITER_TRANSFER_VOLUME = new BigDecimal("1.20");
+  private static final Volume DEFAULT_TRANSFER_VOLUME = new Volume("1.20", Units.MICROLITERS);
 
 
   // public constructor
@@ -87,9 +89,9 @@ public class CompoundCherryPickRequest extends CherryPickRequest
 
   @Override
   @Transient
-  public BigDecimal getDefaultMicroliterTransferVolume()
+  public Volume getDefaultTransferVolume()
   {
-    return DEFAULT_MICROLITER_TRANSFER_VOLUME;
+    return DEFAULT_TRANSFER_VOLUME;
   }
 
   /**

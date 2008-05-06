@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import java.util.List;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 
 /**

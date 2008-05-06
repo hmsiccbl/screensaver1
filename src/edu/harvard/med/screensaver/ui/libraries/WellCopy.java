@@ -9,10 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -36,9 +36,9 @@ public class WellCopy implements Comparable<WellCopy>
   private Pair<WellKey,String> _key;
   private Well _well;
   private Copy _copy;
-  private BigDecimal _initialMicroliterVolume;
-  private BigDecimal _consumedMicroliterVolume;
-  private BigDecimal _remainingMicroliterVolume;
+  private Volume _initialVolume;
+  private Volume _consumedVolume;
+  private Volume _remainingVolume;
   private List<WellVolumeAdjustment> _wellVolumeAdjustments;
 
 
@@ -50,12 +50,12 @@ public class WellCopy implements Comparable<WellCopy>
     _copy = copy;
     CopyInfo copyInfo = _copy.getCopyInfo(_well.getPlateNumber());
     if (copyInfo == null) {
-      _initialMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+      _initialVolume = new Volume(0);
     }
     else {
-      _initialMicroliterVolume = copyInfo.getMicroliterWellVolume();
+      _initialVolume = copyInfo.getWellVolume();
     }
-    _remainingMicroliterVolume = _initialMicroliterVolume;
+    _remainingVolume = _initialVolume;
     _wellVolumeAdjustments = new ArrayList<WellVolumeAdjustment>();
     _key = new Pair<WellKey,String>(_well.getWellKey(), copy.getName());
   }
@@ -64,9 +64,9 @@ public class WellCopy implements Comparable<WellCopy>
   {
     assert wellVolumeAdjustment.getWell().equals(_well) : "all wellVolumeAdjustments must be for same well";
     assert wellVolumeAdjustment.getCopy().equals(_copy) : "all wellVolumeAdjustments must be for same copy";
-    _remainingMicroliterVolume = _remainingMicroliterVolume.add(wellVolumeAdjustment.getMicroliterVolume());
+    _remainingVolume = _remainingVolume.add(wellVolumeAdjustment.getVolume());
     _wellVolumeAdjustments.add(wellVolumeAdjustment);
-    _consumedMicroliterVolume = null; // force re-compute
+    _consumedVolume = null; // force re-compute
   }
 
   public Copy getCopy()
@@ -74,22 +74,22 @@ public class WellCopy implements Comparable<WellCopy>
     return _copy;
   }
 
-  public BigDecimal getInitialMicroliterVolume()
+  public Volume getInitialVolume()
   {
-    return _initialMicroliterVolume;
+    return _initialVolume;
   }
 
-  public BigDecimal getConsumedMicroliterVolume()
+  public Volume getConsumedVolume()
   {
-    if (_consumedMicroliterVolume == null) {
-      _consumedMicroliterVolume = _initialMicroliterVolume.subtract(_remainingMicroliterVolume);
+    if (_consumedVolume == null) {
+      _consumedVolume = _initialVolume.subtract(_remainingVolume);
     }
-    return _consumedMicroliterVolume;
+    return _consumedVolume;
   }
 
-  public BigDecimal getRemainingMicroliterVolume()
+  public Volume getRemainingVolume()
   {
-    return _remainingMicroliterVolume;
+    return _remainingVolume;
   }
 
   public Well getWell()
@@ -123,7 +123,7 @@ public class WellCopy implements Comparable<WellCopy>
   @Override
   public String toString()
   {
-    return _key + "=" + _remainingMicroliterVolume;
+    return _key + "=" + _remainingVolume;
   }
 
   public Pair<WellKey,String> getKey()

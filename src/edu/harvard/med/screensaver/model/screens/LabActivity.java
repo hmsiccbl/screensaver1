@@ -9,13 +9,12 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -23,11 +22,12 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -53,7 +53,7 @@ public abstract class LabActivity extends Activity
 
   private Screen _screen;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
-  private BigDecimal _microliterVolumeTransferredPerWell;
+  private Volume _volumeTransferredPerWell;
 
 
   // public instance methods
@@ -84,28 +84,23 @@ public abstract class LabActivity extends Activity
   }
 
   /**
-   * Get the volume transferred per well, in microliters
-   * @return the volume transferred per well, in microliters
+   * Get the volume transferred per well
+   * @return the volume transferred per well
    */
-  @org.hibernate.annotations.Type(type="big_decimal")
-  public BigDecimal getMicroliterVolumeTransferedPerWell()
+  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  public Volume getVolumeTransferredPerWell()
   {
-    return _microliterVolumeTransferredPerWell;
+    return _volumeTransferredPerWell;
   }
 
   /**
-   * Set the volume transferred per well, in microliters
-   * @param microliterVolumeTransferedPerWell the new volume transferred per well, in microliters
+   * Set the volume transferred per well
+   * @param volumeTransferredPerWell the new volume transferred per well
    */
-  public void setMicroliterVolumeTransferedPerWell(
-    BigDecimal microliterVolumeTransferedPerWell)
+  public void setVolumeTransferredPerWell(Volume volumeTransferredPerWell)
   {
-    if (microliterVolumeTransferedPerWell == null) {
-      _microliterVolumeTransferredPerWell = null;
-    }
-    else {
-      _microliterVolumeTransferredPerWell = microliterVolumeTransferedPerWell.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
-    }
+    _volumeTransferredPerWell = volumeTransferredPerWell;
   }
 
   /**

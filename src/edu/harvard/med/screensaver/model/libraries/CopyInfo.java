@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,12 +29,13 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -67,8 +66,8 @@ public class CopyInfo extends AbstractEntity
   private Integer _plateNumber;
   private String _location;
   private PlateType _plateType;
-  /** The default initial volume (microliters) for a well on this copy plate. */
-  private BigDecimal _microliterWellVolume;
+  /** The default initial volume for a well on this copy plate. */
+  private Volume _wellVolume;
   private String _comments;
   private Date _datePlated;
   private Date _dateRetired;
@@ -207,15 +206,15 @@ public class CopyInfo extends AbstractEntity
   }
 
   /**
-   * Get the default volume (microliters) for wells on this copy plate.
+   * Get the default volume for wells on this copy plate.
    * @return the volume
    */
-  @Column(nullable=false)
+  @Column(nullable=false, precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.Type(type="big_decimal")
-  public BigDecimal getMicroliterWellVolume()
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  public Volume getWellVolume()
   {
-    return _microliterWellVolume;
+    return _wellVolume;
   }
 
   /**
@@ -288,7 +287,7 @@ public class CopyInfo extends AbstractEntity
 
   /**
    * Construct an initialized <code>CopyInfo</code>. Intended only for use by {@link
-   * Copy#createCopyInfo(Integer, String, PlateType, BigDecimal)}.
+   * Copy#createCopyInfo(Integer, String, PlateType, Volume)}.
    * @param copy the copy
    * @param plateNumber the plate number
    * @param location the location
@@ -301,13 +300,13 @@ public class CopyInfo extends AbstractEntity
     Integer plateNumber,
     String location,
     PlateType plateType,
-    BigDecimal volume)
+    Volume volume)
   {
     _copy = copy;
     _plateNumber = plateNumber;
     _location = location;
     _plateType = plateType;
-    setMicroliterWellVolume(volume);
+    setWellVolume(volume);
   }
 
 
@@ -388,13 +387,8 @@ public class CopyInfo extends AbstractEntity
    * @param volume the new volume
    * @motivation for hibernate and package constructor
    */
-  private void setMicroliterWellVolume(BigDecimal volume)
+  private void setWellVolume(Volume volume)
   {
-    if (volume == null) {
-      _microliterWellVolume = null;
-    }
-    else {
-      _microliterWellVolume = volume.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
-    }
+    _wellVolume = volume;
   }
 }

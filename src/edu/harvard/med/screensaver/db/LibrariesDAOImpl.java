@@ -9,11 +9,11 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -225,23 +225,23 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     });
   }
 
-  public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy)
+  public Volume findRemainingVolumeInWellCopy(Well well, Copy copy)
   {
     String hql;
 
-    hql = "select ci.microliterWellVolume from CopyInfo ci where ci.copy=? and ci.plateNumber=? and ci.dateRetired is null";
+    hql = "select ci.wellVolume from CopyInfo ci where ci.copy=? and ci.plateNumber=? and ci.dateRetired is null";
     List result = getHibernateTemplate().find(hql, new Object[] { copy, well.getPlateNumber() });
     if (result == null || result.size() == 0) {
-      return BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+      return Volume.ZERO;
     }
-    BigDecimal initialMicroliterVolume = (BigDecimal) result.get(0);
+    Volume initialVolume = (Volume) result.get(0);
 
-    hql = "select sum(wva.microliterVolume) from WellVolumeAdjustment wva where wva.copy=? and wva.well=?";
-    BigDecimal deltaMicroliterVolume = (BigDecimal) getHibernateTemplate().find(hql, new Object[] { copy, well }).get(0);
-    if (deltaMicroliterVolume == null) {
-      deltaMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+    hql = "select sum(wva.volume) from WellVolumeAdjustment wva where wva.copy=? and wva.well=?";
+    Volume deltaVolume = (Volume) getHibernateTemplate().find(hql, new Object[] { copy, well }).get(0);
+    if (deltaVolume == null) {
+      deltaVolume = Volume.ZERO;
     }
-    return initialMicroliterVolume.add(deltaMicroliterVolume).setScale(Well.VOLUME_SCALE);
+    return initialVolume.add(deltaVolume);
   }
 
   // private methods

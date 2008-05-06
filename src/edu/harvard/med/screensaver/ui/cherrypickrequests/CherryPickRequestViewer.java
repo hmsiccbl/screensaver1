@@ -945,7 +945,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   @UIControllerMethod
   public String allocateCherryPicks()
   {
-    if (_cherryPickRequest.getMicroliterTransferVolumePerWellApproved() == null) {
+    if (_cherryPickRequest.getTransferVolumePerWellApproved() == null) {
       showMessage("cherryPicks.approvedCherryPickVolumeRequired");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
@@ -1152,8 +1152,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           newCherryPickRequest.setComments("Created for unfulfilled cherry picks in Cherry Pick Request " +
                                            cherryPickRequest.getCherryPickRequestNumber());
           // TODO: this might be better done in a copy constructor
-          newCherryPickRequest.setMicroliterTransferVolumePerWellApproved(cherryPickRequest.getMicroliterTransferVolumePerWellApproved());
-          newCherryPickRequest.setMicroliterTransferVolumePerWellRequested(cherryPickRequest.getMicroliterTransferVolumePerWellRequested());
+          newCherryPickRequest.setTransferVolumePerWellApproved(cherryPickRequest.getTransferVolumePerWellApproved());
+          newCherryPickRequest.setTransferVolumePerWellRequested(cherryPickRequest.getTransferVolumePerWellRequested());
           newCherryPickRequest.setVolumeApprovedBy(cherryPickRequest.getVolumeApprovedBy());
           newCherryPickRequest.setDateVolumeApproved(cherryPickRequest.getDateVolumeApproved());
           newCherryPickRequest.setDateRequested(new Date());

@@ -87,16 +87,16 @@
 
 						<ss:propertyGroup label="Volumes">
 							<ss:property id="requestedVolume"
-								label="Requested Volume (&#181;L)"
+								label="Requested Volume"
 								description="The volume per well that the screener requested"
-								value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellRequested}"
+								value="#{cherryPickRequestViewer.cherryPickRequest.transferVolumePerWellRequested}" type="Volume"
 								editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
 								editWidth="5" />
 
 							<ss:property id="approvedVolume"
-								label="Approved Volume (&#181;L)"
+								label="Approved Volume"
 								ion="The volume per well approved by the screening room"
-								value="#{cherryPickRequestViewer.cherryPickRequest.microliterTransferVolumePerWellApproved}"
+								value="#{cherryPickRequestViewer.cherryPickRequest.transferVolumePerWellApproved}" type="Volume"
 								editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
 								editWidth="5" />
 

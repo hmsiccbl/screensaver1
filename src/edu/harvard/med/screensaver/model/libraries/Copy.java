@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,14 +26,15 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -156,7 +156,7 @@ public class Copy extends SemanticIDAbstractEntity
     Integer plateNumber,
     String location,
     PlateType plateType,
-    BigDecimal volume)
+    Volume volume)
   {
     CopyInfo copyInfo = new CopyInfo(this, plateNumber, location, plateType, volume);
     if (! _copyInfos.add(copyInfo)) {

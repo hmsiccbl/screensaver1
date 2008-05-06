@@ -25,6 +25,7 @@ import javax.faces.model.DataModel;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
@@ -60,8 +61,8 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
   private WellCopyVolumeSearchResults _wellCopyVolumeSearchResults;
   private Library _library;
   private RNAiCherryPickRequest _cherryPickRequest;
-  private Map<Pair<WellKey,String>,BigDecimal> _expectedRemainingWellCopyVolume = new HashMap<Pair<WellKey,String>,BigDecimal>();
-  private Map<WellKey,BigDecimal> _expectedRemainingWellVolume = new HashMap<WellKey,BigDecimal>();
+  private Map<Pair<WellKey,String>,Volume> _expectedRemainingWellCopyVolume = new HashMap<Pair<WellKey,String>,Volume>();
+  private Map<WellKey,Volume> _expectedRemainingWellVolume = new HashMap<WellKey,Volume>();
 
 
   // public constructors and methods
@@ -127,7 +128,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
           }
           else if (column.getName().equals("Initial Volume")) {
             assertEquals("row " + j + ", " + expectedKey  + ":Initial Volume",
-                         expectedKey.getSecond().equals("C") ? new BigDecimal("10.00") : new BigDecimal("20.00"),
+                         expectedKey.getSecond().equals("C") ? new Volume(10) : new Volume(20),
                          (BigDecimal) cellValue);
             ++columnsTested;
           }
@@ -180,14 +181,14 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
           }
           else if (column.getName().equals("Total Initial Copy Volume")) {
             assertEquals("row " + j + ", " + expectedKey  + ":Total Initial Copy Volume",
-                         new BigDecimal("30.00"),
+                         new Volume(30),
                          (BigDecimal) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Consumed Volume")) {
             // this tests aggregation of WVAs
             assertEquals("row " + j + ", " + expectedKey  + ":Consumed Volume",
-                         new BigDecimal("30.00").subtract(_expectedRemainingWellVolume.get(expectedKey)),
+                         new Volume(30).subtract(_expectedRemainingWellVolume.get(expectedKey)),
                          (BigDecimal) cellValue);
             ++columnsTested;
           }
@@ -227,10 +228,10 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         _library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
         Copy copyC = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         Copy copyD = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
-        copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("20.00"));
+        copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(20));
+        copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(20));
         genericEntityDao.saveOrUpdateEntity(_library);
 
         Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
@@ -239,7 +240,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         Well plate2WellA01 = genericEntityDao.findEntityById(Well.class, "00002:A01");
         Well plate2WellB01 = genericEntityDao.findEntityById(Well.class, "00002:B01");
 
-        _cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 3);
+        _cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(3));
         ScreenerCherryPick dummyScreenerCherryPick = _cherryPickRequest.createScreenerCherryPick(plate1WellA01);
         // note: you cannot normally have 2 LCP for the same well in a CPR, 
         // but we do that here anyway to test aggregation of 2 LCPs in the same well;
@@ -252,26 +253,26 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen());
         
-        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new BigDecimal("-1.00"), null));
-        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new BigDecimal("-1.00"), null));
-        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB02, new BigDecimal("-1.00"), null));
-        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate1WellB02, new BigDecimal("-1.00"), null));
-        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate2WellB01, new BigDecimal("-1.00"), null));
+        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new Volume(-1), null));
+        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new Volume(-1), null));
+        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB02, new Volume(-1), null));
+        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate1WellB02, new Volume(-1), null));
+        genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate2WellB01, new Volume(-1), null));
         
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "C"), new BigDecimal("7.00"));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "D"), new BigDecimal("17.00"));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB01.getWellKey(), "C"), new BigDecimal("8.00"));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB02.getWellKey(), "C"), new BigDecimal("9.00"));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB02.getWellKey(), "D"), new BigDecimal("19.00"));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellA01.getWellKey(), "C"), new BigDecimal("7.00"));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellB01.getWellKey(), "D"), new BigDecimal("16.00"));
+        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "C"), new Volume(7));
+        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "D"), new Volume(17));
+        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB01.getWellKey(), "C"), new Volume(8));
+        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB02.getWellKey(), "C"), new Volume(9));
+        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB02.getWellKey(), "D"), new Volume(19));
+        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellA01.getWellKey(), "C"), new Volume(7));
+        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellB01.getWellKey(), "D"), new Volume(16));
         
         for (Well well : _library.getWells()) {
-          BigDecimal expectedRemainingWellVolume = new BigDecimal("0.00");
+          Volume expectedRemainingWellVolume = new Volume(0);
           for (Copy copy : _library.getCopies()) {
             Pair<WellKey,String> wellCopyKey = new Pair<WellKey,String>(well.getWellKey(), copy.getName());
             if (!_expectedRemainingWellCopyVolume.containsKey(wellCopyKey)) {
-              BigDecimal expectedRemainingWellCopyVolume = copy.getCopyInfos().iterator().next().getMicroliterWellVolume();
+              Volume expectedRemainingWellCopyVolume = copy.getCopyInfos().iterator().next().getWellVolume();
               _expectedRemainingWellCopyVolume.put(wellCopyKey, expectedRemainingWellCopyVolume);
               expectedRemainingWellVolume = expectedRemainingWellVolume.add(expectedRemainingWellCopyVolume);
             }

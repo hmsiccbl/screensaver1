@@ -11,7 +11,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -84,7 +83,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   /**
    * The number of decimal places used when recording volume values.
    */
-  public static final int VOLUME_SCALE = 2;
+  public static final int VOLUME_PRECISION = 10;
+  public static final int VOLUME_SCALE = 9;
 
   public static final Collection<Integer> PLATE_COLUMNS_LIST;
 

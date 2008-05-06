@@ -28,6 +28,7 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 
@@ -75,7 +76,7 @@ public class WellVolumeAdjustment extends AbstractEntity
   private Integer _version;
   private Copy _copy;
   private Well _well;
-  private BigDecimal _microliterVolume;
+  private Volume _volume;
   private LabCherryPick _labCherryPick;
   private WellVolumeCorrectionActivity _wellVolumeCorrectionActivity;
 
@@ -87,12 +88,12 @@ public class WellVolumeAdjustment extends AbstractEntity
    * {@link LabCherryPick#createWellVolumeAdjustment(WellVolumeAdjustment)}.
    * @param copy the copy
    * @param well the well
-   * @param microliterVolume the volume in microliters
+   * @param volume the volume
    * @param labCherryPick the lab cherry pick
    */
-  public WellVolumeAdjustment(Copy copy, Well well, BigDecimal microliterVolume, LabCherryPick labCherryPick)
+  public WellVolumeAdjustment(Copy copy, Well well, Volume volume, LabCherryPick labCherryPick)
   {
-    this(copy, well, microliterVolume);
+    this(copy, well, volume);
     _labCherryPick = labCherryPick;
   }
 
@@ -167,15 +168,15 @@ public class WellVolumeAdjustment extends AbstractEntity
   }
 
   /**
-   * Get the volume in microliters.
-   * @return the volume in microliters
+   * Get the volume
+   * @return the volume
    */
-  @Column(nullable=false, updatable=false)
+  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE, nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.Type(type="big_decimal")
-  public BigDecimal getMicroliterVolume()
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  public Volume getVolume()
   {
-    return _microliterVolume;
+    return _volume;
   }
 
   /**
@@ -240,15 +241,15 @@ public class WellVolumeAdjustment extends AbstractEntity
 
   /**
    * Construct an initialized <code>WellVolumeAdjustment</code>. Intended only for use by
-   * {@link WellVolumeCorrectionActivity#createWellVolumeAdjustment(Copy, Well, BigDecimal)}.
+   * {@link WellVolumeCorrectionActivity#createWellVolumeAdjustment(Copy, Well, Volume)}.
    * @param copy the copy
    * @param well the well
-   * @param microliterVolume the volume in microliters
+   * @param volume the volume
    * @param wellVolumeCorrectionActivity
    */
-  WellVolumeAdjustment(Copy copy, Well well, BigDecimal microliterVolume, WellVolumeCorrectionActivity wellVolumeCorrectionActivity)
+  WellVolumeAdjustment(Copy copy, Well well, Volume volume, WellVolumeCorrectionActivity wellVolumeCorrectionActivity)
   {
-    this(copy, well, microliterVolume);
+    this(copy, well, volume);
     _wellVolumeCorrectionActivity = wellVolumeCorrectionActivity;
   }
 
@@ -267,20 +268,17 @@ public class WellVolumeAdjustment extends AbstractEntity
   /**
    * Construct a partially initialized <code>WellVolumeAdjustment</code>. Intended only for
    * use by
-   * {@link #WellVolumeAdjustment(Copy, Well, BigDecimal, LabCherryPick)} and
-   * {@link #WellVolumeAdjustment(Copy, Well, BigDecimal, WellVolumeCorrectionActivity)}.
+   * {@link #WellVolumeAdjustment(Copy, Well, Volume, LabCherryPick)} and
+   * {@link #WellVolumeAdjustment(Copy, Well, Volume, WellVolumeCorrectionActivity)}.
    * @param copy the copy
    * @param well the well
-   * @param microliterVolume the volume in microliters
+   * @param volume the volume
    */
-  private WellVolumeAdjustment(Copy copy, Well well, BigDecimal microliterVolume)
+  private WellVolumeAdjustment(Copy copy, Well well, Volume volume)
   {
-    if (microliterVolume.scale() != Well.VOLUME_SCALE) {
-      throw new IllegalArgumentException("scale must be " + Well.VOLUME_SCALE);
-    }
     _copy = copy;
     _well = well;
-    _microliterVolume = microliterVolume;
+    _volume = volume;
   }
 
 
@@ -339,13 +337,13 @@ public class WellVolumeAdjustment extends AbstractEntity
   }
 
   /**
-   * Set the volume in microliters.
-   * @param microliterVolume the new volume in microliters
+   * Set the volume
+   * @param volume the new volume
    * @motivation for hibernate
    */
-  private void setMicroliterVolume(BigDecimal microliterVolume)
+  private void setVolume(Volume volume)
   {
-    _microliterVolume = microliterVolume;
+    _volume = volume;
   }
 
 

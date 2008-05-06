@@ -9,11 +9,11 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -86,7 +86,7 @@ public interface LibrariesDAO
 
   public void loadOrCreateWellsForLibrary(Library library);
 
-  public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy);
+  public Volume findRemainingVolumeInWellCopy(Well well, Copy copy);
 
   public Collection<String> findAllVendorNames();
 

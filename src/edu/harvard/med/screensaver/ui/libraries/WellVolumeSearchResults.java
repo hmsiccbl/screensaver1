@@ -18,6 +18,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
@@ -149,7 +150,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public BigDecimal getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getTotalInitialMicroliterVolume();
+        return wellVolume.getTotalInitialVolume().getValue(Units.MICROLITERS);
       }
     });
     columns.add(new FixedDecimalColumn<WellVolume>("Consumed Volume",
@@ -157,7 +158,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public BigDecimal getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getConsumedMicroliterVolume();
+        return wellVolume.getConsumedVolume().getValue(Units.MICROLITERS);
       }
     });
     columns.add(new TextColumn<WellVolume>("Max Remaining Volume",
@@ -165,7 +166,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMaxWellCopyVolume().getRemainingMicroliterVolume() + " (" +
+        return wellVolume.getMaxWellCopyVolume().getRemainingVolume() + " (" +
                wellVolume.getMaxWellCopyVolume().getCopy().getName() + ")";
       }
 
@@ -176,9 +177,9 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
           public int compare(WellVolume wv1, WellVolume wv2)
           {
             return wv1.getMaxWellCopyVolume()
-                      .getRemainingMicroliterVolume()
+                      .getRemainingVolume()
                       .compareTo(wv2.getMaxWellCopyVolume()
-                                    .getRemainingMicroliterVolume());
+                                    .getRemainingVolume());
           }
         };
       }
@@ -188,8 +189,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMinWellCopyVolume()
-                         .getRemainingMicroliterVolume() + " (" +
+        return wellVolume.getMinWellCopyVolume().getRemainingVolume() + " (" +
                wellVolume.getMinWellCopyVolume().getCopy().getName() + ")";
       }
 
@@ -199,10 +199,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
         return new Comparator<WellVolume>() {
           public int compare(WellVolume wv1, WellVolume wv2)
           {
-            return wv1.getMinWellCopyVolume()
-                      .getRemainingMicroliterVolume()
-                      .compareTo(wv2.getMinWellCopyVolume()
-                                    .getRemainingMicroliterVolume());
+            return wv1.getMinWellCopyVolume().getRemainingVolume().compareTo(wv2.getMinWellCopyVolume().getRemainingVolume());
           }
         };
       }

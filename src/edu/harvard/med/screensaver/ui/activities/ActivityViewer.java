@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;

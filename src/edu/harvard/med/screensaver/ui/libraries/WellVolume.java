@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
@@ -35,8 +35,8 @@ public class WellVolume implements Comparable<WellVolume>
   
   private Well _well;
   private List<WellCopy> _wellCopyVolumes;
-  private BigDecimal _totalInitialMicroliterVolume;
-  private BigDecimal _consumedMicroliterVolume;
+  private Volume _totalInitialVolume;
+  private Volume _consumedVolume;
   private WellCopy _maxWellCopyVolume;
   private WellCopy _minWellCopyVolume;
   private List<WellVolumeAdjustment> _volumeAdjustments;
@@ -50,7 +50,7 @@ public class WellVolume implements Comparable<WellVolume>
   {
     _well = well;
 
-    _totalInitialMicroliterVolume = calcTotalInitialMicroliterVolume(wellCopies);
+    _totalInitialVolume = calcTotalInitialVolume(wellCopies);
 
     _wellCopyVolumes = new ArrayList<WellCopy>(wellCopies);
     Collections.sort(_wellCopyVolumes, 
@@ -61,18 +61,18 @@ public class WellVolume implements Comparable<WellVolume>
       }
     });
 
-    _consumedMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+    _consumedVolume = Volume.ZERO;
     if (wellCopies.size() > 0) {
       _minWellCopyVolume = _maxWellCopyVolume = wellCopies.iterator().next();
     }
     _volumeAdjustments = new ArrayList<WellVolumeAdjustment>();
     for (WellCopy wellCopyVolume : wellCopies) {
       assert wellCopyVolume.getWell().equals(_well) : "all wellCopyVolumes must be for same well";
-      _consumedMicroliterVolume = _consumedMicroliterVolume.add(wellCopyVolume.getConsumedMicroliterVolume());
-      if (wellCopyVolume.getRemainingMicroliterVolume().compareTo(_minWellCopyVolume.getRemainingMicroliterVolume()) < 0) {
+      _consumedVolume = _consumedVolume.add(wellCopyVolume.getConsumedVolume());
+      if (wellCopyVolume.getRemainingVolume().compareTo(_minWellCopyVolume.getRemainingVolume()) < 0) {
         _minWellCopyVolume = wellCopyVolume;
       }
-      if (wellCopyVolume.getRemainingMicroliterVolume().compareTo(_maxWellCopyVolume.getRemainingMicroliterVolume()) > 0) {
+      if (wellCopyVolume.getRemainingVolume().compareTo(_maxWellCopyVolume.getRemainingVolume()) > 0) {
         _maxWellCopyVolume = wellCopyVolume;
       }
       _volumeAdjustments.addAll(wellCopyVolume.getWellVolumeAdjustments());
@@ -81,14 +81,14 @@ public class WellVolume implements Comparable<WellVolume>
     _copyNames = makeCopyNames(_wellCopyVolumes);
   }
 
-  public BigDecimal getTotalInitialMicroliterVolume()
+  public Volume getTotalInitialVolume()
   {
-    return _totalInitialMicroliterVolume;
+    return _totalInitialVolume;
   }
 
-  public BigDecimal getConsumedMicroliterVolume()
+  public Volume getConsumedVolume()
   {
-    return _consumedMicroliterVolume;
+    return _consumedVolume;
   }
 
   public WellCopy getMaxWellCopyVolume()
@@ -152,18 +152,18 @@ public class WellVolume implements Comparable<WellVolume>
 
   // private methods
 
-  private BigDecimal calcTotalInitialMicroliterVolume(Collection<WellCopy> wellCopies)
+  private Volume calcTotalInitialVolume(Collection<WellCopy> wellCopies)
   {
-    BigDecimal totalInitialMicroliterVolume = BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);  
+    Volume totalInitialVolume = new Volume(0);
     if (wellCopies.size() > 0) {
       for (WellCopy wellCopy : wellCopies) {
         CopyInfo copyInfoForWell = wellCopy.getCopy().getCopyInfo(_well.getPlateNumber());
         if (copyInfoForWell != null) {
-          totalInitialMicroliterVolume = totalInitialMicroliterVolume.add(copyInfoForWell.getMicroliterWellVolume());
+          totalInitialVolume = totalInitialVolume.add(copyInfoForWell.getWellVolume());
         }
       }
     }
-    return totalInitialMicroliterVolume;
+    return totalInitialVolume;
   }
   
   private List<String> makeCopyNames(List<WellCopy> wellCopyVolumes)

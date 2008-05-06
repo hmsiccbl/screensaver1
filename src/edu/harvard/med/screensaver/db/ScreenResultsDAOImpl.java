@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,10 +21,8 @@ import edu.harvard.med.screensaver.util.CollectionUtils;
 
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.springframework.orm.hibernate3.HibernateCallback;
 
 public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDAO
 {

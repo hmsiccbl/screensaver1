@@ -610,6 +610,8 @@
 
   <bean id="setConverter" class="edu.harvard.med.screensaver.ui.table.column.SortedSetConverter" />
 
+  <bean id="volumeConverter" class="edu.harvard.med.screensaver.ui.util.VolumeConverter" />
+
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.util.SilencingReagentTypeConverter" />
 
   <bean id="statusValueConverter" class="edu.harvard.med.screensaver.ui.util.StatusValueConverter" />

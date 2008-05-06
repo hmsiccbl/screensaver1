@@ -29,6 +29,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(AbstractEntityTest.class);
     addTestSuite(ModelTestCoverageTest.class);
     addTestSuite(PropertyPathTest.class);
+    addTestSuite(VolumeTest.class);
 
     // ignored abstract classes
     // addTestSuite(ActivityTest.class);

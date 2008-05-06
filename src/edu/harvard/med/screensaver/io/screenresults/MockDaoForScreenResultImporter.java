@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +26,7 @@ import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -275,9 +275,9 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public BigDecimal findRemainingVolumeInWellCopy(Well well, Copy copy)
+  public Volume findRemainingVolumeInWellCopy(Well well, Copy copy)
   {
-    return BigDecimal.ZERO.setScale(Well.VOLUME_SCALE);
+    return Volume.ZERO;
   }
 
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)

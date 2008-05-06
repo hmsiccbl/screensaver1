@@ -15,11 +15,11 @@
 		<t:panelGrid id="searchAndColumnsPanel" columns="1" width="100%">
 			<h:form>
 				<t:collapsiblePanel id="columnsSelectionPanel" var="isCollapsed"
-					rendered="#{!searchResults.capabilities[&quot;viewEntity&quot;] || searchResults.summaryView}">
+					rendered="#{!searchResults.capabilities['viewEntity'] || searchResults.summaryView}">
 					<f:facet name="header">
 						<t:headerLink immediate="true">
 							<t:outputText
-								value="Columns #{isCollapsed ? &quot;&gt;&gt;&quot; : &quot;&lt;&lt;&quot;}"
+								value="Columns #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
 								escape="true" styleClass="label" />
 						</t:headerLink>
 					</f:facet>
@@ -39,7 +39,7 @@
 							</f:facet>
 							<f:facet name="group">
 								<h:panelGroup
-									rendered="#{searchResults.readAdmin || node.description != &quot;Administrative&quot;}">
+									rendered="#{searchResults.readAdmin || node.description != 'Administrative'}">
 									<h:outputText value="#{node.description}" styleClass="label" />
 								</h:panelGroup>
 							</f:facet>
@@ -61,7 +61,7 @@
 					<f:facet name="header">
 						<t:headerLink immediate="true">
 							<t:outputText
-								value="Search #{isCollapsed ? &quot;&gt;&gt;&quot; : &quot;&lt;&lt;&quot;}"
+								value="Search #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
 								escape="true" styleClass="label" />
 						</t:headerLink>
 					</f:facet>
@@ -90,24 +90,24 @@
 								<t:inputText id="simpleCriterionValue"
 									value="#{column.criterion.value}"
 									converter="#{column.converter}"
-									rendered="#{column.columnType.name == &quot;TEXT&quot; || column.columnType.name == &quot;LIST&quot; || column.columnType.name == &quot;INTEGER&quot; || column.columnType.name == &quot;REAL&quot; || column.columnType.name == &quot;FIXED_DECIMAL&quot;}"
-									size="#{column.columnType.name == &quot;TEXT&quot; ? 30 : 8}"
+									rendered="#{column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL'}"
+									size="#{column.columnType.name == 'TEXT' ? 30 : 8}"
 									styleClass="inputText" />
 								<t:inputDate id="dateCriterionValue" type="date"
 									popupCalendar="true" size="1" value="#{column.criterion.value}"
-									rendered="#{column.columnType.name == &quot;DATE&quot;}"
+									rendered="#{column.columnType.name == 'DATE'}"
 									styleClass="inputText" />
 								<t:selectOneMenu id="vocabularyCriterionValue"
 									value="#{column.criterion.value}"
 									converter="#{column.converter}"
-									rendered="#{column.columnType.name == &quot;VOCABULARY&quot;}"
+									rendered="#{column.columnType.name == 'VOCABULARY'}"
 									styleClass="inputText">
 									<f:selectItems value="#{column.vocabularySelections}" />
 								</t:selectOneMenu>
 								<t:selectOneMenu id="booleanCriterionValue"
 									value="#{column.criterion.value}"
 									converter="#{column.converter}"
-									rendered="#{column.columnType.name == &quot;BOOLEAN&quot;}"
+									rendered="#{column.columnType.name == 'BOOLEAN'}"
 									styleClass="inputText">
 									<f:selectItems value="#{column.booleanSelections}" />
 								</t:selectOneMenu>
@@ -149,7 +149,7 @@
 					<t:columns id="dataColumns"
 						value="#{searchResults.columnManager.visibleColumnModel}"
 						var="column"
-						styleClass="#{column.numeric ? &quot;numericColumn&quot; : &quot;column&quot;}">
+						styleClass="#{column.numeric ? 'numericColumn' : 'column'}">
 						<f:facet name="header">
 							<t:panelGrid columns="1">
 								<t:popup displayAtDistanceY="20">
@@ -187,7 +187,7 @@
 									<t:inputText id="simpleCriterionValue"
 										value="#{column.criterion.value}"
 										converter="#{column.converter}"
-										rendered="#{(column.columnType.name == &quot;TEXT&quot; || column.columnType.name == &quot;INTEGER&quot; || column.columnType.name == &quot;REAL&quot; || column.columnType.name == &quot;FIXED_DECIMAL&quot;) &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
+										rendered="#{(column.columnType.name == 'TEXT' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL') &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
 										size="8" styleClass="inputText"
 										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
 										displayValueOnlyStyleClass="data"
@@ -195,17 +195,17 @@
 									<t:inputDate id="dateCriterionValue" type="date"
 										popupCalendar="true" size="1"
 										value="#{column.criterion.value}"
-										rendered="#{column.columnType.name == &quot;DATE&quot; &amp;&amp; searchResults.tableFilterMode}"
+										rendered="#{column.columnType.name == 'DATE' &amp;&amp; searchResults.tableFilterMode}"
 										styleClass="inputText"
 										tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
 									<t:outputText id="dateCriterionValueOutput"
 										value="#{column.criterion.value}"
-										rendered="#{column.columnType.name == &quot;DATE&quot; &amp;&amp; (!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined)}"
+										rendered="#{column.columnType.name == 'DATE' &amp;&amp; (!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined)}"
 										styleClass="data" />
 									<t:selectOneMenu id="vocabularyCriterionValue"
 										value="#{column.criterion.value}"
 										converter="#{column.converter}"
-										rendered="#{column.columnType.name == &quot;VOCABULARY&quot; &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
+										rendered="#{column.columnType.name == 'VOCABULARY' &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
 										styleClass="inputText"
 										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
 										displayValueOnlyStyleClass="data"
@@ -216,7 +216,7 @@
 									<t:selectOneMenu id="booleanCriterionValue"
 										value="#{column.criterion.value}"
 										converter="#{column.converter}"
-										rendered="#{column.columnType.name == &quot;BOOLEAN&quot; &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
+										rendered="#{column.columnType.name == 'BOOLEAN' &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
 										styleClass="inputText"
 										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
 										displayValueOnlyStyleClass="data"
@@ -235,7 +235,7 @@
 							</t:panelGrid>
 						</f:facet>
 						<t:panelStack
-							selectedPanel="#{searchResults.rowRestricted ? &quot;restricted&quot; : column.editable &amp;&amp; searchResults.editMode ? &quot;input&quot; : &quot;output&quot;}">
+							selectedPanel="#{searchResults.rowRestricted ? 'restricted' : column.editable &amp;&amp; searchResults.editMode ? 'input' : 'output'}">
 							<!-- this restricted field is a "last line of defense" against displaying data
                  that should not be viewable by the user; in general, a search result should
                  never contain restricted data to begin with -->
@@ -264,11 +264,11 @@
 				<ui:insert name="searchResultFooter" />
 
 				<t:panelGrid
-					rendered="#{searchResults.capabilities[&quot;viewRowDetail&quot;] &amp;&amp; searchResults.rowDetailVisible &amp;&amp; !searchResults.editMode}"
+					rendered="#{searchResults.capabilities['viewRowDetail'] &amp;&amp; searchResults.rowDetailVisible &amp;&amp; !searchResults.editMode}"
 					columns="1">
 					<t:outputText value="Row Detail:" styleClass="subsection" />
 					<t:aliasBean alias="#{rowDetail}"
-						value="#{searchResults.capabilities[&quot;viewRowDetail&quot;] ? searchResults.rowDetail : null}">
+						value="#{searchResults.capabilities['viewRowDetail'] ? searchResults.rowDetail : null}">
 						<t:outputText value="Coming soon!" />
 					</t:aliasBean>
 					<t:commandButton image="/images/delete.png"
@@ -277,16 +277,16 @@
 
 				<t:panelGroup id="commandPanel">
 					<t:panelGroup id="editCommandsPanel"
-						rendered="#{searchResults.capabilities[&quot;editable&quot;]}">
+						rendered="#{searchResults.capabilities['editable']}">
 						<t:commandButton id="editCommand" value="Edit"
 							action="#{searchResults.edit}"
-							rendered="#{searchResults.capabilities[&quot;editable&quot;] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; !searchResults.editMode}" />
+							rendered="#{searchResults.capabilities['editable'] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; !searchResults.editMode}" />
 						<t:commandButton id="saveCommand" value="Save"
 							action="#{searchResults.save}"
-							rendered="#{searchResults.capabilities[&quot;editable&quot;] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; searchResults.editMode}" />
+							rendered="#{searchResults.capabilities['editable'] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; searchResults.editMode}" />
 						<t:commandButton id="cancelCommand" value="Cancel"
 							immediate="true" action="#{searchResults.cancel}"
-							rendered="#{searchResults.capabilities[&quot;editable&quot;] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; searchResults.editMode}" />
+							rendered="#{searchResults.capabilities['editable'] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; searchResults.editMode}" />
 					</t:panelGroup>
 				</t:panelGroup>
 			</t:buffer>
@@ -294,17 +294,17 @@
       <ss:dataTableNavigator dataTable="#{searchResults}">
 				<ui:define name="custom3">
 					<t:commandButton id="summaryViewerCommand"
-						rendered="#{searchResults.entityView}"
+						rendered="#{searchResults.capabilities['viewEntity'] &amp;&amp; searchResults.entityView}"
 						value="Back to Search Results"
 						action="#{searchResults.returnToSummaryList}" styleClass="command" />
 				</ui:define>
 
 				<ui:define name="custom4">
 					<t:commandButton id="exportSearchResultsCommandButton"
-						rendered="#{searchResults.summaryView &amp;&amp; searchResults.capabilities[&quot;exportData&quot;] &amp;&amp; searchResults.dataExporterSelector.size > 0}"
+						rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 0}"
 						value="Export" action="#{searchResults.downloadSearchResults}" />
           <t:selectOneMenu id="downloadFormat"
-            rendered="#{searchResults.summaryView &amp;&amp; searchResults.capabilities[&quot;exportData&quot;] &amp;&amp; searchResults.dataExporterSelector.size > 1}"
+            rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 1}"
             value="#{searchResults.dataExporterSelector.value}">
             <f:selectItems
               value="#{searchResults.dataExporterSelector.selectItems}" />
@@ -314,11 +314,11 @@
 			</ss:dataTableNavigator>
 
 			<t:outputText value="#{dataTableBuffer}" escape="false"
-				rendered="#{!searchResults.capabilities[&quot;viewEntity&quot;] || !searchResults.entityView}" />
+				rendered="#{!searchResults.capabilities['viewEntity'] || !searchResults.entityView}" />
 		</h:form>
 
 		<t:panelGroup
-			rendered="#{searchResults.capabilities[&quot;viewEntity&quot;] &amp;&amp; searchResults.entityView}">
+			rendered="#{searchResults.capabilities['viewEntity'] &amp;&amp; searchResults.entityView}">
 			<ui:insert name="entityViewer">
 				<t:outputText value="entityViewer ain't got no body" />
 			</ui:insert>

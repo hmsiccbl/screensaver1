@@ -9,12 +9,10 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -22,6 +20,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -49,7 +48,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
   public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
   private static final int CHERRY_PICK_SILENCING_AGENT_ALLOWANCE = 500 * 4;
-  private static final BigDecimal DEFAULT_MICROLITER_TRANSFER_VOLUME = null;
+  private static final Volume DEFAULT_TRANSFER_VOLUME = null;
 
 
   // private instance datum
@@ -96,9 +95,9 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   
   @Override
   @Transient
-  public BigDecimal getDefaultMicroliterTransferVolume()
+  public Volume getDefaultTransferVolume()
   {
-    return DEFAULT_MICROLITER_TRANSFER_VOLUME;
+    return DEFAULT_TRANSFER_VOLUME;
   }
 
 

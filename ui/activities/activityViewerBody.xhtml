@@ -75,9 +75,9 @@
 					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}" />
 
 				<ss:property id="reagentVolumeTransferred"
-					label="Volume Transferred (&#181;L)"
-					value="#{activityViewer.activity.microliterVolumeTransferedPerWell}"
-					description="The microliter volume transfered per well"
+					label="Volume Transferred" 
+					value="#{activityViewer.activity.volumeTransferredPerWell}" type="Volume"
+					description="The volume transferred per well"
 					editable="#{activityViewer.editMode}" editWidth="6"
 					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}" />
 

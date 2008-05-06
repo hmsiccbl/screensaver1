@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
@@ -93,10 +94,10 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
       public String getCellValue(WellVolumeAdjustment wva) { return wva.getCopy().getName(); }
     });
     columns.add(new FixedDecimalEntityColumn<WellVolumeAdjustment>(
-      new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "microliterVolume"),
+      new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "volume"),
       "Volume", "The volume adjustment amount", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellVolumeAdjustment wva) { return wva.getMicroliterVolume(); }
+      public BigDecimal getCellValue(WellVolumeAdjustment wva) { return wva.getVolume().getValue(Units.MICROLITERS); }
     });
     columns.add(new IntegerEntityColumn<WellVolumeAdjustment>(
       new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "labCherryPick.cherryPickRequest", "cherryPickRequestNumber"),

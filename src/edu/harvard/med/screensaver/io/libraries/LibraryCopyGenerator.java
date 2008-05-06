@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.io.libraries;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,9 +30,10 @@ import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.cli.OptionBuilder;
@@ -74,7 +74,7 @@ public class LibraryCopyGenerator
       if (!app.processOptions(true, true)) {
         System.exit(1);
       }
-      BigDecimal volume = new BigDecimal(app.getCommandLineOptionValue("v")).setScale(Well.VOLUME_SCALE);
+      Volume volume = new Volume(app.getCommandLineOptionValue("v"), Units.MICROLITERS);
       String copyName = app.getCommandLineOptionValue("c");
       DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
       Date datePlated = dateFormat.parse(app.getCommandLineOptionValue("d"));

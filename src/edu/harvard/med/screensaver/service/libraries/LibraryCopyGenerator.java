@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.service.libraries;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +17,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.screenresults.ExtantLibraryException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -52,7 +52,7 @@ public class LibraryCopyGenerator
   @Transactional
   public List<CopyInfo> createPlateCopies(List<Integer> plateNumbers,
                                           List<String> copyNames,
-                                          BigDecimal volume,
+                                          Volume volume,
                                           PlateType plateType,
                                           Date datePlated) 
     throws ExtantLibraryException
@@ -67,7 +67,7 @@ public class LibraryCopyGenerator
   @Transactional
   public List<CopyInfo> createPlateCopies(Integer plateNumber,
                                           List<String> copyNames,
-                                          BigDecimal volume,
+                                          Volume volume,
                                           PlateType plateType,
                                           Date datePlated) 
     throws ExtantLibraryException
@@ -97,7 +97,7 @@ public class LibraryCopyGenerator
   @Transactional
   public CopyInfo createPlateCopy(Copy copy,
                                   Integer plateNumber,
-                                  BigDecimal volume,
+                                  Volume volume,
                                   PlateType plateType,
                                   Date datePlated)
   {
@@ -109,7 +109,7 @@ public class LibraryCopyGenerator
       return copyInfo;
     }
     else {
-      if (!(copyInfo.getMicroliterWellVolume().equals(volume) &&
+      if (!(copyInfo.getWellVolume().equals(volume) &&
         copyInfo.getPlateType().equals(plateType))) {
         throw new DataModelViolationException("attempted to create a new plate copy that already exists (and that has different values for plate type and/or initial volume)"); 
       }

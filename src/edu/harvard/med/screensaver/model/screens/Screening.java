@@ -9,17 +9,14 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 /**
  * A screening room activity representing a screener screening various assay
@@ -54,7 +51,6 @@ public abstract class Screening extends LabActivity
   private Date _assayProtocolLastModifiedDate;
   private AssayProtocolType _assayProtocolType;
   private Integer _numberOfReplicates;
-  private BigDecimal _estimatedFinalScreenConcentrationInMoles;
 
 
   // public instance methods
@@ -131,32 +127,6 @@ public abstract class Screening extends LabActivity
   public void setNumberOfReplicates(Integer numberOfReplicates)
   {
     _numberOfReplicates = numberOfReplicates;
-  }
-
-  /**
-   * Get the estimated final screen concentration, in Moles.
-   * @return the estimated final screen concentration, in Moles
-   */
-  @org.hibernate.annotations.Type(type="big_decimal")
-  public BigDecimal getEstimatedFinalScreenConcentrationInMoles()
-  {
-    return _estimatedFinalScreenConcentrationInMoles;
-  }
-
-  /**
-   * Set the estimated final screen concentration, in Moles.
-   * @param estimatedFinalScreenConcentrationInMoles the new estimated final screen concentration,
-   * in Moles.
-   */
-  public void setEstimatedFinalScreenConcentrationInMoles(
-    BigDecimal estimatedFinalScreenConcentrationInMoles)
-  {
-    if (estimatedFinalScreenConcentrationInMoles == null) {
-      _estimatedFinalScreenConcentrationInMoles = null;
-    }
-    else {
-      _estimatedFinalScreenConcentrationInMoles = estimatedFinalScreenConcentrationInMoles.setScale(Well.VOLUME_SCALE, RoundingMode.HALF_UP);
-    }
   }
 
 

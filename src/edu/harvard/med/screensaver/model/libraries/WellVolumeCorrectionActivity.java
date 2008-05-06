@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 /**
@@ -111,18 +111,18 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
    * Create and return a new well volume adjustment for the well volume correction activity.
    * @param copy the copy
    * @param well the well
-   * @param microliterVolume the volume in microliters
+   * @param volume the volume
    * @return true the new well volume adjustment
    */
   public WellVolumeAdjustment createWellVolumeAdjustment(
       Copy copy,
       Well well,
-      BigDecimal microliterVolume)
+      Volume volume)
   {
     WellVolumeAdjustment wellVolumeAdjustment = new WellVolumeAdjustment(
       copy,
       well,
-      microliterVolume,
+      volume,
       this);
     _wellVolumeAdjustments.add(wellVolumeAdjustment);
     return wellVolumeAdjustment;

@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -1122,19 +1123,19 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction() {
         Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
         Copy copyC = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-        copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyD = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyE = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
-        copyE.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        copyE.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        copyE.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyE.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyF = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
-        copyF.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00"));
-        copyF.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new BigDecimal("100.00")); // should be ignored
+        copyF.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyF.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyG = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "G");
-        copyG.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new BigDecimal("10.00")).setDateRetired(new Date());
+        copyG.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10)).setDateRetired(new Date());
 
         genericEntityDao.saveOrUpdateEntity(library);
 
@@ -1145,13 +1146,13 @@ public class ComplexDAOTest extends AbstractSpringTest
         Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
         Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
         /*Well wellC03 =*/ genericEntityDao.findEntityById(Well.class, "00001:C03");
-        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyD, wellA01, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyF, wellA01, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyD, wellB02, new BigDecimal("-1.00")));
-        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyF, wellB02, new BigDecimal("-1.00")));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyD, wellA01, new Volume(-1)));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyF, wellA01, new Volume(-1)));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyD, wellB02, new Volume(-1)));
+        wellVolumeAdjustments.add(wellVolumeCorrectionActivity.createWellVolumeAdjustment(copyF, wellB02, new Volume(-1)));
         genericEntityDao.saveOrUpdateEntity(wellVolumeCorrectionActivity);
 
-        RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, 2);
+        RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(2));
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(wellA01);
         LabCherryPick labCherryPick1 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, wellA01);
         labCherryPick1.setAllocated(copyE);
@@ -1172,21 +1173,21 @@ public class ComplexDAOTest extends AbstractSpringTest
     Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
     Well wellC03 = genericEntityDao.findEntityById(Well.class, "00001:C03");
 
-    assertEquals("C:A01", new BigDecimal("10.00"), librariesDao.findRemainingVolumeInWellCopy(wellA01, copyC));
-    assertEquals("C:B02", new BigDecimal("10.00"), librariesDao.findRemainingVolumeInWellCopy(wellB02, copyC));
-    assertEquals("C:C03", new BigDecimal("10.00"), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyC));
-    assertEquals("D:A01", new BigDecimal("9.00"),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyD));
-    assertEquals("D:B02", new BigDecimal("9.00"),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyD));
-    assertEquals("D:C03", new BigDecimal("10.00"), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyD));
-    assertEquals("E:A01", new BigDecimal("8.00"),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyE));
-    assertEquals("E:B02", new BigDecimal("10.00"), librariesDao.findRemainingVolumeInWellCopy(wellB02, copyE));
-    assertEquals("E:C03", new BigDecimal("10.00"), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyE));
-    assertEquals("F:A01", new BigDecimal("9.00"),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyF));
-    assertEquals("F:B02", new BigDecimal("7.00"),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyF));
-    assertEquals("F:C03", new BigDecimal("10.00"), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyF));
-    assertEquals("G:A01", new BigDecimal("0.00"),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyG));
-    assertEquals("G:B02", new BigDecimal("0.00"),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyG));
-    assertEquals("G:C03", new BigDecimal("0.00"),  librariesDao.findRemainingVolumeInWellCopy(wellC03, copyG));
+    assertEquals("C:A01", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellA01, copyC));
+    assertEquals("C:B02", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellB02, copyC));
+    assertEquals("C:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyC));
+    assertEquals("D:A01", new Volume(9),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyD));
+    assertEquals("D:B02", new Volume(9),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyD));
+    assertEquals("D:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyD));
+    assertEquals("E:A01", new Volume(8),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyE));
+    assertEquals("E:B02", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellB02, copyE));
+    assertEquals("E:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyE));
+    assertEquals("F:A01", new Volume(9),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyF));
+    assertEquals("F:B02", new Volume(7),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyF));
+    assertEquals("F:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyF));
+    assertEquals("G:A01", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyG));
+    assertEquals("G:B02", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyG));
+    assertEquals("G:C03", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellC03, copyG));
   }
 
 }

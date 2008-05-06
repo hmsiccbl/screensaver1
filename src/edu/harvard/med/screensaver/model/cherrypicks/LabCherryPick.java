@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,18 +25,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -310,18 +310,18 @@ public class LabCherryPick extends AbstractEntity
    * Create and return a new well volume adjustment for the lab cherry pick.
    * @param copy the copy
    * @param well the well
-   * @param microliterVolume the volume in microliters
+   * @param volume the volume
    * @return true the new well volume adjustment
    */
   public WellVolumeAdjustment createWellVolumeAdjustment(
       Copy copy,
       Well well,
-      BigDecimal microliterVolume)
+      Volume volume)
   {
     WellVolumeAdjustment wellVolumeAdjustment = new WellVolumeAdjustment(
       copy,
       well,
-      microliterVolume,
+      volume,
       this);
     _wellVolumeAdjustments.add(wellVolumeAdjustment);
     return wellVolumeAdjustment;
@@ -369,7 +369,7 @@ public class LabCherryPick extends AbstractEntity
       createWellVolumeAdjustment(
           sourceCopy,
           getSourceWell(),
-          getCherryPickRequest().getMicroliterTransferVolumePerWellApproved().negate());
+          getCherryPickRequest().getTransferVolumePerWellApproved().negate());
     }
 
     boolean nowFulfilled = !isUnfulfilled();
@@ -409,12 +409,12 @@ public class LabCherryPick extends AbstractEntity
    * @return the volume
    */
   @Transient
-  public BigDecimal getVolume()
+  public Volume getVolume()
   {
     if (!isPlated()) {
-      throw new IllegalStateException("a cherry pick does not have a transferred volume before it has been transfered");
+      throw new IllegalStateException("a cherry pick does not have a transferred volume before it has been transferred");
     }
-    return _cherryPickRequest.getMicroliterTransferVolumePerWellApproved();
+    return _cherryPickRequest.getTransferVolumePerWellApproved();
   }
 
   /**
@@ -520,7 +520,7 @@ public class LabCherryPick extends AbstractEntity
   /**
    * Get whether liquid volume for this cherry pick has been transferred from a
    * source copy plate to a cherry pick assay plate.
-   * @return true iff source plate well liquid volume has been transfered
+   * @return true iff source plate well liquid volume has been transferred
    */
   @Transient
   public boolean isPlated()

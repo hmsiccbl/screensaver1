@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.service.cherrypicks;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -22,6 +21,8 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -52,7 +53,7 @@ public class CherryPickRequestAllocator
    * inaccuracy on the number of times the well was drawn from, but the above
    * strategy is considered sufficient by the lab).
    */
-   public static final BigDecimal MINIMUM_SOURCE_WELL_VOLUME = new BigDecimal(3).setScale(Well.VOLUME_SCALE);
+   public static final Volume MINIMUM_SOURCE_WELL_VOLUME = new Volume(3, Units.MICROLITERS);
 
 
   // static members
@@ -171,7 +172,7 @@ public class CherryPickRequestAllocator
 
   // private methods
 
-  private Copy selectCopy(Well well, BigDecimal volumeNeeded)
+  private Copy selectCopy(Well well, Volume volumeNeeded)
   {
     List<Copy> copies = new ArrayList<Copy>(well.getLibrary().getCopies());
     if (copies.size() == 0) {
@@ -180,7 +181,7 @@ public class CherryPickRequestAllocator
     Collections.sort(copies, SourceCopyComparator.getInstance());
 
     for (Copy copy : copies) {
-      BigDecimal wellCopyVolumeRemaining = _librariesDao.findRemainingVolumeInWellCopy(well, copy);
+      Volume wellCopyVolumeRemaining = _librariesDao.findRemainingVolumeInWellCopy(well, copy);
       if (log.isDebugEnabled()) {
         log.debug("remaining volume in " + well + " " + copy + ": " + wellCopyVolumeRemaining);
       }
@@ -196,12 +197,12 @@ public class CherryPickRequestAllocator
 
   private void validateAllocationBusinessRules(CherryPickRequest cherryPickRequest)
   {
-    BigDecimal volume = cherryPickRequest.getMicroliterTransferVolumePerWellApproved();
+    Volume volume = cherryPickRequest.getTransferVolumePerWellApproved();
     if (volume == null) {
       throw new BusinessRuleViolationException("cannot allocate cherry picks unless the approved transfer volume has been specified in the cherry pick request");
     }
     // TODO: this check should be done in CherryPickRequest instead
-    if (volume.compareTo(BigDecimal.ZERO) <= 0) {
+    if (volume.compareTo(Volume.ZERO) <= 0) {
       throw new DataModelViolationException("cherry pick request approved transfer volume must be positive");
     }
   }
@@ -213,7 +214,7 @@ public class CherryPickRequestAllocator
     // relationships, such as libraries.copies) from being reattached in calling code
     Well sourceWell = _dao.reloadEntity(labCherryPick.getSourceWell(), true, "library.copies.copyInfos");
     Copy copy = selectCopy(sourceWell,
-                           labCherryPick.getCherryPickRequest().getMicroliterTransferVolumePerWellApproved());
+                           labCherryPick.getCherryPickRequest().getTransferVolumePerWellApproved());
     if (copy == null) {
       return false;
     }

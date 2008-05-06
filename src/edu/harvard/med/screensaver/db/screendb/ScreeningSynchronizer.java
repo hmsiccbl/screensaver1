@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.db.screendb;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,14 +16,15 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
 
 abstract class ScreeningSynchronizer
 {
@@ -68,9 +68,9 @@ abstract class ScreeningSynchronizer
     final VisitVolumeTransferredPerWellParser parser = new VisitVolumeTransferredPerWellParser();
     String volumeTransferredString = resultSet.getString("vol_of_compd_transf");
     String screenType = resultSet.getString("screen_type");
-    BigDecimal microliterVolumeTransferedPerWell =
+    Volume volumeTransferredPerWell =
       parser.getVolumeTransferredPerWell(volumeTransferredString, screenType);
-    screening.setMicroliterVolumeTransferedPerWell(microliterVolumeTransferedPerWell);
+    screening.setVolumeTransferredPerWell(volumeTransferredPerWell);
   }
 
   // FROM GROUP DISCUSSION:
@@ -84,17 +84,9 @@ abstract class ScreeningSynchronizer
   throws SQLException
   {
     String estimatedFinalScreenConcentrationString = resultSet.getString("est_final_screen_conc");
-    BigDecimal estimatedFinalScreenConcentration = null;
     if (estimatedFinalScreenConcentrationString != null) {
-      if (estimatedFinalScreenConcentrationString.contains("13")) {
-        estimatedFinalScreenConcentration = new BigDecimal(13);
-      }
-      else if (estimatedFinalScreenConcentrationString.contains("20")) {
-        estimatedFinalScreenConcentration = new BigDecimal(20);
-      }
+      screening.setComments("estimated final screen concentration = '" + estimatedFinalScreenConcentrationString + "'");
     }
-    screening.setEstimatedFinalScreenConcentrationInMoles(
-      estimatedFinalScreenConcentration);
   }
 
   protected void synchronizeAssayProtocolType(ResultSet resultSet, Screening screening)
