@@ -90,7 +90,7 @@
 								<t:inputText id="simpleCriterionValue"
 									value="#{column.criterion.value}"
 									converter="#{column.converter}"
-									rendered="#{column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL'}"
+									rendered="#{column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME'}"
 									size="#{column.columnType.name == 'TEXT' ? 30 : 8}"
 									styleClass="inputText" />
 								<t:inputDate id="dateCriterionValue" type="date"
@@ -187,7 +187,7 @@
 									<t:inputText id="simpleCriterionValue"
 										value="#{column.criterion.value}"
 										converter="#{column.converter}"
-										rendered="#{(column.columnType.name == 'TEXT' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL') &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
+										rendered="#{(column.columnType.name == 'TEXT' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME') &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
 										size="8" styleClass="inputText"
 										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
 										displayValueOnlyStyleClass="data"
@@ -310,7 +310,7 @@
               value="#{searchResults.dataExporterSelector.selectItems}" />
           </t:selectOneMenu>
 				</ui:define>
-				
+
 			</ss:dataTableNavigator>
 
 			<t:outputText value="#{dataTableBuffer}" escape="false"
