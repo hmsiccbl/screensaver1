@@ -293,8 +293,8 @@ public interface GenericEntityDAO
    *
    * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
-   * @param propertyName the name of the property to query against
-   * @param propertyValue the value of the property to query for
+   * @param name2Value a <code>Map</code> containing entries for each
+   *          property/value pair to query against
    * @return a list of entities that have the specified value for the specified
    *         property
    * @exception InvalidArgumentException when there is more
