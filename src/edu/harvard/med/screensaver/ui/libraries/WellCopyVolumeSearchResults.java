@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,7 +32,6 @@ import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -46,10 +44,10 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
-import edu.harvard.med.screensaver.ui.table.column.FixedDecimalColumn;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
+import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.util.Pair;
@@ -256,20 +254,20 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
 //    @Override
 //    public Object cellAction(WellCopyVolume wellCopy) { return _libraryViewer.viewLibraryCopyVolumes(wellVolume.getWell(), WellCopyVolumeSearchResults.this); }
     });
-    columns.add(new FixedDecimalColumn<WellCopy>(
+    columns.add(new VolumeColumn<WellCopy>(
       "Initial Volume", "The initial volume of this well copy", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getInitialVolume().getValue(Units.MICROLITERS); }
+      public Volume getCellValue(WellCopy wellCopy) { return wellCopy.getInitialVolume(); }
     });
-    columns.add(new FixedDecimalColumn<WellCopy>(
+    columns.add(new VolumeColumn<WellCopy>(
       "Consumed Volume", "The volume already used from this well copy", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getConsumedVolume().getValue(Units.MICROLITERS); }
+      public Volume getCellValue(WellCopy wellCopy) { return wellCopy.getConsumedVolume(); }
     });
-    columns.add(new FixedDecimalColumn<WellCopy>(
+    columns.add(new VolumeColumn<WellCopy>(
       "Remaining Volume", "The remaining volume of this well copy", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return wellCopy.getRemainingVolume().getValue(Units.MICROLITERS); }
+      public Volume getCellValue(WellCopy wellCopy) { return wellCopy.getRemainingVolume(); }
     });
     _withdrawalsAdjustmentsColumn = new IntegerColumn<WellCopy>(
       "Withdrawals/Adjustments", "The number of withdrawals and administrative adjustments made from this well copy", TableColumn.UNGROUPED) {
@@ -287,10 +285,10 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
       }
     };
     columns.add(_withdrawalsAdjustmentsColumn);
-    _newRemainingVolumeColumn = new FixedDecimalColumn<WellCopy>(
+    _newRemainingVolumeColumn = new VolumeColumn<WellCopy>(
       "New Remaining Volume", "Enter new remaining volume", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellCopy wellCopy) { return _newRemainingVolumes.get(wellCopy).getValue(Units.MICROLITERS); }
+      public Volume getCellValue(WellCopy wellCopy) { return _newRemainingVolumes.get(wellCopy); }
 
       @Override
       public void setCellValue(WellCopy wellCopy, Object value)

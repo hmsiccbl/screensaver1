@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -21,15 +21,15 @@ public class Volume implements Comparable<Volume>
 {
   // static members
 
-  public static enum Units { 
+  public static enum Units {
     LITERS("L", 0),
     MILLILITERS("mL", 3),
     MICROLITERS("uL", 6),
-    NANOLITERS("nL", 9); 
-    
+    NANOLITERS("nL", 9);
+
     private String _symbol;
     private int _scale;
-    
+
     private Units(String symbol, int scale)
     {
       _symbol = symbol;
@@ -40,7 +40,7 @@ public class Volume implements Comparable<Volume>
     {
       return _symbol;
     }
-    
+
     public int getScale()
     {
       return _scale;
@@ -50,21 +50,21 @@ public class Volume implements Comparable<Volume>
   private static final long serialVersionUID = 1L;
   public static final Volume ZERO = new Volume(0);
 
-  
+
   // instance data members
-  
+
   private BigDecimal _value;
   private Units _units;
   private BigDecimal _displayValue;
 
 
   // public constructors and methods
-  
+
   public Volume(Integer value)
   {
     this(value, Units.MICROLITERS);
   }
-  
+
   public Volume(Integer value, Units units)
   {
     this(value.toString(), units);
@@ -74,7 +74,7 @@ public class Volume implements Comparable<Volume>
   {
     this(value, Units.MICROLITERS);
   }
-  
+
   public Volume(Long value, Units units)
   {
     this(value.toString(), units);
@@ -84,7 +84,7 @@ public class Volume implements Comparable<Volume>
    * Create a WellVolume using a String representation of a decimal number,
    * provided in the specified units. Changes smaller units small enough to hold
    * the provided decimal number as a whole number.
-   * 
+   *
    * @param value
    * @param units
    */
@@ -103,21 +103,21 @@ public class Volume implements Comparable<Volume>
   {
     return _units;
   }
-  
+
   public BigDecimal getValue()
   {
     return _value;
   }
-  
+
   public BigDecimal getValue(Units units)
   {
     return convertUnits(this, units);
   }
-  
+
   /**
    * Convert to new units new units. Protects against loss of precision during
    * conversion.
-   * 
+   *
    * @throws ArithmeticException if non-zero trailing decimal places would be
    *           lost in the conversion
    * @return a new Volume instance, with the converted value in the requested units
@@ -129,7 +129,7 @@ public class Volume implements Comparable<Volume>
     }
     return new Volume(convertUnits(this, newUnits).toString(), newUnits);
   }
-  
+
   public Volume convertToReasonableUnits()
   {
     EnumSet<Units> unitsSet = EnumSet.allOf(Units.class);
@@ -151,16 +151,16 @@ public class Volume implements Comparable<Volume>
     if (_displayValue == null) {
       _displayValue = stripTrailingFractionalZeros(_value);
     }
-    return _displayValue.toString() + _units._symbol;
+    return _displayValue.toString() + " " + _units._symbol;
   }
-  
+
   private BigDecimal stripTrailingFractionalZeros(BigDecimal value)
   {
     int scale = 0;
     do {
       BigDecimal truncated = _value.setScale(scale, RoundingMode.DOWN);
       if (truncated.setScale(value.scale()).equals(value)) {
-        return truncated; 
+        return truncated;
       }
       ++scale;
     } while (scale <= Units.values()[Units.values().length - 1].getScale());
@@ -171,23 +171,23 @@ public class Volume implements Comparable<Volume>
   {
     return new Volume(_value.add(value.convert(_units)._value), _units);
   }
-  
+
   public Volume subtract(Volume value)
   {
     return new Volume(_value.subtract(value.convert(_units)._value), _units);
   }
-  
+
   public Volume negate()
   {
     return new Volume(_value.negate().toString(), _units);
   }
 
-  
+
   // private static methods
 
   private static BigDecimal scaleValue(BigDecimal value, Units units)
   {
-    return value.setScale(Units.values()[Units.values().length - 1].getScale() - units.getScale(), 
+    return value.setScale(Units.values()[Units.values().length - 1].getScale() - units.getScale(),
                           RoundingMode.UNNECESSARY);
   }
 
@@ -201,7 +201,7 @@ public class Volume implements Comparable<Volume>
   {
     return _value.compareTo(o.convert(_units)._value);
   }
-  
+
   @Override
   public boolean equals(Object obj)
   {
@@ -217,7 +217,7 @@ public class Volume implements Comparable<Volume>
     Volume other = (Volume) obj;
     return _value.equals(other.convert(_units)._value);
   }
-  
+
   @Override
   public int hashCode()
   {

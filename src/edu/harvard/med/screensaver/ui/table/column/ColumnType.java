@@ -21,6 +21,7 @@ import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.util.NoOpStringConverter;
+import edu.harvard.med.screensaver.ui.util.VolumeConverter;
 
 public enum ColumnType {
 
@@ -40,6 +41,10 @@ public enum ColumnType {
                 new BigDecimalConverter(),
                 Operator.COMPARABLE_OPERATORS,
                 Operator.EQUAL),
+  VOLUME(true,
+         new VolumeConverter(),
+         Operator.COMPARABLE_OPERATORS,
+         Operator.EQUAL),
   DATE(false,
        new ShortDateTimeConverter(),
        Operator.COMPARABLE_OPERATORS,

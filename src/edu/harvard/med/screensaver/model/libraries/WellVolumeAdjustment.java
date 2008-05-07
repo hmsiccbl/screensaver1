@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.math.BigDecimal;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -173,7 +171,7 @@ public class WellVolumeAdjustment extends AbstractEntity
    */
   @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE, nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
   public Volume getVolume()
   {
     return _volume;

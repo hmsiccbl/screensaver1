@@ -11,23 +11,21 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
-import edu.harvard.med.screensaver.model.Volume.Units;
+import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
-import edu.harvard.med.screensaver.ui.table.column.FixedDecimalColumn;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.table.column.ListColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
+import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 
@@ -37,7 +35,7 @@ import org.apache.log4j.Logger;
  * Aggregates WellVolumeAdjustments into WellVolumes, and provides these
  * WellVolumes as a SearchResult. Underlying data is set via methods
  * {@link WellCopyVolumeSearchResults}.
- * 
+ *
  * @see WellCopyVolumeSearchResults
  */
 public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,WellKey>
@@ -63,7 +61,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
    * @motivation for CGLIB2
    */
   protected WellVolumeSearchResults() {}
-    
+
   public WellVolumeSearchResults(GenericEntityDAO dao,
                                  LibraryViewer libraryViewer,
                                  WellViewer wellViewer,
@@ -138,74 +136,65 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
         return _wellViewer.viewWell(wellVolume.getWell());
       }
     });
-    columns.add(new ListColumn<WellVolume>("Copies", "The copies of this well", TableColumn.UNGROUPED) {
+    columns.add(new ListColumn<WellVolume>("Copies",
+      "The copies of this well", TableColumn.UNGROUPED) {
       @Override
       public List<String> getCellValue(WellVolume wellVolume)
       {
         return wellVolume.getCopiesList();
       }
     });
-    columns.add(new FixedDecimalColumn<WellVolume>("Total Initial Copy Volume",
-                                                   "The sum of initial volumes from all copies of this well", TableColumn.UNGROUPED) {
+    columns.add(new VolumeColumn<WellVolume>("Total Initial Copy Volume",
+      "The sum of initial volumes from all copies of this well", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellVolume wellVolume)
+      public Volume getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getTotalInitialVolume().getValue(Units.MICROLITERS);
+        return wellVolume.getTotalInitialVolume();
       }
     });
-    columns.add(new FixedDecimalColumn<WellVolume>("Consumed Volume",
-                                                   "The cumulative volume already used from this well, across all copies", TableColumn.UNGROUPED) {
+    columns.add(new VolumeColumn<WellVolume>("Consumed Volume",
+      "The cumulative volume already used from this well, across all copies", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellVolume wellVolume)
+      public Volume getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getConsumedVolume().getValue(Units.MICROLITERS);
+        return wellVolume.getConsumedVolume();
       }
     });
-    columns.add(new TextColumn<WellVolume>("Max Remaining Volume",
-                                           "The maximum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+    columns.add(new VolumeColumn<WellVolume>("Max Remaining Volume",
+      "The maximum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getMaxWellCopyVolume().getRemainingVolume();
+      }
+    });
+    columns.add(new TextColumn<WellVolume>("Max Remaining Volume Copy",
+      "The copy with the maximum remaining volume of this well", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMaxWellCopyVolume().getRemainingVolume() + " (" +
-               wellVolume.getMaxWellCopyVolume().getCopy().getName() + ")";
-      }
-
-      @Override
-      protected Comparator<WellVolume> getAscendingComparator()
-      {
-        return new Comparator<WellVolume>() {
-          public int compare(WellVolume wv1, WellVolume wv2)
-          {
-            return wv1.getMaxWellCopyVolume()
-                      .getRemainingVolume()
-                      .compareTo(wv2.getMaxWellCopyVolume()
-                                    .getRemainingVolume());
-          }
-        };
+        return wellVolume.getMaxWellCopyVolume().getCopy().getName();
       }
     });
-    columns.add(new TextColumn<WellVolume>("Min Remaining Volume",
-                                           "The minimum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+    columns.add(new VolumeColumn<WellVolume>("Min Remaining Volume",
+      "The minimum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getMinWellCopyVolume().getRemainingVolume();
+
+      }
+    });
+    columns.add(new TextColumn<WellVolume>("Min Remaining Volume Copy",
+      "The copy with the minimum remaining volume of this well", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMinWellCopyVolume().getRemainingVolume() + " (" +
-               wellVolume.getMinWellCopyVolume().getCopy().getName() + ")";
-      }
-
-      @Override
-      protected Comparator<WellVolume> getAscendingComparator()
-      {
-        return new Comparator<WellVolume>() {
-          public int compare(WellVolume wv1, WellVolume wv2)
-          {
-            return wv1.getMinWellCopyVolume().getRemainingVolume().compareTo(wv2.getMinWellCopyVolume().getRemainingVolume());
-          }
-        };
+        return wellVolume.getMinWellCopyVolume().getCopy().getName();
       }
     });
     columns.add(new IntegerColumn<WellVolume>("Withdrawals/Adjustments",
-                                              "The number of withdrawals and administrative adjustments made from this well, across all copies", TableColumn.UNGROUPED) {
+      "The number of withdrawals and administrative adjustments made from this well, across all copies", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(WellVolume wellVolume)
       {

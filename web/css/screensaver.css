@@ -230,6 +230,9 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .numericColumn {
 	text-align: right;
+}
+
+.narrowColumn,.numericColumn {
 	/* allows text columns to dominate the table width; still given the width it needs */
 	width: 1px;
 }
@@ -291,7 +294,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .menuAndContent {
 	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
 	/*	table-layout: fixed;*/
-	
+
 }
 
 .menuColumn,.contentColumn {
@@ -391,11 +394,11 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 }
 
 .activeTab {
-	
+
 }
 
 .inactiveTab {
-	
+
 }
 
 .newsDate {

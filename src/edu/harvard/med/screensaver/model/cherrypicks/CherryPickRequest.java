@@ -42,7 +42,6 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -99,8 +98,8 @@ public abstract class CherryPickRequest extends AbstractEntity
       }
     }
   }
-  
-  
+
+
   // private instance data
 
   private Integer _cherryPickRequestId;
@@ -145,7 +144,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   /**
    * Get the default requested and approved transfer volume. This value will be
    * used when creating a new CherryPickRequest.
-   * 
+   *
    * @return the default approved transfer volume; may be null.
    */
   @Transient
@@ -342,7 +341,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * invocation, due to caching of the result; if the status of CPAPs change,
    * you should reload the CPR in a new Hibernate session to obtain an
    * up-to-date result!</i> Get the set of active cherry pick assay plates.
-   * 
+   *
    * @return the set of active cherry pick assay plates, which excludes any
    *         assay plates that are failed
    */
@@ -371,7 +370,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * invocation, due to caching of the result; if the status of CPAPs change,
    * you should reload the CPR in a new Hibernate session to obtain an
    * up-to-date result!</i>
-   * 
+   *
    * @return the set of "pending" CherryPickAssayPlates, which means they are
    *         neither plated, canceled, nor failed; in other words, they need to
    *         be plated
@@ -395,7 +394,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * invocation, due to caching of the result; if the status of CPAPs change,
    * you should reload the CPR in a new Hibernate session to obtain an
    * up-to-date result!</i>
-   * 
+   *
    * @return the set of "completed" CherryPickAssayPlates, which means they are
    *         either plated or canceled
    */
@@ -552,7 +551,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @return the transferVolumePerWell
    */
   @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
   public Volume getTransferVolumePerWellRequested()
   {
     return _transferVolumePerWellRequested;
@@ -575,7 +574,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @return the transferVolumePerWell
    */
   @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
   public Volume getTransferVolumePerWellApproved()
   {
     return _transferVolumePerWellApproved;
@@ -630,7 +629,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   /**
    * Add a well to the set of wells to be left empty when generating the cherry
    * pick plate mapping.
-   * 
+   *
    * @param wellName the well to add
    */
   public boolean addEmptyWellOnAssayPlate(WellName wellName)
