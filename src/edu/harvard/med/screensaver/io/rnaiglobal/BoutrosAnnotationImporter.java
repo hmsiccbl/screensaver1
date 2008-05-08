@@ -63,7 +63,7 @@ public class BoutrosAnnotationImporter
   public static void main(String[] args) throws ParseException
   {
     CommandLineApplication app = new CommandLineApplication(args);
-    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("data file to import").withArgName("csv file").create("f"));
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("data file to import").withArgName("Excel workbook file").create("f"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for RNAi Global user").withArgName("password").create("rp"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for user accounts associated with study").withArgName("password").create("up"));
     if (!app.processOptions(true, true)) {
