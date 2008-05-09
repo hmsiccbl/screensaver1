@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +49,8 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.transaction.annotation.Transactional;
 
 public class ScreenDetailViewer extends StudyDetailViewer implements EditableViewer
@@ -362,9 +363,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
     if (_newStatusValue != null) {
       try {
-        getScreen().createStatusItem(
-                       new Date(),
-                       _newStatusValue);
+        getScreen().createStatusItem(new LocalDate(), _newStatusValue);
       }
       catch (DuplicateEntityException e) {
         showMessage("screens.duplicateEntity", "status item");
@@ -404,7 +403,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String addLetterOfSupport()
   {
     try {
-      getScreen().createLetterOfSupport(new Date(), "");
+      getScreen().createLetterOfSupport(new LocalDate(), "");
     }
     catch (DuplicateEntityException e) {
       showMessage("screens.duplicateEntity", "letter of support");
@@ -463,8 +462,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
     _dao.reattachEntity(_screen);
     _dao.reattachEntity(_screen.getLeadScreener());
-    Date now = new Date();
-    Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), now, now);
+    Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), new LocalDate());
     _dao.persistEntity(activity);
     _dao.flush();
     return _activityViewer.viewActivity(activity);
@@ -481,8 +479,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     }
     _dao.reattachEntity(_screen);
     _dao.reattachEntity(cpr);
-    Date now = new Date();
-    Activity activity = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), now, now, cpr);
+    Activity activity = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), new LocalDate(), cpr);
     _dao.persistEntity(activity);
     _dao.flush();
     return _activityViewer.viewActivity(activity);

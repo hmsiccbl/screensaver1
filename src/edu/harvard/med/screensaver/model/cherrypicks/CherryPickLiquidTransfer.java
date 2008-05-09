@@ -20,13 +20,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 /**
  * Tracks the event whereby a set of CherryPickAssayPlates have been plated for
@@ -66,19 +67,17 @@ public class CherryPickLiquidTransfer extends LabActivity
    * CherryPickLiquidTransferStatus)}.
    * @param screen the screen
    * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
    * @param dateOfActivity the date the screening room activity took place
    * @param status the status of the cherry pick liquid transfer
    */
   public CherryPickLiquidTransfer(
     Screen screen,
     ScreensaverUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity,
+    LocalDate dateOfActivity,
     CherryPickLiquidTransferStatus status)
   {
     // TODO: business logic to test that cherryPickRequest.getScreen().equals(screen)
-    super(screen, performedBy, dateCreated, dateOfActivity);
+    super(screen, performedBy, dateOfActivity);
     if (status == null) {
       throw new NullPointerException("status is required");
     }

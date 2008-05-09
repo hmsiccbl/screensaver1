@@ -10,8 +10,6 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.beans.IntrospectionException;
-import java.util.Date;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -46,11 +44,11 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     {
       public void runTransaction()
       {
-        ScreeningRoomUser labMember = new ScreeningRoomUser(new Date(), "Lab", "Member", "lab_member@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
+        ScreeningRoomUser labMember = new ScreeningRoomUser("Lab", "Member", "lab_member@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(labMember);
         assertNotNull("lab member without lab head", labMember.getLabName());
 
-        ScreeningRoomUser labHead = new ScreeningRoomUser(new Date(), "Lab", "Head", "lab_head@hms.harvard.edu", "", "","", "", "", ScreeningRoomUserClassification.ICCBL_NSRB_STAFF, false);
+        ScreeningRoomUser labHead = new ScreeningRoomUser("Lab", "Head", "lab_head@hms.harvard.edu");
         labHead.setLabAffiliation(new LabAffiliation("LabAffiliation", AffiliationCategory.HMS));
         labMember.setLabHead(labHead);
         genericEntityDao.saveOrUpdateEntity(labHead);
@@ -68,17 +66,11 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
   }
 
   public void testAdministrativeRoleNotAllowed() {
-    final ScreeningRoomUser user = new ScreeningRoomUser(new Date(),
-                                                         "first",
+    final ScreeningRoomUser user = new ScreeningRoomUser("first",
                                                          "last",
-                                                         "first_last@hms.harvard.edu",
-                                                         "",
-                                                         "",
-                                                         "",
-                                                         "ec1",
-                                                         "",
-                                                         ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                         false);
+                                                         "first_last@hms.harvard.edu");
+    user.setECommonsId("ec1");
+
     user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     genericEntityDao.saveOrUpdateEntity(user);
 

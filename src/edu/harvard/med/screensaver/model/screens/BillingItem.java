@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -26,6 +24,8 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -53,7 +53,7 @@ public class BillingItem extends AbstractEntity
   private BillingInformation _billingInformation;
   private String _itemToBeCharged;
   private String _amount;
-  private Date _dateFaxed;
+  private LocalDate _dateFaxed;
 
 
   // public constructor
@@ -147,7 +147,8 @@ public class BillingItem extends AbstractEntity
    * @return the date faxed
    */
   @Column(nullable=false)
-  public Date getDateFaxed()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateFaxed()
   {
     return _dateFaxed;
   }
@@ -156,9 +157,9 @@ public class BillingItem extends AbstractEntity
    * Set the date faxed.
    * @param dateFaxed the new date faxed
    */
-  public void setDateFaxed(Date dateFaxed)
+  public void setDateFaxed(LocalDate dateFaxed)
   {
-    _dateFaxed = truncateDate(dateFaxed);
+    _dateFaxed = dateFaxed;
   }
 
 
@@ -176,7 +177,7 @@ public class BillingItem extends AbstractEntity
     BillingInformation billingInformation,
     String itemToBeCharged,
     String amount,
-    Date dateFaxed)
+    LocalDate dateFaxed)
   {
     if (billingInformation == null) {
       throw new NullPointerException();
@@ -184,7 +185,7 @@ public class BillingItem extends AbstractEntity
     _billingInformation = billingInformation;
     _itemToBeCharged = itemToBeCharged;
     _amount = amount;
-    _dateFaxed = truncateDate(dateFaxed);
+    _dateFaxed = dateFaxed;
   }
 
 

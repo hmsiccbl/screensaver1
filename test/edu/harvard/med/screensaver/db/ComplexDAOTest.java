@@ -13,7 +13,6 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -54,12 +53,12 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
 import org.hibernate.LazyInitializationException;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -324,7 +323,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
+          ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
           ResultValueType[] rvt = new ResultValueType[replicates];
           for (int i = 0; i < replicates; i++) {
             rvt[i] = screenResult.createResultValueType(
@@ -440,7 +439,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       {
         public void runTransaction()
         {
-          ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
+          ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
 
           for (int i = 0; i < replicates; i++) {
             ResultValueType rvt = screenResult.createResultValueType(
@@ -512,82 +511,34 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         ScreeningRoomUser user1 = new ScreeningRoomUser (
-          new Date(),
           "first1",
           "last1",
-          "email1@hms.harvard.edu",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ScreeningRoomUserClassification.ICCB_FELLOW,
-          false);
+          "email1@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user1);
         ScreeningRoomUser user2 = new ScreeningRoomUser (
-          new Date(),
           "first2",
           "last2",
-          "email2@hms.harvard.edu",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ScreeningRoomUserClassification.ICCB_FELLOW,
-          false);
+          "email2@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user2);
         ScreeningRoomUser user3 = new ScreeningRoomUser (
-          new Date(),
           "first3",
           "last3",
-          "email3@hms.harvard.edu",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ScreeningRoomUserClassification.ICCB_FELLOW,
-          false);
+          "email3@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user3);
         ScreeningRoomUser user4 = new ScreeningRoomUser (
-          new Date(),
           "first4",
           "last4",
-          "email4@hms.harvard.edu",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ScreeningRoomUserClassification.ICCB_FELLOW,
-          false);
+          "email4@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user4);
         ScreeningRoomUser user5 = new ScreeningRoomUser (
-          new Date(),
           "first5",
           "last5",
-          "email5@hms.harvard.edu",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ScreeningRoomUserClassification.ICCB_FELLOW,
-          false);
+          "email5@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user5);
         ScreeningRoomUser user6 = new ScreeningRoomUser (
-          new Date(),
           "first6",
           "last6",
-          "email6@hms.harvard.edu",
-          "",
-          "",
-          "",
-          "",
-          "",
-          ScreeningRoomUserClassification.ICCB_FELLOW,
-          false);
+          "email6@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user6);
         user2.setLabHead(user1);
         user3.setLabHead(user1);
@@ -809,7 +760,7 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        ScreenResult screenResult = screen.createScreenResult(new Date());
+        ScreenResult screenResult = screen.createScreenResult();
         ResultValueType rvt1 = screenResult.createResultValueType("RVT1", null, false, true, false, "");
         rvt1.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
         rvt1.setPositiveIndicatorCutoff(indicatorCutoff);
@@ -866,7 +817,7 @@ public class ComplexDAOTest extends AbstractSpringTest
   public void testFindResultValuesByPlate()
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    ScreenResult screenResult = screen.createScreenResult(new Date());
+    ScreenResult screenResult = screen.createScreenResult();
     ResultValueType rvt1 = screenResult.createResultValueType("Raw Value");
     ResultValueType rvt2 = screenResult.createResultValueType("Derived Value");
     rvt1.setNumeric(true);
@@ -950,17 +901,9 @@ public class ComplexDAOTest extends AbstractSpringTest
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        ScreeningRoomUser labMember = new ScreeningRoomUser(new Date(),
-                                                            "Lab",
+        ScreeningRoomUser labMember = new ScreeningRoomUser("Lab",
                                                             "Member",
-                                                            "lab_member@hms.harvard.edu",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                            false);
+                                                            "lab_member@hms.harvard.edu");
         screen.getLabHead().addLabMember(labMember);
         screen.addKeyword("keyword1");
         screen.addKeyword("keyword2");
@@ -1036,28 +979,12 @@ public class ComplexDAOTest extends AbstractSpringTest
           e.printStackTrace();
           fail(e.getMessage());
         }
-        ScreeningRoomUser collab1 = new ScreeningRoomUser(new Date(),
-                                                          "Col",
+        ScreeningRoomUser collab1 = new ScreeningRoomUser("Col",
                                                           "Laborator1",
-                                                          "collab1@hms.harvard.edu",
-                                                          "",
-                                                          "",
-                                                          "",
-                                                          "",
-                                                          "",
-                                                          ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                          false);
-        ScreeningRoomUser collab2 = new ScreeningRoomUser(new Date(),
-                                                          "Col",
+                                                          "collab1@hms.harvard.edu");
+        ScreeningRoomUser collab2 = new ScreeningRoomUser("Col",
                                                           "Laborator2",
-                                                          "collab2@hms.harvard.edu",
-                                                          "",
-                                                          "",
-                                                          "",
-                                                          "",
-                                                          "",
-                                                          ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                          false);
+                                                          "collab2@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(collab1);
         genericEntityDao.saveOrUpdateEntity(collab2);
         screen.addCollaborator(collab1);
@@ -1134,13 +1061,13 @@ public class ComplexDAOTest extends AbstractSpringTest
         copyF.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
         copyF.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyG = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "G");
-        copyG.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10)).setDateRetired(new Date());
+        copyG.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10)).setDateRetired(new LocalDate());
 
         genericEntityDao.saveOrUpdateEntity(library);
 
         WellVolumeCorrectionActivity wellVolumeCorrectionActivity =
           new WellVolumeCorrectionActivity(new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "", ""),
-                                           new Date());
+                                           new LocalDate());
         Set<WellVolumeAdjustment> wellVolumeAdjustments = wellVolumeCorrectionActivity.getWellVolumeAdjustments();
         Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
         Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");

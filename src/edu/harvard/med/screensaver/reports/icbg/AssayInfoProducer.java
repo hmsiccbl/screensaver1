@@ -9,12 +9,11 @@
 
 package edu.harvard.med.screensaver.reports.icbg;
 
-import java.util.Date;
-
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -39,19 +38,19 @@ public class AssayInfoProducer
     assayCategoryText += screen.getSummary().toUpperCase();
     setAssayCategory(assayInfo, assayCategoryText);
 
-    Date assayDate = null;
+    LocalDate assayDate = null;
     for (StatusItem statusItem: screen.getStatusItems()) {
-      Date statusItemDate = statusItem.getStatusDate();
-      if (assayDate == null || assayDate.before(statusItemDate)) {
+      LocalDate statusItemDate = statusItem.getStatusDate();
+      if (assayDate == null || assayDate.compareTo(statusItemDate) < 0) {
         assayDate = statusItemDate;
       }
     }
     
-    // TODO: replace with non-deprecated
     assayInfo.setAssayDate(
-      (assayDate.getMonth() + 1) + "/" +
-      assayDate.getDate() + "/" +
-      (assayDate.getYear() + 1900));
+      assayDate.getMonthOfYear() + "/" +
+      assayDate.getDayOfMonth() + "/" +
+      (assayDate.getYear()));
+    assert assayDate.getYear() >= 1900 : "year should include century";
     
     return assayInfo;
   }

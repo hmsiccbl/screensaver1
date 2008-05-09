@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -30,6 +29,8 @@ import edu.harvard.med.screensaver.ui.table.column.entity.FixedDecimalEntityColu
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+
+import org.joda.time.LocalDate;
 
 public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellVolumeAdjustment,Integer>
 {
@@ -58,7 +59,7 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
       new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "activity", "dateOfActivity"),
       "Date", "The date the volume adjustment was made", TableColumn.UNGROUPED) {
       @Override
-      protected Date getDate(WellVolumeAdjustment wva)
+      protected LocalDate getDate(WellVolumeAdjustment wva)
       {
         Activity activity = wva.getRelatedActivity();
         if (activity != null) {

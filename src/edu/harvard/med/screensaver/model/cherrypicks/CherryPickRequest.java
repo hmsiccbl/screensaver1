@@ -53,6 +53,8 @@ import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorO
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -107,12 +109,12 @@ public abstract class CherryPickRequest extends AbstractEntity
   private Screen _screen;
   private Integer _legacyCherryPickRequestNumber; // ScreenDB visits.id
   private ScreeningRoomUser _requestedBy;
-  private Date _dateRequested;
+  private LocalDate _dateRequested;
   private PlateType _assayPlateType;
   private Volume _transferVolumePerWellRequested;
   private Volume _transferVolumePerWellApproved;
   private AdministratorUser _volumeApprovedBy;
-  private Date _dateVolumeApproved;
+  private LocalDate _dateVolumeApproved;
   private boolean _randomizedAssayPlateLayout;
   private Set<WellName> _emptyWellsOnAssayPlate = new HashSet<WellName>();
   private String _comments;
@@ -517,7 +519,8 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @return the date of the request
    */
   @Column(nullable=false)
-  public Date getDateRequested()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateRequested()
   {
     return _dateRequested;
   }
@@ -526,9 +529,9 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Set the date created.
    * @param dateRequested the new date created
    */
-  public void setDateRequested(Date dateRequested)
+  public void setDateRequested(LocalDate dateRequested)
   {
-    _dateRequested = truncateDate(dateRequested);
+    _dateRequested = dateRequested;
   }
 
   /**
@@ -596,7 +599,8 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Get the date the volume was approved.
    * @return the date the volume was approved
    */
-  public Date getDateVolumeApproved()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateVolumeApproved()
   {
     return _dateVolumeApproved;
   }
@@ -605,9 +609,9 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Set the date the volume was approved.
    * @param dateVolumeApproved the new date the volume was approved
    */
-  public void setDateVolumeApproved(Date dateVolumeApproved)
+  public void setDateVolumeApproved(LocalDate dateVolumeApproved)
   {
-    _dateVolumeApproved = truncateDate(dateVolumeApproved);
+    _dateVolumeApproved = dateVolumeApproved;
   }
 
   /**
@@ -801,13 +805,13 @@ public abstract class CherryPickRequest extends AbstractEntity
   protected CherryPickRequest(
     Screen screen,
     ScreeningRoomUser requestedBy,
-    Date dateRequested,
+    LocalDate dateRequested,
     Integer legacyId)
   {
     setLegacyCherryPickRequestNumber(legacyId);
     _screen = screen;
     _requestedBy = requestedBy;
-    _dateRequested = truncateDate(dateRequested);
+    _dateRequested = dateRequested;
     if (getDefaultTransferVolume() != null) {
       setTransferVolumePerWellRequested(getDefaultTransferVolume());
       setTransferVolumePerWellApproved(getDefaultTransferVolume());

@@ -9,11 +9,8 @@
 
 package edu.harvard.med.screensaver.io.workbook2;
 
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import jxl.BooleanCell;
@@ -23,6 +20,8 @@ import jxl.NumberCell;
 import jxl.Sheet;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 
 /**
  * Encapsulates the parsing and error annotation operations for a cell in a
@@ -58,24 +57,9 @@ public class Cell
   
   // static methods
   
-  public static Date convertGmtDateToLocalTimeZone(Date date)
+  public static LocalDateTime convertGmtDateToLocalTimeZone(Date date)
   {
-    try {
-      // all of the below nonsense is to convert the GMT-time zone date (as
-      // returned from the workbook) to the local time zone; see
-      // http://www.andykhan.com/jexcelapi/tutorial.html#dates
-      DateFormat dateFormat = DateFormat.getDateInstance();
-      dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-      String formattedDate = dateFormat.format(date); // formatted output is w/o time zone
-      dateFormat.setTimeZone(TimeZone.getDefault()); 
-      Date convertedDate = dateFormat.parse(formattedDate); // convertedDate is now correct for current time zone
-      return convertedDate;
-    }
-    catch (ParseException e) {
-      // should never occur since we're using the DateFormat object to parse what it previously formatted 
-      log.error(e);
-      return date; 
-    }
+    return new LocalDateTime(date.getTime(), DateTimeZone.UTC);
   }
 
 
@@ -407,14 +391,14 @@ public class Cell
    *         is returned (to allow parsing code to proceed w/a default value)
    *         contain a value
    */
-  public Date getDate()
+  public LocalDateTime getDate()
   {
     try {
       jxl.Cell cell = getJxlCell();
       if (cell.getType() == CellType.EMPTY) {
         if (_required) {
           _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
-          return new Date();
+          return new LocalDateTime();
         }
         return null;
       }
@@ -424,14 +408,14 @@ public class Cell
     catch (CellOutOfRangeException e) {
       if (_required) {
         _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
-        return new Date();
+        return new LocalDateTime();
       }
       return null;
     }
     catch (ClassCastException e) {
       if (_required) {
         _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a date)", this);
-        return new Date();
+        return new LocalDateTime();
       }
       return null;
     }

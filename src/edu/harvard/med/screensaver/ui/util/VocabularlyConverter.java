@@ -72,7 +72,7 @@ public class VocabularlyConverter<V> implements Converter
     UIComponent uiComponent,
     String stringValue) throws ConverterException
   {
-    if (stringValue.length() == 0 || stringValue == null) {
+    if (stringValue == null || stringValue.length() == 0) {
       return null;
     }
     NormalizedString normalized = new NormalizedString(stringValue);

@@ -14,9 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +25,6 @@ import java.util.TreeSet;
 
 import jxl.BooleanFormulaCell;
 import jxl.CellType;
-import jxl.DateCell;
 import jxl.NumberCell;
 import jxl.NumberFormulaCell;
 import jxl.Sheet;
@@ -42,7 +39,7 @@ import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.io.workbook2.Cell.Factory;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -55,13 +52,12 @@ import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
-import edu.harvard.med.screensaver.util.DateUtil;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.lang.math.IntRange;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 
 /**
  */
@@ -74,7 +70,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
   public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
-  public static final String SCREEN_RESULT_115_NO_DATE_TEST_WORKBOOK_FILE = "ScreenResultTest115-no-date.xls";
   public static final String SCREEN_RESULT_MISSING_DERIVED_FROM_WORKBOOK_FILE = "ScreenResultTest115-missing-derived-from.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "ScreenResultErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
@@ -295,11 +290,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
                      new Integer(115),
                      new Integer((int) ((NumberCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getValue()));
       }
-      if (screenInfoRow.equals(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING)) {
-        assertEquals(screenInfoRow.name() + " value",
-                     DateUtil.makeDate(2006, 1, 1),
-                     DateUtils.truncate(Cell.convertGmtDateToLocalTimeZone(((DateCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getDate()), Calendar.DATE));
-      }
       ++i;
     }
 
@@ -322,6 +312,24 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  sheet1.getCell('H' - 'A', 11).getContents());
     assertEquals("value required",
                  sheet1.getCell('H' - 'A', 12).getContents());
+  }
+
+  /**
+   * Tests that screen result errors are saved to a new set of workbooks.
+   * @throws IOException
+   * @throws BiffException
+   * @throws WriteException
+   */
+  public void testParseDateCell() throws IOException, BiffException, WriteException
+  {
+    File file = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
+    ParseErrorManager errors = new ParseErrorManager();
+    Workbook workbook = new Workbook(file, errors);
+    Factory cellFactory = new Cell.Factory(workbook, 0, errors);
+    assertEquals(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING + " value",
+                 new LocalDateTime(2006, 1, 1, 0, 0),
+                 cellFactory.getCell((short) ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, 
+                                     ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING.ordinal()).getDate());
   }
 
   /**
@@ -362,37 +370,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
    }
 
   /**
-   * Test that if a screen result file has no "Date of First Screening Room
-   * Activity" value, the screen result's "date created" property should default
-   * to the Screen's first visit date.
-   */
-  public void testScreenResultDateCreated() throws Exception
-  {
-
-    Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    try {
-      screen.createLibraryScreening(
-        screen.getLeadScreener(),
-        DateUtil.makeDate(2007, 1, 1),
-        DateUtil.makeDate(2007, 2, 2));
-    }
-    catch (DuplicateEntityException e) {
-      e.printStackTrace();
-    }
-
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_NO_DATE_TEST_WORKBOOK_FILE);
-    ScreenResult screenResult = mockScreenResultParser.parse(screen,
-                                                             workbookFile);
-    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
-
-    Date expectedDate = DateUtil.makeDate(2007, 2, 2);
-    ScreenResult expectedScreenResult = makeScreenResult(expectedDate);
-    assertEquals("dateCreated",
-                 expectedScreenResult.getDateCreated(),
-                 screenResult.getDateCreated());
-  }
-
-    /**
    * Tests parsing of the new ScreenResult workbook format, which is an
    * "all-in-one" format, and has significant structural changes.
    *
@@ -531,11 +508,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   private void doTestScreenResult115ParseResult(ScreenResult screenResult)
   {
-    Date expectedDate = DateUtil.makeDate(2006, 1, 1);
-    ScreenResult expectedScreenResult = makeScreenResult(expectedDate);
-    assertEquals("date",
-                 expectedDate,
-                 screenResult.getDateCreated());
+    ScreenResult expectedScreenResult = makeScreenResult();
     assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
 
     Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
@@ -701,30 +674,21 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   // testing  utility methods
 
-  public static ScreenResult makeScreenResult(Date date)
+  public static ScreenResult makeScreenResult()
   {
-    Screen screen = makeScreen(date);
-    ScreenResult screenResult = screen.createScreenResult(date);
+    Screen screen = makeScreen();
+    ScreenResult screenResult = screen.createScreenResult();
     return screenResult;
   }
 
-  private static Screen makeScreen(Date date)
+  private static Screen makeScreen()
   {
-    ScreeningRoomUser screener = new ScreeningRoomUser(date,
-                                                       "first",
+    ScreeningRoomUser screener = new ScreeningRoomUser("first",
                                                        "last",
-                                                       "first_last@hms.harvard.edu",
-                                                       "",
-                                                       "",
-                                                       "",
-                                                       "",
-                                                       "",
-                                                       ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                       false);
+                                                       "first_last@hms.harvard.edu");
     Screen screen = new Screen(screener,
                                screener,
                                1,
-                               date,
                                ScreenType.SMALL_MOLECULE,
                                "test screen");
     return screen;

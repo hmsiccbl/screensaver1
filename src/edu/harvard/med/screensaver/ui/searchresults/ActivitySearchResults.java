@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +34,7 @@ import edu.harvard.med.screensaver.ui.util.VocabularlyConverter;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -138,7 +138,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
       new PropertyPath<A>(_type, "datePerformed"),
       "Date Performed", "The date of the activity", TableColumn.UNGROUPED) {
       @Override
-      protected Date getDate(Activity activity) {
+      protected LocalDate getDate(Activity activity) {
         return activity.getDateOfActivity();
       }
     });
@@ -146,8 +146,8 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
       new PropertyPath<A>(_type, "dateRecorded"),
       "Date Recorded", "The date the activity was recorded", TableColumn.UNGROUPED) {
       @Override
-      protected Date getDate(A activity) {
-        return activity.getDateCreated();
+      protected LocalDate getDate(A activity) {
+        return activity.getDateCreated().toLocalDate();
       }
     });
     columns.get(columns.size() - 1).setVisible(showAdminStatusFields());

@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.io.screens;
 
-import java.util.Date;
-
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -26,6 +24,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDateTime;
 
 public class IccbCompoundsStudyCreator
 {
@@ -59,7 +58,7 @@ public class IccbCompoundsStudyCreator
           ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu");
           ScreeningRoomUser leadScreener = labHead;
 
-          study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
+          study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
 
           AnnotationType unsuitableAnnotType = study.createAnnotationType("Unsuitable", "Flag indicating whether compound is unsuitable for screening.", false);

@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.table.column.entity;
 
 import java.util.Comparator;
-import java.util.Date;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.PropertyPath;
@@ -18,9 +17,11 @@ import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.column.ColumnType;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
-public abstract class DateEntityColumn<E extends AbstractEntity> extends EntityColumn<E,Date>
+import org.joda.time.LocalDate;
+
+public abstract class DateEntityColumn<E extends AbstractEntity> extends EntityColumn<E,LocalDate>
 {
-  abstract protected Date getDate(E o);
+  abstract protected LocalDate getDate(E o);
 
   public DateEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
@@ -33,7 +34,7 @@ public abstract class DateEntityColumn<E extends AbstractEntity> extends EntityC
   }
 
   @Override
-  public Date getCellValue(E o)
+  public LocalDate getCellValue(E o)
   {
     return getDate(o);
   }

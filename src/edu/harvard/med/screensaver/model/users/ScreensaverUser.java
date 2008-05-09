@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,13 +29,16 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.util.CryptoUtils;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -57,7 +59,7 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-abstract public class ScreensaverUser extends AbstractEntity
+abstract public class ScreensaverUser extends TimeStampedAbstractEntity
 {
 
   // static fields
@@ -72,7 +74,6 @@ abstract public class ScreensaverUser extends AbstractEntity
   private Integer _version;
   private transient HashMap<String,Boolean> _rolesMap;
   private Set<Activity> _activitiesPerformed = new HashSet<Activity>();
-  private Date _dateCreated;
   private String _firstName;
   private String _lastName;
   private String _email;
@@ -84,7 +85,7 @@ abstract public class ScreensaverUser extends AbstractEntity
   private String _digestedPassword;
   private String _eCommonsId;
   private String _harvardId;
-  private Date _harvardIdExpirationDate;
+  private LocalDate _harvardIdExpirationDate;
 
 
   // public constructors
@@ -104,7 +105,6 @@ abstract public class ScreensaverUser extends AbstractEntity
     String lastName,
     String email)
   {
-    setDateCreated(new Date());
     setFirstName(firstName);
     setLastName(lastName);
     setEmail(email);
@@ -112,7 +112,6 @@ abstract public class ScreensaverUser extends AbstractEntity
 
   /**
    * Construct an initialized <code>ScreensaverUser</code>.
-   * @param dateCreated the date created
    * @param firstName the first name
    * @param lastName the last name
    * @param email the email
@@ -121,7 +120,6 @@ abstract public class ScreensaverUser extends AbstractEntity
    * @param comments the comments
    */
   public ScreensaverUser(
-    Date dateCreated,
     String firstName,
     String lastName,
     String email,
@@ -129,40 +127,12 @@ abstract public class ScreensaverUser extends AbstractEntity
     String mailingAddress,
     String comments)
   {
-    setDateCreated(dateCreated);
     setFirstName(firstName);
     setLastName(lastName);
     setEmail(email);
     setPhone(phone);
     setMailingAddress(mailingAddress);
     setComments(comments);
-  }
-
-  /**
-   * Construct an initialized <code>ScreensaverUser</code>.
-   * @param dateCreated the date created
-   * @param firstName the first name
-   * @param lastName the last name
-   * @param email the email
-   * @param phone the phone number
-   * @param mailingAddress the mailing address
-   * @param comments the comments
-   */
-  public ScreensaverUser(
-    String firstName,
-    String lastName,
-    String email,
-    String phone,
-    String mailingAddress,
-    String comments)
-  {
-    this(new Date(),
-         firstName,
-         lastName,
-         email,
-         phone,
-         mailingAddress,
-         comments);
   }
 
 
@@ -293,25 +263,6 @@ abstract public class ScreensaverUser extends AbstractEntity
   public Set<Activity> getActivitiesPerformed()
   {
     return _activitiesPerformed;
-  }
-
-  /**
-   * Get the date created.
-   * @return the date created
-   */
-  @Column(nullable=false)
-  public Date getDateCreated()
-  {
-    return _dateCreated;
-  }
-
-  /**
-   * Set the date created.
-   * @param dateCreated the new date created
-   */
-  public void setDateCreated(Date dateCreated)
-  {
-    _dateCreated = truncateDate(dateCreated);
   }
 
   /**
@@ -569,7 +520,8 @@ abstract public class ScreensaverUser extends AbstractEntity
    * Get the harvard id expiration date.
    * @return the harvard id expiration date
    */
-  public Date getHarvardIdExpirationDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getHarvardIdExpirationDate()
   {
     return _harvardIdExpirationDate;
   }
@@ -578,9 +530,9 @@ abstract public class ScreensaverUser extends AbstractEntity
    * Set the harvard id expiration date.
    * @param harvardIdExpirationDate the new harvard id expiration date
    */
-  public void setHarvardIdExpirationDate(Date harvardIdExpirationDate)
+  public void setHarvardIdExpirationDate(LocalDate harvardIdExpirationDate)
   {
-    _harvardIdExpirationDate = truncateDate(harvardIdExpirationDate);
+    _harvardIdExpirationDate = harvardIdExpirationDate;
   }
 
 

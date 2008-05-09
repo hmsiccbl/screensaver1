@@ -434,9 +434,9 @@
 							<t:outputLabel for="dateOfLiquidTransfer" value="Date:"
 								styleClass="label"
 								title="The date the reagent transfer took place" />
-							<t:inputDate id="dateOfLiquidTransfer"
+							<t:inputText id="dateOfLiquidTransfer"
 								value="#{cherryPickRequestViewer.dateOfLiquidTransfer}"
-								popupCalendar="true"
+								converter="#{dateConverter}"
 								rendered="#{cherryPickRequestViewer.editable}"
 								styleClass="inputText" />
 							<t:outputLabel for="liquidTransferComments" value="Comments:"

@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +37,8 @@ import edu.harvard.med.screensaver.util.eutils.PublicationInfo;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 public class ScreenSynchronizer
 {
@@ -109,28 +110,29 @@ public class ScreenSynchronizer
       ScreeningRoomUser leadScreener = getLeadScreener(resultSet);
       ScreeningRoomUser labHead = getLabHead(leadScreener);
       Integer screenNumber = resultSet.getInt("id");
-      Date dateCreated = resultSet.getDate("date_created");
+      DateTime dateCreated = ResultSetUtil.getDateTime(resultSet, "date_created");
       ScreenType screenType = _screenUserType.getTermForValue(resultSet.getString("screen_type"));
       String screenTitle = resultSet.getString("screen_title");
-      Date dataMeetingScheduled = resultSet.getDate("data_mtg_schld");
-      Date dataMeetingComplete = resultSet.getDate("data_mtg_done");
+      LocalDate dataMeetingScheduled = ResultSetUtil.getDate(resultSet, "data_mtg_schld");
+      LocalDate dataMeetingComplete = ResultSetUtil.getDate(resultSet, "data_mtg_done");
       String summary = resultSet.getString("summary");
       String comments = resultSet.getString("comments");
       String abaseStudyId = resultSet.getString("study_id");
       String abaseProtocolId = resultSet.getString("protocol_id");
       String keywords = resultSet.getString("keywords");
       String fundingSupportString = resultSet.getString("funding_support");
-      Date publishableProtocolDateEntered = resultSet.getDate("protocol_date_entered");
+      LocalDate publishableProtocolDateEntered = ResultSetUtil.getDate(resultSet, "protocol_date_entered");
       String publishableProtocolEnteredBy = resultSet.getString("protocol_entered_by");
       String publishableProtocol = resultSet.getString("protocol");
       String publishableProtocolComments = resultSet.getString("protocol_comments");
 
       Screen screen = _dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
       if (screen == null) {
-        screen = new Screen(leadScreener, labHead, screenNumber, dateCreated, screenType,
+        screen = new Screen(leadScreener, labHead, screenNumber, screenType,
           StudyType.IN_VITRO,
           screenTitle, dataMeetingScheduled, dataMeetingComplete, summary, comments, abaseStudyId,
           abaseProtocolId);
+        screen.setDateCreated(dateCreated);
       }
       else {
         if (!screen.getScreenType().equals(screenType)) {
@@ -212,7 +214,7 @@ public class ScreenSynchronizer
   {
     BillingInformation billingInformation = screen.getBillingInformation();
     BillingInfoToBeRequested billingInfoToBeRequested = resultSet.getBoolean("billing_info_to_be_requested") ? BillingInfoToBeRequested.YES : BillingInfoToBeRequested.NO;
-    Date billingInfoReturnDate = resultSet.getDate("billing_info_return_date");
+    LocalDate billingInfoReturnDate = ResultSetUtil.getDate(resultSet, "billing_info_return_date");
     String billingComments = resultSet.getString("billing_comments");
     if (billingInformation == null) {
       billingInformation = new BillingInformation(screen, billingInfoToBeRequested);
@@ -265,7 +267,7 @@ public class ScreenSynchronizer
     while (resultSet.next()) {
       Integer screenNumber = resultSet.getInt("screen_id");
       Screen screen = getScreenFromTable("screen_status", screenNumber);
-      Date statusDate = resultSet.getDate("status_date");
+      LocalDate statusDate = ResultSetUtil.getDate(resultSet, "status_date");
       StatusValue statusValue = getStatusValue(resultSet);
       try {
         screen.createStatusItem(statusDate, statusValue);
@@ -314,7 +316,7 @@ public class ScreenSynchronizer
     while (resultSet.next()) {
       Integer screenNumber = resultSet.getInt("screen_id");
       Screen screen = getScreenFromTable("abase", screenNumber);
-      Date testsetDate = resultSet.getDate("abase_date");
+      LocalDate testsetDate = ResultSetUtil.getDate(resultSet, "abase_date");
       String testsetName = resultSet.getString("testset_name");
       String comments = resultSet.getString("comments");
       screen.createAbaseTestset(testsetDate, testsetName, comments);

@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.util.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +28,8 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -57,9 +57,9 @@ public class ChecklistItem extends AbstractEntity
   private Integer _version;
   private ChecklistItemType _checklistItemType;
   private ScreeningRoomUser _screeningRoomUser;
-  private Date _activationDate;
+  private LocalDate _activationDate;
   private String _activationInitials;
-  private Date _deactivationDate;
+  private LocalDate _deactivationDate;
   private String _deactivationInitials;
 
 
@@ -130,7 +130,8 @@ public class ChecklistItem extends AbstractEntity
    * Get the activation date.
    * @return the activation date
    */
-  public Date getActivationDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getActivationDate()
   {
     return _activationDate;
   }
@@ -139,9 +140,9 @@ public class ChecklistItem extends AbstractEntity
    * Set the activation date.
    * @param activationDate the new activation date
    */
-  public void setActivationDate(Date activationDate)
+  public void setActivationDate(LocalDate activationDate)
   {
-    _activationDate = truncateDate(activationDate);
+    _activationDate = activationDate;
   }
 
   /**
@@ -167,7 +168,8 @@ public class ChecklistItem extends AbstractEntity
    * Get the deactivation date.
    * @return the deactivation date
    */
-  public Date getDeactivationDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDeactivationDate()
   {
     return _deactivationDate;
   }
@@ -176,9 +178,9 @@ public class ChecklistItem extends AbstractEntity
    * Set the deactivation date.
    * @param deactivationDate the new deactivation date
    */
-  public void setDeactivationDate(Date deactivationDate)
+  public void setDeactivationDate(LocalDate deactivationDate)
   {
-    _deactivationDate = truncateDate(deactivationDate);
+    _deactivationDate = deactivationDate;
   }
 
   /**
@@ -207,7 +209,7 @@ public class ChecklistItem extends AbstractEntity
    * Construct an initialized <code>ChecklistItem</code>.
    * <p>
    * Intended only for use by {@link
-   * ScreeningRoomUser#createChecklistItem(ChecklistItemType, Date, String, Date, String)}.
+   * ScreeningRoomUser#createChecklistItem(ChecklistItemType, LocalDate, String, LocalDate, String)}.
    * @param checklistItemType the checklist item type
    * @param screeningRoomUser the screening room user
    * @param activationDate the activation date
@@ -218,9 +220,9 @@ public class ChecklistItem extends AbstractEntity
   ChecklistItem(
     ChecklistItemType checklistItemType,
     ScreeningRoomUser screeningRoomUser,
-    Date activationDate,
+    LocalDate activationDate,
     String activationInitials,
-    Date deactivationDate,
+    LocalDate deactivationDate,
     String deactivationInitials)
   {
     if (checklistItemType == null || screeningRoomUser == null) {
@@ -228,9 +230,9 @@ public class ChecklistItem extends AbstractEntity
     }
     _checklistItemType = checklistItemType;
     _screeningRoomUser = screeningRoomUser;
-    _activationDate = truncateDate(activationDate);
+    _activationDate = activationDate;
     _activationInitials = activationInitials;
-    _deactivationDate = truncateDate(deactivationDate);
+    _deactivationDate = deactivationDate;
     _deactivationInitials = deactivationInitials;
   }
 

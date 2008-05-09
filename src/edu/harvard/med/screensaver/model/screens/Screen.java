@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,6 +54,8 @@ import edu.harvard.med.screensaver.util.StringUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -82,7 +83,6 @@ public class Screen extends Study
   private Integer _screenId;
   private Integer _version;
   private String _title;
-  private Date _dateCreated;
   private ScreeningRoomUser _leadScreener; // should rename
   private ScreeningRoomUser _labHead;
   private Set<ScreeningRoomUser> _collaborators = new HashSet<ScreeningRoomUser>();
@@ -110,16 +110,16 @@ public class Screen extends Study
 
   private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
   private Set<LabActivity> _labActivities = new HashSet<LabActivity>();
-  private Date _dataMeetingScheduled;
-  private Date _dataMeetingComplete;
+  private LocalDate _dataMeetingScheduled;
+  private LocalDate _dataMeetingComplete;
   private BillingInformation _billingInformation;
   private Set<FundingSupport> _fundingSupports = new HashSet<FundingSupport>();
-  private Date _dateOfApplication;
+  private LocalDate _dateOfApplication;
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private String _abaseStudyId;
   private String _abaseProtocolId;
   private Set<LetterOfSupport> _lettersOfSupport = new HashSet<LetterOfSupport>();
-  private Date _publishableProtocolDateEntered;
+  private LocalDate _publishableProtocolDateEntered;
   private String _publishableProtocolEnteredBy;private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
 
 
@@ -130,7 +130,6 @@ public class Screen extends Study
    * @param leadScreener the lead screener
    * @param labHead the lab head
    * @param screenNumber the screen number
-   * @param dateCreated the date created
    * @param screenType the screen type
    * @param title the title
    */
@@ -138,7 +137,6 @@ public class Screen extends Study
     ScreeningRoomUser leadScreener,
     ScreeningRoomUser labHead,
     Integer screenNumber,
-    Date dateCreated,
     ScreenType screenType,
     String title)
   {
@@ -146,7 +144,6 @@ public class Screen extends Study
       leadScreener,
       labHead,
       screenNumber,
-      dateCreated,
       screenType,
       StudyType.IN_VITRO,
       title,
@@ -163,7 +160,6 @@ public class Screen extends Study
    * @param leadScreener the lead screener
    * @param labHead the lab head
    * @param screenNumber the screen number
-   * @param dateCreated the date created
    * @param screenType the screen type
    * @param studyType the study type
    * @param title the title
@@ -172,7 +168,6 @@ public class Screen extends Study
     ScreeningRoomUser leadScreener,
     ScreeningRoomUser labHead,
     Integer screenNumber,
-    Date dateCreated,
     ScreenType screenType,
     StudyType studyType,
     String title)
@@ -181,7 +176,6 @@ public class Screen extends Study
       leadScreener,
       labHead,
       screenNumber,
-      dateCreated,
       screenType,
       studyType,
       title,
@@ -198,7 +192,6 @@ public class Screen extends Study
    * @param leadScreener the lead screener
    * @param labHead the lab head
    * @param screenNumber the screen number
-   * @param dateCreated the date created
    * @param screenType the screen type
    * @param studyType the study type
    * @param title the title
@@ -213,12 +206,11 @@ public class Screen extends Study
     ScreeningRoomUser leadScreener,
     ScreeningRoomUser labHead,
     Integer screenNumber,
-    Date dateCreated,
     ScreenType screenType,
     StudyType studyType,
     String title,
-    Date dataMeetingScheduled,
-    Date dataMeetingComplete,
+    LocalDate dataMeetingScheduled,
+    LocalDate dataMeetingComplete,
     String summary,
     String comments,
     String abaseStudyId,
@@ -230,14 +222,13 @@ public class Screen extends Study
     _leadScreener = leadScreener;
     _labHead = labHead;
     _screenNumber = screenNumber;
-    _dateCreated = truncateDate(dateCreated);
     _screenType = screenType;
     _title = title;
     _leadScreener.getScreensLed().add(this);
     _labHead.getScreensHeaded().add(this);
     _studyType = studyType;
-    _dataMeetingScheduled = truncateDate(dataMeetingScheduled);
-    _dataMeetingComplete = truncateDate(dataMeetingComplete);
+    _dataMeetingScheduled = dataMeetingScheduled;
+    _dataMeetingComplete = dataMeetingComplete;
     _summary = summary;
     _comments = comments;
     _abaseStudyId = abaseStudyId;
@@ -463,25 +454,11 @@ public class Screen extends Study
 
   /**
    * Create and return a new screen result for the screen.
-   * @param dateCreated the date the screen result data was initially created
    * @return the new screen result
    */
-  public ScreenResult createScreenResult(Date dateCreated)
+  public ScreenResult createScreenResult()
   {
-    return createScreenResult(dateCreated, false, null);
-  }
-
-  /**
-   * Create and return a new screen result for the screen.
-   * @param dateCreated the date the screen result data was initially created
-   * @param isShareable whether the screen result can be viewed by all users of the system
-   * @param replicateCount the number of replicates (assay plates) associated with the screen
-   * result
-   * @return the new screen result
-   */
-  public ScreenResult createScreenResult(Date dateCreated, boolean isShareable, Integer replicateCount)
-  {
-    _screenResult = new ScreenResult(this, dateCreated, isShareable, replicateCount);
+    _screenResult = new ScreenResult(this, false, null);
     return _screenResult;
   }
 
@@ -530,7 +507,7 @@ public class Screen extends Study
    * @param statusValue the status value
    * @return the new status item
    */
-  public StatusItem createStatusItem(Date statusDate, StatusValue statusValue)
+  public StatusItem createStatusItem(LocalDate statusDate, StatusValue statusValue)
   {
     StatusItem statusItem = new StatusItem(this, statusDate, statusValue);
     _statusItems.add(statusItem);
@@ -579,17 +556,15 @@ public class Screen extends Study
   /**
    * Create and return a new library screening for the screen.
    * @param performedBy the user that performed the library assay
-   * @param dateCreated the date created
    * @param assayProtocolType the assay protocol type
    * @return the new library screening
    */
   public LibraryScreening createLibraryScreening(
     ScreeningRoomUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity)
+    LocalDate dateOfActivity)
   {
     LibraryScreening libraryScreening =
-      new LibraryScreening(this, performedBy, dateCreated, dateOfActivity);
+      new LibraryScreening(this, performedBy, dateOfActivity);
     _labActivities.add(libraryScreening);
     return libraryScreening;
   }
@@ -597,18 +572,15 @@ public class Screen extends Study
   /**
    * Create and return a new cherry pick liquid transfer for the screen.
    * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
    * @param dateOfActivity the date the lab activity took place
    * @return the new cherry pick liquid transfer
    */
   public CherryPickLiquidTransfer createCherryPickLiquidTransfer(
     ScreensaverUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity)
+    LocalDate dateOfActivity)
   {
     return createCherryPickLiquidTransfer(
       performedBy,
-      dateCreated,
       dateOfActivity,
       CherryPickLiquidTransferStatus.SUCCESSFUL);
   }
@@ -616,21 +588,18 @@ public class Screen extends Study
   /**
    * Create and return a new cherry pick liquid transfer for the screen.
    * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
    * @param dateOfActivity the date the lab activity took place
    * @param status the status of the cherry pick liquid transfer
    * @return the new cherry pick liquid transfer
    */
   public CherryPickLiquidTransfer createCherryPickLiquidTransfer(
     ScreensaverUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity,
+    LocalDate dateOfActivity,
     CherryPickLiquidTransferStatus status)
   {
     CherryPickLiquidTransfer cherryPickLiquidTransfer = new CherryPickLiquidTransfer(
       this,
       performedBy,
-      dateCreated,
       dateOfActivity,
       status);
     _labActivities.add(cherryPickLiquidTransfer);
@@ -640,21 +609,18 @@ public class Screen extends Study
   /**
    * Create and return a new rnai cherry pick screening for the screen.
    * @param performedBy the user that performed the screening
-   * @param dateCreated the date created
    * @param dateOfActivity the date the screening took place
    * @param rnaiCherryPickRequest the RNAi cherry pick request
    * @return the newly created rnai cherry pick screening
    */
   public RNAiCherryPickScreening createRNAiCherryPickScreening(
     ScreeningRoomUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity,
+    LocalDate dateOfActivity,
     RNAiCherryPickRequest rnaiCherryPickRequest)
   {
     RNAiCherryPickScreening screening = new RNAiCherryPickScreening(
       this,
       performedBy,
-      dateCreated,
       dateOfActivity,
       rnaiCherryPickRequest);
     _labActivities.add(screening);
@@ -692,7 +658,7 @@ public class Screen extends Study
    */
   public CherryPickRequest createCherryPickRequest()
   {
-    return createCherryPickRequest(getLeadScreener(), new Date(), null);
+    return createCherryPickRequest(getLeadScreener(), new LocalDate(), null);
   }
 
   /**
@@ -705,7 +671,7 @@ public class Screen extends Study
    */
   public CherryPickRequest createCherryPickRequest(
     ScreeningRoomUser requestedBy,
-    Date dateRequested)
+    LocalDate dateRequested)
   {
     return createCherryPickRequest(requestedBy, dateRequested, null);
   }
@@ -720,7 +686,7 @@ public class Screen extends Study
    */
   public CherryPickRequest createCherryPickRequest(
     ScreeningRoomUser requestedBy,
-    Date dateRequested,
+    LocalDate dateRequested,
     Integer legacyId)
   {
     CherryPickRequest cherryPickRequest;
@@ -764,7 +730,7 @@ public class Screen extends Study
    * @param comments the comments
    * @return the new abase testset
    */
-  public AbaseTestset createAbaseTestset(Date testsetDate, String testsetName, String comments)
+  public AbaseTestset createAbaseTestset(LocalDate testsetDate, String testsetName, String comments)
   {
     AbaseTestset abaseTestset = new AbaseTestset(this, testsetDate, testsetName, comments);
     _abaseTestsets.add(abaseTestset);
@@ -843,7 +809,7 @@ public class Screen extends Study
    * @param writtenBy the written by
    * @return the new letter for support
    */
-  public LetterOfSupport createLetterOfSupport(Date dateWritten, String writtenBy)
+  public LetterOfSupport createLetterOfSupport(LocalDate dateWritten, String writtenBy)
   {
     LetterOfSupport letterOfSupport = new LetterOfSupport(this, dateWritten, writtenBy);
     _lettersOfSupport.add(letterOfSupport);
@@ -990,25 +956,6 @@ public class Screen extends Study
   }
 
   /**
-   * Get the date created.
-   * @return the date created
-   */
-  @Column(nullable=false)
-  public Date getDateCreated()
-  {
-    return _dateCreated;
-  }
-
-  /**
-   * Set the date created.
-   * @param dateCreated the new date created
-   */
-  public void setDateCreated(Date dateCreated)
-  {
-    _dateCreated = truncateDate(dateCreated);
-  }
-
-  /**
    * Get the study type.
    * @return the study type
    */
@@ -1077,7 +1024,8 @@ public class Screen extends Study
    * @return the data meeting scheduled
    */
   @Column
-  public Date getDataMeetingScheduled()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDataMeetingScheduled()
   {
     return _dataMeetingScheduled;
   }
@@ -1086,9 +1034,9 @@ public class Screen extends Study
    * Set the data meeting scheduled date.
    * @param dataMeetingScheduled the new data meeting scheduled date
    */
-  public void setDataMeetingScheduled(Date dataMeetingScheduled)
+  public void setDataMeetingScheduled(LocalDate dataMeetingScheduled)
   {
-    _dataMeetingScheduled = truncateDate(dataMeetingScheduled);
+    _dataMeetingScheduled = dataMeetingScheduled;
   }
 
   /**
@@ -1096,7 +1044,8 @@ public class Screen extends Study
    * @return the data meeting completed date
    */
   @Column
-  public Date getDataMeetingComplete()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDataMeetingComplete()
   {
     return _dataMeetingComplete;
   }
@@ -1105,9 +1054,9 @@ public class Screen extends Study
    * Set the data meeting complete.
    * @param dataMeetingComplete the new data meeting complete
    */
-  public void setDataMeetingComplete(Date dataMeetingComplete)
+  public void setDataMeetingComplete(LocalDate dataMeetingComplete)
   {
-    _dataMeetingComplete = truncateDate(dataMeetingComplete);
+    _dataMeetingComplete = dataMeetingComplete;
   }
 
   /**
@@ -1308,7 +1257,8 @@ public class Screen extends Study
    * Get the date the publishable protocol was entered.
    * @return the date the publishable protocol was entered
    */
-  public Date getPublishableProtocolDateEntered()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getPublishableProtocolDateEntered()
   {
     return _publishableProtocolDateEntered;
   }
@@ -1317,7 +1267,7 @@ public class Screen extends Study
    * Set the date the publishable protocol was entered.
    * @param publishableProtocolDateEntered the new date the publishable protocol was entered
    */
-  public void setPublishableProtocolDateEntered(Date publishableProtocolDateEntered)
+  public void setPublishableProtocolDateEntered(LocalDate publishableProtocolDateEntered)
   {
     _publishableProtocolDateEntered = publishableProtocolDateEntered;
   }
@@ -1385,7 +1335,8 @@ public class Screen extends Study
    * @return the date of application
    */
   @Column
-  public Date getDateOfApplication()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateOfApplication()
   {
     return _dateOfApplication;
   }
@@ -1394,9 +1345,9 @@ public class Screen extends Study
    * Set the date of application.
    * @param dateOfApplication the new date of application
    */
-  public void setDateOfApplication(Date dateOfApplication)
+  public void setDateOfApplication(LocalDate dateOfApplication)
   {
-    _dateOfApplication = truncateDate(dateOfApplication);
+    _dateOfApplication = dateOfApplication;
   }
 
   /**

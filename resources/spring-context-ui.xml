@@ -604,7 +604,7 @@
 
   <bean id="stringConverter" class="edu.harvard.med.screensaver.ui.util.NoOpStringConverter" />
 
-  <bean id="dateConverter" class="edu.harvard.med.screensaver.ui.table.column.ShortDateTimeConverter" />
+  <bean id="dateConverter" class="edu.harvard.med.screensaver.ui.table.column.LocalDateConverter" />
 
   <bean id="listConverter" class="edu.harvard.med.screensaver.ui.table.column.ListConverter" />
 

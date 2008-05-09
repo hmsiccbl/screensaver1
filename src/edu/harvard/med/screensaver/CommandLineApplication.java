@@ -10,11 +10,9 @@
 package edu.harvard.med.screensaver;
 
 import java.lang.reflect.Constructor;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +25,8 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -57,6 +57,8 @@ public class CommandLineApplication
   private static final Logger log = Logger.getLogger(CommandLineApplication.class);
 
   public static final String DEFAULT_SPRING_CONFIG = "spring-context-cmdline.xml";
+
+  public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
 
 
   // instance data
@@ -212,21 +214,20 @@ public class CommandLineApplication
     return null;
   }
 
-  public Date getCommandLineOptionValue(String optionName,
-                                        Class<? extends Date> ofType,
-                                        DateFormat dateFormat)
+  public DateTime getCommandLineOptionValue(String optionName,
+                                            DateTimeFormatter formatter)
     throws ParseException
   {
     verifyOptionsProcessed();
     _lastAccessOption = _options.getOption(optionName);
     if (!_cmdLine.hasOption(optionName) &&
       _option2DefaultValue.containsKey(optionName)) {
-      return (Date) _option2DefaultValue.get(optionName);
+      return (DateTime) _option2DefaultValue.get(optionName);
     }
     if (_cmdLine.hasOption(optionName)) {
       try {
         String value = getCommandLineOptionValue(optionName);
-        return dateFormat.parse(value);
+        return formatter.parseDateTime(value);
       }
       catch (Exception e) {
         throw new ParseException("could not parse date option " + optionName);

@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.ui.screenresults;
 
 import java.awt.Color;
 import java.text.NumberFormat;
-import java.util.Date;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
@@ -38,7 +37,7 @@ public class HeatMapCellTest extends AbstractSpringTest
   public void testHeatMapCell()
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    ScreenResult screenResult = screen.createScreenResult(new Date());
+    ScreenResult screenResult = screen.createScreenResult();
     ResultValueType rvt = screenResult.createResultValueType("rvt1");
     Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
     Well well = library.createWell(new WellKey(1, "A01"), WellType.EMPTY);

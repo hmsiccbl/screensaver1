@@ -46,7 +46,7 @@ public enum ColumnType {
          Operator.COMPARABLE_OPERATORS,
          Operator.EQUAL),
   DATE(false,
-       new ShortDateTimeConverter(),
+       new LocalDateConverter(),
        Operator.COMPARABLE_OPERATORS,
        Operator.EQUAL),
   BOOLEAN(false,

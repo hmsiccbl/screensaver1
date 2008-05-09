@@ -10,8 +10,6 @@
 package edu.harvard.med.screensaver.service.libraries;
 
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -28,8 +26,8 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
 {
@@ -60,7 +58,7 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
 
   public void testCreatePlateCopy() throws ExtantLibraryException
   {
-    Date today = new Date();
+    LocalDate today = new LocalDate();
     Volume volume = new Volume(22);
 
     try {
@@ -81,7 +79,7 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
         assertEquals(expectedCopyName, copyInfo.getCopy().getName());
         assertEquals(volume, copyInfo.getWellVolume());
         assertEquals(PlateType.EPPENDORF, copyInfo.getPlateType());
-        assertEquals(DateUtils.truncate(today, Calendar.DATE), copyInfo.getDatePlated());
+        assertEquals(today, copyInfo.getDatePlated());
       }
     }
     

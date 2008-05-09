@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +27,8 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 
 /**
@@ -150,16 +151,14 @@ public abstract class LabActivity extends Activity
    * Construct an initialized <code>LabActivity</code>.
    * @param screen the screen
    * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
    * @param dateOfActivity the date the lab activity took place
    */
   protected LabActivity(
     Screen screen,
     ScreensaverUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity)
+    LocalDate dateOfActivity)
   {
-    super(performedBy, dateCreated, dateOfActivity);
+    super(performedBy, dateOfActivity);
     if (screen == null) {
       throw new NullPointerException();
     }

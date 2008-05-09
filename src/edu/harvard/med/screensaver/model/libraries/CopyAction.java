@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,6 +26,8 @@ import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -54,7 +54,7 @@ public class CopyAction extends AbstractEntity
   private Integer _version;
   private CopyInfo _copyInfo;
   private String _description;
-  private Date _date;
+  private LocalDate _date;
 
 
   // public constructor
@@ -127,7 +127,8 @@ public class CopyAction extends AbstractEntity
    * @return the date
    */
   @Column(nullable=false)
-  public Date getDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDate()
   {
     return _date;
   }
@@ -136,9 +137,9 @@ public class CopyAction extends AbstractEntity
    * Set the date.
    * @param date the new date
    */
-  public void setDate(Date date)
+  public void setDate(LocalDate date)
   {
-    _date = truncateDate(date);
+    _date = date;
   }
 
 
@@ -153,11 +154,11 @@ public class CopyAction extends AbstractEntity
   CopyAction(
     CopyInfo copyInfo,
     String description,
-    Date date)
+    LocalDate date)
   {
     _copyInfo = copyInfo;
     _description = description;
-    _date = truncateDate(date);
+    _date = date;
   }
 
 

@@ -14,9 +14,7 @@ package edu.harvard.med.screensaver.model;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Transient;
@@ -27,7 +25,6 @@ import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.proxy.HibernateProxyHelper;
 
@@ -251,33 +248,6 @@ public abstract class AbstractEntity implements Serializable
 
 
   // protected methods
-
-  /**
-   * Remove the time portion of the date and return the result.
-   *
-   * @param originalDate the date to truncate
-   * @return the truncated date
-   */
-  protected Date truncateDate(Date originalDate)
-  {
-    return truncateDate(originalDate, Calendar.DATE);
-  }
-
-  /**
-   * Remove the time portion of the date that is less significant than
-   * <code>mostSignificantField</code>.
-   *
-   * @param originalDate the date to truncate
-   * @param mostSignificantField the field from Calendar
-   * @return the truncated date
-   */
-  protected Date truncateDate(Date originalDate, int mostSignificantField)
-  {
-    if (originalDate == null) {
-      return null;
-    }
-    return DateUtils.truncate(originalDate, mostSignificantField);
-  }
 
   /**
    * Return true iff the caller of the method that is calling this method is

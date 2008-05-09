@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +23,6 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -132,32 +130,16 @@ public class ScreenResultExporterTest extends AbstractSpringTest
 
   private void addDummyCollaboratorsToScreen(ScreenResult screenResult)
   {
-    ScreeningRoomUser collaborator1 = new ScreeningRoomUser(new Date(),
-                                                            "Cindy",
+    ScreeningRoomUser collaborator1 = new ScreeningRoomUser("Cindy",
                                                             "Collaborator",
                                                             "cindy_collaborator_"
                                                             + screenResult.getScreen().getScreenNumber()
-                                                            + "@hms.harvard.edu",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            ScreeningRoomUserClassification.OTHER,
-                                                            true);
-    ScreeningRoomUser collaborator2 = new ScreeningRoomUser(new Date(),
-                                                            "Chris",
+                                                            + "@hms.harvard.edu");
+    ScreeningRoomUser collaborator2 = new ScreeningRoomUser("Chris",
                                                             "Collaborator",
                                                             "chris_collaborator_"
                                                             + screenResult.getScreen().getScreenNumber()
-                                                            + "@hms.harvard.edu",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            "",
-                                                            ScreeningRoomUserClassification.OTHER,
-                                                            true);
+                                                            + "@hms.harvard.edu");
 
     screenResult.getScreen().addCollaborator(collaborator1);
     screenResult.getScreen().addCollaborator(collaborator2);

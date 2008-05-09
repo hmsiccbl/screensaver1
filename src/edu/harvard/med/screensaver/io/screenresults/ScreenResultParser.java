@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,9 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +56,6 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericaln
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.LabActivity;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.IntRange;
@@ -520,9 +516,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   {
     DataHeadersParseResult dataHeadersParseResult = new DataHeadersParseResult();
     Sheet dataHeadersSheet = initializeDataHeadersSheet(workbook);
-    ParsedScreenInfo parsedScreenInfo = parseScreenInfo(workbook, screen);
+    parseScreenInfo(workbook, screen);
 
-    ScreenResult screenResult = screen.createScreenResult(parsedScreenInfo.getDateCreated());
+    ScreenResult screenResult = screen.createScreenResult();
     dataHeadersParseResult.setScreenResult(screenResult);
     int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
@@ -897,17 +893,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private static class ParsedScreenInfo {
     private Integer _screenId;
-    private Date _date;
-
-    public Date getDateCreated()
-    {
-      return _date;
-    }
-
-    public void setDate(Date date)
-    {
-      _date = date;
-    }
 
     public Integer getScreenNumber()
     {
@@ -943,11 +928,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         Cell labelCell = factory.getCell((short) 0, iRow);
         String rowLabel = labelCell.getString();
         if (rowLabel != null) {
-          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING.getDisplayText())) {
-            Cell valueCell = factory.getCell((short) 1, iRow, false);
-            parsedScreenInfo.setDate(valueCell.getDate());
-          }
-          else if (rowLabel.equalsIgnoreCase(ScreenInfoRow.ID.getDisplayText())) {
+          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.ID.getDisplayText())) {
             Cell valueCell = factory.getCell((short) 1, iRow, true);
             parsedScreenInfo.setScreenId(valueCell.getInteger());
           }
@@ -961,17 +942,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _errors.addError("screen result data file is for screen number " +
                        parsedScreenInfo.getScreenNumber() +
                        ", expected " + screen.getScreenNumber());
-    }
-    if (parsedScreenInfo.getDateCreated() == null) {
-      if (screen.getLabActivities().size() > 0) {
-        SortedSet<LabActivity> sortedLabActivities =
-          new TreeSet<LabActivity>(screen.getLabActivities());
-        parsedScreenInfo.setDate(sortedLabActivities.first().getDateOfActivity());
-      }
-      else {
-        log.warn("screen result's screen has no library screenings, so screen result's \"date created\" property will be set to today");
-        parsedScreenInfo.setDate(new Date());
-      }
     }
     return parsedScreenInfo;
   }

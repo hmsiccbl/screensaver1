@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,8 @@ import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
+
+import org.joda.time.LocalDate;
 
 
 /**
@@ -233,7 +234,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       "Status Date", "The date of the most recent change of status for the screen",
       TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
-      protected Date getDate(Screen screen) {
+      protected LocalDate getDate(Screen screen) {
         SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
         return statusItems.size() == 0 ? null : statusItems.last().getStatusDate();
       }

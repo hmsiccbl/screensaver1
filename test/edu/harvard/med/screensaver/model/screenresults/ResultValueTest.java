@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.beans.IntrospectionException;
-import java.util.Date;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -34,7 +33,7 @@ public class ResultValueTest extends AbstractEntityInstanceTest<ResultValue>
   public void testResultValueNumericPrecision()
   {
     ScreenResult screenResult =
-      MakeDummyEntities.makeDummyScreen(1).createScreenResult(new Date());
+      MakeDummyEntities.makeDummyScreen(1).createScreenResult();
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     Well well = library.createWell(new WellKey("00001:A01"), WellType.EXPERIMENTAL);
     ResultValueType rvt = screenResult.createResultValueType("rvt");

@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.io.workbook2;
 
-import java.util.Date;
+import org.joda.time.LocalDateTime;
 
 public class NullCell extends Cell
 {
@@ -50,7 +50,7 @@ public class NullCell extends Cell
   }
 
   @Override
-  public Date getDate()
+  public LocalDateTime getDate()
   {
     return null;
   }

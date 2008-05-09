@@ -66,10 +66,10 @@ extends AbstractPropertiesTester<E>
     {
       assertNotNull("property has public getter: " + getPropertyFullname(), getReadMethod());
       
-      if (setterOrAdderMethodNotExpected() || isCollectionProperty()) {
+      if (setterOrAdderMethodNotExpected()) {
         assertNull("property does not have public setter: " + getPropertyFullname(), getWriteMethod());
       }
-      else {
+      else if (!isCollectionProperty()) { // a collection property *may* have a setter, optionally
         assertNotNull("property has public setter: " + getPropertyFullname(), getWriteMethod());
       }
     }

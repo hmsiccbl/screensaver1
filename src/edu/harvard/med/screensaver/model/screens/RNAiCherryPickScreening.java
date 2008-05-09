@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -18,11 +16,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 /**
  * A Hibernate entity bean representing a library screening performed on set of
@@ -102,18 +102,16 @@ public class RNAiCherryPickScreening extends Screening
    * Construct an initialized <code>RNAiCherryPickScreening</code>.
    * @param screen the screen
    * @param performedBy the user that performed the screening
-   * @param dateCreated the date created
    * @param dateOfActivity the date the screening took place
    * @param rnaiCherryPickRequest the RNAi cherry pick request
    */
   RNAiCherryPickScreening(
     Screen screen,
     ScreeningRoomUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity,
+    LocalDate dateOfActivity,
     RNAiCherryPickRequest rnaiCherryPickRequest)
   {
-    super(screen, performedBy, dateCreated, dateOfActivity);
+    super(screen, performedBy, dateOfActivity);
     _rnaiCherryPickRequest = rnaiCherryPickRequest;
     _rnaiCherryPickRequest.getRNAiCherryPickScreenings().add(this);
   }

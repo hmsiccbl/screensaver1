@@ -15,13 +15,13 @@ import java.util.SortedSet;
 
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
-public abstract class Study extends AbstractEntity
+public abstract class Study extends TimeStampedAbstractEntity
 {
   public static final Integer MIN_STUDY_NUMBER = 100000;
 

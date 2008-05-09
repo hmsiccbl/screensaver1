@@ -93,8 +93,8 @@
 									rendered="#{column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME'}"
 									size="#{column.columnType.name == 'TEXT' ? 30 : 8}"
 									styleClass="inputText" />
-								<t:inputDate id="dateCriterionValue" type="date"
-									popupCalendar="true" size="1" value="#{column.criterion.value}"
+								<t:inputText id="dateCriterionValue" size="1"
+									value="#{column.criterion.value}" converter="#{dateConverter}"
 									rendered="#{column.columnType.name == 'DATE'}"
 									styleClass="inputText" />
 								<t:selectOneMenu id="vocabularyCriterionValue"
@@ -192,9 +192,8 @@
 										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
 										displayValueOnlyStyleClass="data"
 										tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
-									<t:inputDate id="dateCriterionValue" type="date"
-										popupCalendar="true" size="1"
-										value="#{column.criterion.value}"
+									<t:inputText id="dateCriterionValue" size="1"
+										value="#{column.criterion.value}" converter="#{dateConverter}"
 										rendered="#{column.columnType.name == 'DATE' &amp;&amp; searchResults.tableFilterMode}"
 										styleClass="inputText"
 										tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
@@ -253,7 +252,7 @@
 									action="#{searchResults.cellAction}">
 									<f:param name="commandValue"
 										value="#{searchResults.escapeBackslashes[item]}" />
-									<t:outputText id="text" value="#{item}" />
+									<t:outputText id="text" value="#{item}" converter="#{column.converter}" />
 								</t:commandLink>
 								<t:outputText value=", " rendered="#{itemIndex &lt; itemCount - 1}" />
 							</t:dataList>

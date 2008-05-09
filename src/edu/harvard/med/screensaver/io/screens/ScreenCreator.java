@@ -10,9 +10,7 @@
 package edu.harvard.med.screensaver.io.screens;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +25,14 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.dao.DataIntegrityViolationException;
 
 /**
@@ -52,14 +52,14 @@ public class ScreenCreator
   {
     final CommandLineApplication app = new CommandLineApplication(args);
     try {
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+      DateTimeFormatter dateFormat = DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN);
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("#").withLongOpt("number").create("n"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("title").withLongOpt("title").withDescription("the title of the screen").create("t"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("screen type").withLongOpt("screen-type").withDescription(StringUtils.makeListString(Arrays.asList(ScreenType.values()), ", ")).create("y"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("study type").withLongOpt("study-type").withDescription(StringUtils.makeListString(Arrays.asList(ScreenType.values()), ", ")).create("yy"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("text").withLongOpt("summary").create("s"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("text").withLongOpt("protocol").create("p"));
-      app.addCommandLineOption(OptionBuilder.hasArg().withArgName(dateFormat.toPattern()).withLongOpt("date-created").create("d"));
+      app.addCommandLineOption(OptionBuilder.hasArg().withArgName(CommandLineApplication.DEFAULT_DATE_PATTERN).withLongOpt("date-created").create("d"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("file").withLongOpt("result-file").create("f"));
 
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("first name").withLongOpt("lab-head-first-name").create("hf"));
@@ -82,7 +82,7 @@ public class ScreenCreator
       final StudyType studyType = app.getCommandLineOptionEnumValue("yy", StudyType.class);
       final String summary = app.isCommandLineFlagSet("s") ? app.getCommandLineOptionValue("s") : null;
       final String protocol = app.isCommandLineFlagSet("p") ? app.getCommandLineOptionValue("p") : null;
-      final Date dateCreated = app.isCommandLineFlagSet("d") ? app.getCommandLineOptionValue("d", Date.class, dateFormat) : new Date();
+      final DateTime dateCreated = app.isCommandLineFlagSet("d") ? app.getCommandLineOptionValue("d", dateFormat) : new DateTime();
       final File screenResultFile = app.isCommandLineFlagSet("f") ?  app.getCommandLineOptionValue("f", File.class) : null;
 
       final String labHeadFirstName = app.getCommandLineOptionValue("hf");
@@ -103,7 +103,8 @@ public class ScreenCreator
               log.info("set lab head for lead screener");
             }
 
-            Screen screen = new Screen(leadScreener, labHead, screenNumber, dateCreated, screenType, studyType, title);
+            Screen screen = new Screen(leadScreener, labHead, screenNumber, screenType, studyType, title);
+            screen.setDateCreated(dateCreated);
             screen.setSummary(summary);
             screen.setPublishableProtocol(protocol);
 
@@ -119,7 +120,9 @@ public class ScreenCreator
                 log.info("screen result successfully imported");
               }
             }
-            dao.saveOrUpdateEntity(screen);
+            dao.persistEntity(screen.getLabHead());
+            dao.persistEntity(screen.getLeadScreener());
+            dao.persistEntity(screen);
           }
           catch (Exception e) {
             throw new DAOTransactionRollbackException(e);
@@ -166,7 +169,7 @@ public class ScreenCreator
       log.info("found existing user " + users.get(0) + " for " + firstName + " " + lastName + " (" + email + ")");
       return users.get(0);
     }
-    ScreeningRoomUser newUser = new ScreeningRoomUser(new Date(), firstName, lastName, email, "", "", "", "", "", ScreeningRoomUserClassification.UNASSIGNED, false);
+    ScreeningRoomUser newUser = new ScreeningRoomUser(firstName, lastName, email);
     log.info("created new user " + newUser + " for " + firstName + " " + lastName + " (" + email + ")");
     return newUser;
   }

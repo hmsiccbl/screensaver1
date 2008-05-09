@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -75,7 +74,7 @@ public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest<Co
         
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         
-        ScreenResult screenResult = screen.createScreenResult(new Date());
+        ScreenResult screenResult = screen.createScreenResult();
         ResultValueType resultValueType = screenResult.createResultValueType("values");
         for (Well well : wells) {
           resultValueType.createResultValue(well, "1.0");

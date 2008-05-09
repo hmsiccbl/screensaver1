@@ -13,9 +13,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
-
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -23,6 +20,10 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 class LibraryScreeningSynchronizer extends ScreeningSynchronizer
 {
@@ -95,7 +96,7 @@ class LibraryScreeningSynchronizer extends ScreeningSynchronizer
       LibraryScreening screening = createLibraryScreening(resultSet);
       screening.setComments(resultSet.getString("comments"));
       screening.setAssayProtocol(resultSet.getString("assay_protocol"));
-      screening.setAssayProtocolLastModifiedDate(resultSet.getDate("assay_date"));
+      screening.setAssayProtocolLastModifiedDate(ResultSetUtil.getDate(resultSet, "assay_date"));
       screening.setNumberOfReplicates(resultSet.getInt("no_replicate_screen"));
       screening.setAbaseTestsetId(resultSet.getString("abase_testset_id"));
       screening.setSpecial(getIsSpecial(resultSet));
@@ -129,11 +130,13 @@ class LibraryScreeningSynchronizer extends ScreeningSynchronizer
   throws SQLException, ScreenDBSynchronizationException
   {
     Integer screenNumber = resultSet.getInt("screen_id");
-    Date dateCreated = resultSet.getDate("date_created");
-    Date dateOfActivity = resultSet.getDate("date_of_visit");
+    DateTime dateCreated = ResultSetUtil.getDateTime(resultSet, "date_created");
+    LocalDate dateOfActivity = ResultSetUtil.getDate(resultSet, "date_of_visit");
     Screen screen = _screenSynchronizer.getScreenForScreenNumber(screenNumber);
     ScreeningRoomUser performedBy = getPerformedBy(resultSet);
-    return screen.createLibraryScreening(performedBy, dateCreated, dateOfActivity);
+    LibraryScreening libraryScreening = screen.createLibraryScreening(performedBy, dateOfActivity);
+    libraryScreening.setDateCreated(dateCreated);
+    return libraryScreening;
   }
 }
 

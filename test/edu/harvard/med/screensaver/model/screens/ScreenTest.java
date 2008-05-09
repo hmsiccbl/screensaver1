@@ -11,13 +11,8 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.engine.EntityKey;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -25,7 +20,12 @@ import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.util.DateUtil;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.engine.EntityKey;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 {
@@ -50,19 +50,16 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
     LibraryScreening screening1 = screen.createLibraryScreening(
       screen.getLeadScreener(),
-      DateUtil.makeDate(2007, 1, 1),
-      DateUtil.makeDate(2007, 3, 7));
+      new LocalDate(2007, 3, 7));
     LibraryScreening screening2 = screen.createLibraryScreening(
       screen.getLeadScreener(),
-      DateUtil.makeDate(2007, 1, 1),
-      DateUtil.makeDate(2007, 3, 8));
+      new LocalDate(2007, 3, 8));
     CherryPickRequest cpr = screen.createCherryPickRequest(
       screen.getLeadScreener(),
-      DateUtil.makeDate(2007, 3, 9));
+      new LocalDate(2007, 3, 9));
     CherryPickLiquidTransfer cplt = screen.createCherryPickLiquidTransfer(
       MakeDummyEntities.makeDummyUser(1, "Lab", "Guy"),
-      DateUtil.makeDate(2007, 1, 1),
-      new Date());
+      new LocalDate());
 
     Set<LibraryScreening> libraryScreenings =
       screen.getlabActivitiesOfType(LibraryScreening.class);
@@ -96,7 +93,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(107);
-        ScreenResult screenResult = screen.createScreenResult(new Date());
+        ScreenResult screenResult = screen.createScreenResult();
         screenResult.createResultValueType("Luminescence");
         screenResult.createResultValueType("FI");
         genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());

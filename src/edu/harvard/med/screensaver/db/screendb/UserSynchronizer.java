@@ -14,7 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,6 +29,9 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 /**
  * Assumes first/last doesn't change, that it is safe to use a business key across the two
@@ -157,7 +159,7 @@ public class UserSynchronizer
 
   private ScreeningRoomUser constructScreeningRoomUser(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException
   {
-    Date dateCreated = resultSet.getDate("date_created");
+    DateTime dateCreated = ResultSetUtil.getDateTime(resultSet, "date_created");
     String firstName = resultSet.getString("first");
     String lastName = resultSet.getString("last");
     String email = getEmail(resultSet);
@@ -169,7 +171,7 @@ public class UserSynchronizer
       ecommonsId = null;
     }
     String harvardId = resultSet.getString("harvard_id");
-    Date harvardIdExpirationDate = resultSet.getDate("harvard_id_exp_date");
+    LocalDate harvardIdExpirationDate = ResultSetUtil.getDate(resultSet, "harvard_id_exp_date");
     String affiliationName = resultSet.getString("lab_affiliation");
     ScreeningRoomUserClassification classification = getClassification(resultSet);
     boolean isNonScreeningUser = resultSet.getBoolean("non_user");
@@ -178,9 +180,11 @@ public class UserSynchronizer
     String comsCrhbaPermitPrincipalInvestigator = resultSet.getString("permit_pi");
 
     ScreeningRoomUser user = getExistingUser(firstName, lastName);
+
     if (user == null) {
-      user = new ScreeningRoomUser(dateCreated, firstName, lastName, email, phone,
+      user = new ScreeningRoomUser(firstName, lastName, email, phone,
         mailingAddress, comments, ecommonsId, harvardId, classification, isNonScreeningUser);
+      user.setDateCreated(dateCreated);
     }
     else {
       user.setDateCreated(dateCreated);
@@ -302,9 +306,9 @@ public class UserSynchronizer
     ResultSet resultSet = statement.executeQuery();
     Set<String> screendbChecklistItemTypeNamesFound = new HashSet<String>();
     while (resultSet.next()) {
-      Date activationDate = resultSet.getDate("activate_date");
+      LocalDate activationDate = ResultSetUtil.getDate(resultSet, "activate_date");
       String activationInitials = resultSet.getString("activate_initials");
-      Date deactivationDate = resultSet.getDate("deactivate_date");
+      LocalDate deactivationDate = ResultSetUtil.getDate(resultSet, "deactivate_date");
       String deactivationInitials = resultSet.getString("deactivate_initials");
 
       String screendbChecklistItemName = resultSet.getString("name");

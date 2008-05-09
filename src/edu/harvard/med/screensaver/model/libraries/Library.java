@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +24,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -34,6 +34,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -97,8 +99,8 @@ public class Library extends AbstractEntity
   private String _screeningCopy;
   private String _compoundConcentrationInScreeningCopy;
   private String _cherryPickCopy;
-  private Date _dateReceived;
-  private Date _dateScreenable;
+  private LocalDate _dateReceived;
+  private LocalDate _dateScreenable;
   private String _nonCompoundWells;
   private String _screeningRoomComments;
   private String _diversitySetPlates;
@@ -573,7 +575,8 @@ public class Library extends AbstractEntity
    * Get the date received.
    * @return the date received
    */
-  public Date getDateReceived()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateReceived()
   {
     return _dateReceived;
   }
@@ -582,16 +585,17 @@ public class Library extends AbstractEntity
    * Set the date received.
    * @param dateReceived the new date received
    */
-  public void setDateReceived(Date dateReceived)
+  public void setDateReceived(LocalDate dateReceived)
   {
-    _dateReceived = truncateDate(dateReceived);
+    _dateReceived = dateReceived;
   }
 
   /**
    * Get the date screenable.
    * @return the date screenable
    */
-  public Date getDateScreenable()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateScreenable()
   {
     return _dateScreenable;
   }
@@ -600,9 +604,9 @@ public class Library extends AbstractEntity
    * Set the date screenable.
    * @param dateScreenable the new date screenable
    */
-  public void setDateScreenable(Date dateScreenable)
+  public void setDateScreenable(LocalDate dateScreenable)
   {
-    _dateScreenable = truncateDate(dateScreenable);
+    _dateScreenable = dateScreenable;
   }
 
   /**

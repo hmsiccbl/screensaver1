@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -32,6 +31,8 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+
+import org.joda.time.LocalDate;
 
 
 /**
@@ -141,7 +142,7 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
       new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "dateRequested"),
       "Date Requested", "The date of the cherry pick request", TableColumn.UNGROUPED) {
       @Override
-      protected Date getDate(CherryPickRequest cpr) { return cpr.getDateRequested(); }
+      protected LocalDate getDate(CherryPickRequest cpr) { return cpr.getDateRequested(); }
     });
     columns.add(new UserNameColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "requestedBy"),

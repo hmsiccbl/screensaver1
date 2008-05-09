@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,10 +24,11 @@ import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.screens.Screen;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -82,7 +82,6 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @param isNonScreeningUser does not perform any screening, but is otherwise associated with Screens in this system
    */
   public ScreeningRoomUser(
-    Date dateCreated,
     String firstName,
     String lastName,
     String email,
@@ -94,8 +93,7 @@ public class ScreeningRoomUser extends ScreensaverUser
     ScreeningRoomUserClassification userClassification,
     boolean isNonScreeningUser)
   {
-    super(dateCreated,
-          firstName,
+    super(firstName,
           lastName,
           email,
           phone,
@@ -107,6 +105,21 @@ public class ScreeningRoomUser extends ScreensaverUser
     setNonScreeningUser(isNonScreeningUser);
   }
 
+  public ScreeningRoomUser(String firstName,
+                           String lastName,
+                           String email)
+  {
+    this(firstName,
+         lastName,
+         email,
+         "",
+         "",
+         "",
+         "",
+         "",
+         ScreeningRoomUserClassification.UNASSIGNED,
+         false);
+  }
 
   // public instance methods
 
@@ -294,7 +307,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    */
   public ChecklistItem createChecklistItem(
     ChecklistItemType checklistItemType,
-    Date activationDate,
+    LocalDate activationDate,
     String activationInitials)
   {
     return createChecklistItem(checklistItemType, activationDate, activationInitials, null, null);
@@ -311,9 +324,9 @@ public class ScreeningRoomUser extends ScreensaverUser
    */
   public ChecklistItem createChecklistItem(
     ChecklistItemType checklistItemType,
-    Date activationDate,
+    LocalDate activationDate,
     String activationInitials,
-    Date deactivationDate,
+    LocalDate deactivationDate,
     String deactivationInitials)
   {
     ChecklistItem checklistItem = new ChecklistItem(

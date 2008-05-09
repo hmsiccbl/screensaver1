@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -22,6 +21,8 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+
+import org.joda.time.LocalDate;
 
 
 /**
@@ -86,7 +87,7 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
       new PropertyPath<E>(_type, "dateCreated"),
       "Date Created",
       "The date the user's account was created", TableColumn.UNGROUPED) {
-      public Date getDate(ScreensaverUser user) { return user.getDateCreated(); }
+      public LocalDate getDate(ScreensaverUser user) { return user.getDateCreated().toLocalDate(); }
     });
 
 //    TableColumnManager<ScreensaverUser> columnManager = getColumnManager();

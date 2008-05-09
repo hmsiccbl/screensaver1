@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,12 +20,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 /**
  * Tracks the activity of correcting the "known" volume of a set of wells on a
@@ -66,7 +66,7 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
    * @param performedBy the user that performed the activity
    * @param dateOfActivity the date the activity took place
    */
-  public WellVolumeCorrectionActivity(AdministratorUser performedBy, Date datePerformed)
+  public WellVolumeCorrectionActivity(AdministratorUser performedBy, LocalDate datePerformed)
   {
     super(performedBy, datePerformed);
   }

@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +32,8 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,14 +129,13 @@ public class CherryPickRequestAllocator
   public void cancelAndDeallocateAssayPlates(final CherryPickRequest cherryPickRequestIn,
                                              final Set<CherryPickAssayPlate> assayPlates,
                                              final ScreensaverUser performedByIn,
-                                             final Date dateOfLiquidTransfer,
+                                             final LocalDate dateOfLiquidTransfer,
                                              final String comments)
   {
     CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(cherryPickRequestIn);
     ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
     CherryPickLiquidTransfer cplt =
       cherryPickRequest.getScreen().createCherryPickLiquidTransfer(performedBy,
-                                                                   new Date(),
                                                                    dateOfLiquidTransfer,
                                                                    CherryPickLiquidTransferStatus.CANCELED);
     cplt.setComments(comments);

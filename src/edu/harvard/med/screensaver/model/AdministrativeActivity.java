@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -21,6 +19,9 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 /**
  * Represents an activity involving administrative decisions or changes to data.
@@ -46,7 +47,7 @@ abstract public class AdministrativeActivity extends Activity
   // private instance data
 
   private AdministratorUser _approvedBy;
-  private Date _dateApproved;
+  private LocalDate _dateApproved;
 
 
   // public instance methods
@@ -84,7 +85,8 @@ abstract public class AdministrativeActivity extends Activity
    * Get the date the activity was approved.
    * @return the date the activity was approved
    */
-  public Date getDateApproved()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")  
+  public LocalDate getDateApproved()
   {
     return _dateApproved;
   }
@@ -93,7 +95,7 @@ abstract public class AdministrativeActivity extends Activity
    * Set the date the activity was approved.
    * @param dateApproved the new date the activity was approved
    */
-  public void setDateApproved(Date dateApproved)
+  public void setDateApproved(LocalDate dateApproved)
   {
     _dateApproved = dateApproved;
   }
@@ -106,20 +108,10 @@ abstract public class AdministrativeActivity extends Activity
    * @param performedBy the user that performed the activity
    * @param dateOfActivity the date the activity took place
    */
-  protected AdministrativeActivity(ScreensaverUser performedBy, Date dateOfActivity)
+  protected AdministrativeActivity(ScreensaverUser performedBy, 
+                                   LocalDate dateOfActivity)
   {
-    this(performedBy, new Date(), dateOfActivity, null, null);
-  }
-
-  /**
-   * Construct an initialized <code>AdministrativeActivity</code>.
-   * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
-   * @param dateOfActivity the date the activity took place
-   */
-  protected AdministrativeActivity(ScreensaverUser performedBy, Date dateCreated, Date dateOfActivity)
-  {
-    this(performedBy, dateCreated, dateOfActivity, null, null);
+    this(performedBy, dateOfActivity, null, null);
   }
 
   /**
@@ -131,29 +123,11 @@ abstract public class AdministrativeActivity extends Activity
    */
   protected AdministrativeActivity(
     ScreensaverUser performedBy,
-    Date dateOfActivity,
+    LocalDate dateOfActivity,
     AdministratorUser approvedBy,
-    Date dateApproved)
+    LocalDate dateApproved)
   {
-    this(performedBy, new Date(), dateOfActivity, approvedBy, dateApproved);
-  }
-
-  /**
-   * Construct an initialized <code>AdministrativeActivity</code>.
-   * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
-   * @param dateOfActivity the date the activity took place
-   * @param approvedBy the administrator use who approved the activity
-   * @param dateApproved the date the activity was approved
-   */
-  protected AdministrativeActivity(
-    ScreensaverUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity,
-    AdministratorUser approvedBy,
-    Date dateApproved)
-  {
-    super(performedBy, dateCreated, dateOfActivity);
+    super(performedBy, dateOfActivity);
 
     // we normally do not get involved with maintaining bi-directional relationships in the
     // constructors, because normally we have a @ContainedEntity(containingEntityClass) that

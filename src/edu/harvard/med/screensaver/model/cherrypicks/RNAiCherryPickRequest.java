@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,6 +26,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 /**
  * A hibernate entity representing an RNAi cherry pick request.
@@ -61,7 +61,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
 
   /**
    * Construct an initialized <code>RNAiCherryPickRequest</code>. Intended only for use
-   * by {@link Screen#createCherryPickRequest(ScreeningRoomUser, Date, Integer)}.
+   * by {@link Screen#createCherryPickRequest(ScreeningRoomUser, LocalDate, Integer)}.
    * @param screen the screen
    * @param requestedBy the user that made the request
    * @param dateRequested the date created
@@ -71,7 +71,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   public RNAiCherryPickRequest(
     Screen screen,
     ScreeningRoomUser requestedBy,
-    Date dateRequested,
+    LocalDate dateRequested,
     Integer legacyCherryPickRequestNumber)
   {
     super(screen, requestedBy, dateRequested, legacyCherryPickRequestNumber);

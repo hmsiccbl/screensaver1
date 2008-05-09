@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.service.libraries;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -25,6 +24,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 public class LibraryCopyGenerator
@@ -54,7 +54,7 @@ public class LibraryCopyGenerator
                                           List<String> copyNames,
                                           Volume volume,
                                           PlateType plateType,
-                                          Date datePlated) 
+                                          LocalDate datePlated) 
     throws ExtantLibraryException
   {
     List<CopyInfo> result = new ArrayList<CopyInfo>(copyNames.size());
@@ -69,7 +69,7 @@ public class LibraryCopyGenerator
                                           List<String> copyNames,
                                           Volume volume,
                                           PlateType plateType,
-                                          Date datePlated) 
+                                          LocalDate datePlated) 
     throws ExtantLibraryException
   {
     List<CopyInfo> result = new ArrayList<CopyInfo>(copyNames.size());
@@ -99,7 +99,7 @@ public class LibraryCopyGenerator
                                   Integer plateNumber,
                                   Volume volume,
                                   PlateType plateType,
-                                  Date datePlated)
+                                  LocalDate datePlated)
   {
     CopyInfo copyInfo = copy.getCopyInfo(plateNumber);
     if (copyInfo == null) {

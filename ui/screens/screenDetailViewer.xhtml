@@ -99,8 +99,7 @@ TODO:
 							<ss:property id="dateCreated" label="Created"
 								description="The date the screen was originally recorded in Screensaver"
 								value="#{screenDetailViewer.screen.dateCreated}" type="Date"
-								rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
-								editable="#{screenDetailViewer.editMode}" />
+								rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}" />
 
 							<ss:property id="dateOfApplication" label="Application Date"
 								description="The date the application for the screen was submitted"
@@ -234,8 +233,9 @@ TODO:
 											<f:facet name="header">
 												<t:outputText value="Written" />
 											</f:facet>
-											<t:inputDate id="statusDateEditable"
-												value="#{letterOfSupport.dateWritten}" popupCalendar="true"
+											<t:inputText id="statusDateEditable"
+												value="#{letterOfSupport.dateWritten}" 
+												converter="#{dateConverter}"
 												rendered="#{screenDetailViewer.editMode}"
 												styleClass="inputText" />
 											<t:outputText id="statusDate"
@@ -375,8 +375,9 @@ TODO:
 											<f:facet name="header">
 												<t:outputText value="Date" />
 											</f:facet>
-											<t:inputDate id="statusDateEditable"
-												value="#{statusItem.statusDate}" popupCalendar="true"
+											<t:inputText id="statusDateEditable"
+												value="#{statusItem.statusDate}" 
+												converter="#{dateConverter}"
 												rendered="#{screenDetailViewer.editMode}"
 												styleClass="inputText" />
 											<t:outputText id="statusDate"

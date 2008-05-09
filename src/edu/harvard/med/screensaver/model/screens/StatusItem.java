@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -29,6 +28,8 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -59,7 +60,7 @@ public class StatusItem extends AbstractEntity implements Comparable
   private Integer _statusItemId;
   private Integer _version;
   private Screen _screen;
-  private Date _statusDate;
+  private LocalDate _statusDate;
   private StatusValue _statusValue;
 
 
@@ -116,7 +117,8 @@ public class StatusItem extends AbstractEntity implements Comparable
    * @return the status date
    */
   @Column(nullable=false)
-  public Date getStatusDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getStatusDate()
   {
     return _statusDate;
   }
@@ -125,9 +127,9 @@ public class StatusItem extends AbstractEntity implements Comparable
    * Set the status date.
    * @param statusDate the new status date
    */
-  public void setStatusDate(Date statusDate)
+  public void setStatusDate(LocalDate statusDate)
   {
-    _statusDate = truncateDate(statusDate);
+    _statusDate = statusDate;
   }
 
   /**
@@ -177,13 +179,13 @@ public class StatusItem extends AbstractEntity implements Comparable
    * @param statusDate the status date
    * @param statusValue the status value
    */
-  StatusItem(Screen screen, Date statusDate, StatusValue statusValue)
+  protected StatusItem(Screen screen, LocalDate statusDate, StatusValue statusValue)
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
-    _statusDate = truncateDate(statusDate);
+    _statusDate = statusDate;
     _statusValue = statusValue;
   }
 

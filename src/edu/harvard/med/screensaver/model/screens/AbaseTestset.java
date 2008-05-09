@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,6 +25,8 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -52,7 +52,7 @@ public class AbaseTestset extends AbstractEntity
   private Integer _abaseTestsetId;
   private Integer _version;
   private Screen _screen;
-  private Date _testsetDate;
+  private LocalDate _testsetDate;
   private String _testsetName;
   private String _comments;
 
@@ -109,7 +109,8 @@ public class AbaseTestset extends AbstractEntity
    * @return the testset date
    */
   @Column(nullable=false)
-  public Date getTestsetDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getTestsetDate()
   {
     return _testsetDate;
   }
@@ -118,9 +119,9 @@ public class AbaseTestset extends AbstractEntity
    * Set the testset date.
    * @param testsetDate the new testset date
    */
-  public void setTestsetDate(Date testsetDate)
+  public void setTestsetDate(LocalDate testsetDate)
   {
-    _testsetDate = truncateDate(testsetDate);
+    _testsetDate = testsetDate;
   }
 
   /**
@@ -174,7 +175,7 @@ public class AbaseTestset extends AbstractEntity
    * @param testsetName the testset name
    * @param comments the comments
    */
-  AbaseTestset(Screen screen, Date testsetDate, String testsetName, String comments)
+  AbaseTestset(Screen screen, LocalDate testsetDate, String testsetName, String comments)
   {
     if (screen == null) {
       throw new NullPointerException();

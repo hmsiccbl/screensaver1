@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,10 +25,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -58,15 +59,15 @@ public class BillingInformation extends AbstractEntity
   private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
   private BillingInfoToBeRequested _billingInfoToBeRequested;
   private boolean _isBillingForSuppliesOnly;
-  private Date _billingInfoReturnDate;
+  private LocalDate _billingInfoReturnDate;
   private String _amountToBeChargedForScreen;
   private String _facilitiesAndAdministrationCharge;
-  private Date _feeFormRequestedDate;
+  private LocalDate _feeFormRequestedDate;
   private String _feeFormRequestedInitials;
   private boolean _isFeeFormOnFile;
-  private Date _dateCompleted5KCompounds;
-  private Date _dateFaxedToBillingDepartment;
-  private Date _dateCharged;
+  private LocalDate _dateCompleted5KCompounds;
+  private LocalDate _dateFaxedToBillingDepartment;
+  private LocalDate _dateCharged;
   private String _comments;
 
 
@@ -160,7 +161,7 @@ public class BillingInformation extends AbstractEntity
    * @param dateFaxed the date faxed
    * @return the new billing item for this billing information
    */
-  public BillingItem createBillingItem(String itemToBeCharged, String amount, Date dateFaxed)
+  public BillingItem createBillingItem(String itemToBeCharged, String amount, LocalDate dateFaxed)
   {
     BillingItem billingItem = new BillingItem(this, itemToBeCharged, amount, dateFaxed);
     _billingItems.add(billingItem);
@@ -210,7 +211,8 @@ public class BillingInformation extends AbstractEntity
    * Get the billing info return date.
    * @return the billing info return date
    */
-  public Date getBillingInfoReturnDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getBillingInfoReturnDate()
   {
     return _billingInfoReturnDate;
   }
@@ -219,9 +221,9 @@ public class BillingInformation extends AbstractEntity
    * Set the billing info return date.
    * @param billingInfoReturnDate the new billing info return date
    */
-  public void setBillingInfoReturnDate(Date billingInfoReturnDate)
+  public void setBillingInfoReturnDate(LocalDate billingInfoReturnDate)
   {
-    _billingInfoReturnDate = truncateDate(billingInfoReturnDate);
+    _billingInfoReturnDate = billingInfoReturnDate;
   }
 
   /**
@@ -266,7 +268,8 @@ public class BillingInformation extends AbstractEntity
    * Get the fee form requested date.
    * @return the fee form requested date
    */
-  public Date getFeeFormRequestedDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getFeeFormRequestedDate()
   {
     return _feeFormRequestedDate;
   }
@@ -275,9 +278,9 @@ public class BillingInformation extends AbstractEntity
    * Set the fee form requested date.
    * @param feeFormRequestedDate the new fee form requested date
    */
-  public void setFeeFormRequestedDate(Date feeFormRequestedDate)
+  public void setFeeFormRequestedDate(LocalDate feeFormRequestedDate)
   {
-    _feeFormRequestedDate = truncateDate(feeFormRequestedDate);
+    _feeFormRequestedDate = feeFormRequestedDate;
   }
 
   /**
@@ -322,7 +325,8 @@ public class BillingInformation extends AbstractEntity
    * Get the date completed 5-10K compounds.
    * @return the date completed 5-10K compounds
    */
-  public Date getDateCompleted5KCompounds()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateCompleted5KCompounds()
   {
     return _dateCompleted5KCompounds;
   }
@@ -331,16 +335,17 @@ public class BillingInformation extends AbstractEntity
    * Set the date completed 5-10K compounds.
    * @param dateCompleted5KCompounds the new date completed 5-10K compounds
    */
-  public void setDateCompleted5KCompounds(Date dateCompleted5KCompounds)
+  public void setDateCompleted5KCompounds(LocalDate dateCompleted5KCompounds)
   {
-    _dateCompleted5KCompounds = truncateDate(dateCompleted5KCompounds);
+    _dateCompleted5KCompounds = dateCompleted5KCompounds;
   }
 
   /**
    * Get the date faxed to billing department.
    * @return the date faxed to billing department
    */
-  public Date getDateFaxedToBillingDepartment()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateFaxedToBillingDepartment()
   {
     return _dateFaxedToBillingDepartment;
   }
@@ -349,16 +354,17 @@ public class BillingInformation extends AbstractEntity
    * Set the date faxed to billing department.
    * @param dateFaxedToBillingDepartment the new date faxed to billing department
    */
-  public void setDateFaxedToBillingDepartment(Date dateFaxedToBillingDepartment)
+  public void setDateFaxedToBillingDepartment(LocalDate dateFaxedToBillingDepartment)
   {
-    _dateFaxedToBillingDepartment = truncateDate(dateFaxedToBillingDepartment);
+    _dateFaxedToBillingDepartment = dateFaxedToBillingDepartment;
   }
 
   /**
    * Get the date charged.
    * @return the date charged
    */
-  public Date getDateCharged()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateCharged()
   {
     return _dateCharged;
   }
@@ -367,9 +373,9 @@ public class BillingInformation extends AbstractEntity
    * Set the date charged.
    * @param dateCharged the new date charged
    */
-  public void setDateCharged(Date dateCharged)
+  public void setDateCharged(LocalDate dateCharged)
   {
-    _dateCharged = truncateDate(dateCharged);
+    _dateCharged = dateCharged;
   }
 
   /**

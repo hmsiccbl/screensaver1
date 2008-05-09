@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.service.cherrypicks;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +45,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTest
 {
@@ -90,7 +90,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         copy2.createCopyInfo(5, "loc1", PlateType.EPPENDORF, new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         CopyInfo retiredPlateCopyInfo =
           copy2.createCopyInfo(6, "loc1", PlateType.EPPENDORF, new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        retiredPlateCopyInfo.setDateRetired(new Date());
+        retiredPlateCopyInfo.setDateRetired(new LocalDate());
 
         Copy copy3 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
         copy3.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
@@ -206,7 +206,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
         WellVolumeCorrectionActivity wellVolumeCorrectionActivity =
           new WellVolumeCorrectionActivity(new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "", ""),
-                                           new Date());
+                                           new LocalDate());
         Set<WellVolumeAdjustment> wellVolumeAdjustments = wellVolumeCorrectionActivity.getWellVolumeAdjustments();
         Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
         Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
@@ -337,7 +337,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         CherryPickRequest cpr2 = genericEntityDao.reloadEntity(cpr);
-        cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(cpr2, assayPlatesToCancel, adminUser, new Date(), "test comment");
+        cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(cpr2, assayPlatesToCancel, adminUser, new LocalDate(), "test comment");
       }
     });
     
@@ -382,7 +382,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     ScreeningRoomUser cherryPickRequestor =
       MakeDummyEntities.makeDummyUser(screenNumber, "Cherry", "Picker");
     RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest)
-      screen.createCherryPickRequest(cherryPickRequestor, new Date());
+      screen.createCherryPickRequest(cherryPickRequestor, new LocalDate());
     cherryPickRequest.setTransferVolumePerWellApproved(volume);
     return cherryPickRequest;
   }

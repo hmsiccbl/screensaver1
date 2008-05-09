@@ -10,10 +10,11 @@
 package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.beans.IntrospectionException;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -28,7 +29,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPickRequest>
 {
@@ -92,14 +92,13 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
         librariesDao.loadOrCreateWellsForLibrary(library);
         Well well = library.getWells().iterator().next();
         ScreeningRoomUser user = new ScreeningRoomUser(
-          new Date(), "joe", "user",  "email", "phone", "addr", "comments", "ecommons",
-          "harvardId", ScreeningRoomUserClassification.GRADUATE_STUDENT, false);
+          "joe", "user", "email");
         genericEntityDao.saveOrUpdateEntity(user);
-        Screen screen = new Screen(user, user, screenNumber, new Date(), ScreenType.SMALL_MOLECULE, "title");
+        Screen screen = new Screen(user, user, screenNumber, ScreenType.SMALL_MOLECULE, "title");
         genericEntityDao.saveOrUpdateEntity(screen);
         
         CompoundCherryPickRequest request = (CompoundCherryPickRequest)
-          screen.createCherryPickRequest(user, new Date(), cherryPickRequestNumber);
+          screen.createCherryPickRequest(user, new LocalDate(), cherryPickRequestNumber);
         CherryPickAssayPlate plate = new CherryPickAssayPlate(request, 1, 0 , PlateType.ABGENE);
         ScreenerCherryPick screenerCherryPick = request.createScreenerCherryPick(well);
         LabCherryPick labCherryPick = request.createLabCherryPick(screenerCherryPick, well);
@@ -107,7 +106,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
         labCherryPick.setMapped(plate, 0, 0);
         
         CherryPickLiquidTransfer transfer =
-          screen.createCherryPickLiquidTransfer(user, new Date(), new Date());
+          screen.createCherryPickLiquidTransfer(user, new LocalDate());
         transfer.addCherryPickAssayPlate(plate);
 
         genericEntityDao.saveOrUpdateEntity(request);
@@ -146,7 +145,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
     Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     CherryPickRequest cherryPickRequest = screen.createCherryPickRequest(
       screen.getLeadScreener(), 
-      new Date(),
+      new LocalDate(),
       4000);
     genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
     
@@ -160,7 +159,7 @@ public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPick
     Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     CherryPickRequest cherryPickRequest1 = screen.createCherryPickRequest(
       screen.getLeadScreener(), 
-      new Date(),
+      new LocalDate(),
       4000);
     CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
     genericEntityDao.saveOrUpdateEntity(screen);

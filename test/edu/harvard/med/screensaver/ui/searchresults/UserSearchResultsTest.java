@@ -22,9 +22,9 @@ import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.util.DateUtil;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 public class UserSearchResultsTest extends AbstractSpringPersistenceTest
 {
@@ -55,11 +55,11 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     _screenerSearchResults.getColumnManager().setSortColumnName("User");
 
     _admin1 = MakeDummyEntities.makeDummyUser(1, "Al", "Capone");
-    _admin1.setDateCreated(DateUtil.makeDate(2007, 1, 1));
+    _admin1.setDateCreated(new DateTime(2007, 1, 1, 0, 0, 0, 0));
     _admin2 = MakeDummyEntities.makeDummyUser(1, "Bugsy", "Malone");
-    _admin2.setDateCreated(DateUtil.makeDate(2007, 3, 3));
+    _admin2.setDateCreated(new DateTime(2007, 3, 3, 0, 0, 0, 0));
     _admin3 = MakeDummyEntities.makeDummyUser(1, "Jesse", "James");
-    _admin3.setDateCreated(DateUtil.makeDate(2007, 9, 9));
+    _admin3.setDateCreated(new DateTime(2007, 9, 9, 0, 0, 0, 0));
     genericEntityDao.persistEntity(_admin1);
     genericEntityDao.persistEntity(_admin2);
     genericEntityDao.persistEntity(_admin3);

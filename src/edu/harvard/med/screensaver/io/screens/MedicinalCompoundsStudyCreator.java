@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.io.screens;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Date;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -42,6 +41,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDateTime;
 
 public class MedicinalCompoundsStudyCreator
 {
@@ -102,7 +102,7 @@ public class MedicinalCompoundsStudyCreator
           ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu");
           ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu");
 
-          study = new Screen(leadScreener, labHead, STUDY_NUMBER, new Date(), ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
+          study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
           study.setShareable(false);
 

@@ -9,14 +9,15 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 /**
  * A screening room activity representing a screener screening various assay
@@ -48,7 +49,7 @@ public abstract class Screening extends LabActivity
   // private instance data
 
   private String _assayProtocol;
-  private Date _assayProtocolLastModifiedDate;
+  private LocalDate _assayProtocolLastModifiedDate;
   private AssayProtocolType _assayProtocolType;
   private Integer _numberOfReplicates;
 
@@ -78,7 +79,8 @@ public abstract class Screening extends LabActivity
    * Get the date the assay protocol was last modified.
    * @return the date the assay protocol was last modified
    */
-  public Date getAssayProtocolLastModifiedDate()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getAssayProtocolLastModifiedDate()
   {
     return _assayProtocolLastModifiedDate;
   }
@@ -87,9 +89,9 @@ public abstract class Screening extends LabActivity
    * Set the date the assay protocol was last modified.
    * @param assayProtocolLastModifiedDate the new date the assay protocol was last modified
    */
-  public void setAssayProtocolLastModifiedDate(Date assayProtocolLastModifiedDate)
+  public void setAssayProtocolLastModifiedDate(LocalDate assayProtocolLastModifiedDate)
   {
-    _assayProtocolLastModifiedDate = truncateDate(assayProtocolLastModifiedDate);
+    _assayProtocolLastModifiedDate = assayProtocolLastModifiedDate;
   }
 
   /**
@@ -142,10 +144,9 @@ public abstract class Screening extends LabActivity
   protected Screening(
     Screen screen,
     ScreeningRoomUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity)
+    LocalDate dateOfActivity)
   {
-    super(screen, performedBy, dateCreated, dateOfActivity);
+    super(screen, performedBy, dateOfActivity);
   }
 
   /**

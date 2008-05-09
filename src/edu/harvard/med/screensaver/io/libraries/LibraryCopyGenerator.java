@@ -11,11 +11,8 @@ package edu.harvard.med.screensaver.io.libraries;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,6 +36,9 @@ import edu.harvard.med.screensaver.util.StringUtils;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Creates a set of new library copy plates for a given copy name, initializing
@@ -65,7 +65,7 @@ public class LibraryCopyGenerator
   {
     try {
       CommandLineApplication app = new CommandLineApplication(args);
-      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("yyyy-mm-dd").withLongOpt("date-plated").create("d"));
+      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName(CommandLineApplication.DEFAULT_DATE_PATTERN).withLongOpt("date-plated").create("d"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("name").withLongOpt("copy-name").create("c"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("plate type").withLongOpt("plate-type").withDescription(StringUtils.makeListString(Arrays.asList(PlateType.values()), "|")).create("p"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("microliter volume").withLongOpt("volume").create("v"));
@@ -76,8 +76,8 @@ public class LibraryCopyGenerator
       }
       Volume volume = new Volume(app.getCommandLineOptionValue("v"), Units.MICROLITERS);
       String copyName = app.getCommandLineOptionValue("c");
-      DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-      Date datePlated = dateFormat.parse(app.getCommandLineOptionValue("d"));
+      DateTimeFormatter dateFormat = DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN);
+      LocalDate datePlated = app.getCommandLineOptionValue("d", dateFormat).toLocalDate();
       PlateType plateType = PlateType.valueOf(app.getCommandLineOptionValue("p").toUpperCase());
       Set<Integer> plateNumbers = readPlateNumbers(app);
       log.info("creating RNAi cherry pick library copy " + copyName +

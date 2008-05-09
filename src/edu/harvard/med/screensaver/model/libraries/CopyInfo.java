@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +35,8 @@ import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -69,8 +70,8 @@ public class CopyInfo extends AbstractEntity
   /** The default initial volume for a well on this copy plate. */
   private Volume _wellVolume;
   private String _comments;
-  private Date _datePlated;
-  private Date _dateRetired;
+  private LocalDate _datePlated;
+  private LocalDate _dateRetired;
 
 
   // public instance methods
@@ -144,7 +145,7 @@ public class CopyInfo extends AbstractEntity
    * @param date the date
    * @return the newly created copy action for the copy info
    */
-  public CopyAction createCopyAction(String description, Date date)
+  public CopyAction createCopyAction(String description, LocalDate date)
   {
     CopyAction copyAction = new CopyAction(this, description, date);
     // no need to check for duplicate entities here since copy actions are not SemanticID
@@ -240,7 +241,8 @@ public class CopyInfo extends AbstractEntity
    * Get the date plated.
    * @return the date plated
    */
-  public Date getDatePlated()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDatePlated()
   {
     return _datePlated;
   }
@@ -249,16 +251,17 @@ public class CopyInfo extends AbstractEntity
    * Set the date plated.
    * @param datePlated the new date plated
    */
-  public void setDatePlated(Date datePlated)
+  public void setDatePlated(LocalDate datePlated)
   {
-    _datePlated = truncateDate(datePlated);
+    _datePlated = datePlated;
   }
 
   /**
    * Get the date retired.
    * @return the date retired
    */
-  public Date getDateRetired()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateRetired()
   {
     return _dateRetired;
   }
@@ -267,9 +270,9 @@ public class CopyInfo extends AbstractEntity
    * Set the date retired.
    * @param dateRetired the new date retired
    */
-  public void setDateRetired(Date dateRetired)
+  public void setDateRetired(LocalDate dateRetired)
   {
-    _dateRetired = truncateDate(dateRetired);
+    _dateRetired = dateRetired;
   }
 
   /**

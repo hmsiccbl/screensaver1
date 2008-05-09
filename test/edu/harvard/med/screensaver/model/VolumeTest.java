@@ -167,21 +167,21 @@ public class VolumeTest extends TestCase
   
   public void testToString()
   {
-    assertEquals("0L", new Volume("0", Units.LITERS).toString());
-    assertEquals("0L", new Volume("0.0", Units.LITERS).toString());
-    assertEquals("0.1L", new Volume("0.1", Units.LITERS).toString());
-    assertEquals("0.1L", new Volume("0.100", Units.LITERS).toString());
-    assertEquals("0.1001L", new Volume("0.1001", Units.LITERS).toString());
-    assertEquals("10L", new Volume("10", Units.LITERS).toString());
-    assertEquals("10L", new Volume("10.0", Units.LITERS).toString());
-    assertEquals("10L", new Volume("10.0000", Units.LITERS).toString());
-    assertEquals("10L", new Volume("10.0", Units.LITERS).toString());
-    assertEquals("10.01L", new Volume("10.01", Units.LITERS).toString());
-    assertEquals("1uL", new Volume("1", Units.MICROLITERS).toString());
-    assertEquals("1.001uL", new Volume("1.001", Units.MICROLITERS).toString());
-    assertEquals("1.001uL", new Volume("1.0010", Units.MICROLITERS).toString());
-    assertEquals("1.001mL", new Volume("1.00100", Units.MILLILITERS).toString());
-    assertEquals("1.00101mL", new Volume("1.00101", Units.MILLILITERS).toString());
+    assertEquals("0 L", new Volume("0", Units.LITERS).toString());
+    assertEquals("0 L", new Volume("0.0", Units.LITERS).toString());
+    assertEquals("0.1 L", new Volume("0.1", Units.LITERS).toString());
+    assertEquals("0.1 L", new Volume("0.100", Units.LITERS).toString());
+    assertEquals("0.1001 L", new Volume("0.1001", Units.LITERS).toString());
+    assertEquals("10 L", new Volume("10", Units.LITERS).toString());
+    assertEquals("10 L", new Volume("10.0", Units.LITERS).toString());
+    assertEquals("10 L", new Volume("10.0000", Units.LITERS).toString());
+    assertEquals("10 L", new Volume("10.0", Units.LITERS).toString());
+    assertEquals("10.01 L", new Volume("10.01", Units.LITERS).toString());
+    assertEquals("1 uL", new Volume("1", Units.MICROLITERS).toString());
+    assertEquals("1.001 uL", new Volume("1.001", Units.MICROLITERS).toString());
+    assertEquals("1.001 uL", new Volume("1.0010", Units.MICROLITERS).toString());
+    assertEquals("1.001 mL", new Volume("1.00100", Units.MILLILITERS).toString());
+    assertEquals("1.00101 mL", new Volume("1.00101", Units.MILLILITERS).toString());
   }
   
 

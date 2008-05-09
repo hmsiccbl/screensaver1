@@ -10,13 +10,14 @@
 package edu.harvard.med.screensaver.ui.table.column;
 
 import java.util.Comparator;
-import java.util.Date;
 
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
-public abstract class DateColumn<R> extends TableColumn<R,Date>
+import org.joda.time.LocalDate;
+
+public abstract class DateColumn<R> extends TableColumn<R,LocalDate>
 {
-  abstract protected Date getDate(R o);
+  abstract protected LocalDate getDate(R o);
 
   public DateColumn(String name, String description, String group)
   {
@@ -24,7 +25,7 @@ public abstract class DateColumn<R> extends TableColumn<R,Date>
   }
 
   @Override
-  public Date getCellValue(R o)
+  public LocalDate getCellValue(R o)
   {
     return getDate(o);
   }

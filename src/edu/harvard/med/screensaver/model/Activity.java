@@ -9,9 +9,6 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +27,8 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -41,7 +40,7 @@ import org.hibernate.annotations.Parameter;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-public abstract class Activity extends AbstractEntity implements Comparable
+public abstract class Activity extends TimeStampedAbstractEntity implements Comparable
 {
 
   // static fields
@@ -55,8 +54,7 @@ public abstract class Activity extends AbstractEntity implements Comparable
   private Integer _activityId;
   private Integer _version;
   private ScreensaverUser _performedBy;
-  private Date _dateCreated;
-  private Date _dateOfActivity;
+  private LocalDate _dateOfActivity;
   private String _comments;
 
 
@@ -133,33 +131,23 @@ public abstract class Activity extends AbstractEntity implements Comparable
   }
 
   /**
-   * Get the date the activity entity was created.
-   * @return the date the activity entity was created
-   */
-  @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
-  public Date getDateCreated()
-  {
-    return _dateCreated;
-  }
-
-  /**
    * Get the date the activity was performed.
    * @return the date the activity was performed
    */
   @Column(nullable=false)
-  public Date getDateOfActivity()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")  
+  public LocalDate getDateOfActivity()
   {
     return _dateOfActivity;
   }
 
   /**
    * Set the date the activity was performed.
-   * @param dateCreated the new date the activity was performed.
+   * @param dateOfActivity the new date the activity was performed.
    */
-  public void setDateOfActivity(Date dateOfActivity)
+  public void setDateOfActivity(LocalDate dateOfActivity)
   {
-    _dateOfActivity = truncateDate(dateOfActivity);
+    _dateOfActivity = dateOfActivity;
   }
 
   /**
@@ -190,13 +178,12 @@ public abstract class Activity extends AbstractEntity implements Comparable
    * @param dateCreated the date created
    * @param dateOfActivity the date the activity took place
    */
-  protected Activity(ScreensaverUser performedBy, Date dateCreated, Date dateOfActivity)
+  protected Activity(ScreensaverUser performedBy, LocalDate dateOfActivity)
   {
     if (performedBy == null) {
       throw new NullPointerException();
     }
     _performedBy = performedBy;
-    setDateCreated(dateCreated);
     setDateOfActivity(dateOfActivity);
   }
 
@@ -239,15 +226,5 @@ public abstract class Activity extends AbstractEntity implements Comparable
   private void setVersion(Integer version)
   {
     _version = version;
-  }
-
-  /**
-   * Set the date the activity entity was created.
-   * @param dateCreated the new date the activity entity was created
-   * @motivation for hibernate
-   */
-  private void setDateCreated(Date dateCreated)
-  {
-    _dateCreated = truncateDate(dateCreated, Calendar.SECOND);
   }
 }

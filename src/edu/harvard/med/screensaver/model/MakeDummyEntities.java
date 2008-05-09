@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
@@ -38,9 +37,9 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDateTime;
 
 public class MakeDummyEntities
 {
@@ -50,17 +49,9 @@ public class MakeDummyEntities
 
   public static ScreeningRoomUser makeDummyUser(int screenNumber, String first, String last)
   {
-    return new ScreeningRoomUser(new Date(),
-                                 first,
+    return new ScreeningRoomUser(first,
                                  last + "_" + screenNumber,
-                                 first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu",
-                                 "",
-                                 "",
-                                 "",
-                                 "",
-                                 "",
-                                 ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                 true);
+                                 first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu");
   }
 
   public static Screen makeDummyScreen(int screenNumber, ScreenType screenType)
@@ -82,7 +73,6 @@ public class MakeDummyEntities
     Screen screen = new Screen(labHead,
                                leadScreener,
                                screenNumber,
-                               new Date(),
                                screenType,
                                studyType,
                                "Dummy screen");
@@ -91,7 +81,7 @@ public class MakeDummyEntities
 
   public static ScreenResult makeDummyScreenResult(Screen screen, Library library)
   {
-    ScreenResult screenResult = screen.createScreenResult(new Date());
+    ScreenResult screenResult = screen.createScreenResult();
 
     // create ResultValueTypes
 

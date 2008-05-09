@@ -16,9 +16,9 @@ import java.util.Collections;
 import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.util.DateUtil;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 // TODO: test other operators
 public class CriterionTest extends TestCase
@@ -47,8 +47,8 @@ public class CriterionTest extends TestCase
       assertMatches(operator, new Double("0.0"), new Double("1.0"), !expectedMatch);
       assertMatches(operator, Boolean.TRUE, Boolean.TRUE, expectedMatch);
       assertMatches(operator, Boolean.TRUE, Boolean.FALSE, !expectedMatch);
-      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 1), expectedMatch);
-      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 2), !expectedMatch);
+      assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 1), expectedMatch);
+      assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 2), !expectedMatch);
       assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedMatch); 
       assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(0), new Integer(2)), !expectedMatch);
     }
@@ -75,9 +75,9 @@ public class CriterionTest extends TestCase
       assertMatches(operator, Boolean.TRUE, Boolean.TRUE, expectedEqualityMatches);
       assertMatches(operator, Boolean.TRUE, Boolean.FALSE, expectedLessThanMatches);
       assertMatches(operator, Boolean.FALSE, Boolean.TRUE, expectedGreaterThanMatches);
-      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 1), expectedEqualityMatches);
-      assertMatches(operator, DateUtil.makeDate(2000, 1, 2), DateUtil.makeDate(2000, 1, 1), expectedLessThanMatches);
-      assertMatches(operator, DateUtil.makeDate(2000, 1, 1), DateUtil.makeDate(2000, 1, 2), expectedGreaterThanMatches);
+      assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 1), expectedEqualityMatches);
+      assertMatches(operator, new LocalDate(2000, 1, 2), new LocalDate(2000, 1, 1), expectedLessThanMatches);
+      assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 2), expectedGreaterThanMatches);
       assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedEqualityMatches); 
       assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(0), new Integer(2)), expectedLessThanMatches);
       assertMatches(operator, Arrays.asList(new Integer(0), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedGreaterThanMatches);

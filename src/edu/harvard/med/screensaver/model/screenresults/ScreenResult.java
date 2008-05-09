@@ -33,11 +33,14 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
+
+import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -60,7 +63,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class ScreenResult extends AbstractEntity
+public class ScreenResult extends TimeStampedAbstractEntity
 {
 
   private static final long serialVersionUID = 0;
@@ -72,8 +75,6 @@ public class ScreenResult extends AbstractEntity
   private Integer _version;
   private Screen _screen;
   private SortedSet<Well> _wells = new TreeSet<Well>();
-  private Date _dateCreated;
-  private Date _dateLastImported;
   private boolean _isShareable;
   private Integer _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
@@ -93,17 +94,14 @@ public class ScreenResult extends AbstractEntity
 
   /**
    * Construct an initialized <code>ScreenResult</code>. Intended only for use by {@link
-   * Screen#createScreenResult(Date)} and {@link Screen#createScreenResult(Date, boolean, Integer)}.
+   * Screen#createScreenResult()} and {@link Screen#createScreenResult(Date, boolean, Integer)}.
    * @param screen the screen
-   * @param dateCreated the date the screen result's data was initially created
    * @param isShareable whether this screen result can be viewed by all users of the system
    * @param replicateCount
    */
-  public ScreenResult(Screen screen, Date dateCreated, boolean isShareable, Integer replicateCount)
+  public ScreenResult(Screen screen, boolean isShareable, Integer replicateCount)
   {
     setScreen(screen);
-    setDateCreated(dateCreated);
-    setDateLastImported(new Date());
     setShareable(isShareable);
     setReplicateCount(replicateCount);
   }
@@ -157,45 +155,13 @@ public class ScreenResult extends AbstractEntity
   }
 
   /**
-   * Get the date that this <code>ScreenResult</code>'s data was initially created.
-   * @return the date that this <code>ScreenResult</code>'s data was initially created
-   */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="date")
-  public Date getDateCreated()
-  {
-    return _dateCreated;
-  }
-
-  /**
-   * Set the date that this <code>ScreenResult</code>'s data was initially created.
-   * @param dateCreated the new date that this <code>ScreenResult</code>'s data was initially
-   * created
-   */
-  public void setDateCreated(Date dateCreated)
-  {
-    _dateCreated = truncateDate(dateCreated);
-  }
-
-  /**
    * Get the date this <code>ScreenResult</code> was last imported into Screensaver.
    * @return the date this <code>ScreenResult</code> was last imported into Screensaver
    */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="date")
-  public Date getDateLastImported()
+  @Transient
+  public DateTime getDateLastImported()
   {
-    return _dateLastImported;
-  }
-
-  /**
-   * Set the date this <code>ScreenResult</code> was last imported into Screensaver.
-   * @param dateImported the new date this <code>ScreenResult</code> was last imported into
-   * Screensaver
-   */
-  public void setDateLastImported(Date dateImported)
-  {
-    _dateLastImported = truncateDate(dateImported);
+    return getDateCreated();
   }
 
   /**

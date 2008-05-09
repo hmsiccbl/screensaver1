@@ -15,7 +15,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,6 +90,8 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.dao.DataAccessException;
 
 public class CherryPickRequestViewer extends AbstractBackingBean
@@ -401,7 +402,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   private boolean _showFailedLabCherryPicks;
 
   private UISelectOneEntityBean<ScreensaverUser> _liquidTransferPerformedBy;
-  private Date _dateOfLiquidTransfer = new Date();
+  private LocalDate _dateOfLiquidTransfer = new LocalDate();
   private String _liquidTransferComments;
 
   private EmptyWellsConverter _emptyWellsConverter;
@@ -841,12 +842,12 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   }
 
-  public Date getDateOfLiquidTransfer()
+  public LocalDate getDateOfLiquidTransfer()
   {
     return _dateOfLiquidTransfer;
   }
 
-  public void setDateOfLiquidTransfer(Date dateOfLiquidTransfer)
+  public void setDateOfLiquidTransfer(LocalDate dateOfLiquidTransfer)
   {
     _dateOfLiquidTransfer = dateOfLiquidTransfer;
   }
@@ -1156,7 +1157,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
           newCherryPickRequest.setTransferVolumePerWellRequested(cherryPickRequest.getTransferVolumePerWellRequested());
           newCherryPickRequest.setVolumeApprovedBy(cherryPickRequest.getVolumeApprovedBy());
           newCherryPickRequest.setDateVolumeApproved(cherryPickRequest.getDateVolumeApproved());
-          newCherryPickRequest.setDateRequested(new Date());
+          newCherryPickRequest.setDateRequested(new LocalDate());
           newCherryPickRequest.setRandomizedAssayPlateLayout(cherryPickRequest.isRandomizedAssayPlateLayout());
           newCherryPickRequest.addEmptyWellsOnAssayPlate(cherryPickRequest.getEmptyWellsOnAssayPlate());
           newCherryPickRequest.setRequestedBy(cherryPickRequest.getRequestedBy());
@@ -1396,7 +1397,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean
 
   private void doRecordLiquidTransferForAssayPlates(final Set<CherryPickAssayPlate> selectedAssayPlates,
                                                     final ScreensaverUser performedByIn,
-                                                    final Date dateOfLiquidTransfer,
+                                                    final LocalDate dateOfLiquidTransfer,
                                                     final String comments,
                                                     final boolean success)
   {
@@ -1408,7 +1409,6 @@ public class CherryPickRequestViewer extends AbstractBackingBean
         ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
         CherryPickLiquidTransfer liquidTransfer = 
           cherryPickRequest.getScreen().createCherryPickLiquidTransfer(performedBy,
-                                                                       new Date(),
                                                                        dateOfLiquidTransfer,
                                                                        success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
         liquidTransfer.setComments(comments);

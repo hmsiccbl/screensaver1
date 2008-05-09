@@ -9,11 +9,8 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.Date;
-
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.CryptoUtils;
@@ -65,7 +62,7 @@ public class UserTest extends AbstractSpringTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreensaverUser user = new ScreeningRoomUser(new Date(), "First", "Last", "first_last@hms.harvard.edu", "", "", "", "", "", ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR, false);
+        ScreensaverUser user = new ScreeningRoomUser("First", "Last", "first_last@hms.harvard.edu");
         user.setLoginId("myLoginId");
         user.updateScreensaverPassword("myPassword");
         genericEntityDao.saveOrUpdateEntity(user);
@@ -92,10 +89,10 @@ public class UserTest extends AbstractSpringTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreensaverUser user1 = new ScreeningRoomUser(new Date(), "First1", "Last1", userEmail1, "", "", "", "", "", ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR, false);
+        ScreensaverUser user1 = new ScreeningRoomUser("First1", "Last1", userEmail1);
         user1.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
         genericEntityDao.saveOrUpdateEntity(user1);
-        ScreensaverUser user2 = new ScreeningRoomUser(new Date(), "First2", "Last2", userEmail2, "", "", "", "", "", ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR, false);
+        ScreensaverUser user2 = new ScreeningRoomUser("First2", "Last2", userEmail2);
         user2.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
         genericEntityDao.saveOrUpdateEntity(user2);
       }

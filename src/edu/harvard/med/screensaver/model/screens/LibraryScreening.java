@@ -27,6 +27,8 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 
 /**
@@ -157,16 +159,14 @@ public class LibraryScreening extends Screening
    * Screen#createLibraryScreening(ScreeningRoomUser, Date, Date)}.
    * @param screen the screen
    * @param performedBy the user that performed the library assay
-   * @param dateCreated the date created
    * @param assayProtocolType the assay protocol type
    */
   LibraryScreening(
     Screen screen,
     ScreeningRoomUser performedBy,
-    Date dateCreated,
-    Date dateOfActivity)
+    LocalDate dateOfActivity)
   {
-    super(screen, performedBy, dateCreated, dateOfActivity);
+    super(screen, performedBy, dateOfActivity);
   }
 
 

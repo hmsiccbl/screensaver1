@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,6 +26,8 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -53,7 +53,7 @@ public class LetterOfSupport extends AbstractEntity
   private Integer _letterOfSupportId;
   private Integer _version;
   private Screen _screen;
-  private Date _dateWritten;
+  private LocalDate _dateWritten;
   private String _writtenBy;
 
 
@@ -111,7 +111,8 @@ public class LetterOfSupport extends AbstractEntity
    * @return the date written
    */
   @Column(nullable=false)
-  public Date getDateWritten()
+  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  public LocalDate getDateWritten()
   {
     return _dateWritten;
   }
@@ -120,9 +121,9 @@ public class LetterOfSupport extends AbstractEntity
    * Set the date written.
    * @param dateWritten the new date written
    */
-  public void setDateWritten(Date dateWritten)
+  public void setDateWritten(LocalDate dateWritten)
   {
-    _dateWritten = truncateDate(dateWritten);
+    _dateWritten = dateWritten;
   }
 
   /**
@@ -157,14 +158,14 @@ public class LetterOfSupport extends AbstractEntity
    */
   LetterOfSupport(
     Screen screen,
-    Date dateWritten,
+    LocalDate dateWritten,
     String writtenBy) throws DuplicateEntityException
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
-    _dateWritten = truncateDate(dateWritten);
+    _dateWritten = dateWritten;
     _writtenBy = writtenBy;
   }
 

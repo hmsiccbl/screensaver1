@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.db;
 
 import java.io.File;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,7 +24,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
@@ -162,10 +160,10 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
                                                            ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
 
     Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-    ScreenResult screenResult1 = rnaiScreen.createScreenResult(new Date());
+    ScreenResult screenResult1 = rnaiScreen.createScreenResult();
     screenResult1.setShareable(true);
     Screen compoundScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
-    ScreenResult screenResult2 = compoundScreen.createScreenResult(new Date());
+    ScreenResult screenResult2 = compoundScreen.createScreenResult();
     screenResult2.setShareable(true);
 
     rnaiScreen.setLeadScreener(rnaiUser);
@@ -276,7 +274,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         screen116.addCollaborator(users[6]);
         
         Screen screen117 = MakeDummyEntities.makeDummyScreen(117, screenType);
-        screen117.createScreenResult(new Date());
+        screen117.createScreenResult();
         screen117.setLeadScreener(users[6]);
         
         for (int i = 0; i < users.length; i ++) {
@@ -436,19 +434,10 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
  
   private ScreeningRoomUser makeUserWithRoles(ScreensaverUserRole... roles)
   {
-    Date created = new Date();
     Object object = new Object();
-    ScreeningRoomUser user = new ScreeningRoomUser(created,
-                                                   "first",
+    ScreeningRoomUser user = new ScreeningRoomUser("first",
                                                    "last" + object.hashCode(),
-                                                   "email@hms.harvard.edu",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   "",
-                                                   ScreeningRoomUserClassification.ICCBL_NSRB_STAFF,
-                                                   true);
+                                                   "email@hms.harvard.edu");
     for (ScreensaverUserRole role : roles) {
       user.addScreensaverUserRole(role);
     }

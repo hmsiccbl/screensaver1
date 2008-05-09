@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +27,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 /**
  * A hibernate entity representing a compound cherry pick request.
@@ -55,7 +55,7 @@ public class CompoundCherryPickRequest extends CherryPickRequest
 
   /**
    * Construct an initialized <code>CompoundCherryPickRequest</code>. Intended only for use
-   * by {@link Screen#createCherryPickRequest(ScreeningRoomUser, Date, Integer)}.
+   * by {@link Screen#createCherryPickRequest(ScreeningRoomUser, LocalDate, Integer)}.
    * @param screen the screen
    * @param requestedBy the user that made the request
    * @param dateRequested the date created
@@ -65,7 +65,7 @@ public class CompoundCherryPickRequest extends CherryPickRequest
   public CompoundCherryPickRequest(
     Screen screen,
     ScreeningRoomUser requestedBy,
-    Date dateRequested,
+    LocalDate dateRequested,
     Integer legacyCherryPickRequestNumber)
   {
     super(screen, requestedBy, dateRequested, legacyCherryPickRequestNumber);

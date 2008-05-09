@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.io.rnaiglobal;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import jxl.Cell;
@@ -31,9 +30,7 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.util.DateUtil;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -53,7 +50,6 @@ public class BoutrosAnnotationImporter
   private static final String STUDY_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
   private static final String STUDY_SUMMARY = "In-silico analysis of SMARTPool siRNA gene targets, using RefSeq release 23";
   private static final String STUDY_URL = "http://www.dkfz.de/signaling2/siGENOME/";
-  private static final Date STUDY_DATE = DateUtil.makeDate(2007, 6, 14);
   private static final String LAB_AFFILIATION_NAME = "DKFZ German Cancer Research Center";
   private static final String LAB_HEAD_EMAIL = "m.boutros@dkfz.de";
   private static final String SCREENER_EMAIL = "t.horn@dkfz.de";
@@ -116,7 +112,6 @@ public class BoutrosAnnotationImporter
           Screen screen = new Screen(leadScreener,
                                      labHead,
                                      STUDY_NUMBER,
-                                     STUDY_DATE,
                                      ScreenType.RNAI,
                                      StudyType.IN_SILICO,
                                      STUDY_TITLE);
@@ -158,17 +153,9 @@ public class BoutrosAnnotationImporter
                                                       "email",
                                                       email);
     if (user == null) {
-      user = new ScreeningRoomUser(new Date(),
-                                   firstName,
+      user = new ScreeningRoomUser(firstName,
                                    lastName,
-                                   email,
-                                   "",
-                                   "",
-                                   "",
-                                   "",
-                                   "",
-                                   ScreeningRoomUserClassification.UNASSIGNED,
-                                   true);
+                                   email);
       user.setLoginId(loginId);
       user.updateScreensaverPassword(password);
       user.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);

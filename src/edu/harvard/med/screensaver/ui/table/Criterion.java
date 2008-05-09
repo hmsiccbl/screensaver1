@@ -10,9 +10,7 @@
 package edu.harvard.med.screensaver.ui.table;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 
@@ -20,7 +18,6 @@ import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -160,11 +157,6 @@ public class Criterion<T> extends Observable
       if (value == "") {
         value = null;
       }
-    }
-    
-    // HACK: handle Date values without time portion.  forced to do this here, since can't figure out a way of controlling MyFaces's InputDate's handling of dates (ignores Converter) 
-    if (value instanceof Date) {
-      value = (T) DateUtils.truncate((Date) value, Calendar.DATE);
     }
     
     if (NullSafeUtils.nullSafeEquals(_value, value)) {

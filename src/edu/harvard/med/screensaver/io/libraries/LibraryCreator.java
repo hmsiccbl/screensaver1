@@ -12,9 +12,7 @@ package edu.harvard.med.screensaver.io.libraries;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.io.ParseError;
@@ -26,6 +24,9 @@ import edu.harvard.med.screensaver.util.StringUtils;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.dao.DataIntegrityViolationException;
 
 /**
@@ -46,7 +47,7 @@ public class LibraryCreator
   {
     final CommandLineApplication app = new CommandLineApplication(args);
     try {
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+      DateTimeFormatter dateFormat = DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN);
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("library name").withLongOpt("name").withDescription("full, official name for the library").create("n"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("short name").withLongOpt("short-name").withDescription("a short name for identifying the library").create("s"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("library type").withLongOpt("library-type").withDescription(StringUtils.makeListString(Arrays.asList(LibraryType.values()), ", ")).create("lt"));
@@ -55,8 +56,8 @@ public class LibraryCreator
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("#").withLongOpt("end-plate").create("ep"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("name").withLongOpt("vendor").create("v"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("text").withLongOpt("description").create("d"));
-      app.addCommandLineOption(OptionBuilder.hasArg().withArgName(dateFormat.toPattern()).withLongOpt("date-received").create("dr"));
-      app.addCommandLineOption(OptionBuilder.hasArg().withArgName(dateFormat.toPattern()).withLongOpt("date-screenable").create("ds"));
+      app.addCommandLineOption(OptionBuilder.hasArg().withArgName(CommandLineApplication.DEFAULT_DATE_PATTERN).withLongOpt("date-received").create("dr"));
+      app.addCommandLineOption(OptionBuilder.hasArg().withArgName(CommandLineApplication.DEFAULT_DATE_PATTERN).withLongOpt("date-screenable").create("ds"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("file").withLongOpt("contents-file").create("f"));
       if (!app.processOptions(true, true)) {
         System.exit(1);
@@ -70,8 +71,8 @@ public class LibraryCreator
       int endPlate = app.getCommandLineOptionValue("ep", Integer.class);
       String vendor = app.isCommandLineFlagSet("v") ? app.getCommandLineOptionValue("v") : null;
       String description = app.isCommandLineFlagSet("d") ? app.getCommandLineOptionValue("d") : null;
-      Date dateReceived = app.isCommandLineFlagSet("dr") ? app.getCommandLineOptionValue("dr", Date.class, dateFormat) : null;
-      Date dateScreenable = app.isCommandLineFlagSet("ds") ? app.getCommandLineOptionValue("ds", Date.class, dateFormat) : null;
+      LocalDate dateReceived = app.isCommandLineFlagSet("dr") ? app.getCommandLineOptionValue("dr", dateFormat).toLocalDate() : null;
+      LocalDate dateScreenable = app.isCommandLineFlagSet("ds") ? app.getCommandLineOptionValue("ds", dateFormat).toLocalDate() : null;
       final File libraryContentsFile = app.isCommandLineFlagSet("f") ?  app.getCommandLineOptionValue("f", File.class) : null;
 
       final Library library = new Library(libraryName, shortName, screenType, libraryType, startPlate, endPlate);

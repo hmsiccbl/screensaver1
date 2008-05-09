@@ -40,14 +40,6 @@
 
 			<t:panelGrid columns="2" styleClass="standardTable"
 				columnClasses="keyColumn,textColumn" rowClasses="row1,row2">
-				<!-- as long as screenResult.dateCreated is synonymous with "first screening room activity date",
-				       there's no point in displaying this redundant field, as screening room activities, with their associated dates, are
-				       shown in screen panel -->
-				<!--t:outputLabel for="screenResultDateCreated"
-						value="Date of first screening room activity" styleClass="keyColumn" />
-					<t:outputText id="screenResultDateCreated"
-						value="#{screenResultViewer.screenResult.dateCreated}"
-						styleClass="dataText" /-->
 
 				<t:outputLabel for="screenResultLastImported" value="Last Imported"
 					title="The date the current screen results were loaded into the database" />

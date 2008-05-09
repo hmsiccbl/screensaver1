@@ -20,9 +20,7 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -75,9 +73,10 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
@@ -507,10 +506,10 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
     String capitalizedSingularPropName = StringUtils.capitalize(singularPropName);
 
-    // collection property has no setter (should only have add and/or remove methods)
-    assertNull(
-      "collection property has no setter: " + fullPropName,
-      propertyDescriptor.getWriteMethod());
+//    // collection property has no setter (should only have add and/or remove methods)
+//    assertNull(
+//      "collection property has no setter: " + fullPropName,
+//      propertyDescriptor.getWriteMethod());
 
     // if the getter method for the property is annotated with
     // @Column(hasNonconventionalSetterMethod=true), then there is no adder method for this
@@ -1169,9 +1168,13 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       _characterTestValue %= Well.PLATE_ROWS; // HACK: prevent well row from exploding (TODO: create WellRow class)
       return _characterTestValue;
     }
-    if (type.equals(Date.class)) {
+    if (type.equals(LocalDate.class)) {
       _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
-      return DateUtils.round(new Date(_dateMilliseconds), Calendar.DATE);
+      return new LocalDate(_dateMilliseconds);
+    }
+    if (type.equals(DateTime.class)) {
+      _dateMilliseconds += 1000 * 60 * 60 * 24 * 1.32;
+      return new DateTime(_dateMilliseconds);
     }
     if (type.equals(ScreenType.class)) {
       // TODO: we need a way of controlling the ScreenType in particular circumstances; e.g., we want to run all tests on Screen for all ScreenTypes (and avoid problematic cases like testing createCPR() when ScreenType is Other

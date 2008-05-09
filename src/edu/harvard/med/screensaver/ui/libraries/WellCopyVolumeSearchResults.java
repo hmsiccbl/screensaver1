@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,6 +52,7 @@ import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy,Pair<WellKey,String>>
@@ -367,7 +367,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
         if (_newRemainingVolumes.size() > 0) {
           AdministratorUser administratorUser = (AdministratorUser) _dao.reloadEntity(screensaverUser);
           WellVolumeCorrectionActivity wellVolumeCorrectionActivity =
-            new WellVolumeCorrectionActivity(administratorUser, new Date());
+            new WellVolumeCorrectionActivity(administratorUser, new LocalDate());
           wellVolumeCorrectionActivity.setComments(getWellVolumeAdjustmentActivityComments());
           // TODO
           //wellVolumeCorrectionActivity.setApprovedBy();

@@ -10,12 +10,9 @@
 package edu.harvard.med.screensaver.db;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
@@ -32,6 +29,8 @@ import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -118,7 +117,7 @@ public class SimpleDAOTest extends AbstractSpringTest
     {
       public void runTransaction()
       {
-        ScreenResult screenResult = ScreenResultParserTest.makeScreenResult(new Date());
+        ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
         rvts[0] = screenResult.createResultValueType("rvt0");
         rvts[0].setDerived(true);
         rvts[0].setAssayPhenotype("Mouse");
