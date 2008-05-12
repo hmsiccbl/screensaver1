@@ -161,7 +161,8 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   public String cancel()
   {
     _isEditMode = false;
-    return reload();
+    reload();
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod

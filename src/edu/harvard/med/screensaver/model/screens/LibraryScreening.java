@@ -28,7 +28,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 
 /**
@@ -95,7 +94,7 @@ public class LibraryScreening extends Screening
   @Sort(type=SortType.NATURAL)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="platesUsed")
   public SortedSet<PlatesUsed> getPlatesUsed()

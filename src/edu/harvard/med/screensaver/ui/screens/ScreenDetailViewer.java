@@ -465,7 +465,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), new LocalDate());
     _dao.persistEntity(activity);
     _dao.flush();
-    return _activityViewer.viewActivity(activity);
+    String result = _activityViewer.viewActivity(activity);
+    _activityViewer.edit(); // open in edit mode
+    return result;
   }
   
   @UIControllerMethod
@@ -482,7 +484,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     Activity activity = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), new LocalDate(), cpr);
     _dao.persistEntity(activity);
     _dao.flush();
-    return _activityViewer.viewActivity(activity);
+    String result = _activityViewer.viewActivity(activity);
+    _activityViewer.edit(); // open in edit mode
+    return result;
   }
 
   @UIControllerMethod

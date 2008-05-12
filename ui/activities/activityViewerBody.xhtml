@@ -111,7 +111,7 @@
 					value="#{activityViewer.activity.special}"
 					description="Whether the library screening was performed on plates provided by the screener"
 					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}"
-					editable="#{activityViewer.libraryAndPlatesScreenedDataModel.rowCount == 0}" />
+					editable="#{activityViewer.editMode &amp;&amp; activityViewer.libraryAndPlatesScreenedDataModel.rowCount == 0}" />
 
 				<ss:property id="platesScreened" label="Plates Screened"
 					description="Plates screened by this library activity"
