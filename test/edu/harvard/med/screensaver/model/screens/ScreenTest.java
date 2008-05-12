@@ -62,19 +62,19 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       new LocalDate());
 
     Set<LibraryScreening> libraryScreenings =
-      screen.getlabActivitiesOfType(LibraryScreening.class);
+      screen.getLabActivitiesOfType(LibraryScreening.class);
     assertEquals("library screening activities",
                  new TreeSet<LibraryScreening>(Arrays.asList(screening1, screening2)),
                  libraryScreenings);
 
     Set<CherryPickLiquidTransfer> cherryPickLiquidTransfers =
-      screen.getlabActivitiesOfType(CherryPickLiquidTransfer.class);
+      screen.getLabActivitiesOfType(CherryPickLiquidTransfer.class);
     assertEquals("cherry pick liquid transfer activities",
                new TreeSet<CherryPickLiquidTransfer>(Arrays.asList(cplt)),
                cherryPickLiquidTransfers);
 
     Set<LabActivity> activities =
-      screen.getlabActivitiesOfType(LabActivity.class);
+      screen.getLabActivitiesOfType(LabActivity.class);
     assertEquals("cherry pick liquid transfer activities",
                  new TreeSet<LabActivity>(Arrays.asList(screening1, screening2, cplt)),
                  activities);

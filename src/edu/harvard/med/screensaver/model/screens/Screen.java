@@ -109,7 +109,7 @@ public class Screen extends Study
   // iccb screen
 
   private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
-  private Set<LabActivity> _labActivities = new HashSet<LabActivity>();
+  private SortedSet<LabActivity> _labActivities = new TreeSet<LabActivity>();
   private LocalDate _dataMeetingScheduled;
   private LocalDate _dataMeetingComplete;
   private BillingInformation _billingInformation;
@@ -538,8 +538,9 @@ public class Screen extends Study
     org.hibernate.annotations.CascadeType.DELETE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
+  @Sort(type=SortType.NATURAL)
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="labActivity")
-  public Set<LabActivity> getLabActivities()
+  public SortedSet<LabActivity> getLabActivities()
   {
     return _labActivities;
   }
@@ -552,9 +553,9 @@ public class Screen extends Study
    */
   @SuppressWarnings("unchecked")
   @Transient
-  public <E extends LabActivity> Set<E> getlabActivitiesOfType(Class<E> clazz)
+  public <E extends LabActivity> SortedSet<E> getLabActivitiesOfType(Class<E> clazz)
   {
-    Set<E> result = new TreeSet<E>();
+    SortedSet<E> result = new TreeSet<E>();
     for (LabActivity labActivity : _labActivities) {
       if (clazz.isAssignableFrom(labActivity.getClass())) {
         result.add((E) labActivity);
@@ -1550,7 +1551,7 @@ public class Screen extends Study
   /**
    * @motivation for hibernate
    */
-  private void setLabActivities(Set<LabActivity> labActivities)
+  private void setLabActivities(SortedSet<LabActivity> labActivities)
   {
     _labActivities = labActivities;
   }

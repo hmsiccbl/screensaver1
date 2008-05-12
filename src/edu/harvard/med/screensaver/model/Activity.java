@@ -63,8 +63,19 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
   @Transient
   public int compareTo(Object o)
   {
+    if (this.equals(o)) {
+      return 0;
+    }
     Activity other = (Activity) o;
-    return getDateOfActivity().compareTo(other.getDateOfActivity());
+    int result = getDateOfActivity().compareTo(other.getDateOfActivity());
+    if (result != 0) {
+      return result;
+    }
+    result = getDateCreated().compareTo(other.getDateCreated());
+    if (result != 0) {
+      return result;
+    }
+    return hashCode() > other.hashCode() ? 1 : -1;
   }
 
   @Override

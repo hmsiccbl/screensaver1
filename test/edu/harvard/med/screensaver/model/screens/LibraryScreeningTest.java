@@ -12,8 +12,10 @@ package edu.harvard.med.screensaver.model.screens;
 import java.beans.IntrospectionException;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScreening>
 {
@@ -30,6 +32,37 @@ public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScre
   public LibraryScreeningTest() throws IntrospectionException
   {
     super(LibraryScreening.class);
+  }
+  
+  public void testAddLibraryScreeningDuplicatesAssayProtocolInfo()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+    LibraryScreening previousScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+    LibraryScreening currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
+    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
+    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
+
+    previousScreening = currentScreening;
+    previousScreening.setAssayProtocol("previous assay protocol");
+    currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
+    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
+    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
+    
+    previousScreening = currentScreening;
+    previousScreening.setAssayProtocolLastModifiedDate(new LocalDate(2000, 1, 1));
+    currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
+    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
+    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
+    
+    previousScreening = currentScreening;
+    previousScreening.setAssayProtocolType(AssayProtocolType.ESTABLISHED);
+    currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
+    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
+    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
   }
 
 }

@@ -28,7 +28,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 
 /**
@@ -58,16 +57,6 @@ public abstract class LabActivity extends Activity
 
 
   // public instance methods
-
-  @Override
-  public int compareTo(Object o)
-  {
-    if (o instanceof LabActivity) {
-      LabActivity other = (LabActivity) o;
-      return getDateOfActivity().compareTo(other.getDateOfActivity());
-    }
-    return 0;
-  }
 
   /**
    * Get the screen.
