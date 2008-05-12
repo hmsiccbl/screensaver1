@@ -9,6 +9,11 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import junit.framework.Test;
@@ -17,17 +22,22 @@ import jxl.Sheet;
 import jxl.Workbook;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.searchresults.GenericDataExporter;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.jboss.jsfunit.facade.JSFClientSession;
 import org.jboss.jsfunit.facade.JSFServerSession;
+import org.joda.time.LocalDate;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.SubmitButton;
 import com.meterware.httpunit.WebForm;
@@ -172,7 +182,7 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
     assertEquals("exporter type", GenericDataExporter.FORMAT_NAME, dataExporter.getFormatName());
     // TODO: this is causing an error; we can rely upon the current behavior of the desired exporter being selected by default, by this makes the test more fragile, of course
 //    client.setParameter("downloadFormat",  Integer.toString(dataExporter.hashCode()));
-    client.submit("downloadSearchResultsCommandButton");
+    client.submit("exportSearchResultsCommandButton");
     assertEquals("download file content type", GenericDataExporter.FORMAT_MIME_TYPE, client.getWebResponse().getContentType());
     assertEquals("download file name", "searchResult.xls", client.getWebResponse().getHeaderField("Content-Location"));
     Workbook workbook = Workbook.getWorkbook(client.getWebResponse().getInputStream());
@@ -183,5 +193,92 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
     
     // TODO: test filtering is respected in export
   }
+  
+//  public void testAddAndDeleteLibraryScreeningPlatesScreened() throws InterruptedException, MalformedURLException, IOException, SAXException
+//  {
+//    LibraryScreening libraryScreening = initializeLibraryScreening();
+//    Library library = MakeDummyEntities.makeDummyLibrary(10, libraryScreening.getScreen().getScreenType(), 2);
+//    _dao.persistEntity(library);
+//
+//    JSFClientSession client = new JSFClientSession(_webConv, "/main.jsf");
+//    JSFServerSession server = new JSFServerSession(client);
+//
+//    ActivityViewer activityViewer = (ActivityViewer) server.getManagedBeanValue("#{activityViewer}");
+//    activityViewer.viewActivity(libraryScreening);
+//    
+//    client = new JSFClientSession(_webConv, "/activities/activityViewer.jsf");
+//    server = new JSFServerSession(client);
+//
+//    assertEquals(libraryScreening.getEntityId(),
+//                 server.getManagedBeanValue("#{activityViewer.activity.entityId}"));
+//    client.submit("editCommand");
+//    assertEquals(Boolean.TRUE, server.getManagedBeanValue("#{activityViewer.editMode}"));
+//    client.setParameter("newPlatesScreenedStartPlateField", "10000");
+//    client.setParameter("newPlatesScreenedEndPlateField", "10001");
+//    client.setParameter("newPlatesScreenedCopyField", "C");
+//    client.submit("platesScreenedCollectionTableAddCommand");
+//    DataModel model = (DataModel) server.getManagedBeanValue("#{activityViewer.libraryAndPlatesScreenedDataModel");
+//    assertEquals(1, model.getRowCount());
+//    model.setRowIndex(0);
+//    LibraryAndPlatesUsed libraryAndPlatesUsed = (LibraryAndPlatesUsed) model.getRowData();
+//    assertEquals(new Integer(10000), libraryAndPlatesUsed.getPlatesUsed().getStartPlate());
+//    assertEquals(new Integer(10001), libraryAndPlatesUsed.getPlatesUsed().getStartPlate());
+//    assertEquals("C", libraryAndPlatesUsed.getPlatesUsed().getCopy());
+//    assertEquals(library, libraryAndPlatesUsed.getLibrary());
+//    client.submit("saveCommand");
+//    assertEquals(Boolean.FALSE, server.getManagedBeanValue("#{activityViewer.editMode}"));
+//    model = (DataModel) server.getManagedBeanValue("#{activityViewer.libraryAndPlatesScreenedDataModel");
+//    assertEquals(1, model.getRowCount());
+//    libraryAndPlatesUsed = (LibraryAndPlatesUsed) model.getRowData();
+//    assertEquals(new Integer(10000), libraryAndPlatesUsed.getPlatesUsed().getStartPlate());
+//    assertEquals(new Integer(10001), libraryAndPlatesUsed.getPlatesUsed().getStartPlate());
+//    assertEquals("C", libraryAndPlatesUsed.getPlatesUsed().getCopy());
+//    assertEquals(library, libraryAndPlatesUsed.getLibrary());
+//    client.submit("editCommand");
+//    model = (DataModel) server.getManagedBeanValue("#{activityViewer.libraryAndPlatesScreenedDataModel");
+//    assertEquals(1, model.getRowCount());
+//    model.setRowIndex(0);
+//    activityViewer.deletePlatesScreened();
+//    client.submit("saveCommand");
+//    model = (DataModel) server.getManagedBeanValue("#{activityViewer.libraryAndPlatesScreenedDataModel");
+//    assertEquals(0, model.getRowCount());
+//    assertEquals(Collections.emptySet(), server.getManagedBeanValue("#{activityViewer.activity.platesUsed}"));
+//  }
 
+  public void testAddLibraryScreeningDuplicatesAssayProtocolInfo() throws InterruptedException, MalformedURLException, IOException, SAXException
+  {
+    LibraryScreening previousScreening = initializeLibraryScreening();
+
+    JSFClientSession client = new JSFClientSession(_webConv, "/main.jsf");
+    JSFServerSession server = new JSFServerSession(client);
+
+    client.setParameter("screenNumber", "1");
+    client.submit("quickFindScreenSubmit");
+    assertEquals("/screens/screenViewer.xhtml", server.getCurrentViewID());
+    assertEquals(new Integer(1), 
+                 server.getManagedBeanValue("#{screenDetailViewer.labActivitiesDataModel.rowCount}"));
+
+    client.submit("addLibraryScreeningCommand");
+    assertEquals("/activities/activityViewer.xhtml", server.getCurrentViewID());
+    assertEquals(previousScreening.getAssayProtocol(),
+                 server.getManagedBeanValue("#{activityViewer.activity.assayProtocol}"));
+    assertFalse(previousScreening.getEntityId().equals(server.getManagedBeanValue("#{activityViewer.activity.entityId}")));
+  }
+  
+  private LibraryScreening initializeLibraryScreening()
+  {
+    LibraryScreening previousScreening = (LibraryScreening) _dao.runQuery(new Query() {
+      public List execute(Session session) {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
+        LibraryScreening previousScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+        previousScreening.setAssayProtocol("assay protocol test value");
+        _dao.persistEntity(screen.getLabHead());
+        _dao.persistEntity(screen.getLeadScreener());
+        _dao.persistEntity(screen);
+        return Arrays.asList(previousScreening);
+      }
+    }).get(0);
+    return previousScreening;
+  }
+  
 }

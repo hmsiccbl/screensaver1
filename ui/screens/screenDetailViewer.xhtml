@@ -482,15 +482,12 @@ TODO:
 									</t:dataTable>
                   <t:panelGroup styleClass="commandPanel"
                     rendered="#{screenDetailViewer.editable}">
-                    <t:commandButton value="Add Library Screening..."
-                      action="#{screenDetailViewer.addLibraryScreening}"
-                      styleClass="command" />
-                  </t:panelGroup>
+										<t:commandButton id="addLibraryScreeningCommand"
+											value="Add Library Screening..."
+											action="#{screenDetailViewer.addLibraryScreening}"
+											styleClass="command" />
+									</t:panelGroup>
 								</t:panelGrid>
-
-								<t:commandButton value="Add Lab Activity..."
-									action="#{screenDetailViewer.addLabActivity}"
-									styleClass="command" rendered="#{screenDetailViewer.editMode}" />
 							</ui:define>
 						</ss:property>
 

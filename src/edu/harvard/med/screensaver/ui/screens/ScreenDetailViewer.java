@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -36,6 +37,7 @@ import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -462,6 +464,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _dao.reattachEntity(_screen);
     _dao.reattachEntity(_screen.getLeadScreener());
     Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), new LocalDate());
+    duplicateMostRecentAssayProtocol();
     _dao.persistEntity(activity);
     _dao.flush();
     String result = _activityViewer.viewActivity(activity);
@@ -481,6 +484,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _dao.reattachEntity(_screen);
     _dao.reattachEntity(cpr);
     Activity activity = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), new LocalDate(), cpr);
+    duplicateMostRecentAssayProtocol();
     _dao.persistEntity(activity);
     _dao.flush();
     String result = _activityViewer.viewActivity(activity);
@@ -583,4 +587,17 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
     return (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(entityClass.getSimpleName()));
   }
+
+  private void duplicateMostRecentAssayProtocol() 
+  {
+    SortedSet<Screening> screenings = getScreen().getLabActivitiesOfType(Screening.class);
+    if (screenings.size() >= 2) {
+      Screening currentScreening = screenings.last();
+      Screening previousScreening = screenings.headSet(currentScreening).last();
+      currentScreening.setAssayProtocol(previousScreening.getAssayProtocol());
+      currentScreening.setAssayProtocolLastModifiedDate(previousScreening.getAssayProtocolLastModifiedDate());
+      currentScreening.setAssayProtocolType(previousScreening.getAssayProtocolType());
+    }
+  }
+  
 }

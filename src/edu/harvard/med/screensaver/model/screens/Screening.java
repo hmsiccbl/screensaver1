@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.SortedSet;
-
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 
@@ -148,13 +146,6 @@ public abstract class Screening extends LabActivity
     LocalDate dateOfActivity)
   {
     super(screen, performedBy, dateOfActivity);
-    SortedSet<Screening> screenings = screen.getLabActivitiesOfType(Screening.class);
-    if (screenings.size() >= 2) {
-      Screening previousScreening = screenings.headSet(this).last();
-      setAssayProtocol(previousScreening.getAssayProtocol());
-      setAssayProtocolLastModifiedDate(previousScreening.getAssayProtocolLastModifiedDate());
-      setAssayProtocolType(previousScreening.getAssayProtocolType());
-    }
   }
 
   /**

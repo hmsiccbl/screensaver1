@@ -12,10 +12,8 @@ package edu.harvard.med.screensaver.model.screens;
 import java.beans.IntrospectionException;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 
 import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScreening>
 {
@@ -33,45 +31,5 @@ public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScre
   {
     super(LibraryScreening.class);
   }
-  
-  public void testAddLibraryScreeningDuplicatesAssayProtocolInfo() throws InterruptedException
-  {
-    Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    LibraryScreening previousScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
-    Thread.sleep(1);
-    LibraryScreening currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
-    assertEquals(-1, previousScreening.compareTo(currentScreening));
-    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
-    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
-    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
-
-    previousScreening = currentScreening;
-    previousScreening.setAssayProtocol("previous assay protocol");
-    Thread.sleep(1);
-    currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
-    assertEquals(-1, previousScreening.compareTo(currentScreening));
-    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
-    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
-    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
-    
-    previousScreening = currentScreening;
-    previousScreening.setAssayProtocolLastModifiedDate(new LocalDate(2000, 1, 1));
-    Thread.sleep(1);
-    currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
-    assertEquals(-1, previousScreening.compareTo(currentScreening));
-    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
-    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
-    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
-    
-    previousScreening = currentScreening;
-    previousScreening.setAssayProtocolType(AssayProtocolType.ESTABLISHED);
-    Thread.sleep(1);
-    currentScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
-    assertEquals(-1, previousScreening.compareTo(currentScreening));
-    assertEquals(previousScreening.getAssayProtocol(), currentScreening.getAssayProtocol());
-    assertEquals(previousScreening.getAssayProtocolLastModifiedDate(), currentScreening.getAssayProtocolLastModifiedDate());
-    assertEquals(previousScreening.getAssayProtocolType(), currentScreening.getAssayProtocolType());
-  }
-
 }
 
