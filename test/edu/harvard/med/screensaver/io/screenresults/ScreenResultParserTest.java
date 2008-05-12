@@ -56,7 +56,6 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 
 /**

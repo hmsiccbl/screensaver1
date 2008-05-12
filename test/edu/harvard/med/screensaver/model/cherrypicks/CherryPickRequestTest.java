@@ -12,10 +12,6 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 import java.beans.IntrospectionException;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -29,6 +25,9 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 public class CherryPickRequestTest extends AbstractEntityInstanceTest<CherryPickRequest>
 {

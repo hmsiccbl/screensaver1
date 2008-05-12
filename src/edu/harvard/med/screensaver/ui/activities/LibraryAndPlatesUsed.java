@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.activities;
 
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 

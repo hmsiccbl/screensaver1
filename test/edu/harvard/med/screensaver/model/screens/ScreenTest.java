@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.engine.EntityKey;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 {

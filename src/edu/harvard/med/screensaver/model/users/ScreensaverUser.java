@@ -37,7 +37,6 @@ import edu.harvard.med.screensaver.util.CryptoUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 

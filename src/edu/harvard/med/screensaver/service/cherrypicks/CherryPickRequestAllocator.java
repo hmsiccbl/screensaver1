@@ -33,7 +33,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +53,7 @@ public class CherryPickRequestAllocator
    * inaccuracy on the number of times the well was drawn from, but the above
    * strategy is considered sufficient by the lab).
    */
-   public static final Volume MINIMUM_SOURCE_WELL_VOLUME = new Volume(3, Units.MICROLITERS);
+   public static final Volume MINIMUM_SOURCE_WELL_VOLUME = new Volume(5, Units.MICROLITERS);
 
 
   // static members
@@ -140,7 +139,7 @@ public class CherryPickRequestAllocator
                                                                    CherryPickLiquidTransferStatus.CANCELED);
     cplt.setComments(comments);
     _dao.saveOrUpdateEntity(cplt);
-    
+
     // note: by iterating through cherryPickRequest's active assay plates, rather than the
     // assayPlates method arg, we are manipulating Hibernate-managed persistent entities,
     // rather than detached entities
@@ -150,7 +149,7 @@ public class CherryPickRequestAllocator
           // note: it is okay to cancel a plate that has some (or all) lab cherry
           // picks that are unallocated
           if (labCherryPick.isAllocated()) {
-            // TODO: I cannot determine why explicit reattachment of the LCP is necessary; the unit test passes without it, but when invoked via the web interface, the LCPs' WVAs fail to be deleted in the database 
+            // TODO: I cannot determine why explicit reattachment of the LCP is necessary; the unit test passes without it, but when invoked via the web interface, the LCPs' WVAs fail to be deleted in the database
             LabCherryPick labCherryPick2 = _dao.reattachEntity(labCherryPick);
             labCherryPick2.setAllocated(null);
           }

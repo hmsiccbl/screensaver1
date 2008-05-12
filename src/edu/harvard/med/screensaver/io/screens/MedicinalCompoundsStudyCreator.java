@@ -41,7 +41,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-import org.joda.time.LocalDateTime;
 
 public class MedicinalCompoundsStudyCreator
 {
@@ -102,9 +101,9 @@ public class MedicinalCompoundsStudyCreator
           ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu");
           ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu");
 
-          study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
+          study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO, TITLE);
           study.setSummary(SUMMARY);
-          study.setShareable(false);
+          study.setShareable(true);
 
           AnnotationType annotType = study.createAnnotationType("Notes on Suitability",
                                                                A_NO_SPECIFIC_CONCERNS + ". " +

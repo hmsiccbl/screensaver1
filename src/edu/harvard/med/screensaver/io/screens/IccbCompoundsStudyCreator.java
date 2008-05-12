@@ -24,7 +24,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-import org.joda.time.LocalDateTime;
 
 public class IccbCompoundsStudyCreator
 {

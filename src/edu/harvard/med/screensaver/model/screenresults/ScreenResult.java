@@ -40,7 +40,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading

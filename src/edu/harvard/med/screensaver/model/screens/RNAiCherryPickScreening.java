@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 /**
  * A Hibernate entity bean representing a library screening performed on set of

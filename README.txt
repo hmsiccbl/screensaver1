@@ -58,10 +58,6 @@ resources/         Java resource files; i.e., files that can found within the
                    (Hibernate mapping files, build-number.txt, schema
                    create/drop scripts).
 
-resources/sql/     SQL schema scripts.  Placed under resources, since 
-                   Screensaver application requires access to these scripts for
-                   development-related functionality.
-
 src/               Java source code (only! see resources/).
 
 test/              Testing-related Java source code, including JUnit test

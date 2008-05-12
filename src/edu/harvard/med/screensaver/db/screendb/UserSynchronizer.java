@@ -31,7 +31,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 /**
  * Assumes first/last doesn't change, that it is safe to use a business key across the two

@@ -21,7 +21,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 
 /**
  * Represents an activity involving administrative decisions or changes to data.

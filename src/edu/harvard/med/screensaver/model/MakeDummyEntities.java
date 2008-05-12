@@ -39,7 +39,6 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
-import org.joda.time.LocalDateTime;
 
 public class MakeDummyEntities
 {
