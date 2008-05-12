@@ -42,7 +42,7 @@
 				action="#{actionBean[deleteAction]}" styleClass="command" />
 		</t:column>
 	</t:dataTable>
-	<t:div rendered="#{editable}">
+	<t:div rendered="#{editable}" styleClass="groupingPanel">
 		<ui:insert name="addProperties" />
 		<t:commandButton value="Add" action="#{actionBean[addAction]}"
 			styleClass="command" />

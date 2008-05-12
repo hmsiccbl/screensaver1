@@ -60,11 +60,6 @@
 					</ui:define>
 				</ss:property>
 
-				<ss:property id="comments" label="Comments"
-					value="#{activityViewer.activity.comments}"
-					editable="#{activityViewer.editMode}" description="Comments"
-					type="Textarea" editWidth="80" editHeight="5" />
-
 				<!-- LibraryScreening properties -->
 
 				<ss:property id="numberOfReplicates"
@@ -124,31 +119,51 @@
 					<ui:define name="data">
 						<ss:collectionTable id="platesScreened"
 							editable="#{activityViewer.editMode}"
-							dataModel="#{activityViewer.platesScreenedDataModel}"
+							dataModel="#{activityViewer.libraryAndPlatesScreenedDataModel}"
 							actionBean="#{activityViewer}" addAction="addPlatesScreened"
 							deleteAction="deletePlatesScreened">
 							<ui:define name="columns">
+                <t:column>
+                  <f:facet name="header">
+                    <t:outputText value="Library" />
+                  </f:facet>
+									<t:outputText 
+										value="#{empty element.library ? '' : element.library.shortName}"
+										styleClass="dataText" />
+									<t:outputText id="library2"
+										rendered="#{!empty element.library}"
+										value=" (#{element.library.startPlate}-#{element.library.endPlate})"
+										styleClass="dataText" />
+								</t:column>
 								<t:column>
 									<f:facet name="header">
 										<t:outputText value="Start Plate" />
 									</f:facet>
-									<t:inputText id="startPlate" value="#{element.startPlate}"
+									<t:inputText id="startPlate" value="#{element.platesUsed.startPlate}"
 										displayValueOnly="#{! activityViewer.editMode}"
 										styleClass="inputText" displayValueOnlyClass="dataText" />
+									<t:outputText id="invalidStartPlate"
+										styleClass="dataText errorMessage"
+										rendered="#{!activityViewer.editMode &amp;&amp; empty element.library}" 
+										value="&lt;invalid start plate&gt;"/>
 								</t:column>
 								<t:column>
 									<f:facet name="header">
 										<t:outputText value="End Plate" />
 									</f:facet>
-									<t:inputText id="startPlate" value="#{element.endPlate}"
+									<t:inputText id="endPlate" value="#{element.platesUsed.endPlate}"
 										displayValueOnly="#{! activityViewer.editMode}"
 										styleClass="inputText" displayValueOnlyClass="dataText" />
+									<t:outputText id="invalidEndPlate"
+										styleClass="dataText errorMessage"
+										rendered="#{!activityViewer.editMode &amp;&amp; !empty element.library &amp;&amp; (element.platesUsed.endPlate &gt; element.library.endPlate || element.platesUsed.endPlate &lt; element.platesUsed.startPlate)}" 
+										value="&lt;invalid end plate&gt;"/>
 								</t:column>
 								<t:column>
 									<f:facet name="header">
 										<t:outputText value="Copy" />
 									</f:facet>
-									<t:selectOneMenu value="#{element.copy}" styleClass="dataText"
+									<t:selectOneMenu value="#{element.platesUsed.copy}" styleClass="dataText"
 										displayValueOnly="#{! activityViewer.editMode}"
 										displayValueOnlyStyleClass="inputText">
 										<t:selectItems value="#{activityViewer.allCopies}" var="copy"
@@ -193,6 +208,11 @@
 							bean="#{cherryPickRequestViewer}" action="viewCherryPickRequest" />
 					</ui:define>
 				</ss:property>
+
+        <ss:property id="comments" label="Comments"
+          value="#{activityViewer.activity.comments}"
+          editable="#{activityViewer.editMode}" description="Comments"
+          type="Textarea" editWidth="80" editHeight="5" />
 
 			</t:panelGrid>
 		</t:div>

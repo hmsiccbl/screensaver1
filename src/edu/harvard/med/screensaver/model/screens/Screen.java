@@ -432,6 +432,16 @@ public class Screen extends Study
     }
     return false;
   }
+  
+  @Transient
+  public Set<ScreeningRoomUser> getAssociatedScreeningRoomUsers()
+  {
+    Set<ScreeningRoomUser> users = new HashSet<ScreeningRoomUser>();
+    users.add(getLabHead());
+    users.add(getLeadScreener());
+    users.addAll(getCollaborators());
+    return users;
+  }
 
   /**
    * Get the screen result.
@@ -555,7 +565,7 @@ public class Screen extends Study
 
   /**
    * Create and return a new library screening for the screen.
-   * @param performedBy the user that performed the library assay
+   * @param performedBy the user that performed the screening
    * @param assayProtocolType the assay protocol type
    * @return the new library screening
    */
@@ -567,6 +577,22 @@ public class Screen extends Study
       new LibraryScreening(this, performedBy, dateOfActivity);
     _labActivities.add(libraryScreening);
     return libraryScreening;
+  }
+
+  /**
+   * Create and return a new external screening for the screen.
+   * @param performedBy the user that performed the screening
+   * @param assayProtocolType the assay protocol type
+   * @return the new external screening
+   */
+  public ExternalScreening createExternalScreening(
+    ScreeningRoomUser performedBy,
+    LocalDate dateOfActivity)
+  {
+    ExternalScreening externalScreening =
+      new ExternalScreening(this, performedBy, dateOfActivity);
+    _labActivities.add(externalScreening);
+    return externalScreening;
   }
 
   /**

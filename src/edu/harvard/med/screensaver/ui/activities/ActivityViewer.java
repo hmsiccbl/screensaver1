@@ -11,14 +11,18 @@ package edu.harvard.med.screensaver.ui.activities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
@@ -45,12 +49,13 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   // instance data members
 
   private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
   
   private Activity _activity;
   private boolean _isEditMode = false;
   private UISelectOneEntityBean<ScreensaverUser> _performedBy;
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
-  private DataModel _platesScreenedDataModel;
+  private DataModel _libraryAndPlatesScreenedDataModel;
   private PlatesUsed _newPlatesScreened;
 
 
@@ -63,9 +68,11 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   {
   }
 
-  public ActivityViewer(GenericEntityDAO dao)
+  public ActivityViewer(GenericEntityDAO dao,
+                        LibrariesDAO librariesDao)
   {
     _dao = dao;
+    _librariesDao = librariesDao;
   }
 
 
@@ -85,8 +92,15 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   public UISelectOneBean<ScreensaverUser> getPerformedBy()
   {
     if (_performedBy == null) {
+      Set<ScreensaverUser> performedByCandidates;
+      if (_activity instanceof LabActivity) {
+         performedByCandidates = new HashSet<ScreensaverUser>(((LabActivity) _activity).getScreen().getAssociatedScreeningRoomUsers());
+      }
+      else {
+        performedByCandidates = new HashSet<ScreensaverUser>(_dao.findAllEntitiesOfType(ScreensaverUser.class));
+      }
       _performedBy = new UISelectOneEntityBean<ScreensaverUser>(
-        _dao.findAllEntitiesOfType(ScreensaverUser.class), 
+        performedByCandidates,
         (ScreensaverUser) _activity.getPerformedBy(), 
         _dao) {
         protected String getLabel(ScreensaverUser t) { return t.getFullNameLastFirst(); }
@@ -161,16 +175,18 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-  public DataModel getPlatesScreenedDataModel()
+  public DataModel getLibraryAndPlatesScreenedDataModel()
   {
-    if (_platesScreenedDataModel == null) {
-      List<PlatesUsed> platesUsed = new ArrayList<PlatesUsed>();
+    if (_libraryAndPlatesScreenedDataModel == null) {
+      List<LibraryAndPlatesUsed> libraryAndPlatesUsed = new ArrayList<LibraryAndPlatesUsed>();
       if (_activity instanceof LibraryScreening) {
-        platesUsed.addAll(((LibraryScreening) _activity).getPlatesUsed());
+        for (PlatesUsed platesUsed : ((LibraryScreening) _activity).getPlatesUsed()) {
+          libraryAndPlatesUsed.add(new LibraryAndPlatesUsed(_librariesDao, platesUsed));
+        }
       }
-      _platesScreenedDataModel = new ListDataModel(platesUsed);
+      _libraryAndPlatesScreenedDataModel = new ListDataModel(libraryAndPlatesUsed);
     }
-    return _platesScreenedDataModel;
+    return _libraryAndPlatesScreenedDataModel;
   }
 
 
@@ -206,7 +222,8 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
                                  true,
                                  "performedBy",
                                  "screen.labHead",
-                                 "screen.leadScreener");
+                                 "screen.leadScreener",
+                                 "screen.collaborators");
     if (activity instanceof LibraryScreening) {
       _dao.need(activity, "platesUsed");
     }
@@ -228,7 +245,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
         libraryScreening.createPlatesUsed(getNewPlatesScreened().getStartPlate(),
                                           getNewPlatesScreened().getEndPlate(),
                                           getNewPlatesScreened().getCopy());
-        _platesScreenedDataModel = null;
+        _libraryAndPlatesScreenedDataModel = null;
         _newPlatesScreened = null;
       }
     }
@@ -239,9 +256,9 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   {
     if (_activity instanceof LibraryScreening) {
       LibraryScreening libraryScreening = (LibraryScreening) _activity;
-      PlatesUsed platesUsed = (PlatesUsed) getPlatesScreenedDataModel().getRowData();
-      libraryScreening.getPlatesUsed().remove(platesUsed);
-      _platesScreenedDataModel = null;
+      LibraryAndPlatesUsed libraryAndPlatesUsed = (LibraryAndPlatesUsed) getLibraryAndPlatesScreenedDataModel().getRowData();
+      libraryScreening.getPlatesUsed().remove(libraryAndPlatesUsed.getPlatesUsed());
+      _libraryAndPlatesScreenedDataModel = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -259,7 +276,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   {
     _isEditMode = false;
     _performedBy = null;
-    _platesScreenedDataModel = null;
+    _libraryAndPlatesScreenedDataModel = null;
     _newPlatesScreened = null;
   }
 }

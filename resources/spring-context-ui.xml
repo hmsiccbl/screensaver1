@@ -592,6 +592,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.activities.ActivityViewer">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
     <aop:scoped-proxy />
   </bean>
 
