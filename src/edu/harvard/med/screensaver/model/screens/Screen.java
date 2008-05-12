@@ -580,22 +580,6 @@ public class Screen extends Study
   }
 
   /**
-   * Create and return a new external screening for the screen.
-   * @param performedBy the user that performed the screening
-   * @param assayProtocolType the assay protocol type
-   * @return the new external screening
-   */
-  public ExternalScreening createExternalScreening(
-    ScreeningRoomUser performedBy,
-    LocalDate dateOfActivity)
-  {
-    ExternalScreening externalScreening =
-      new ExternalScreening(this, performedBy, dateOfActivity);
-    _labActivities.add(externalScreening);
-    return externalScreening;
-  }
-
-  /**
    * Create and return a new cherry pick liquid transfer for the screen.
    * @param performedBy the user that performed the activity
    * @param dateOfActivity the date the lab activity took place

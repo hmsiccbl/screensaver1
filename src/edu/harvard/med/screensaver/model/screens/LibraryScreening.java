@@ -55,6 +55,7 @@ public class LibraryScreening extends Screening
   private static final Logger log = Logger.getLogger(LibraryScreening.class);
 
   public static final String ACTIVITY_TYPE_NAME = "Library Screening";
+  private static final String SPECIAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME = ACTIVITY_TYPE_NAME + " (screener-provided plates)";
 
   
   // private instance data
@@ -76,6 +77,9 @@ public class LibraryScreening extends Screening
   @Transient
   public String getActivityTypeName()
   {
+    if (isSpecial()) {
+      return SPECIAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME;
+    }
     return ACTIVITY_TYPE_NAME;
   }
 
