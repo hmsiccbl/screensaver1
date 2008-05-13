@@ -129,14 +129,14 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
           else if (column.getName().equals("Initial Volume")) {
             assertEquals("row " + j + ", " + expectedKey  + ":Initial Volume",
                          expectedKey.getSecond().equals("C") ? new Volume(10) : new Volume(20),
-                         (BigDecimal) cellValue);
+                         (Volume) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Remaining Volume")) {
             // this tests aggregation of WVAs
             assertEquals("row " + j + ", " + expectedKey  + ":Remaining Volume",
                          _expectedRemainingWellCopyVolume.get(expectedKey),
-                         (BigDecimal) cellValue);
+                         (Volume) cellValue);
             ++columnsTested;
           }
           // TODO: test all aggregation columns!
@@ -182,14 +182,14 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
           else if (column.getName().equals("Total Initial Copy Volume")) {
             assertEquals("row " + j + ", " + expectedKey  + ":Total Initial Copy Volume",
                          new Volume(30),
-                         (BigDecimal) cellValue);
+                         (Volume) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Consumed Volume")) {
             // this tests aggregation of WVAs
             assertEquals("row " + j + ", " + expectedKey  + ":Consumed Volume",
                          new Volume(30).subtract(_expectedRemainingWellVolume.get(expectedKey)),
-                         (BigDecimal) cellValue);
+                         (Volume) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Copies")) {

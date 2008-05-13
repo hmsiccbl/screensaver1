@@ -209,21 +209,24 @@ public class DataTableTest extends TestCase
     _dataTable.getDataTableModel().setRowIndex(0);
     _dataTable.getRowData();
     assertEquals("no data fetch after adding criterion", prevFetchCount, _fetchCount);
-    assertEquals("no data sort after adding criterion", prevSortCount, _sortCount);
     assertEquals("data filter after adding criterion", prevFilterCount + 1, _filterCount);
+    // for InMemoryDataModel: sort must occur after filter occurs
+    assertEquals("data sort after filter", prevSortCount + 1, _sortCount);  
     _statusCol.getCriterion().setValue(Status.NEW);
     _dataTable.getDataTableModel().setRowIndex(0);
     _dataTable.getRowData();
     assertEquals("no data fetch after changing existing criterion value", prevFetchCount, _fetchCount);
-    assertEquals("no data sort after changing existing criterion value", prevSortCount, _sortCount);
     assertEquals("data filter after changing existing criterion value", prevFilterCount + 2, _filterCount);
+    // for InMemoryDataModel: sort must occur after filter occurs
+    assertEquals("data sort after changing existing criterion value", prevSortCount + 2, _sortCount);
     
     _statusCol.setVisible(false);
     _dataTable.getDataTableModel().setRowIndex(0);
     _dataTable.getRowData();
     assertEquals("no data fetch after criterion column hidden", prevFetchCount, _fetchCount);
-    assertEquals("no data sort after criterion column hidden", prevSortCount, _sortCount);
     assertEquals("data filter after criterion column hidden", prevFilterCount + 3, _filterCount);
+    // for InMemoryDataModel: sort must occur after filter occurs
+    assertEquals("data sort after criterion column hidden", prevSortCount + 3, _sortCount);
     
     _statusCol.setVisible(true);
     _dataTable.getDataTableModel().setRowIndex(0);
@@ -232,7 +235,7 @@ public class DataTableTest extends TestCase
     // for InMemoryDatModel:
     // when "raw" data is re-fetched, sort and filter need to be reapplied
     // re-filter also necessary since criterion column may have changed filter result
-    assertEquals("data sort after criterion column unhidden", prevSortCount + 1, _sortCount);
+    assertEquals("data sort after criterion column unhidden", prevSortCount + 4, _sortCount);
     assertEquals("data filter after criterion column unhidden", prevFilterCount + 4, _filterCount);
   }
   

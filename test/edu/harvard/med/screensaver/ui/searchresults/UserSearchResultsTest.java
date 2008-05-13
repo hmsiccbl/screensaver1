@@ -81,7 +81,7 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
       _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(0);
       assertEquals("row " + rowIndex + ", col 0", user.getFullNameLastFirst(), _screenerSearchResults.getCellValue());
       _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(1);
-      assertEquals("row " + rowIndex + ", col 1", user.getDateCreated(), _screenerSearchResults.getCellValue());
+      assertEquals("row " + rowIndex + ", col 1", user.getDateCreated().toLocalDate(), _screenerSearchResults.getCellValue());
     }
   }
 

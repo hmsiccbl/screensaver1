@@ -151,15 +151,18 @@ public class DataTableModelLazyUpdateDecorator<R> extends DataTableModel<R>
   private void lazyUpdate()
   {
     // For InMemoryDataModel, if a fetch is needed, we must be sure to
-    // also refilter and resort.  Arguably, InMemoryDataModel should
-    // handle this dependency, but it's actually more efficient to do so here,
-    // since we avoid the possibility of executing redundant filter and sort
-    // operations
+    // also refilter. If a refilter is needed, we must be sure to also resort,
+    // since InMemoryDataModel performs the refiltering on unsorted data
+    // HACK: Arguably, InMemoryDataModel should handle this dependency, but it's 
+    // actually more efficient to do so here, since we avoid the possibility 
+    // of executing redundant filter and sort operations
     if (_base instanceof InMemoryDataModel) {
       if (_fetchNeeded) {
         if (_filterColumns != null) {
           _filterNeeded = true;
         }
+      }
+      if (_filterNeeded) {
         if (_sortColumns != null) {
           _sortNeeded = true;
         }
