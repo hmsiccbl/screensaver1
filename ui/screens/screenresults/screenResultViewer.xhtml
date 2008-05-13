@@ -84,7 +84,7 @@
 		</t:collapsiblePanel>
 
 		<t:div
-			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary']}">
+			rendered="#{!empty screenResultViewer.screenResult  &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary']}">
 			<t:collapsiblePanel id="dataHeadersPanel"
 				value="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
 				title="Data Headers" var="isCollapsed" titleVar="title">
@@ -143,7 +143,7 @@
 
 	<!-- Warning: wellSearchResultsBody.xhtml must be included outside of h:form elements -->
 	<t:div
-		rendered="#{!empty screenResultViewer.screenResult &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary'] &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
+		rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary'] &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
 		<ui:include src="/libraries/wellSearchResultsBody.xhtml">
 			<ui:param name="wellsBrowser"
 				value="#{screenResultViewer.resultValueTable}" />
