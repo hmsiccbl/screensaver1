@@ -93,7 +93,7 @@
 									rendered="#{column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME'}"
 									size="#{column.columnType.name == 'TEXT' ? 30 : 8}"
 									styleClass="inputText" />
-								<t:inputText id="dateCriterionValue" size="1"
+								<t:inputText id="dateCriterionValue" size="10"
 									value="#{column.criterion.value}" converter="#{dateConverter}"
 									rendered="#{column.columnType.name == 'DATE'}"
 									styleClass="inputText" />
@@ -192,7 +192,7 @@
 										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
 										displayValueOnlyStyleClass="data"
 										tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
-									<t:inputText id="dateCriterionValue" size="1"
+									<t:inputText id="dateCriterionValue" size="10"
 										value="#{column.criterion.value}" converter="#{dateConverter}"
 										rendered="#{column.columnType.name == 'DATE' &amp;&amp; searchResults.tableFilterMode}"
 										styleClass="inputText"

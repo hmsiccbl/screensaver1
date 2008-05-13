@@ -116,8 +116,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
         !getDataTableModel().isRowAvailable()) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    E rowData = (E) getRowData();
-    if (rowData != entityToView && getDataTableUIComponent() != null) {
+    E currentEntity = (E) getRowData();
+    if (getDataTableUIComponent() != null) {
       // first, scroll the data table so that the user-selected row is the first on the page,
       // otherwise rowsPerPageSelector's observer will switch to whatever entity was previously in the first row
       int rowIndex = getDataTableModel().getRowIndex();
@@ -128,9 +128,11 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       getRowsPerPageSelector().setSelection(1);
 
       // set the entity to be viewed
-      log.debug("viewCurrentEntity(): setting entity to view: " + rowData);
-      setEntityToView(rowData);
-      entityToView = rowData;
+      if (currentEntity != entityToView) {  
+        log.debug("viewCurrentEntity(): setting entity to view: " + currentEntity);
+        setEntityToView(currentEntity);
+        entityToView = currentEntity;
+      }
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -228,6 +230,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   public String returnToSummaryList()
   {
     getRowsPerPageSelector().setSelection(getRowsPerPageSelector().getDefaultSelection());
+    gotoPageContainingRow(getDataTableUIComponent().getFirst());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 

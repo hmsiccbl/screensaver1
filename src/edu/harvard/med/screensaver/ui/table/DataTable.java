@@ -219,6 +219,22 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     gotoRowIndex(pageIndex * getRowsPerPage());
   }
 
+  /**
+   * Scrolls data table to a page boundary.
+   * 
+   * @motivation ensures that previous & next commands do not have problems
+   *             moving to previous & last page
+   */
+  public void gotoPageContainingRow(int rowIndex)
+  {
+    int rowsPerPage = getRowsPerPage();
+    if (rowIndex % rowsPerPage != 0) {
+      int pageBoundaryRowIndex = rowsPerPage * (rowIndex / rowsPerPage);
+      log.debug("scrolling to page boundary row: " + pageBoundaryRowIndex);
+      gotoRowIndex(pageBoundaryRowIndex);
+    }
+  }
+
   public void gotoRowIndex(int rowIndex)
   {
     if (_dataTableUIComponent != null) {
@@ -249,14 +265,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     String rowsPerPageValue = (String) event.getNewValue();
     log.debug("rowsPerPage changed to " + rowsPerPageValue);
     getRowsPerPageSelector().setValue(rowsPerPageValue);
-    // scroll to a page boundary, to ensure that first/next do not have problems moving to first/last page
-    int rowIndex = _dataTableUIComponent.getFirst();
-    int rowsPerPage = getRowsPerPage();
-    if (rowIndex % rowsPerPage != 0) {
-      int pageBoundaryRowIndex = rowsPerPage * (rowIndex / rowsPerPage);
-      log.debug("scrolling to page boundary row: " + pageBoundaryRowIndex);
-      gotoRowIndex(pageBoundaryRowIndex);
-    }
+    gotoPageContainingRow(_dataTableUIComponent.getFirst());
     getFacesContext().renderResponse();
   }
 
