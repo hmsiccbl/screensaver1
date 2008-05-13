@@ -184,12 +184,7 @@ public class ScreenDBSynchronizer
       new UserSynchronizer(_connection, _dao);
     final ScreenSynchronizer screenSynchronizer =
       new ScreenSynchronizer(_connection, _dao, userSynchronizer);
-    final LibraryScreeningSynchronizer libraryScreeningSynchronizer =
-      new LibraryScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
-    final RNAiCherryPickScreeningSynchronizer rnaiCherryPickScreeningSynchronizer =
-      new RNAiCherryPickScreeningSynchronizer(_connection, _dao, _librariesDao, userSynchronizer, screenSynchronizer);
 
-    log.info("synchronizing non-libraries..");
     _dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -200,15 +195,8 @@ public class ScreenDBSynchronizer
         log.info("synchronizing screens..");
         screenSynchronizer.synchronizeScreens();
         log.info("done synchronizing screens.");
-        log.info("synchronizing library screenings..");
-        libraryScreeningSynchronizer.synchronizeLibraryScreenings();
-        log.info("done synchronizing library screenings.");
-        log.info("synchronizing rnai cherry pick screenings..");
-        rnaiCherryPickScreeningSynchronizer.synchronizeRnaiCherryPickScreenings();
-        log.info("done synchronizing rnai cherry pick screenings.");
       }
     });
-    log.info("done synchronizing non-libraries.");
   }
 
   private void closeConnection()
