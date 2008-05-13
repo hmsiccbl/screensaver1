@@ -169,6 +169,10 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	font-size: small;
 }
 
+.dataText,.inputText {
+	font-weight: normal;
+}
+
 .label,.inverseLabel {
 	font-weight: bold;
 }

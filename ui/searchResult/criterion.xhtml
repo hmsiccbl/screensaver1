@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+	  facelet params:
+	    - column: TableColumn
+	    - rendered: boolean (optional, default=true)
+	    - editable: boolean (optional, default=true)
+	    - editWidth: int (optional, default=30) for text criterion only
+	-->
+
+
+<ui:component>
+
+	<t:inputText id="simpleCriterionValue"
+		value="#{column.criterion.value}" converter="#{column.converter}"
+		rendered="#{(empty rendered ? true : rendered) &amp;&amp; (column.columnType.name == 'TEXT' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'DATE' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME')}"
+		size="#{column.columnType.name == 'TEXT' ? (empty editWidth ? 30 : editWidth)  : column.columnType.name == 'DATE' ? 10 : 8}"
+		styleClass="inputText"
+		displayValueOnly="#{empty editable ? false : !editable}"
+		displayValueOnlyStyleClass="dataText"
+		tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
+	<t:selectOneMenu id="vocabularyCriterionValue"
+		value="#{column.criterion.value}" converter="#{column.converter}"
+		rendered="#{(empty rendered ? true : rendered) &amp;&amp; column.columnType.name == 'VOCABULARY'}"
+		styleClass="inputText"
+		displayValueOnly="#{empty editable ? false : !editable}"
+		displayValueOnlyStyleClass="dataText"
+		onchange="javascript:document.getElementById('search').click()"
+		tabindex="#{searchResults.columnManager.currentColumnIndex + 1}">
+		<f:selectItems value="#{column.vocabularySelections}" />
+	</t:selectOneMenu>
+	<t:selectOneMenu id="booleanCriterionValue"
+		value="#{column.criterion.value}" converter="#{column.converter}"
+		rendered="#{(empty rendered ? true : rendered) &amp;&amp; column.columnType.name == 'BOOLEAN'}"
+		styleClass="inputText"
+		displayValueOnly="#{empty editable ? false : !editable}"
+		displayValueOnlyStyleClass="dataText"
+		onchange="javascript:document.getElementById('search').click()"
+		tabindex="#{searchResults.columnManager.currentColumnIndex + 1}">
+		<f:selectItems value="#{column.booleanSelections}" />
+	</t:selectOneMenu>
+
+</ui:component>
+
+</html>

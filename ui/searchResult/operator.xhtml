@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!--
+	  facelet params:
+	    - column: TableColumn
+	    - rendered: boolean (optional, default=true)
+	    - editable: boolean (optional, default=true)
+	-->
+
+
+<ui:component>
+
+	<t:selectOneMenu id="operator" value="#{column.criterion.operator}"
+		converter="#{operatorConverter}" styleClass="inputText"
+		rendered="#{empty rendered ? true : rendered}"
+		displayValueOnly="#{empty editable ? false : !editable}"
+		displayValueOnlyStyleClass="dataText">
+		<f:selectItems value="#{column.columnType.operatorSelections}" />
+	</t:selectOneMenu>
+
+</ui:component>
+
+</html>

@@ -17,6 +17,16 @@
     </tag>
 
     <tag>
+        <tag-name>operator</tag-name>
+        <source>../searchResult/operator.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>criterion</tag-name>
+        <source>../searchResult/criterion.xhtml</source>
+    </tag>
+
+    <tag>
         <tag-name>user</tag-name>
         <source>../users/user.xhtml</source>
     </tag>

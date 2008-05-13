@@ -80,40 +80,13 @@
 								<t:outputText value="#{column.name}" styleClass="label" />
 							</t:column>
 							<t:column id="fieldOperatorColumn">
-								<t:selectOneMenu id="operator"
-									value="#{column.criterion.operator}"
-									converter="#{operatorConverter}" styleClass="inputText">
-									<f:selectItems value="#{column.columnType.operatorSelections}" />
-								</t:selectOneMenu>
+								<ss:operator column="#{column}"/>
 							</t:column>
 							<t:column id="fieldInputColumn">
-								<t:inputText id="simpleCriterionValue"
-									value="#{column.criterion.value}"
-									converter="#{column.converter}"
-									rendered="#{column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME'}"
-									size="#{column.columnType.name == 'TEXT' ? 30 : 8}"
-									styleClass="inputText" />
-								<t:inputText id="dateCriterionValue" size="10"
-									value="#{column.criterion.value}" converter="#{dateConverter}"
-									rendered="#{column.columnType.name == 'DATE'}"
-									styleClass="inputText" />
-								<t:selectOneMenu id="vocabularyCriterionValue"
-									value="#{column.criterion.value}"
-									converter="#{column.converter}"
-									rendered="#{column.columnType.name == 'VOCABULARY'}"
-									styleClass="inputText">
-									<f:selectItems value="#{column.vocabularySelections}" />
-								</t:selectOneMenu>
-								<t:selectOneMenu id="booleanCriterionValue"
-									value="#{column.criterion.value}"
-									converter="#{column.converter}"
-									rendered="#{column.columnType.name == 'BOOLEAN'}"
-									styleClass="inputText">
-									<f:selectItems value="#{column.booleanSelections}" />
-								</t:selectOneMenu>
+								<ss:criterion column="#{column}" />
 							</t:column>
 							<t:column>
-								<t:commandButton image="/images/delete.png" immediate="true"
+								<t:commandButton value="Reset" immediate="true"
 									action="#{column.criterion.reset}" styleClass="command" />
 							</t:column>
 						</t:dataTable>
@@ -121,13 +94,13 @@
 							<!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
 							<t:commandButton id="searchButton" value="Search"
 								styleClass="command" />
-							<t:commandButton value="Reset" immediate="true"
+							<t:commandButton value="Reset All" immediate="true"
 								action="#{searchResults.resetFilter}" styleClass="command" />
 							<t:selectBooleanCheckbox id="showFiltersInTableOption"
 								value="#{searchResults.tableFilterMode}"
 								onchange="javascript:document.getElementById('defaultSearchButton').click()" />
 							<t:outputLabel for="showFiltersInTableOption"
-								value="Show filters in table" styleClass="label" />
+								value="Show search fields above table columns" styleClass="label" />
 						</t:panelGroup>
 					</t:panelGrid>
 				</t:collapsiblePanel>
@@ -176,60 +149,21 @@
 
 								<t:panelGrid id="tableColumnFilter" columns="1"
 									headerClass="tableFilterPanel">
-									<t:selectOneMenu id="operator"
-										value="#{column.criterion.operator}"
-										converter="#{operatorConverter}" styleClass="inputText"
+									<ss:operator column="#{column}"
 										rendered="#{searchResults.tableFilterMode || !column.criterion.undefined}"
-										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
-										displayValueOnlyStyleClass="data">
-										<f:selectItems value="#{column.columnType.operatorSelections}" />
-									</t:selectOneMenu>
-									<t:inputText id="simpleCriterionValue"
-										value="#{column.criterion.value}"
-										converter="#{column.converter}"
-										rendered="#{(column.columnType.name == 'TEXT' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME') &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
-										size="8" styleClass="inputText"
-										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
-										displayValueOnlyStyleClass="data"
-										tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
-									<t:inputText id="dateCriterionValue" size="10"
-										value="#{column.criterion.value}" converter="#{dateConverter}"
-										rendered="#{column.columnType.name == 'DATE' &amp;&amp; searchResults.tableFilterMode}"
-										styleClass="inputText"
-										tabindex="#{searchResults.columnManager.currentColumnIndex + 1}" />
-									<t:outputText id="dateCriterionValueOutput"
-										value="#{column.criterion.value}"
-										rendered="#{column.columnType.name == 'DATE' &amp;&amp; (!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined)}"
-										styleClass="data" />
-									<t:selectOneMenu id="vocabularyCriterionValue"
-										value="#{column.criterion.value}"
-										converter="#{column.converter}"
-										rendered="#{column.columnType.name == 'VOCABULARY' &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
-										styleClass="inputText"
-										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
-										displayValueOnlyStyleClass="data"
-										onchange="javascript:document.getElementById('search').click()"
-										tabindex="#{searchResults.columnManager.currentColumnIndex + 1}">
-										<f:selectItems value="#{column.vocabularySelections}" />
-									</t:selectOneMenu>
-									<t:selectOneMenu id="booleanCriterionValue"
-										value="#{column.criterion.value}"
-										converter="#{column.converter}"
-										rendered="#{column.columnType.name == 'BOOLEAN' &amp;&amp; (searchResults.tableFilterMode || !column.criterion.undefined)}"
-										styleClass="inputText"
-										displayValueOnly="#{!searchResults.tableFilterMode &amp;&amp; !column.criterion.undefined}"
-										displayValueOnlyStyleClass="data"
-										onchange="javascript:document.getElementById('search').click()">
-										<f:selectItems value="#{column.booleanSelections}" />
-									</t:selectOneMenu>
-									<t:panelGroup>
+										editable="#{searchResults.tableFilterMode}" />
+									<ss:criterion column="#{column}"
+										rendered="#{searchResults.tableFilterMode || !column.criterion.undefined}"
+										editable="#{searchResults.tableFilterMode}" 
+										editWidth="10" />
+									<t:panelGrid columns="2">
 										<t:commandButton id="search" forceId="true" value="Search"
 											styleClass="command"
 											rendered="#{searchResults.tableFilterMode}" />
-										<t:commandButton image="/images/delete.png" immediate="true"
+										<t:commandButton value="Reset" immediate="true"
 											action="#{column.criterion.reset}" styleClass="command"
 											rendered="#{searchResults.tableFilterMode}" />
-									</t:panelGroup>
+									</t:panelGrid>
 								</t:panelGrid>
 							</t:panelGrid>
 						</f:facet>
@@ -270,7 +204,7 @@
 						value="#{searchResults.capabilities['viewRowDetail'] ? searchResults.rowDetail : null}">
 						<t:outputText value="Coming soon!" />
 					</t:aliasBean>
-					<t:commandButton image="/images/delete.png"
+					<t:commandButton value="Close"
 						action="#{searchResults.hideRowDetail}" />
 				</t:panelGrid>
 
