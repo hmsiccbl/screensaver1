@@ -18,11 +18,17 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
 
 public class LocalDateConverter implements Converter
 {
 
   private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("MM/dd/yyyy");
+  private static final DateTimeFormatter parser = 
+    new DateTimeFormatterBuilder().
+    append(DateTimeFormat.forPattern("MM/dd")).
+    appendLiteral("/").appendTwoDigitYear(1980, true).
+    toFormatter();
 
   public Object getAsObject(FacesContext arg0, UIComponent arg1, String arg2)
     throws ConverterException
@@ -30,7 +36,7 @@ public class LocalDateConverter implements Converter
     if ( arg2 == null || arg2.length() == 0) {
       return null;
     }
-    return formatter.parseDateTime(arg2).toLocalDate();
+    return parser.parseDateTime(arg2).toLocalDate();
   }
 
   public String getAsString(FacesContext arg0, UIComponent arg1, Object arg2)
