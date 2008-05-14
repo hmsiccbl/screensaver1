@@ -77,7 +77,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
 
-  
+
 
 
   // constructors
@@ -149,7 +149,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     return isReadAdmin() ||
            _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(getScreen());
   }
-  
+
   public AssayReadoutType getNewAssayReadoutType()
   {
     return _newAssayReadoutType;
@@ -464,14 +464,14 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _dao.reattachEntity(_screen);
     _dao.reattachEntity(_screen.getLeadScreener());
     Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), new LocalDate());
-    duplicateMostRecentAssayProtocol();
+    duplicateMostRecentScreening();
     _dao.persistEntity(activity);
     _dao.flush();
     String result = _activityViewer.viewActivity(activity);
     _activityViewer.edit(); // open in edit mode
     return result;
   }
-  
+
   @UIControllerMethod
   @Transactional
   public String addRNAiCherryPickScreening()
@@ -484,7 +484,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _dao.reattachEntity(_screen);
     _dao.reattachEntity(cpr);
     Activity activity = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), new LocalDate(), cpr);
-    duplicateMostRecentAssayProtocol();
+    duplicateMostRecentScreening();
     _dao.persistEntity(activity);
     _dao.flush();
     String result = _activityViewer.viewActivity(activity);
@@ -588,7 +588,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     return (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(entityClass.getSimpleName()));
   }
 
-  private void duplicateMostRecentAssayProtocol() 
+  private void duplicateMostRecentScreening()
   {
     SortedSet<Screening> screenings = getScreen().getLabActivitiesOfType(Screening.class);
     if (screenings.size() >= 2) {
@@ -597,7 +597,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       currentScreening.setAssayProtocol(previousScreening.getAssayProtocol());
       currentScreening.setAssayProtocolLastModifiedDate(previousScreening.getAssayProtocolLastModifiedDate());
       currentScreening.setAssayProtocolType(previousScreening.getAssayProtocolType());
+      currentScreening.setNumberOfReplicates(previousScreening.getNumberOfReplicates());
+      currentScreening.setVolumeTransferredPerWell(previousScreening.getVolumeTransferredPerWell());
     }
   }
-  
+
 }
