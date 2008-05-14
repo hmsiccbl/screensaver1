@@ -517,6 +517,7 @@
     class="edu.harvard.med.screensaver.ui.screens.ScreenFinder">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenViewer" />
+    <constructor-arg ref="screenDetailViewer" />
     <aop:scoped-proxy/>
   </bean>
 

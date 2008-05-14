@@ -161,6 +161,14 @@
 					<t:commandButton action="#{screenFinder.findScreen}"
 						id="quickFindScreenSubmit" value="Go"
 						rendered="#{menu.authenticatedUser}" styleClass="command" />
+					<t:commandButton action="#{screenFinder.addLibraryScreening}"
+						id="quickAddLibraryScreening" value="Add Library Screening"
+						rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
+						styleClass="command" />
+          <t:commandButton action="#{screenFinder.addCherryPickRequest}"
+            id="quickAddCherryPickRequest" value="Add Cherry Pick Request"
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['cherryPickAdmin']}"
+            styleClass="command" />
 				</t:panelGrid>
 			</h:form>
 

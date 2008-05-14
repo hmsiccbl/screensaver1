@@ -33,6 +33,7 @@ public class ScreenFinder extends AbstractBackingBean
 
   private GenericEntityDAO _dao;
   private ScreenViewer _screenViewer;
+  private ScreenDetailViewer _screenDetailViewer;
 
   private Integer _screenNumber;
 
@@ -47,10 +48,12 @@ public class ScreenFinder extends AbstractBackingBean
   }
 
   public ScreenFinder(GenericEntityDAO dao,
-                      ScreenViewer screenViewer)
+                      ScreenViewer screenViewer,
+                      ScreenDetailViewer screenDetailViewer)
   {
     _dao = dao;
     _screenViewer = screenViewer;
+    _screenDetailViewer = screenDetailViewer;
   }
 
 
@@ -86,4 +89,24 @@ public class ScreenFinder extends AbstractBackingBean
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+
+  public String addLibraryScreening()
+  {
+    String result = findScreen();
+    if (result == VIEW_SCREEN) {
+      return _screenDetailViewer.addLibraryScreening();
+    }
+    return result;
+  }
+
+  public String addCherryPickRequest()
+  {
+    String result = findScreen();
+    if (result == VIEW_SCREEN) {
+      return _screenDetailViewer.addCherryPickRequest();
+    }
+    return result;
+  }
+
 }
+
