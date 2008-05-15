@@ -21,6 +21,8 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
@@ -48,15 +50,17 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
 
   // instance data members
 
+  private ActivityViewer _thisProxy;
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
-  
+
   private Activity _activity;
-  private boolean _isEditMode = false;
+  private boolean _isEditMode;
   private UISelectOneEntityBean<ScreensaverUser> _performedBy;
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
   private DataModel _libraryAndPlatesScreenedDataModel;
   private PlatesUsed _newPlatesScreened;
+  private AbstractBackingBean _returnToViewAfterEdit;
 
 
   // constructors
@@ -68,9 +72,12 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   {
   }
 
-  public ActivityViewer(GenericEntityDAO dao,
+  public ActivityViewer(ActivityViewer _activityViewerProxy,
+                        GenericEntityDAO dao,
                         LibrariesDAO librariesDao)
   {
+    _thisProxy = _activityViewerProxy;
+    _returnToViewAfterEdit = _thisProxy;
     _dao = dao;
     _librariesDao = librariesDao;
   }
@@ -88,7 +95,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     _activity = activity;
     resetView();
   }
-  
+
   public UISelectOneBean<ScreensaverUser> getPerformedBy()
   {
     if (_performedBy == null) {
@@ -101,14 +108,14 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
       }
       _performedBy = new UISelectOneEntityBean<ScreensaverUser>(
         performedByCandidates,
-        (ScreensaverUser) _activity.getPerformedBy(), 
+        (ScreensaverUser) _activity.getPerformedBy(),
         _dao) {
         protected String getLabel(ScreensaverUser t) { return t.getFullNameLastFirst(); }
       };
     }
     return _performedBy;
   }
-  
+
   public UISelectOneBean<AssayProtocolType> getAssayProtocolType()
   {
     if (_assayProtocolType == null) {
@@ -120,7 +127,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     }
     return _assayProtocolType;
   }
-  
+
   public PlatesUsed getNewPlatesScreened()
   {
     if (_newPlatesScreened == null) {
@@ -128,13 +135,13 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     }
     return _newPlatesScreened;
   }
-  
+
   @Override
   public String reload()
   {
-    return viewActivity(_activity);
+    return _thisProxy.viewActivity(_activity);
   }
-    
+
   @Override
   protected ScreensaverUserRole getEditableAdminRole()
   {
@@ -147,22 +154,18 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   }
 
   @UIControllerMethod
-  @Transactional
   public String edit()
   {
     _isEditMode = true;
-    _dao.reattachEntity(getActivity()); // check for updated data 
-    //_dao.need();
+    _returnToViewAfterEdit = _thisProxy;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod
-  @Transactional // necessary, due to Spring AOP not triggered on self-invocations of methods 
   public String cancel()
   {
     _isEditMode = false;
-    reload();
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _returnToViewAfterEdit.reload();
   }
 
   @UIControllerMethod
@@ -170,12 +173,15 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   public String save()
   {
     _isEditMode = false;
-    _dao.reattachEntity(getActivity());
+    _dao.saveOrUpdateEntity(getActivity());
     getActivity().setPerformedBy(getPerformedBy().getSelection());
+//    if (_activity instanceof LibraryScreening) {
+//      resplitExistingPlatesUsedByLibrary((LibraryScreening) _activity);
+//    }
     // TODO _labActivitiesBrowser.refetch();
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return _returnToViewAfterEdit.reload();
   }
-  
+
   public DataModel getLibraryAndPlatesScreenedDataModel()
   {
     if (_libraryAndPlatesScreenedDataModel == null) {
@@ -234,7 +240,18 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     setActivity(activity);
     return VIEW_ACTIVITY;
   }
-  
+
+  @UIControllerMethod
+  @Transactional
+  public String editNewActivity(Activity activity, AbstractBackingBean returnToViewerAfterEdit)
+  {
+    setActivity(activity);
+    _isEditMode = true;
+    _returnToViewAfterEdit = returnToViewerAfterEdit;
+    return VIEW_ACTIVITY;
+  }
+
+  @UIControllerMethod
   public String addPlatesScreened()
   {
     if (_activity instanceof LibraryScreening) {
@@ -243,14 +260,50 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
         getNewPlatesScreened().getEndPlate() != null &&
         getNewPlatesScreened().getCopy() != null &&
         getNewPlatesScreened().getCopy().length() != 0) {
-        libraryScreening.createPlatesUsed(getNewPlatesScreened().getStartPlate(),
-                                          getNewPlatesScreened().getEndPlate(),
-                                          getNewPlatesScreened().getCopy());
+        for(PlatesUsed platesUsed : splitPlateRangeByLibrary(getNewPlatesScreened())) {
+          libraryScreening.createPlatesUsed(platesUsed.getStartPlate(),
+                                            platesUsed.getEndPlate(),
+                                            platesUsed.getCopy());
+        }
         _libraryAndPlatesScreenedDataModel = null;
         _newPlatesScreened = null;
       }
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  private Set<PlatesUsed> splitPlateRangeByLibrary(PlatesUsed platesUsed)
+  {
+    int startPlate = platesUsed.getStartPlate();
+    int endPlate = platesUsed.getEndPlate();
+    Library libraryWithEndPlate = _librariesDao.findLibraryWithPlate(endPlate);
+    if (libraryWithEndPlate == null) {
+      throw new DataModelViolationException("end plate " + endPlate + " is not contained in any library");
+    }
+    Set<PlatesUsed> result = new HashSet<PlatesUsed>();
+    do {
+      Library libraryWithStartPlate = _librariesDao.findLibraryWithPlate(startPlate);
+      if (libraryWithStartPlate == null) {
+        throw new DataModelViolationException("plate " + startPlate + " is not contained in any library");
+      }
+      PlatesUsed platesUsed2 = new PlatesUsed();
+      platesUsed2.setStartPlate(startPlate);
+      platesUsed2.setEndPlate(Math.min(libraryWithStartPlate.getEndPlate(), endPlate));
+      platesUsed2.setCopy(platesUsed.getCopy());
+      result.add(platesUsed2);
+      startPlate = libraryWithStartPlate.getEndPlate() + 1;
+    } while (startPlate <= endPlate);
+    return result;
+  }
+
+  private void resplitExistingPlatesUsedByLibrary(LibraryScreening libraryScreening)
+  {
+    Set<PlatesUsed> newPlatesUsed = new HashSet<PlatesUsed>();
+    for (PlatesUsed platesUsed : libraryScreening.getPlatesUsed()) {
+      newPlatesUsed.addAll(splitPlateRangeByLibrary(platesUsed));
+    }
+    libraryScreening.getPlatesUsed().clear();
+    libraryScreening.getPlatesUsed().addAll(newPlatesUsed);
   }
 
   public String deletePlatesScreened()
@@ -263,19 +316,20 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   public List<String> getAllCopies()
   {
     // TODO: master copies list to be acquired from database
     return Arrays.asList("", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "HA", "HB", "HC", "HD", "HE", "HF", "HG", "HH", "HI", "HJ", "H Stock", "MA", "MB", "MC", "MD", "ME", "MF", "MG", "MH", "MI", "MJ", "M Stock", "St A", "St B", "St C", "St D", "St E");
   }
 
-  
+
   // private methods
 
   private void resetView()
   {
     _isEditMode = false;
+    _returnToViewAfterEdit = _thisProxy;
     _performedBy = null;
     _libraryAndPlatesScreenedDataModel = null;
     _newPlatesScreened = null;

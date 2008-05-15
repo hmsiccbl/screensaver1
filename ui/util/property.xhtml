@@ -16,6 +16,7 @@
 	     - value
 	     - editable: boolean, (optional, defaults to false)
 	     - rendered: boolean, (optional, defaults to true)
+	     - required: boolean, (optional, defaults to false)
 	     - editWidth
 	     - editHeight ('Textarea' type only)
 	     - converter (optional)
@@ -49,13 +50,15 @@
 			<ui:insert name="editableData">
 				<t:inputText id="#{id}#{type}Field"
 					rendered="#{!(type == 'Textarea' || type == 'Boolean')}"
+					required="#{required}"
 					value="#{value}" size="#{editWidth}" styleClass="inputText"
 					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : stringConverter}" />
 				<t:inputTextarea id="#{id}#{type}Field1"
-					rendered="#{type == 'Textarea'}" value="#{value}"
-					cols="#{editWidth}" rows="#{editHeight}" styleClass="inputText" />
+					rendered="#{type == 'Textarea'}" required="#{required}"
+					value="#{value}" cols="#{editWidth}" rows="#{editHeight}"
+					styleClass="inputText" />
 				<t:selectBooleanCheckbox id="#{id}BooleanField2" value="#{value}"
-					rendered="#{type == 'Boolean'}"
+					rendered="#{type == 'Boolean'}" required="#{required}"
 					onclick="#{submitOnChange ? 'javascript:submit()' : ''}"
 					immediate="#{submitOnChange}" />
 			</ui:insert>

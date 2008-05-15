@@ -37,7 +37,7 @@
 					<ss:property id="dateOfActivity" label="Performed"
 						description="The date the activity was performed in the lab"
 						value="#{activityViewer.activity.dateOfActivity}" type="Date"
-						editable="#{activityViewer.editMode}" />
+						required="true" editable="#{activityViewer.editMode}" />
 				</ss:propertyGroup>
 
 				<ss:propertyGroup label="Screen Summary">
@@ -70,7 +70,7 @@
 					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}" />
 
 				<ss:property id="reagentVolumeTransferred"
-					label="Volume Transferred" 
+					label="Volume Transferred"
 					value="#{activityViewer.activity.volumeTransferredPerWell}" type="Volume"
 					description="The volume transferred per well"
 					editable="#{activityViewer.editMode}" editWidth="6"
@@ -127,7 +127,7 @@
                   <f:facet name="header">
                     <t:outputText value="Library" />
                   </f:facet>
-									<t:outputText 
+									<t:outputText
 										value="#{empty element.library ? '' : element.library.shortName}"
 										styleClass="dataText" />
 									<t:outputText id="library2"
@@ -142,10 +142,6 @@
 									<t:inputText id="startPlate" value="#{element.platesUsed.startPlate}"
 										displayValueOnly="#{! activityViewer.editMode}"
 										styleClass="inputText" displayValueOnlyClass="dataText" />
-									<t:outputText id="invalidStartPlate"
-										styleClass="dataText errorMessage"
-										rendered="#{!activityViewer.editMode &amp;&amp; empty element.library}" 
-										value="&lt;invalid start plate&gt;"/>
 								</t:column>
 								<t:column>
 									<f:facet name="header">
@@ -154,10 +150,6 @@
 									<t:inputText id="endPlate" value="#{element.platesUsed.endPlate}"
 										displayValueOnly="#{! activityViewer.editMode}"
 										styleClass="inputText" displayValueOnlyClass="dataText" />
-									<t:outputText id="invalidEndPlate"
-										styleClass="dataText errorMessage"
-										rendered="#{!activityViewer.editMode &amp;&amp; !empty element.library &amp;&amp; (element.platesUsed.endPlate &gt; element.library.endPlate || element.platesUsed.endPlate &lt; element.platesUsed.startPlate)}" 
-										value="&lt;invalid end plate&gt;"/>
 								</t:column>
 								<t:column>
 									<f:facet name="header">

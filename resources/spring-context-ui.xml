@@ -592,6 +592,7 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.activities.ActivityViewer">
+    <constructor-arg ref="activityViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <aop:scoped-proxy />

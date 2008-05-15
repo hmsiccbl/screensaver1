@@ -458,22 +458,20 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
-  @Transactional
+//  @Transactional
   public String addLibraryScreening()
   {
-    _dao.reattachEntity(_screen);
-    _dao.reattachEntity(_screen.getLeadScreener());
+//    _dao.reattachEntity(_screen);
+//    _dao.reattachEntity(_screen.getLeadScreener());
     Activity activity = _screen.createLibraryScreening(_screen.getLeadScreener(), new LocalDate());
     duplicateMostRecentScreening();
-    _dao.persistEntity(activity);
-    _dao.flush();
-    String result = _activityViewer.viewActivity(activity);
-    _activityViewer.edit(); // open in edit mode
-    return result;
+//    _dao.persistEntity(activity);
+//    _dao.flush();
+    return _activityViewer.editNewActivity(activity, this);
   }
 
   @UIControllerMethod
-  @Transactional
+//  @Transactional
   public String addRNAiCherryPickScreening()
   {
     RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) getCherryPickRequestsDataModel().getRowData();
@@ -481,15 +479,13 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       reportSystemError("missing CherryPickRequest argument");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    _dao.reattachEntity(_screen);
-    _dao.reattachEntity(cpr);
+//    _dao.reattachEntity(_screen);
+//    _dao.reattachEntity(cpr);
     Activity activity = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), new LocalDate(), cpr);
     duplicateMostRecentScreening();
-    _dao.persistEntity(activity);
-    _dao.flush();
-    String result = _activityViewer.viewActivity(activity);
-    _activityViewer.edit(); // open in edit mode
-    return result;
+//    _dao.persistEntity(activity);
+//    _dao.flush();
+    return _activityViewer.editNewActivity(activity, this);
   }
 
   @UIControllerMethod
@@ -599,6 +595,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       currentScreening.setAssayProtocolType(previousScreening.getAssayProtocolType());
       currentScreening.setNumberOfReplicates(previousScreening.getNumberOfReplicates());
       currentScreening.setVolumeTransferredPerWell(previousScreening.getVolumeTransferredPerWell());
+      currentScreening.setDateOfActivity(null); // force user to specify a date
     }
   }
 
