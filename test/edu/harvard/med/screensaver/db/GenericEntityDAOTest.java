@@ -16,6 +16,8 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -28,9 +30,12 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
+import org.hibernate.LazyInitializationException;
 
 
 public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
@@ -272,5 +277,122 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     catch (Exception e) {
       // pass
     }
+  }
+  
+  public void testEntityInflation()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
+        ScreeningRoomUser labMember = new ScreeningRoomUser("Lab",
+                                                            "Member",
+                                                            "lab_member@hms.harvard.edu");
+        screen.getLabHead().addLabMember(labMember);
+        screen.addKeyword("keyword1");
+        screen.addKeyword("keyword2");
+        genericEntityDao.saveOrUpdateEntity(labMember);
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
+        genericEntityDao.saveOrUpdateEntity(screen);
+      }
+    });
+
+    final Screen[] screenOut = new Screen[1];
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        genericEntityDao.need(screen,
+                              "keywords",
+                              "labHead.labMembers");
+        screenOut[0] = screen;
+      }
+    });
+
+    // note: the Hibernate session/txn *must* be closed before we can make our assertions
+    Screen screen = screenOut[0];
+    try {
+      assertEquals("keywords size", 2, screen.getKeywords().size());
+      assertEquals("labHead last name", "Screener_1", screen.getLabHead().getLastName());
+      assertEquals("labHead.LabMembers size", 1, screen.getLabHead().getLabMembers().size());
+      assertEquals("labHead.LabMembers[0].lastName", "Member", screen.getLabHead().getLabMembers().iterator().next().getLastName());
+    }
+    catch (LazyInitializationException e) {
+      e.printStackTrace();
+      fail("screen relationships were not initialized by genericEntityDao.need(AbstractEntity, String...)");
+    }
+    try {
+      screen.getCollaborators().iterator().next();
+      fail("expected LazyInitializationException for screen.collaborators access");
+    }
+    catch (LazyInitializationException e) {}
+  }
+
+  public void testEntityInflationInvalidRelationship()
+  {
+    Library library = new Library("library 1",
+                                  "lib1",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  1);
+    library.createWell(new WellKey(1, "A01"), WellType.EXPERIMENTAL);
+    genericEntityDao.saveOrUpdateEntity(library);
+    try {
+        // oops...should've been "wells"!
+      genericEntityDao.need(library, "hbnWells");
+      fail("invalid relationship name was not detected!");
+    }
+    catch (Exception e) {}
+  }
+
+  public void testRelationshipSize()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
+        try {
+          screen.createPublication("1", "2007", "authro1", "Title1");
+          screen.createPublication("2", "2007", "author2", "Title2");
+        }
+        catch (DuplicateEntityException e) {
+          e.printStackTrace();
+          fail(e.getMessage());
+        }
+        ScreeningRoomUser collab1 = new ScreeningRoomUser("Col",
+                                                          "Laborator1",
+                                                          "collab1@hms.harvard.edu");
+        ScreeningRoomUser collab2 = new ScreeningRoomUser("Col",
+                                                          "Laborator2",
+                                                          "collab2@hms.harvard.edu");
+        genericEntityDao.saveOrUpdateEntity(collab1);
+        genericEntityDao.saveOrUpdateEntity(collab2);
+        screen.addCollaborator(collab1);
+        screen.addCollaborator(collab2);
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
+        genericEntityDao.saveOrUpdateEntity(screen);
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        assertEquals("publications size", 2, genericEntityDao.relationshipSize(screen.getPublications()));
+        assertEquals("collaborators size", 2, genericEntityDao.relationshipSize(screen.getCollaborators()));
+        // TODO: test that this relationshipSize() method is invocable outside of a Hibernate session
+        assertEquals("publications size", 2, genericEntityDao.relationshipSize(screen, "publications"));
+        assertEquals("collaborators size w/criteria",
+                     1,
+                     genericEntityDao.relationshipSize(screen, "collaborators", "lastName", "Laborator2"));
+      }
+    });
   }
 }
