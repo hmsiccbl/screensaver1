@@ -262,6 +262,12 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
     assertEquals("/activities/activityViewer.xhtml", server.getCurrentViewID());
     assertEquals(previousScreening.getAssayProtocol(),
                  server.getManagedBeanValue("#{activityViewer.activity.assayProtocol}"));
+    assertEquals(previousScreening.getAssayProtocolType(),
+                 server.getManagedBeanValue("#{activityViewer.activity.assayProtocolType}"));
+    assertEquals(previousScreening.getNumberOfReplicates(),
+                 server.getManagedBeanValue("#{activityViewer.activity.numberOfReplicates}"));
+    assertEquals(previousScreening.getVolumeTransferredPerWell(),
+                 server.getManagedBeanValue("#{activityViewer.activity.volumeTransferredPerWell}"));
     assertFalse(previousScreening.getEntityId().equals(server.getManagedBeanValue("#{activityViewer.activity.entityId}")));
   }
   
