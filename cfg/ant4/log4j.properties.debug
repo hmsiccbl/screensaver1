@@ -29,11 +29,18 @@ log4j.logger.userActivity=info
 ### Screensaver application
 
 log4j.logger.edu.harvard.med.screensaver=info
-log4j.logger.edu.harvard.med.screensaver.db=debug
-log4j.logger.edu.harvard.med.screensaver.ui.screenresults=debug
+log4j.logger.edu.harvard.med.screensaver.db=info
+log4j.logger.edu.harvard.med.screensaver.ui=debug
+log4j.logger.edu.harvard.med.screensaver.io=debug
+log4j.logger.edu.harvard.med.screensaver.ui.table=debug
+log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=debug
+log4j.logger.edu.harvard.med.screensaver.model=error
+log4j.logger.edu.harvard.med.screensaver.io=debug
+log4j.logger.edu.harvard.med.screensaver.util.eutils=info
 
 log4j.logger.org.apache.commons.dbcp=debug
 log4j.logger.springframework.jdbc=debug
+
 
 
 log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
@@ -71,8 +78,8 @@ log4j.logger.org.springframework.orm.hibernate3=error
 
 ### JavaServer Faces
 
-log4j.logger.org.apache.myfaces=warn
-log4j.logger.org.apache.myfaces.application=debug
+log4j.logger.org.apache.myfaces=info
+#log4j.logger.org.apache.myfaces.application=debug
 log4j.logger.org.apache.myfaces.application.jsp=error
 
 # hide silly warnings about obsolete JSP comment styles, in Tomahawk components
@@ -131,7 +138,7 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 
 # log just the SQL - set this to "debug" to get all the SQL stmts
-log4j.logger.org.hibernate.SQL=debug
+#log4j.logger.org.hibernate.SQL=debug
 
 # log transaction activity (should set these all at once to same log level)
 #log4j.logger.org.hibernate.transaction=debug
