@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Comparator;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -24,7 +22,6 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 import org.apache.log4j.Logger;
 
@@ -44,13 +41,6 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
 
   private static final Logger log = Logger.getLogger(PlatesUsed.class);
   private static final long serialVersionUID = 0L;
-  private static final Comparator<Integer> _plateComparator = new NullSafeComparator<Integer>(true) {
-    @Override
-    protected int doCompare(Integer plate1, Integer plate2)
-    {
-      return plate1.compareTo(plate2);
-    }
-  };
 
 
   // private instance data
@@ -73,7 +63,17 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
 
   public int compareTo(PlatesUsed that)
   {
-    return _plateComparator.compare(this.getStartPlate(), that.getStartPlate());
+    if (this.equals(that)) {
+      return 0;
+    }
+    int result = getStartPlate().compareTo(that.getStartPlate());
+    if (result == 0) {
+      result = getCopy().compareTo(that.getCopy());
+    }
+    if (result == 0) {
+      result = hashCode() < that.hashCode() ? -1 : 1;
+    }
+    return result;
   }
 
   @Override

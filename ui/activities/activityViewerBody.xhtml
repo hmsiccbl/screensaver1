@@ -71,8 +71,8 @@
 
 				<ss:property id="reagentVolumeTransferred"
 					label="Volume Transferred"
-					value="#{activityViewer.activity.volumeTransferredPerWell}" type="Volume"
-					description="The volume transferred per well"
+					value="#{activityViewer.activity.volumeTransferredPerWell}"
+					type="Volume" description="The volume transferred per well"
 					editable="#{activityViewer.editMode}" editWidth="6"
 					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}" />
 
@@ -106,8 +106,8 @@
 						editable="#{activityViewer.editMode}" />
 				</ss:propertyGroup>
 
-				<ss:property id="screenerProvidedPlates" type="Boolean" submitOnChange="true"
-					label="For screener-provided plates"
+				<ss:property id="screenerProvidedPlates" type="Boolean"
+					submitOnChange="true" label="For screener-provided plates"
 					value="#{activityViewer.activity.special}"
 					description="Whether the library screening was performed on plates provided by the screener"
 					rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}"
@@ -123,10 +123,10 @@
 							actionBean="#{activityViewer}" addAction="addPlatesScreened"
 							deleteAction="deletePlatesScreened">
 							<ui:define name="columns">
-                <t:column>
-                  <f:facet name="header">
-                    <t:outputText value="Library" />
-                  </f:facet>
+								<t:column>
+									<f:facet name="header">
+										<t:outputText value="Library" />
+									</f:facet>
 									<t:outputText
 										value="#{empty element.library ? '' : element.library.shortName}"
 										styleClass="dataText" />
@@ -139,28 +139,22 @@
 									<f:facet name="header">
 										<t:outputText value="Start Plate" />
 									</f:facet>
-									<t:inputText id="startPlate" value="#{element.platesUsed.startPlate}"
-										displayValueOnly="#{! activityViewer.editMode}"
-										styleClass="inputText" displayValueOnlyClass="dataText" />
+									<t:outputText id="startPlate"
+										value="#{element.platesUsed.startPlate}" styleClass="dataText" />
 								</t:column>
 								<t:column>
 									<f:facet name="header">
 										<t:outputText value="End Plate" />
 									</f:facet>
-									<t:inputText id="endPlate" value="#{element.platesUsed.endPlate}"
-										displayValueOnly="#{! activityViewer.editMode}"
-										styleClass="inputText" displayValueOnlyClass="dataText" />
+									<t:outputText id="endPlate"
+										value="#{element.platesUsed.endPlate}" styleClass="dataText" />
 								</t:column>
 								<t:column>
 									<f:facet name="header">
 										<t:outputText value="Copy" />
 									</f:facet>
-									<t:selectOneMenu value="#{element.platesUsed.copy}" styleClass="dataText"
-										displayValueOnly="#{! activityViewer.editMode}"
-										displayValueOnlyStyleClass="inputText">
-										<t:selectItems value="#{activityViewer.allCopies}" var="copy"
-											itemLabel="#{copy}" itemValue="#{copy}" />
-									</t:selectOneMenu>
+									<t:outputText id="copy" value="#{element.platesUsed.copy}"
+										styleClass="dataText" />
 								</t:column>
 							</ui:define>
 							<ui:define name="addProperties">
@@ -201,10 +195,10 @@
 					</ui:define>
 				</ss:property>
 
-        <ss:property id="comments" label="Comments"
-          value="#{activityViewer.activity.comments}"
-          editable="#{activityViewer.editMode}" description="Comments"
-          type="Textarea" editWidth="80" editHeight="5" />
+				<ss:property id="comments" label="Comments"
+					value="#{activityViewer.activity.comments}"
+					editable="#{activityViewer.editMode}" description="Comments"
+					type="Textarea" editWidth="80" editHeight="5" />
 
 			</t:panelGrid>
 		</t:div>
