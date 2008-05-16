@@ -124,6 +124,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return libraries.size() == 0;
   }
 
+  /**
+   * Converts each well in the library back to an empty well, deleting
+   * information about its contents. Associated reagents are not deleted, but
+   * their association with the well is removed. <i>For time and memory
+   * performance reasons, the reagents' well associations are not updated in
+   * memory, so reload the library in a new Hibernate session if you need the
+   * in-memory representation to reflect the update.</i>
+   */
   public void deleteLibraryContents(Library library)
   {
     library = _dao.reloadEntity(library, 
