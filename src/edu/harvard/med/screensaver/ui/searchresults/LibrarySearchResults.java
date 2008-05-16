@@ -181,6 +181,6 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
   @Override
   protected void setEntityToView(Library library)
   {
-    _libraryViewer.viewLibrary(library, true);
+    _libraryViewer.viewLibrary(library);
   }
 }

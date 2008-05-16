@@ -126,6 +126,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 
   public void deleteLibraryContents(Library library)
   {
+    library = _dao.reloadEntity(library, 
+                                false,
+                                "wells.compounds", 
+                                "wells.silencingReagents");
     for (Well well : library.getWells()) {
       if (well.getWellType().equals(WellType.EXPERIMENTAL)) {
         well.setGenbankAccessionNumber(null);

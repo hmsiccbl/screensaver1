@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -22,6 +21,7 @@ import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -128,41 +128,20 @@ public class LibraryViewer extends AbstractBackingBean
   }
 
   @UIControllerMethod
+  @Transactional
   public String viewLibrary(Library library)
   {
-    return viewLibrary(library, false);
-  }
-
-  @UIControllerMethod
-  public String viewLibrary(final Library libraryIn, boolean showNavigationBar)
-  {
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        Library library = _dao.reloadEntity(libraryIn, true);
-        setLibrary(library);
-        setLibrarySize(
-          _dao.relationshipSize(library, "wells", "wellType", "experimental"));
-        setLibraryNameValueTable(new LibraryNameValueTable(library, getLibrarySize()));
-      }
-    });
+    setLibrary(_dao.reloadEntity(library, true));
+    setLibrarySize(_dao.relationshipSize(_library, "wells", "wellType", "experimental"));
+    setLibraryNameValueTable(new LibraryNameValueTable(_library, getLibrarySize()));
     return VIEW_LIBRARY;
   }
 
   @UIControllerMethod
+  @Transactional
   public String viewLibraryContents()
   {
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-//        Library library = _dao.reloadEntity(_library, true);
-//        _dao.needReadOnly(library,
-//                          "wells.silencingReagents.gene.genbankAccessionNumbers",
-//                          "wells.compounds");
-        _wellsBrowser.searchWellsForLibrary(_library);
-      }
-    });
-
+    _wellsBrowser.searchWellsForLibrary(_library);
     return VIEW_WELL_SEARCH_RESULTS;
   }
 
@@ -196,14 +175,7 @@ public class LibraryViewer extends AbstractBackingBean
   @UIControllerMethod
   public String unloadLibraryContents()
   {
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        Library library = _dao.reloadEntity(_library);
-        _librariesDao.deleteLibraryContents(library);
-      }
-    });
+    _librariesDao.deleteLibraryContents(_library);
     showMessage("libraries.unloadedLibraryContents", "libraryViewer");
     return viewLibrary(_library);
   }

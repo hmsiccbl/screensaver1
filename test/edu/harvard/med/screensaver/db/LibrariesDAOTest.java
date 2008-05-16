@@ -14,6 +14,7 @@ package edu.harvard.med.screensaver.db;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -255,6 +256,61 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     assertEquals("G:A01", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyG));
     assertEquals("G:B02", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyG));
     assertEquals("G:C03", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellC03, copyG));
+  }
+  
+  public void testDeleteSmallMoleculeLibraryContents()
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 20);
+    genericEntityDao.persistEntity(library);
+    doTestDeleteLibraryContents(library);
+  }
+
+  public void testDeleteRnaiLibraryContents()
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 2);
+    genericEntityDao.persistEntity(library);
+    doTestDeleteLibraryContents(library);
+  }
+
+  private void doTestDeleteLibraryContents(Library library)
+  {
+    int i = 0;
+    for (Well well : library.getWells()) {
+      if (well.getWellType() == WellType.EXPERIMENTAL) {
+        if (library.getScreenType() == ScreenType.SMALL_MOLECULE && well.getCompounds().size() > 0) {
+          ++i;
+        }
+        else if (library.getScreenType() == ScreenType.RNAI && well.getSilencingReagents().size() > 0) {
+          ++i;
+        }
+      }
+    }
+    assertTrue("has library contents before delete library contents", i > 0);
+
+    librariesDao.deleteLibraryContents(library);
+    Library library2 = genericEntityDao.findEntityByProperty(Library.class,
+                                                             "libraryName",
+                                                             "library 1",
+                                                             true,
+                                                             "wells.compounds", 
+                                                             "wells.silencingReagents", 
+                                                             "wells.molfileList");
+    doTestWellsAreEmpty(library2);
+  }
+
+  private void doTestWellsAreEmpty(Library library)
+  {
+    for (Well well : library.getWells()) {
+      assertEquals("compounds", 0, well.getCompounds().size());
+      assertEquals("silencing reagents count", 0, well.getSilencingReagents().size());
+      assertEquals("genes count", 0, well.getGenes().size());
+      assertNull(well.getReagent());
+      assertNull(well.getGenbankAccessionNumber());
+      assertNull(well.getIccbNumber());
+      assertNull(well.getMolfile());
+      assertNull(well.getSmiles());
+      assertEquals(WellType.EMPTY, well.getWellType());
+    }
   }
 
 }

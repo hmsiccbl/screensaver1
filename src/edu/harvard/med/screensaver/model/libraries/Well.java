@@ -468,7 +468,9 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public void setMolfile(String molfile)
   {
     _molfile.clear();
-    _molfile.add(molfile);
+    if (molfile != null) {
+      _molfile.add(molfile);
+    }
   }
 
   /**
