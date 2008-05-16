@@ -28,7 +28,7 @@ public class PackageTestSuite extends TestSuite
   {
     addTest(edu.harvard.med.screensaver.db.datafetcher.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.db.hibernate.PackageTestSuite.suite());
-    addTestSuite(SimpleDAOTest.class);
+    addTestSuite(GenericEntityDAOTest.class);
     addTestSuite(ComplexDAOTest.class);
     addTestSuite(UserTest.class);
     addTestSuite(WebDataAccessPolicyTest.class);

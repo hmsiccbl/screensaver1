@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -33,47 +33,12 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import org.apache.log4j.Logger;
 
 
-/**
- * Tests the {@link DAOImpl} in some simple, straightfoward ways.
- * 
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- */
-public class SimpleDAOTest extends AbstractSpringTest
+public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 {
   
-  private static final Logger log = Logger.getLogger(SimpleDAOTest.class);
+  private static final Logger log = Logger.getLogger(GenericEntityDAOTest.class);
   
-  // public static methods
-  
-  public static void main(String[] args)
-  {
-    junit.textui.TestRunner.run(SimpleDAOTest.class);
-  }
 
-  
-  // protected instance fields
-  
-  /**
-   * Bean property, for database access via Spring and Hibernate.
-   */
-  protected GenericEntityDAO genericEntityDao;
-
-  /**
-   * For schema-related test setup tasks.
-   */
-  protected SchemaUtil schemaUtil;
-
-  
-  // protected instance methods
-
-  @Override
-  protected void onSetUp() throws Exception
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-  }
-
-  
   // public instance methods
   
   public void testPersistEntity()
@@ -204,11 +169,11 @@ public class SimpleDAOTest extends AbstractSpringTest
   
   public void testFindEntitiesByProperty2()
   {
-    genericEntityDao.defineEntity(Library.class, "ln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
-    genericEntityDao.defineEntity(Library.class, "ln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
-    genericEntityDao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
-    genericEntityDao.defineEntity(Library.class, "ln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
-    genericEntityDao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
+    genericEntityDao.persistEntity(new Library("ln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50));
+    genericEntityDao.persistEntity(new Library("ln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100));
+    genericEntityDao.persistEntity(new Library("ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150));
+    genericEntityDao.persistEntity(new Library("ln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200));
+    genericEntityDao.persistEntity(new Library("ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250));
     
     assertEquals(3, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.NATURAL_PRODUCTS).size());
     assertEquals(2, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
@@ -226,20 +191,6 @@ public class SimpleDAOTest extends AbstractSpringTest
     compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "something other than spaz");
     assertNull(compound2);
   }
-  
-//  public void testFindEntitiesByPropertyPattern()
-//  {
-//    genericEntityDao.defineEntity(Library.class, "npln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50);
-//    genericEntityDao.defineEntity(Library.class, "npln2", "sn2", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 51, 100);
-//    genericEntityDao.defineEntity(Library.class, "ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150);
-//    genericEntityDao.defineEntity(Library.class, "npln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200);
-//    genericEntityDao.defineEntity(Library.class, "ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250);
-//    
-//    assertEquals(3, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "npln*").size());
-//    assertEquals(2, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ln*").size());
-//    assertEquals(5, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "*ln*").size());
-//    assertEquals(0, genericEntityDao.findEntitiesByPropertyPattern(Library.class, "libraryName", "ZZZZZZZZZ*").size());
-//  }
   
   public void testFindEntitiesByPropertyWithInflation()
   {
