@@ -785,7 +785,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     ++_numberUnfulfilledLabCherryPicks;
   }
 
-  void decUnfulfilledLabCherryPicks()
+  public void decUnfulfilledLabCherryPicks()
   {
     --_numberUnfulfilledLabCherryPicks;
   }

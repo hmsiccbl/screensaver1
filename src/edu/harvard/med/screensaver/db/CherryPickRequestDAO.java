@@ -81,12 +81,11 @@ public class CherryPickRequestDAO extends AbstractDAO
 
     // dissociate from related entities
     labCherryPick.getCherryPickRequest().getLabCherryPicks().remove(labCherryPick);
-//    if (labCherryPick.getSourceCopy() != null) {
-//      labCherryPick.getSourceCopy().getHbnLabCherryPicks().remove(labCherryPick);
-//    }
     if (labCherryPick.getAssayPlate() != null) {
       labCherryPick.getAssayPlate().getLabCherryPicks().remove(labCherryPick);
     }
+    
+    labCherryPick.getCherryPickRequest().decUnfulfilledLabCherryPicks();
 
     getHibernateTemplate().delete(labCherryPick);
   }
