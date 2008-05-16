@@ -129,17 +129,18 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     library = _dao.reloadEntity(library, 
                                 false,
                                 "wells.compounds", 
-                                "wells.silencingReagents");
+                                "wells.silencingReagents",
+                                "wells.reagent");
     for (Well well : library.getWells()) {
       if (well.getWellType().equals(WellType.EXPERIMENTAL)) {
         well.setGenbankAccessionNumber(null);
         well.setIccbNumber(null);
         well.setMolfile(null);
         well.setSmiles(null);
-        well.removeCompounds();
-        well.removeSilencingReagents();
+        well.removeCompounds(false);
+        well.removeSilencingReagents(false);
         well.setWellType(WellType.EMPTY);
-        well.setReagent(null); // do this after well type, exp well must have reagent!
+        well.removeReagent(false); // do this after well type, exp well must have reagent!
       }
     }
     log.info("deleted library contents for " + library.getLibraryName());

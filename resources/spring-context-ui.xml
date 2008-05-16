@@ -212,6 +212,7 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.LibraryViewer">
+    <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser" />

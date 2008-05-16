@@ -244,11 +244,16 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   /**
    * Remove all the compounds.
+   * 
+   * @param updateWell whether to update the well.Compounds relationship in
+   *          memory only (the database will reflect the removed relationship)
    */
-  public void removeCompounds()
+  public void removeCompounds(boolean updateWell)
   {
     for (Compound compound : _compounds) {
-      compound.getWells().remove(this);
+      if (updateWell) {
+        compound.getWells().remove(this);
+      }
     }
     _compounds.clear();
   }
@@ -304,11 +309,16 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   /**
    * Remove all the silencing reagents.
+   * 
+   * @param updateWell whether to update the well.Compounds relationship in
+   *          memory only (the database will reflect the removed relationship)
    */
-  public void removeSilencingReagents()
+  public void removeSilencingReagents(boolean updateWell)
   {
     for (SilencingReagent silencingReagent : _silencingReagents) {
-      silencingReagent.getWells().remove(this);
+      if (updateWell) {
+        silencingReagent.getWells().remove(this);
+      }
     }
     _silencingReagents.clear();
   }
@@ -529,6 +539,16 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
     if (_wellType.equals(WellType.EXPERIMENTAL) && _reagent == null) {
       throw new DataModelViolationException("experimental well must have a reagent");
+    }
+  }
+  
+  public void removeReagent(boolean updateWell)
+  {
+    if (_reagent != null) {
+      _reagent = null;
+      if (updateWell) {
+        _reagent.removeWell(this);
+      }
     }
   }
 

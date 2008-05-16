@@ -34,6 +34,7 @@ public class LibraryViewer extends AbstractBackingBean
 
   // private instance methods
 
+  private LibraryViewer _thisProxy;
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private WellSearchResults _wellsBrowser;
@@ -56,7 +57,8 @@ public class LibraryViewer extends AbstractBackingBean
   {
   }
 
-  public LibraryViewer(GenericEntityDAO dao,
+  public LibraryViewer(LibraryViewer thisProxy,
+                       GenericEntityDAO dao,
                        LibrariesDAO librariesDao,
                        WellSearchResults wellsBrowser,
                        WellCopyVolumeSearchResults wellCopyVolumesBrowser,
@@ -64,6 +66,7 @@ public class LibraryViewer extends AbstractBackingBean
                        RNAiLibraryContentsImporter rnaiLibraryContentsImporter,
                        NaturalProductsLibraryContentsImporter naturalProductsLibraryContentsImporter)
   {
+    _thisProxy = thisProxy;
     _dao = dao;
     _librariesDao = librariesDao;
     _wellsBrowser = wellsBrowser;
@@ -124,7 +127,7 @@ public class LibraryViewer extends AbstractBackingBean
     String libraryIdAsString = (String) getRequestParameter("libraryId");
     Integer libraryId = Integer.parseInt(libraryIdAsString);
     Library library = _dao.findEntityById(Library.class, libraryId);
-    return viewLibrary(library);
+    return _thisProxy.viewLibrary(library);
   }
 
   @UIControllerMethod
@@ -177,6 +180,6 @@ public class LibraryViewer extends AbstractBackingBean
   {
     _librariesDao.deleteLibraryContents(_library);
     showMessage("libraries.unloadedLibraryContents", "libraryViewer");
-    return viewLibrary(_library);
+    return _thisProxy.viewLibrary(_library);
   }
 }
