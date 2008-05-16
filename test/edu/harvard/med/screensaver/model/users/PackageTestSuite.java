@@ -33,6 +33,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(ChecklistItemTest.class);
     addTestSuite(ChecklistItemTypeTest.class);
     addTestSuite(LabAffiliationTest.class);
+    addTestSuite(ScreensaverUserTest.class);
     addTestSuite(ScreeningRoomUserTest.class);
     addTestSuite(AdministratorUserTest.class);
   }
