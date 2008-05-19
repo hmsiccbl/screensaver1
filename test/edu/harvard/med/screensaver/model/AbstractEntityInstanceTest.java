@@ -31,6 +31,7 @@ import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.EntityNetworkPersister.EntityNetworkPersisterException;
@@ -320,10 +321,9 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     createPersistentBeanForTest();
     exercizePropertyDescriptors(new PropertyDescriptorExercizor()
     {
-      public void exercizePropertyDescriptor(
-        AbstractEntity bean,
-        BeanInfo beanInfo,
-        final PropertyDescriptor propertyDescriptor)
+      public void exercizePropertyDescriptor(final AbstractEntity bean,
+                                             BeanInfo beanInfo,
+                                             final PropertyDescriptor propertyDescriptor)
       {
         if (setterMethodNotExpected(bean.getClass(), propertyDescriptor)) {
           return;
@@ -335,27 +335,29 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
           return;
         }
         final Method setter = propertyDescriptor.getWriteMethod();
-        class TestValueBeanTester implements BeanTester
-        {
-          Object testValue;
-          public void testBean(AbstractEntity bean)
-          {
-            // TODO - work out a test for containedEntity.alternateContainingEntityClass as well
-            ContainedEntity containedEntity = (ContainedEntity) getter.getReturnType().getAnnotation(ContainedEntity.class);
-            if (containedEntity != null &&
-              containedEntity.containingEntityClass().isAssignableFrom(bean.getClass())) {
-              testValue = getTestValueForType(getter.getReturnType(), bean);
-            }
-            else {
-              testValue = getTestValueForType(getter.getReturnType());
-            }
+
+        // call the setter
+        Object testValue = null;
+        // TODO - work out a test for containedEntity.alternateContainingEntityClass as well
+        ContainedEntity containedEntity = (ContainedEntity) getter.getReturnType().getAnnotation(ContainedEntity.class);
+        if (containedEntity != null &&
+          containedEntity.containingEntityClass().isAssignableFrom(bean.getClass())) {
+          testValue = getTestValueForType(getter.getReturnType(), bean);
+        }
+        else {
+          testValue = getTestValueForType(getter.getReturnType());
+        }
+        if (testValue instanceof AbstractEntity) {
+          persistEntityNetwork((AbstractEntity) testValue);
+          if (testValue instanceof AbstractEntity) {
+            // ensure we have an entity whose equals method use the entityId
+            // and not the object hashCode
+            testValue = genericEntityDao.reloadEntity((AbstractEntity) testValue);
           }
         }
-        TestValueBeanTester testValueBeanTester = new TestValueBeanTester();
-        doTestBean(bean, testValueBeanTester);
-        final Object testValue = testValueBeanTester.testValue;
 
-        // right, if the testValue happens to be a contained entity of the bean, then the above
+
+        // if the testValue happens to be a contained entity of the bean, then the above
         // call to getTestValueForType should have hooked the testValue up with the parent
         // already, so we probably shouldn't call the setter again. in fact, the setter
         // should be private for contained entities, so the setter invocation should fail
@@ -365,32 +367,29 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
         if (testValueClassContainedEntityAnnotation != null &&
           testValueClassContainedEntityAnnotation.containingEntityClass().equals(bean.getClass())) {
           assertNull("setter should be null for contained entity: " + propertyDescriptor, setter);
+          return;
         }
-        else {
 
-        // call the setter
-        doTestBean(bean, new BeanTester()
-        {
-          public void testBean(AbstractEntity bean)
+        final Object finalTestValue = testValue;
+
+        log.info("calling setter " + setter + " on bean " + bean + " with test value " + testValue);
+        genericEntityDao.doInTransaction(new DAOTransaction() {
+          public void runTransaction()
           {
             try {
-              log.info("calling setter " + setter + " on bean " + bean + " with test value " + testValue);
-              if (testValue instanceof AbstractEntity) {
-                setter.invoke(bean, getPersistedEntity((AbstractEntity) testValue));
+              genericEntityDao.reattachEntity(bean);
+              Object setValue = finalTestValue;
+              if (finalTestValue instanceof AbstractEntity) {
+                // ensure the entity is managed to avoid LazyInitEx
+                setValue = genericEntityDao.reattachEntity((AbstractEntity) finalTestValue);
               }
-              else {
-              setter.invoke(bean, testValue);
-              }
+              setter.invoke(bean, setValue);
             }
             catch (Exception e) {
-              e.printStackTrace();
-              fail(
-                   "setter threw exception: " +
-                   bean.getClass() + "." + propertyDescriptor.getName());
+              throw new DAOTransactionRollbackException(e); 
             }
           }
         });
-        }
 
         // call the getter
         doTestBean(bean, new BeanTester()
@@ -399,27 +398,25 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
           {
             try {
               // this only makes sense for non-persistent tests; testing equality, rather than sameness, is probably good enough
-//              if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
-//                assertSame("getter returns what setter set for " +
-//                           _bean.getClass() + "." + propertyDescriptor.getName(),
-//                           testValue,
-//                           getter.invoke(_bean));
-//              }
-//              else {
-              if (testValue instanceof AbstractEntity) {
-                persistEntityNetwork((AbstractEntity) testValue);
-              }
+//            if (AbstractEntity.class.isAssignableFrom(getter.getReturnType())) {
+//            assertSame("getter returns what setter set for " +
+//            _bean.getClass() + "." + propertyDescriptor.getName(),
+//            testValue,
+//            getter.invoke(_bean));
+//            }
+//            else {
+              Object actualValue = getter.invoke(bean);
+              log.debug(actualValue.toString());
               assertEquals("getter returns what setter set for " +
                            bean.getClass() + "." + propertyDescriptor.getName(),
-                           testValue,
-                           getter.invoke(bean));
+                           finalTestValue,
+                           actualValue);
             }
             catch (Exception e) {
               e.printStackTrace();
               fail("getter " + bean.getClass() + "." + propertyDescriptor.getName() +
                    " threw exception: " + e.getMessage());
             }
-
           }
         });
       }
@@ -804,6 +801,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
             assertNotNull("this.getter() returns non-null related _bean of type " +
                           relatedProperty.getBeanClass().getSimpleName(),
                           relatedBean);
+            hibernateTemplate.initialize(relatedBean); // in case it's a Hibernate proxy
             relatedBeanHolder[0] = relatedBean;
           }
           catch (Exception e) {
@@ -1024,6 +1022,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
           try {
             AbstractEntity thisSideBean = (AbstractEntity) relatedProperty.invokeGetter(relatedBean);
             assertNotNull("related getter, " + relatedProperty.getFullName() + ", returns non-null", thisSideBean);
+            hibernateTemplate.initialize(thisSideBean); // in case it's a Hibernate proxy
             thisSideBeanHolder[0] = thisSideBean;
           }
           catch (Exception e) {
@@ -1114,7 +1113,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   private boolean _booleanTestValue = true;
   private Character _characterTestValue = 'a';
   private int     _stringTestValueIndex = Integer.parseInt("antz", STRING_TEST_VALUE_RADIX);
-  private long    _dateMilliseconds = 0;
+  private long    _dateMilliseconds = new LocalDate(2008, 3, 10).toDateMidnight().getMillis();
   private int     _vocabularyTermCounter = 0;
   private int     _wellNameTestValueIndex = 0;
   private WellKey _wellKeyTestValue = new WellKey("00001:A01");
@@ -1825,17 +1824,13 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   }
 
   /**
-   * If the bean has already been persisted, then get the persisted copy, as the
-   * current copy is detached. If it has not been persisted, persist it now so
-   * we can get the entityId.
+   * Get the Hibernate-managed instance of the specified entity.
+   * 
+   * @return the same entity if already managed by the current Hibernate
+   *         session, otherwise loads from the database.
    */
   private AbstractEntity getPersistedEntity(AbstractEntity bean)
   {
-    if (hibernateTemplate.contains(bean)) {
-      return bean;
-    }
-    persistEntityNetwork(bean);
-    log.info("bean.getEntityId() = " + bean.getEntityId());
-    return (AbstractEntity) hibernateTemplate.get(bean.getClass(), bean.getEntityId());
+    return (AbstractEntity) hibernateTemplate.get(bean.getEntityClass(), bean.getEntityId());
   }
 }
