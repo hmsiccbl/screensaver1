@@ -117,7 +117,7 @@ public class StatusItem extends AbstractEntity implements Comparable
    * @return the status date
    */
   @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getStatusDate()
   {
     return _statusDate;

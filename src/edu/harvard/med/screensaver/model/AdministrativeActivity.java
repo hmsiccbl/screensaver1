@@ -84,7 +84,7 @@ abstract public class AdministrativeActivity extends Activity
    * Get the date the activity was approved.
    * @return the date the activity was approved
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")  
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")  
   public LocalDate getDateApproved()
   {
     return _dateApproved;

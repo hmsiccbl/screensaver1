@@ -146,7 +146,7 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
    * @return the date the activity was performed
    */
   @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")  
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateOfActivity()
   {
     return _dateOfActivity;

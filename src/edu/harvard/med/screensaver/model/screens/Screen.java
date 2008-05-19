@@ -1035,7 +1035,7 @@ public class Screen extends Study
    * @return the data meeting scheduled
    */
   @Column
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDataMeetingScheduled()
   {
     return _dataMeetingScheduled;
@@ -1055,7 +1055,7 @@ public class Screen extends Study
    * @return the data meeting completed date
    */
   @Column
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDataMeetingComplete()
   {
     return _dataMeetingComplete;
@@ -1268,7 +1268,7 @@ public class Screen extends Study
    * Get the date the publishable protocol was entered.
    * @return the date the publishable protocol was entered
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getPublishableProtocolDateEntered()
   {
     return _publishableProtocolDateEntered;
@@ -1346,7 +1346,7 @@ public class Screen extends Study
    * @return the date of application
    */
   @Column
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateOfApplication()
   {
     return _dateOfApplication;

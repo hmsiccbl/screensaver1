@@ -519,7 +519,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @return the date of the request
    */
   @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateRequested()
   {
     return _dateRequested;
@@ -599,7 +599,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Get the date the volume was approved.
    * @return the date the volume was approved
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateVolumeApproved()
   {
     return _dateVolumeApproved;

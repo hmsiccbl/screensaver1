@@ -519,7 +519,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
    * Get the harvard id expiration date.
    * @return the harvard id expiration date
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getHarvardIdExpirationDate()
   {
     return _harvardIdExpirationDate;

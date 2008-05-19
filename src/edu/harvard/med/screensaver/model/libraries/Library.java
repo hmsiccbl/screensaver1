@@ -575,7 +575,7 @@ public class Library extends AbstractEntity
    * Get the date received.
    * @return the date received
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateReceived()
   {
     return _dateReceived;
@@ -594,7 +594,7 @@ public class Library extends AbstractEntity
    * Get the date screenable.
    * @return the date screenable
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateScreenable()
   {
     return _dateScreenable;

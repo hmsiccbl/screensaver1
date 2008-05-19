@@ -130,7 +130,7 @@ public class ChecklistItem extends AbstractEntity
    * Get the activation date.
    * @return the activation date
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getActivationDate()
   {
     return _activationDate;
@@ -168,7 +168,7 @@ public class ChecklistItem extends AbstractEntity
    * Get the deactivation date.
    * @return the deactivation date
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDeactivationDate()
   {
     return _deactivationDate;

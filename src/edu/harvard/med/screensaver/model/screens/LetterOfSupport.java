@@ -111,7 +111,7 @@ public class LetterOfSupport extends AbstractEntity
    * @return the date written
    */
   @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateWritten()
   {
     return _dateWritten;

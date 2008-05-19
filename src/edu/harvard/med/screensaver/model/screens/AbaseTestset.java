@@ -109,7 +109,7 @@ public class AbaseTestset extends AbstractEntity
    * @return the testset date
    */
   @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getTestsetDate()
   {
     return _testsetDate;

@@ -241,7 +241,7 @@ public class CopyInfo extends AbstractEntity
    * Get the date plated.
    * @return the date plated
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDatePlated()
   {
     return _datePlated;
@@ -260,7 +260,7 @@ public class CopyInfo extends AbstractEntity
    * Get the date retired.
    * @return the date retired
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateRetired()
   {
     return _dateRetired;

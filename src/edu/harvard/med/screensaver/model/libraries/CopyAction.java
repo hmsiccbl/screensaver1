@@ -127,7 +127,7 @@ public class CopyAction extends AbstractEntity
    * @return the date
    */
   @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDate()
   {
     return _date;

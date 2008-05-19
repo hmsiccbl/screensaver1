@@ -211,7 +211,7 @@ public class BillingInformation extends AbstractEntity
    * Get the billing info return date.
    * @return the billing info return date
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getBillingInfoReturnDate()
   {
     return _billingInfoReturnDate;
@@ -268,7 +268,7 @@ public class BillingInformation extends AbstractEntity
    * Get the fee form requested date.
    * @return the fee form requested date
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getFeeFormRequestedDate()
   {
     return _feeFormRequestedDate;
@@ -325,7 +325,7 @@ public class BillingInformation extends AbstractEntity
    * Get the date completed 5-10K compounds.
    * @return the date completed 5-10K compounds
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateCompleted5KCompounds()
   {
     return _dateCompleted5KCompounds;
@@ -344,7 +344,7 @@ public class BillingInformation extends AbstractEntity
    * Get the date faxed to billing department.
    * @return the date faxed to billing department
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateFaxedToBillingDepartment()
   {
     return _dateFaxedToBillingDepartment;
@@ -363,7 +363,7 @@ public class BillingInformation extends AbstractEntity
    * Get the date charged.
    * @return the date charged
    */
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateCharged()
   {
     return _dateCharged;

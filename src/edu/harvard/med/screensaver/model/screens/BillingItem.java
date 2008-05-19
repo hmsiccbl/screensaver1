@@ -147,7 +147,7 @@ public class BillingItem extends AbstractEntity
    * @return the date faxed
    */
   @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentLocalDate")
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateFaxed()
   {
     return _dateFaxed;
