@@ -119,7 +119,7 @@ public class ScreenResultImporter extends AbstractBackingBean
   @UIControllerMethod
   public String cancel()
   {
-    return _screenViewer.viewLastScreen();
+    return _screenViewer.viewScreen(_screen);
   }
 
   @UIControllerMethod
@@ -162,7 +162,7 @@ public class ScreenResultImporter extends AbstractBackingBean
       return viewScreenResultImportErrors();
     }
     _screensBrowser.refetch();
-    return _screenViewer.viewLastScreen();
+    return _screenViewer.viewScreen(_screen);
   }
 
   @UIControllerMethod

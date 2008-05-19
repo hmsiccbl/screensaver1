@@ -21,10 +21,12 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
@@ -49,7 +51,7 @@ import org.springframework.dao.DataAccessException;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @SuppressWarnings("unchecked")
-public class ScreenResultViewer extends AbstractBackingBean
+public class ScreenResultViewer extends AbstractBackingBean implements EntityViewer
 {
 
   // static data members
@@ -116,6 +118,11 @@ public class ScreenResultViewer extends AbstractBackingBean
 
 
   // public methods
+
+  public AbstractEntity getEntity()
+  {
+    return getScreenResult();
+  }
 
   /**
    * @param screenResult can be null

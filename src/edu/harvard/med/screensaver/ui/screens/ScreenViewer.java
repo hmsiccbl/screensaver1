@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -21,7 +20,7 @@ import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
 
 import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
 public class ScreenViewer extends StudyViewer
 {
@@ -32,6 +31,7 @@ public class ScreenViewer extends StudyViewer
 
   // instance data members
 
+  private ScreenViewer _thisProxy;
   private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
   private ScreenDetailViewer _screenDetailViewer;
@@ -51,7 +51,8 @@ public class ScreenViewer extends StudyViewer
   {
   }
 
-  public ScreenViewer(GenericEntityDAO dao,
+  public ScreenViewer(ScreenViewer screenViewer,
+                      GenericEntityDAO dao,
                       ScreenDetailViewer screenDetailViewer,
                       ReagentSearchResults reagentSearchResults,
                       ScreenResultsDAO screenResultsDao,
@@ -59,7 +60,8 @@ public class ScreenViewer extends StudyViewer
                       HeatMapViewer heatMapViewer,
                       ScreenResultImporter screenResultImporter)
   {
-    super(dao, screenDetailViewer, null, reagentSearchResults);
+    super(screenViewer, dao, screenDetailViewer, null, reagentSearchResults);
+    _thisProxy = screenViewer;
     _dao = dao;
     _screenResultsDao = screenResultsDao;
     _screenDetailViewer = screenDetailViewer;
@@ -102,10 +104,11 @@ public class ScreenViewer extends StudyViewer
     if (screen == null) {
       throw new IllegalArgumentException(Screen.class.getSimpleName() + " " + entityId + " does not exist");
     }
-    return viewScreen(screen);
+    return _thisProxy.viewScreen(screen);
   }
 
   @UIControllerMethod
+  @Transactional
   public String viewScreen(final Screen screenIn)
   {
     // TODO: implement as aspect
@@ -115,45 +118,25 @@ public class ScreenViewer extends StudyViewer
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
-    try {
-      _dao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Screen screen = _dao.reloadEntity(screenIn,
-                                            true,
-                                            "labHead",
-                                            "labHead.labMembers",
-                                            "leadScreener",
-                                            "billingInformation");
-          _dao.needReadOnly(screen, "collaborators.labHead");
-          _dao.needReadOnly(screen, "labActivities.performedBy");
-          _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
-          _dao.needReadOnly(screen, "statusItems");
-          _dao.needReadOnly(screen, "cherryPickRequests");
-          _dao.needReadOnly(screen, "annotationTypes.annotationValues");
-          _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
-          _dao.needReadOnly(screen.getScreenResult(),
-                            "resultValueTypes.derivedTypes",
-                            "resultValueTypes.typesDerivedFrom");
-          setScreen(screen);
-        }
-      });
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
+    Screen screen = _dao.reloadEntity(screenIn,
+                                      true,
+                                      "labHead",
+                                      "labHead.labMembers",
+                                      "leadScreener",
+    "billingInformation");
+    _dao.needReadOnly(screen, "collaborators.labHead");
+    _dao.needReadOnly(screen, "labActivities.performedBy");
+    _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
+    _dao.needReadOnly(screen, "statusItems");
+    _dao.needReadOnly(screen, "cherryPickRequests");
+    _dao.needReadOnly(screen, "annotationTypes.annotationValues");
+    _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
+    _dao.needReadOnly(screen.getScreenResult(),
+                      "resultValueTypes.derivedTypes",
+    "resultValueTypes.typesDerivedFrom");
+    setScreen(screen);
     return VIEW_SCREEN;
   }
-
-  @UIControllerMethod
-  public String viewLastScreen()
-  {
-    return viewScreen(getScreen());
-  }
-
 
   // private methods
 

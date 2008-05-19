@@ -18,6 +18,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -25,13 +26,14 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.ReagentNameValueTable;
 
 import org.apache.log4j.Logger;
 
-public class ReagentViewer extends AbstractBackingBean
+public class ReagentViewer extends AbstractBackingBean implements EntityViewer
 {
   // static members
 
@@ -71,6 +73,11 @@ public class ReagentViewer extends AbstractBackingBean
 
 
   // public instance methods
+
+  public AbstractEntity getEntity()
+  {
+    return getReagent();
+  }
 
   public Reagent getReagent()
   {

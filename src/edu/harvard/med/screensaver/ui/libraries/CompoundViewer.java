@@ -11,14 +11,16 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.CompoundNameValueTable;
 
 import org.apache.log4j.Logger;
 
-public class CompoundViewer extends AbstractBackingBean
+public class CompoundViewer extends AbstractBackingBean implements EntityViewer
 {
 
   // private static stuff
@@ -50,6 +52,11 @@ public class CompoundViewer extends AbstractBackingBean
 
 
   // public instance methods
+  
+  public AbstractEntity getEntity()
+  {
+    return getCompound();
+  }
 
   public Compound getCompound()
   {

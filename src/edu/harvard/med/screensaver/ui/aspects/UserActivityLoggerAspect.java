@@ -38,16 +38,20 @@ public class UserActivityLoggerAspect extends OrderedAspect
 
   public void logUserActivity(JoinPoint joinPoint)
   {
+    Object target = joinPoint.getTarget();
+    List<Object> args = Arrays.asList(joinPoint.getArgs());
+
     StringBuilder s = new StringBuilder();
+    s.append(target.getClass().getSimpleName()).append('.');
     s.append(joinPoint.getSignature().getName());
 
-    Object target = joinPoint.getTarget();
     if (target instanceof EntityViewer) {
-      EntityViewer entityViewer = (EntityViewer) target;
-      AbstractEntity entity = entityViewer.getEntity();
-      s.append(": ").append(entity);
+      if (args.isEmpty() || !(args.get(0) instanceof AbstractEntity)) {
+        EntityViewer entityViewer = (EntityViewer) target;
+        AbstractEntity entity = entityViewer.getEntity();
+        s.append('[').append(entity == null ? "" : entity).append(']');
+      }
     }
-    List<Object> args = Arrays.asList(joinPoint.getArgs());
     s.append(" ").append(StringUtils.makeListString(args, ", "));
     _currentScreensaverUser.logActivity(s.toString());
   }

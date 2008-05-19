@@ -15,10 +15,12 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable;
 import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
@@ -27,7 +29,7 @@ import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 
 
-public class StudyViewer extends AbstractBackingBean
+public class StudyViewer extends AbstractBackingBean implements EntityViewer
 {
   // static members
 
@@ -36,6 +38,7 @@ public class StudyViewer extends AbstractBackingBean
 
   // instance data members
 
+  private StudyViewer _thisProxy;
   private GenericEntityDAO _dao;
   private StudyDetailViewer _studyDetailViewer;
   private AnnotationTypesTable _annotationTypesTable;
@@ -53,11 +56,13 @@ public class StudyViewer extends AbstractBackingBean
   {
   }
 
-  public StudyViewer(GenericEntityDAO dao,
+  public StudyViewer(StudyViewer thisProxy, 
+                     GenericEntityDAO dao,
                      StudyDetailViewer studyDetailViewer,
                      AnnotationTypesTable annotationTypesTable,
                      ReagentSearchResults reagentSearchResults)
   {
+    _thisProxy = thisProxy;
     _dao = dao;
     _annotationTypesTable = annotationTypesTable;
     _studyDetailViewer = studyDetailViewer;
@@ -69,6 +74,11 @@ public class StudyViewer extends AbstractBackingBean
 
 
   // public methods
+
+  public AbstractEntity getEntity()
+  {
+    return getStudy();
+  }
 
   public Study getStudy()
   {

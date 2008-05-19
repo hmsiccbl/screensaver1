@@ -71,6 +71,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMap
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
@@ -83,6 +84,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn;
+import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
@@ -92,8 +94,9 @@ import edu.harvard.med.screensaver.util.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
-public class CherryPickRequestViewer extends AbstractBackingBean
+public class CherryPickRequestViewer extends AbstractBackingBean implements EditableViewer
 {
   // static members
 
@@ -536,6 +539,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean
     // set "Cherry Pick Plates" panel to initially expanded, if cherry pick plates have been created
     boolean hasCherryPickPlates = _cherryPickRequest.getCherryPickAssayPlates().size() > 0;
     _isPanelCollapsedMap.put("cherryPickPlates", !hasCherryPickPlates);
+  }
+  
+  public AbstractEntity getEntity()
+  {
+    return getCherryPickRequest();
   }
 
   public CherryPickRequest getCherryPickRequest()
@@ -1194,39 +1202,28 @@ public class CherryPickRequestViewer extends AbstractBackingBean
   }
 
   @UIControllerMethod
-  public String setEditMode()
+  public String edit()
   {
     _isEditMode = true;
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        _dao.reattachEntity(_cherryPickRequest); // checks if up-to-date
-      }
-    });
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod
-  public String cancelEdit() {
+  public String cancel() 
+  {
     // edits are discarded (and edit mode is canceled) by virtue of controller reloading the screen entity from the database
     return viewCherryPickRequest(_cherryPickRequest);
   }
 
   @UIControllerMethod
-  public String save() {
+  @Transactional
+  public String save() 
+  {
     _isEditMode = false;
-
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        _dao.reattachEntity(_cherryPickRequest);
-        _cherryPickRequest.setAssayPlateType(_assayPlateType.getSelection());
-        _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
-        _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
-      }
-    });
+    _dao.reattachEntity(_cherryPickRequest);
+    _cherryPickRequest.setAssayPlateType(_assayPlateType.getSelection());
+    _cherryPickRequest.setRequestedBy(_requestedBy.getSelection());
+    _cherryPickRequest.setVolumeApprovedBy(_volumeApprovedBy.getSelection());
     return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
   }
 

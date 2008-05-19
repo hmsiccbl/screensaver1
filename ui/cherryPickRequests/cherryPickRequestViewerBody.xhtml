@@ -23,7 +23,7 @@
 						<t:panelGroup id="adminCommandPanel"
 							rendered="#{cherryPickRequestViewer.editable}">
 							<t:commandButton id="editCommand" value="Edit"
-								action="#{cherryPickRequestViewer.setEditMode}"
+								action="#{cherryPickRequestViewer.edit}"
 								styleClass="command"
 								rendered="#{!cherryPickRequestViewer.editMode}"
 								title="Enter edit mode for the cherry pick request" />
@@ -40,7 +40,7 @@
 								title="Save your changes and leave edit mode" />
 							<t:commandButton id="cancelEditCommand" value="Cancel"
 								rendered="#{cherryPickRequestViewer.editMode}"
-								action="#{cherryPickRequestViewer.cancelEdit}" immediate="true"
+								action="#{cherryPickRequestViewer.cancel}" immediate="true"
 								styleClass="command"
 								title="Discard your changes and leave edit mode" />
 						</t:panelGroup>

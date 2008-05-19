@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.ui.UIControllerMethod;
 
 import org.springframework.transaction.annotation.Transactional;
 
-public interface EditableViewer
+public interface EditableViewer extends edu.harvard.med.screensaver.ui.EntityViewer
 {
   public boolean isEditMode();
 

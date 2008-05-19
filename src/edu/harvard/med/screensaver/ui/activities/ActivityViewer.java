@@ -20,6 +20,7 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -84,6 +85,11 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
 
 
   // public methods
+  
+  public AbstractEntity getEntity()
+  {
+    return getActivity();
+  }
 
   public Activity getActivity()
   {
@@ -175,9 +181,6 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     _isEditMode = false;
     _dao.saveOrUpdateEntity(getActivity());
     getActivity().setPerformedBy(getPerformedBy().getSelection());
-//    if (_activity instanceof LibraryScreening) {
-//      resplitExistingPlatesUsedByLibrary((LibraryScreening) _activity);
-//    }
     // TODO _labActivitiesBrowser.refetch();
     return _returnToViewAfterEdit.reload();
   }
@@ -242,10 +245,11 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   }
 
   @UIControllerMethod
-  @Transactional
   public String editNewActivity(Activity activity, AbstractBackingBean returnToViewerAfterEdit)
   {
     setActivity(activity);
+    // TODO: this model shouldn't allow this null value, and we should really set to null at the UI component level only 
+    activity.setDateOfActivity(null);
     _isEditMode = true;
     _returnToViewAfterEdit = returnToViewerAfterEdit;
     return VIEW_ACTIVITY;
@@ -294,16 +298,6 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
       startPlate = libraryWithStartPlate.getEndPlate() + 1;
     } while (startPlate <= endPlate);
     return result;
-  }
-
-  private void resplitExistingPlatesUsedByLibrary(LibraryScreening libraryScreening)
-  {
-    Set<PlatesUsed> newPlatesUsed = new HashSet<PlatesUsed>();
-    for (PlatesUsed platesUsed : libraryScreening.getPlatesUsed()) {
-      newPlatesUsed.addAll(splitPlateRangeByLibrary(platesUsed));
-    }
-    libraryScreening.getPlatesUsed().clear();
-    libraryScreening.getPlatesUsed().addAll(newPlatesUsed);
   }
 
   public String deletePlatesScreened()

@@ -15,20 +15,22 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyEntityBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
-public class StudyDetailViewer extends AbstractBackingBean
+import org.apache.log4j.Logger;
+
+public class StudyDetailViewer extends AbstractBackingBean implements EntityViewer
 {
   // static members
 
@@ -65,6 +67,11 @@ public class StudyDetailViewer extends AbstractBackingBean
 
 
   // public methods
+
+  public AbstractEntity getEntity()
+  {
+    return getStudy();
+  }
 
   public void setStudy(Study study)
   {

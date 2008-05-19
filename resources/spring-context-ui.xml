@@ -386,6 +386,7 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.StudyViewer">
+    <constructor-arg ref="studyViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="studyDetailViewer" />
     <constructor-arg>
@@ -425,6 +426,7 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
+    <constructor-arg ref="screenViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="reagentsBrowser" />

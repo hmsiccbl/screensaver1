@@ -11,12 +11,14 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.GeneNameValueTable;
 
-public class GeneViewer extends AbstractBackingBean
+public class GeneViewer extends AbstractBackingBean implements EntityViewer
 {
 
   // private instance fields
@@ -43,6 +45,11 @@ public class GeneViewer extends AbstractBackingBean
 
 
   // public instance methods
+
+  public AbstractEntity getEntity()
+  {
+    return getGene();
+  }
 
   public Gene getGene()
   {
