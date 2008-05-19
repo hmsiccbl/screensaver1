@@ -180,6 +180,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   {
     _isEditMode = false;
     _dao.saveOrUpdateEntity(getActivity());
+    _dao.flush();
     getActivity().setPerformedBy(getPerformedBy().getSelection());
     // TODO _labActivitiesBrowser.refetch();
     return _returnToViewAfterEdit.reload();
