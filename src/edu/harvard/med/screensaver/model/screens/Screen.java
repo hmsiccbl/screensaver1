@@ -945,28 +945,6 @@ public class Screen extends Study
   }
 
   /**
-   * Get whether this <code>Screen</code> allows it Annotations and
-   * ScreenResult to be downloaded.
-   * @return <code>true</code> iff this <code>Screen</code> is
-   *         downloadable
-   */
-  @Column(nullable=false, name="isDownloadable")
-  public boolean isDownloadable()
-  {
-    return _isDownloadable;
-  }
-
-  /**
-   * Set whether this <code>Screen</code> allows it Annotations and
-   * ScreenResult to be downloaded.
-   * @param isDownloadable the new isDownloadable value
-   */
-  public void setDownloadable(boolean isDownloadable)
-  {
-    _isDownloadable = isDownloadable;
-  }
-
-  /**
    * Get the study type.
    * @return the study type
    */

@@ -467,7 +467,6 @@
         class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypesTable"
         parent="uiBean" />
     </constructor-arg>
-    <constructor-arg ref="screenResultExporter" />
     <constructor-arg ref="wellsBrowser" />
     <aop:scoped-proxy />
   </bean>

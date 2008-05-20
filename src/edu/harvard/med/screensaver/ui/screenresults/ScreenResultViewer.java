@@ -70,7 +70,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   private ScreenViewer _screenViewer;
   private EditableViewer _screenDetailViewer;
   private ResultValueTypesTable _resultValueTypesTable;
-  private ScreenResultExporter _screenResultExporter;
   private WellSearchResults _wellSearchResults;
 
   private ScreenResult _screenResult;
@@ -96,7 +95,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
                             ScreenViewer screenViewer,
                             EditableViewer screenDetailViewer,
                             ResultValueTypesTable resultValueTypesTable,
-                            ScreenResultExporter screenResultExporter,
                             WellSearchResults wellSearchResults)
 
   {
@@ -106,7 +104,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
     _screenViewer = screenViewer;
     _screenDetailViewer = screenDetailViewer;
     _resultValueTypesTable = resultValueTypesTable;
-    _screenResultExporter = screenResultExporter;
     _wellSearchResults = wellSearchResults;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
@@ -163,59 +160,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
 
 
   // JSF application methods
-
-  @UIControllerMethod
-  public String download()
-  {
-    try {
-      _dao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          ScreenResult screenResult = _dao.reloadEntity(_screenResult,
-                                                        true,
-          "resultValueTypes");
-          // note: we eager fetch the resultValues for each ResultValueType
-          // individually, since fetching all with a single needReadOnly() call
-          // would generate an SQL result cross-product for all RVTs+RVs that
-          // would include a considerable amount of redundant data
-          // for the (denormalized) RVT fields
-          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-            _dao.needReadOnly(rvt, "resultValues");
-          }
-          File exportedWorkbookFile = null;
-          FileOutputStream out = null;
-          try {
-            if (screenResult != null) {
-              HSSFWorkbook workbook = _screenResultExporter.build(screenResult);
-              exportedWorkbookFile = File.createTempFile("screenResult" + screenResult.getScreen().getScreenNumber() + ".",
-              ".xls");
-              out = new FileOutputStream(exportedWorkbookFile);
-              workbook.write(out);
-              out.close();
-              JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-                                                     exportedWorkbookFile,
-                                                     Workbook.MIME_TYPE);
-            }
-          }
-          catch (IOException e)
-          {
-            reportApplicationError(e);
-          }
-          finally {
-            IOUtils.closeQuietly(out);
-            if (exportedWorkbookFile != null && exportedWorkbookFile.exists()) {
-              exportedWorkbookFile.delete();
-            }
-          }
-        }
-      });
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
 
   @UIControllerMethod
   public String delete()

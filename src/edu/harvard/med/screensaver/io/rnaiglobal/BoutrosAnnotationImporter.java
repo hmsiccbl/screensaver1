@@ -118,8 +118,6 @@ public class BoutrosAnnotationImporter
           screen.setSummary(STUDY_SUMMARY);
           screen.setUrl(STUDY_URL);
           screen.setShareable(true);
-          screen.setDownloadable(false);
-
 
           ScreeningRoomUser rnaiGlobalMember = findOrCreateUser("RNAi Global",
                                                                 "Member",
