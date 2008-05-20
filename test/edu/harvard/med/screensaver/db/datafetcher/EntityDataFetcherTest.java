@@ -578,6 +578,15 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     assertEquals("result size", 1, keys.size());
     assertEquals("filtered result", "02001:P24", keys.get(0));
   }
+  
+  public void testFetchEmptySet()
+  {
+    _wellSetFetcher = new EntitySetDataFetcher<Well,String>(Well.class,
+      Collections.<String>emptySet(),
+      genericEntityDao);
+    List<String> keys = _wellSetFetcher.findAllKeys();
+    assertEquals("result size", 0, keys.size());
+  }
 
 
   // private methods

@@ -282,7 +282,7 @@
 							value="View Unfulfilled Well Volumes"
 							rendered="#{cherryPickRequestViewer.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
 							action="#{cherryPickRequestViewer.viewCherryPickRequestWellVolumesForUnfulfilled}"
-							disabled="#{cherryPickRequestViewer.screenerCherryPickCount == 0}"
+							disabled="#{cherryPickRequestViewer.cherryPickRequest.numberUnfulfilledLabCherryPicks == 0}"
 							styleClass="command"
 							title="View the  available reagent volumes for the unfulfilled cherry picks on the cherry pick copy plates" />
 						<t:commandButton id="allocateCherryPicks" value="Reserve reagent"

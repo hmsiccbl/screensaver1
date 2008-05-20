@@ -16,9 +16,14 @@ import edu.harvard.med.screensaver.ui.table.Criterion.OperatorClass;
 
 class Predicate extends Clause
 {
-  /**
-   *
-   */
+  public final static Clause FALSE = new Clause() {
+    @Override
+    public String toHql()
+    {
+      return "false = true";
+    }
+  };
+  
   private final HqlBuilder _hqlBuilder;
   private String _whereExpression;
 

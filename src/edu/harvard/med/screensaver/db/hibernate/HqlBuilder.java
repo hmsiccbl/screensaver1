@@ -178,7 +178,10 @@ public class HqlBuilder
   public HqlBuilder whereIn(String alias, String property, Set<?> values)
   {
     checkAliasExists(alias);
-    if (values.size() > 0) {
+    if (values.size() == 0) {
+      _where.add(Predicate.FALSE);
+    }
+    else {
       _where.add(new Predicate(this, makeRef(alias, property), values));
     }
     return this;
