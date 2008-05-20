@@ -56,13 +56,22 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   public void testFindCherryPickRequestByNumber()
   {
     schemaUtil.truncateTablesOrCreateSchema();
-    Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
+    final Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     CherryPickRequest cherryPickRequest1 = screen.createCherryPickRequest(
       screen.getLeadScreener(), 
       new LocalDate(),
       4000);
     CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
-    genericEntityDao.saveOrUpdateEntity(screen);
+    
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
+        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
+        genericEntityDao.saveOrUpdateEntity(screen);
+      }
+    });
 
     CherryPickRequest foundCherryPickRequest1 = 
       cherryPickRequestDao.findCherryPickRequestByNumber(4000);
