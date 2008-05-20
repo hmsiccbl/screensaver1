@@ -9,9 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +16,6 @@ import java.util.Map;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -32,13 +27,9 @@ import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.dao.DataAccessException;
 
 
 /**

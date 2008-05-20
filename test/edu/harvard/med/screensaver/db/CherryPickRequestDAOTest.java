@@ -19,22 +19,16 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
-import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 
 import org.apache.log4j.Logger;
