@@ -286,6 +286,10 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	background-color: #f8f8f8;
 }
 
+.scroller {
+  background-color: #336699;
+}
+
 .scroller_activePage {
 	font-weight: bold;
 	color: white;
@@ -298,7 +302,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .menuAndContent {
 	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
 	/*	table-layout: fixed;*/
-
+	
 }
 
 .menuColumn,.contentColumn {
@@ -398,11 +402,11 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 }
 
 .activeTab {
-
+	
 }
 
 .inactiveTab {
-
+	
 }
 
 .newsDate {
