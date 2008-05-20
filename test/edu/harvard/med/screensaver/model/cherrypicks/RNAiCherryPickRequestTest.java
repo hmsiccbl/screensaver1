@@ -16,7 +16,6 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -28,7 +27,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocato
 
 import org.apache.log4j.Logger;
 
-public class RNAiCherryPickRequestTest extends AbstractEntityInstanceTest<RNAiCherryPickRequest>
+public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryPickRequest>
 {
   private static Logger log = Logger.getLogger(RNAiCherryPickRequestTest.class);
 

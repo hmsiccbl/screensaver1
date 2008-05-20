@@ -19,19 +19,26 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -45,6 +52,30 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   protected CherryPickRequestDAO cherryPickRequestDao;
   protected LibrariesDAO librariesDao;
 
+
+  public void testFindCherryPickRequestByNumber()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
+    CherryPickRequest cherryPickRequest1 = screen.createCherryPickRequest(
+      screen.getLeadScreener(), 
+      new LocalDate(),
+      4000);
+    CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
+    genericEntityDao.saveOrUpdateEntity(screen);
+
+    CherryPickRequest foundCherryPickRequest1 = 
+      cherryPickRequestDao.findCherryPickRequestByNumber(4000);
+    assertEquals("found legacy cherryPickRequest", 
+                 cherryPickRequest1.getCherryPickRequestNumber(), 
+                 foundCherryPickRequest1.getCherryPickRequestNumber());
+
+    CherryPickRequest foundCherryPickRequest2 = 
+      cherryPickRequestDao.findCherryPickRequestByNumber(cherryPickRequest2.getCherryPickRequestNumber());
+    assertEquals("found legacy cherryPickRequest", 
+                 cherryPickRequest2.getCherryPickRequestNumber(), 
+                 foundCherryPickRequest2.getCherryPickRequestNumber());
+  }
 
   public void testFindDuplicateCherryPicksForScreen()
   {

@@ -102,7 +102,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   private Class<E> _entityClass;
   private BeanInfo _beanInfo;
   private E _bean;
-
+  private PropertyDescriptor _testedPropertyDescriptor;
 
   // public constructors and instance methods
 
@@ -1547,10 +1547,10 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
     // TODO: should prefer factory methods that return type most specific to entityClass
     Method bestCandidate = null;
-    int bestCandidateArgCount = -1;
+    int bestCandidateArgCount = Integer.MAX_VALUE;
     for (Method candidate : candidateFactoryMethods) {
       int candidateArgCount = candidate.getParameterTypes().length;
-      if (candidateArgCount > bestCandidateArgCount) {
+      if (candidateArgCount < bestCandidateArgCount) {
         bestCandidate = candidate;
         bestCandidateArgCount = candidateArgCount;
       }
@@ -1586,7 +1586,9 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
       log.info("excercizing JavaBean entity property " + _bean.getClass().getSimpleName() + "." + propertyName +
                " with " + exercizor.getClass().getEnclosingMethod().getName());
+      _testedPropertyDescriptor = propertyDescriptor;
       exercizor.exercizePropertyDescriptor(_bean, _beanInfo, propertyDescriptor);
+      _testedPropertyDescriptor = null;
     }
   }
 
@@ -1832,5 +1834,10 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   private AbstractEntity getPersistedEntity(AbstractEntity bean)
   {
     return (AbstractEntity) hibernateTemplate.get(bean.getEntityClass(), bean.getEntityId());
+  }
+
+  protected PropertyDescriptor getTestedPropertyDescriptor()
+  {
+    return _testedPropertyDescriptor;
   }
 }

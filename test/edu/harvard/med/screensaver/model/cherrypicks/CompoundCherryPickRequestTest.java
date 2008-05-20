@@ -13,11 +13,8 @@ import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -29,7 +26,9 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
-public class CompoundCherryPickRequestTest extends AbstractEntityInstanceTest<CompoundCherryPickRequest>
+import org.apache.log4j.Logger;
+
+public class CompoundCherryPickRequestTest extends CherryPickRequestTest<CompoundCherryPickRequest>
 {
 
   // private static datum

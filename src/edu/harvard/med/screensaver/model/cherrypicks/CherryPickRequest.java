@@ -625,7 +625,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   )
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_empty_wells_to_cherry_pick_request")
   @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="emptyWellOnAssayPlate")
-  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(initialCardinality=240)
+  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(initialCardinality=144)
   public Set<WellName> getEmptyWellsOnAssayPlate()
   {
     return _emptyWellsOnAssayPlate;
