@@ -20,8 +20,10 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 
 import org.apache.log4j.Logger;
@@ -34,7 +36,7 @@ import org.springframework.dao.DataAccessException;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class CompoundLibraryContentsImporter extends AbstractBackingBean
+public class CompoundLibraryContentsImporter extends AbstractBackingBean implements EntityViewer
 {
 
   private static Logger log = Logger.getLogger(CompoundLibraryContentsImporter.class);
@@ -48,8 +50,6 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
   private UploadedFile _uploadedFile;
   private Library _library;
 
-
-  // constructors
 
   /**
    * @motivation for CGLIB2
@@ -67,8 +67,10 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
     _compoundLibraryContentsParser = compoundLibraryContentsParser;
   }
 
-
-  // backing bean property getter and setter methods
+  public AbstractEntity getEntity()
+  {
+    return getLibrary();
+  }
 
   public void setUploadedFile(UploadedFile uploadedFile)
   {
@@ -160,6 +162,5 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean
       return IMPORT_COMPOUND_LIBRARY_CONTENTS;
     }
   }
-
 }
 

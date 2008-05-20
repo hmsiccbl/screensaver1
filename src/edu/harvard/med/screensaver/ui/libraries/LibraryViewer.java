@@ -186,7 +186,6 @@ public class LibraryViewer extends AbstractBackingBean implements EntityViewer
   public String unloadLibraryContents()
   {
     _librariesDao.deleteLibraryContents(_library);
-    showMessage("libraries.unloadedLibraryContents", "libraryViewer");
     return _thisProxy.viewLibrary(_library);
   }
 }

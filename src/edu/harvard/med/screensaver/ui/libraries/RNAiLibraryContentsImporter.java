@@ -23,9 +23,11 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
@@ -38,7 +40,7 @@ import org.springframework.dao.DataAccessException;
  *
  * @author s
  */
-public class RNAiLibraryContentsImporter extends AbstractBackingBean
+public class RNAiLibraryContentsImporter extends AbstractBackingBean implements EntityViewer
 {
 
   private static Logger log = Logger.getLogger(RNAiLibraryContentsImporter.class);
@@ -54,8 +56,6 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
   private SilencingReagentType _silencingReagentType =
     RNAiLibraryContentsParser.DEFAULT_SILENCING_REAGENT_TYPE;
 
-
-  // constructors
 
   /**
    * @motivation for CGLIB2
@@ -73,8 +73,10 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean
     _rnaiLibraryContentsParser = rnaiLibraryContentsParser;
   }
 
-
-  // backing bean property getter and setter methods
+  public AbstractEntity getEntity()
+  {
+    return getLibrary();
+  }
 
   public void setUploadedFile(UploadedFile uploadedFile)
   {
