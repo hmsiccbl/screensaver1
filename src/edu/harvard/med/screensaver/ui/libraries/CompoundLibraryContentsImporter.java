@@ -91,7 +91,6 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean impleme
   {
     _library = library;
     setUploadedFile(null);
-    _compoundLibraryContentsParser.clearErrors();
   }
 
   public boolean getHasErrors()
@@ -124,6 +123,7 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean impleme
   @UIControllerMethod
   public String importLibraryContents()
   {
+    _compoundLibraryContentsParser.clearErrors();
     try {
       if (_uploadedFile == null || _uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", _uploadedFile.getName());

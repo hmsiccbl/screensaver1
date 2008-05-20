@@ -97,7 +97,6 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean implements 
   {
     _library = library;
     setUploadedFile(null);
-    _rnaiLibraryContentsParser.clearErrors();
   }
 
   /**
@@ -157,6 +156,7 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean implements 
   @UIControllerMethod
   public String importLibraryContents()
   {
+    _rnaiLibraryContentsParser.clearErrors();
     try {
       if (_uploadedFile == null || _uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", _uploadedFile.getName());

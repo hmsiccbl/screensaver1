@@ -91,7 +91,6 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean 
   {
     _library = library;
     setUploadedFile(null);
-    _naturalProductsLibraryContentsParser.clearErrors();
   }
 
   public boolean getHasErrors()
@@ -125,6 +124,7 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean 
   @UIControllerMethod
   public String importLibraryContents()
   {
+    _naturalProductsLibraryContentsParser.clearErrors();
     try {
       if (_uploadedFile == null || _uploadedFile.getInputStream().available() == 0) {
         showMessage("badUploadedFile", _uploadedFile == null ? "<null>" : _uploadedFile.getName());
