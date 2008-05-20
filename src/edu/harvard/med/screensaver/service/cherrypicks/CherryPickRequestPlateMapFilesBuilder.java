@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -292,7 +293,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     out.print(cherryPick.getAssayPlate().getAssayPlateType().getFullName());
     out.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());
     out.print(cherryPick.getCherryPickRequest().getScreen().getScreenNumber());
-    out.print(cherryPick.getCherryPickRequest().getTransferVolumePerWellApproved());
+    out.print(cherryPick.getCherryPickRequest().getTransferVolumePerWellApproved().getValue().setScale(2, RoundingMode.HALF_UP));
     out.println();
   }
 
