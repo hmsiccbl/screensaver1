@@ -65,7 +65,6 @@ public class LocalDateType implements UserType
     throws HibernateException, SQLException
   {
     Date sqlDate = rs.getDate(names[0]);
-    log.debug("LocalDateType.nullSafeGet: resultSet date=" + sqlDate);
     // Deferred check after first read
     if (rs.wasNull()) return null;
     LocalDate localDate = new LocalDate(sqlDate);
