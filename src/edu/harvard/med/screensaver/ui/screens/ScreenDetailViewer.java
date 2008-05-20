@@ -494,6 +494,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     // TODO: save screen
     Screen screen = _dao.reloadEntity(getScreen());
     CherryPickRequest cpr = screen.createCherryPickRequest();
+    _dao.persistEntity(cpr);
+    _dao.flush();
     return _cherryPickRequestViewer.viewCherryPickRequest(cpr);
   }
 
