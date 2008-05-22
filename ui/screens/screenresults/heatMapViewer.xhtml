@@ -9,7 +9,7 @@
 
 <ui:composition>
 
-<!-- 
+<!--
 TODO:
 - scaling: min/max from controls (absolute, avg), plate samples, experiment samples
 - place matching color next to max, min, median
@@ -36,11 +36,11 @@ TODO:
 
 			<t:commandButton id="previousPlateButton"
 				image="/images/arrow-previous.png"
-				action="#{heatMapViewer.previousPlate}" styleClass="command"
+				action="#{heatMapViewer.previousPlate}" styleClass="command scroller"
 				title="Previous plate" />
 
 			<t:commandButton id="nextPlateButton" image="/images/arrow-next.png"
-				action="#{heatMapViewer.nextPlate}" styleClass="command"
+				action="#{heatMapViewer.nextPlate}" styleClass="command scroller"
 				title="Next plage" />
 
 			<t:outputLabel for="showValues" value="Show values"
