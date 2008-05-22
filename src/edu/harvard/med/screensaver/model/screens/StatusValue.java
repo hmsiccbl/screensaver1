@@ -23,14 +23,14 @@ public enum StatusValue implements VocabularyTerm
 
   // the vocabulary
   
+  PENDING("Pending"),
   ACCEPTED("Accepted"),
+  ONGOING("Ongoing"),
   COMPLETED("Completed"),
   COMPLETED___DUPLICATE_WITH_ONGOING("Completed - Duplicate with Ongoing"),
   DROPPED___TECHNICAL("Dropped - Technical"),
   DROPPED___RESOURCES("Dropped - Resources"),
   NEVER_INITIATED("Never Initiated"),
-  ONGOING("Ongoing"),
-  PENDING("Pending"),
   TRANSFERRED_TO_BROAD_INSTITUTE("Transferred to Broad Institute")
   ;
 

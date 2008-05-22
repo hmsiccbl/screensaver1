@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -38,11 +39,13 @@ import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
+import org.apache.commons.collections.Transformer;
 import org.joda.time.LocalDate;
 
 
@@ -85,7 +88,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       screens.addAll(screener.getScreensHeaded());
       screens.addAll(screener.getScreensLed());
       screens.addAll(screener.getScreensCollaborated());
-      if (screens.size() == 0) {
+      if (screens.isEmpty()) {
         showMessage("screens.noScreensForUser");
       }
       else {
@@ -154,6 +157,13 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       @Override
       public ScreensaverUser getUser(Screen screen) { return screen.getLabHead(); }
     });
+    columns.add(new TextEntityColumn<Screen>(
+      new PropertyPath(Screen.class, "labHead.labAffiliation", "affiliationName"),
+      "Lab Affiliation", "The affiliation of the lab performing the screen", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen screen) { return screen.getLabHead().getLabAffiliation().getAffiliationName(); }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
     columns.add(new UserNameColumn<Screen>(
       new RelationshipPath(Screen.class, "leadScreener"),
       "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED) {
@@ -213,6 +223,22 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       @Override
       public ScreenType getCellValue(Screen screen) { return screen.getScreenType(); }
     });
+    columns.add(new DateEntityColumn<Screen>(
+      new PropertyPath(Screen.class, "dateCreated"),
+      "Date Created", "The date the screen was added to the database",
+      TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      protected LocalDate getDate(Screen screen) { return screen.getDateCreated().toLocalDate(); }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    columns.add(new DateEntityColumn<Screen>(
+      new PropertyPath(Screen.class, "labActivities", "dateOfActivity"),
+      "Date Of Last Activity", "The date of the last lab activity performed for this screen",
+      TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      protected LocalDate getDate(Screen screen) { return screen.getLabActivities().isEmpty() ? null : screen.getLabActivities().last().getDateOfActivity(); }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
     columns.add(new EnumEntityColumn<Screen,StatusValue>(
       new PropertyPath(Screen.class, "statusItems", "statusValue"),
       "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
@@ -221,12 +247,8 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       @Override
       public StatusValue getCellValue(Screen screen)
       {
-        SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
-        if (statusItems.size() == 0) {
-          return null;
-        }
-        StatusItem statusItem = statusItems.last();
-        return statusItem.getStatusValue();
+        SortedSet<StatusItem> statusItems = screen.getStatusItems();
+        return statusItems.isEmpty() ? null : statusItems.last().getStatusValue();
       }
     });
     columns.add(new DateEntityColumn<Screen>(
@@ -235,10 +257,26 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
       protected LocalDate getDate(Screen screen) {
-        SortedSet<StatusItem> statusItems = screen.getSortedStatusItems();
-        return statusItems.size() == 0 ? null : statusItems.last().getStatusDate();
+        SortedSet<StatusItem> statusItems = screen.getStatusItems();
+        return statusItems.isEmpty() ? null : statusItems.last().getStatusDate();
       }
     });
+    // TODO: should make this a vocab list, but need support for list-of-vocab column type
+    columns.add(new ListEntityColumn<Screen>(
+      new PropertyPath(Screen.class, "fundingSupports", "value"),
+      "Funding Supports", "The list of funding supports for the screen",
+      TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public List<String> getCellValue(Screen screen) 
+      { 
+        return new ArrayList<String>(
+          org.apache.commons.collections.CollectionUtils.collect(screen.getFundingSupports(), new Transformer() {
+            public Object transform(Object e) { return ((FundingSupport) e).getValue(); }
+          }));
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    
 
 //    TableColumnManager<Screen> columnManager = getColumnManager();
 //    columnManager.addCompoundSortColumns(columnManager.getColumn("Lab Head"),

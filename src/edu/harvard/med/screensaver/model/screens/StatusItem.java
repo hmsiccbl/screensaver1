@@ -46,7 +46,7 @@ import org.joda.time.LocalDate;
 }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class StatusItem extends AbstractEntity implements Comparable
+public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
 {
 
   // static fields
@@ -155,15 +155,20 @@ public class StatusItem extends AbstractEntity implements Comparable
 
   // Comparable interface methods
 
-  public int compareTo(Object o)
+  public int compareTo(StatusItem other)
   {
-    if (o == null) {
+    if (other == null) {
       return 1;
     }
-    StatusItem other = (StatusItem) o;
-    int result = _statusValue.compareTo(other._statusValue);
+    if (this.equals(other)) {
+      return 0;
+    }
+    int result = _statusDate.compareTo(other.getStatusDate());
     if (result == 0) {
-      return _statusDate.compareTo(other._statusDate);
+      result = getStatusValue().compareTo(other.getStatusValue());
+    }
+    if (result == 0) {
+      result = hashCode() < other.hashCode() ? -1 : 1;
     }
     return result;
   }

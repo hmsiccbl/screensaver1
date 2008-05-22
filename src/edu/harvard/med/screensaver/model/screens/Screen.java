@@ -108,7 +108,7 @@ public class Screen extends Study
 
   // iccb screen
 
-  private Set<StatusItem> _statusItems = new HashSet<StatusItem>();
+  private SortedSet<StatusItem> _statusItems = new TreeSet<StatusItem>();
   private SortedSet<LabActivity> _labActivities = new TreeSet<LabActivity>();
   private LocalDate _dataMeetingScheduled;
   private LocalDate _dataMeetingComplete;
@@ -489,26 +489,15 @@ public class Screen extends Study
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  @OrderBy("statusDate")
+  @Sort(type=SortType.NATURAL)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
-  public Set<StatusItem> getStatusItems()
+  public SortedSet<StatusItem> getStatusItems()
   {
     return _statusItems;
-  }
-
-  /**
-   * Get the status items, sorted by their natural ordering.
-   * @return the status items, sorted by their natural ordering; null if there
-   *         are no status items
-   */
-  @Transient
-  public SortedSet<StatusItem> getSortedStatusItems()
-  {
-    return new TreeSet<StatusItem>(getStatusItems());
   }
 
   /**
@@ -1107,7 +1096,6 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.FundingSupport$UserType")
   @org.hibernate.annotations.ForeignKey(name="fk_screen_funding_support_to_screen")
-  @OrderBy("fundingSupport")
   public Set<FundingSupport> getFundingSupports()
   {
     return _fundingSupports;
@@ -1521,7 +1509,7 @@ public class Screen extends Study
    * @param statusItems the new status items
    * @motivation for hibernate
    */
-  private void setStatusItems(Set<StatusItem> statusItems)
+  private void setStatusItems(SortedSet<StatusItem> statusItems)
   {
     _statusItems = statusItems;
   }
