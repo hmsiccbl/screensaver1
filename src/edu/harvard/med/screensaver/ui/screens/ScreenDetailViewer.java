@@ -577,6 +577,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       return;
     }
     Screening previousScreening = screenings.last(); 
+    currentScreening.setPerformedBy(previousScreening.getPerformedBy());
     currentScreening.setAssayProtocol(previousScreening.getAssayProtocol());
     currentScreening.setAssayProtocolLastModifiedDate(previousScreening.getAssayProtocolLastModifiedDate());
     currentScreening.setAssayProtocolType(previousScreening.getAssayProtocolType());
