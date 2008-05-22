@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -30,22 +30,24 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.LazyInitializationException;
+import org.joda.time.LocalDate;
 
 
 public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 {
-  
+
   private static final Logger log = Logger.getLogger(GenericEntityDAOTest.class);
-  
+
 
   // public instance methods
-  
+
   public void testPersistEntity()
   {
     Compound compound = new Compound("smiles", "inchi", true);
@@ -55,18 +57,18 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     assertEquals("names match", compounds.get(0).getSmiles(), "smiles");
     assertEquals("salty match", compounds.get(0).isSalt(), true);
   }
-  
+
   public void testFindAllEntitiesWithType()
   {
     List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("no compounds in an empty database", 0, compounds.size());
-    
+
     genericEntityDao.saveOrUpdateEntity(new Compound("smiles", "inchi"));
     compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
     assertEquals("one compound in the machine", compounds.size(), 1);
     assertEquals("smiles match", "smiles", compounds.get(0).getSmiles());
   }
-  
+
   public void testFindEntityById()
   {
     Compound compound = new Compound("smilesZ", "inchiZ");
@@ -79,7 +81,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     compound2 = genericEntityDao.findEntityById(Compound.class, id + "'");
     assertEquals(null, compound2);
   }
-  
+
   public void testFindEntitiesByProperties()
   {
     final ResultValueType[] rvts = new ResultValueType[4];
@@ -106,7 +108,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
         genericEntityDao.saveOrUpdateEntity(rvts[0]);
       }
     });
-    
+
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -128,7 +130,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       }
     });
   }
-  
+
   public void testFindEntityByProperties()
   {
     final Library[] expectedLibrary = new Library[1];
@@ -163,7 +165,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
   {
     Compound compound = new Compound("spaz", "inchi");
     genericEntityDao.saveOrUpdateEntity(compound);
-    
+
     List<Compound> compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "spaz");
     assertEquals(1, compounds.size());
     assertEquals(compound, compounds.get(0));
@@ -171,7 +173,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "something other than spaz");
     assertEquals(0, compounds.size());
   }
-  
+
   public void testFindEntitiesByProperty2()
   {
     genericEntityDao.persistEntity(new Library("ln1", "sn1", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 1, 50));
@@ -179,7 +181,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.persistEntity(new Library("ln3", "sn3", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 101, 150));
     genericEntityDao.persistEntity(new Library("ln4", "sn4", ScreenType.SMALL_MOLECULE, LibraryType.NATURAL_PRODUCTS, 151, 200));
     genericEntityDao.persistEntity(new Library("ln5", "sn5", ScreenType.SMALL_MOLECULE, LibraryType.DISCRETE, 201, 250));
-    
+
     assertEquals(3, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.NATURAL_PRODUCTS).size());
     assertEquals(2, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.DISCRETE).size());
     assertEquals(0, genericEntityDao.findEntitiesByProperty(Library.class, "libraryType", LibraryType.COMMERCIAL).size());
@@ -189,14 +191,14 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
   {
     Compound compound = new Compound("spaz", "inchi");
     genericEntityDao.saveOrUpdateEntity(compound);
-    
+
     Compound compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "spaz");
     assertEquals(compound, compound2);
 
     compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "something other than spaz");
     assertNull(compound2);
   }
-  
+
   public void testFindEntitiesByPropertyWithInflation()
   {
     final Library[] expectedLibrary = new Library[1];
@@ -227,9 +229,9 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
         SilencingReagent siReagent3 = gene3.createSilencingReagent(SilencingReagentType.SIRNA, "TTTT");
         Well well3 = expectedLibrary[0].createWell(new WellKey(3, "A01"), WellType.EXPERIMENTAL);
         well3.addSilencingReagent(siReagent3);
-        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy1"); 
-        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy2"); 
-        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy3"); 
+        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy1");
+        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy2");
+        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy3");
         genericEntityDao.saveOrUpdateEntity(expectedLibrary[0]);
       }
     });
@@ -239,10 +241,10 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        actualLibrary[0] = genericEntityDao.findEntityByProperty(Library.class, 
-                                                                 "startPlate", 
-                                                                 1, 
-                                                                 false, 
+        actualLibrary[0] = genericEntityDao.findEntityByProperty(Library.class,
+                                                                 "startPlate",
+                                                                 1,
+                                                                 false,
                                                                  //"wells", // implicit
                                                                  //"hbnWells.silencingReagents", // implicit
                                                                  "wells.silencingReagents.gene", // implicit
@@ -255,14 +257,14 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       int i = 1;
       for (Well well : actualLibrary[0].getWells()) {
          assertEquals("inflated well", "A01", well.getWellName());
-         assertEquals("inflated silencing reagent", 
-                      new String[] { "AAAA", "CCCC", "TTTT" }[i - 1], 
+         assertEquals("inflated silencing reagent",
+                      new String[] { "AAAA", "CCCC", "TTTT" }[i - 1],
                       well.getSilencingReagents().iterator().next().getSequence());
-         assertEquals("inflated gene", 
-                      "ANT" + i, 
+         assertEquals("inflated gene",
+                      "ANT" + i,
                       well.getSilencingReagents().iterator().next().getGene().getGeneName());
-         assertEquals("inflated genbankAccessionNumbers", 
-                      "GBAN" + i, 
+         assertEquals("inflated genbankAccessionNumbers",
+                      "GBAN" + i,
                       well.getSilencingReagents().iterator().next().getGene().getGenbankAccessionNumbers().iterator().next());
          ++i;
       }
@@ -278,7 +280,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       // pass
     }
   }
-  
+
   public void testEntityInflation()
   {
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -347,6 +349,48 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       fail("invalid relationship name was not detected!");
     }
     catch (Exception e) {}
+  }
+
+  /**
+   * Tests that reloadEntity() will eager fetch any specified relationships,
+   * even if the entity is already managed by the current Hibernate session in
+   * which reloadEntity() is called.
+   */
+  public void testReloadOfManagedEntityEagerFetchesRequestedRelationships()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
+        screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+        genericEntityDao.persistEntity(screen.getLabHead());
+        genericEntityDao.persistEntity(screen.getLeadScreener());
+        genericEntityDao.persistEntity(screen);
+      }
+    });
+
+    class Txn implements DAOTransaction
+    {
+      Screen screen;
+      LabActivity activity;
+      public void runTransaction()
+      {
+        //screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        //screen = genericEntityDao.reloadEntity(screen, true, "leadScreener");
+        activity = genericEntityDao.findEntityByProperty(LabActivity.class, "dateOfActivity", new LocalDate());
+        activity = genericEntityDao.reloadEntity(activity, true, "performedBy");
+      }
+    };
+    Txn txn = new Txn();
+    genericEntityDao.doInTransaction(txn);
+    //txn.screen.getLeadScreener().getFullNameLastFirst(); // no LazyInitExc
+    txn.activity.getPerformedBy().getFullNameLastFirst(); // no LazyInitExc
+    try {
+      //txn.screen.getLabHead().getFullNameLastFirst();
+      txn.activity.getScreen().getTitle();
+      fail("expected LazyInitializationException on screen.getLabHead()");
+    } catch (LazyInitializationException e) {}
   }
 
   public void testRelationshipSize()

@@ -85,7 +85,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
 
 
   // public methods
-  
+
   public AbstractEntity getEntity()
   {
     return getActivity();
@@ -114,7 +114,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
       }
       _performedBy = new UISelectOneEntityBean<ScreensaverUser>(
         performedByCandidates,
-        (ScreensaverUser) _activity.getPerformedBy(),
+        _activity.getPerformedBy(),
         _dao) {
         protected String getLabel(ScreensaverUser t) { return t.getFullNameLastFirst(); }
       };
@@ -215,7 +215,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     if (activity == null) {
       throw new IllegalArgumentException(Activity.class.getSimpleName() + " " + entityId + " does not exist");
     }
-    return viewActivity(activity);
+    return _thisProxy.viewActivity(activity);
   }
 
   @UIControllerMethod
@@ -231,10 +231,16 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
 
     activity = _dao.reloadEntity(activity,
                                  true,
-                                 "performedBy",
                                  "screen.labHead",
                                  "screen.leadScreener",
-                                 "screen.collaborators");
+                                 "screen.collaborators",
+                                 "performedBy");
+    // HACK: performedBy is not being eager fetched when this method is called
+    // from viewActivity(); chalking this up to a Hibernate bug for now, since
+    // the relationships *are* being eager fetched; problem manifests in
+    // ActivityViewer.getPerformedBy() method
+    activity.getPerformedBy().getEntityId();
+
     if (activity instanceof LibraryScreening) {
       _dao.need(activity, "platesUsed");
     }
@@ -249,7 +255,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   public String editNewActivity(Activity activity, AbstractBackingBean returnToViewerAfterEdit)
   {
     setActivity(activity);
-    // TODO: this model shouldn't allow this null value, and we should really set to null at the UI component level only 
+    // TODO: this model shouldn't allow this null value, and we should really set to null at the UI component level only
     activity.setDateOfActivity(null);
     _isEditMode = true;
     _returnToViewAfterEdit = returnToViewerAfterEdit;
