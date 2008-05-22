@@ -268,10 +268,12 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     if (_activity instanceof LibraryScreening) {
       LibraryScreening libraryScreening = (LibraryScreening) _activity;
       if (getNewPlatesScreened().getStartPlate() != null &&
-        getNewPlatesScreened().getEndPlate() != null &&
         getNewPlatesScreened().getCopy() != null &&
         getNewPlatesScreened().getCopy().length() != 0) {
-        for(PlatesUsed platesUsed : splitPlateRangeByLibrary(getNewPlatesScreened())) {
+        if (getNewPlatesScreened().getEndPlate() == null) {
+          getNewPlatesScreened().setEndPlate(getNewPlatesScreened().getStartPlate());
+        }
+        for (PlatesUsed platesUsed : splitPlateRangeByLibrary(getNewPlatesScreened())) {
           libraryScreening.createPlatesUsed(platesUsed.getStartPlate(),
                                             platesUsed.getEndPlate(),
                                             platesUsed.getCopy());
