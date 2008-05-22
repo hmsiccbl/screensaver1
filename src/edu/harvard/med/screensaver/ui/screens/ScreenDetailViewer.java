@@ -468,6 +468,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       reportSystemError("missing CherryPickRequest argument");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
+    cpr = _dao.reloadEntity(cpr, true, "requestedBy", "RNAiCherryPickScreenings");
     Screening screening = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), 
                                                                 new LocalDate(),
                                                                 cpr);
