@@ -21,8 +21,8 @@
 
 	<t:inputText id="simpleCriterionValue"
 		value="#{column.criterion.value}" converter="#{column.converter}"
-		rendered="#{(empty rendered ? true : rendered) &amp;&amp; (column.columnType.name == 'TEXT' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'DATE' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME')}"
-		size="#{column.columnType.name == 'TEXT' ? (empty editWidth ? 30 : editWidth)  : column.columnType.name == 'DATE' ? 10 : 8}"
+		rendered="#{(empty rendered ? true : rendered) &amp;&amp; (column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' || column.columnType.name == 'INTEGER' || column.columnType.name == 'REAL' || column.columnType.name == 'DATE' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME')}"
+		size="#{column.columnType.name == 'TEXT' || column.columnType.name == 'LIST' ? (empty editWidth ? 30 : editWidth)  : column.columnType.name == 'DATE' ? 10 : 8}"
 		styleClass="inputText"
 		displayValueOnly="#{empty editable ? false : !editable}"
 		displayValueOnlyStyleClass="dataText"
