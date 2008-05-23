@@ -15,9 +15,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-
 import edu.harvard.med.screensaver.io.libraries.DataRowType;
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
@@ -32,6 +29,9 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfo;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 
 
 /**
@@ -63,6 +63,7 @@ public class DataRowParser
   private Factory _cellFactory;
   private ParseErrorManager _errorManager;
   private Map<ParsedRNAiLibraryColumn,String> _dataRowContents;
+  private DataRowType _dataRowType;
 
 
   // package constructor and instance method
@@ -97,37 +98,56 @@ public class DataRowParser
    */
   void parseDataRow() throws DataRowParserException
   {
-    DataRowType dataRowType = _columnHeaders.getDataRowType(_dataRow);
-    if (dataRowType.equals(DataRowType.EMPTY)) {
+    _dataRowType = _columnHeaders.getDataRowType(_dataRow);
+    if (_dataRowType.equals(DataRowType.EMPTY)) {
+      _dataRowContents = null;
       return;
     }
-    populateDataRowContents();
-    if (dataRowType.equals(DataRowType.PLATE_WELL_ONLY)) {
-
-      // when the data row has Plate, Well, and no gene information, we assume it is a control well
-      parseControlWell();
-    }
-    else {
-      parseDataRowContent();
-    }
-  }
-
-
-  // private instance methods
-
-  /**
-   * populate the {@link #_dataRowContents data row contents}.
-   */
-  private void populateDataRowContents()
-  {
     _dataRowContents = _columnHeaders.getDataRowContents(_dataRow, _rowIndex);
   }
 
+  void processDataRow()
+    throws DataRowParserException
+  {
+    if (_dataRowContents == null) {
+      return;
+    }
+    if (_dataRowType.equals(DataRowType.PLATE_WELL_ONLY)) {
+      // when the data row has Plate, Well, and no gene information, we assume it is a control well
+      processControlWell();
+    }
+    else {
+      processDataRowContent();
+    }
+  }
+
+  Integer getPlateNumber()
+  {
+    if (_dataRowContents == null || _dataRowType == DataRowType.EMPTY) {
+      return null;
+    }
+    try {
+      Integer plateNumber = _parser.getPlateNumberParser().parse(_cellFactory.getCell(_columnHeaders.getColumnIndex(ParsedRNAiLibraryColumn.PLATE),
+                                                                                      _rowIndex));
+      if (plateNumber < 0) {
+        return null;
+      }
+      return plateNumber;
+      //return new BigDecimal(_dataRowContents.get(ParsedRNAiLibraryColumn.PLATE)).toBigInteger().intValue();
+    }
+    catch (NumberFormatException e) {
+      return null;
+    }
+  }
+
+  
+  // private instance methods
+
   /**
-   * Parse the data row content
+   * Process the data row content by updating the entity model with the data
    * @throws DataRowParserException
    */
-  private void parseDataRowContent() throws DataRowParserException
+  private void processDataRowContent() throws DataRowParserException
   {
     String plateWellAbbreviation = getPlateWellAbbreviation();
     if (plateWellAbbreviation == null) {
@@ -178,7 +198,7 @@ public class DataRowParser
    * Excel files I've been handling so far, but it is pretty ad-hoc. -s)
    * @throws DataRowParserException
    */
-  private void parseControlWell() throws DataRowParserException
+  private void processControlWell() throws DataRowParserException
   {
     String plateWellAbbreviation = getPlateWellAbbreviation();
     if (plateWellAbbreviation == null) {
@@ -208,7 +228,7 @@ public class DataRowParser
       return null;
     }
     WellKey wellKey = new WellKey(plateNumber, wellName);
-    Well well = _parser.getLibrariesDAO().findWell(wellKey);
+    Well well = _parser.getLibrariesDAO().findWell(wellKey, true);
     if (well == null) {
       throw new DataRowParserException(
         "specified well does not exist: " + wellKey + ". this is probably due to an erroneous plate number.",
@@ -453,4 +473,5 @@ public class DataRowParser
     }
     return silencingReagent;
   }
+
 }

@@ -91,7 +91,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
     catch (FileNotFoundException e) {
       fail("file not found: " + filename);
     }
-    library = compoundLibraryContentsParser.parseLibraryContents(library, file, stream);
+    library = compoundLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
     genericEntityDao.saveOrUpdateEntity(library);
 
     List<? extends ParseError> errors = compoundLibraryContentsParser.getErrors();

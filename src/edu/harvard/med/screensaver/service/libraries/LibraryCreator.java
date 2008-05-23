@@ -98,7 +98,7 @@ public class LibraryCreator
       else {
         throw new UnsupportedOperationException("can only import library contents for RNAi or Small Molecule libraries");
       }
-      parser.parseLibraryContents(library, null, libraryContentsIn);
+      parser.parseLibraryContents(library, null, libraryContentsIn, null, null);
       log.info("parsed library contents for " + library);
     }
     else {

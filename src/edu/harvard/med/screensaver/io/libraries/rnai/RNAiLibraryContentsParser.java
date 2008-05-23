@@ -1,11 +1,11 @@
-// $HeadURL$
-// $Id$
-//
-// Copyright 2006 by the President and Fellows of Harvard College.
-//
-// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
-// at Harvard Medical School. This software is distributed under the terms of
-// the GNU General Public License.
+//$HeadURL$
+//$Id$
+
+//Copyright 2006 by the President and Fellows of Harvard College.
+
+//Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+//at Harvard Medical School. This software is distributed under the terms of
+//the GNU General Public License.
 
 package edu.harvard.med.screensaver.io.libraries.rnai;
 
@@ -19,11 +19,11 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
 import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
 import edu.harvard.med.screensaver.io.workbook.WellNameParser;
 import edu.harvard.med.screensaver.io.workbook.Workbook;
+import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -108,16 +108,23 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @param library the library to load contents of
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
+   * @param startPlate the first plate in the plate range to be loaded; null
+   *          okay; if endPlate is null, all plate after and including
+   *          startPlate will be loaded
+   * @param endPlate the last plate, inclusive, in the plate range to be loaded;
+   *          null okay; if startPlate is null, all plates before and including
+   *          endPlate will be loaded
    * @return the library with the contents loaded
    * @throws ParseLibraryContentsException if parse errors encountered. The
    *           exception will contain a reference to a ParseErrors object which
    *           can be inspected and/or reported to the user.
    */
-  public Library parseLibraryContents(
-    final Library library,
-    final File file,
-    final InputStream stream)
-    throws ParseLibraryContentsException
+  public Library parseLibraryContents(final Library library,
+                                      final File file,
+                                      final InputStream stream, 
+                                      final Integer startPlate, 
+                                      final Integer endPlate)
+  throws ParseLibraryContentsException
   {
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -125,7 +132,7 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
         initialize(library, file, stream);
         HSSFWorkbook hssfWorkbook = _workbook.getWorkbook();
         for (int i = 0; i < hssfWorkbook.getNumberOfSheets(); i++) {
-          loadLibraryContentsFromHSSFSheet(i, hssfWorkbook.getSheetAt(i));
+          loadLibraryContentsFromHSSFSheet(i, hssfWorkbook.getSheetAt(i), startPlate, endPlate);
         }
         if (getHasErrors()) {
           throw new ParseLibraryContentsException(_errorManager);
@@ -233,9 +240,9 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     _plateNumberParser = new PlateNumberParser(_errorManager);
     _wellNameParser = new WellNameParser(_errorManager);
 
-    // load all of the library's wells in the Hibernate session, which avoids the need
-    // to make database queries when checking for existence of wells
-    _librariesDao.loadOrCreateWellsForLibrary(library);
+    // create the library's wells, if necessary
+    _librariesDao.loadOrCreateWellsForLibrary(_library);
+    _dao.flush(); // allow LibariesDAO.findWell(id, true) to find well in database
   }
 
 
@@ -243,8 +250,17 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * Load library contents from a single worksheet.
    * @param sheetIndex the index of the worksheet to load library contents from
    * @param hssfSheet the worksheet to load library contents from
+   * @param startPlate the first plate in the plate range to be loaded; null
+   *          okay; if endPlate is null, all plate after and including
+   *          startPlate will be loaded
+   * @param endPlate the last plate, inclusive, in the plate range to be loaded;
+   *          null okay; if startPlate is null, all plates before and including
+   *          endPlate will be loaded
    */
-  private void loadLibraryContentsFromHSSFSheet(int sheetIndex, HSSFSheet hssfSheet)
+  private void loadLibraryContentsFromHSSFSheet(int sheetIndex, 
+                                                HSSFSheet hssfSheet, 
+                                                Integer startPlate, 
+                                                Integer endPlate)
   {
     Cell.Factory cellFactory = new Cell.Factory(_workbook, sheetIndex, _errorManager);
     String sheetName = _workbook.getWorkbook().getSheetName(sheetIndex);
@@ -253,26 +269,34 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
     if (columnHeaders == null) {
       return;
     }
+    int nLoaded = 0;
     for (int i = 1; i <= hssfSheet.getLastRowNum(); i++) {
       if (hssfSheet.getRow(i) != null) {
-        DataRowParser dataRowParser = new DataRowParser(
-          this,
-          columnHeaders,
-          hssfSheet.getRow(i),
-          i,
-          cellFactory,
-          _errorManager);
+        DataRowParser dataRowParser = new DataRowParser(this,
+                                                        columnHeaders,
+                                                        hssfSheet.getRow(i),
+                                                        i,
+                                                        cellFactory,
+                                                        _errorManager);
         try {
           dataRowParser.parseDataRow();
+          if (dataRowParser.getPlateNumber() != null) {
+            if ((startPlate == null || startPlate <= dataRowParser.getPlateNumber()) &&
+              (endPlate == null || endPlate >= dataRowParser.getPlateNumber())) {
+              dataRowParser.processDataRow();
+              ++nLoaded;
+            }
+          }
         }
         catch (DataRowParserException e) {
           _errorManager.addError(e.getMessage(), e.getCell());
         }
       }
       if (i % 100 == 0) {
-        log.info("parsed " + i + " for library " + _library.getLibraryName());
+        log.info("parsed " + i + ", loaded " + nLoaded + " for library " + _library.getLibraryName());
       }
     }
+    log.info("loaded " + nLoaded + " for library " + _library.getLibraryName());
   }
 
   /**
@@ -283,22 +307,20 @@ public class RNAiLibraryContentsParser implements LibraryContentsParser
    * @return the ParsedRNAiLibraryColumn
    */
   private RNAiLibraryColumnHeaders parseColumnHeaders(
-    HSSFRow columnHeaderRow,
-    String sheetName,
-    Factory cellFactory)
+                                                      HSSFRow columnHeaderRow,
+                                                      String sheetName,
+                                                      Factory cellFactory)
   {
     if (columnHeaderRow == null) {
       _errorManager.addError("encountered a sheet without any rows: " + sheetName);
       return null;
     }
-    RNAiLibraryColumnHeaders columnHeaders = new RNAiLibraryColumnHeaders(
-      columnHeaderRow,
-      _errorManager,
-      cellFactory,
-      sheetName);
+    RNAiLibraryColumnHeaders columnHeaders = new RNAiLibraryColumnHeaders(columnHeaderRow,
+                                                                          _errorManager,
+                                                                          cellFactory,
+                                                                          sheetName);
     if (! columnHeaders.parseColumnHeaders()) {
-      _errorManager.addError(
-        "couldn't import sheet contents due to problems with column headers: " + sheetName);
+      _errorManager.addError("couldn't import sheet contents due to problems with column headers: " + sheetName);
       return null;
     }
     return columnHeaders;

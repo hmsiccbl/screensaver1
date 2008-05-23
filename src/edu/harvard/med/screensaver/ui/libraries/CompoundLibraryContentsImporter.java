@@ -137,7 +137,9 @@ public class CompoundLibraryContentsImporter extends AbstractBackingBean impleme
             Library library = _dao.reloadEntity(_library);
             _compoundLibraryContentsParser.parseLibraryContents(library,
                                                                 new File(_uploadedFile.getName()),
-                                                                _uploadedFile.getInputStream());
+                                                                _uploadedFile.getInputStream(), 
+                                                                null, 
+                                                                null);
             _dao.saveOrUpdateEntity(library);
           }
           catch (IOException e) {

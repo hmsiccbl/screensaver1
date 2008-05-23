@@ -139,7 +139,9 @@ public class NaturalProductsLibraryContentsImporter extends AbstractBackingBean 
             _naturalProductsLibraryContentsParser.parseLibraryContents(
               library,
               new File(_uploadedFile.getName()),
-              _uploadedFile.getInputStream());
+              _uploadedFile.getInputStream(),
+              null,
+              null);
             _dao.saveOrUpdateEntity(library);
           }
           catch (IOException e) {

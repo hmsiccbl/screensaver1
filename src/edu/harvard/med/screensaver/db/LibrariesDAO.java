@@ -32,19 +32,23 @@ public interface LibrariesDAO
                                            ScreenType[] screenTypes);
 
   /**
-   * Find and return the well.
-   *
+   * Find and return the well. If the well is in the Hibernate session, but not
+   * yet in the database, this method will return the managed instance of the
+   * Well.
+   * 
    * @param wellKey the wellKey
    * @return the well, null if there is no well
    */
   public Well findWell(WellKey wellKey);
 
   /**
-   * Find and return the well.
-   *
+   * Find and return the well. If the well is in the Hibernate session, but not
+   * yet in the database, this method will <i>not</i> return the managed
+   * instance of the Well.
+   * 
    * @param wellKey the wellKey
-   * @param loadContents if true, then load all the compounds, silencing reagents and genes
-   * associated with the well
+   * @param loadContents if true, then load all the compounds, silencing
+   *          reagents and genes associated with the well
    * @return the well, null if there is no well
    */
   public Well findWell(WellKey wellKey, boolean loadContents);

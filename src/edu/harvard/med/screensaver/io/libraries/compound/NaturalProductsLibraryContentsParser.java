@@ -172,7 +172,9 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
           parseLibraryContents(
             library,
             libraryContentsFile,
-            new FileInputStream(libraryContentsFile));
+            new FileInputStream(libraryContentsFile),
+            null,
+            null);
         }
         catch (FileNotFoundException e) {
           throw new InternalError("braindamage: " + e.getMessage());
@@ -202,7 +204,9 @@ public class NaturalProductsLibraryContentsParser implements LibraryContentsPars
   public Library parseLibraryContents(
     final Library library,
     final File file,
-    final InputStream stream)
+    final InputStream stream, 
+    Integer startPlate, 
+    Integer endPlate)
   throws ParseLibraryContentsException
   {
     log.info("parsing natural products Excel file " + file.getName());

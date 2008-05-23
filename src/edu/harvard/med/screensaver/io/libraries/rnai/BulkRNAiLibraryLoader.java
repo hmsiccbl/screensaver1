@@ -85,7 +85,7 @@ public class BulkRNAiLibraryLoader
           log.info("processing RNAi File: " + rnaiFile.getName());
           Library library = getLibraryForRNAiFile(rnaiFile);
           try {
-            _parser.parseLibraryContents(library, rnaiFile, new FileInputStream(rnaiFile));
+            _parser.parseLibraryContents(library, rnaiFile, new FileInputStream(rnaiFile), null, null);
             _dao.saveOrUpdateEntity(library);
           }
           catch (FileNotFoundException e) {

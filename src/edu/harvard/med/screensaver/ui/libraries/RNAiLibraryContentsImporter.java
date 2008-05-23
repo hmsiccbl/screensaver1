@@ -171,7 +171,9 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean implements 
             _rnaiLibraryContentsParser.setSilencingReagentType(_silencingReagentType);
             _rnaiLibraryContentsParser.parseLibraryContents(library,
                                                             new File(_uploadedFile.getName()),
-                                                            _uploadedFile.getInputStream());
+                                                            _uploadedFile.getInputStream(), 
+                                                            null, 
+                                                            null);
             _dao.saveOrUpdateEntity(library);
           }
           catch (IOException e) {

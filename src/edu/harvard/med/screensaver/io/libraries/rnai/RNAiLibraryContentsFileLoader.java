@@ -13,15 +13,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.model.libraries.Library;
+
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
 
 /**
  * A command line tool to load a single RNAi library contents file.
@@ -50,6 +51,16 @@ public class RNAiLibraryContentsFileLoader
     "library-short-name",
     "the short name of the library to load contents for"
   };
+  public static final String[] START_PLATE_OPTION = {
+    "sp",
+    "start-plate",
+    "the beginning of the plate range to be loaded (inclusive)"
+  };
+  public static final String[] END_PLATE_OPTION = {
+    "ep",
+    "end-plate",
+    "the end of the plate range to be loaded (inclusive)"
+  };
 
   @SuppressWarnings("static-access")
   public static void main(String[] args)
@@ -71,6 +82,20 @@ public class RNAiLibraryContentsFileLoader
       .withDescription(INPUT_FILE_OPTION[DESCRIPTION_INDEX])
       .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION_INDEX])
       .create(INPUT_FILE_OPTION[SHORT_OPTION_INDEX]));
+    application.addCommandLineOption(OptionBuilder
+                                     .hasArg()
+                                     .withArgName(START_PLATE_OPTION[SHORT_OPTION_INDEX])
+                                     .isRequired(false)
+                                     .withDescription(START_PLATE_OPTION[DESCRIPTION_INDEX])
+                                     .withLongOpt(START_PLATE_OPTION[LONG_OPTION_INDEX])
+                                     .create(START_PLATE_OPTION[SHORT_OPTION_INDEX]));
+    application.addCommandLineOption(OptionBuilder
+                                     .hasArg()
+                                     .withArgName(END_PLATE_OPTION[SHORT_OPTION_INDEX])
+                                     .isRequired(false)
+                                     .withDescription(END_PLATE_OPTION[DESCRIPTION_INDEX])
+                                     .withLongOpt(END_PLATE_OPTION[LONG_OPTION_INDEX])
+                                     .create(END_PLATE_OPTION[SHORT_OPTION_INDEX]));
     try {
       if (! application.processOptions(true, true)) {
         return;
@@ -81,7 +106,9 @@ public class RNAiLibraryContentsFileLoader
         application.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION_INDEX], File.class);
       RNAiLibraryContentsFileLoader libraryLoader = (RNAiLibraryContentsFileLoader)
         application.getSpringBean("rnaiLibraryContentsFileLoader");
-      libraryLoader.loadLibrary(libraryShortName, libraryContentsFile);
+      Integer startPlate = application.getCommandLineOptionValue(START_PLATE_OPTION[SHORT_OPTION_INDEX], Integer.class);
+      Integer endPlate = application.getCommandLineOptionValue(END_PLATE_OPTION[SHORT_OPTION_INDEX], Integer.class);
+      libraryLoader.loadLibrary(libraryShortName, libraryContentsFile, startPlate, endPlate);
     }
     catch (ParseException e) {
       log.error("error processing command line options", e);
@@ -108,8 +135,18 @@ public class RNAiLibraryContentsFileLoader
 
   /**
    * Database must be created and initialized before running this method.
+   * 
+   * @param startPlate the first plate in the plate range to be loaded; null
+   *          okay; if endPlate is null, all plate after and including
+   *          startPlate will be loaded
+   * @param endPlate the last plate, inclusive, in the plate range to be loaded;
+   *          null okay; if startPlate is null, all plates before and including
+   *          endPlate will be loaded
    */
-  public void loadLibrary(final String libraryShortName, final File libraryContentsFile)
+  public void loadLibrary(final String libraryShortName, 
+                          final File libraryContentsFile, 
+                          final Integer startPlate, 
+                          final Integer endPlate)
   {
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -124,13 +161,15 @@ public class RNAiLibraryContentsFileLoader
           _parser.parseLibraryContents(
             library,
             libraryContentsFile,
-            new FileInputStream(libraryContentsFile));
+            new FileInputStream(libraryContentsFile),
+            startPlate,
+            endPlate);
         }
         catch (FileNotFoundException e) {
           throw new InternalError("braindamage: " + e.getMessage());
         }
-        if (_parser.getHasErrors()) {
-          for (WorkbookParseError error : _parser.getErrors()) {
+        catch (ParseLibraryContentsException e) {
+          for (ParseError error : e.getErrors()) {
             log.error(error.toString());
           }
         }

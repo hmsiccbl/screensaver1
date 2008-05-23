@@ -103,7 +103,7 @@ public class BulkCompoundLibraryLoader
         {
           Library library = getLibraryForSDFile(sdFile);
           try {
-            _parser.parseLibraryContents(library, sdFile, new FileInputStream(sdFile));
+            _parser.parseLibraryContents(library, sdFile, new FileInputStream(sdFile), null, null);
             _dao.saveOrUpdateEntity(library);
           }
           catch (FileNotFoundException e) {

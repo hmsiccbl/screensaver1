@@ -30,10 +30,16 @@ public interface LibraryContentsParser
    * @param library the library to load contents of
    * @param file the name of the file that contains the library contents
    * @param stream the input stream to load library contents from
+   * @param startPlate the first plate in the plate range to be loaded; null
+   *          okay; if endPlate is null, all plate after and including
+   *          startPlate will be loaded
+   * @param endPlate the last plate, inclusive, in the plate range to be loaded;
+   *          null okay; if startPlate is null, all plates before and including
+   *          endPlate will be loaded
    * @return the library with the contents loaded
    * @throws ParseLibraryContentsException if parse errors encountered. The
    *           exception will contain a reference to a ParseErrors object which
    *           can be inspected and/or reported to the user.
    */
-  public Library parseLibraryContents(Library library, File file, InputStream stream) throws ParseLibraryContentsException;
+  public Library parseLibraryContents(Library library, File file, InputStream stream, Integer startPlate, Integer endPlate) throws ParseLibraryContentsException;
 }

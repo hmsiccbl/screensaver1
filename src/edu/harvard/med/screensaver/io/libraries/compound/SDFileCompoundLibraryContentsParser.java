@@ -94,7 +94,9 @@ public class SDFileCompoundLibraryContentsParser implements LibraryContentsParse
    */
   public Library parseLibraryContents(final Library library,
                                       final File file,
-                                      final InputStream stream)
+                                      final InputStream stream,
+                                      Integer startPlate, 
+                                      Integer endPlate)
   {
     _dao.doInTransaction(new DAOTransaction()
     {

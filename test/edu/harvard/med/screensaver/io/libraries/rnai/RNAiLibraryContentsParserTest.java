@@ -17,13 +17,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -35,8 +31,10 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.util.eutils.MockNCBIGeneInfoProvider;
 
+import org.apache.log4j.Logger;
 
-public class RNAiLibraryContentsParserTest extends AbstractSpringTest
+
+public class RNAiLibraryContentsParserTest extends AbstractSpringPersistenceTest
 {
 
   // static fields
@@ -49,9 +47,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   // instance fields
 
   protected RNAiLibraryContentsParser springFreeRnaiLibraryContentsParser;
-  protected GenericEntityDAO genericEntityDao;
   protected LibrariesDAO librariesDao;
-  protected SchemaUtil schemaUtil;
 
 
   // constructor and test methods
@@ -59,7 +55,6 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
-    schemaUtil.truncateTablesOrCreateSchema();
     springFreeRnaiLibraryContentsParser = new RNAiLibraryContentsParser(genericEntityDao, librariesDao, new MockNCBIGeneInfoProvider());
   }
 
@@ -82,7 +77,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       fail("file not found: " + filename);
     }
     try {
-      library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+      library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
     }
     catch (ParseLibraryContentsException e) {
       List<WorkbookParseError> errors = (List<WorkbookParseError>) e.getErrors();
@@ -156,7 +151,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       fail("file not found: " + filename);
     }
     try {
-      springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+      springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
     }
     catch (ParseLibraryContentsException e) {
       List<WorkbookParseError> errors = (List<WorkbookParseError>) e.getErrors();
@@ -286,7 +281,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       fail("file not found: " + filename);
     }
     try {
-      library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+      library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
     }
     catch (ParseLibraryContentsException e) {
       fail("workbook has no errors");
@@ -361,6 +356,57 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
     assertEquals("a09 gene symbol", "CERK", a09gene.getEntrezgeneSymbol());
   }
 
+  public void testPlateRanges() throws FileNotFoundException
+  {
+    Library library;
+//    library = doParseRange(50001, 50003);
+//    assertEquals("library has all wells for plates [50001,50003]", 384 * 3, library.getWells().size());
+//    assertEquals(3, genericEntityDao.findAllEntitiesOfType(Gene.class).size());
+//
+//    schemaUtil.truncateTablesOrCreateSchema();
+//    library = doParseRange(50001, null);
+//    assertEquals("library has all wells for plates [50001,-]", 384 * 3, library.getWells().size());
+//    assertEquals(3, genericEntityDao.findAllEntitiesOfType(Gene.class).size());
+//
+//    schemaUtil.truncateTablesOrCreateSchema();
+//    library = doParseRange(null, 50003);
+//    assertEquals("library has all wells for plates [-,50003]", 384 * 3, library.getWells().size());
+//    assertEquals(3, genericEntityDao.findAllEntitiesOfType(Gene.class).size());
+
+    schemaUtil.truncateTablesOrCreateSchema();
+    library = doParseRange(50002, 50002);
+    assertEquals("library has all wells for plates [50002,50002]", 384 * 3, library.getWells().size());
+    assertEquals(1, genericEntityDao.findAllEntitiesOfType(Gene.class).size());
+    assertNull(genericEntityDao.findEntityById(Gene.class, 22848));
+    assertNull(genericEntityDao.findEntityById(Gene.class, 22850));
+
+    schemaUtil.truncateTablesOrCreateSchema();
+    library = doParseRange(null, 50002);
+    assertEquals("library has all wells for plates [-,50002]", 384 * 3, library.getWells().size());
+    assertEquals(2, genericEntityDao.findAllEntitiesOfType(Gene.class).size());
+    assertNull(genericEntityDao.findEntityById(Gene.class, 22850));
+
+    schemaUtil.truncateTablesOrCreateSchema();
+    library = doParseRange(50002, null);
+    assertEquals("library has all wells for plates [50002,-]", 384 * 3, library.getWells().size());
+    assertEquals(2, genericEntityDao.findAllEntitiesOfType(Gene.class).size());
+    assertNull(genericEntityDao.findEntityById(Gene.class, 22848));
+  }
+
+  private Library doParseRange(Integer startPlate, Integer endPlate) throws FileNotFoundException
+  {
+    Library library = new Library(
+      "Human1", "Human1",
+      ScreenType.SMALL_MOLECULE, LibraryType.SIRNA,
+      50001, 50003);
+    String filename = "plate_ranges.xls";
+    File file = new File(TEST_INPUT_FILE_DIR, filename);
+    InputStream stream = null;
+    stream = new FileInputStream(file);
+    library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, startPlate, endPlate);
+    return library;
+  }
+
   /**
    * test that previously loaded wells, silencing reagents, and genes are appropriately reused.
    * test:
@@ -408,7 +454,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
-        library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+        library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
         List<WorkbookParseError> errors = springFreeRnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
         assertEquals("library has all wells", 384, library.getWells().size());
@@ -426,7 +472,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
-        library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+        library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
         errors = springFreeRnaiLibraryContentsParser.getErrors();
         assertEquals("workbook has no errors", 0, errors.size());
         assertEquals("library has all wells", 384, library.getWells().size());
@@ -509,7 +555,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
         catch (FileNotFoundException e) {
           fail("file not found: " + filename);
         }
-        library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+        library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
         Set<Well> wells = library.getWells();
 
         List<WorkbookParseError> errors = springFreeRnaiLibraryContentsParser.getErrors();
@@ -555,7 +601,7 @@ public class RNAiLibraryContentsParserTest extends AbstractSpringTest
       fail("file not found: " + filename);
     }
     try {
-      library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream);
+      library = springFreeRnaiLibraryContentsParser.parseLibraryContents(library, file, stream, null, null);
     }
     catch (ParseLibraryContentsException e) {
       List<WorkbookParseError> errors = (List<WorkbookParseError>) e.getErrors();
