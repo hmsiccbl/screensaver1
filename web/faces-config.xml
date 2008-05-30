@@ -198,6 +198,11 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/screens/screenViewer</to-view-id>
       <redirect/>
     </navigation-case>
+    <navigation-case>
+      <from-outcome>viewScreenDetail</from-outcome>
+      <to-view-id>/screens/screenDetailViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
 
     <!--  === cherryPickRequests navigation rules === -->
 

@@ -9,16 +9,25 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Iterator;
+import java.util.regex.Pattern;
+
+import javax.faces.application.FacesMessage;
+
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 import org.jboss.jsfunit.facade.JSFClientSession;
 import org.jboss.jsfunit.facade.JSFServerSession;
 import org.jboss.jsfunit.framework.WebConversationFactory;
+import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.WebConversation;
 
@@ -51,6 +60,8 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
   protected AdministratorUser _testUser;
   protected GenericEntityDAO _dao;
   protected WebConversation _webConv;
+  protected JSFClientSession _client;
+  protected JSFServerSession _server;
   
   /**
    * Sets up the database with a test user and authenticates the user via BASIC
@@ -86,8 +97,8 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     _webConv = WebConversationFactory.makeWebConversation();
     _webConv.setAuthorization(TEST_USER_NAME, TEST_USER_PASSWORD);
 
-    JSFClientSession client = new JSFClientSession(_webConv, "/main/main.jsf");
-    JSFServerSession server = new JSFServerSession(client);
+    visitMainPage();
+
     _schemaUtil.verifyIsTestDatabase();
   }
 
@@ -113,23 +124,61 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     return user;
   }
   
-  protected JSFClientSession getClient(String jsfPagePath)
+  protected JSFClientSession visitPage(String jsfPagePath)
   {
     try {
-      return new JSFClientSession(_webConv, jsfPagePath);
+      _client = new JSFClientSession(_webConv, jsfPagePath);
+      _server = new JSFServerSession(_client);
+      return _client;
     }
     catch (Exception e) {
       throw new JsfUnitException(e);
     }
   }
   
-  protected JSFServerSession getServer(JSFClientSession client)
+  protected JSFClientSession visitMainPage()
+    throws MalformedURLException,
+    IOException,
+    SAXException
   {
-    try {
-      return new JSFServerSession(client);
+    return visitPage("/main/main.jsf");
+  }
+  
+  protected void submit(String submitButtonId,
+                        Pair<String,String>... nameValuePairs) throws SAXException, IOException
+  {
+    for (Pair<String,String> nameValuePair : nameValuePairs) {
+      _client.setParameter(nameValuePair.getFirst(),
+                           nameValuePair.getSecond());
     }
-    catch (Exception e) {
-      throw new JsfUnitException(e);
+    _client.submit(submitButtonId);
+  }
+  
+  /**
+   * @param viewURL e.g. <code>/main/main.jsf</code>
+   */
+  protected void assertAtView(String viewId)
+  {
+    assertEquals("current view", viewId, _client.getWebResponse().getURL().getPath());
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <T> T getBeanValue(String elExpr)
+  {
+    return (T) _server.getManagedBeanValue("#{" + elExpr + "}");
+  }
+
+  protected void assertMessage(String regex)
+  {
+    Pattern pattern = Pattern.compile(regex);
+    Iterator<FacesMessage> msgsItr = _server.getFacesMessages();
+    while (msgsItr.hasNext()) {
+      String msg = msgsItr.next().getSummary();
+      log.debug(msg);
+      if (pattern.matcher(msg).matches()) {
+        return;
+      }
     }
+    fail("faces message exists matching " + regex);
   }
 }

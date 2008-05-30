@@ -131,7 +131,7 @@
 			<t:htmlTag id="menuSectionSeparator2" value="hr"
 				rendered="#{menu.authenticatedUser}" />
 
-			<h:form id="quickFindWellForm">
+			<h:form id="findWellForm">
 				<t:panelGrid columns="2"
 					rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}"
 					title="Look up a library well by plate number and well name">
@@ -144,35 +144,39 @@
 					<t:inputText id="wellName" value="#{wellFinder.wellName}" size="3"
 						styleClass="inputText" />
 					<t:commandButton action="#{wellFinder.findWell}"
-						id="quickFindWellSubmit" value="Go" styleClass="command"
+						id="findWellCommand" value="Go" styleClass="command"
 						rendered="#{menu.authenticatedUser}" />
 					<t:outputText id="nowPanelGridHasEvenChildCount" value="" />
 				</t:panelGrid>
 			</h:form>
 
-			<h:form id="quickFindScreenForm"
-				title="Look up a screen by screen number">
+			<h:form id="screensForm"
+				title="Screen commands">
 				<t:panelGrid columns="1"
 					rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
+					<t:commandButton action="#{menu.addScreen}"
+						id="addScreenCommand" value="Add Screen"
+						rendered="#{menu.authenticatedUser &amp;&amp; menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
+						styleClass="command" />
 					<t:outputLabel id="screenNumberLabel" for="screenNumber"
 						value="Screen #" styleClass="menuItem label" />
 					<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"
 						size="5" styleClass="inputText" />
 					<t:commandButton action="#{screenFinder.findScreen}"
-						id="quickFindScreenSubmit" value="Go"
+						id="findScreenCommand" value="Go"
 						rendered="#{menu.authenticatedUser}" styleClass="command" />
 					<t:commandButton action="#{screenFinder.addLibraryScreening}"
-						id="quickAddLibraryScreening" value="Add Library Screening"
+						id="addLibraryScreening" value="Add Library Screening"
 						rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
 						styleClass="command" />
           <t:commandButton action="#{screenFinder.addCherryPickRequest}"
-            id="quickAddCherryPickRequest" value="Add CP Request"
+            id="addCherryPickRequest" value="Add CP Request"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['cherryPickAdmin']}"
             styleClass="command" />
 				</t:panelGrid>
 			</h:form>
 
-			<h:form id="quickFindCherryPickRequest"
+			<h:form id="findCherryPickRequestForm"
 				title="Look up a cherry pick request by cherry pick request number">
 				<t:panelGrid columns="1"
 					rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
@@ -184,7 +188,7 @@
 						size="5" styleClass="inputText" />
 					<t:commandButton
 						action="#{cherryPickRequestFinder.findCherryPickRequest}"
-						id="quickFindCherryPickRequestSubmit" value="Go"
+						id="findCherryPickRequestCommand" value="Go"
 						rendered="#{menu.authenticatedUser}" styleClass="command" />
 				</t:panelGrid>
 			</h:form>

@@ -19,9 +19,9 @@
 			<t:buffer into="#{commandsBuffer}">
 				<t:panelGroup id="commandPanel">
 					<t:commandButton action="#{wellFinder.findWells}"
-						id="findWellsSubmit" value="Find Wells" styleClass="command" />
+						id="findWellsCommand" value="Find Wells" styleClass="command" />
 					<t:commandButton action="#{wellFinder.findWellVolumes}"
-						id="findWellVolumes" value="Find Well Volumes"
+						id="findWellVolumesCommand" value="Find Well Volumes"
 						rendered="#{wellCopyVolumesBrowser.editable || wellCopyVolumesBrowser.readAdmin}"
 						styleClass="command" />
 				</t:panelGroup>

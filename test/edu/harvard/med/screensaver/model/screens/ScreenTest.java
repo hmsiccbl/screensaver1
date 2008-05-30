@@ -117,5 +117,27 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     });
   }
   
+  /**
+   * Tests that no problems occur when Hibernate applies cascades to
+   * leadScreener and labHead relationships. Regression test for problems that
+   * were occurring with these cascades.
+   */
+  public void testScreenToScreenerCascades()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    Screen screen1a = MakeDummyEntities.makeDummyScreen(1);
+    genericEntityDao.persistEntity(screen1a);
+    Screen screen1b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(1), true, "labHead", "leadScreener");
+    assertEquals(screen1a.getLabHead(), screen1b.getLabHead());
+    assertEquals(screen1a.getLeadScreener(), screen1b.getLeadScreener());
+    
+    Screen screen2a = MakeDummyEntities.makeDummyScreen(2);
+    screen2a.setLeadScreener(screen2a.getLabHead());
+    genericEntityDao.persistEntity(screen2a);
+    Screen screen2b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(2), true, "labHead", "leadScreener");
+    assertEquals(screen2a.getLabHead(), screen2b.getLabHead());
+    assertEquals(screen2a.getLabHead(), screen2b.getLeadScreener());
+  }
+  
 }
 

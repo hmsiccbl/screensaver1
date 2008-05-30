@@ -60,6 +60,7 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENS = "browseScreens";
   public static final String BROWSE_MY_SCREENS = "browseScreens";
   public static final String VIEW_SCREEN = "viewScreen";
+  public static final String VIEW_SCREEN_DETAIL = "viewScreenDetail";
   public static final String BROWSE_CHERRY_PICK_REQUESTS = "browseCherryPickRequests";
   public static final String VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT = "viewCherryPickRequest";
   public static final String VIEW_BILLING_INFORMATION_ACTION_RESULT = "viewBillingInformation";

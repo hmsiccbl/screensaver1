@@ -10,19 +10,24 @@
 package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
+import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.EntityViewer;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectManyEntityBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
@@ -97,6 +102,11 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
   public DataModel getCollaboratorsDataModel()
   {
     return new ListDataModel(new ArrayList<ScreeningRoomUser>(_study.getCollaborators()));
+  }
+
+  public List<SelectItem> getScreenTypeSelectItems()
+  {
+    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
   }
 
   public UISelectOneBean<ScreeningRoomUser> getLabName()

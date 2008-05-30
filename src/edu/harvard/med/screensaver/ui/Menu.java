@@ -17,6 +17,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
@@ -45,6 +46,7 @@ public class Menu extends AbstractBackingBean
   private UserSearchResults<AdministratorUser> _staffBrowser;
   private UserSearchResults<ScreeningRoomUser> _screenersBrowser;
   private ActivitySearchResults _activitiesBrowser;
+  private ScreenDetailViewer _screenDetailViewer;
 
 
   // public methods
@@ -64,7 +66,8 @@ public class Menu extends AbstractBackingBean
               LibrarySearchResults librariesBrowser,
               UserSearchResults<ScreeningRoomUser> screenersBrowser,
               UserSearchResults<AdministratorUser> staffBrowser,
-              ActivitySearchResults activitiesBrowser)
+              ActivitySearchResults activitiesBrowser,
+              ScreenDetailViewer screenDetailViewer)
   {
     _dao = dao;
     _librariesDao = librariesDao;
@@ -75,6 +78,7 @@ public class Menu extends AbstractBackingBean
     _staffBrowser = staffBrowser;
     _screenersBrowser = screenersBrowser;
     _activitiesBrowser = activitiesBrowser;
+    _screenDetailViewer = screenDetailViewer;
   }
 
   // JSF application methods
@@ -221,5 +225,17 @@ public class Menu extends AbstractBackingBean
       _activitiesBrowser.searchActivitiesForUser(user);
     }
     return BROWSE_ACTIVITIES;
+  }
+  
+  @UIControllerMethod
+  public String addScreen()
+  {
+    return _screenDetailViewer.editNewScreen(this);
+  }
+  
+  @Override
+  public String reload()
+  {
+    return VIEW_MAIN;
   }
 }

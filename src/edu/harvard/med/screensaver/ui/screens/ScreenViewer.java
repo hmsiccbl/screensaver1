@@ -41,7 +41,7 @@ public class ScreenViewer extends StudyViewer
 
   private Screen _screen;
 
-
+  
   // constructors
 
   /**
@@ -53,9 +53,9 @@ public class ScreenViewer extends StudyViewer
 
   public ScreenViewer(ScreenViewer screenViewer,
                       GenericEntityDAO dao,
+                      ScreenResultsDAO screenResultsDao,
                       ScreenDetailViewer screenDetailViewer,
                       ReagentSearchResults reagentSearchResults,
-                      ScreenResultsDAO screenResultsDao,
                       ScreenResultViewer screenResultViewer,
                       HeatMapViewer heatMapViewer,
                       ScreenResultImporter screenResultImporter)
@@ -123,17 +123,22 @@ public class ScreenViewer extends StudyViewer
                                       "labHead",
                                       "labHead.labMembers",
                                       "leadScreener",
-    "billingInformation");
+                                      "billingInformation");
     _dao.needReadOnly(screen, "collaborators.labHead");
     _dao.needReadOnly(screen, "labActivities.performedBy");
-    _dao.needReadOnly(screen, "abaseTestsets", "attachedFiles", "fundingSupports", "keywords", "lettersOfSupport", "publications");
+    _dao.needReadOnly(screen,
+                      "attachedFiles", 
+                      "fundingSupports", 
+                      "keywords", 
+                      "lettersOfSupport", 
+                      "publications");
     _dao.needReadOnly(screen, "statusItems");
     _dao.needReadOnly(screen, "cherryPickRequests");
     _dao.needReadOnly(screen, "annotationTypes.annotationValues");
     _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
     _dao.needReadOnly(screen.getScreenResult(),
                       "resultValueTypes.derivedTypes",
-    "resultValueTypes.typesDerivedFrom");
+                      "resultValueTypes.typesDerivedFrom");
     setScreen(screen);
     return VIEW_SCREEN;
   }

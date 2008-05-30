@@ -36,7 +36,13 @@
 
 	<ss:property id="screenType" label="Screen Type"
 		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
-		editable="false" converter="#{screenTypeConverter}" />
+		editable="#{empty screen.entityId}" converter="#{screenTypeConverter}" >
+    <ui:define name="editableData">
+      <ui:insert name="editableScreenType" >
+      No editableScreenType definition!
+      </ui:insert>
+		</ui:define>
+	</ss:property>
 
 	<!-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design -->
 	<ss:property id="labName" label="Lab Name"
@@ -63,7 +69,7 @@
 		</ui:define>
 	</ss:property>
 
-	<ss:property id="title" label="Title" type="Textarea"
+	<ss:property id="title" label="Title" type="Textarea" required="true"
 		description="The title of the screen" value="#{screen.title}"
 		editable="#{editable}" editWidth="80" />
 

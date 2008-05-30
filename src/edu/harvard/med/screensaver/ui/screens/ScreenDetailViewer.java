@@ -24,6 +24,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -39,7 +40,11 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
@@ -62,20 +67,22 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
 
   // instance data
 
-  public GenericEntityDAO _dao;
+  private ScreenDetailViewer _thisProxy;
+  private GenericEntityDAO _dao;
+  private ScreenDAO _screenDao;
   private WebDataAccessPolicy _dataAccessPolicy;
-  public ScreenViewer _screenViewer;
-  public ScreenSearchResults _screensBrowser;
+  private ScreenViewer _screenViewer;
+  private ScreenSearchResults _screensBrowser;
   private ActivityViewer _activityViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
+  private AbstractBackingBean _returnToViewAfterEdit;
 
   private Screen _screen;
-  public boolean _isEditMode = true;
+  private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
   private FundingSupport _newFundingSupport;
   private StatusValue _newStatusValue;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
-
 
 
 
@@ -88,7 +95,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
   }
 
-  public ScreenDetailViewer(GenericEntityDAO dao,
+  public ScreenDetailViewer(ScreenDetailViewer thisProxy,
+                            GenericEntityDAO dao,
+                            ScreenDAO screenDao,
                             UsersDAO usersDao,
                             WebDataAccessPolicy dataAccessPolicy,
                             ScreenViewer screenViewer,
@@ -97,7 +106,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
                             CherryPickRequestViewer cherryPickRequestViewer)
   {
     super(dao, usersDao);
+    _thisProxy = thisProxy;
     _dao = dao;
+    _screenDao = screenDao;
     _dataAccessPolicy = dataAccessPolicy;
     _screenViewer = screenViewer;
     _screensBrowser = screensBrowser;
@@ -123,7 +134,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @Override
   public String reload()
   {
-    return _screenViewer.viewScreen(_screen);
+    return _screenViewer.viewScreen(getScreen());
   }
 
   public boolean isEditMode()
@@ -307,16 +318,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   /* JSF Application methods */
 
   @UIControllerMethod
-  @Transactional
-  public String edit()
-  {
-    _isEditMode = true;
-    _dao.reattachEntity(getScreen()); // checks if up-to-date, generating error if not
-    _dao.need(getScreen(), "labHead.labMembers");
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
   public String toggleAdminViewMode()
   {
     _isEditMode = false;
@@ -332,9 +333,42 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
+  public String editNewScreen(AbstractBackingBean returnToViewerAfterEdit)
+  {
+    ScreensaverUser user = getScreensaverUser();
+    if (!(user instanceof AdministratorUser && 
+      ((AdministratorUser) user).isUserInRole(ScreensaverUserRole.SCREENS_ADMIN))) {
+      showMessage("unauthorizedOperation", "add a new screen");
+    }
+
+    Screen screen = new Screen();
+    screen.setStudyType(StudyType.IN_VITRO);
+    screen.setScreenNumber(_screenDao.findNextScreenNumber());
+    setScreen(screen);
+    _isEditMode = true;
+    _returnToViewAfterEdit = returnToViewerAfterEdit;
+    return VIEW_SCREEN_DETAIL;
+  }
+
+  @UIControllerMethod
+  public String edit()
+  {
+    _isEditMode = true;
+    return VIEW_SCREEN_DETAIL;
+  }
+
+  @UIControllerMethod
   public String cancel()
   {
-    return reload();
+    _isEditMode = true;
+    if (_returnToViewAfterEdit != null) {
+      return _returnToViewAfterEdit.reload();
+    }
+    if (_screen.getEntityId() == null) {
+      _screensBrowser.searchAllScreens();
+      return BROWSE_SCREENS;
+    }
+    return _screenViewer.viewScreen(_screen);
   }
 
   @UIControllerMethod
@@ -342,15 +376,27 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String save()
   {
     _isEditMode = false;
-    _dao.reattachEntity(getScreen());
-    _dao.reattachEntity(getScreen().getLeadScreener());
-    _dao.reattachEntity(getScreen().getLabHead());
-    getScreen().setLabHead(getLabName().getSelection());
-    getScreen().setLeadScreener(getLeadScreener().getSelection());
-    // TODO: fix; #128935
-//    getScreen().setCollaboratorsList(getCollaborators().getSelections());
+    // TODO: would like to use this code, since it handles both new and extant
+    // Screens, but I think UISelectOneEntityBean's auto-loading of entities is
+    // actually getting in the way, since it causes NonUniqueObjectException
+//  getScreen().setLabHead(getLabName().getSelection());
+//  getScreen().setLeadScreener(getLeadScreener().getSelection());
+//  _dao.saveOrUpdateEntity(getScreen());
+    // instead, we handle each case separately:
+    if (getScreen().getEntityId() == null) {
+      getScreen().setLabHead(getLabName().getSelection());
+      getScreen().setLeadScreener(getLeadScreener().getSelection());
+      _dao.persistEntity(getScreen());
+    }
+    else {
+      _dao.reattachEntity(getScreen());
+      getScreen().setLabHead(getLabName().getSelection());
+      getScreen().setLeadScreener(getLeadScreener().getSelection());
+    }
+    
+    _dao.flush();
     _screensBrowser.refetch();
-    return VIEW_SCREEN;
+    return _screenViewer.viewScreen(_screen);
   }
 
   @UIControllerMethod
@@ -554,7 +600,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private void resetView()
   {
     _isEditMode = false;
-    _isAdminViewMode = false;
+    _returnToViewAfterEdit = null;
+    //_isAdminViewMode = false; // maintain this setting when viewing a new screen
     _newFundingSupport = null;
     _newStatusValue = null;
     _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;

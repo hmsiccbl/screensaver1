@@ -35,6 +35,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
@@ -124,6 +125,16 @@ public class Screen extends Study
 
 
   // public constructors
+
+
+  /**
+   * Construct an uninitialized <code>Screen</code>.
+   * 
+   * @motivation for new Screen creation via user interface, where even required
+   *             fields are allowed to be uninitialized, initially
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  public Screen() {}
 
   /**
    * Construct an initialized <code>Screen</code>.
@@ -274,10 +285,14 @@ public class Screen extends Study
    * Get the lead screener.
    * @return the lead screener
    */
-  @ManyToOne(fetch=FetchType.LAZY)
+  @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="leadScreenerId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lead_screener")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensLed")
   public ScreeningRoomUser getLeadScreener()
   {
@@ -297,7 +312,9 @@ public class Screen extends Study
     if (leadScreener == null) {
       throw new NullPointerException();
     }
-    _leadScreener.getScreensLed().remove(this);
+    if (_leadScreener != null) {
+      _leadScreener.getScreensLed().remove(this);
+    }
     _leadScreener = leadScreener;
     _leadScreener.getScreensLed().add(this);
   }
@@ -306,10 +323,14 @@ public class Screen extends Study
    * Get the lab head.
    * @return the lab head
    */
-  @ManyToOne(fetch=FetchType.LAZY)
+  @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labHeadId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE
+  })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensHeaded")
   public ScreeningRoomUser getLabHead()
   {
@@ -332,7 +353,9 @@ public class Screen extends Study
     if (labHead.equals(_labHead)) {
       return;
     }
-    _labHead.getScreensHeaded().remove(this);
+    if (_labHead != null) {
+      _labHead.getScreensHeaded().remove(this);
+    }
     _labHead = labHead;
     _labHead.getScreensHeaded().add(this);
   }
@@ -946,6 +969,19 @@ public class Screen extends Study
   }
 
   /**
+   * Set the study type.
+   *
+   * @param studyType the new studyType
+   */
+  public void setStudyType(StudyType studyType)
+  {
+    if (_studyType != null && studyType != studyType) {
+      throw new BusinessRuleViolationException("screen type is immutable");
+    }
+    _studyType = studyType;
+  }
+
+  /**
    * Get the screen type.
    * @return the screen type
    */
@@ -955,6 +991,19 @@ public class Screen extends Study
   public ScreenType getScreenType()
   {
     return _screenType;
+  }
+
+  /**
+   * Set the screen type.
+   * @param screenType the new screen type
+   * @motivation for hibernate
+   */
+  public void setScreenType(ScreenType screenType)
+  {
+    if (_screenType != null && screenType != _screenType) {
+      throw new BusinessRuleViolationException("screen type is immutable");
+    }
+    _screenType = screenType;
   }
 
   /**
@@ -1421,15 +1470,6 @@ public class Screen extends Study
   }
 
 
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>Screen</code>.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected Screen() {}
-
-
   // private instance methods
 
   /**
@@ -1462,26 +1502,6 @@ public class Screen extends Study
   private void setVersion(Integer version)
   {
     _version = version;
-  }
-
-  /**
-   * Set the study type.
-   *
-   * @param studyType the new studyType
-   */
-  private void setStudyType(StudyType studyType)
-  {
-    _studyType = studyType;
-  }
-
-  /**
-   * Set the screen type.
-   * @param screenType the new screen type
-   * @motivation for hibernate
-   */
-  private void setScreenType(ScreenType screenType)
-  {
-    _screenType = screenType;
   }
 
   /**

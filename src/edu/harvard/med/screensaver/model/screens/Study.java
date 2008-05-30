@@ -49,7 +49,7 @@ public abstract class Study extends TimeStampedAbstractEntity
   public boolean isStudyOnly()
   {
     // TODO: this is a total hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
-    return getStudyNumber() >= MIN_STUDY_NUMBER;
+    return getStudyNumber() == null || getStudyNumber() >= MIN_STUDY_NUMBER;
   }
 
   @Override

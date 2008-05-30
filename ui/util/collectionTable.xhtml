@@ -14,7 +14,7 @@
 	     - dataModel: JSF data model
 	     - columns: UI fragment
 	     - editable: boolean
-	     - actionBean: backing bean containing methods with names provied by addAction and deleteAction attributes (below)
+	     - actionBean: backing bean containing methods with names provided by addAction and deleteAction attributes (below)
 	     - addAction
 	     - deleteAction
 	     - addProperties: UI fragment (optional) containing UI to be used by addAction
@@ -45,7 +45,7 @@
 	<t:div rendered="#{editable}" styleClass="groupingPanel">
 		<ui:insert name="addProperties" />
 		<t:commandButton value="Add" action="#{actionBean[addAction]}"
-			styleClass="command" />
+			immediate="true" styleClass="command" />
 	</t:div>
 
 </ui:composition>

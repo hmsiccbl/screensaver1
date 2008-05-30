@@ -14,14 +14,11 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import jxl.Sheet;
 import jxl.Workbook;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -29,8 +26,10 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewerJsfUnitTest;
 import edu.harvard.med.screensaver.ui.searchresults.GenericDataExporter;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -38,9 +37,6 @@ import org.jboss.jsfunit.facade.JSFClientSession;
 import org.jboss.jsfunit.facade.JSFServerSession;
 import org.joda.time.LocalDate;
 import org.xml.sax.SAXException;
-
-import com.meterware.httpunit.SubmitButton;
-import com.meterware.httpunit.WebForm;
 
 /**
  * Top-level class for user interface unit tests. (As this grows, it will be
@@ -55,7 +51,11 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
 
   public static Test suite()
   {
-    return new TestSuite(ScreensaverJsfUnitTest.class);
+    TestSuite suite = new TestSuite();
+    suite.addTestSuite(ScreensaverJsfUnitTest.class);
+    suite.addTest(ScreenViewerJsfUnitTest.suite());
+    suite.addTest(InfrastructureJsfUnitTest.suite());
+    return suite;
   }
 
 //  public void testLogin() throws IOException, SAXException
@@ -111,58 +111,13 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
   {
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     _dao.persistEntity(library);
-    
-    JSFClientSession client = new JSFClientSession(_webConv, "/libraries/wellFinder.jsf");
-    JSFServerSession server = new JSFServerSession(client);
-    
-    WebForm form = client.getWebResponse().getFormWithID("wellFinderForm");
-    form.setParameter("plateWellList", "01000 A1 A3");
-    SubmitButton findWellsButton = form.getSubmitButton("wellFinderForm:findWellsSubmit");
-    form.submit(findWellsButton);
-    
-    assertEquals("/libraries/wellSearchResults.xhtml", server.getCurrentViewID());
-    
-    DataTableModel model = (DataTableModel) server.getManagedBeanValue("#{wellsBrowser.dataTableModel}");
+
+    visitPage("/libraries/wellFinder.jsf");
+    submit("findWellsCommand", new Pair<String,String>("plateWellList", "01000 A1 A3")); 
+    assertAtView("/screensaver/libraries/wellSearchResults.jsf");
+
+    DataTableModel model = getBeanValue("wellsBrowser.dataTableModel");
     assertEquals("row count", 2, model.getRowCount());
-  }
-  
-  public void testUIControllerMethodExceptionHandlerAspect() throws Exception
-  {
-    Integer screenNumber = 1;
-    final Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber);
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() 
-      {
-        _dao.persistEntity(screen.getLeadScreener());
-        _dao.persistEntity(screen.getLabHead());
-        _dao.persistEntity(screen);
-      }
-    });
-    
-    JSFClientSession client1 = new JSFClientSession(_webConv, "/main/main.jsf");
-    JSFServerSession server1 = new JSFServerSession(client1);
-    client1.setParameter("quickFindScreenForm:screenNumber", Integer.toString(screenNumber));
-    client1.submit("quickFindScreenSubmit");
-    assertEquals("/screens/screenViewer.xhtml", server1.getCurrentViewID());
-    assertEquals(screenNumber, (Integer) server1.getManagedBeanValue("#{screenViewer.screen.screenNumber}"));
-    log.debug("viewing screen #1 in session " + ((HttpSession) server1.getFacesContext().getExternalContext().getSession(false)).getId());
-    
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() 
-      {
-        Screen screen2 = _dao.reloadEntity(screen);
-        screen2.setComments("screen edited!");
-      }
-    });
-    log.debug("edited screen in separate Hibernate session");
-    
-    client1.submit("screenDetailPanelForm:editCommand");
-    log.debug("invoked Edit command on Screen Detail Viewer");
-    assertTrue("screen viewer entity is out-of-date", server1.getFacesMessages().hasNext());
-    assertTrue("screen viewer entity is out-of-date", server1.getFacesMessages().next().getSummary().startsWith("Other users have already modified the data that you are attempting to update"));
-    assertEquals("screen updated to lastest version",
-                 "screen edited!",
-                 (String) server1.getManagedBeanValue("#{screenViewer.screen.comments}"));
   }
   
   public void testDownloadSearchResults() throws Exception
@@ -173,7 +128,7 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
     JSFClientSession client = new JSFClientSession(_webConv, "/libraries/wellFinder.jsf");
     JSFServerSession server = new JSFServerSession(client);
     client.setParameter("plateWellList", "01000 A1 A2 G12 G13 H20");
-    client.submit("wellFinderForm:findWellsSubmit");
+    client.submit("wellFinderForm:findWellsCommand");
     assertEquals("/libraries/wellSearchResults.xhtml", server.getCurrentViewID());
     assertEquals("search result size", new Integer(5), server.getManagedBeanValue("#{wellsBrowser.dataTableModel.rowCount}"));
   
@@ -245,7 +200,7 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
 //    assertEquals(Collections.emptySet(), server.getManagedBeanValue("#{activityViewer.activity.platesUsed}"));
 //  }
 
-  public void testAddLibraryScreeningDuplicatesAssayProtocolInfo() throws InterruptedException, MalformedURLException, IOException, SAXException
+  public void testAddLibraryScreeningDuplicatesMostRecentScreening() throws InterruptedException, MalformedURLException, IOException, SAXException
   {
     LibraryScreening previousScreening = initializeLibraryScreening();
 
@@ -253,7 +208,7 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
     JSFServerSession server = new JSFServerSession(client);
 
     client.setParameter("screenNumber", "1");
-    client.submit("quickFindScreenSubmit");
+    client.submit("findScreenCommand");
     assertEquals("/screens/screenViewer.xhtml", server.getCurrentViewID());
     assertEquals(new Integer(1), 
                  server.getManagedBeanValue("#{screenDetailViewer.labActivitiesDataModel.rowCount}"));

@@ -5,13 +5,28 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
 
 	<t:panelGrid columns="1" width="100%"
 		rendered="#{!empty screenViewer.screen}">
-		<ui:include src="screenDetailViewer.xhtml" />
+		<h:form id="screenDetailPanelForm">
+			<ss:collapsiblePanel id="screenDetail"
+				isCollapsed="#{screenDetailViewer.panelCollapsed}" label="Screen">
+				<ui:define name="closedContent">
+					<f:subview id="screenSummary">
+						<t:panelGrid columns="4">
+							<ss:screenSummaryProperties screen="#{screenDetailViewer.screen}" />
+						</t:panelGrid>
+					</f:subview>
+				</ui:define>
+				<ui:define name="content">
+					<ui:include src="screenDetailViewerBody.xhtml" />
+				</ui:define>
+			</ss:collapsiblePanel>
+		</h:form>
 		<ui:include src="screenresults/screenResultViewer.xhtml" />
 	</t:panelGrid>
 

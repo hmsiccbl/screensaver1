@@ -156,6 +156,7 @@
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="staffBrowser" />
     <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="screenDetailViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -428,9 +429,9 @@
     class="edu.harvard.med.screensaver.ui.screens.ScreenViewer">
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="reagentsBrowser" />
-    <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />
     <constructor-arg ref="screenResultImporter" />
@@ -442,7 +443,9 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer">
+    <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="screenDao" />
     <constructor-arg ref="usersDao" />
     <constructor-arg ref="dataAccessPolicy" />
     <constructor-arg ref="screenViewer" />
