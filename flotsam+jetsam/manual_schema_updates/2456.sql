@@ -2,7 +2,7 @@ BEGIN;
 
 INSERT INTO schema_history (screensaver_revision, date_updated, comment)
 SELECT
-2457,
+2456,
 current_timestamp,
 'changed status value';
 
