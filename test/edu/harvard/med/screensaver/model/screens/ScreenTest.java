@@ -11,11 +11,13 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -136,6 +138,70 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     Screen screen2b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(2), true, "labHead", "leadScreener");
     assertEquals(screen2a.getLabHead(), screen2b.getLabHead());
     assertEquals(screen2a.getLabHead(), screen2b.getLeadScreener());
+  }
+
+  public void testCandidateStatusItems()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+    Set<StatusValue> expected = new HashSet<StatusValue>(Arrays.asList(StatusValue.values()));
+    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+
+    LocalDate today = new LocalDate();
+    screen.createStatusItem(today, StatusValue.PENDING_ICCB);
+    expected.remove(StatusValue.PENDING_ICCB);
+    expected.remove(StatusValue.PENDING_NSRB);
+    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+
+    screen.createStatusItem(today, StatusValue.PILOTED);
+    expected.remove(StatusValue.PILOTED);
+    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+
+    screen.createStatusItem(today, StatusValue.ACCEPTED);
+    expected.remove(StatusValue.ACCEPTED);
+    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+
+    screen.createStatusItem(today, StatusValue.ONGOING);
+    expected.remove(StatusValue.ONGOING);
+    assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
+
+    screen.createStatusItem(today, StatusValue.COMPLETED);
+    assertEquals(0, screen.getCandidateStatusValues().size());
+  }
+
+  public void testAddAnachronisticStatusItem()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+
+    screen.createStatusItem(new LocalDate(2008, 6, 2), StatusValue.ONGOING);
+    try {
+      screen.createStatusItem(new LocalDate(2008, 6, 1), StatusValue.COMPLETED);
+      fail("expected BusinessRuleViolationException");
+    }
+    catch (BusinessRuleViolationException e) {
+      assertEquals("date of new status item must not be before the date of the previous status item", e.getMessage());
+    }
+
+    try {
+      screen.createStatusItem(new LocalDate(2008, 6, 3), StatusValue.ACCEPTED);
+      fail("expected BusinessRuleViolationException");
+    }
+    catch (BusinessRuleViolationException e) {
+      assertEquals("date of new status item must not be after date of subsequent status item", e.getMessage());
+    }
+  }
+
+  public void testAddConflictingStatusItem()
+  {
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+
+    screen.createStatusItem(new LocalDate(2008, 6, 2), StatusValue.PENDING_ICCB);
+    try {
+      screen.createStatusItem(new LocalDate(2008, 6, 2), StatusValue.PENDING_NSRB);
+      fail("expected BusinessRuleViolationException");
+    }
+    catch (BusinessRuleViolationException e) {
+      assertEquals("status item is mutually exclusive with existing status item " + StatusValue.PENDING_ICCB, e.getMessage());
+    }
   }
 
 }

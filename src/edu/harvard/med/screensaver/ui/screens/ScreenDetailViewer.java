@@ -26,6 +26,7 @@ import javax.faces.model.SelectItem;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -52,6 +53,7 @@ import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -81,7 +83,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
   private FundingSupport _newFundingSupport;
-  private StatusValue _newStatusValue;
+  private UISelectOneBean<StatusValue> _newStatusItemValue;
+  private LocalDate _newStatusItemDate;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
 
 
@@ -180,27 +183,27 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _newFundingSupport = newFundingSupportController;
   }
 
-  public StatusValue getNewStatusValue()
+  public UISelectOneBean<StatusValue> getNewStatusItemValue()
   {
-    return _newStatusValue;
+    if (_newStatusItemValue == null) {
+      _newStatusItemValue = new UISelectOneBean<StatusValue>(_screen.getCandidateStatusValues());
+    }
+    return _newStatusItemValue;
   }
 
-  public void setNewStatusValue(StatusValue newStatusValueController)
+  public LocalDate getNewStatusItemDate()
   {
-    _newStatusValue = newStatusValueController;
+    return _newStatusItemDate;
+  }
+
+  public void setNewStatusItemDate(LocalDate newStatusItemDate)
+  {
+    _newStatusItemDate = newStatusItemDate;
   }
 
   public DataModel getStatusItemsDataModel()
   {
-    ArrayList<StatusItem> statusItems = new ArrayList<StatusItem>(getScreen().getStatusItems());
-    Collections.sort(statusItems,
-                     new Comparator<StatusItem>() {
-      public int compare(StatusItem si1, StatusItem si2)
-      {
-        return si1.getStatusDate().compareTo(si2.getStatusDate());
-      }
-    });
-    return new ListDataModel(statusItems);
+    return new ListDataModel(new ArrayList<StatusItem>(getScreen().getStatusItems()));
   }
 
   public DataModel getLabActivitiesDataModel()
@@ -289,15 +292,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String getAbaseTestsets()
   {
     return StringUtils.makeListString(new ArrayList<AbaseTestset>(getScreen().getAbaseTestsets()), ", ");
-  }
-
-  public List<SelectItem> getNewStatusValueSelectItems()
-  {
-    Set<StatusValue> candiateStatusValues = new HashSet<StatusValue>(Arrays.asList(StatusValue.values()));
-    for (StatusItem statusItem : getScreen().getStatusItems()) {
-      candiateStatusValues.remove(statusItem.getStatusValue());
-    }
-    return JSFUtils.createUISelectItems(candiateStatusValues);
   }
 
   public List<SelectItem> getNewFundingSupportSelectItems()
@@ -402,14 +396,16 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String addStatusItem()
   {
-    if (_newStatusValue != null) {
+    if (getNewStatusItemValue().getSelection() != null && getNewStatusItemDate() != null) {
       try {
-        getScreen().createStatusItem(new LocalDate(), _newStatusValue);
+        getScreen().createStatusItem(getNewStatusItemDate(),
+                                     getNewStatusItemValue().getSelection());
       }
-      catch (DuplicateEntityException e) {
-        showMessage("screens.duplicateEntity", "status item");
+      catch (BusinessRuleViolationException e) {
+        showMessage("businessError", e.getMessage());
       }
-      setNewStatusValue(null);
+      _newStatusItemValue = null; // reset
+      _newStatusItemDate = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -418,6 +414,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String deleteStatusItem()
   {
     getScreen().getStatusItems().remove(getSelectedEntityOfType(StatusItem.class));
+    _newStatusItemValue = null; // reset
+    _newStatusItemDate = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -603,7 +601,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _returnToViewAfterEdit = null;
     //_isAdminViewMode = false; // maintain this setting when viewing a new screen
     _newFundingSupport = null;
-    _newStatusValue = null;
+    _newStatusItemValue = null;
+    _newStatusItemDate = null;
     _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;
   }
 

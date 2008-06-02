@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
@@ -116,7 +117,8 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
    * Get the status date.
    * @return the status date
    */
-  @Column(nullable=false)
+  @Column(nullable=false, updatable=false)
+  @Immutable
   @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getStatusDate()
   {
@@ -124,32 +126,15 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
   }
 
   /**
-   * Set the status date.
-   * @param statusDate the new status date
-   */
-  public void setStatusDate(LocalDate statusDate)
-  {
-    _statusDate = statusDate;
-  }
-
-  /**
    * Get the status value.
    * @return the status value
    */
-  @Column(nullable=false)
+  @Column(nullable=false, updatable=false)
+  @Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.StatusValue$UserType")
   public StatusValue getStatusValue()
   {
     return _statusValue;
-  }
-
-  /**
-   * Set the status value.
-   * @param statusValue the new status value
-   */
-  public void setStatusValue(StatusValue statusValue)
-  {
-    _statusValue = statusValue;
   }
 
 
@@ -157,20 +142,7 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
 
   public int compareTo(StatusItem other)
   {
-    if (other == null) {
-      return 1;
-    }
-    if (this.equals(other)) {
-      return 0;
-    }
-    int result = _statusDate.compareTo(other.getStatusDate());
-    if (result == 0) {
-      result = getStatusValue().compareTo(other.getStatusValue());
-    }
-    if (result == 0) {
-      result = hashCode() < other.hashCode() ? -1 : 1;
-    }
-    return result;
+    return getStatusValue().getRank().compareTo(other.getStatusValue().getRank());
   }
 
 
@@ -200,8 +172,9 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
   /**
    * Construct an uninitialized <code>StatusItem</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
+   * @motivation for user interface
    */
-  protected StatusItem() {}
+  public StatusItem() {}
 
 
   // private instance methods
@@ -246,4 +219,23 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
   {
     _version = version;
   }
+
+  /**
+   * Set the status date.
+   * @param statusDate the new status date
+   */
+  private void setStatusDate(LocalDate statusDate)
+  {
+    _statusDate = statusDate;
+  }
+
+  /**
+   * Set the status value.
+   * @param statusValue the new status value
+   */
+  private void setStatusValue(StatusValue statusValue)
+  {
+    _statusValue = statusValue;
+  }
+
 }

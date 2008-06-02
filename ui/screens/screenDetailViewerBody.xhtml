@@ -361,12 +361,7 @@ TODO:
 								<f:facet name="header">
 									<t:outputText value="Date" />
 								</f:facet>
-								<t:inputText id="statusDateEditable"
-									value="#{statusItem.statusDate}" converter="#{dateConverter}"
-									rendered="#{screenDetailViewer.editMode}"
-									styleClass="inputText" />
 								<t:outputText id="statusDate" value="#{statusItem.statusDate}"
-									rendered="#{!screenDetailViewer.editMode}"
 									styleClass="dataText" />
 							</t:column>
 							<t:column rendered="#{screenDetailViewer.editMode}">
@@ -376,15 +371,19 @@ TODO:
 							</t:column>
 						</t:dataTable>
 						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
-							<t:selectOneMenu value="#{screenDetailViewer.newStatusValue}"
-								required="false" styleClass="inputText selectMenu"
-								converter="#{statusValueConverter}">
+							<t:selectOneMenu id="newStatusItemValue"
+								value="#{screenDetailViewer.newStatusItemValue.value}"
+								required="false" styleClass="inputText selectMenu">
 								<f:selectItems
-									value="#{screenDetailViewer.newStatusValueSelectItems}" />
+									value="#{screenDetailViewer.newStatusItemValue.selectItems}" />
 							</t:selectOneMenu>
+							<t:inputText id="newStatusItemDate" required="false"
+								value="#{screenDetailViewer.newStatusItemDate}" size="10"
+								styleClass="inputText" converter="#{dateConverter}" />
 							<t:commandButton value="Add Status Item"
-								action="#{screenDetailViewer.addStatusItem}" immediate="true"
-								disabled="#{empty screenDetailViewer.newStatusValueSelectItems}"
+								id="addStatusItemCommand"
+								action="#{screenDetailViewer.addStatusItem}"
+								disabled="#{screenDetailViewer.newStatusItemValue.size == 0}"
 								styleClass="command" />
 						</t:panelGroup>
 					</t:panelGrid>

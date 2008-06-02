@@ -10,8 +10,10 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -35,6 +37,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
@@ -503,7 +506,11 @@ public class Screen extends Study
   }
 
   /**
-   * Get the status items.
+   * Get the status items. A Screen may only contain one status with a given
+   * {@link StatusItem#rank} value (StatusItems with the same rank are mutually
+   * exclusive). Ordering of StatusItems must be equivalent whether by
+   * {@link StatusItem#rank} or {@link StatusItem#date}.
+   *
    * @return the status items
    */
   @OneToMany(
@@ -530,9 +537,23 @@ public class Screen extends Study
    */
   public StatusItem createStatusItem(LocalDate statusDate, StatusValue statusValue)
   {
-    StatusItem statusItem = new StatusItem(this, statusDate, statusValue);
-    _statusItems.add(statusItem);
-    return statusItem;
+    StatusItem newStatusItem = new StatusItem(this, statusDate, statusValue);
+    SortedSet<StatusItem> headSet = _statusItems.headSet(newStatusItem);
+    SortedSet<StatusItem> tailSet = _statusItems.tailSet(newStatusItem);
+    if (!headSet.isEmpty() &&
+      headSet.last().getStatusDate().compareTo(newStatusItem.getStatusDate()) > 0) {
+      throw new BusinessRuleViolationException("date of new status item must not be before the date of the previous status item");
+    }
+    if (!tailSet.isEmpty()) {
+      if (tailSet.first().compareTo(newStatusItem) == 0) {
+        throw new BusinessRuleViolationException("status item is mutually exclusive with existing status item " + tailSet.first().getStatusValue());
+      }
+      if (tailSet.first().getStatusDate().compareTo(newStatusItem.getStatusDate()) < 0) {
+        throw new BusinessRuleViolationException("date of new status item must not be after date of subsequent status item");
+      }
+    }
+    _statusItems.add(newStatusItem);
+    return newStatusItem;
   }
 
   /**
@@ -1472,6 +1493,23 @@ public class Screen extends Study
       return true;
     }
     return false;
+  }
+
+  @Transient
+  public List<StatusValue> getCandidateStatusValues()
+  {
+    List<StatusValue> candidateStatusValues = new ArrayList<StatusValue>(Arrays.asList(StatusValue.values()));
+    Set<Integer> illegalStatusValueRanks = new HashSet<Integer>();
+    for (StatusItem statusItem : getStatusItems()) {
+      illegalStatusValueRanks.add(statusItem.getStatusValue().getRank());
+    }
+    Iterator<StatusValue> iter = candidateStatusValues.iterator();
+    while (iter.hasNext()) {
+      if (illegalStatusValueRanks.contains(iter.next().getRank())) {
+        iter.remove();
+      }
+    }
+    return candidateStatusValues;
   }
 
 
