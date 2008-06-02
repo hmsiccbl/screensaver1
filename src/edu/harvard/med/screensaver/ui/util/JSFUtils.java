@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -35,7 +35,7 @@ public class JSFUtils
   /**
    * Performs the necessary steps to return a server-side file to an HTTP
    * client. Must be called within a JSF-enabled servlet environment.
-   * 
+   *
    * @param facesContext the JSF FacesContext
    * @param file the File to send to the HTTP client
    * @param mimeType the MIME type of the file being sent
@@ -43,7 +43,7 @@ public class JSFUtils
    */
   public static void handleUserFileDownloadRequest(
     FacesContext facesContext,
-    File file, 
+    File file,
     String mimeType)
     throws IOException
   {
@@ -58,7 +58,7 @@ public class JSFUtils
    * Performs the necessary steps to return server-side data, provided as an
    * InputStream, to an HTTP client. Must be called within a JSF-enabled servlet
    * environment.
-   * 
+   *
    * @param facesContext the JSF FacesContext
    * @param dataInputStream an InputStream containing the data to send to the HTTP client
    * @param contentLocation set the "content-location" HTTP header to this value, allowing the downloaded file to be named
@@ -74,40 +74,50 @@ public class JSFUtils
   {
     HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
     response.setContentType(mimeType);
-    
+
     // NOTE: the second line does the trick with the filename. leaving first line in for posterity
     response.setHeader("Content-Location", contentLocation);
     response.setHeader("Content-disposition", "attachment; filename=\"" + contentLocation + "\"");
-    
+
     OutputStream out = response.getOutputStream();
     IOUtils.copy(dataInputStream, out);
     out.close();
-    
+
     // skip Render-Response JSF lifecycle phase, since we're generating a
     // non-Faces response
     facesContext.responseComplete();
   }
 
-
-  
   /**
    * Creates a UISelectItems object that can be assigned to the "value"
    * attribute of a UISelectItems JSF component.
-   * @deprecated Use a subclass of {@link UISelectBean}
    */
   public static List<SelectItem> createUISelectItems(Collection items)
   {
+    return createUISelectItems(items, false);
+  }
+
+  /**
+   * Creates a UISelectItems object that can be assigned to the "value"
+   * attribute of a UISelectItems JSF component.
+   */
+  public static List<SelectItem> createUISelectItems(Collection items,
+                                                     boolean addEmptyItem)
+  {
     List<SelectItem> result = new ArrayList<SelectItem>();
+    if (addEmptyItem) {
+      result.add(new SelectItem("", ""));
+    }
     for (Object item : items) {
       result.add(new SelectItem(item,
                                 item.toString()));
     }
     return result;
   }
-  
+
   /**
    * Output the names of all registered JSF components to the logger, as debug output.
-   * 
+   *
    * @motivation allows developer to determine the valid set of JSF component
    *             names that can be passed to Application.createComponent();
    * @param component
@@ -121,7 +131,7 @@ public class JSFUtils
       log.debug("component name: " + iter.next().toString());
     }
   }
-                             
+
   /**
    * Output the hierarchical structure of a JSF component with nested children.
    */
@@ -136,5 +146,5 @@ public class JSFUtils
     }
   }
 
-  
+
 }

@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.screens;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedSet;
 
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
@@ -106,14 +107,19 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
 
   public List<SelectItem> getScreenTypeSelectItems()
   {
-    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
+    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()),
+                                        _study.getScreenType() == null);
   }
 
   public UISelectOneBean<ScreeningRoomUser> getLabName()
   {
     if (_labName == null) {
-      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(_usersDao.findAllLabHeads(), _study.getLabHead(), _dao) {
-        protected String getLabel(ScreeningRoomUser t) { return t.getLabName(); }
+      SortedSet<ScreeningRoomUser> labHeads = _usersDao.findAllLabHeads();
+      if (_study.getLabHead() == null) {
+        labHeads.add(null);
+      }
+      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(labHeads, _study.getLabHead(), _dao) {
+        protected String getLabel(ScreeningRoomUser t) { return t == null ? "" : t.getLabName(); }
       };
     }
     return _labName;
@@ -189,8 +195,11 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
           leadScreenerCandidates.add(labHead);
           leadScreenerCandidates.addAll(labHead.getLabMembers());
         }
+        if (_study.getLeadScreener() == null) {
+          leadScreenerCandidates.add(null);
+        }
         _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates, _study.getLeadScreener(), _dao) {
-          protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
+          protected String getLabel(ScreeningRoomUser t) { return t == null ? "" : t.getFullNameLastFirst(); }
         };
       }
     });

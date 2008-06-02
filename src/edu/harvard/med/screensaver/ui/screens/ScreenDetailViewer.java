@@ -336,7 +336,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String editNewScreen(AbstractBackingBean returnToViewerAfterEdit)
   {
     ScreensaverUser user = getScreensaverUser();
-    if (!(user instanceof AdministratorUser && 
+    if (!(user instanceof AdministratorUser &&
       ((AdministratorUser) user).isUserInRole(ScreensaverUserRole.SCREENS_ADMIN))) {
       showMessage("unauthorizedOperation", "add a new screen");
     }
@@ -393,7 +393,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       getScreen().setLabHead(getLabName().getSelection());
       getScreen().setLeadScreener(getLeadScreener().getSelection());
     }
-    
+
     _dao.flush();
     _screensBrowser.refetch();
     return _screenViewer.viewScreen(_screen);
@@ -515,7 +515,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     cpr = _dao.reloadEntity(cpr, true, "requestedBy", "RNAiCherryPickScreenings");
-    Screening screening = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(), 
+    Screening screening = _screen.createRNAiCherryPickScreening(cpr.getRequestedBy(),
                                                                 new LocalDate(),
                                                                 cpr);
     duplicateMostRecentScreening(screening);
@@ -623,7 +623,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     if (screenings.isEmpty()) {
       return;
     }
-    Screening previousScreening = screenings.last(); 
+    Screening previousScreening = screenings.last();
     currentScreening.setAssayProtocol(previousScreening.getAssayProtocol());
     currentScreening.setAssayProtocolLastModifiedDate(previousScreening.getAssayProtocolLastModifiedDate());
     currentScreening.setAssayProtocolType(previousScreening.getAssayProtocolType());

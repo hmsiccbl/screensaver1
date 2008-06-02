@@ -35,7 +35,6 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
@@ -129,7 +128,7 @@ public class Screen extends Study
 
   /**
    * Construct an uninitialized <code>Screen</code>.
-   * 
+   *
    * @motivation for new Screen creation via user interface, where even required
    *             fields are allowed to be uninitialized, initially
    * @motivation for hibernate and proxy/concrete subclass constructors
@@ -455,7 +454,7 @@ public class Screen extends Study
     }
     return false;
   }
-  
+
   @Transient
   public Set<ScreeningRoomUser> getAssociatedScreeningRoomUsers()
   {
@@ -960,8 +959,7 @@ public class Screen extends Study
    * Get the study type.
    * @return the study type
    */
-  @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  @Column(nullable=false)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.StudyType$UserType")
   public StudyType getStudyType()
   {
@@ -975,9 +973,10 @@ public class Screen extends Study
    */
   public void setStudyType(StudyType studyType)
   {
-    if (_studyType != null && studyType != studyType) {
-      throw new BusinessRuleViolationException("screen type is immutable");
-    }
+    // commenting this until comprehensive testing is performed, since it requires many relationships to be eager fetched, which may cause problems
+//  if (isDataLoaded()) {
+//    throw new BusinessRuleViolationException("screen type is immutable after screen contains data");
+//  }
     _studyType = studyType;
   }
 
@@ -985,8 +984,7 @@ public class Screen extends Study
    * Get the screen type.
    * @return the screen type
    */
-  @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  @Column(nullable=false)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.ScreenType$UserType")
   public ScreenType getScreenType()
   {
@@ -1000,10 +998,17 @@ public class Screen extends Study
    */
   public void setScreenType(ScreenType screenType)
   {
-    if (_screenType != null && screenType != _screenType) {
-      throw new BusinessRuleViolationException("screen type is immutable");
-    }
+    // commenting this until comprehensive testing is performed, since it requires many relationships to be eager fetched, which may cause problems
+//    if (isDataLoaded()) {
+//      throw new BusinessRuleViolationException("screen type is immutable after screen contains data");
+//    }
     _screenType = screenType;
+  }
+
+  @Transient
+  public boolean isDataLoaded()
+  {
+    return getScreenResult() != null || !getCherryPickRequests().isEmpty() || !getAnnotationTypes().isEmpty() || !getLabActivities().isEmpty();
   }
 
   /**

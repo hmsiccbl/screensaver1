@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -18,7 +18,6 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
@@ -35,14 +34,14 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 
   // instance data members
 
-  
+
   // public constructors and methods
 
   public ScreenTest() throws IntrospectionException
   {
     super(Screen.class);
   }
-  
+
 
   public void testGetLabActivities() throws Exception
   {
@@ -53,7 +52,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     LibraryScreening screening2 = screen.createLibraryScreening(
       screen.getLeadScreener(),
       new LocalDate(2007, 3, 8));
-    CherryPickRequest cpr = screen.createCherryPickRequest(
+    /*CherryPickRequest cpr =*/ screen.createCherryPickRequest(
       screen.getLeadScreener(),
       new LocalDate(2007, 3, 9));
     CherryPickLiquidTransfer cplt = screen.createCherryPickLiquidTransfer(
@@ -116,7 +115,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       }
     });
   }
-  
+
   /**
    * Tests that no problems occur when Hibernate applies cascades to
    * leadScreener and labHead relationships. Regression test for problems that
@@ -130,7 +129,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     Screen screen1b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(1), true, "labHead", "leadScreener");
     assertEquals(screen1a.getLabHead(), screen1b.getLabHead());
     assertEquals(screen1a.getLeadScreener(), screen1b.getLeadScreener());
-    
+
     Screen screen2a = MakeDummyEntities.makeDummyScreen(2);
     screen2a.setLeadScreener(screen2a.getLabHead());
     genericEntityDao.persistEntity(screen2a);
@@ -138,6 +137,6 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     assertEquals(screen2a.getLabHead(), screen2b.getLabHead());
     assertEquals(screen2a.getLabHead(), screen2b.getLeadScreener());
   }
-  
+
 }
 

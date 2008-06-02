@@ -36,9 +36,10 @@
 
 	<ss:property id="screenType" label="Screen Type"
 		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
-		editable="#{empty screen.entityId}" converter="#{screenTypeConverter}" >
-    <ui:define name="editableData">
-      <ui:insert name="editableScreenType" >
+		editable="#{editable &amp;&amp; !screenDetailViewer.screen.dataLoaded}"
+		converter="#{screenTypeConverter}">
+		<ui:define name="editableData">
+			<ui:insert name="editableScreenType">
       No editableScreenType definition!
       </ui:insert>
 		</ui:define>
