@@ -194,13 +194,17 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	display: none;
 }
 
-.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn {
+.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.column500 {
 	vertical-align: top;
 	border-style: none;
 	padding-top: 1px;
 	padding-bottom: 0px;
 	padding-left: 3px;
 	padding-right: 3px;
+}
+
+.column500 {
+	width: 500px;
 }
 
 /* table columns that contain text should have a min width to make text readable (not too vertical) */
@@ -302,7 +306,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .menuAndContent {
 	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
 	/*	table-layout: fixed;*/
-	
+
 }
 
 .menuColumn,.contentColumn {
@@ -402,11 +406,11 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 }
 
 .activeTab {
-	
+
 }
 
 .inactiveTab {
-	
+
 }
 
 .newsDate {

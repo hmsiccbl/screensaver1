@@ -29,7 +29,7 @@ TODO:
 	<t:panelGrid id="leftAndRightSides" columns="2"
 		columnClasses="column,column" styleClass="standardTable">
 		<t:panelGrid id="leftSide" columns="2"
-			columnClasses="propertyLabelColumn,column" styleClass="layoutPanel">
+			columnClasses="propertyLabelColumn,column500" styleClass="layoutPanel">
 
 			<ss:screenSummaryProperties screen="#{screenDetailViewer.screen}"
 				editable="#{screenDetailViewer.editMode}">
@@ -108,19 +108,19 @@ TODO:
 					editable="#{screenDetailViewer.editMode}" />
 			</ss:propertyGroup>
 
-			<ss:property id="publishableProtocol" label="Publishable Protocol"
-				value="#{screenDetailViewer.screen.publishableProtocol}"
-				rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
-				editable="#{screenDetailViewer.editMode}"
-				description="A publication-quality description of the protocol used for this screen"
-				type="Textarea" editWidth="80" editHeight="3" />
-
 			<ss:property id="summary" label="Summary"
 				value="#{screenDetailViewer.screen.summary}"
 				rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 				editable="#{screenDetailViewer.editMode}"
 				description="A summary of the screen" type="Textarea" editWidth="80"
 				editHeight="3" />
+
+      <ss:property id="publishableProtocol" label="Publishable Protocol"
+        value="#{screenDetailViewer.screen.publishableProtocol}"
+        rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
+        editable="#{screenDetailViewer.editMode}"
+        description="A publication-quality description of the protocol used for this screen"
+        type="Textarea" editWidth="80" editHeight="3" />
 
 			<ss:property id="comments" label="Comments"
 				value="#{screenDetailViewer.screen.comments}"
@@ -337,59 +337,6 @@ TODO:
 				</ui:define>
 			</ss:property>
 
-			<ss:property id="statusItems" label="Status Items"
-				rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
-				description="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped">
-				<ui:define name="data">
-					<t:panelGrid columns="1">
-						<t:outputText value="&lt;none&gt;" styleClass="dataText"
-							rendered="#{empty screenDetailViewer.screen.statusItems}" />
-						<t:dataTable id="statusItems" var="statusItem"
-							value="#{screenDetailViewer.statusItemsDataModel}"
-							preserveDataModel="false"
-							rendered="#{!empty screenDetailViewer.screen.statusItems}"
-							styleClass="standardTable" rowClasses="row1,row2"
-							columnClasses="column" headerClass="tableHeader">
-							<t:column>
-								<f:facet name="header">
-									<t:outputText value="Status" />
-								</f:facet>
-								<t:outputText value="#{statusItem.statusValue}"
-									styleClass="dataText" />
-							</t:column>
-							<t:column>
-								<f:facet name="header">
-									<t:outputText value="Date" />
-								</f:facet>
-								<t:outputText id="statusDate" value="#{statusItem.statusDate}"
-									styleClass="dataText" />
-							</t:column>
-							<t:column rendered="#{screenDetailViewer.editMode}">
-								<t:commandButton value="Delete" image="/images/delete.png"
-									action="#{screenDetailViewer.deleteStatusItem}"
-									styleClass="command" />
-							</t:column>
-						</t:dataTable>
-						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
-							<t:selectOneMenu id="newStatusItemValue"
-								value="#{screenDetailViewer.newStatusItemValue.value}"
-								required="false" styleClass="inputText selectMenu">
-								<f:selectItems
-									value="#{screenDetailViewer.newStatusItemValue.selectItems}" />
-							</t:selectOneMenu>
-							<t:inputText id="newStatusItemDate" required="false"
-								value="#{screenDetailViewer.newStatusItemDate}" size="10"
-								styleClass="inputText" converter="#{dateConverter}" />
-							<t:commandButton value="Add Status Item"
-								id="addStatusItemCommand"
-								action="#{screenDetailViewer.addStatusItem}"
-								disabled="#{screenDetailViewer.newStatusItemValue.size == 0}"
-								styleClass="command" />
-						</t:panelGroup>
-					</t:panelGrid>
-				</ui:define>
-			</ss:property>
-
 			<ss:property id="assayReadoutTypes" label="Assay Readout Types"
 				rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 				description="The assay readout types used">
@@ -401,9 +348,10 @@ TODO:
 				</ui:define>
 			</ss:property>
 
-			<ss:property id="keywords" label="Keywords" type="Set"
-				value="#{screenDetailViewer.screen.keywords}"
-				editable="#{screenDetailViewer.editMode}"
+			<ss:property id="keywords"
+				label="#{screenDetailViewer.editMode ? 'Keywords (comma-separated)' : 'Keywords'}"
+				type="Set" value="#{screenDetailViewer.screen.keywords}"
+				editable="#{screenDetailViewer.editMode}" editWidth="80"
 				description="A set of keywords associated with the screen" />
 
 			<ss:property label="Billing Information"
@@ -419,6 +367,59 @@ TODO:
 		</t:panelGrid>
 
 		<t:panelGrid id="rightSide" columns="1">
+
+      <ss:property id="statusItems" label="Status Items"
+        rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
+        description="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped">
+        <ui:define name="data">
+          <t:panelGrid columns="1">
+            <t:outputText value="&lt;none&gt;" styleClass="dataText"
+              rendered="#{empty screenDetailViewer.screen.statusItems}" />
+            <t:dataTable id="statusItems" var="statusItem"
+              value="#{screenDetailViewer.statusItemsDataModel}"
+              preserveDataModel="false"
+              rendered="#{!empty screenDetailViewer.screen.statusItems}"
+              styleClass="standardTable" rowClasses="row1,row2"
+              columnClasses="column" headerClass="tableHeader">
+              <t:column>
+                <f:facet name="header">
+                  <t:outputText value="Status" />
+                </f:facet>
+                <t:outputText value="#{statusItem.statusValue}"
+                  styleClass="dataText" />
+              </t:column>
+              <t:column>
+                <f:facet name="header">
+                  <t:outputText value="Date" />
+                </f:facet>
+                <t:outputText id="statusDate" value="#{statusItem.statusDate}"
+                  styleClass="dataText" />
+              </t:column>
+              <t:column rendered="#{screenDetailViewer.editMode}">
+                <t:commandButton value="Delete" image="/images/delete.png"
+                  action="#{screenDetailViewer.deleteStatusItem}"
+                  styleClass="command" />
+              </t:column>
+            </t:dataTable>
+            <t:panelGroup rendered="#{screenDetailViewer.editMode}">
+              <t:selectOneMenu id="newStatusItemValue"
+                value="#{screenDetailViewer.newStatusItemValue.value}"
+                required="false" styleClass="inputText selectMenu">
+                <f:selectItems
+                  value="#{screenDetailViewer.newStatusItemValue.selectItems}" />
+              </t:selectOneMenu>
+              <t:inputText id="newStatusItemDate" required="false"
+                value="#{screenDetailViewer.newStatusItemDate}" size="10"
+                styleClass="inputText" converter="#{dateConverter}" />
+              <t:commandButton value="Add Status Item"
+                id="addStatusItemCommand"
+                action="#{screenDetailViewer.addStatusItem}"
+                disabled="#{screenDetailViewer.newStatusItemValue.size == 0}"
+                styleClass="command" />
+            </t:panelGroup>
+          </t:panelGrid>
+        </ui:define>
+      </ss:property>
 
 			<ss:property id="labActivities" label="Lab Activities"
 				rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}"

@@ -50,7 +50,10 @@
 		description="The name of the lab carrying out the screen"
 		value="#{screen.labHead}" editable="#{editable}">
 		<ui:define name="data">
-			<ss:user user="#{screen.labHead}" />
+		  <t:panelGroup>
+		  <ss:user user="#{screen.labHead}" />
+		  <t:outputText value="(#{screen.labHead.labAffiliationName})" styleClass="dataText" />
+		  </t:panelGroup>
 		</ui:define>
 		<ui:define name="editableData">
 		  <ui:insert name="editableLabHead" >
@@ -70,7 +73,7 @@
 		</ui:define>
 	</ss:property>
 
-	<ss:property id="title" label="Title" type="Textarea" required="true"
+	<ss:property id="title" label="Title" type="Text" required="true"
 		description="The title of the screen" value="#{screen.title}"
 		editable="#{editable}" editWidth="80" />
 
