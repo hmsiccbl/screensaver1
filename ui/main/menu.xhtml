@@ -154,17 +154,18 @@
 				title="Screen commands">
 				<t:panelGrid columns="1"
 					rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
+					<t:commandButton action="#{screenFinder.findScreen}"
+						id="defaultCommand" styleClass="hiddenCommand" />
 					<t:commandButton action="#{menu.addScreen}"
 						id="addScreenCommand" value="Add Screen"
-						rendered="#{menu.authenticatedUser &amp;&amp; menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
+						rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
 						styleClass="command" />
 					<t:outputLabel id="screenNumberLabel" for="screenNumber"
 						value="Screen #" styleClass="menuItem label" />
 					<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"
 						size="5" styleClass="inputText" />
 					<t:commandButton action="#{screenFinder.findScreen}"
-						id="findScreenCommand" value="Go"
-						rendered="#{menu.authenticatedUser}" styleClass="command" />
+						id="findScreenCommand" value="Go" styleClass="command" />
 					<t:commandButton action="#{screenFinder.addLibraryScreening}"
 						id="addLibraryScreening" value="Add Library Screening"
 						rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
