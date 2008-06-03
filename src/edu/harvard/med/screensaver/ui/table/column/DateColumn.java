@@ -29,12 +29,21 @@ public abstract class DateColumn<R> extends TableColumn<R,LocalDate>
   {
     return getDate(o);
   }
+  
   @Override
   protected Comparator<R> getAscendingComparator()
   {
     return new NullSafeComparator<R>() {
+      NullSafeComparator<LocalDate> _dateComparator = new NullSafeComparator<LocalDate>() {
+        @Override
+        protected int doCompare(LocalDate d1, LocalDate d2)
+        {
+          return d1.compareTo(d2);
+        }
+      };
+
       @Override
-      protected int doCompare(R o1, R o2) { return getDate(o1).compareTo(getDate(o2)); }
+      protected int doCompare(R o1, R o2) { return _dateComparator.compare(getDate(o1), getDate(o2)); }
     };
   }
 

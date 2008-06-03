@@ -42,8 +42,16 @@ public abstract class DateEntityColumn<E extends AbstractEntity> extends EntityC
   protected Comparator<E> getAscendingComparator()
   {
     return new NullSafeComparator<E>() {
+      NullSafeComparator<LocalDate> _dateComparator = new NullSafeComparator<LocalDate>() {
+        @Override
+        protected int doCompare(LocalDate d1, LocalDate d2)
+        {
+          return d1.compareTo(d2);
+        }
+      };
+
       @Override
-      protected int doCompare(E o1, E o2) { return getDate(o1).compareTo(getDate(o2)); }
+      protected int doCompare(E o1, E o2) { return _dateComparator.compare(getDate(o1), getDate(o2)); }
     };
   }
 
