@@ -431,6 +431,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screenDetailViewer" />
+    <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="reagentsBrowser" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />

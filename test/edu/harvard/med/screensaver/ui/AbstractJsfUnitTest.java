@@ -151,7 +151,12 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
       _client.setParameter(nameValuePair.getFirst(),
                            nameValuePair.getSecond());
     }
-    _client.submit(submitButtonId);
+    if (submitButtonId == null) {
+      _client.submit();
+    }
+    else {
+      _client.submit(submitButtonId);
+    }
   }
   
   /**

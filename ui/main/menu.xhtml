@@ -70,8 +70,9 @@
 							value="Small Molecule"
 							title="Browse the currently available small molecule libraries" />
 					</t:panelNavigation2>
-					<t:commandNavigation2 action="#{menu.browseScreens}"
-						styleClass="menuItem" value="Browse Screens" accesskey="S"
+					<t:commandNavigation2 id="browseScreensCommand"
+						action="#{menu.browseScreens}" styleClass="menuItem"
+						value="Browse Screens" accesskey="S"
 						title="Browse the screens currently available and accessible to you"
 						rendered="#{menu.screener || menu.readAdmin}" />
 					<t:commandNavigation2 action="#{menu.browseMyScreens}"

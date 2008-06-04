@@ -354,13 +354,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String cancel()
   {
-    _isEditMode = true;
+    _isEditMode = false;
     if (_returnToViewAfterEdit != null) {
       return _returnToViewAfterEdit.reload();
-    }
-    if (_screen.getEntityId() == null) {
-      _screensBrowser.searchAllScreens();
-      return BROWSE_SCREENS;
     }
     return _screenViewer.viewScreen(_screen);
   }
@@ -389,7 +385,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     }
 
     _dao.flush();
-    _screensBrowser.refetch();
+    //_screensBrowser.refetch(); // TODO: confuses viewScreen() when attempting to redisplay same screen within screens browser
     return _screenViewer.viewScreen(_screen);
   }
 

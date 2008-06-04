@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -233,6 +234,31 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     gotoPageContainingRow(getDataTableUIComponent().getFirst());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+  
+  public boolean gotoRowContainingEntity(E entity)
+  {
+    // first test whether the current row is already the one with the requested entity
+    E currentEntityInSearchResults = null;
+    if (getDataTableUIComponent() != null) {
+      int currentRow = getDataTableUIComponent().getFirst();
+      getDataTableModel().setRowIndex(currentRow);
+      if (getDataTableModel().isRowAvailable()) {
+        currentEntityInSearchResults = (E) getDataTableModel().getRowData();
+        if (entity.equals(currentEntityInSearchResults)) {
+          return true;
+        }
+      }
+    }
+
+    // else, do linear search to find the entity (but only works for InMemoryDataModel)
+    int rowIndex = findRowOfEntity(entity);
+    if (rowIndex >= 0) {
+      gotoRowIndex(rowIndex);
+      return true;
+    }
+
+    return false;
+  }
 
   /**
    * Override to ensure that "table filter mode" is always disabled when in
@@ -382,5 +408,18 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
     return model;
   }
-
+  
+  protected int findRowOfEntity(E entity)
+  {
+    if (getBaseDataTableModel() instanceof InMemoryDataModel) {
+      DataTableModel model = (DataTableModel) getDataTableModel();
+      List<E> data = (List<E>) model.getWrappedData();
+      for (int i = 0; i < data.size(); i++) {
+        if (data.get(i).equals(entity)) {
+          return i;
+        }
+      }
+    }
+    return -1;
+  }
 }

@@ -27,8 +27,6 @@ import edu.harvard.med.screensaver.ui.AbstractJsfUnitTest;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.schedule.renderer.ScheduleCompactMonthRenderer;
-import org.hibernate.type.TrueFalseType;
 import org.joda.time.LocalDate;
 
 /**
@@ -51,6 +49,8 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     super.setUp();
     _screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
     _dao.persistEntity(_screen);
+    // ensure _screen entity has an ID-based hashCode
+    _screen = _dao.reloadEntity(_screen, true, "labHead", "leadScreener", "collaborators");
   }
 
   public void testOpenScreenViewer() throws Exception
@@ -67,9 +67,15 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertEquals("screen number", new Integer(2), (Integer) getBeanValue("screenDetailViewer.screen.screenNumber"));
 //    submit("saveCommand");
 //    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
-//    assertMessage("required.*titleTextareaField1");
-    submit("saveCommand", new Pair<String,String>("screenDetailViewerForm:titleTextareaField1", "Test screen title"));
-    assertAtView("/screensaver/screens/screenViewer.jsf");
+//    assertMessage("required.*titleTextField");
+    _client.setParameter("screenDetailViewerForm:labNameMenu", Integer.toString(_screen.getLabHead().hashCode()));
+    _client.submitNoButton("screenDetailViewerForm");
+    assertEquals(2, getBeanValue("screenDetailViewer.leadScreener.size"));
+    submit("saveCommand", 
+           new Pair<String,String>("screenDetailViewerForm:titleTextField", "Test screen title"),
+           new Pair<String,String>("screenDetailViewerForm:leadScreenerMenu", Integer.toString(_screen.getLabHead().hashCode())),
+           new Pair<String,String>("screenDetailViewerForm:screenTypeMenu", ScreenType.SMALL_MOLECULE.toString()));
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
     assertEquals("screen number", new Integer(2), (Integer) getBeanValue("screenViewer.screen.screenNumber"));
     assertNotNull("screen created", _dao.findEntityByProperty(Screen.class, "screenNumber", 2));
   }
@@ -90,8 +96,8 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     submit("screenDetailPanelForm:editCommand");
     assertAtView("/screensaver/screens/screenDetailViewer.jsf");
     submit("saveCommand",
-           new Pair<String,String>("screenDetailViewerForm:titleTextareaField1", "new title"));
-    assertAtView("/screensaver/screens/screenViewer.jsf");
+           new Pair<String,String>("screenDetailViewerForm:titleTextField", "new title"));
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
     assertFalse("read-only mode", (Boolean) getBeanValue("screenDetailViewer.editMode"));
     assertEquals("title changed", "new title", getBeanValue("screenViewer.screen.title"));
   }
@@ -103,15 +109,14 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     submit("screenDetailPanelForm:editCommand");
     assertAtView("/screensaver/screens/screenDetailViewer.jsf");
     submit("cancelEditCommand",
-           new Pair<String,String>("screenDetailViewerForm:titleTextareaField1", "new title"));
-    assertAtView("/screensaver/screens/screenViewer.jsf");
+           new Pair<String,String>("screenDetailViewerForm:titleTextField", "new title"));
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
     assertFalse("read-only mode", (Boolean) getBeanValue("screenDetailViewer.editMode"));
     assertEquals("title not changed", oldTitle, getBeanValue("screenViewer.screen.title"));
   }
 
   public void testAddStatusItem() throws Exception
   {
-
     visitScreenViewer(_screen);
     submit("screenDetailPanelForm:editCommand");
     assertAtView("/screensaver/screens/screenDetailViewer.jsf");
@@ -128,14 +133,39 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertEquals(StatusValue.COMPLETED, ((SortedSet<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).last().getStatusValue());
     assertEquals(new LocalDate(2008, 2, 2), ((SortedSet<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).last().getStatusDate());
     submit("saveCommand");
-    assertAtView("/screensaver/screens/screenViewer.jsf");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
   }
+  
+  public void testFindScreenNumber() throws Exception
+  {
+    Screen screen2 = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
+    _dao.persistEntity(screen2);
 
+    // test from virgin session, screens browser not yet opened/initalized
+    visitMainPage();
+    submit("findScreenCommand", new Pair<String,String>("screenNumber", "2"));
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertEquals(new Integer(2), getBeanValue("screenViewer.screen.screenNumber"));
+    assertEquals(1, getBeanValue("screensBrowser.rowCount"));
+    assertTrue(((Boolean) getBeanValue("screensBrowser.entityView")).booleanValue());
+    
+    // test after screens browser has been opened/initialized; screen should be found in existing screen search results context
+    _client.clickCommandLink("browseScreensCommand");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertEquals(2, getBeanValue("screensBrowser.rowCount"));
+    submit("findScreenCommand", new Pair<String,String>("screenNumber", "1"));
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertEquals(new Integer(1), getBeanValue("screenViewer.screen.screenNumber"));
+    assertEquals(2, getBeanValue("screensBrowser.rowCount"));
+    assertTrue(((Boolean) getBeanValue("screensBrowser.entityView")).booleanValue());
+  }
+  
   private void visitScreenViewer(Screen screen)
   {
     ScreenViewer viewer = getBeanValue("screenViewer");
-    viewer.setScreen(screen);
-    visitPage("/screens/screenViewer.jsf");
+    viewer.viewScreen(screen);
+    visitPage("/screens/screensBrowser.jsf");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
   }
 
 }

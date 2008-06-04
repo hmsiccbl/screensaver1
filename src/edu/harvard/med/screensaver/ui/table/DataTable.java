@@ -55,6 +55,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
 
   private DataTableModelLazyUpdateDecorator<R> _dataTableModel;
   private UIData _dataTableUIComponent;
+  private Integer _pendingFirstRow;
   private TableColumnManager<R> _columnManager;
   private UIInput _rowsPerPageUIComponent;
   private RowsPerPageSelector _rowsPerPageSelector = new RowsPerPageSelector(Collections.<Integer>emptyList());
@@ -63,6 +64,8 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
    * @motivation for unit tests
    */
   private DataTableModel<R> _baseDataTableModel;
+
+
 
 
 
@@ -84,6 +87,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
 
     _baseDataTableModel = dataTableModel;
     _dataTableModel = new DataTableModelLazyUpdateDecorator<R>(_baseDataTableModel);
+    _pendingFirstRow = null;
     refetch();
     refilter();
     resort();
@@ -97,6 +101,10 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   public void setDataTableUIComponent(UIData dataTableUIComponent)
   {
     _dataTableUIComponent = dataTableUIComponent;
+    if (_pendingFirstRow != null) {
+      _dataTableUIComponent.setFirst(_pendingFirstRow);
+      _pendingFirstRow = null;
+    }
   }
 
   /**
@@ -237,17 +245,15 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
 
   public void gotoRowIndex(int rowIndex)
   {
-    if (_dataTableUIComponent != null) {
-      log.debug("gotoRowIndex(): requested row: " + rowIndex);
-      // ensure value is within valid range, and in particular that we never
-      // show less than the table's configured row count (unless it's more than
-      // the total number of rows)
-      rowIndex = Math.max(0, Math.min(rowIndex,
-                                      getRowCount() -
-                                        getDataTableUIComponent().getRows()));
-      _dataTableUIComponent.setFirst(rowIndex);
-      log.debug("gotoRowIndex(): actual row: " + rowIndex);
-    }
+    log.debug("gotoRowIndex(): requested row: " + rowIndex);
+    // ensure value is within valid range, and in particular that we never
+    // show less than the table's configured row count (unless it's more than
+    // the total number of rows)
+    rowIndex = Math.max(0, Math.min(rowIndex,
+                                    getRowCount() - getRowsPerPage()
+                                    /*getDataTableUIComponent().getRows()*/));
+    setRowIndex(rowIndex);
+    log.debug("gotoRowIndex(): actual row: " + rowIndex);
   }
 
   public boolean isNumericColumn()
@@ -349,19 +355,14 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   {
     getDataTableModel().filter(getColumnManager().getVisibleColumns());
     // note: we cannot call gotoRowIndex(), as this will cause DTMLUD to trigger
-    if (_dataTableUIComponent != null) {
-      _dataTableUIComponent.setFirst(0);
-    }
+    setRowIndex(0);
   }
 
   public void resort()
   {
     getDataTableModel().sort(getColumnManager().getSortColumns(),
                              getColumnManager().getSortDirection());
-    // note: we cannot call gotoRowIndex(), as this will cause DTMLUD to trigger
-    if (_dataTableUIComponent != null) {
-      _dataTableUIComponent.setFirst(0);
-    }
+    setRowIndex(0);
   }
 
   // private methods
@@ -375,4 +376,22 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     }
   }
 
+
+  /**
+   * Low-level setter method for changing the current row index. Client code
+   * should call gotoRowIndex()
+   * 
+   * @motivation handle the case where client code wants to goto a row index,
+   *             but the _dataTableUIComponent has not yet been set by JSF
+   * @param rowIndex the row index
+   */
+  private void setRowIndex(int rowIndex)
+  {
+    if (_dataTableUIComponent != null) {
+      _dataTableUIComponent.setFirst(rowIndex);
+    }
+    else {
+      _pendingFirstRow = rowIndex;
+    }
+  }
 }

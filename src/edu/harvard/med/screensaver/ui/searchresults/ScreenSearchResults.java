@@ -292,6 +292,6 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
   @Override
   protected void setEntityToView(Screen screen)
   {
-    _screenViewer.viewScreen(screen);
+    _screenViewer.setScreen(screen);
   }
 }
