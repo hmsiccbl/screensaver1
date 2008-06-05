@@ -87,6 +87,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private Screen _screen;
   private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
+  private boolean _isPublishableProtocolDetailsCollapsed = true;
   private FundingSupport _newFundingSupport;
   private UISelectOneBean<StatusValue> _newStatusItemValue;
   private LocalDate _newStatusItemDate;
@@ -157,6 +158,16 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public boolean isAdminViewMode()
   {
     return _isAdminViewMode;
+  }
+
+  public boolean isPublishableProtocolDetailsCollapsed()
+  {
+    return _isPublishableProtocolDetailsCollapsed;
+  }
+
+  public void setPublishableProtocolDetailsCollapsed(boolean isPublishableProtocolDetailsCollapsed)
+  {
+    _isPublishableProtocolDetailsCollapsed = isPublishableProtocolDetailsCollapsed;
   }
 
   /**
@@ -341,6 +352,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     candiateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
     return JSFUtils.createUISelectItems(candiateAssayReadoutTypes);
   }
+
 
 
 
@@ -660,6 +672,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _isEditMode = false;
     _returnToViewAfterEdit = null;
     //_isAdminViewMode = false; // maintain this setting when viewing a new screen
+    //_isPublishableProtocolDetailsCollapsed = true; // maintain this setting when viewing a new screen
     _newFundingSupport = null;
     _newStatusItemValue = null;
     _newStatusItemDate = null;

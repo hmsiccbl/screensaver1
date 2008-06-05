@@ -114,12 +114,44 @@ TODO:
 				description="A summary of the screen" type="Textarea" editWidth="80"
 				editHeight="3" />
 
-      <ss:property id="publishableProtocol" label="Publishable Protocol"
-        value="#{screenDetailViewer.screen.publishableProtocol}"
-        rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
-        editable="#{screenDetailViewer.editMode}"
-        description="A publication-quality description of the protocol used for this screen"
-        type="Textarea" editWidth="80" editHeight="3" />
+			<ss:propertyGroup label="Publishable Protocol" columns="1" columnClasses="column"
+				rendered="#{screenDetailViewer.allowedAccessToScreenDetails}">
+				<ss:property id="publishableProtocol" label="" 
+					value="#{screenDetailViewer.screen.publishableProtocol}"
+					editable="#{screenDetailViewer.editMode}"
+					description="A publication-quality description of the protocol used for this screen"
+					type="Textarea" editWidth="80" editHeight="3" />
+				<t:collapsiblePanel var="isCollapsed1"
+					value="#{screenDetailViewer.publishableProtocolDetailsCollapsed}">
+					<f:facet name="header">
+						<t:headerLink immediate="true">
+							<t:outputText
+								value="#{isCollapsed1 ? 'More &gt;&gt;' : 'Less &lt;&lt;'}"
+								styleClass="dataText" />
+						</t:headerLink>
+					</f:facet>
+					<t:panelGrid columns="2" columnClasses="propertyLabelColumn,column">
+						<ss:property id="publishableProtocolComments" label="Comments"
+							value="#{screenDetailViewer.screen.publishableProtocolComments}"
+							editable="#{screenDetailViewer.editMode}"
+							description="Comments associated with the publishable protocol"
+							type="Textarea" editWidth="80" editHeight="3" />
+						<ss:propertyGroup label="Entered" columns="4"
+							columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
+							<ss:property id="publishableProtocolDateEntered"
+								label="Date" type="Date"
+								value="#{screenDetailViewer.screen.publishableProtocolDateEntered}"
+								editable="#{screenDetailViewer.editMode}"
+								description="The date the publishable protocol was entered" />
+							<ss:property id="publishableProtocolEnteredBy" label="By"
+								type="Text"
+								value="#{screenDetailViewer.screen.publishableProtocolEnteredBy}"
+								editable="#{screenDetailViewer.editMode}"
+								description="The initial of the person that entered the publishable protocol" />
+						</ss:propertyGroup>
+					</t:panelGrid>
+				</t:collapsiblePanel>
+			</ss:propertyGroup> 
 
 			<ss:property id="comments" label="Comments"
 				value="#{screenDetailViewer.screen.comments}"

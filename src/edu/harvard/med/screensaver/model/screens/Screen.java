@@ -109,7 +109,6 @@ public class Screen extends Study
   private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
   private SortedSet<String> _keywords = new TreeSet<String>();
   private String _publishableProtocol;
-  private String _publishableProtocolComments;
   private ScreenResult _screenResult;
 
   // iccb screen
@@ -124,8 +123,10 @@ public class Screen extends Study
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private String _abaseStudyId;
   private String _abaseProtocolId;
+  private String _publishableProtocolComments;
   private LocalDate _publishableProtocolDateEntered;
-  private String _publishableProtocolEnteredBy;private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
+  private String _publishableProtocolEnteredBy;
+  private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
 
 
   // public constructors
