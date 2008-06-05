@@ -61,6 +61,8 @@ public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationTyp
         assertNotNull(at.createAnnotationValue(reagent1, "a"));
         assertNotNull(at.createAnnotationValue(reagent2, "b"));
         assertNull(at.createAnnotationValue(reagent1, "c"));;
+        genericEntityDao.persistEntity(reagent1);
+        genericEntityDao.persistEntity(reagent2);
         genericEntityDao.persistEntity(study);
       }
     });
