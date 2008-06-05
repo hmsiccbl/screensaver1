@@ -42,7 +42,6 @@
     <mapping class="edu.harvard.med.screensaver.model.screens.BillingInformation" />
     <mapping class="edu.harvard.med.screensaver.model.screens.BillingItem" />
     <mapping class="edu.harvard.med.screensaver.model.screens.EquipmentUsed" />
-    <mapping class="edu.harvard.med.screensaver.model.screens.LetterOfSupport" />
     <mapping class="edu.harvard.med.screensaver.model.screens.LibraryScreening" />
     <mapping class="edu.harvard.med.screensaver.model.screens.PlatesUsed" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Publication" />

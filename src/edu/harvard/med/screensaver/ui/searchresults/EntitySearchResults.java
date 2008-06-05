@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -129,7 +128,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       getRowsPerPageSelector().setSelection(1);
 
       // set the entity to be viewed
-      if (currentEntity != entityToView) {  
+      if (currentEntity != entityToView) {
         log.debug("viewCurrentEntity(): setting entity to view: " + currentEntity);
         setEntityToView(currentEntity);
         entityToView = currentEntity;
@@ -189,7 +188,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
 
   /**
    * Constructs a EntitySearchResults object.
-   * 
+   *
    * @param dataExporters a List of DataExporters that must be one of the reified
    *          types DataExporter<DataTableModel<E>> or DataExporter<E>
    */
@@ -234,7 +233,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     gotoPageContainingRow(getDataTableUIComponent().getFirst());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   public boolean gotoRowContainingEntity(E entity)
   {
     // first test whether the current row is already the one with the requested entity
@@ -291,7 +290,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    * @motivation type safety of return type
    */
   @Override
-  public EntityDataFetcher<E,K> getDataFetcher() 
+  public EntityDataFetcher<E,K> getDataFetcher()
   {
     return (EntityDataFetcher<E,K>) super.getDataFetcher();
   }
@@ -408,7 +407,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
     return model;
   }
-  
+
   protected int findRowOfEntity(E entity)
   {
     if (getBaseDataTableModel() instanceof InMemoryDataModel) {

@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
@@ -73,7 +74,12 @@ public class JSFUtils
     throws IOException
   {
     HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
-    response.setContentType(mimeType);
+    if (mimeType == null && contentLocation != null) {
+      mimeType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(contentLocation);
+    }
+    if (mimeType != null) {
+      response.setContentType(mimeType);
+    }
 
     // NOTE: the second line does the trick with the filename. leaving first line in for posterity
     response.setHeader("Content-Location", contentLocation);

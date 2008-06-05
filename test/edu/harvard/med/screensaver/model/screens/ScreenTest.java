@@ -10,18 +10,23 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.engine.EntityKey;
@@ -202,6 +207,35 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     catch (BusinessRuleViolationException e) {
       assertEquals("status item is mutually exclusive with existing status item " + StatusValue.PENDING_ICCB, e.getMessage());
     }
+  }
+
+  public void testAddAndDeleteAttachedFiles() throws IOException
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+    screen.createAttachedFile("file1.txt", AttachedFileType.SCREENER_CORRESPONDENCE, "file1 contents");
+    genericEntityDao.persistEntity(screen);
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true, "attachedFiles");
+        assertEquals("add attached file to transient screen", 1, screen.getAttachedFiles().size());
+        try {
+          assertEquals("attached file contents accessible",
+                       "file1 contents",
+                       IOUtils.toString(screen.getAttachedFiles().iterator().next().getFileContents().getBinaryStream()));
+        }
+        catch (Exception e) {
+          throw new DAOTransactionRollbackException(e);
+        }
+      }
+    });
+
+    Iterator<AttachedFile> iter = screen.getAttachedFiles().iterator();
+    AttachedFile attachedFile = iter.next();
+    screen.getAttachedFiles().remove(attachedFile);
+    genericEntityDao.saveOrUpdateEntity(screen);
+    screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true, "attachedFiles");
+    assertEquals("delete attached file from detached screen", 0, screen.getAttachedFiles().size());
   }
 
 }

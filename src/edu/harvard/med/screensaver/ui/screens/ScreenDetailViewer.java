@@ -9,6 +9,10 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,9 +37,9 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
+import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
-import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
@@ -57,6 +61,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +92,10 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private LocalDate _newStatusItemDate;
   private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
 
+  private String _newAttachedFileName;
+  private UISelectOneBean<AttachedFileType> _newAttachedFileType;
+  private UploadedFile _uploadedAttachedFileContents;
+  private String _newAttachedFileContents;
 
 
   // constructors
@@ -245,17 +254,42 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     return new ListDataModel(publications);
   }
 
-  public DataModel getLettersOfSupportDataModel()
+  public String getNewAttachedFileName()
   {
-    ArrayList<LetterOfSupport> lettersOfSupport = new ArrayList<LetterOfSupport>(getScreen().getLettersOfSupport());
-    Collections.sort(lettersOfSupport,
-                     new Comparator<LetterOfSupport>() {
-      public int compare(LetterOfSupport los1, LetterOfSupport los2)
-      {
-        return los1.getDateWritten().compareTo(los2.getDateWritten());
-      }
-    });
-    return new ListDataModel(lettersOfSupport);
+    return _newAttachedFileName;
+  }
+
+  public void setNewAttachedFileName(String newAttachedFileName)
+  {
+    _newAttachedFileName = newAttachedFileName;
+  }
+
+  public UISelectOneBean<AttachedFileType> getNewAttachedFileType()
+  {
+    if (_newAttachedFileType == null) {
+      _newAttachedFileType = new UISelectOneBean<AttachedFileType>(Arrays.asList(AttachedFileType.values()));
+    }
+    return _newAttachedFileType;
+  }
+
+  public String getNewAttachedFileContents()
+  {
+    return _newAttachedFileContents;
+  }
+
+  public void setNewAttachedFileContents(String newAttachedFileContents)
+  {
+    _newAttachedFileContents = newAttachedFileContents;
+  }
+
+  public void setUploadedAttachedFileContents(UploadedFile uploadedFile)
+  {
+    _uploadedAttachedFileContents = uploadedFile;
+  }
+
+  public UploadedFile getUploadedAttachedFileContents()
+  {
+    return _uploadedAttachedFileContents;
   }
 
   public DataModel getAttachedFilesDataModel()
@@ -307,6 +341,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     candiateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
     return JSFUtils.createUISelectItems(candiateAssayReadoutTypes);
   }
+
 
 
   /* JSF Application methods */
@@ -435,33 +470,42 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
-  public String addLetterOfSupport()
-  {
-    try {
-      getScreen().createLetterOfSupport(new LocalDate(), "");
-    }
-    catch (DuplicateEntityException e) {
-      showMessage("screens.duplicateEntity", "letter of support");
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String deleteLetterOfSupport()
-  {
-    getScreen().getLettersOfSupport().remove(getSelectedEntityOfType(LetterOfSupport.class));
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
   public String addAttachedFile()
   {
+    String filename;
+    InputStream contentsInputStream;
+    if (_uploadedAttachedFileContents != null) {
+      filename = _uploadedAttachedFileContents.getName();
+      try {
+        contentsInputStream = _uploadedAttachedFileContents.getInputStream();
+      }
+      catch (IOException e) {
+        reportApplicationError(e.getMessage());
+        return REDISPLAY_PAGE_ACTION_RESULT;
+      }
+      _uploadedAttachedFileContents = null;
+    }
+    else {
+      filename = _newAttachedFileName;
+      contentsInputStream = new ByteArrayInputStream(_newAttachedFileContents.getBytes());
+    }
+
     try {
-      getScreen().createAttachedFile("<new>", "");
+      if (filename == null || filename.trim().length() == 0) {
+        showMessage("requiredValue", "Attached File Name");
+        return REDISPLAY_PAGE_ACTION_RESULT;
+      }
+      getScreen().createAttachedFile(filename,
+                                     _newAttachedFileType.getSelection(),
+                                     contentsInputStream);
     }
-    catch (DuplicateEntityException e) {
-      showMessage("screens.duplicateEntity", "attached file");
+    catch (IOException e) {
+      reportApplicationError("could not attach the file contents");
     }
+    _newAttachedFileName = null;
+    _newAttachedFileContents = null;
+    _newAttachedFileType = null;
+    _uploadedAttachedFileContents = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -469,6 +513,25 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String deleteAttachedFile()
   {
     getScreen().getAttachedFiles().remove(getSelectedEntityOfType(AttachedFile.class));
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  @Transactional
+  public String downloadAttachedFile() throws IOException, SQLException
+  {
+    AttachedFile attachedFile = (AttachedFile) getRequestMap().get("attachedFile");
+    // attachedFile must be Hibernate-managed in order to access the contents (a LOB type)
+    // if attachedFile is transient, we should not attempt to reattach, and contents will be accessible
+    if (attachedFile.getAttachedFileId() != null) {
+      attachedFile = _dao.reloadEntity(attachedFile, true);
+    }
+    if (attachedFile != null) {
+      JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                         attachedFile.getFileContents().getBinaryStream(),
+                                         attachedFile.getFilename(),
+                                         null);
+    }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -599,6 +662,10 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _newFundingSupport = null;
     _newStatusItemValue = null;
     _newStatusItemDate = null;
+    _newAttachedFileContents = null;
+    _newAttachedFileName = null;
+    _newAttachedFileType = null;
+    _uploadedAttachedFileContents = null;
     _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;
   }
 

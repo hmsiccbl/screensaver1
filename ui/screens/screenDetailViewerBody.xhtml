@@ -11,7 +11,6 @@
 <!--
 TODO:
 - add URL field
-- provide file upload for attached file
 -->
 
 <ui:composition>
@@ -190,59 +189,8 @@ TODO:
 						</t:dataTable>
 						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
 							<t:commandButton value="Add Publication"
-								action="#{screenDetailViewer.addPublication}" immediate="true"
+								action="#{screenDetailViewer.addPublication}"
 								styleClass="command" />
-						</t:panelGroup>
-					</t:panelGrid>
-				</ui:define>
-			</ss:property>
-
-			<ss:property id="lettersOfSupport" label="Letters of Support"
-				rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
-				title="Letters of support written by screening room staff for those associated with the screen">
-				<ui:define name="data">
-					<t:panelGrid columns="1"
-						rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
-						<t:outputText value="&lt;none&gt;" styleClass="dataText"
-							rendered="#{empty screenDetailViewer.screen.lettersOfSupport}" />
-						<t:dataTable id="lettersOfSupport" var="letterOfSupport"
-							value="#{screenDetailViewer.lettersOfSupportDataModel}"
-							preserveDataModel="false"
-							rendered="#{!empty screenDetailViewer.screen.lettersOfSupport}"
-							styleClass="standardTable" rowClasses="row1,row2"
-							columnClasses="column" headerClass="tableHeader">
-							<t:column>
-								<f:facet name="header">
-									<t:outputText value="Written By" />
-								</f:facet>
-								<t:inputText value="#{letterOfSupport.writtenBy}"
-									displayValueOnly="#{!screenDetailViewer.editMode}"
-									styleClass="inputText" displayValueOnlyStyleClass="dataText" />
-							</t:column>
-							<t:column>
-								<f:facet name="header">
-									<t:outputText value="Written" />
-								</f:facet>
-								<t:inputText id="statusDateEditable"
-									value="#{letterOfSupport.dateWritten}"
-									converter="#{dateConverter}"
-									rendered="#{screenDetailViewer.editMode}"
-									styleClass="inputText" />
-								<t:outputText id="statusDate"
-									value="#{letterOfSupport.dateWritten}"
-									rendered="#{screenDetailViewer.adminViewMode}"
-									styleClass="dataText" />
-							</t:column>
-							<t:column>
-								<t:commandButton value="Delete" image="/images/delete.png"
-									action="#{screenDetailViewer.deleteLetterOfSupport}"
-									styleClass="command" rendered="#{screenDetailViewer.editMode}" />
-							</t:column>
-						</t:dataTable>
-						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
-							<t:commandButton value="Add Letter of Support"
-								action="#{screenDetailViewer.addLetterOfSupport}"
-								immediate="true" styleClass="command" />
 						</t:panelGroup>
 					</t:panelGrid>
 				</ui:define>
@@ -264,34 +212,66 @@ TODO:
 							columnClasses="column" headerClass="tableHeader">
 							<t:column>
 								<f:facet name="header">
-									<t:outputText value="File Name" />
+									<t:outputText value="Date Added" />
 								</f:facet>
-								<t:inputText value="#{attachedFile.filename}"
-									displayValueOnly="#{!screenDetailViewer.editMode}"
-									styleClass="inputText" displayValueOnlyStyleClass="dataText" />
+								<t:outputText value="#{attachedFile.dateCreated}"
+									converter="#{dateConverter}" />
 							</t:column>
 							<t:column>
 								<f:facet name="header">
-									<t:outputText value="Contents" />
+									<t:outputText value="File Type" />
 								</f:facet>
-								<t:inputText value="#{attachedFile.fileContents}"
-									displayValueOnly="#{!screenDetailViewer.editMode}"
-									styleClass="inputText" displayValueOnlyStyleClass="dataText" />
+								<t:outputText value="#{attachedFile.fileType}" />
 							</t:column>
 							<t:column>
+								<f:facet name="header">
+									<t:outputText value="File Name" />
+								</f:facet>
+								<t:commandLink value="#{attachedFile.filename}"
+									action="#{screenDetailViewer.downloadAttachedFile}"
+									styleClass="dataText" />
+							</t:column>
+							<t:column rendered="#{screenDetailViewer.editMode}">
 								<t:commandButton value="Delete" image="/images/delete.png"
 									action="#{screenDetailViewer.deleteAttachedFile}"
 									styleClass="command" rendered="#{screenDetailViewer.editMode}" />
-								<t:commandButton value="View..."
-									action="#{screenDetailViewer.viewAttachedFile}"
-									styleClass="command" />
 							</t:column>
 						</t:dataTable>
-						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
-							<t:commandButton value="Add Attached File"
-								action="#{screenDetailViewer.addAttachedFile}" immediate="true"
-								styleClass="command" />
-						</t:panelGroup>
+						<t:panelGrid columns="2"
+							columnClasses="propertyLabelColumn,column"
+							rendered="#{screenDetailViewer.editMode}">
+							<t:outputLabel for="newAttachedFileType" value="File Type"
+								styleClass="label" />
+							<t:selectOneMenu id="newAttachedFileType"
+								value="#{screenDetailViewer.newAttachedFileType.value}"
+								required="false" styleClass="inputText selectMenu">
+								<f:selectItems
+									value="#{screenDetailViewer.newAttachedFileType.selectItems}" />
+							</t:selectOneMenu>
+							<t:outputLabel for="uploadScreenAttachedFile"
+								value="Option #1: Upload File" styleClass="label" />
+							<t:inputFileUpload id="uploadAttachedFile"
+								value="#{screenDetailViewer.uploadedAttachedFileContents}"
+								maxlength="#{1024 * 1024}" styleClass="inputText" />
+							<t:outputLabel for="uploadScreenAttachedFile"
+								value="Option #2: Enter" styleClass="label" />
+							<t:panelGrid columns="2">
+								<t:outputLabel for="newAttachedFilename" value="Name"
+									styleClass="label propertyLabelColumn" />
+								<t:inputText id="newAttachedFilename"
+									value="#{screenDetailViewer.newAttachedFileName}"
+									styleClass="inputText" />
+								<t:outputLabel for="newAttachedFileContents" value="Contents"
+									styleClass="label propertyLabelColumn" />
+								<t:inputText id="newAttachedFileContents"
+									value="#{screenDetailViewer.newAttachedFileContents}"
+									styleClass="inputText" />
+							</t:panelGrid>
+						</t:panelGrid>
+						<t:commandButton value="Add Attached File"
+							action="#{screenDetailViewer.addAttachedFile}"
+							rendered="#{screenDetailViewer.editMode}"
+							styleClass="command" />
 					</t:panelGrid>
 				</ui:define>
 			</ss:property>

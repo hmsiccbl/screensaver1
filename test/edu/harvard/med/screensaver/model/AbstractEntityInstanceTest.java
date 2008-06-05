@@ -18,6 +18,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,7 +75,9 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -263,6 +266,12 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
                     ((AbstractEntity) getterValue).getEntityId());
                   // TODO: could run AE.isEquivalent as well..
                 }
+                else if (originalValue instanceof Blob) {
+                  assertEquals("getter for immutable property " + propFullName +
+                               " returns value specified in constructor",
+                               IOUtils.toString(((Blob) originalValue).getBinaryStream()),
+                               IOUtils.toString(((Blob) getterValue).getBinaryStream()));
+                }
                 else {
                   assertEquals("getter for immutable property " + propFullName +
                     " returns value specified in constructor",
@@ -386,7 +395,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
               setter.invoke(bean, setValue);
             }
             catch (Exception e) {
-              throw new DAOTransactionRollbackException(e); 
+              throw new DAOTransactionRollbackException(e);
             }
           }
         });
@@ -766,7 +775,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     }
 
     log.debug("testBidirectionalityOfOneSideOfRelationship: " + propFullName);
-    
+
     final RelatedProperty relatedProperty = new RelatedProperty(bean.getClass(), propertyDescriptor);
 
     assertNotNull("related _bean " + relatedProperty.getBeanClass().getSimpleName() +
@@ -938,7 +947,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     if (!relatedProperty.exists()) {
       return;
     }
-    
+
     // get basic objects related to the _bean
     Class<? extends AbstractEntity> beanClass = bean.getClass();
     String propertyName = propertyDescriptor.getName();
@@ -1161,6 +1170,9 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     }
     if (type.equals(String.class)) {
       return getStringTestValue();
+    }
+    if (type.equals(Blob.class)) {
+      return Hibernate.createBlob(getStringTestValue().getBytes());
     }
     if (type.equals(Character.class)) {
       _characterTestValue++;
@@ -1827,7 +1839,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
   /**
    * Get the Hibernate-managed instance of the specified entity.
-   * 
+   *
    * @return the same entity if already managed by the current Hibernate
    *         session, otherwise loads from the database.
    */

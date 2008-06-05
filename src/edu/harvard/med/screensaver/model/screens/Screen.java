@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -121,7 +124,6 @@ public class Screen extends Study
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private String _abaseStudyId;
   private String _abaseProtocolId;
-  private Set<LetterOfSupport> _lettersOfSupport = new HashSet<LetterOfSupport>();
   private LocalDate _publishableProtocolDateEntered;
   private String _publishableProtocolEnteredBy;private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
 
@@ -827,39 +829,6 @@ public class Screen extends Study
   }
 
   /**
-   * Get the letters of support.
-   * @return the letters of support
-   */
-  @OneToMany(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="letterOfSupport")
-  public Set<LetterOfSupport> getLettersOfSupport()
-  {
-    return _lettersOfSupport;
-  }
-
-  /**
-   * Create and return a new letter of support for the screen.
-   * @param dateWritten the date written
-   * @param writtenBy the written by
-   * @return the new letter for support
-   */
-  public LetterOfSupport createLetterOfSupport(LocalDate dateWritten, String writtenBy)
-  {
-    LetterOfSupport letterOfSupport = new LetterOfSupport(this, dateWritten, writtenBy);
-    _lettersOfSupport.add(letterOfSupport);
-    return letterOfSupport;
-  }
-
-  /**
    * Get the attached files.
    * @return the attached files
    */
@@ -881,11 +850,25 @@ public class Screen extends Study
   /**
    * Create and return a new attached file for the screen.
    * @param filename the filename
+   * @param fileType the file type
    * @param fileContents the file contents
+   * @throws IOException
    */
-  public AttachedFile createAttachedFile(String filename, String fileContents)
+  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, String fileContents) throws IOException
   {
-    AttachedFile attachedFile = new AttachedFile(this, filename, fileContents);
+    return createAttachedFile(filename, fileType, new ByteArrayInputStream(fileContents.getBytes()));
+  }
+
+  /**
+   * Create and return a new attached file for the screen.
+   * @param filename the filename
+   * @param fileType the file type
+   * @param fileContents the file contents
+   * @throws IOException
+   */
+  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  {
+    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileContents);
     _attachedFiles.add(attachedFile);
     return attachedFile;
   }
@@ -1613,16 +1596,6 @@ public class Screen extends Study
   private void setPublications(Set<Publication> publications)
   {
     _publications = publications;
-  }
-
-  /**
-   * Set the letters of support.
-   * @param lettersOfSupport the new letters of support
-   * @motivation for hibernate
-   */
-  private void setLettersOfSupport(Set<LetterOfSupport> lettersOfSupport)
-  {
-    _lettersOfSupport = lettersOfSupport;
   }
 
   /**

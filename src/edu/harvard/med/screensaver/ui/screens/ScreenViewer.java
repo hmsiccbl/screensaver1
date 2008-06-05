@@ -9,9 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -50,7 +47,7 @@ public class ScreenViewer extends StudyViewer
 
 
 
-  
+
   // constructors
 
   /**
@@ -101,10 +98,9 @@ public class ScreenViewer extends StudyViewer
     _dao.needReadOnly(screen, "collaborators.labHead");
     _dao.needReadOnly(screen, "labActivities.performedBy");
     _dao.needReadOnly(screen,
-                      "attachedFiles", 
-                      "fundingSupports", 
-                      "keywords", 
-                      "lettersOfSupport", 
+                      "attachedFiles",
+                      "fundingSupports",
+                      "keywords",
                       "publications");
     _dao.needReadOnly(screen, "statusItems");
     _dao.needReadOnly(screen, "cherryPickRequests");
@@ -114,7 +110,7 @@ public class ScreenViewer extends StudyViewer
                       "resultValueTypes.derivedTypes",
                       "resultValueTypes.typesDerivedFrom");
     _screen = screen;
-    
+
     setStudy(screen);
     _screenDetailViewer.setScreen(screen);
     _screenResultImporter.setScreen(screen);
@@ -123,7 +119,7 @@ public class ScreenViewer extends StudyViewer
     _screenResultViewer.setScreenResult(screenResult);
     resetView();
   }
-  
+
 
   /* JSF Application methods */
 

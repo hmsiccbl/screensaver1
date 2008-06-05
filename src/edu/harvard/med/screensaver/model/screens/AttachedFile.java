@@ -10,6 +10,10 @@
 package edu.harvard.med.screensaver.model.screens;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Blob;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,16 +22,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.Immutable;
 
 
 /**
@@ -40,7 +47,7 @@ import org.apache.log4j.Logger;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "screenId", "filename" }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class AttachedFile extends AbstractEntity
+public class AttachedFile extends TimeStampedAbstractEntity
 {
 
   // static fields
@@ -55,7 +62,8 @@ public class AttachedFile extends AbstractEntity
   private Integer _version;
   private Screen _screen;
   private String _filename;
-  private String _fileContents;
+  private AttachedFileType _fileType;
+  private Blob _fileContents;
 
 
   // public constructor
@@ -126,14 +134,26 @@ public class AttachedFile extends AbstractEntity
     _filename = filename;
   }
 
+  @Column(nullable=false)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.AttachedFileType$UserType")
+  public AttachedFileType getFileType()
+  {
+    return _fileType;
+  }
+
+  public void setFileType(AttachedFileType fileType)
+  {
+    _fileType = fileType;
+  }
+
   /**
    * Get the file contents.
-   * TODO: this should really be a BLOB, not TEXT.
    * @return the file contents
    */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="text")
-  public String getFileContents()
+  @Column(nullable=false, updatable=false)
+  @Immutable
+  @Lob
+  public Blob getFileContents()
   {
     return _fileContents;
   }
@@ -142,7 +162,7 @@ public class AttachedFile extends AbstractEntity
    * Set the file contents.
    * @param fileContents the new file contents
    */
-  public void setFileContents(String fileContents)
+  private void setFileContents(Blob fileContents)
   {
     _fileContents = fileContents;
   }
@@ -156,15 +176,17 @@ public class AttachedFile extends AbstractEntity
    * @param screen the screen
    * @param filename the filename
    * @param fileContents the file contents
+   * @throws IOException
    */
-  AttachedFile(Screen screen, String filename, String fileContents)
+  AttachedFile(Screen screen, String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
     _filename = filename;
-    _fileContents = fileContents;
+    _fileType = fileType;
+    _fileContents = Hibernate.createBlob(fileContents);
   }
 
 

@@ -38,7 +38,6 @@ import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
-import edu.harvard.med.screensaver.model.screens.LetterOfSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -152,11 +151,6 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(LabAffiliation entity)
-  {
-    return true;
-  }
-
-  public boolean visit(LetterOfSupport entity)
   {
     return true;
   }

@@ -36,7 +36,6 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(BillingInformationTest.class);
     addTestSuite(BillingItemTest.class);
     addTestSuite(EquipmentUsedTest.class);
-    addTestSuite(LetterOfSupportTest.class);
     addTestSuite(LibraryScreeningTest.class);
     addTestSuite(PlatesUsedTest.class);
     addTestSuite(PublicationTest.class);
