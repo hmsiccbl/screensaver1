@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;

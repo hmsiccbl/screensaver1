@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractJsfUnitTest;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -71,7 +72,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     _client.setParameter("screenDetailViewerForm:labNameMenu", Integer.toString(_screen.getLabHead().hashCode()));
     _client.submitNoButton("screenDetailViewerForm");
     assertEquals(2, getBeanValue("screenDetailViewer.leadScreener.size"));
-    submit("saveCommand", 
+    submit("saveCommand",
            new Pair<String,String>("screenDetailViewerForm:titleTextField", "Test screen title"),
            new Pair<String,String>("screenDetailViewerForm:leadScreenerMenu", Integer.toString(_screen.getLabHead().hashCode())),
            new Pair<String,String>("screenDetailViewerForm:screenTypeMenu", ScreenType.SMALL_MOLECULE.toString()));
@@ -135,7 +136,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     submit("saveCommand");
     assertAtView("/screensaver/screens/screensBrowser.jsf");
   }
-  
+
   public void testFindScreenNumber() throws Exception
   {
     Screen screen2 = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
@@ -148,7 +149,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertEquals(new Integer(2), getBeanValue("screenViewer.screen.screenNumber"));
     assertEquals(1, getBeanValue("screensBrowser.rowCount"));
     assertTrue(((Boolean) getBeanValue("screensBrowser.entityView")).booleanValue());
-    
+
     // test after screens browser has been opened/initialized; screen should be found in existing screen search results context
     _client.clickCommandLink("browseScreensCommand");
     assertAtView("/screensaver/screens/screensBrowser.jsf");
@@ -159,7 +160,32 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertEquals(2, getBeanValue("screensBrowser.rowCount"));
     assertTrue(((Boolean) getBeanValue("screensBrowser.entityView")).booleanValue());
   }
-  
+
+  public void testAddAndDeleteCollaborators() throws Exception
+  {
+    ScreeningRoomUser collaborator = new ScreeningRoomUser("Col", "Laborator", "col_laborator@hms.harvard.edu");
+    _dao.persistEntity(collaborator);
+    collaborator = _dao.reloadEntity(collaborator);
+
+    visitScreenViewer(_screen);
+    submit("screenDetailPanelForm:editCommand");
+    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
+    submit("collaboratorsTableAddCommand",
+           new Pair<String,String>("collaboratorsEditable", Integer.toString(collaborator.hashCode())));
+    assertTrue(((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.collaborators")).contains(collaborator));
+    submit("saveCommand");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertTrue(((Set<ScreeningRoomUser>) getBeanValue("screenViewer.screen.collaborators")).contains(collaborator));
+
+    submit("screenDetailPanelForm:editCommand");
+    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
+    submit("0:collaboratorsTableDeleteCommand");
+    assertFalse(((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.collaborators")).contains(collaborator));
+    submit("saveCommand");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertFalse(((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.collaborators")).contains(collaborator));
+  }
+
   private void visitScreenViewer(Screen screen)
   {
     ScreenViewer viewer = getBeanValue("screenViewer");

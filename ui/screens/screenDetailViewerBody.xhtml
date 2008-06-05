@@ -62,26 +62,26 @@ TODO:
 			<ss:property id="collaborators" label="Collaborators"
 				description="Other scientists involved in carrying out the screen">
 				<ui:define name="data">
-					<t:panelGrid columns="1" styleClass="layoutPanel"
-						rendered="#{!screenDetailViewer.editMode}">
-						<t:outputText value="&lt;none&gt;" styleClass="dataText"
-							rendered="#{empty screenDetailViewer.screen.collaborators}" />
-						<t:dataTable id="collaborators" var="collaborator"
-							value="#{screenDetailViewer.screen.collaborators}"
-							styleClass="standardTable" columnClasses="column"
-							rendered="#{!empty screenDetailViewer.screen.collaborators}">
+					<ss:collectionTable id="collaboratorsTable"
+						editable="#{screenDetailViewer.editMode}"
+						dataModel="#{screenDetailViewer.collaboratorsDataModel}"
+						actionBean="#{screenDetailViewer}" addAction="addCollaborator"
+						deleteAction="deleteCollaborator">
+						<ui:define name="columns">
 							<t:column>
-								<ss:user user="#{collaborator}" />
+								<ss:user user="#{element}" />
 							</t:column>
-						</t:dataTable>
-					</t:panelGrid>
-					<t:selectManyListbox id="collaboratorsEditable"
-						value="#{screenDetailViewer.collaborators.value}"
-						rendered="#{screenDetailViewer.editMode}" size="5"
-						styleClass="inputText selectMenu">
-						<f:selectItems
-							value="#{screenDetailViewer.collaborators.selectItems}" />
-					</t:selectManyListbox>
+						</ui:define>
+						<ui:define name="addProperties">
+							<t:selectOneMenu id="collaboratorsEditable"
+								value="#{screenDetailViewer.newCollaborator.value}"
+								rendered="#{screenDetailViewer.editMode}"
+								styleClass="inputText selectMenu">
+								<f:selectItems
+									value="#{screenDetailViewer.newCollaborator.selectItems}" />
+							</t:selectOneMenu>
+						</ui:define>
+					</ss:collectionTable>
 				</ui:define>
 			</ss:property>
 

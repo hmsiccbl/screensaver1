@@ -8,7 +8,7 @@
 	xmlns:s="http://myfaces.apache.org/sandbox"
 	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
-<!-- 
+<!--
 	   Facelet params:
 	     - id
 	     - dataModel: JSF data model
@@ -38,14 +38,15 @@
 			</t:column>
 		</ui:insert>
 		<t:column rendered="#{editable}">
-			<t:commandButton value="Delete" image="/images/delete.png"
-				action="#{actionBean[deleteAction]}" styleClass="command" />
+			<t:commandButton id="#{id}DeleteCommand" value="Delete"
+				image="/images/delete.png" action="#{actionBean[deleteAction]}"
+				styleClass="command" />
 		</t:column>
 	</t:dataTable>
 	<t:div rendered="#{editable}" styleClass="groupingPanel">
 		<ui:insert name="addProperties" />
-		<t:commandButton value="Add" action="#{actionBean[addAction]}"
-			immediate="true" styleClass="command" />
+		<t:commandButton id="#{id}AddCommand" value="Add"
+			action="#{actionBean[addAction]}" styleClass="command" />
 	</t:div>
 
 </ui:composition>
