@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -23,14 +25,16 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.EntityViewer;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
-import edu.harvard.med.screensaver.ui.util.UISelectManyEntityBean;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
@@ -51,7 +55,7 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
   private Study _study;
   private UISelectOneEntityBean<ScreeningRoomUser> _labName;
   private UISelectOneEntityBean<ScreeningRoomUser> _leadScreener;
-  private UISelectManyEntityBean<ScreeningRoomUser> _collaborators;
+  private UISelectOneBean<ScreeningRoomUser> _newCollaborator;
   private boolean _isPanelCollapsed;
 
 
@@ -125,24 +129,54 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
     return _labName;
   }
 
-  /**
-   * Get a list of SelectItems for selecting the screen's collaborators.
-   */
-  public UISelectManyBean<ScreeningRoomUser> getCollaborators()
+  public UISelectOneBean<ScreeningRoomUser> getNewCollaborator()
   {
-    if (_collaborators == null) {
-      _collaborators =
-        new UISelectManyEntityBean<ScreeningRoomUser>(_usersDao.findCandidateCollaborators(),
-                                                      _study.getCollaborators(),
-                                                      _dao)
-        {
-          protected String getLabel(ScreeningRoomUser t)
-          {
-            return t.getFullNameLastFirst();
-          }
-        };
+    if (_newCollaborator == null) {
+      _newCollaborator = new UISelectOneBean<ScreeningRoomUser>(getCandidateCollaborators()) {
+        @Override
+        protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
+      };
     }
-    return _collaborators;
+    return _newCollaborator;
+  }
+
+  private Collection<ScreeningRoomUser> getCandidateCollaborators()
+  {
+    List<ScreeningRoomUser> candidateCollaborators =
+      _dao.findAllEntitiesOfType(ScreeningRoomUser.class,
+                                 true,
+                                 "screensCollaborated");
+    Collections.sort(candidateCollaborators, ScreensaverUserComparator.getInstance());
+    Screen screen = (Screen) getStudy(); // HACK
+    candidateCollaborators.removeAll(screen.getCollaborators());
+    candidateCollaborators.remove(screen.getLeadScreener());
+    candidateCollaborators.remove(screen.getLabHead());
+    return candidateCollaborators;
+  }
+
+  @UIControllerMethod
+  public String addCollaborator()
+  {
+    if (getNewCollaborator().getSelection() != null) {
+      try {
+        ScreeningRoomUser collaborator = getNewCollaborator().getSelection();
+        ( /*HACK*/(Screen) getStudy()).addCollaborator(collaborator);
+      }
+      catch (BusinessRuleViolationException e) {
+        showMessage("businessError", e.getMessage());
+      }
+      _newCollaborator = null;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteCollaborator()
+  {
+    ScreeningRoomUser collaborator = (ScreeningRoomUser) getRequestMap().get("element");
+    getStudy().getCollaborators().remove(collaborator);
+    _newCollaborator = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   public UISelectOneBean<ScreeningRoomUser> getLeadScreener()
@@ -169,11 +203,11 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
 
   // private methods
 
-  private void resetView()
+  protected void resetView()
   {
     _labName = null;
     _leadScreener = null;
-    _collaborators = null;
+    _newCollaborator = null;
   }
 
   /**

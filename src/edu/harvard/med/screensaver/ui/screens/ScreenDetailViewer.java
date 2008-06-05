@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -48,7 +47,6 @@ import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -59,7 +57,6 @@ import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -99,8 +96,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private UISelectOneBean<AttachedFileType> _newAttachedFileType;
   private UploadedFile _uploadedAttachedFileContents;
   private String _newAttachedFileContents;
-
-  private UISelectOneBean<ScreeningRoomUser> _newCollaborator;
 
 
   // constructors
@@ -175,60 +170,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
     return isReadAdmin() ||
            _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(getScreen());
-  }
-
-  public DataModel getCollaboratorsDataModel()
-  {
-    return new ListDataModel(getScreen().getCollaboratorsList());
-  }
-
-  public UISelectOneBean<ScreeningRoomUser> getNewCollaborator()
-  {
-    if (_newCollaborator == null) {
-      _newCollaborator = new UISelectOneBean<ScreeningRoomUser>(getCandidateCollaborators()) {
-        @Override
-        protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
-      };
-    }
-    return _newCollaborator;
-  }
-
-  private Collection<ScreeningRoomUser> getCandidateCollaborators()
-  {
-    List<ScreeningRoomUser> candidateCollaborators =
-      _dao.findAllEntitiesOfType(ScreeningRoomUser.class,
-                                 true,
-                                 "screensCollaborated");
-    Collections.sort(candidateCollaborators, ScreensaverUserComparator.getInstance());
-    candidateCollaborators.removeAll(_screen.getCollaborators());
-    candidateCollaborators.remove(_screen.getLeadScreener());
-    candidateCollaborators.remove(_screen.getLabHead());
-    return candidateCollaborators;
-  }
-
-  @UIControllerMethod
-  public String addCollaborator()
-  {
-    if (getNewCollaborator().getSelection() != null) {
-      try {
-        ScreeningRoomUser collaborator = getNewCollaborator().getSelection();
-        getScreen().addCollaborator(collaborator);
-      }
-      catch (BusinessRuleViolationException e) {
-        showMessage("businessError", e.getMessage());
-      }
-      _newCollaborator = null;
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String deleteCollaborator()
-  {
-    ScreeningRoomUser collaborator = (ScreeningRoomUser) getRequestMap().get("element");
-    getScreen().getCollaborators().remove(collaborator);
-    _newCollaborator = null;
-    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   public AssayReadoutType getNewAssayReadoutType()
@@ -713,12 +654,12 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
 
   // private methods
 
-  private void resetView()
+  protected void resetView()
   {
+    super.resetView();
     _isEditMode = false;
     _returnToViewAfterEdit = null;
     //_isAdminViewMode = false; // maintain this setting when viewing a new screen
-    _newCollaborator = null;
     _newFundingSupport = null;
     _newStatusItemValue = null;
     _newStatusItemDate = null;
