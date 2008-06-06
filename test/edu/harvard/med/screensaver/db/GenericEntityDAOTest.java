@@ -16,7 +16,6 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -400,14 +399,8 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        try {
-          screen.createPublication("1", "2007", "authro1", "Title1");
-          screen.createPublication("2", "2007", "author2", "Title2");
-        }
-        catch (DuplicateEntityException e) {
-          e.printStackTrace();
-          fail(e.getMessage());
-        }
+        screen.createPublication();
+        screen.createPublication();
         ScreeningRoomUser collab1 = new ScreeningRoomUser("Col",
                                                           "Laborator1",
                                                           "collab1@hms.harvard.edu");

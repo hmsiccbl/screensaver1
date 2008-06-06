@@ -804,29 +804,26 @@ public class Screen extends Study
 
   /**
    * Create a new publication for this screen.
-   * @param yearPublished the year published
-   * @param authors the authors
-   * @param title the title
+   * 
    * @return the new publication
    */
-  public Publication createPublication(String yearPublished, String authors, String title)
+  public Publication createPublication()
   {
-    return createPublication(null, yearPublished, authors, title);
-  }
-
-  /**
-   * Create a new publication for this screen.
-   * @param pubmedId the pubmed id
-   * @param yearPublished the year published
-   * @param authors the authors
-   * @param title the title
-   * @return the new publication
-   */
-  public Publication createPublication(String pubmedId, String yearPublished, String authors, String title)
-  {
-    Publication publication = new Publication(this, pubmedId, yearPublished, authors, title);
+    Publication publication = new Publication(this);
     _publications.add(publication);
     return publication;
+  }
+
+  public void createPublication(Publication publicationDTO)
+  {
+    Publication publication = createPublication();
+    publication.setTitle(publicationDTO.getTitle());
+    publication.setPubmedId(publicationDTO.getPubmedId());
+    publication.setYearPublished(publicationDTO.getYearPublished());
+    publication.setAuthors(publicationDTO.getAuthors());
+    publication.setJournal(publicationDTO.getJournal());
+    publication.setVolume(publicationDTO.getVolume());
+    publication.setPages(publicationDTO.getPages());
   }
 
   /**

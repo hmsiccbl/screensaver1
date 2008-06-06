@@ -186,4 +186,15 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     }
     fail("faces message exists matching " + regex);
   }
+  
+  protected void assertPageContainsText(String text) throws IOException
+  {
+    assertPageContainsText(text, true);
+  }
+  
+  protected void assertPageContainsText(String text, boolean contains) throws IOException
+  {
+    boolean result = _client.getWebResponse().getText().contains(text);
+    assertTrue(contains ? result : !result);
+  }
 }

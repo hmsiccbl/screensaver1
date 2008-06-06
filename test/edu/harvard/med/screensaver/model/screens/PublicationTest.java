@@ -31,5 +31,18 @@ public class PublicationTest extends AbstractEntityInstanceTest<Publication>
   {
     super(Publication.class);
   }
+  
+  public void testPublicationCitation()
+  {
+    Publication publication = new Publication();
+    publication.setTitle("Screensaver: LIMS for HTS Facilities");
+    publication.setAuthors("Tolopko, A., Sullivan, J., Lieftink, C.");
+    publication.setJournal("Bioinformatics");
+    publication.setYearPublished("2019");
+    publication.setVolume("218");
+    publication.setPages("101-103");
+    assertEquals("Tolopko, A., Sullivan, J., Lieftink, C. \"Screensaver: LIMS for HTS Facilities\" Bioinformatics 218 (2019): 101-103.",
+                 publication.getCitation());
+  }
 }
 

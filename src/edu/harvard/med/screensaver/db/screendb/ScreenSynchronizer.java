@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
+import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
@@ -33,7 +34,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.eutils.EutilsException;
-import edu.harvard.med.screensaver.util.eutils.PublicationInfo;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 import org.apache.log4j.Logger;
@@ -336,17 +336,15 @@ public class ScreenSynchronizer
     while (resultSet.next()) {
       Integer screenNumber = resultSet.getInt("screen_id");
       Screen screen = getScreenFromTable("pub_med", screenNumber);
-      String pubmedId = resultSet.getString("pubmed_id");
+      String pubmedIdStr = resultSet.getString("pubmed_id");
       try {
-        PublicationInfo publicationInfo =
-          _publicationInfoProvider.getPublicationInfoForPubmedId(new Integer(pubmedId));
-        screen.createPublication(pubmedId,
-          publicationInfo.getYearPublished(),
-          publicationInfo.getAuthors(),
-          publicationInfo.getTitle());
+        Integer pubmedId = new Integer(pubmedIdStr);
+        Publication publication =
+          _publicationInfoProvider.getPublicationForPubmedId(pubmedId);
+        screen.createPublication(publication);
       }
       catch (EutilsException e) {
-        log.error("unable to get publication info from pubmed for " + pubmedId + " for " + screen);
+        log.error("unable to get publication info from pubmed for " + pubmedIdStr + " for " + screen);
       }
       catch (DuplicateEntityException e) {
         throw new ScreenDBSynchronizationException(

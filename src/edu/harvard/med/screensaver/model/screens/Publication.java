@@ -24,6 +24,7 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 
@@ -51,10 +52,13 @@ public class Publication extends AbstractEntity
   private Integer _publicationId;
   private Integer _version;
   private Screen _screen;
-  private String _pubmedId;
+  private Integer _pubmedId;
   private String _yearPublished;
   private String _authors;
   private String _title;
+  private String _journal;
+  private String _volume;
+  private String _pages;
 
 
   // public instance methods
@@ -109,8 +113,7 @@ public class Publication extends AbstractEntity
    * Get the pubmed id.
    * @return the pubmed id
    */
-  @org.hibernate.annotations.Type(type="text")
-  public String getPubmedId()
+  public Integer getPubmedId()
   {
     return _pubmedId;
   }
@@ -119,7 +122,7 @@ public class Publication extends AbstractEntity
    * Set the pubmed id.
    * @param pubmedId the new pubmed id
    */
-  public void setPubmedId(String pubmedId)
+  public void setPubmedId(Integer pubmedId)
   {
     _pubmedId = pubmedId;
   }
@@ -128,7 +131,6 @@ public class Publication extends AbstractEntity
    * Get the year published.
    * @return the year published
    */
-  @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
   public String getYearPublished()
   {
@@ -148,7 +150,6 @@ public class Publication extends AbstractEntity
    * Get the authors.
    * @return the authors
    */
-  @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
   public String getAuthors()
   {
@@ -168,7 +169,6 @@ public class Publication extends AbstractEntity
    * Get the title.
    * @return the title
    */
-  @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
   public String getTitle()
   {
@@ -184,29 +184,82 @@ public class Publication extends AbstractEntity
   {
     _title = title;
   }
+  
+  @Transient
+  public String getCitation()
+  {
+    StringBuilder citation = new StringBuilder();
+    if (_authors != null) {
+      citation.append(_authors).append(' ');
+    }
+    if (!StringUtils.isEmpty(_title)) {
+      citation.append('"').append(_title).append("\" ");
+    }
+    if (!StringUtils.isEmpty(_journal)) {
+      citation.append(_journal).append(' ');
+    }
+    if (!StringUtils.isEmpty(_volume)) {
+      citation.append(_volume).append(' ');
+    }
+    if (!StringUtils.isEmpty(_yearPublished)) {
+      citation.append('(').append(_yearPublished).append(")");
+    }
+    if (!StringUtils.isEmpty(_yearPublished) && !StringUtils.isEmpty(_pages)) {
+      citation.append(": ");
+    }
+    if (!StringUtils.isEmpty(_pages)) {
+      citation.append(_pages).append('.');
+    }
+    return citation.toString();
+  }
 
 
   // package constructor
+
+  @org.hibernate.annotations.Type(type="text")
+  public String getJournal()
+  {
+    return _journal;
+  }
+
+  public void setJournal(String journal)
+  {
+    _journal = journal;
+  }
+
+  @org.hibernate.annotations.Type(type="text")
+  public String getVolume()
+  {
+    return _volume;
+  }
+
+  public void setVolume(String volume)
+  {
+    _volume = volume;
+  }
+
+  @org.hibernate.annotations.Type(type="text")
+  public String getPages()
+  {
+    return _pages;
+  }
+
+  public void setPages(String pages)
+  {
+    _pages = pages;
+  }
 
   /**
    * Construct an initialized <code>Publication</code>. Intended for use only by {@link
    * Screen#createPublication}.
    * @param screen the screen
-   * @param pubmedId the pubmed id
-   * @param yearPublished the year published
-   * @param authors the authors
-   * @param title the title
    */
-  Publication(Screen screen, String pubmedId, String yearPublished, String authors, String title)
+  Publication(Screen screen)
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
-    _pubmedId = pubmedId;
-    _yearPublished = yearPublished;
-    _authors = authors;
-    _title = title;
   }
 
 
@@ -216,7 +269,7 @@ public class Publication extends AbstractEntity
    * Construct an uninitialized <code>Publication</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  protected Publication() {}
+  public Publication() {}
 
 
   // private constructor and instance methods

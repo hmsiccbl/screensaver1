@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.util.eutils;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.model.screens.Publication;
 
 /**
  * Test the {@link PublicationInfoProvider}.
@@ -24,14 +25,17 @@ public class PublicationInfoProviderTest extends AbstractSpringTest
   private PublicationInfoProvider _publicationInfoProvider = new PublicationInfoProvider();
 
   // Watts DC
-  public void testGetGeneInfoForEntrezgeneId()
+  public void testGetPublicationInfoForPubmedId()
   {
     try {
-      PublicationInfo publicationInfo = _publicationInfoProvider.getPublicationInfoForPubmedId(77);
-      assertNotNull(publicationInfo);
-      assertEquals(publicationInfo.getYearPublished(), "1975");
-      assertEquals(publicationInfo.getAuthors(), "Chegwidden WR, Watts DC");
-      assertEquals(publicationInfo.getTitle(), "Kinetic studies and effects of anions on creatine phosphokinase from skeletal muscle of rhesus monkey (Macaca mulatta).");
+      Publication publication = _publicationInfoProvider.getPublicationForPubmedId(77);
+      assertNotNull(publication);
+      assertEquals(publication.getYearPublished(), "1975");
+      assertEquals(publication.getAuthors(), "Chegwidden WR, Watts DC");
+      assertEquals(publication.getTitle(), "Kinetic studies and effects of anions on creatine phosphokinase from skeletal muscle of rhesus monkey (Macaca mulatta).");
+      assertEquals(publication.getJournal(), "Biochimica et biophysica acta");
+      assertEquals(publication.getVolume(), "410");
+      assertEquals(publication.getPages(), "99-114");
     }
     catch (EutilsException e) {
       fail("PublicationInforProvider threw an exception: " + e.getMessage());

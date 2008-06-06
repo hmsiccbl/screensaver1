@@ -33,6 +33,7 @@ import org.joda.time.LocalDate;
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
+@SuppressWarnings("unchecked")
 public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
 {
   private static final Logger log = Logger.getLogger(ScreenViewerJsfUnitTest.class);
@@ -57,7 +58,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
   public void testOpenScreenViewer() throws Exception
   {
     visitScreenViewer(_screen);
-    assertTrue(_client.getWebResponse().getText().contains(_screen.getTitle()));
+    assertPageContainsText(_screen.getTitle());
   }
 
   public void testAddAndSaveScreen() throws Exception
@@ -184,6 +185,37 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     submit("saveCommand");
     assertAtView("/screensaver/screens/screensBrowser.jsf");
     assertFalse(((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.collaborators")).contains(collaborator));
+  }
+  
+  public void testAddAndDeletePublication() throws Exception
+  {
+    visitScreenViewer(_screen);
+    submit("screenDetailPanelForm:editCommand");
+    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
+    submit("publicationsTableAddCommand",
+           new Pair<String,String>("publicationTitle", "Screensaver LIMS"),
+           new Pair<String,String>("publicationAuthors", "Tolopko, Andrew"),
+           new Pair<String,String>("publicationJournal", "Modern LIMS Development"),
+           new Pair<String,String>("publicationVolume", "101"),
+           new Pair<String,String>("publicationPages", "9-11"),
+           new Pair<String,String>("publicationYear", "2008"),
+           new Pair<String,String>("publicationPubMedId", "10001"));
+    assertEquals(1, ((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.publications")).size());
+    assertPageContainsText("Screensaver LIMS");
+    submit("saveCommand");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertEquals(1, ((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.publications")).size());
+    assertPageContainsText("Screensaver LIMS");
+
+    submit("screenDetailPanelForm:editCommand");
+    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
+    submit("0:publicationsTableDeleteCommand");
+    assertEquals(0, ((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.publications")).size());
+    assertPageContainsText("Screensaver LIMS", false);
+    submit("saveCommand");
+    assertEquals(0, ((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.publications")).size());
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertPageContainsText("Screensaver LIMS", false);
   }
 
   private void visitScreenViewer(Screen screen)

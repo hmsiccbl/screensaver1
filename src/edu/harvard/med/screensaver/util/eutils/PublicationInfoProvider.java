@@ -9,12 +9,13 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.screens.Publication;
+
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 /**
@@ -52,7 +53,7 @@ public class PublicationInfoProvider extends EutilsUtils
    * @return the publication info
    * @throws EutilsException 
    */
-  public synchronized PublicationInfo getPublicationInfoForPubmedId(Integer pubmedId) throws EutilsException
+  public synchronized Publication getPublicationForPubmedId(Integer pubmedId) throws EutilsException
   {
     _pubmedId = pubmedId;
     Document esummaryDocument = getXMLForEutilsQuery("esummary.fcgi", "&db=pubmed&id=" + pubmedId);
@@ -60,20 +61,34 @@ public class PublicationInfoProvider extends EutilsUtils
       return null;
     }
     NodeList nodes = esummaryDocument.getElementsByTagName("Item");
-    String yearPublished = getYearPublishedFromNodeList(nodes);
-    String authors = getAuthorsFromNodeList(nodes);
-    String title = getTitleFromNodeList(nodes); 
-    if (yearPublished == null || authors == null || title == null) {
-      return null;
-    }
-    return new PublicationInfo(yearPublished, authors, title);
+    Publication publication = new Publication();
+    publication.setPubmedId(pubmedId);
+    publication.setTitle(getNamedItemFromNodeList(nodes, "Title"));
+    publication.setYearPublished(getYearPublishedFromNodeList(nodes));
+    publication.setAuthors(getAuthorsFromNodeList(nodes));
+    publication.setVolume(getNamedItemFromNodeList(nodes, "Volume"));
+    publication.setJournal(getNamedItemFromNodeList(nodes, "FullJournalName"));
+    publication.setPages(getNamedItemFromNodeList(nodes, "Pages"));
+    return publication;
   }
 
   
   // protected instance methods
   
-  protected void reportError(String nestedMessage)
+  private String getJournalItem(Document doc, String itemName)
   {
+    NodeList journalNodes = doc.getElementsByTagName("*").item(0).getChildNodes();
+    for (int i = 0; i < journalNodes.getLength(); ++i) {
+      Node journalNode = journalNodes.item(i);
+      if (journalNode.getNodeName().equals(itemName)) {
+        return journalNode.getTextContent();
+      }
+    }
+    return null;
+  }
+
+  protected void reportError(String nestedMessage)
+    {
     String errorMessage = (_pubmedId == null) ?
       "Error querying NCBI: " + nestedMessage :
       "Error querying NCBI for pubmed id " + _pubmedId + ": " + nestedMessage;
@@ -84,9 +99,8 @@ public class PublicationInfoProvider extends EutilsUtils
   // private instance methods
 
   /**
-   * Get the gene name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
-   * @return the species name from the list of "Item" element nodes
+   * @return the year published from the list of "Item" element nodes
    * @throws EutilsException 
    */
   private String getYearPublishedFromNodeList(NodeList nodes) throws EutilsException
@@ -99,9 +113,8 @@ public class PublicationInfoProvider extends EutilsUtils
   }
 
   /**
-   * Get the species name from the list of "Item" element nodes.
    * @param nodes the list of "Item" element nodes
-   * @return the species name from the list of "Item" element nodes
+   * @return the authors (comma-delimited list) from the list of "Item" element nodes
    */
   private String getAuthorsFromNodeList(NodeList nodes)
   {
@@ -113,16 +126,5 @@ public class PublicationInfoProvider extends EutilsUtils
       return null;
     }
     return authors.substring(0, authors.length() - 2);
-  }
-
-  /**
-   * Get the species name from the list of "Item" element nodes.
-   * @param nodes the list of "Item" element nodes
-   * @return the species name from the list of "Item" element nodes
-   * @throws EutilsException 
-   */
-  private String getTitleFromNodeList(NodeList nodes) throws EutilsException
-  {
-    return getNamedItemFromNodeList(nodes, "Title");
   }
 }

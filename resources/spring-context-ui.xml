@@ -453,6 +453,7 @@
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
+    <constructor-arg ref="publicationInfoProvider" />
     <aop:scoped-proxy/>
   </bean>
 

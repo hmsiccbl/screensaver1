@@ -137,7 +137,7 @@ TODO:
 							description="Comments associated with the publishable protocol"
 							type="Textarea" editWidth="80" editHeight="3" />
 						<ss:propertyGroup label="Entered" columns="4"
-							columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
+							columnClasses="propertyLabelColumn,column,propertyLabelColumn,column">
 							<ss:property id="publishableProtocolDateEntered"
 								label="Date" type="Date"
 								value="#{screenDetailViewer.screen.publishableProtocolDateEntered}"
@@ -163,67 +163,70 @@ TODO:
 			<ss:property id="publications" label="Publications"
 				description="Publications reporting results of the screen">
 				<ui:define name="data">
-					<t:panelGrid columns="1">
-						<t:outputText value="&lt;none&gt;" styleClass="dataText"
-							rendered="#{empty screenDetailViewer.screen.publications}" />
-						<t:dataTable id="publications" var="publication"
-							value="#{screenDetailViewer.publicationsDataModel}"
-							preserveDataModel="false"
-							rendered="#{!empty screenDetailViewer.screen.publications}"
-							styleClass="standardTable" rowClasses="row1,row2"
-							columnClasses="column" headerClass="tableHeader">
+					<ss:collectionTable id="publicationsTable"
+						dataModel="#{screenDetailViewer.publicationsDataModel}"
+						editable="#{screenDetailViewer.editMode}"
+						actionBean="#{screenDetailViewer}" addAction="addPublication"
+						deleteAction="deletePublication">
+						<ui:define name="columns">
 							<t:column>
 								<f:facet name="header">
 									<t:outputText value="Pubmed ID" />
 								</f:facet>
-								<t:inputText value="#{publication.pubmedId}"
-									rendered="#{screenDetailViewer.editMode}"
-									styleClass="inputText" />
 								<h:outputLink
-									value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi"
-									rendered="#{!screenDetailViewer.editMode}">
+									value="http://www.ncbi.nlm.nih.gov/entrez/query.fcgi">
 									<f:param name="cmd" value="Search" />
 									<f:param name="db" value="PubMed" />
-									<f:param name="term" value="#{publication.pubmedId}[PMID]" />
-									<t:outputText value="#{publication.pubmedId}" />
+									<f:param name="term" value="#{element.pubmedId}[PMID]" />
+									<t:outputText value="#{element.pubmedId}" />
 								</h:outputLink>
 							</t:column>
 							<t:column>
 								<f:facet name="header">
-									<t:outputText value="Year" />
+									<t:outputText value="Citation" />
 								</f:facet>
-								<t:inputText value="#{publication.yearPublished}"
-									displayValueOnly="#{!screenDetailViewer.editMode}"
-									maxlength="4" styleClass="inputText"
-									displayValueOnlyStyleClass="dataText" />
+								<t:outputText value="#{element.citation}" styleClass="dataText" />
 							</t:column>
-							<t:column>
-								<f:facet name="header">
-									<t:outputText value="Title" />
-								</f:facet>
-								<t:inputText value="#{publication.title}" required="true"
-									displayValueOnly="#{!screenDetailViewer.editMode}"
-									styleClass="inputText" displayValueOnlyStyleClass="dataText" />
-							</t:column>
-							<t:column>
-								<f:facet name="header">
-									<t:outputText value="Authors" />
-								</f:facet>
-								<t:inputText value="#{publication.authors}"
-									displayValueOnly="#{!screenDetailViewer.editMode}"
-									styleClass="inputText" displayValueOnlyStyleClass="dataText" />
-							</t:column>
-							<t:column>
-								<t:commandButton value="Delete" image="/images/delete.png"
-									action="#{screenDetailViewer.deletePublication}"
-									styleClass="command" rendered="#{screenDetailViewer.editMode}" />
-							</t:column>
-						</t:dataTable>
-						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
-							<t:commandButton value="Add Publication"
-								action="#{screenDetailViewer.addPublication}"
+						</ui:define>
+					</ss:collectionTable>
+				</ui:define>
+				<ui:define name="addProperties">
+					<t:panelGrid columns="2">
+            <t:outputText value="PubMed ID" styleClass="label" />
+						<t:panelGroup styleClass="layoutPanel">
+							<t:inputText id="publicationPubMedId"
+								value="#{screenDetailViewer.newPublication.pubmedId}">
+								<f:converter converterId="javax.faces.Integer" />
+							</t:inputText>
+							<t:commandButton id="#{id}LookupPubMedIdCommand"
+								value="Lookup PubMed ID"
+								action="#{screenDetailViewer.lookupPublicationByPubMedId}"
 								styleClass="command" />
 						</t:panelGroup>
+						<t:outputText value="Title" styleClass="label" />
+						<t:inputText id="publicationTitle"
+							value="#{screenDetailViewer.newPublication.title}" size="80"
+							styleClass="inputText" />
+						<t:outputText value="Authors" styleClass="label" />
+						<t:inputText id="publicationAuthors"
+							value="#{screenDetailViewer.newPublication.authors}" size="80"
+							styleClass="inputText" />
+						<t:outputText value="Journal" styleClass="label" />
+						<t:inputText id="publicationJournal"
+							value="#{screenDetailViewer.newPublication.journal}" size="80"
+							styleClass="inputText" />
+						<t:outputText value="Volume" styleClass="label" />
+						<t:inputText id="publicationVolume"
+							value="#{screenDetailViewer.newPublication.volume}"
+							styleClass="inputText" />
+						<t:outputText value="Year" styleClass="label" />
+						<t:inputText id="publicationYear"
+							value="#{screenDetailViewer.newPublication.yearPublished}"
+							maxlength="4" styleClass="inputText" />
+						<t:outputText value="Pages" styleClass="label" />
+						<t:inputText id="publicationPages"
+							value="#{screenDetailViewer.newPublication.pages}"
+							styleClass="inputText" />
 					</t:panelGrid>
 				</ui:define>
 			</ss:property>

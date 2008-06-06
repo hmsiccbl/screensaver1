@@ -31,7 +31,6 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
@@ -59,6 +58,7 @@ import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.StringUtils;
+import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
@@ -82,9 +82,10 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private ScreenSearchResults _screensBrowser;
   private ActivityViewer _activityViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
-  private AbstractBackingBean _returnToViewAfterEdit;
+  private PublicationInfoProvider _publicationInfoProvider;
 
   private Screen _screen;
+  private AbstractBackingBean _returnToViewAfterEdit;
   private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
   private boolean _isPublishableProtocolDetailsCollapsed = true;
@@ -98,6 +99,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private UploadedFile _uploadedAttachedFileContents;
   private String _newAttachedFileContents;
 
+  private Publication _newPublication;
+
+  
 
   // constructors
 
@@ -116,7 +120,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
                             ScreenViewer screenViewer,
                             ScreenSearchResults screensBrowser,
                             ActivityViewer activityViewer,
-                            CherryPickRequestViewer cherryPickRequestViewer)
+                            CherryPickRequestViewer cherryPickRequestViewer,
+                            PublicationInfoProvider publicationInfoProvider)
   {
     super(dao, usersDao);
     _thisProxy = thisProxy;
@@ -127,6 +132,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _screensBrowser = screensBrowser;
     _activityViewer = activityViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
+    _publicationInfoProvider = publicationInfoProvider;
   }
 
 
@@ -263,6 +269,14 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       }
     });
     return new ListDataModel(publications);
+  }
+
+  public Publication getNewPublication()
+  {
+    if (_newPublication == null) {
+      _newPublication = new Publication();
+    }
+    return _newPublication;
   }
 
   public String getNewAttachedFileName()
@@ -465,19 +479,34 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String addPublication()
   {
+    getScreen().createPublication(_newPublication);
+    _newPublication = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String lookupPublicationByPubMedId()
+  {
     try {
-      getScreen().createPublication("<new>", "", "", "");
+      _newPublication = 
+        _publicationInfoProvider.getPublicationForPubmedId(_newPublication.getPubmedId());
+      if (_newPublication == null) {
+        reportApplicationError("Publication for PubMed ID " + _newAttachedFileContents + " was not found");
+      }
     }
-    catch (DuplicateEntityException e) {
-      showMessage("screens.duplicateEntity", "publication");
+    catch (Exception e) {
+      reportSystemError(e.getMessage());
     }
+
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UIControllerMethod
   public String deletePublication()
   {
-    getScreen().getPublications().remove(getSelectedEntityOfType(Publication.class));
+    Publication publication = (Publication) getRequestMap().get("element");
+    if (publication != null) {
+      getScreen().getPublications().remove(publication);
+    }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -524,7 +553,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String deleteAttachedFile()
   {
-    getScreen().getAttachedFiles().remove(getSelectedEntityOfType(AttachedFile.class));
+    AttachedFile attachedFile = (AttachedFile) getRequestMap().get("attachedFile");
+    getScreen().getAttachedFiles().remove(attachedFile);
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -681,6 +711,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _newAttachedFileType = null;
     _uploadedAttachedFileContents = null;
     _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;
+    _newPublication = null;
   }
 
   @SuppressWarnings("unchecked")

@@ -61,7 +61,12 @@
     id="ncbiGeneInfoProvider"
     class="edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProviderImpl"
   />
-    
+  
+  <bean
+    id="publicationInfoProvider"
+    class="edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider"
+    scope="prototype" />
+
   <bean
     id="rnaiLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
