@@ -373,10 +373,33 @@ TODO:
 				rendered="#{screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['billingAdmin']}"
 				description="Information for tracking billing from ICCB-L to the lab performing the screen">
 				<ui:define name="data">
-					<t:commandButton id="viewBillingInformation"
-						value="#{screenDetailViewer.editMode ? 'Edit...' : 'View...'}"
-						action="#{screenDetailViewer.viewBillingInformation}"
-						styleClass="command" />
+          <t:outputText id="billingInformationUndefined"
+            value="&lt;none&gt;"
+            styleClass="dataText"
+            rendered="#{empty screenDetailViewer.screen.billingInformation &amp;&amp; !screenDetailViewer.editMode}" />
+					<t:commandButton id="addBillingInformation" value="Add"
+						action="#{screenDetailViewer.addBillingInformation}"
+						rendered="#{empty screenDetailViewer.screen.billingInformation &amp;&amp; screenDetailViewer.editMode}" />
+					
+					<t:collapsiblePanel var="isBillingInformationCollapsed"
+						value="#{screenDetailViewer.billingInformationCollapsed}"
+						rendered="#{!empty screenDetailViewer.screen.billingInformation}">
+						<f:facet name="header">
+							<t:headerLink immediate="true">
+								<t:outputText
+									value="#{isBillingInformationCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+									styleClass="dataText" />
+							</t:headerLink>
+						</f:facet>
+						<t:panelGrid id="billingInfoProperties" columns="2"
+							columnClasses="propertyLabelColumn,column"
+							styleClass="layoutPanel" style="width: 100%">
+							<ss:property id="amountToBeChargedForScreen"
+								label="Amount to be charged for Screen"
+								value="#{screenDetailViewer.screen.billingInformation.amountToBeChargedForScreen}"
+								editable="#{screenDetailViewer.editMode}" type="Currency" />
+						</t:panelGrid>
+					</t:collapsiblePanel>
 				</ui:define>
 			</ss:property>
 		</t:panelGrid>

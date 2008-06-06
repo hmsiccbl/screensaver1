@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.math.BigDecimal;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -52,7 +54,7 @@ public class BillingItem extends AbstractEntity
   private Integer _version;
   private BillingInformation _billingInformation;
   private String _itemToBeCharged;
-  private String _amount;
+  private BigDecimal _amount;
   private LocalDate _dateFaxed;
 
 
@@ -126,9 +128,8 @@ public class BillingItem extends AbstractEntity
    * Get the amount.
    * @return the amount
    */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="text")
-  public String getAmount()
+  @Column(nullable=false, precision=9, scale=2)
+  public BigDecimal getAmount()
   {
     return _amount;
   }
@@ -137,7 +138,7 @@ public class BillingItem extends AbstractEntity
    * Set the amount.
    * @param amount the new amount
    */
-  public void setAmount(String amount)
+  public void setAmount(BigDecimal amount)
   {
     _amount = amount;
   }
@@ -176,7 +177,7 @@ public class BillingItem extends AbstractEntity
   BillingItem(
     BillingInformation billingInformation,
     String itemToBeCharged,
-    String amount,
+    BigDecimal amount,
     LocalDate dateFaxed)
   {
     if (billingInformation == null) {

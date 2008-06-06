@@ -11,7 +11,7 @@
 	   facelets parameters:
 	     - id
 	     - label
-	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'Volume'
+	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'Volume', 'Currency'
 	     - description
 	     - value
 	     - editable: boolean, (optional, defaults to false)
@@ -40,7 +40,7 @@
 			<ui:insert name="data">
 				<t:outputText id="#{id}#{type}Value" value="#{value}"
 					rendered="#{type != 'Textarea'}" styleClass="propertyValue"
-					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : stringConverter}" />
+					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
 				<t:inputTextarea id="#{id}#{type}Value1"
 					rendered="#{type == 'Textarea'}" value="#{value}" readonly="true"
 					cols="#{editWidth}" rows="#{editHeight}" styleClass="propertyValue" />
@@ -52,7 +52,7 @@
 					rendered="#{!(type == 'Textarea' || type == 'Boolean')}"
 					required="#{required}"
 					value="#{value}" size="#{editWidth}" styleClass="inputText"
-					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : stringConverter}" />
+					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
 				<t:inputTextarea id="#{id}#{type}Field1"
 					rendered="#{type == 'Textarea'}" required="#{required}"
 					value="#{value}" cols="#{editWidth}" rows="#{editHeight}"

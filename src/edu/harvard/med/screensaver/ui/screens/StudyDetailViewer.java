@@ -145,6 +145,7 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
     List<ScreeningRoomUser> candidateCollaborators =
       _dao.findAllEntitiesOfType(ScreeningRoomUser.class,
                                  true,
+                                 // TODO: this is very inefficient!
                                  "screensCollaborated");
     Collections.sort(candidateCollaborators, ScreensaverUserComparator.getInstance());
     Screen screen = (Screen) getStudy(); // HACK

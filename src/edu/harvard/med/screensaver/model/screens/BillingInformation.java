@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,12 +60,12 @@ public class BillingInformation extends AbstractEntity
   private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
   private BillingInfoToBeRequested _billingInfoToBeRequested;
   private boolean _isBillingForSuppliesOnly;
-  private LocalDate _billingInfoReturnDate;
-  private String _amountToBeChargedForScreen;
-  private String _facilitiesAndAdministrationCharge;
-  private LocalDate _feeFormRequestedDate;
-  private String _feeFormRequestedInitials;
   private boolean _isFeeFormOnFile;
+  private String _feeFormRequestedInitials;
+  private BigDecimal _amountToBeChargedForScreen;
+  private BigDecimal _facilitiesAndAdministrationCharge;
+  private LocalDate _feeFormRequestedDate;
+  private LocalDate _billingInfoReturnDate;
   private LocalDate _dateCompleted5KCompounds;
   private LocalDate _dateFaxedToBillingDepartment;
   private LocalDate _dateCharged;
@@ -161,7 +162,7 @@ public class BillingInformation extends AbstractEntity
    * @param dateFaxed the date faxed
    * @return the new billing item for this billing information
    */
-  public BillingItem createBillingItem(String itemToBeCharged, String amount, LocalDate dateFaxed)
+  public BillingItem createBillingItem(String itemToBeCharged, BigDecimal amount, LocalDate dateFaxed)
   {
     BillingItem billingItem = new BillingItem(this, itemToBeCharged, amount, dateFaxed);
     _billingItems.add(billingItem);
@@ -230,8 +231,9 @@ public class BillingInformation extends AbstractEntity
    * Get the amount to be charged for screen.
    * @return the amount to be charged for screen
    */
-  @org.hibernate.annotations.Type(type="text")
-  public String getAmountToBeChargedForScreen()
+  @Column(precision=9, scale=2)
+  @org.hibernate.annotations.Type(type="big_decimal")
+  public BigDecimal getAmountToBeChargedForScreen()
   {
     return _amountToBeChargedForScreen;
   }
@@ -240,7 +242,7 @@ public class BillingInformation extends AbstractEntity
    * Set the amount to be charged for screen.
    * @param amountToBeChargedForScreen the new amount to be charged for screen
    */
-  public void setAmountToBeChargedForScreen(String amountToBeChargedForScreen)
+  public void setAmountToBeChargedForScreen(BigDecimal amountToBeChargedForScreen)
   {
     _amountToBeChargedForScreen = amountToBeChargedForScreen;
   }
@@ -249,8 +251,9 @@ public class BillingInformation extends AbstractEntity
    * Get the facilities and administration charge.
    * @return the facilities and administration charge
    */
-  @org.hibernate.annotations.Type(type="text")
-  public String getFacilitiesAndAdministrationCharge()
+  @org.hibernate.annotations.Type(type="big_decimal")
+  @Column(precision=9, scale=2)
+  public BigDecimal getFacilitiesAndAdministrationCharge()
   {
     return _facilitiesAndAdministrationCharge;
   }
@@ -259,7 +262,7 @@ public class BillingInformation extends AbstractEntity
    * Set the facilities and administration charge.
    * @param facilitiesAndAdministrationCharge the new facilities and administration charge
    */
-  public void setFacilitiesAndAdministrationCharge(String facilitiesAndAdministrationCharge)
+  public void setFacilitiesAndAdministrationCharge(BigDecimal facilitiesAndAdministrationCharge)
   {
     _facilitiesAndAdministrationCharge = facilitiesAndAdministrationCharge;
   }

@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.AttachedFileType;
+import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -89,6 +90,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
   private boolean _isPublishableProtocolDetailsCollapsed = true;
+  private boolean _isBillingInformationCollapsed = true;
   private FundingSupport _newFundingSupport;
   private UISelectOneBean<StatusValue> _newStatusItemValue;
   private LocalDate _newStatusItemDate;
@@ -174,6 +176,16 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public void setPublishableProtocolDetailsCollapsed(boolean isPublishableProtocolDetailsCollapsed)
   {
     _isPublishableProtocolDetailsCollapsed = isPublishableProtocolDetailsCollapsed;
+  }
+
+  public boolean isBillingInformationCollapsed()
+  {
+    return _isBillingInformationCollapsed;
+  }
+
+  public void setBillingInformationCollapsed(boolean isBillingInformationCollapsed)
+  {
+    _isBillingInformationCollapsed = isBillingInformationCollapsed;
   }
 
   /**
@@ -680,9 +692,13 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
-  public String viewBillingInformation()
+  public String addBillingInformation()
   {
-    return VIEW_BILLING_INFORMATION_ACTION_RESULT;
+    if (_screen.getBillingInformation() == null) {
+      _screen.createBillingInformation(BillingInfoToBeRequested.YES);
+      _isBillingInformationCollapsed = false;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
 
@@ -703,6 +719,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _returnToViewAfterEdit = null;
     //_isAdminViewMode = false; // maintain this setting when viewing a new screen
     //_isPublishableProtocolDetailsCollapsed = true; // maintain this setting when viewing a new screen
+    //_isBillingInformationCollapsed = true; // maintain this setting when viewing a new screen
     _newFundingSupport = null;
     _newStatusItemValue = null;
     _newStatusItemDate = null;
