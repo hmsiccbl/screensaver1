@@ -236,9 +236,13 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   
   /**
    * Get the ordinal position of this <code>ResultValueType</code> within its
-   * parent {@link ScreenResult}.
-   * @return the ordinal position of this <code>ResultValueType</code> within its
-   * parent {@link ScreenResult}
+   * parent {@link ScreenResult}. This ordering is really only significant from
+   * the standpoint of presenting a {@link ScreenResult} to the user
+   * (historically speaking, it reflects the ordering found during spreadsheet
+   * file import).
+   * 
+   * @return the ordinal position of this <code>ResultValueType</code> within
+   *         its parent {@link ScreenResult}
    */
   @Column(nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
@@ -248,23 +252,24 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Get the replicate ordinal, a one-based index indicating the order of this
-   * <code>ResultValueType</code> within its parent {@link ScreenResult}.
-   * This ordering is really only significant from the standpoint of presenting
-   * a {@link ScreenResult} to the user (historically speaking, it reflects the
-   * ordering found during spreadsheet file import).
-   *
-   * @return the replicate ordinal
+   * Get the replicate ordinal, a 1-based index indicating the assay replicate
+   * that produced this ResultValueType's data.
+   * 
+   * @return the replicate ordinal. May be null if assay replicates were not
+   *         produced.
    */
+  // TODO: remove 'Ordinal' suffix, or replace with 'Number' (mathematically, ordinal includes the value 0)
   public Integer getReplicateOrdinal()
   {
     return _replicateOrdinal;
   }
 
   /**
-   * Set the replicate ordinal, a 1-based index indicating the order of this
-   * <code>ResultValueType</code> within its parent {@link ScreenResult}.
-   * @param replicateOrdinal the replicate ordinal
+   * Set the replicate ordinal, a 1-based index indicating the assay replicate
+   * that produced this ResultValueType's data. 
+   * 
+   * @param replicateOrdinal the replicate ordinal. May be null if assay replicates
+   * were not produced.
    */
   public void setReplicateOrdinal(Integer replicateOrdinal)
   {
@@ -957,10 +962,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Set the ordinal position of this <code>ResultValueType</code> within its
-   * parent {@link ScreenResult}.
-   * @param ordinal the ordinal position of this <code>ResultValueType</code>
-   * within its parent {@link ScreenResult}
    * @motivation for Hibernate
    */
   private void setOrdinal(Integer ordinal)
