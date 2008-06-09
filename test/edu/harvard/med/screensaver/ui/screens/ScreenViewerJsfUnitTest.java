@@ -186,7 +186,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertAtView("/screensaver/screens/screensBrowser.jsf");
     assertFalse(((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.collaborators")).contains(collaborator));
   }
-  
+
   public void testAddAndDeletePublication() throws Exception
   {
     visitScreenViewer(_screen);
@@ -218,6 +218,21 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertPageContainsText("Screensaver LIMS", false);
   }
 
+  public void testAddBillingInformation() throws Exception
+  {
+    visitScreenViewer(_screen);
+    assertNull(getBeanValue("screenDetailViewer.screen.billingInformation"));
+    assertElementExists("billingInformationToggleText", false);
+    submit("screenDetailPanelForm:editCommand");
+    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
+    submit("addBillingInformationCommand");
+    assertNotNull(getBeanValue("screenDetailViewer.screen.billingInformation"));
+    assertElementTextEqualsRegex("billingInformationToggleText", "Hide.*");
+    submit("saveCommand");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertElementTextEqualsRegex("billingInformationToggleText", "Hide.*");
+  }
+
   private void visitScreenViewer(Screen screen)
   {
     ScreenViewer viewer = getBeanValue("screenViewer");
@@ -225,5 +240,4 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     visitPage("/screens/screensBrowser.jsf");
     assertAtView("/screensaver/screens/screensBrowser.jsf");
   }
-
 }

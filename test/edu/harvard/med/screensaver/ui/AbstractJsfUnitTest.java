@@ -29,6 +29,7 @@ import org.jboss.jsfunit.facade.JSFServerSession;
 import org.jboss.jsfunit.framework.WebConversationFactory;
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.HTMLElement;
 import com.meterware.httpunit.WebConversation;
 
 /**
@@ -119,6 +120,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     user.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
     user.addScreensaverUserRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
     user.addScreensaverUserRole(ScreensaverUserRole.CHERRY_PICK_ADMIN);
+    user.addScreensaverUserRole(ScreensaverUserRole.BILLING_ADMIN);
     _dao.persistEntity(user);
     log.debug("created test user " + user);
     return user;
@@ -196,5 +198,33 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
   {
     boolean result = _client.getWebResponse().getText().contains(text);
     assertTrue(contains ? result : !result);
+  }
+  
+  protected void assertElementTextEqualsRegex(String elementId, String regex)
+  {
+    HTMLElement element = null;
+    try {
+      String fullElementId = _client.getClientIDs().findClientID(elementId);
+      element = _client.getWebResponse().getElementWithID(fullElementId);
+      if (element == null) {
+        fail("element text match failed because " + elementId + " does not exist"); 
+      }
+      assertTrue("elementId text matches " + regex,
+                 element.getText().matches(regex));
+    }
+    catch (SAXException e) {
+      fail("error finding element " + elementId + ": " + e.getMessage());
+    }
+  }
+
+  protected void assertElementExists(String elementId, boolean expectedExists)
+  {
+    HTMLElement element = null;
+    try {
+      element = _client.getWebResponse().getElementWithID(elementId);
+    }
+    catch (SAXException e) {}
+    assertTrue("element " + elementId + (expectedExists ? "exists" : " does not exist"), 
+               expectedExists ? element != null : element == null);  
   }
 }

@@ -377,7 +377,7 @@ TODO:
             value="&lt;none&gt;"
             styleClass="dataText"
             rendered="#{empty screenDetailViewer.screen.billingInformation &amp;&amp; !screenDetailViewer.editMode}" />
-					<t:commandButton id="addBillingInformation" value="Add"
+					<t:commandButton id="addBillingInformationCommand" value="Add"
 						action="#{screenDetailViewer.addBillingInformation}"
 						rendered="#{empty screenDetailViewer.screen.billingInformation &amp;&amp; screenDetailViewer.editMode}" />
 					
@@ -386,7 +386,7 @@ TODO:
 						rendered="#{!empty screenDetailViewer.screen.billingInformation}">
 						<f:facet name="header">
 							<t:headerLink immediate="true">
-								<t:outputText
+								<t:outputText id="billingInformationToggleText"
 									value="#{isBillingInformationCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
 									styleClass="dataText" />
 							</t:headerLink>
