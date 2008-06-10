@@ -58,7 +58,8 @@ public class BillingInformation extends AbstractEntity
   private Integer _version;
   private Screen _screen;
   private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
-  private BillingInfoToBeRequested _billingInfoToBeRequested;
+  private boolean _toBeRequested;
+  private boolean _seeComments;
   private boolean _isBillingForSuppliesOnly;
   private boolean _isFeeFormOnFile;
   private String _feeFormRequestedInitials;
@@ -77,16 +78,16 @@ public class BillingInformation extends AbstractEntity
   /**
    * Construct an initialized <code>BillingInformation</code>.
    * @param screen the screen
-   * @param billingInfoToBeRequested is billing info to be requested
+   * @param toBeRequested is billing info to be requested
    */
   // TODO make package visible
-  public BillingInformation(Screen screen, BillingInfoToBeRequested billingInfoToBeRequested)
+  public BillingInformation(Screen screen, boolean toBeRequested)
   {
     if (screen == null) {
       throw new NullPointerException();
     }
     _screen = screen;
-    _billingInfoToBeRequested = billingInfoToBeRequested;
+    _toBeRequested = toBeRequested;
   }
 
 
@@ -169,31 +170,40 @@ public class BillingInformation extends AbstractEntity
     return billingItem;
   }
 
-  /**
-   * Get the billing info to be requested.
-   * @return the billing info to be requested
-   */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested$UserType")
-  public BillingInfoToBeRequested getBillingInfoToBeRequested()
+  public BillingItem createBillingItem(BillingItem dtoBillingItem)
   {
-    return _billingInfoToBeRequested;
+    return createBillingItem(dtoBillingItem.getItemToBeCharged(),
+                             dtoBillingItem.getAmount(),
+                             dtoBillingItem.getDateFaxed());
   }
 
-  /**
-   * Set the billing info to be requested.
-   * @param billingInfoToBeRequested the new billing info to be requested
-   */
-  public void setBillingInfoToBeRequested(BillingInfoToBeRequested billingInfoToBeRequested)
+  @Column(nullable=false)
+  public boolean isToBeRequested()
   {
-    _billingInfoToBeRequested = billingInfoToBeRequested;
+    return _toBeRequested;
+  }
+
+  public void setToBeRequested(boolean billingInfoToBeRequested)
+  {
+    _toBeRequested = billingInfoToBeRequested;
+  }
+
+  @Column(nullable=false)
+  public boolean isSeeComments()
+  {
+    return _seeComments;
+  }
+
+  public void setSeeComments(boolean seeComments)
+  {
+    _seeComments = seeComments;
   }
 
   /**
    * Get the billing for supplies only.
    * @return the billing for supplies only
    */
-  @Column(nullable=false, name="isBillingForSuppliesOnly")
+  @Column(name="isBillingForSuppliesOnly", nullable=false)
   public boolean isBillingForSuppliesOnly()
   {
     return _isBillingForSuppliesOnly;
@@ -309,8 +319,8 @@ public class BillingInformation extends AbstractEntity
    * Get the is fee form on file.
    * @return the is fee form on file
    */
-  @Column(nullable=false)
-  public boolean getIsFeeFormOnFile()
+  @Column(name="isFeeFormOnFile", nullable=false)
+  public boolean isFeeFormOnFile()
   {
     return _isFeeFormOnFile;
   }
@@ -319,7 +329,7 @@ public class BillingInformation extends AbstractEntity
    * Set the is fee form on file.
    * @param isFeeFormOnFile the new is fee form on file
    */
-  public void setIsFeeFormOnFile(boolean isFeeFormOnFile)
+  public void setFeeFormOnFile(boolean isFeeFormOnFile)
   {
     _isFeeFormOnFile = isFeeFormOnFile;
   }

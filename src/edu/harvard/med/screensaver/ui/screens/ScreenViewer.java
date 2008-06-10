@@ -93,8 +93,8 @@ public class ScreenViewer extends StudyViewer
                                 true,
                                 "labHead",
                                 "labHead.labMembers",
-                                "leadScreener",
-                                "billingInformation");
+                                "leadScreener");
+    _dao.needReadOnly(screen, "billingInformation.billingItems");
     _dao.needReadOnly(screen, "collaborators.labHead");
     _dao.needReadOnly(screen, "labActivities.performedBy");
     _dao.needReadOnly(screen,

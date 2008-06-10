@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -33,19 +34,19 @@ import com.meterware.httpunit.HTMLElement;
 import com.meterware.httpunit.WebConversation;
 
 /**
- * Base class for user interface unit tests. 
- * 
+ * Base class for user interface unit tests.
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
 {
-  
+
   private static final Logger log = Logger.getLogger(AbstractJsfUnitTest.class);
 
   public static final String TEST_USER_NAME = "testuser";
   public static final String TEST_USER_PASSWORD = "testuser";
 
-  // nested class to avoid deployment-time complexities (only *JsfUnitTest named classes are deployed for UI testing) 
+  // nested class to avoid deployment-time complexities (only *JsfUnitTest named classes are deployed for UI testing)
   public static class JsfUnitException extends RuntimeException
   {
     private static final long serialVersionUID = 1L;
@@ -56,14 +57,14 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     }
   }
 
-  
+
   protected SchemaUtil _schemaUtil;
   protected AdministratorUser _testUser;
   protected GenericEntityDAO _dao;
   protected WebConversation _webConv;
   protected JSFClientSession _client;
   protected JSFServerSession _server;
-  
+
   /**
    * Sets up the database with a test user and authenticates the user via BASIC
    * authentication servlet mechanism. Will abort unless database is a test
@@ -105,7 +106,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
 
   private AdministratorUser createTestUser(String first, String last)
   {
-    AdministratorUser user = 
+    AdministratorUser user =
       new AdministratorUser(first,
                             last,
                             first.toLowerCase() + "_" + last.toLowerCase() + "@hms.harvard.edu",
@@ -125,7 +126,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     log.debug("created test user " + user);
     return user;
   }
-  
+
   protected JSFClientSession visitPage(String jsfPagePath)
   {
     try {
@@ -137,7 +138,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
       throw new JsfUnitException(e);
     }
   }
-  
+
   protected JSFClientSession visitMainPage()
     throws MalformedURLException,
     IOException,
@@ -145,7 +146,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
   {
     return visitPage("/main/main.jsf");
   }
-  
+
   protected void submit(String submitButtonId,
                         Pair<String,String>... nameValuePairs) throws SAXException, IOException
   {
@@ -160,7 +161,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
       _client.submit(submitButtonId);
     }
   }
-  
+
   /**
    * @param viewURL e.g. <code>/main/main.jsf</code>
    */
@@ -173,6 +174,11 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
   protected <T> T getBeanValue(String elExpr)
   {
     return (T) _server.getManagedBeanValue("#{" + elExpr + "}");
+  }
+
+  protected int getCollectionSize(String elExpr)
+  {
+    return ((Collection<?>) getBeanValue(elExpr)).size();
   }
 
   protected void assertMessage(String regex)
@@ -188,18 +194,18 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     }
     fail("faces message exists matching " + regex);
   }
-  
+
   protected void assertPageContainsText(String text) throws IOException
   {
     assertPageContainsText(text, true);
   }
-  
+
   protected void assertPageContainsText(String text, boolean contains) throws IOException
   {
     boolean result = _client.getWebResponse().getText().contains(text);
     assertTrue(contains ? result : !result);
   }
-  
+
   protected void assertElementTextEqualsRegex(String elementId, String regex)
   {
     HTMLElement element = null;
@@ -207,7 +213,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
       String fullElementId = _client.getClientIDs().findClientID(elementId);
       element = _client.getWebResponse().getElementWithID(fullElementId);
       if (element == null) {
-        fail("element text match failed because " + elementId + " does not exist"); 
+        fail("element text match failed because " + elementId + " does not exist");
       }
       assertTrue("elementId text matches " + regex,
                  element.getText().matches(regex));
@@ -224,7 +230,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
       element = _client.getWebResponse().getElementWithID(elementId);
     }
     catch (SAXException e) {}
-    assertTrue("element " + elementId + (expectedExists ? "exists" : " does not exist"), 
-               expectedExists ? element != null : element == null);  
+    assertTrue("element " + elementId + (expectedExists ? "exists" : " does not exist"),
+               expectedExists ? element != null : element == null);
   }
 }

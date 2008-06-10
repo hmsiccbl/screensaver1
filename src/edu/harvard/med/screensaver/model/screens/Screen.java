@@ -804,7 +804,7 @@ public class Screen extends Study
 
   /**
    * Create a new publication for this screen.
-   * 
+   *
    * @return the new publication
    */
   public Publication createPublication()
@@ -894,12 +894,12 @@ public class Screen extends Study
    * Set the billing information.
    * @param billingInformation the new billing information
    */
-  public BillingInformation createBillingInformation(BillingInfoToBeRequested billingInfoToBeRequested)
+  public BillingInformation createBillingInformation(boolean toBeRequested)
   {
     if (_billingInformation != null) {
       throw new DataModelViolationException("attempt to overwrite existing billing info");
     }
-    _billingInformation = new BillingInformation(this, billingInfoToBeRequested);
+    _billingInformation = new BillingInformation(this, toBeRequested);
     return _billingInformation;
   }
 

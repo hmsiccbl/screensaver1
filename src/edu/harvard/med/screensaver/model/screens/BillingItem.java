@@ -189,14 +189,12 @@ public class BillingItem extends AbstractEntity
     _dateFaxed = dateFaxed;
   }
 
-
-  // protected constructor
-
   /**
    * Construct an uninitialized <code>BillingItem</code> object.
    * @motivation for hibernate and proxy/concrete subclass constructors
+   * @motivation DTO for user interface
    */
-  protected BillingItem() {}
+  public BillingItem() {}
 
 
   // private constructor and instance methods

@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -213,14 +212,14 @@ public class ScreenSynchronizer
   private void synchronizeBillingInformation(ResultSet resultSet, Screen screen) throws SQLException
   {
     BillingInformation billingInformation = screen.getBillingInformation();
-    BillingInfoToBeRequested billingInfoToBeRequested = resultSet.getBoolean("billing_info_to_be_requested") ? BillingInfoToBeRequested.YES : BillingInfoToBeRequested.NO;
+    boolean toBeRequested = resultSet.getBoolean("billing_info_to_be_requested");
     LocalDate billingInfoReturnDate = ResultSetUtil.getDate(resultSet, "billing_info_return_date");
     String billingComments = resultSet.getString("billing_comments");
     if (billingInformation == null) {
-      billingInformation = new BillingInformation(screen, billingInfoToBeRequested);
+      billingInformation = new BillingInformation(screen, toBeRequested);
     }
     else {
-      billingInformation.setBillingInfoToBeRequested(billingInfoToBeRequested);
+      billingInformation.setToBeRequested(toBeRequested);
     }
     billingInformation.setBillingInfoReturnDate(billingInfoReturnDate);
     billingInformation.setComments(billingComments);

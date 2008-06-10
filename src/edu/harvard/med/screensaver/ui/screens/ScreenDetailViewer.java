@@ -37,7 +37,7 @@ import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.AttachedFileType;
-import edu.harvard.med.screensaver.model.screens.BillingInfoToBeRequested;
+import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -103,7 +103,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
 
   private Publication _newPublication;
 
-  
+  private BillingItem _newBillingItem;
+
+
 
   // constructors
 
@@ -379,7 +381,29 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     return JSFUtils.createUISelectItems(candiateAssayReadoutTypes);
   }
 
+  public DataModel getBillingItemsDataModel()
+  {
+    ArrayList<BillingItem> billingItems = new ArrayList<BillingItem>();
+    if (getScreen().getBillingInformation() != null) {
+      billingItems.addAll(getScreen().getBillingInformation().getBillingItems());
+    }
+    Collections.sort(billingItems,
+                     new Comparator<BillingItem>() {
+      public int compare(BillingItem bi1, BillingItem bi2)
+      {
+        return bi1.getDateFaxed().compareTo(bi2.getDateFaxed());
+      }
+    });
+    return new ListDataModel(billingItems);
+  }
 
+  public BillingItem getNewBillingItem()
+  {
+    if (_newBillingItem == null) {
+      _newBillingItem = new BillingItem();
+    }
+    return _newBillingItem;
+  }
 
 
   /* JSF Application methods */
@@ -495,11 +519,11 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _newPublication = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   public String lookupPublicationByPubMedId()
   {
     try {
-      _newPublication = 
+      _newPublication =
         _publicationInfoProvider.getPublicationForPubmedId(_newPublication.getPubmedId());
       if (_newPublication == null) {
         reportApplicationError("Publication for PubMed ID " + _newAttachedFileContents + " was not found");
@@ -695,12 +719,34 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String addBillingInformation()
   {
     if (_screen.getBillingInformation() == null) {
-      _screen.createBillingInformation(BillingInfoToBeRequested.YES);
+      _screen.createBillingInformation(true);
       _isBillingInformationCollapsed = false;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  @UIControllerMethod
+  public String addBillingItem()
+  {
+    if (_newBillingItem != null) {
+      try {
+        getScreen().getBillingInformation().createBillingItem(_newBillingItem);
+      }
+      catch (BusinessRuleViolationException e) {
+        showMessage("businessError", e.getMessage());
+      }
+      _newBillingItem = null; // reset
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UIControllerMethod
+  public String deleteBillingItem()
+  {
+    getScreen().getBillingInformation().getBillingItems().remove(getRequestMap().get("element"));
+    _newBillingItem = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
 
   // protected methods
 
@@ -729,6 +775,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _uploadedAttachedFileContents = null;
     _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;
     _newPublication = null;
+    _newBillingItem = null;
   }
 
   @SuppressWarnings("unchecked")

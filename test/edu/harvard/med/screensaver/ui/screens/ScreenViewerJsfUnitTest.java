@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.screens;
 
 
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -19,6 +20,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -70,8 +72,11 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
 //    submit("saveCommand");
 //    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
 //    assertMessage("required.*titleTextField");
-    _client.setParameter("screenDetailViewerForm:labNameMenu", Integer.toString(_screen.getLabHead().hashCode()));
-    _client.submitNoButton("screenDetailViewerForm");
+
+    //_client.setParameter("screenDetailViewerForm:labNameMenu", Integer.toString(_screen.getLabHead().hashCode()));
+    //_client.submitNoButton("screenDetailViewerForm");
+    submit("submitLabHead",
+           new Pair<String,String>("screenDetailViewerForm:labNameMenu", Integer.toString(_screen.getLabHead().hashCode())));
     assertEquals(2, getBeanValue("screenDetailViewer.leadScreener.size"));
     submit("saveCommand",
            new Pair<String,String>("screenDetailViewerForm:titleTextField", "Test screen title"),
@@ -218,7 +223,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertPageContainsText("Screensaver LIMS", false);
   }
 
-  public void testAddBillingInformation() throws Exception
+  public void testAddBillingInformationAndBillingItems() throws Exception
   {
     visitScreenViewer(_screen);
     assertNull(getBeanValue("screenDetailViewer.screen.billingInformation"));
@@ -228,9 +233,38 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     submit("addBillingInformationCommand");
     assertNotNull(getBeanValue("screenDetailViewer.screen.billingInformation"));
     assertElementTextEqualsRegex("billingInformationToggleText", "Hide.*");
+
+    // test billing items
+    submit("billingItemsTableAddCommand",
+           new Pair<String,String>("newBillingItemItemToBeChargedTextField", "Plates"),
+           new Pair<String,String>("newBillingItemAmountCurrencyField", "$19.99"),
+           new Pair<String,String>("newBillingItemDateFaxedDateField", "02/18/2008"));
+    assertEquals("billing item added (count)",
+                 1, getCollectionSize("screenDetailViewer.screen.billingInformation.billingItems"));
+    submit("billingItemsTableAddCommand",
+           new Pair<String,String>("newBillingItemItemToBeChargedTextField", "DMSO"),
+           new Pair<String,String>("newBillingItemAmountCurrencyField", "$14.39"),
+           new Pair<String,String>("newBillingItemDateFaxedDateField", "02/19/2008"));
+    assertEquals("billing item added (count)",
+                 2, getCollectionSize("screenDetailViewer.screen.billingInformation.billingItems"));
+    submit("1:billingItemsTableDeleteCommand");
+    assertEquals("billing item added (count)",
+                 1, getCollectionSize("screenDetailViewer.screen.billingInformation.billingItems"));
+
+    BillingItem expectedBillingItem = new BillingItem();
+    expectedBillingItem.setItemToBeCharged("Plates");
+    expectedBillingItem.setAmount(new BigDecimal("19.99"));
+    expectedBillingItem.setDateFaxed(new LocalDate(2008, 2, 18));
+//    assertTrue("billing item added (value)",
+//                 expectedBillingItem.isEquivalent(((Set<BillingItem>) getBeanValue("screenDetailViewer.screen.billingInformation.billingItems")).iterator().next()));
+
     submit("saveCommand");
     assertAtView("/screensaver/screens/screensBrowser.jsf");
     assertElementTextEqualsRegex("billingInformationToggleText", "Hide.*");
+    assertEquals("billing item added (count)",
+                 1, getCollectionSize("screenDetailViewer.screen.billingInformation.billingItems"));
+//    assertTrue("billing item added (value)",
+//               expectedBillingItem.isEquivalent(((Set<BillingItem>) getBeanValue("screenDetailViewer.screen.billingInformation.billingItems")).iterator().next()));
   }
 
   private void visitScreenViewer(Screen screen)
