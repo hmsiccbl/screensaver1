@@ -1159,7 +1159,7 @@ public class Screen extends Study
 
   /**
    * Add the funding support.
-   * @param fundingSupport the funding suppor to add
+   * @param fundingSupport the funding support to add
    * @return true iff the screen did not already have the funding support
    */
   public boolean addFundingSupport(FundingSupport fundingSupport)

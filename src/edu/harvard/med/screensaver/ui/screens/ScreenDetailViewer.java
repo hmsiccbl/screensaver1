@@ -18,14 +18,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
-import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
@@ -91,20 +89,18 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private boolean _isAdminViewMode = false;
   private boolean _isPublishableProtocolDetailsCollapsed = true;
   private boolean _isBillingInformationCollapsed = true;
-  private FundingSupport _newFundingSupport;
+  private UISelectOneBean<FundingSupport> _newFundingSupport;
+  // TODO: use StatusItem DTO instead
   private UISelectOneBean<StatusValue> _newStatusItemValue;
   private LocalDate _newStatusItemDate;
-  private AssayReadoutType _newAssayReadoutType = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs)
-
+  private UISelectOneBean<AssayReadoutType> _newAssayReadoutType;
+  // TODO: use AttachedFile DTO instead
   private String _newAttachedFileName;
   private UISelectOneBean<AttachedFileType> _newAttachedFileType;
   private UploadedFile _uploadedAttachedFileContents;
   private String _newAttachedFileContents;
-
   private Publication _newPublication;
-
   private BillingItem _newBillingItem;
-
 
 
   // constructors
@@ -203,24 +199,24 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
            _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(getScreen());
   }
 
-  public AssayReadoutType getNewAssayReadoutType()
+  public UISelectOneBean<AssayReadoutType> getNewAssayReadoutType()
   {
+    if (_newAssayReadoutType == null) {
+      Set<AssayReadoutType> candidateAssayReadoutTypes = new HashSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
+      candidateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
+      _newAssayReadoutType = new UISelectOneBean<AssayReadoutType>(candidateAssayReadoutTypes, AssayReadoutType.UNSPECIFIED); // the default (as specified in reqs));
+    }
     return _newAssayReadoutType;
   }
 
-  public void setNewAssayReadoutType(AssayReadoutType newAssayReadoutTypeController)
+  public UISelectOneBean<FundingSupport> getNewFundingSupport()
   {
-    _newAssayReadoutType = newAssayReadoutTypeController;
-  }
-
-  public FundingSupport getNewFundingSupport()
-  {
+    if (_newFundingSupport == null) {
+      Set<FundingSupport> candidateFundingSupports = new HashSet<FundingSupport>(Arrays.asList(FundingSupport.values()));
+      candidateFundingSupports.removeAll(getScreen().getFundingSupports());
+      _newFundingSupport = new UISelectOneBean<FundingSupport>(candidateFundingSupports);
+    }
     return _newFundingSupport;
-  }
-
-  public void setNewFundingSupport(FundingSupport newFundingSupportController)
-  {
-    _newFundingSupport = newFundingSupportController;
   }
 
   public UISelectOneBean<StatusValue> getNewStatusItemValue()
@@ -365,20 +361,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String getAbaseTestsets()
   {
     return StringUtils.makeListString(new ArrayList<AbaseTestset>(getScreen().getAbaseTestsets()), ", ");
-  }
-
-  public List<SelectItem> getNewFundingSupportSelectItems()
-  {
-    Set<FundingSupport> candiateFundingSupports = new HashSet<FundingSupport>(Arrays.asList(FundingSupport.values()));
-    candiateFundingSupports.removeAll(getScreen().getFundingSupports());
-    return JSFUtils.createUISelectItems(candiateFundingSupports);
-  }
-
-  public List<SelectItem> getNewAssayReadoutTypeSelectItems()
-  {
-    Set<AssayReadoutType> candiateAssayReadoutTypes = new HashSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
-    candiateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
-    return JSFUtils.createUISelectItems(candiateAssayReadoutTypes);
   }
 
   public DataModel getBillingItemsDataModel()
@@ -542,6 +524,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     Publication publication = (Publication) getRequestMap().get("element");
     if (publication != null) {
       getScreen().getPublications().remove(publication);
+      _newPublication = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -591,6 +574,10 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
     AttachedFile attachedFile = (AttachedFile) getRequestMap().get("attachedFile");
     getScreen().getAttachedFiles().remove(attachedFile);
+    _newAttachedFileName = null;
+    _newAttachedFileContents = null;
+    _newAttachedFileType = null;
+    _uploadedAttachedFileContents = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -616,11 +603,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String addFundingSupport()
   {
-    if (_newFundingSupport != null) {
-      if (!getScreen().addFundingSupport(_newFundingSupport)) {
-        showMessage("screens.duplicateEntity", "funding support");
-      }
-      setNewFundingSupport(null);
+    if (_newFundingSupport != null && _newFundingSupport.getSelection() != null) {
+      getScreen().addFundingSupport(_newFundingSupport.getSelection());
+      _newFundingSupport = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -628,7 +613,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String deleteFundingSupport()
   {
-    getScreen().getFundingSupports().remove(getSelectedEntityOfType(FundingSupport.class));
+    getScreen().getFundingSupports().remove(getRequestMap().get("element"));
+    _newFundingSupport = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -773,7 +759,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _newAttachedFileName = null;
     _newAttachedFileType = null;
     _uploadedAttachedFileContents = null;
-    _newAssayReadoutType = AssayReadoutType.UNSPECIFIED;
+    _newAssayReadoutType = null;
     _newPublication = null;
     _newBillingItem = null;
   }

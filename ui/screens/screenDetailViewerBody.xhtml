@@ -16,13 +16,13 @@ TODO:
 <ui:composition>
 
 	<t:panelGroup id="commandPanel">
-		<h:commandButton id="viewAdminOnlyFieldsCommand"
-			value="#{screenDetailViewer.adminViewMode ? 'Hide Admin' : 'Show Admin'}"
+    <ss:editSaveCancel viewer="#{screenDetailViewer}" />
+		<h:commandLink id="viewAdminOnlyFieldsCommand"
+			value="#{screenDetailViewer.adminViewMode ? 'Admin &lt;&lt;' : 'Admin &gt;&gt;'}"
 			rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) &amp;&amp; !screenDetailViewer.editMode}"
 			action="#{screenDetailViewer.toggleAdminViewMode}"
-			styleClass="command"
+			styleClass="dataText"
 			title="Show or hide administrative fields for the screen" />
-		<ss:editSaveCancel viewer="#{screenDetailViewer}" />
 	</t:panelGroup>
 
 	<t:panelGrid id="leftAndRightSides" columns="2"
@@ -314,44 +314,39 @@ TODO:
 				</ui:define>
 			</ss:property>
 
-			<ss:property id="fundingSupports" label="Funding Support"
+			<ss:property id="fundingSupports" label="Funding Support(s)"
 				rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 				description="The sources of funding support for the screen">
 				<ui:define name="data">
-					<t:panelGrid columns="1"
-						rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
-						<t:outputText value="&lt;none&gt;" styleClass="dataText"
-							rendered="#{empty screenDetailViewer.screen.fundingSupports}" />
-						<t:dataTable id="fundingSupports" var="fundingSupport"
-							value="#{screenDetailViewer.fundingSupportsDataModel}"
-							preserveDataModel="false"
-							rendered="#{!empty screenDetailViewer.screen.fundingSupports}"
-							styleClass="standardTable" rowClasses="row1,row2"
-							columnClasses="column" headerClass="tableHeader">
+					<t:outputText value="#{screenDetailViewer.screen.fundingSupports}"
+						converter="#{setConverter}"
+						rendered="#{screenDetailViewer.fundingSupportsDataModel.rowCount == 1 &amp;&amp; !screenDetailViewer.editMode}"
+						styleClass="dataText" />
+					<ss:collectionTable id="fundingSupportsTable"
+						dataModel="#{screenDetailViewer.fundingSupportsDataModel}"
+						rendered="#{screenDetailViewer.fundingSupportsDataModel.rowCount != 1 || screenDetailViewer.editMode}"
+						editable="#{screenDetailViewer.editMode}"
+						actionBean="#{screenDetailViewer}" addAction="addFundingSupport"
+						deleteAction="deleteFundingSupport">
+						<ui:define name="columns">
 							<t:column>
-								<t:outputText value="#{fundingSupport.value}"
-									styleClass="dataText" />
+								<f:facet name="header">
+									<t:outputText value="Funding Support" />
+								</f:facet>
+								<t:outputText value="#{element.value}" />
 							</t:column>
-							<t:column>
-								<t:commandButton value="Delete" image="/images/delete.png"
-									action="#{screenDetailViewer.deleteFundingSupport}"
-									styleClass="command" rendered="#{screenDetailViewer.editMode}" />
-							</t:column>
-						</t:dataTable>
-						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
-							<t:selectOneMenu value="#{screenDetailViewer.newFundingSupport}"
-								required="false" styleClass="inputText selectMenu"
-								converter="#{fundingSupportConverter}">
-								<f:selectItems
-									value="#{screenDetailViewer.newFundingSupportSelectItems}" />
-							</t:selectOneMenu>
-							<t:commandButton value="Add Funding Support"
-								action="#{screenDetailViewer.addFundingSupport}"
-								immediate="true" rendered="#{screenDetailViewer.editMode}"
-								disabled="#{empty screenDetailViewer.newFundingSupportSelectItems}"
-								styleClass="command" />
-						</t:panelGroup>
-					</t:panelGrid>
+						</ui:define>
+						<ui:define name="addProperties">
+							<t:panelGrid columns="2">
+								<t:selectOneMenu
+									value="#{screenDetailViewer.newFundingSupport.value}"
+									required="false" styleClass="inputText selectMenu">
+									<f:selectItems
+										value="#{screenDetailViewer.newFundingSupport.selectItems}" />
+								</t:selectOneMenu>
+							</t:panelGrid>
+						</ui:define>
+					</ss:collectionTable>
 				</ui:define>
 			</ss:property>
 
@@ -393,21 +388,25 @@ TODO:
 									styleClass="dataText" />
 							</t:headerLink>
 						</f:facet>
-						<t:panelGrid id="billingInfoProperties" columns="2"
-							columnClasses="propertyLabelColumn,column"
+						<t:panelGrid id="billingInfoProperties" columns="4"
+							columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
 							styleClass="layoutPanel" style="width: 100%">
 							<ss:property id="billingInfoToBeRequested"
 								label="Billing Information to be Requested" type="Boolean"
-								value="#{screenDetailViewer.screen.billingInformation.toBeRequested}" editable="#{screenDetailViewer.editMode}" />
+								value="#{screenDetailViewer.screen.billingInformation.toBeRequested}"
+								editable="#{screenDetailViewer.editMode}" />
 							<ss:property id="billingInfoToBeRequestedSeeComment"
 								label="See comments" type="Boolean"
-								value="#{screenDetailViewer.screen.billingInformation.seeComments}" editable="#{screenDetailViewer.editMode}" />
+								value="#{screenDetailViewer.screen.billingInformation.seeComments}"
+								editable="#{screenDetailViewer.editMode}" />
 							<ss:property id="billingForSuppliesOnly"
 								label="Billing For Supplies Only" type="Boolean"
-								value="#{screenDetailViewer.screen.billingInformation.billingForSuppliesOnly}" editable="#{screenDetailViewer.editMode}" />
+								value="#{screenDetailViewer.screen.billingInformation.billingForSuppliesOnly}"
+								editable="#{screenDetailViewer.editMode}" />
 							<ss:property id="feeFormOnFile" label="Fee Form on File"
 								type="Boolean"
-								value="#{screenDetailViewer.screen.billingInformation.feeFormOnFile}" editable="#{screenDetailViewer.editMode}" />
+								value="#{screenDetailViewer.screen.billingInformation.feeFormOnFile}"
+								editable="#{screenDetailViewer.editMode}" />
 							<ss:property id="amountToBeChargedForScreen"
 								label="Amount to be charged for Screen"
 								value="#{screenDetailViewer.screen.billingInformation.amountToBeChargedForScreen}"
@@ -439,10 +438,14 @@ TODO:
 							<ss:property id="dateCharged" label="Date Charged" type="Date"
 								value="#{screenDetailViewer.screen.billingInformation.dateCharged}"
 								editable="#{screenDetailViewer.editMode}" />
+						</t:panelGrid>
+						<t:panelGrid id="billingInfoProperties2" columns="2"
+							columnClasses="propertyLabelColumn,column"
+							styleClass="layoutPanel" style="width: 100%">
 							<ss:property id="billingInformationComments" label="Comments"
 								type="Textarea"
 								value="#{screenDetailViewer.screen.billingInformation.comments}"
-								editWidth="60" editHeight="3"
+								editWidth="50" editHeight="3"
 								editable="#{screenDetailViewer.editMode}" />
 							<ss:property id="billingItems" label="Billing Items">
 								<ui:define name="data">

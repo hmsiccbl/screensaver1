@@ -14,6 +14,7 @@
 	     - dataModel: JSF data model
 	     - columns: UI fragment
 	     - editable: boolean
+	     - rendered: boolean
 	     - actionBean: backing bean containing methods with names provided by addAction and deleteAction attributes (below)
 	     - addAction
 	     - deleteAction
@@ -23,10 +24,10 @@
 <ui:composition>
 
 	<t:outputText value="&lt;none&gt;" styleClass="dataText"
-		rendered="#{dataModel.rowCount == 0}" />
+		rendered="#{(empty rendered || rendered) &amp;&amp; dataModel.rowCount == 0}" />
 	<t:dataTable id="#{id}CollectionTable" var="element"
 		value="#{dataModel}" preserveDataModel="false"
-		rendered="#{dataModel.rowCount > 0}" styleClass="standardTable"
+		rendered="#{(empty rendered || rendered) &amp;&amp; dataModel.rowCount > 0}" styleClass="standardTable"
 		rowClasses="row1,row2" columnClasses="column"
 		headerClass="tableHeader">
 		<ui:insert name="columns">
@@ -43,7 +44,8 @@
 				styleClass="command" />
 		</t:column>
 	</t:dataTable>
-	<t:div rendered="#{editable}" styleClass="groupingPanel">
+	<t:div rendered="#{(empty rendered || rendered) &amp;&amp; editable}"
+		styleClass="groupingPanel">
 		<ui:insert name="addProperties" />
 		<t:commandButton id="#{id}AddCommand" value="Add"
 			action="#{actionBean[addAction]}" styleClass="command" />
