@@ -140,7 +140,7 @@ public class DataRowParser
     }
   }
 
-  
+
   // private instance methods
 
   /**
@@ -172,10 +172,10 @@ public class DataRowParser
     // remove any silencing reagents that were in the well from a previous import. but be careful
     // to not remove any that you are planning to add back in, or you might get a
     // org.hibernate.ObjectDeletedException
-    for (SilencingReagent silencingReagent : well.getSilencingReagents()) {
-      if (! silencingReagents.contains(silencingReagent)) {
-        well.removeSilencingReagent(silencingReagent);
-      }
+    Set<SilencingReagent> silencingReagentsToRemove = new HashSet<SilencingReagent>(well.getSilencingReagents());
+    silencingReagentsToRemove.removeAll(silencingReagents);
+    for (SilencingReagent silencingReagentToRemove : silencingReagentsToRemove) {
+      well.removeSilencingReagent(silencingReagentToRemove);
     }
 
     for (SilencingReagent silencingReagent : silencingReagents) {
