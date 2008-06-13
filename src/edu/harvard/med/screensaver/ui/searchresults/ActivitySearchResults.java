@@ -52,7 +52,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
 
   // instance fields
 
-  private GenericEntityDAO _dao;
+  protected GenericEntityDAO _dao;
   protected ActivityViewer _activityViewer;
   private Class<A> _type;
 
@@ -110,8 +110,8 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
     ArrayList<EntityColumn<A,?>> columns = new ArrayList<EntityColumn<A,?>>();
     columns.add(new IntegerEntityColumn<A>(
       new PropertyPath<A>(_type, "activityId"),
-      "Activity ID", 
-      "The activity number", 
+      "Activity ID",
+      "The activity number",
       TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(A activity) { return activity.getActivityId(); }

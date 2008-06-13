@@ -14,13 +14,14 @@ import java.util.List;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.model.PropertyPath;
+import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
@@ -50,15 +51,6 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   {
   }
 
-  public void searchActivitiesForScreen(Screen screen)
-  {
-  }
-
-  public void searchActivitiesForUser(ScreensaverUser user)
-  {
-
-  }
-
   public LabActivitySearchResults(ActivityViewer activityViewer,
                                   ScreenViewer screenViewer,
                                   GenericEntityDAO dao)
@@ -67,11 +59,19 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
     _screenViewer = screenViewer;
   }
 
+  public void searchLabActivitiesForScreen(Screen screen)
+  {
+    initialize(new ParentedEntityDataFetcher<LabActivity,Integer>(LabActivity.class,
+      new RelationshipPath<LabActivity>(LabActivity.class, "screen"),
+      screen,
+      _dao));
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   protected List<? extends TableColumn<LabActivity,?>> buildColumns()
   {
-    List<EntityColumn<LabActivity,?>> columns = 
+    List<EntityColumn<LabActivity,?>> columns =
       (List<EntityColumn<LabActivity,?>>) super.buildColumns();
     columns.add(1, new IntegerEntityColumn<LabActivity>(
       new PropertyPath<LabActivity>(LabActivity.class, "screen", "screenNumber"),

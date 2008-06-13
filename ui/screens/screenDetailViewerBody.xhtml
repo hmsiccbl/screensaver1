@@ -512,7 +512,7 @@ TODO:
 									<t:outputText value="Date" />
 								</f:facet>
 								<t:outputText id="statusDate" value="#{element.statusDate}"
-									styleClass="dataText" />
+									converter="#{dateConverter}" styleClass="dataText" />
 							</t:column>
 						</ui:define>
 						<ui:define name="addProperties">
@@ -562,7 +562,8 @@ TODO:
 									<t:outputText value="Date" />
 								</f:facet>
 								<t:outputText id="labActivityDate"
-									value="#{activityItem.dateOfActivity}" styleClass="dataText" />
+									value="#{activityItem.dateOfActivity}"
+									converter="#{dateConverter}" styleClass="dataText" />
 							</t:column>
 							<t:column>
 								<f:facet name="header">
@@ -582,6 +583,10 @@ TODO:
 						</t:dataTable>
 						<t:panelGroup styleClass="commandPanel"
 							rendered="#{screenDetailViewer.editable}">
+							<t:commandButton id="showAllLabActivities" value="Show All..."
+								action="#{screenDetailViewer.showAllLabActivities}"
+								disabled="#{screenDetailViewer.labActivitiesDataModel.rowCount == 0}"
+								styleClass="command" />
 							<t:commandButton id="addLibraryScreeningCommand"
 								value="Add Library Screening..."
 								action="#{screenDetailViewer.addLibraryScreening}"
@@ -619,7 +624,7 @@ TODO:
 								</f:facet>
 								<t:outputText id="dateRequested"
 									value="#{cherryPickRequest.dateRequested}"
-									styleClass="dataText" />
+									converter="#{dateConverter}" styleClass="dataText" />
 							</t:column>
 							<t:column>
 								<f:facet name="header">
@@ -639,6 +644,11 @@ TODO:
 						</t:dataTable>
 						<t:panelGroup styleClass="commandPanel"
 							rendered="#{cherryPickRequestViewer.editable}">
+							<t:commandButton id="showAllCherryPickRequests"
+								value="Show All..."
+								disabled="#{screenDetailViewer.cherryPickRequestsDataModel.rowCount == 0}"
+								action="#{screenDetailViewer.showAllCherryPickRequests}"
+								styleClass="command" />
 							<t:commandButton value="Add Cherry Pick Request..."
 								action="#{screenDetailViewer.addCherryPickRequest}"
 								styleClass="command" />

@@ -50,11 +50,12 @@ import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
+import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.util.StringUtils;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 import org.apache.log4j.Logger;
@@ -64,6 +65,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class ScreenDetailViewer extends StudyDetailViewer implements EditableViewer
 {
+  private static final int CHILD_ENTITY_TABLE_MAX_ROWS = 10;
+
   private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
 
   private static Logger log = Logger.getLogger(ScreenDetailViewer.class);
@@ -80,6 +83,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private ActivityViewer _activityViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private PublicationInfoProvider _publicationInfoProvider;
+  private LabActivitySearchResults _labActivitySearchResults;
+  private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
 
   private Screen _screen;
   private AbstractBackingBean _returnToViewAfterEdit;
@@ -101,7 +106,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private BillingItem _newBillingItem;
 
 
-
   // constructors
 
   /**
@@ -120,7 +124,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
                             ScreenSearchResults screensBrowser,
                             ActivityViewer activityViewer,
                             CherryPickRequestViewer cherryPickRequestViewer,
-                            PublicationInfoProvider publicationInfoProvider)
+                            PublicationInfoProvider publicationInfoProvider,
+                            LabActivitySearchResults labActivitySearchResults,
+                            CherryPickRequestSearchResults cherryPickRequestSearchResults)
   {
     super(dao, usersDao);
     _thisProxy = thisProxy;
@@ -132,6 +138,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _activityViewer = activityViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     _publicationInfoProvider = publicationInfoProvider;
+    _labActivitySearchResults = labActivitySearchResults;
+    _cherryPickRequestSearchResults = cherryPickRequestSearchResults;
   }
 
 
@@ -244,14 +252,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public DataModel getLabActivitiesDataModel()
   {
     ArrayList<LabActivity> labActivities = new ArrayList<LabActivity>(getScreen().getLabActivities());
-    Collections.sort(labActivities,
-                     new Comparator<LabActivity>() {
-      public int compare(LabActivity sra1, LabActivity sra2)
-      {
-        return sra1.getDateOfActivity().compareTo(sra2.getDateOfActivity());
-      }
-    });
-    return new ListDataModel(labActivities);
+    Collections.reverse(labActivities);
+    return new ListDataModel(labActivities.subList(0, Math.min(CHILD_ENTITY_TABLE_MAX_ROWS, getScreen().getLabActivities().size())));
   }
 
   public DataModel getCherryPickRequestsDataModel()
@@ -261,10 +263,10 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
                      new Comparator<CherryPickRequest>() {
       public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2)
       {
-        return cpr1.getCherryPickRequestNumber().compareTo(cpr2.getCherryPickRequestNumber());
+        return -1 * cpr1.getCherryPickRequestNumber().compareTo(cpr2.getCherryPickRequestNumber());
       }
     });
-    return new ListDataModel(cherryPickRequests);
+    return new ListDataModel(new ArrayList<CherryPickRequest>(cherryPickRequests.subList(0, Math.min(CHILD_ENTITY_TABLE_MAX_ROWS, cherryPickRequests.size()))));
   }
 
   public DataModel getPublicationsDataModel()
@@ -742,6 +744,18 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     getScreen().getBillingInformation().getBillingItems().remove(getRequestMap().get("element"));
     _newBillingItem = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  public String showAllLabActivities()
+  {
+    _labActivitySearchResults.searchLabActivitiesForScreen(_screen);
+    return BROWSE_ACTIVITIES;
+  }
+
+  public String showAllCherryPickRequests()
+  {
+    _cherryPickRequestSearchResults.searchForScreen(_screen);
+    return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
   // protected methods
