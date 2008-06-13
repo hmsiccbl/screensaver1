@@ -184,7 +184,11 @@ public class Publication extends AbstractEntity
   {
     _title = title;
   }
-  
+
+  /**
+   * @return The citation text for this publication, formatted similarly to the
+   *         citations in Cell (journal).
+   */
   @Transient
   public String getCitation()
   {
@@ -192,20 +196,17 @@ public class Publication extends AbstractEntity
     if (_authors != null) {
       citation.append(_authors).append(' ');
     }
+    if (!StringUtils.isEmpty(_yearPublished)) {
+      citation.append('(').append(_yearPublished).append("). ");
+    }
     if (!StringUtils.isEmpty(_title)) {
-      citation.append('"').append(_title).append("\" ");
+      citation.append(_title).append(". ");
     }
     if (!StringUtils.isEmpty(_journal)) {
       citation.append(_journal).append(' ');
     }
     if (!StringUtils.isEmpty(_volume)) {
-      citation.append(_volume).append(' ');
-    }
-    if (!StringUtils.isEmpty(_yearPublished)) {
-      citation.append('(').append(_yearPublished).append(")");
-    }
-    if (!StringUtils.isEmpty(_yearPublished) && !StringUtils.isEmpty(_pages)) {
-      citation.append(": ");
+      citation.append(_volume).append(", ");
     }
     if (!StringUtils.isEmpty(_pages)) {
       citation.append(_pages).append('.');

@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -24,14 +24,14 @@ public class PublicationTest extends AbstractEntityInstanceTest<Publication>
 
   // instance data members
 
-  
+
   // public constructors and methods
 
   public PublicationTest() throws IntrospectionException
   {
     super(Publication.class);
   }
-  
+
   public void testPublicationCitation()
   {
     Publication publication = new Publication();
@@ -41,7 +41,7 @@ public class PublicationTest extends AbstractEntityInstanceTest<Publication>
     publication.setYearPublished("2019");
     publication.setVolume("218");
     publication.setPages("101-103");
-    assertEquals("Tolopko, A., Sullivan, J., Lieftink, C. \"Screensaver: LIMS for HTS Facilities\" Bioinformatics 218 (2019): 101-103.",
+    assertEquals("Tolopko, A., Sullivan, J., Lieftink, C. (2019). Screensaver: LIMS for HTS Facilities. Bioinformatics 218, 101-103.",
                  publication.getCitation());
   }
 }
