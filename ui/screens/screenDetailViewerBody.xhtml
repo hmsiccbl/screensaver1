@@ -16,7 +16,7 @@ TODO:
 <ui:composition>
 
 	<t:panelGroup id="commandPanel">
-    <ss:editSaveCancel viewer="#{screenDetailViewer}" />
+		<ss:editSaveCancel viewer="#{screenDetailViewer}" />
 		<h:commandLink id="viewAdminOnlyFieldsCommand"
 			value="#{screenDetailViewer.adminViewMode ? 'Admin &lt;&lt;' : 'Admin &gt;&gt;'}"
 			rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) &amp;&amp; !screenDetailViewer.editMode}"
@@ -239,16 +239,12 @@ TODO:
 				rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
 				description="Downloadable files associated with the screen">
 				<ui:define name="data">
-					<t:panelGrid columns="1"
-						rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
-						<t:outputText value="&lt;none&gt;" styleClass="dataText"
-							rendered="#{empty screenDetailViewer.screen.attachedFiles}" />
-						<t:dataTable id="attachedFiles" var="attachedFile"
-							value="#{screenDetailViewer.attachedFilesDataModel}"
-							preserveDataModel="false"
-							rendered="#{!empty screenDetailViewer.screen.attachedFiles}"
-							styleClass="standardTable" rowClasses="row1,row2"
-							columnClasses="column" headerClass="tableHeader">
+					<ss:collectionTable id="attachedFilesTable"
+						dataModel="#{screenDetailViewer.attachedFilesDataModel}"
+						editable="#{screenDetailViewer.editMode}"
+						actionBean="#{screenDetailViewer}" addAction="addAttachedFile"
+						deleteAction="deleteAttachedFile">
+						<ui:define name="columns">
 							<t:column>
 								<f:facet name="header">
 									<t:outputText value="Date Added" />
@@ -270,47 +266,41 @@ TODO:
 									action="#{screenDetailViewer.downloadAttachedFile}"
 									styleClass="dataText" />
 							</t:column>
-							<t:column rendered="#{screenDetailViewer.editMode}">
-								<t:commandButton value="Delete" image="/images/delete.png"
-									action="#{screenDetailViewer.deleteAttachedFile}"
-									styleClass="command" rendered="#{screenDetailViewer.editMode}" />
-							</t:column>
-						</t:dataTable>
-						<t:panelGrid columns="2"
-							columnClasses="propertyLabelColumn,column"
-							rendered="#{screenDetailViewer.editMode}">
-							<t:outputLabel for="newAttachedFileType" value="File Type"
-								styleClass="label" />
-							<t:selectOneMenu id="newAttachedFileType"
-								value="#{screenDetailViewer.newAttachedFileType.value}"
-								required="false" styleClass="inputText selectMenu">
-								<f:selectItems
-									value="#{screenDetailViewer.newAttachedFileType.selectItems}" />
-							</t:selectOneMenu>
-							<t:outputLabel for="uploadScreenAttachedFile"
-								value="Option #1: Upload File" styleClass="label" />
-							<t:inputFileUpload id="uploadAttachedFile"
-								value="#{screenDetailViewer.uploadedAttachedFileContents}"
-								maxlength="#{1024 * 1024}" styleClass="inputText" />
-							<t:outputLabel for="uploadScreenAttachedFile"
-								value="Option #2: Enter" styleClass="label" />
-							<t:panelGrid columns="2">
-								<t:outputLabel for="newAttachedFilename" value="Name"
-									styleClass="label propertyLabelColumn" />
-								<t:inputText id="newAttachedFilename"
-									value="#{screenDetailViewer.newAttachedFileName}"
-									styleClass="inputText" />
-								<t:outputLabel for="newAttachedFileContents" value="Contents"
-									styleClass="label propertyLabelColumn" />
-								<t:inputText id="newAttachedFileContents"
-									value="#{screenDetailViewer.newAttachedFileContents}"
-									styleClass="inputText" />
+						</ui:define>
+						<ui:define name="addProperties">
+							<t:panelGrid columns="2"
+								columnClasses="propertyLabelColumn,column"
+								rendered="#{screenDetailViewer.editMode}">
+								<t:outputLabel for="newAttachedFileType" value="File Type"
+									styleClass="label" />
+								<t:selectOneMenu id="newAttachedFileType"
+									value="#{screenDetailViewer.newAttachedFileType.value}"
+									required="false" styleClass="inputText selectMenu">
+									<f:selectItems
+										value="#{screenDetailViewer.newAttachedFileType.selectItems}" />
+								</t:selectOneMenu>
+								<t:outputLabel for="uploadScreenAttachedFile"
+									value="Option #1: Upload File" styleClass="label" />
+								<t:inputFileUpload id="uploadAttachedFile"
+									value="#{screenDetailViewer.uploadedAttachedFileContents}"
+									maxlength="#{1024 * 1024}" styleClass="inputText" />
+								<t:outputLabel for="uploadScreenAttachedFile"
+									value="Option #2: Enter" styleClass="label" />
+								<t:panelGrid columns="2">
+									<t:outputLabel for="newAttachedFilename" value="Name"
+										styleClass="label propertyLabelColumn" />
+									<t:inputText id="newAttachedFilename"
+										value="#{screenDetailViewer.newAttachedFileName}"
+										styleClass="inputText" />
+									<t:outputLabel for="newAttachedFileContents" value="Contents"
+										styleClass="label propertyLabelColumn" />
+									<t:inputText id="newAttachedFileContents"
+										value="#{screenDetailViewer.newAttachedFileContents}"
+										styleClass="inputText" />
+								</t:panelGrid>
 							</t:panelGrid>
-						</t:panelGrid>
-						<t:commandButton value="Add Attached File"
-							action="#{screenDetailViewer.addAttachedFile}"
-							rendered="#{screenDetailViewer.editMode}" styleClass="command" />
-					</t:panelGrid>
+						</ui:define>
+					</ss:collectionTable>
 				</ui:define>
 			</ss:property>
 
@@ -504,52 +494,46 @@ TODO:
 				rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
 				description="A record of the status of the screen, such as when it was accepted, and whether it is ongoing, completed or dropped">
 				<ui:define name="data">
-					<t:panelGrid columns="1">
-						<t:outputText value="&lt;none&gt;" styleClass="dataText"
-							rendered="#{empty screenDetailViewer.screen.statusItems}" />
-						<t:dataTable id="statusItems" var="statusItem"
-							value="#{screenDetailViewer.statusItemsDataModel}"
-							preserveDataModel="false"
-							rendered="#{!empty screenDetailViewer.screen.statusItems}"
-							styleClass="standardTable" rowClasses="row1,row2"
-							columnClasses="column" headerClass="tableHeader">
+					<ss:collectionTable id="statusItemsTable"
+						editable="#{screenDetailViewer.editMode}"
+						dataModel="#{screenDetailViewer.statusItemsDataModel}"
+						actionBean="#{screenDetailViewer}" addAction="addStatusItem"
+						deleteAction="deleteStatusItem">
+						<ui:define name="columns">
 							<t:column>
 								<f:facet name="header">
 									<t:outputText value="Status" />
 								</f:facet>
-								<t:outputText value="#{statusItem.statusValue}"
+								<t:outputText value="#{element.statusValue}"
 									styleClass="dataText" />
 							</t:column>
 							<t:column>
 								<f:facet name="header">
 									<t:outputText value="Date" />
 								</f:facet>
-								<t:outputText id="statusDate" value="#{statusItem.statusDate}"
+								<t:outputText id="statusDate" value="#{element.statusDate}"
 									styleClass="dataText" />
 							</t:column>
-							<t:column rendered="#{screenDetailViewer.editMode}">
-								<t:commandButton value="Delete" image="/images/delete.png"
-									action="#{screenDetailViewer.deleteStatusItem}"
-									styleClass="command" />
-							</t:column>
-						</t:dataTable>
-						<t:panelGroup rendered="#{screenDetailViewer.editMode}">
-							<t:selectOneMenu id="newStatusItemValue"
-								value="#{screenDetailViewer.newStatusItemValue.value}"
-								required="false" styleClass="inputText selectMenu">
-								<f:selectItems
-									value="#{screenDetailViewer.newStatusItemValue.selectItems}" />
-							</t:selectOneMenu>
-							<t:inputText id="newStatusItemDate" required="false"
-								value="#{screenDetailViewer.newStatusItemDate}" size="10"
-								styleClass="inputText" converter="#{dateConverter}" />
-							<t:commandButton value="Add Status Item"
-								id="addStatusItemCommand"
-								action="#{screenDetailViewer.addStatusItem}"
-								disabled="#{screenDetailViewer.newStatusItemValue.size == 0}"
-								styleClass="command" />
-						</t:panelGroup>
-					</t:panelGrid>
+						</ui:define>
+						<ui:define name="addProperties">
+							<t:panelGrid columns="4">
+								<ss:property id="newStatusItemValue" label="Status" type="Text"
+									value="#{screenDetailViewer.newStatusItemValue}">
+									<ui:define name="editableData">
+										<t:selectOneMenu id="newStatusItemValue"
+											value="#{screenDetailViewer.newStatusItemValue.value}"
+											required="false" styleClass="inputText selectMenu">
+											<f:selectItems
+												value="#{screenDetailViewer.newStatusItemValue.selectItems}" />
+										</t:selectOneMenu>
+									</ui:define>
+								</ss:property>
+								<ss:property id="newStatusItemDate" label="Date"
+									required="false" type="Date"
+									value="#{screenDetailViewer.newStatusItemDate}" />
+							</t:panelGrid>
+						</ui:define>
+					</ss:collectionTable>
 				</ui:define>
 			</ss:property>
 

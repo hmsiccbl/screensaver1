@@ -172,7 +172,7 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
   /**
    * Construct an uninitialized <code>StatusItem</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
-   * @motivation for user interface
+   * @motivation DTO for user interface
    */
   public StatusItem() {}
 

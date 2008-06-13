@@ -127,14 +127,14 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     visitScreenViewer(_screen);
     submit("screenDetailPanelForm:editCommand");
     assertAtView("/screensaver/screens/screenDetailViewer.jsf");
-    submit("addStatusItemCommand",
-           new Pair<String,String>("newStatusItemDate", "1/1/2008"),
+    submit("statusItemsTableAddCommand",
+           new Pair<String,String>("newStatusItemDateDateField", "1/1/2008"),
            new Pair<String,String>("newStatusItemValue", "" + StatusValue.ACCEPTED.hashCode()));
     assertEquals(1, ((Set<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).size());
     assertEquals(StatusValue.ACCEPTED, ((SortedSet<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).first().getStatusValue());
     assertEquals(new LocalDate(2008, 1, 1), ((SortedSet<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).first().getStatusDate());
-    submit("addStatusItemCommand",
-           new Pair<String,String>("newStatusItemDate", "2/2/2008"),
+    submit("statusItemsTableAddCommand",
+           new Pair<String,String>("newStatusItemDateDateField", "2/2/2008"),
            new Pair<String,String>("newStatusItemValue", "" + StatusValue.COMPLETED.hashCode()));
     assertEquals(2, ((Set<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).size());
     assertEquals(StatusValue.COMPLETED, ((SortedSet<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).last().getStatusValue());

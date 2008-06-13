@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -31,7 +30,6 @@ import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.AttachedFileType;
@@ -90,17 +88,18 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private boolean _isPublishableProtocolDetailsCollapsed = true;
   private boolean _isBillingInformationCollapsed = true;
   private UISelectOneBean<FundingSupport> _newFundingSupport;
-  // TODO: use StatusItem DTO instead
   private UISelectOneBean<StatusValue> _newStatusItemValue;
   private LocalDate _newStatusItemDate;
-  private UISelectOneBean<AssayReadoutType> _newAssayReadoutType;
+  //private UISelectOneBean<AssayReadoutType> _newAssayReadoutType;
   // TODO: use AttachedFile DTO instead
   private String _newAttachedFileName;
   private UISelectOneBean<AttachedFileType> _newAttachedFileType;
   private UploadedFile _uploadedAttachedFileContents;
   private String _newAttachedFileContents;
+
   private Publication _newPublication;
   private BillingItem _newBillingItem;
+
 
 
   // constructors
@@ -199,20 +198,20 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
            _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(getScreen());
   }
 
-  public UISelectOneBean<AssayReadoutType> getNewAssayReadoutType()
-  {
-    if (_newAssayReadoutType == null) {
-      Set<AssayReadoutType> candidateAssayReadoutTypes = new HashSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
-      candidateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
-      _newAssayReadoutType = new UISelectOneBean<AssayReadoutType>(candidateAssayReadoutTypes, AssayReadoutType.UNSPECIFIED); // the default (as specified in reqs));
-    }
-    return _newAssayReadoutType;
-  }
+//  public UISelectOneBean<AssayReadoutType> getNewAssayReadoutType()
+//  {
+//    if (_newAssayReadoutType == null) {
+//      Set<AssayReadoutType> candidateAssayReadoutTypes = new HashSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
+//      candidateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
+//      _newAssayReadoutType = new UISelectOneBean<AssayReadoutType>(candidateAssayReadoutTypes, AssayReadoutType.UNSPECIFIED); // the default (as specified in reqs));
+//    }
+//    return _newAssayReadoutType;
+//  }
 
   public UISelectOneBean<FundingSupport> getNewFundingSupport()
   {
     if (_newFundingSupport == null) {
-      Set<FundingSupport> candidateFundingSupports = new HashSet<FundingSupport>(Arrays.asList(FundingSupport.values()));
+      Set<FundingSupport> candidateFundingSupports = new TreeSet<FundingSupport>(Arrays.asList(FundingSupport.values()));
       candidateFundingSupports.removeAll(getScreen().getFundingSupports());
       _newFundingSupport = new UISelectOneBean<FundingSupport>(candidateFundingSupports);
     }
@@ -345,23 +344,34 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     return new ListDataModel(new ArrayList<FundingSupport>(getScreen().getFundingSupports()));
   }
 
+//  public UISelectOneBean<AssayReadoutType> getNewAssayReadoutType()
+//  {
+//    if (_newAssayReadoutType == null) {
+//      Set<AssayReadoutType> candidateAssayReadoutTypes = new TreeSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
+//      candidateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
+//      AssayReadoutType defaultSelection = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs));
+//      if (!candidateAssayReadoutTypes.contains(defaultSelection)) {
+//        defaultSelection = null;
+//      }
+//      _newAssayReadoutType = new UISelectOneBean<AssayReadoutType>(candidateAssayReadoutTypes, defaultSelection);
+//    }
+//    return _newAssayReadoutType;
+//  }
+
   public DataModel getAssayReadoutTypesDataModel()
   {
-    ArrayList<AttachedFile> attachedFiles = new ArrayList<AttachedFile>(getScreen().getAttachedFiles());
-    Collections.sort(attachedFiles,
-                     new Comparator<AttachedFile>() {
-      public int compare(AttachedFile af1, AttachedFile af2)
-      {
-        return af1.getFilename().compareTo(af2.getFilename());
-      }
-    });
     return new ListDataModel(new ArrayList<AssayReadoutType>(getScreen().getAssayReadoutTypes()));
   }
 
-  public String getAbaseTestsets()
-  {
-    return StringUtils.makeListString(new ArrayList<AbaseTestset>(getScreen().getAbaseTestsets()), ", ");
-  }
+//  @UIControllerMethod
+//  public String addAssayReadoutType()
+//  {
+//    if (_newAssayReadoutType != null) {
+//      getScreen().addAssayReadoutType(_newAssayReadoutType.getSelection());
+//      _newAssayReadoutType = null;
+//    }
+//    return REDISPLAY_PAGE_ACTION_RESULT;
+//  }
 
   public DataModel getBillingItemsDataModel()
   {
@@ -759,7 +769,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     _newAttachedFileName = null;
     _newAttachedFileType = null;
     _uploadedAttachedFileContents = null;
-    _newAssayReadoutType = null;
+    //_newAssayReadoutType = null;
     _newPublication = null;
     _newBillingItem = null;
   }
