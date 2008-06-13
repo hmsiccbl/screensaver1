@@ -122,7 +122,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertEquals("title not changed", oldTitle, getBeanValue("screenViewer.screen.title"));
   }
 
-  public void testAddStatusItem() throws Exception
+  public void testAddAndDeleteStatusItem() throws Exception
   {
     visitScreenViewer(_screen);
     submit("screenDetailPanelForm:editCommand");
@@ -141,6 +141,14 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertEquals(new LocalDate(2008, 2, 2), ((SortedSet<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).last().getStatusDate());
     submit("saveCommand");
     assertAtView("/screensaver/screens/screensBrowser.jsf");
+
+    submit("screenDetailPanelForm:editCommand");
+    assertAtView("/screensaver/screens/screenDetailViewer.jsf");
+    submit("0:statusItemsTableDeleteCommand");
+    assertEquals(1, ((Set<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).size());
+    submit("saveCommand");
+    assertAtView("/screensaver/screens/screensBrowser.jsf");
+    assertEquals(1, ((Set<StatusItem>) getBeanValue("screenDetailViewer.screen.statusItems")).size());
   }
 
   public void testFindScreenNumber() throws Exception
@@ -148,7 +156,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     Screen screen2 = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
     _dao.persistEntity(screen2);
 
-    // test from virgin session, screens browser not yet opened/initalized
+    // test from virgin session, screens browser not yet opened/initialized
     visitMainPage();
     submit("findScreenCommand", new Pair<String,String>("screenNumber", "2"));
     assertAtView("/screensaver/screens/screensBrowser.jsf");

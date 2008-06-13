@@ -498,7 +498,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String deleteStatusItem()
   {
-    getScreen().getStatusItems().remove(getSelectedEntityOfType(StatusItem.class));
+    getScreen().getStatusItems().remove(getRequestMap().get("element"));
     _newStatusItemValue = null; // reset
     _newStatusItemDate = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
@@ -772,12 +772,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     //_newAssayReadoutType = null;
     _newPublication = null;
     _newBillingItem = null;
-  }
-
-  @SuppressWarnings("unchecked")
-  private <E> E getSelectedEntityOfType(Class<E> entityClass)
-  {
-    return (E) getHttpServletRequest().getAttribute(StringUtils.uncapitalize(entityClass.getSimpleName()));
   }
 
   private void duplicateMostRecentScreening(Screening currentScreening)
