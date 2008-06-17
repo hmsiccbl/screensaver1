@@ -123,7 +123,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
     _wellSearchResults.searchWellsForScreenResult(screenResult);
     if (screenResult == null) {
       _resultValueTypesTable.initialize(Collections.<ResultValueType>emptyList());
-    } 
+    }
     else {
       _resultValueTypesTable.initialize(screenResult.getResultValueTypesList());
     }
@@ -160,7 +160,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
         public void runTransaction() {
           ScreenResult screenResult = _dao.reattachEntity(_screenResult);
           _screenResultsDao.deleteScreenResult(screenResult);
-          _screensBrowser.refetch();
         }
       });
       return _screenViewer.viewScreen(_screenResult.getScreen());

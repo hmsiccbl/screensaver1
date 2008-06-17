@@ -161,7 +161,6 @@ public class ScreenResultImporter extends AbstractBackingBean
     catch (ScreenResultParseErrorsException e) {
       return viewScreenResultImportErrors();
     }
-    _screensBrowser.refetch();
     return _screenViewer.viewScreen(_screen);
   }
 

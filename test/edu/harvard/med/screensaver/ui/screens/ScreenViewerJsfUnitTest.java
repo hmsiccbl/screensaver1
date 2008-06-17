@@ -291,16 +291,19 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
 
   private void assertShowingScreen(int screenNumber, boolean isEditModeExpected)
   {
-    // note: this does not work since JsfUnit ClientIDs class sets row index on our UIData search results table, causing the entity being viewed to be changed (repeatedly!); the best we can do is to check the screen number in the rendered HTML, since this remains fixed
-    //assertEquals("screen number", new Integer(2), (Integer) getBeanValue("screenDetailViewer.screen.screenNumber"));
-
     if (isEditModeExpected) {
+      assertEquals("screenDetailViewer screen number",
+                   new Integer(screenNumber),
+                   (Integer) getBeanValue("screenDetailViewer.screen.screenNumber"));
       // when in edit mode, screen is shown within a screenDetailViewer, outside of a search results context
       assertAtView("/screensaver/screens/screenDetailViewer.jsf");
       assertElementTextEqualsRegex("screenDetailViewerForm:screenNumberLinkValue", Integer.toString(screenNumber));
       assertTrue("edit mode", (Boolean) getBeanValue("screenDetailViewer.editMode"));
     }
     else {
+      assertEquals("screenViewer screen number",
+                   new Integer(screenNumber),
+                   (Integer) getBeanValue("screenViewer.screen.screenNumber"));
       // when not in edit mode, screen is always to be shown within a search results context
       assertAtView("/screensaver/screens/screensBrowser.jsf");
       assertTrue(((Boolean) getBeanValue("screensBrowser.entityView")).booleanValue());

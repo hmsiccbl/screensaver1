@@ -18,6 +18,7 @@ import java.util.Observer;
 
 import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
+import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -281,6 +282,10 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   public boolean isMultiPaged()
   {
     return getRowCount() > getRowsPerPage();
+  }
+
+  public void dataScrollerListener(ActionEvent event)
+  {
   }
 
   /**

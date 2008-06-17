@@ -160,7 +160,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @Override
   public String reload()
   {
-    return _screenViewer.viewScreen(getScreen());
+    return _screenViewer.reload();
   }
 
   public boolean isEditMode()
@@ -476,8 +476,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     }
 
     _dao.flush();
-    // notify screensBroswer to load updated or new screen data
-    _screensBrowser.refetch();
     return _screenViewer.viewScreen(_screen);
   }
 
@@ -672,11 +670,11 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @Transactional
   public String addCherryPickRequest()
   {
-    // TODO: save screen
     Screen screen = _dao.reloadEntity(getScreen());
     CherryPickRequest cpr = screen.createCherryPickRequest();
     _dao.persistEntity(cpr);
     _dao.flush();
+    reload();
     return _cherryPickRequestViewer.viewCherryPickRequest(cpr);
   }
 

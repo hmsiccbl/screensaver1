@@ -79,6 +79,12 @@ public class ScreenViewer extends StudyViewer
 
   // public methods
 
+  @Override
+  public String reload()
+  {
+    return viewScreen(getScreen());
+  }
+
   public Screen getScreen()
   {
     return _screen;
@@ -87,11 +93,12 @@ public class ScreenViewer extends StudyViewer
   @Transactional
   public void setScreen(Screen screen)
   {
-     screen = _dao.reloadEntity(screen,
-                                true,
-                                "labHead",
-                                "labHead.labMembers",
-                                "leadScreener");
+    log.debug("setScreen(): loading data for " + screen);
+    screen = _dao.reloadEntity(screen,
+                               true,
+                               "labHead",
+                               "labHead.labMembers",
+                               "leadScreener");
     _dao.needReadOnly(screen, "billingInformation.billingItems");
     _dao.needReadOnly(screen, "collaborators.labHead");
     _dao.needReadOnly(screen, "labActivities.performedBy");
@@ -146,15 +153,18 @@ public class ScreenViewer extends StudyViewer
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
+    // calling viewScreen() is a request to view the most up-to-date, persistent
+    // version of the screen, which means the screensBrowser must also be
+    // updated to reflect the persistent version of the screen
+    _screensBrowser.refetch();
+
     // all screens are viewed within the context of a search results, providing the user with screen search options at all times
+    // screensBrowser will call our setScreen() method
     if (!_screensBrowser.viewEntity(screen)) {
       _screensBrowser.searchAllScreens();
       // note: calling viewEntity(screen) will only work as long as
       // ScreenSearchResults continues to use InMemoryDataTableModel
       _screensBrowser.viewEntity(screen);
-    }
-    else {
-      log.debug("screen found in existing ScreensBrowser");
     }
     return BROWSE_SCREENS;
   }

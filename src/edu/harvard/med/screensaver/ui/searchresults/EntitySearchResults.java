@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.faces.model.DataModelEvent;
-import javax.faces.model.DataModelListener;
+import javax.faces.component.UIData;
+import javax.faces.event.ActionEvent;
 
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
@@ -44,6 +44,8 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.ValueReference;
 
 import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.datascroller.HtmlDataScroller;
+import org.apache.myfaces.custom.datascroller.ScrollerActionEvent;
 
 /**
  * SearchResults subclass that presents a particular type of domain model
@@ -79,11 +81,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
 
   private List<DataExporter<?>> _dataExporters = new ArrayList<DataExporter<?>>();
   private UISelectOneBean<DataExporter<?>> _dataExporterSelector;
-  /**
-   * @motivation to prevent redundant calls to setEntityToView
-   */
-  private E entityInView = null;
 
+  private Observer _rowsPerPageSelectorObserver;
 
 
   // abstract methods
@@ -110,7 +109,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    * @motivation To be called by a TableColumn.cellAction() method to view the
    *             current row's entity in the "entity view" mode, or by any other
    *             code that wants to switch to entity view mode.
-   * @motivation To be called by a DataTableModel listener in reponse to
+   * @motivation To be called by a DataTableModel listener in response to
    *             rowSelected() events.
    */
   @UIControllerMethod
@@ -118,6 +117,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   {
     if (getDataTableModel().getRowCount() > 0 &&
         getDataTableModel().isRowAvailable()) {
+      log.debug("viewSelectedEntity(): row " + getDataTableModel().getRowIndex());
       viewEntityAtRow(getDataTableModel().getRowIndex());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
@@ -145,19 +145,20 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       }
     };
 
-    rowsPerPageSelector.addObserver(new Observer() {
+    _rowsPerPageSelectorObserver = new Observer() {
       public void update(Observable obs, Object o)
       {
         if (((Integer) o) == 1) {
           if (getDataTableUIComponent() != null) {
-            // this will cause our DataModel listener to set the entity to be viewed
             log.debug("entering 'entity view' mode; setting data table row to first row on page:" +
                       getDataTableUIComponent().getFirst());
             getDataTableModel().setRowIndex(getDataTableUIComponent().getFirst());
+            viewSelectedEntity();
           }
         }
       }
-    });
+    };
+    rowsPerPageSelector.addObserver(_rowsPerPageSelectorObserver);
 
     return rowsPerPageSelector;
   }
@@ -243,37 +244,40 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
 //    }
 
     // else, do linear search to find the entity (but only works for InMemoryDataModel)
+    log.debug("viewEntity(): entity " + entity);
     int rowIndex = findRowOfEntity(entity);
     if (rowIndex < 0) {
       log.debug("entity " + entity + " not found in entity search results");
       return false;
     }
-    log.debug("entity " + entity + " found in entity search results");
+    log.debug("entity " + entity + " found in entity search results at row " + rowIndex);
     viewEntityAtRow(rowIndex);
     return true;
-  }
-
-  private void switchToEntityViewMode()
-  {
-    getRowsPerPageSelector().setSelection(1);
   }
 
   private void viewEntityAtRow(int rowIndex)
   {
     if (rowIndex >= 0 && rowIndex < getRowCount()) {
-      // first, scroll the data table so that the user-selected row is the first on the page,
-      // otherwise rowsPerPageSelector's observer will switch to whatever entity was previously in the first row
-      scrollToRow(rowIndex);
       getDataTableModel().setRowIndex(rowIndex);
       E entity = (E) getRowData();
-      if (entity != entityInView) { // test instance equality, rather than object equality, in case entity was reloaded and is updated
-        log.debug("viewEntityAtRow(): setting entity to view: " + entity);
-        // have the entity viewer update its data
-        setEntityToView(entity);
-        entityInView = entity;
-      }
+      log.debug("viewEntityAtRow(): setting entity to view: " + entity + " at row " + rowIndex);
+      scrollToRow(rowIndex);
+      setEntityToView(entity);
       switchToEntityViewMode();
     }
+  }
+
+  /**
+   * Switch to entity view mode, but without notifying observer.
+   *
+   * @motivation for switching into entity view mode programatically, as opposed
+   *             to in response to a user event
+   */
+  private void switchToEntityViewMode()
+  {
+    getRowsPerPageSelector().deleteObserver(_rowsPerPageSelectorObserver);
+    getRowsPerPageSelector().setSelection(1);
+    getRowsPerPageSelector().addObserver(_rowsPerPageSelectorObserver);
   }
 
   /**
@@ -368,19 +372,70 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
                                                         List<? extends TableColumn<E,?>> columns)
   {
     if (dataFetcher instanceof EntityDataFetcher) {
-      DataTableModel<E> dataTableModel = doBuildDataModel((EntityDataFetcher<E,K>) dataFetcher, columns);
-      dataTableModel.addDataModelListener(new DataModelListener() {
-        public void rowSelected(DataModelEvent event)
-        {
-          if (isEntityView()) {
-            viewSelectedEntity();
-          }
-        }
-      });
-      return dataTableModel;
+      return doBuildDataModel((EntityDataFetcher<E,K>) dataFetcher, columns);
     }
     // for no-op (empty data model)
     return new InMemoryDataModel<E>(dataFetcher);
+  }
+
+  public void dataScrollerListener(ActionEvent event)
+  {
+    if (isEntityView()) {
+      if (getDataTableUIComponent() != null) {
+        UIData uiData = getDataTableUIComponent();
+        HtmlDataScroller scroller = (HtmlDataScroller) event.getSource();
+        ScrollerActionEvent scrollerEvent = (ScrollerActionEvent) event;
+        String facet = scrollerEvent.getScrollerfacet();
+        int nextRowIndex = -1;
+        int originalRowIndex = uiData.getFirst();
+        // the following code was copied from HtmlDataScroller.broadcast(),
+        // since we must calculate the next row to be scrolled to in exactly the
+        // same way, since the new row is not yet calculated for us at the time
+        // this listener is called.
+        if (HtmlDataScroller.FACET_FIRST.equals(facet)) {
+          nextRowIndex = 0;
+        }
+        else if (HtmlDataScroller.FACET_PREVIOUS.equals(facet)) {
+          int previous = uiData.getFirst() - uiData.getRows();
+          if (previous >= 0) {
+            nextRowIndex = previous;
+          }
+        }
+        else if (HtmlDataScroller.FACET_NEXT.equals(facet)) {
+          int next = uiData.getFirst() + uiData.getRows();
+          if (next < uiData.getRowCount()) {
+            nextRowIndex = next;
+          }
+        }
+        else if (HtmlDataScroller.FACET_FAST_FORWARD.equals(facet)) {
+          int fastStep = Math.max(1, scroller.getFastStep());
+          nextRowIndex = uiData.getFirst() + uiData.getRows() * fastStep;
+          int rowcount = uiData.getRowCount();
+          if (nextRowIndex > rowcount) {
+            nextRowIndex = (rowcount - 1) - ((rowcount - 1) % uiData.getRows());
+          }
+        }
+        else if (HtmlDataScroller.FACET_FAST_REWIND.equals(facet)) {
+          int fastStep = Math.max(1, scroller.getFastStep());
+          nextRowIndex = uiData.getFirst() - uiData.getRows() * fastStep;
+          nextRowIndex = Math.max(0, nextRowIndex);
+        }
+        else if (HtmlDataScroller.FACET_LAST.equals(facet)) {
+          int rowcount = uiData.getRowCount();
+          int rows = uiData.getRows();
+          int delta = rowcount % rows;
+          nextRowIndex = delta > 0 && delta < rows ? rowcount - delta : rowcount - rows;
+          nextRowIndex = Math.max(0, nextRowIndex);
+        }
+        if (nextRowIndex >= 0) {
+          getDataTableModel().setRowIndex(nextRowIndex);
+          viewSelectedEntity();
+          // revert scrolling performed by viewSelectedEntity(), since
+          // HtmlDataScroller handler will expect this to be unchanged
+          uiData.setFirst(originalRowIndex);
+        }
+      }
+    }
   }
 
   /**

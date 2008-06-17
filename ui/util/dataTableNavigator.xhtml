@@ -5,8 +5,8 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox">
-	
-	<!-- 
+
+	<!--
 	facelets params:
 	  - custom0: UI fragment
     - custom1: UI fragment
@@ -28,7 +28,8 @@
       <ui:insert name="custom0"/>
 
 			<t:dataScroller id="dataTableScroller" for=":#{dataTable.clientId}"
-				immediate="true" firstRowIndexVar="fromRow" lastRowIndexVar="toRow"
+				immediate="true" actionListener="#{dataTable.dataScrollerListener}"
+				firstRowIndexVar="fromRow" lastRowIndexVar="toRow"
 				rowsCountVar="rowCount" fastStep="10"
 				renderFacetsIfSinglePage="false" styleClass="scroller">
 				<f:facet name="first">
@@ -57,7 +58,7 @@
 				</f:facet>
 			</t:dataScroller>
 
-      <ui:insert name="custom1"/>
+			<ui:insert name="custom1"/>
 
 			<t:dataScroller id="dataTableScroller2" for=":#{dataTable.clientId}"
 				pageCountVar="pages" pageIndexVar="page" firstRowIndexVar="fromRow"
@@ -91,7 +92,7 @@
 			<ui:insert name="custom3"/>
 
       <t:panelGrid columns="2" title="The sort column and direction">
-        <t:outputLabel for="sortColumnMenu" value="Sort by" 
+        <t:outputLabel for="sortColumnMenu" value="Sort by"
           styleClass="inverseLabel"/>
         <t:panelGroup>
           <t:selectOneMenu id="sortColumnMenu"
@@ -111,7 +112,7 @@
           <t:commandButton id="updateSortButton" styleClass="hiddenCommand" />
         </t:panelGroup>
       </t:panelGrid>
-      
+
       <ui:insert name="custom4"/>
 
 		</t:panelGrid>
