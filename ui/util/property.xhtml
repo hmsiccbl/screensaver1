@@ -7,7 +7,7 @@
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox">
 
-<!-- 
+<!--
 	   facelets parameters:
 	     - id
 	     - label
@@ -36,6 +36,7 @@
 		</ui:insert>
 	</t:div>
 	<t:div rendered="#{empty rendered ? true : rendered}">
+		<ui:insert name="valueHeader" />
 		<t:div rendered="#{!editable}">
 			<ui:insert name="data">
 				<t:outputText id="#{id}#{type}Value" value="#{value}"
@@ -63,6 +64,7 @@
 					immediate="#{submitOnChange}" />
 			</ui:insert>
 		</t:div>
+    <ui:insert name="valueFooter" />
 	</t:div>
 </ui:composition>
 

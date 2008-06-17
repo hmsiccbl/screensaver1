@@ -75,7 +75,13 @@
 
 	<ss:property id="title" label="Title" type="Text" required="true"
 		description="The title of the screen" value="#{screen.title}"
-		editable="#{editable}" editWidth="80" />
+		editable="#{editable}" editWidth="80">
+		<ui:define name="valueHeader">
+			<t:outputText
+				rendered="#{screen.screenType.value== 'Small Molecule'}"
+				value="A screen for compounds that..." styleClass="dataText" />
+		</ui:define>
+	</ss:property>
 
 </ui:composition>
 
