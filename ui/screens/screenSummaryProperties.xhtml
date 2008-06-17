@@ -29,8 +29,8 @@
 		description="The number used to uniquely identify the screen"
 		value="#{screen.screenNumber}" editable="false">
 		<ui:define name="data">
-			<ss:entityLink entity="#{screen}" property="screenNumber" bean="#{screenViewer}"
-				action="viewScreen" />
+			<ss:entityLink entity="#{screen}"
+				property="screenNumber" bean="#{screenViewer}" action="viewScreen" />
 		</ui:define>
 	</ss:property>
 

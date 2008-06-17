@@ -7,7 +7,7 @@
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox"
 	xmlns:ss="http://screensaver.med.harvard.edu/ui">
-	
+
 	<!-- facelet params:
          - entity: AbstractEntity
          - property: property to be displayed as the link text (optional, defaults to entityId)
@@ -17,9 +17,9 @@
 
 <ui:composition>
 
-	<t:commandLink action="#{bean[action]}">
+	<t:commandLink id="#{id}Link" action="#{bean[action]}">
 		<f:param name="entityId" value="#{entity.entityId}" />
-		<t:outputText
+		<t:outputText id="#{id}LinkValue"
 			value="#{empty property ? entity.entityId : entity[property]}"
 			styleClass="dataText" />
 	</t:commandLink>
