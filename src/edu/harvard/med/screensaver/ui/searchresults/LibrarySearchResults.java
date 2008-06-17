@@ -116,7 +116,7 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
       public boolean isCommandLink() { return true; }
 
       @Override
-      public Object cellAction(Library library) { return viewCurrentEntity(); }
+      public Object cellAction(Library library) { return viewSelectedEntity(); }
     });
     columns.add(new TextEntityColumn<Library>(new PropertyPath(Library.class, "libraryName"),
       "Library Name", "The full name of the library", TableColumn.UNGROUPED) {

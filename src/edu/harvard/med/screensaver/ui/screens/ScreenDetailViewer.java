@@ -476,7 +476,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     }
 
     _dao.flush();
-    //_screensBrowser.refetch(); // TODO: confuses viewScreen() when attempting to redisplay same screen within screens browser
+    // notify screensBroswer to load updated or new screen data
+    _screensBrowser.refetch();
     return _screenViewer.viewScreen(_screen);
   }
 

@@ -194,7 +194,7 @@ public class ReagentSearchResults extends EntitySearchResults<Reagent,ReagentVen
       @Override
       public Object cellAction(Reagent reagent)
       {
-        return viewCurrentEntity();
+        return viewSelectedEntity();
       }
     });
     columns.add(new TextEntityColumn<Reagent>(

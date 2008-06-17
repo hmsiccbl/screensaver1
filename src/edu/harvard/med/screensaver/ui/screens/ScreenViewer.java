@@ -19,8 +19,6 @@ import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
@@ -148,14 +146,16 @@ public class ScreenViewer extends StudyViewer
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
-    if (!_screensBrowser.gotoRowContainingEntity(screen)) {
-      _screensBrowser.searchAllScreens();
-      _screensBrowser.resetFilter();
-      Criterion<Integer> criterion = (Criterion<Integer>) _screensBrowser.getColumnManager().getColumn("Screen Number").getCriterion();
-      criterion.setOperatorAndValue(Operator.EQUAL, screen.getScreenNumber());
-    }
-    _screensBrowser.getRowsPerPageSelector().setSelection(1);
     // all screens are viewed within the context of a search results, providing the user with screen search options at all times
+    if (!_screensBrowser.viewEntity(screen)) {
+      _screensBrowser.searchAllScreens();
+      // note: calling viewEntity(screen) will only work as long as
+      // ScreenSearchResults continues to use InMemoryDataTableModel
+      _screensBrowser.viewEntity(screen);
+    }
+    else {
+      log.debug("screen found in existing ScreensBrowser");
+    }
     return BROWSE_SCREENS;
   }
 

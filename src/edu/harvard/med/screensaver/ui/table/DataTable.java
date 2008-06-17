@@ -224,36 +224,39 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
 
   public void gotoPageIndex(int pageIndex)
   {
-    gotoRowIndex(pageIndex * getRowsPerPage());
+    scrollToRow(pageIndex * getRowsPerPage());
   }
 
   /**
    * Scrolls data table to a page boundary.
-   * 
+   *
    * @motivation ensures that previous & next commands do not have problems
    *             moving to previous & last page
    */
-  public void gotoPageContainingRow(int rowIndex)
+  public void scrollToPageContainingRow(int rowIndex)
   {
     int rowsPerPage = getRowsPerPage();
     if (rowIndex % rowsPerPage != 0) {
       int pageBoundaryRowIndex = rowsPerPage * (rowIndex / rowsPerPage);
       log.debug("scrolling to page boundary row: " + pageBoundaryRowIndex);
-      gotoRowIndex(pageBoundaryRowIndex);
+      scrollToRow(pageBoundaryRowIndex);
     }
   }
 
-  public void gotoRowIndex(int rowIndex)
+  /**
+   * Scroll to the specified row by setting the UIData component's 'first' row
+   * (the row displayed at the top of the current data table page). Does <i>not</i>
+   * update the DataTableModel's current row index.
+   *
+   * @param rowIndex
+   */
+  public void scrollToRow(int rowIndex)
   {
-    log.debug("gotoRowIndex(): requested row: " + rowIndex);
-    // ensure value is within valid range, and in particular that we never
-    // show less than the table's configured row count (unless it's more than
-    // the total number of rows)
-    rowIndex = Math.max(0, Math.min(rowIndex,
-                                    getRowCount() - getRowsPerPage()
-                                    /*getDataTableUIComponent().getRows()*/));
+    log.debug("scrollToRow(): requested row: " + rowIndex);
+    // ensure value is within valid range
+    rowIndex = Math.max(0, Math.min(rowIndex, getRowCount() - 1));
     setRowIndex(rowIndex);
-    log.debug("gotoRowIndex(): actual row: " + rowIndex);
+    log.debug("scrollToRow(): actual row: " + rowIndex);
   }
 
   public boolean isNumericColumn()
@@ -271,7 +274,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     String rowsPerPageValue = (String) event.getNewValue();
     log.debug("rowsPerPage changed to " + rowsPerPageValue);
     getRowsPerPageSelector().setValue(rowsPerPageValue);
-    gotoPageContainingRow(_dataTableUIComponent.getFirst());
+    scrollToPageContainingRow(_dataTableUIComponent.getFirst());
     getFacesContext().renderResponse();
   }
 
@@ -380,7 +383,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   /**
    * Low-level setter method for changing the current row index. Client code
    * should call gotoRowIndex()
-   * 
+   *
    * @motivation handle the case where client code wants to goto a row index,
    *             but the _dataTableUIComponent has not yet been set by JSF
    * @param rowIndex the row index

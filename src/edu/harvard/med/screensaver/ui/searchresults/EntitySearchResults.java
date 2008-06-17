@@ -82,7 +82,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   /**
    * @motivation to prevent redundant calls to setEntityToView
    */
-  private E entityToView = null;
+  private E entityInView = null;
 
 
 
@@ -104,35 +104,21 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   }
 
   /**
-   * To be called by a TableColumn.cellAction() method to view the current row's
-   * entity in the "entity view" mode, or by any other code that wants to switch
-   * to entity view mode. The current row is determined by
-   * getDataTableModel().getRowIndex().
+   * View the entity currently selected in the DataTableModel in entity view
+   * mode.
+   *
+   * @motivation To be called by a TableColumn.cellAction() method to view the
+   *             current row's entity in the "entity view" mode, or by any other
+   *             code that wants to switch to entity view mode.
+   * @motivation To be called by a DataTableModel listener in reponse to
+   *             rowSelected() events.
    */
   @UIControllerMethod
-  final protected String viewCurrentEntity()
+  final protected String viewSelectedEntity()
   {
-    if (getDataTableModel().getRowCount() == 0 ||
-        !getDataTableModel().isRowAvailable()) {
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    E currentEntity = (E) getRowData();
-    if (getDataTableUIComponent() != null) {
-      // first, scroll the data table so that the user-selected row is the first on the page,
-      // otherwise rowsPerPageSelector's observer will switch to whatever entity was previously in the first row
-      int rowIndex = getDataTableModel().getRowIndex();
-      log.debug("viewCurrentEntity(): scrolling table to row " + rowIndex);
-      getDataTableUIComponent().setFirst(rowIndex);
-
-      // switch to entity view mode, officially
-      getRowsPerPageSelector().setSelection(1);
-
-      // set the entity to be viewed
-      if (currentEntity != entityToView) {
-        log.debug("viewCurrentEntity(): setting entity to view: " + currentEntity);
-        setEntityToView(currentEntity);
-        entityToView = currentEntity;
-      }
+    if (getDataTableModel().getRowCount() > 0 &&
+        getDataTableModel().isRowAvailable()) {
+      viewEntityAtRow(getDataTableModel().getRowIndex());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -207,7 +193,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       if (getDataTableUIComponent() != null) {
         getDataTableModel().setRowIndex(getDataTableUIComponent().getFirst());
       }
-      viewCurrentEntity();
+      viewSelectedEntity();
     }
   }
 
@@ -230,33 +216,64 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   public String returnToSummaryList()
   {
     getRowsPerPageSelector().setSelection(getRowsPerPageSelector().getDefaultSelection());
-    gotoPageContainingRow(getDataTableUIComponent().getFirst());
+    scrollToPageContainingRow(getDataTableUIComponent().getFirst());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public boolean gotoRowContainingEntity(E entity)
+  /**
+   * Switch to entity view mode and show the specified entity, automatically
+   * scrolling the data table to the row containing the entity.
+   *
+   * @param entity
+   * @return true if the entity exists in the search result, otherwise false
+   */
+  public boolean viewEntity(E entity)
   {
-    // first test whether the current row is already the one with the requested entity
-    E currentEntityInSearchResults = null;
-    if (getDataTableUIComponent() != null) {
-      int currentRow = getDataTableUIComponent().getFirst();
-      getDataTableModel().setRowIndex(currentRow);
-      if (getDataTableModel().isRowAvailable()) {
-        currentEntityInSearchResults = (E) getDataTableModel().getRowData();
-        if (entity.equals(currentEntityInSearchResults)) {
-          return true;
-        }
-      }
-    }
+//    // first test whether the current row is already the one with the requested entity
+//    E currentEntityInSearchResults = null;
+//    if (getDataTableUIComponent() != null) {
+//      int currentRow = getDataTableUIComponent().getFirst();
+//      getDataTableModel().setRowIndex(currentRow);
+//      if (getDataTableModel().isRowAvailable()) {
+//        currentEntityInSearchResults = (E) getDataTableModel().getRowData();
+//        if (entity.equals(currentEntityInSearchResults)) {
+//          return true;
+//        }
+//      }
+//    }
 
     // else, do linear search to find the entity (but only works for InMemoryDataModel)
     int rowIndex = findRowOfEntity(entity);
-    if (rowIndex >= 0) {
-      gotoRowIndex(rowIndex);
-      return true;
+    if (rowIndex < 0) {
+      log.debug("entity " + entity + " not found in entity search results");
+      return false;
     }
+    log.debug("entity " + entity + " found in entity search results");
+    viewEntityAtRow(rowIndex);
+    return true;
+  }
 
-    return false;
+  private void switchToEntityViewMode()
+  {
+    getRowsPerPageSelector().setSelection(1);
+  }
+
+  private void viewEntityAtRow(int rowIndex)
+  {
+    if (rowIndex >= 0 && rowIndex < getRowCount()) {
+      // first, scroll the data table so that the user-selected row is the first on the page,
+      // otherwise rowsPerPageSelector's observer will switch to whatever entity was previously in the first row
+      scrollToRow(rowIndex);
+      getDataTableModel().setRowIndex(rowIndex);
+      E entity = (E) getRowData();
+      if (entity != entityInView) { // test instance equality, rather than object equality, in case entity was reloaded and is updated
+        log.debug("viewEntityAtRow(): setting entity to view: " + entity);
+        // have the entity viewer update its data
+        setEntityToView(entity);
+        entityInView = entity;
+      }
+      switchToEntityViewMode();
+    }
   }
 
   /**
@@ -356,7 +373,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
         public void rowSelected(DataModelEvent event)
         {
           if (isEntityView()) {
-            viewCurrentEntity();
+            viewSelectedEntity();
           }
         }
       });
@@ -408,7 +425,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     return model;
   }
 
-  protected int findRowOfEntity(E entity)
+  private int findRowOfEntity(E entity)
   {
     if (getBaseDataTableModel() instanceof InMemoryDataModel) {
       DataTableModel model = (DataTableModel) getDataTableModel();

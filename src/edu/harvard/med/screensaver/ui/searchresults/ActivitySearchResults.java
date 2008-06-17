@@ -117,7 +117,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
       public Integer getCellValue(A activity) { return activity.getActivityId(); }
 
       @Override
-      public Object cellAction(A activity) { return viewCurrentEntity(); }
+      public Object cellAction(A activity) { return viewSelectedEntity(); }
 
       @Override
       public boolean isCommandLink() { return true; }

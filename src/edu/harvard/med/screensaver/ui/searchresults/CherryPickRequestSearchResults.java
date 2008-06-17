@@ -122,7 +122,7 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
       public Integer getCellValue(CherryPickRequest cpr) { return cpr.getCherryPickRequestId(); }
 
       @Override
-      public Object cellAction(CherryPickRequest cpr) { return viewCurrentEntity(); }
+      public Object cellAction(CherryPickRequest cpr) { return viewSelectedEntity(); }
 
       @Override
       public boolean isCommandLink() { return true; }
@@ -134,7 +134,7 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
       public Integer getCellValue(CherryPickRequest cpr) { return cpr.getLegacyCherryPickRequestNumber(); }
 
       @Override
-      public Object cellAction(CherryPickRequest cpr) { return viewCurrentEntity(); }
+      public Object cellAction(CherryPickRequest cpr) { return viewSelectedEntity(); }
 
       @Override
       public boolean isCommandLink() { return true; }

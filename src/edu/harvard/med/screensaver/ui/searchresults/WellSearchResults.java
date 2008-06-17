@@ -524,7 +524,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       @Override
       public Object cellAction(Well well)
       {
-        return viewCurrentEntity();
+        return viewSelectedEntity();
       }
     });
     columns.add(new EnumEntityColumn<Well,WellType>(new PropertyPath<Well>(Well.class, "wellType"),

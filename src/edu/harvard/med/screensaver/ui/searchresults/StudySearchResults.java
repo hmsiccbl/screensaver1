@@ -95,7 +95,7 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
       public Integer getCellValue(Screen study) { return study.getStudyNumber(); }
 
       @Override
-      public Object cellAction(Screen study) { return viewCurrentEntity(); }
+      public Object cellAction(Screen study) { return viewSelectedEntity(); }
 
       @Override
       public boolean isCommandLink() { return true; }

@@ -140,7 +140,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       public Integer getCellValue(Screen screen) { return screen.getScreenNumber(); }
 
       @Override
-      public Object cellAction(Screen screen) { return viewCurrentEntity(); }
+      public Object cellAction(Screen screen) { return viewSelectedEntity(); }
 
       @Override
       public boolean isCommandLink() { return true; }
