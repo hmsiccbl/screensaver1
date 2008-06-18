@@ -152,6 +152,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 
     LocalDate today = new LocalDate();
     screen.createStatusItem(today, StatusValue.PENDING_ICCB);
+    expected.remove(StatusValue.PENDING_LEGACY);
     expected.remove(StatusValue.PENDING_ICCB);
     expected.remove(StatusValue.PENDING_NSRB);
     assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
