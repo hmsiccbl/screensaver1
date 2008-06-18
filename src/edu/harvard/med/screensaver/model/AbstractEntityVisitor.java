@@ -68,6 +68,7 @@ public interface AbstractEntityVisitor
 {
   public boolean visit(AbaseTestset entity);
   public boolean visit(AdministratorUser administratorUser);
+  public boolean visit(AdministrativeActivity administrativeActivity);
   public boolean visit(AnnotationType annotation);
   public boolean visit(AnnotationValue annotationValue);
   public boolean visit(AttachedFile entity);

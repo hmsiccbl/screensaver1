@@ -43,6 +43,7 @@ import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
@@ -95,6 +96,10 @@ import org.joda.time.LocalDate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Join;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
+
 public class CherryPickRequestViewer extends AbstractBackingBean implements EditableViewer
 {
   // static members
@@ -112,7 +117,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
 
   private static final String RNAI_COLUMNS_GROUP = "RNAi";
   private static final String SMALL_MOLECULE_COLUMNS_GROUP = "Small Molecule";
-  
+
   static {
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new IntegerEntityColumn<ScreenerCherryPick>(
       new PropertyPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell", "plateNumber"),
@@ -408,7 +413,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
 
   private EmptyWellsConverter _emptyWellsConverter;
 
-  
+
   // public constructors and methods
 
   /**
@@ -452,11 +457,11 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     _labCherryPicksSearchResult = new EntitySearchResults<LabCherryPick,Integer>() {
       @Override
       protected List<? extends TableColumn<LabCherryPick,?>> buildColumns() { return LAB_CHERRY_PICKS_TABLE_COLUMNS; }
-      
+
       @Override
       protected void setEntityToView(LabCherryPick entity) {}
     };
-    // initialize LCP search result to initially respect 'show failed LCPs' checkbox 
+    // initialize LCP search result to initially respect 'show failed LCPs' checkbox
     if (!_showFailedLabCherryPicks) {
       ((VocabularyEntityColumn) LAB_CHERRY_PICKS_TABLE_COLUMNS.get(0)).clearCriteria().addCriterion(new Criterion<LabCherryPickStatus>(Operator.NOT_EQUAL, LabCherryPickStatus.Failed));
     }
@@ -464,7 +469,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     _screenerCherryPicksSearchResult = new EntitySearchResults<ScreenerCherryPick,Integer>() {
       @Override
       protected List<? extends TableColumn<ScreenerCherryPick,?>> buildColumns() { return SCREENER_CHERRY_PICKS_TABLE_COLUMNS; }
-      
+
       @Override
       protected void setEntityToView(ScreenerCherryPick entity) {}
     };
@@ -498,7 +503,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
 
     _isEditMode = false;
     _cherryPicksInput = null;
-    
+
     _assayPlateType = new UISelectOneBean<PlateType>(Arrays.asList(PlateType.values()), _cherryPickRequest.getAssayPlateType()) {
       @Override
       protected String getLabel(PlateType plateType) { return plateType.getFullName(); }
@@ -539,7 +544,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     boolean hasCherryPickPlates = _cherryPickRequest.getCherryPickAssayPlates().size() > 0;
     _isPanelCollapsedMap.put("cherryPickPlates", !hasCherryPickPlates);
   }
-  
+
   public AbstractEntity getEntity()
   {
     return getCherryPickRequest();
@@ -577,7 +582,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     try {
       _dao.doInTransaction(new DAOTransaction()
       {
-        public void runTransaction()  
+        public void runTransaction()
         {
           CherryPickRequest cherryPickRequest = _dao.reloadEntity(cherryPickRequestIn,
                                                                   true,
@@ -596,9 +601,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
           _eagerFetchCpltPerformedByHack(cherryPickRequest);
           _dao.needReadOnly(cherryPickRequest,
                             "cherryPickAssayPlates.cherryPickLiquidTransfer.performedBy");
-          _dao.needReadOnly(cherryPickRequest, 
-                            "screenerCherryPicks.screenedWell.silencingReagents");
           _dao.needReadOnly(cherryPickRequest,
+                            "screenerCherryPicks.screenedWell.deprecationActivity",
+                            "screenerCherryPicks.screenedWell.silencingReagents",
                             "screenerCherryPicks.screenedWell.compounds");
           _dao.needReadOnly(cherryPickRequest,
                             "labCherryPicks.assayPlate",
@@ -617,40 +622,40 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
 
         /**
          the following code:
-        
+
          _dao.needReadOnly(cherryPickRequest, "cherryPickAssayPlates.cherryPickLiquidTransfer.performedBy");
-        
+
          fails to load the performedBy user, leading to a "org.hibernate.LazyInitializationException: could not
          initialize proxy - the owning Session was closed" error when constructing the AssayPlatesDataModel. im
          reasonably certain this is due to a bug in Hibernate. turning on logging debug for:
-        
+
          log4j.logger.org.hibernate.event=debug
-        
+
          reveals that, even though the HQL generated by GenericDAOImpl specifies fetching the performedBy
          relationship, an attempt to resolve the performedBy in the session cache never occurs. Turning on:
-        
+
          log4j.logger.org.hibernate.hql.ast=debug
-        
+
          further reveals that there seems to be some silenced exception going on in the processing of the
          left join fetch against performedBy:
-        
+
          12:04:09,858 DEBUG org.hibernate.hql.ast.HqlSqlWalker:320 - createFromJoinElement() : -- join tree --
          \-[JOIN_FRAGMENT] FromElement: 'screensaver_user screensave3_' FromElement{explicit,not a collection join,fetch join,fetch non-lazy properties,classAlias=x3,role=null,tableName=screensaver_user,tableAlias=screensave3_,origin=cherry_pick_liquid_transfer cherrypick2_,colums={cherrypick2_2_.performed_by_id ,className=edu.harvard.med.screensaver.model.users.ScreensaverUser}}
-        
+
           12:04:09,859 DEBUG org.hibernate.hql.ast.tree.FromElement:266 - attempt to disable subclass-inclusions
           java.lang.Exception: stack-trace source
                   at org.hibernate.hql.ast.tree.FromElement.setIncludeSubclasses(FromElement.java:266)
                   at org.hibernate.hql.ast.HqlSqlWalker.beforeSelectClause(HqlSqlWalker.java:761)
                   at org.hibernate.hql.antlr.HqlSqlBaseWalker.selectClause(HqlSqlBaseWalker.java:1346)
                   at org.hibernate.hql.antlr.HqlSqlBaseWalker.query(HqlSqlBaseWalker.java:553)
-        
+
          i am speculating here that some key code missed getting executed due to this exception getting thrown.
          i dont feel like debugging this HQL parsing problem, since our HQL here looks perfectly kosher:
-        
+
          select distinct x from edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest x
            left join fetch x.cherryPickAssayPlates x1 left join fetch x1.cherryPickLiquidTransfer x2
            left join fetch x2.performedBy x3 where x.id = ?
-        
+
          instead, i wrote up the following workaround that is reasonably close to the performance of the original:
          */
         private void _eagerFetchCpltPerformedByHack(CherryPickRequest cherryPickRequest)
@@ -664,7 +669,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
           }
         }
       });
-      
+
       _labCherryPicksSearchResult.initialize(buildCherryPicksDataFetcher(LabCherryPick.class));
       _labCherryPicksSearchResult.getColumnManager().addAllCompoundSorts(LAB_CHERRY_PICKS_TABLE_COMPOUND_SORTS);
       _labCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(RNAI_COLUMNS_GROUP, _cherryPickRequest.getScreen().getScreenType() == ScreenType.RNAI);
@@ -678,7 +683,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
       _screenerCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(SMALL_MOLECULE_COLUMNS_GROUP, _cherryPickRequest.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE);
       _screenerCherryPicksSearchResult.setCurrentScreensaverUser(getCurrentScreensaverUser());
       _screenerCherryPicksSearchResult.setMessages(getMessages());
-      
+
       return VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT;
     }
     catch (DataAccessException e) {
@@ -689,13 +694,13 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-  
+
   @Override
   public String reload()
   {
     return viewCherryPickRequest(_cherryPickRequest);
   }
- 
+
   public boolean isEditMode()
   {
     return _isEditMode;
@@ -996,7 +1001,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
       showMessage("cherryPicks.assayPlateTypeRequired");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    
+
     _cherryPickRequestPlateMapper.generatePlateMapping(_cherryPickRequest);
     return viewCherryPickRequest(_cherryPickRequest);
   }
@@ -1208,7 +1213,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
   }
 
   @UIControllerMethod
-  public String cancel() 
+  public String cancel()
   {
     // edits are discarded (and edit mode is canceled) by virtue of controller reloading the screen entity from the database
     return viewCherryPickRequest(_cherryPickRequest);
@@ -1216,7 +1221,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
 
   @UIControllerMethod
   @Transactional
-  public String save() 
+  public String save()
   {
     _isEditMode = false;
     _dao.reattachEntity(_cherryPickRequest);
@@ -1353,7 +1358,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
                                             true,
                                             // needed by libraryPoolToDuplexWellMapper, below
                                             "silencingReagents.wells.silencingReagents.gene",
-                                            "silencingReagents.gene");
+                                            "silencingReagents.gene",
+                                            "deprecationActivity");
             if (well == null) {
               throw new InvalidCherryPickWellException(wellKey, "no such well");
             }
@@ -1375,8 +1381,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
 
       doWarnOnInvalidPoolWellScreenerCherryPicks(_cherryPickRequest);
       doWarnOnDuplicateScreenerCherryPicks(_cherryPickRequest);
-
-
+      doWarnOnDeprecatedWells(_cherryPickRequest);
     }
     catch (DataAccessException e) {
       showMessage("databaseOperationFailed", e.getMessage());
@@ -1402,7 +1407,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
       {
         CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(_cherryPickRequest);
         ScreensaverUser performedBy = _dao.reloadEntity(performedByIn);
-        CherryPickLiquidTransfer liquidTransfer = 
+        CherryPickLiquidTransfer liquidTransfer =
           cherryPickRequest.getScreen().createCherryPickLiquidTransfer(performedBy,
                                                                        dateOfLiquidTransfer,
                                                                        success ? CherryPickLiquidTransferStatus.SUCCESSFUL : CherryPickLiquidTransferStatus.FAILED);
@@ -1422,10 +1427,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     });
   }
 
-  private void doWarnOnInvalidPoolWellScreenerCherryPicks(CherryPickRequest _cherryPickRequest)
+  private void doWarnOnInvalidPoolWellScreenerCherryPicks(CherryPickRequest cherryPickRequest)
   {
     int n = 0;
-    for (ScreenerCherryPick screenerCherryPick : _cherryPickRequest.getScreenerCherryPicks()) {
+    for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
       if (screenerCherryPick.getLabCherryPicks().size() == 0) {
         ++n;
       }
@@ -1435,18 +1440,35 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     }
   }
 
-  private void doWarnOnDuplicateScreenerCherryPicks(final CherryPickRequest _cherryPickRequest)
+  private void doWarnOnDuplicateScreenerCherryPicks(CherryPickRequest cherryPickRequest)
   {
-    Map<WellKey,Number> duplicateScreenerCherryPickWellKeysMap = _cherryPickRequestDao.findDuplicateCherryPicksForScreen(_cherryPickRequest.getScreen());
+    Map<WellKey,Number> duplicateScreenerCherryPickWellKeysMap = _cherryPickRequestDao.findDuplicateCherryPicksForScreen(cherryPickRequest.getScreen());
     Set<WellKey> duplicateScreenerCherryPickWellKeys = duplicateScreenerCherryPickWellKeysMap.keySet();
     Set<WellKey> ourScreenerCherryPickWellsKeys = new HashSet<WellKey>();
-    for (ScreenerCherryPick screenerCherryPick : _cherryPickRequest.getScreenerCherryPicks()) {
+    for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
       ourScreenerCherryPickWellsKeys.add(screenerCherryPick.getScreenedWell().getWellKey());
     }
     duplicateScreenerCherryPickWellKeys.retainAll(ourScreenerCherryPickWellsKeys);
     if (duplicateScreenerCherryPickWellKeysMap.size() > 0) {
       String duplicateWellsList = StringUtils.makeListString(duplicateScreenerCherryPickWellKeys, ", ");
-      showMessage("cherryPicks.duplicateCherryPicksInScreen", _cherryPickRequest.getScreen().getScreenNumber(), duplicateWellsList);
+      showMessage("cherryPicks.duplicateCherryPicksInScreen", cherryPickRequest.getScreen().getScreenNumber(), duplicateWellsList);
+    }
+  }
+
+  private void doWarnOnDeprecatedWells(CherryPickRequest cherryPickRequest)
+  {
+    Multimap<AdministrativeActivity,WellKey> wellDeprecations = new TreeMultimap<AdministrativeActivity,WellKey>();
+    for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
+      Well well = screenerCherryPick.getScreenedWell();
+      if (well.isDeprecated()) {
+        wellDeprecations.put(well.getDeprecationActivity(),
+                             well.getWellKey());
+      }
+    }
+    for (AdministrativeActivity deprecationActivity : wellDeprecations.keySet()) {
+      showMessage("cherryPicks.deprecatedWells",
+                  deprecationActivity.getComments(),
+                  Join.join(", ", wellDeprecations.values()));
     }
   }
 

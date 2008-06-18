@@ -9,16 +9,20 @@
 
 package edu.harvard.med.screensaver.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
@@ -34,7 +38,7 @@ import org.joda.time.LocalDate;
 @PrimaryKeyJoinColumn(name="activityId")
 @org.hibernate.annotations.ForeignKey(name="fk_administrative_activity_to_activity")
 @org.hibernate.annotations.Proxy
-abstract public class AdministrativeActivity extends Activity
+public class AdministrativeActivity extends Activity
 {
 
   // private static data
@@ -45,11 +49,33 @@ abstract public class AdministrativeActivity extends Activity
 
   // private instance data
 
+  private AdministrativeActivityType _type;
   private AdministratorUser _approvedBy;
   private LocalDate _dateApproved;
 
 
   // public instance methods
+
+  @Override
+  @Transient
+  public String getActivityTypeName()
+  {
+    return getType().getValue();
+  }
+
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+
+  @Column(name="administrativeActivityType", nullable=false, updatable=false)
+  @Immutable
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.AdministrativeActivityType$UserType")
+  public AdministrativeActivityType getType()
+  {
+    return _type;
+  }
 
   /**
    * Get the administrator user that approved the activity.
@@ -84,7 +110,7 @@ abstract public class AdministrativeActivity extends Activity
    * Get the date the activity was approved.
    * @return the date the activity was approved
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")  
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateApproved()
   {
     return _dateApproved;
@@ -107,10 +133,11 @@ abstract public class AdministrativeActivity extends Activity
    * @param performedBy the user that performed the activity
    * @param dateOfActivity the date the activity took place
    */
-  protected AdministrativeActivity(ScreensaverUser performedBy, 
-                                   LocalDate dateOfActivity)
+  public AdministrativeActivity(ScreensaverUser performedBy,
+                                LocalDate dateOfActivity,
+                                AdministrativeActivityType type)
   {
-    this(performedBy, dateOfActivity, null, null);
+    this(performedBy, dateOfActivity, null, null, type);
   }
 
   /**
@@ -120,11 +147,12 @@ abstract public class AdministrativeActivity extends Activity
    * @param approvedBy the administrator use who approved the activity
    * @param dateApproved the date the activity was approved
    */
-  protected AdministrativeActivity(
+  public AdministrativeActivity(
     ScreensaverUser performedBy,
     LocalDate dateOfActivity,
     AdministratorUser approvedBy,
-    LocalDate dateApproved)
+    LocalDate dateApproved,
+    AdministrativeActivityType type)
   {
     super(performedBy, dateOfActivity);
 
@@ -133,7 +161,7 @@ abstract public class AdministrativeActivity extends Activity
     // has factory methods to create the child entities and manage the relationships. but
     // AdministrativeActivities don't have any containing entities. you might argue that they
     // could be children of the performedBy, but this is problematic because we probably would
-    // want the administrative activites to live beyond the scope of the administrator (i guess
+    // want the administrative activities to live beyond the scope of the administrator (i guess
     // administrators should be un-deletable), and also because they are bundled with other,
     // non-administrative activities in ScreensaverUser.activitiesPerformed. and those other
     // activities have a different parent entity (Screen). this is the only time i had to do
@@ -144,6 +172,7 @@ abstract public class AdministrativeActivity extends Activity
       approvedBy.getActivitiesApproved().add(this);
     }
 
+    _type = type;
     _approvedBy = approvedBy;
     _dateApproved = dateApproved;
   }
@@ -153,4 +182,9 @@ abstract public class AdministrativeActivity extends Activity
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected AdministrativeActivity() {}
+
+  private void setType(AdministrativeActivityType type)
+  {
+    _type = type;
+  }
 }

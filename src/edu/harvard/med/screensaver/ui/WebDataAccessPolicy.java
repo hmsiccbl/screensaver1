@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui;
 
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -88,6 +89,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   public boolean visit(AbaseTestset entity)
   {
     return true;
+  }
+
+  public boolean visit(AdministrativeActivity administrativeActivity)
+  {
+    return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
   public boolean visit(AnnotationType annotation)

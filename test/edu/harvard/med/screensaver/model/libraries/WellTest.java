@@ -11,17 +11,22 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 public class WellTest extends AbstractEntityInstanceTest<Well>
 {
@@ -122,7 +127,45 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         assertEquals(rvt, resultValue.getResultValueType());
       }
     });
+  }
 
+  public void testDeprecation()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+        genericEntityDao.persistEntity(library);
+        Well well = genericEntityDao.findEntityById(Well.class, new WellKey(1000, "A01").toString());
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
+        AdministrativeActivity deprecationActivity =
+          new AdministrativeActivity(admin,
+                                     new LocalDate(),
+                                     admin,
+                                     new LocalDate(),
+                                     AdministrativeActivityType.WELL_DEPRECATION);
+        deprecationActivity.setComments("discontinued gene");
+        well.setDeprecationActivity(deprecationActivity);
+      }
+    });
+
+    Well well = genericEntityDao.findEntityById(Well.class,
+                                                new WellKey(1000, "A01").toString(),
+                                                true,
+                                                "deprecationActivity");
+    assertTrue(well.isDeprecated());
+    assertEquals("discontinued gene", well.getDeprecationActivity().getComments());
+  }
+
+  @Override
+  public Object getTestValueForType(Class type,
+                                    AbstractEntity parentBean,
+                                    boolean persistEntities)
+  {
+    if (type.equals(AdministrativeActivityType.class)) {
+      return AdministrativeActivityType.WELL_DEPRECATION;
+    }
+    return super.getTestValueForType(type, parentBean, persistEntities);
   }
 
 }

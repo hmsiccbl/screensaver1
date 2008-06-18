@@ -39,6 +39,8 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -126,6 +128,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   private String _genbankAccessionNumber;
   private Map<ResultValueType,ResultValue> _resultValues = new HashMap<ResultValueType,ResultValue>();
   private Set<ScreenResult> _screenResults = new HashSet<ScreenResult>();
+  private AdministrativeActivity _deprecationActivity;
 
   private transient WellKey _wellKey;
 
@@ -244,7 +247,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   /**
    * Remove all the compounds.
-   * 
+   *
    * @param updateWell whether to update the well.Compounds relationship in
    *          memory only (the database will reflect the removed relationship)
    */
@@ -309,7 +312,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   /**
    * Remove all the silencing reagents.
-   * 
+   *
    * @param updateWell whether to update the well.Compounds relationship in
    *          memory only (the database will reflect the removed relationship)
    */
@@ -459,6 +462,43 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   }
 
   /**
+   * Determines whether the well has been marked as deprecated. A deprecated
+   * well is one that is no longer valid for screening. It will continue to be
+   * available when a library is screened, but it should not be cherry picked.
+   *
+   * @return whether the well is deprecated
+   */
+  @Transient
+  public boolean isDeprecated()
+  {
+    return _deprecationActivity != null;
+  }
+
+  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
+             fetch=FetchType.LAZY)
+  @JoinColumn(nullable=true, updatable=true, name="deprecation_admin_activity")
+  @org.hibernate.annotations.ForeignKey(name="fk_well_to_deprecation_admin_activity")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  //@org.hibernate.annotations.Index(name="well_deprecation_activity_id_index", columnNames={"deprecation_admin_activity"})
+  public AdministrativeActivity getDeprecationActivity()
+  {
+    return _deprecationActivity;
+  }
+
+  public void setDeprecationActivity(AdministrativeActivity deprecationActivity)
+  {
+    if (!isHibernateCaller()) {
+      if (deprecationActivity != null &&
+        deprecationActivity.getType() != AdministrativeActivityType.WELL_DEPRECATION) {
+        throw new DataModelViolationException("can only add AdministrativeActivity of type " + AdministrativeActivityType.WELL_DEPRECATION);
+      }
+    }
+    _deprecationActivity = deprecationActivity;
+  }
+
+  /**
    * Get the molfile for the well.
    * @return the molfile for the well
    */
@@ -541,7 +581,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
       throw new DataModelViolationException("experimental well must have a reagent");
     }
   }
-  
+
   public void removeReagent(boolean updateWell)
   {
     if (_reagent != null) {

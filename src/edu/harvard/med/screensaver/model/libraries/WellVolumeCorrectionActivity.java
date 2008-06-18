@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
@@ -53,7 +54,7 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
 
   private static final String ACTIVITY_TYPE_NAME =  "Well Volume Correction";
 
-  
+
   // private instance datum
 
   private Set<WellVolumeAdjustment> _wellVolumeAdjustments = new HashSet<WellVolumeAdjustment>();
@@ -68,7 +69,7 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
    */
   public WellVolumeCorrectionActivity(AdministratorUser performedBy, LocalDate datePerformed)
   {
-    super(performedBy, datePerformed);
+    super(performedBy, datePerformed, AdministrativeActivityType.WELL_VOLUME_CORRECTION);
   }
 
 

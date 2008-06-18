@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.db.accesspolicy;
 
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
@@ -61,6 +62,11 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   private static Logger log = Logger.getLogger(UnrestrictedDataAccessPolicy.class);
 
   public boolean visit(AbaseTestset entity)
+  {
+    return true;
+  }
+
+  public boolean visit(AdministrativeActivity administrativeActivity)
   {
     return true;
   }

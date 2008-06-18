@@ -1267,7 +1267,6 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     _concreteStandinMap.put(Screening.class, LibraryScreening.class);
     _concreteStandinMap.put(LabActivity.class, LibraryScreening.class);
     _concreteStandinMap.put(Activity.class, LibraryScreening.class);
-    _concreteStandinMap.put(AdministrativeActivity.class, WellVolumeCorrectionActivity.class);
     _concreteStandinMap.put(CherryPickRequest.class, RNAiCherryPickRequest.class);
   }
 

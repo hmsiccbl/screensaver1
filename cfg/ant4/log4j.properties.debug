@@ -30,16 +30,15 @@ log4j.logger.userActivity=info
 
 log4j.logger.edu.harvard.med.screensaver=info
 log4j.logger.edu.harvard.med.screensaver.db=info
-log4j.logger.edu.harvard.med.screensaver.ui=debug
-log4j.logger.edu.harvard.med.screensaver.io=debug
-log4j.logger.edu.harvard.med.screensaver.ui.table=debug
-log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=debug
-log4j.logger.edu.harvard.med.screensaver.model=error
-log4j.logger.edu.harvard.med.screensaver.io=debug
+log4j.logger.edu.harvard.med.screensaver.ui=info
+log4j.logger.edu.harvard.med.screensaver.io=info
+log4j.logger.edu.harvard.med.screensaver.ui.table=info
+log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=info
+log4j.logger.edu.harvard.med.screensaver.model=info
 log4j.logger.edu.harvard.med.screensaver.util.eutils=info
 
-log4j.logger.org.apache.commons.dbcp=debug
-log4j.logger.springframework.jdbc=debug
+#log4j.logger.org.apache.commons.dbcp=debug
+#log4j.logger.springframework.jdbc=debug
 
 
 
@@ -78,9 +77,8 @@ log4j.logger.org.springframework.orm.hibernate3=error
 
 ### JavaServer Faces
 
-log4j.logger.org.apache.myfaces=info
-#log4j.logger.org.apache.myfaces.application=debug
-log4j.logger.org.apache.myfaces.application.jsp=error
+log4j.logger.org.apache.myfaces=error
+log4j.logger.org.apache.myfaces.application=error
 
 # hide silly warnings about obsolete JSP comment styles, in Tomahawk components
 log4j.logger.org.apache.myfaces.shared_tomahawk.taglib=error
