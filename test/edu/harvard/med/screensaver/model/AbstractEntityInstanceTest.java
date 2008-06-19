@@ -62,7 +62,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
-import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.propertytesters.CollectionPropertiesInitialCardinalityTester;
 import edu.harvard.med.screensaver.model.propertytesters.PropertiesGetterAndSetterTester;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;

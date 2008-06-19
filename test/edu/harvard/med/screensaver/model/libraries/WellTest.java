@@ -132,6 +132,41 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
   public void testDeprecation()
   {
     schemaUtil.truncateTablesOrCreateSchema();
+    initDeprecatedWells();
+
+    Well well = genericEntityDao.findEntityById(Well.class,
+                                                new WellKey(1000, "A01").toString(),
+                                                true,
+                                                "deprecationActivity");
+    assertTrue(well.isDeprecated());
+    assertEquals("discontinued gene", well.getDeprecationActivity().getComments());
+  }
+
+//  public void testIsDeprecatedDerivedPropertyFormula()
+//  {
+//    schemaUtil.truncateTablesOrCreateSchema();
+//    initDeprecatedWells();
+//    
+//    String hql = "from Well where deprecated = true";
+//    List<Well> result = genericEntityDao.findEntitiesByHql(Well.class, hql);
+//    assertEquals(1, result.size());
+//    assertEquals(new WellKey(1000, "A01"), result.get(0).getWellKey());
+//    assertTrue(result.get(0).isDeprecated());
+//  }
+
+  @Override
+  public Object getTestValueForType(Class type,
+                                    AbstractEntity parentBean,
+                                    boolean persistEntities)
+  {
+    if (type.equals(AdministrativeActivityType.class)) {
+      return AdministrativeActivityType.WELL_DEPRECATION;
+    }
+    return super.getTestValueForType(type, parentBean, persistEntities);
+  }
+
+  private void initDeprecatedWells()
+  {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
@@ -148,25 +183,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         well.setDeprecationActivity(deprecationActivity);
       }
     });
-
-    Well well = genericEntityDao.findEntityById(Well.class,
-                                                new WellKey(1000, "A01").toString(),
-                                                true,
-                                                "deprecationActivity");
-    assertTrue(well.isDeprecated());
-    assertEquals("discontinued gene", well.getDeprecationActivity().getComments());
   }
-
-  @Override
-  public Object getTestValueForType(Class type,
-                                    AbstractEntity parentBean,
-                                    boolean persistEntities)
-  {
-    if (type.equals(AdministrativeActivityType.class)) {
-      return AdministrativeActivityType.WELL_DEPRECATION;
-    }
-    return super.getTestValueForType(type, parentBean, persistEntities);
-  }
-
+  
 }
 

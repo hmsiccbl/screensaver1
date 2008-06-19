@@ -468,15 +468,19 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    *
    * @return whether the well is deprecated
    */
-  @Transient
+  //TODO @Formula("deprecation_admin_activity_id IS NOT NULL")
+  @Column(name="isDeprecated", nullable=false)
   public boolean isDeprecated()
   {
     return _deprecationActivity != null;
   }
+  
+  public void setDeprecated(boolean isDeprecated) {
+  }
 
   @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
              fetch=FetchType.LAZY)
-  @JoinColumn(nullable=true, updatable=true, name="deprecation_admin_activity")
+  @JoinColumn(nullable=true, updatable=true, name="deprecation_admin_activity_id")
   @org.hibernate.annotations.ForeignKey(name="fk_well_to_deprecation_admin_activity")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })

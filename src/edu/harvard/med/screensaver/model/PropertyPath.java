@@ -29,6 +29,13 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
   // static members
 
   private static Logger log = Logger.getLogger(PropertyPath.class);
+  
+  /**
+   * Use to communicate the intent of the 'propertyName' constructor argument,
+   * when the property path represents a collection of values, which have no
+   * particular property name other than the collection element itself.
+   */
+  public final static String COLLECTION_OF_VALUES = "";
 
 
   // instance data members
@@ -38,6 +45,11 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
 
   // public constructors and methods
 
+  /**
+   * @propertyName the name of the property. Can be COLLECTION_OF_VALUES if the leaf of
+   *               the path is a collection of values (which have no further
+   *               properties except the values themselves)
+   */
   public PropertyPath(Class<E> rootEntityClass,
                       String propertyName,
                       Object... restrictionValues)
@@ -49,9 +61,9 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
   }
 
   /**
-   * @propertyName the name of the property. Can be null if the leaf of the path
-   *               is a collection of values (which have no further properties
-   *               except the values themselves).
+   * @propertyName the name of the property. Can be COLLECTION_OF_VALUES if the leaf of
+   *               the path is a collection of values (which have no further
+   *               properties except the values themselves)
    */
   public PropertyPath(Class<E> rootEntityClass,
                       String path,
@@ -65,9 +77,9 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
   }
 
   /**
-   * @propertyName the name of the property. Can be null if the leaf of the path
-   *               is a collection of values (which have no further properties
-   *               except the values themselves).
+   * @propertyName the name of the property. Can be COLLECTION_OF_VALUES if the leaf of
+   *               the path is a collection of values (which have no further
+   *               properties except the values themselves)
    */
   public PropertyPath(RelationshipPath<E> path,
                       String propertyName)

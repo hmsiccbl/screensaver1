@@ -79,6 +79,7 @@ import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
@@ -143,6 +144,26 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
       @Override
       public String getCellValue(ScreenerCherryPick scp) { return scp.getScreenedWell().getSimpleVendorIdentifier(); }
     });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new BooleanEntityColumn<ScreenerCherryPick>(
+      new PropertyPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell", "deprecated"),
+      "Deprecated", "Whether the cherry picked well has been deprecated (and should not have been cherry picked)", TableColumn.UNGROUPED) {
+      @Override
+      public Boolean getCellValue(ScreenerCherryPick scp)
+      {
+        return scp.getScreenedWell().isDeprecated();
+      }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.size() - 1).setVisible(false);
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TextEntityColumn<ScreenerCherryPick>(
+      new PropertyPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell.deprecationActivity", "comments"),
+      "Deprecation Reason", "Why the cherry picked well has been deprecated (and should not have been cherry picked)", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(ScreenerCherryPick scp)
+      {
+        return scp.getScreenedWell().isDeprecated() ? scp.getScreenedWell().getDeprecationActivity().getComments() : null;
+      }
+    });
+    SCREENER_CHERRY_PICKS_TABLE_COLUMNS.get(SCREENER_CHERRY_PICKS_TABLE_COLUMNS.size() - 1).setVisible(false);
     SCREENER_CHERRY_PICKS_TABLE_COLUMNS.add(new TextEntityColumn<ScreenerCherryPick>(
       new PropertyPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell", "iccbNumber"),
       "ICCB Number", "The identifier assigned by ICCB-L to the contents of this well", SMALL_MOLECULE_COLUMNS_GROUP) {
@@ -296,6 +317,26 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
         return lcp.getSourceWell().getGenbankAccessionNumber();
       }
     });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new BooleanEntityColumn<LabCherryPick>(
+      new PropertyPath<LabCherryPick>(LabCherryPick.class, "sourceWell", "deprecated"),
+      "Deprecated", "Whether the cherry picked well has been deprecated (and should not have been cherry picked)", TableColumn.UNGROUPED) {
+      @Override
+      public Boolean getCellValue(LabCherryPick lcp)
+      {
+        return lcp.getSourceWell().isDeprecated();
+      }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.get(LAB_CHERRY_PICKS_TABLE_COLUMNS.size() - 1).setVisible(false);
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new TextEntityColumn<LabCherryPick>(
+      new PropertyPath<LabCherryPick>(LabCherryPick.class, "sourceWell.deprecationActivity", "comments"),
+      "Deprecation Reason", "Why the cherry picked well has been deprecated (and should not have been cherry picked)", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(LabCherryPick lcp)
+      {
+        return lcp.getSourceWell().isDeprecated() ? lcp.getSourceWell().getDeprecationActivity().getComments() : null;
+      }
+    });
+    LAB_CHERRY_PICKS_TABLE_COLUMNS.get(LAB_CHERRY_PICKS_TABLE_COLUMNS.size() - 1).setVisible(false);
     LAB_CHERRY_PICKS_TABLE_COLUMNS.add(new IntegerEntityColumn<LabCherryPick>(
       new PropertyPath<LabCherryPick>(LabCherryPick.class, "assayPlate", "plateOrdinal"),
       "Cherry Pick Plate #", "The cherry pick plate number that this cherry pick has been mapped to", TableColumn.UNGROUPED) {
@@ -1458,8 +1499,8 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
   private void doWarnOnDeprecatedWells(CherryPickRequest cherryPickRequest)
   {
     Multimap<AdministrativeActivity,WellKey> wellDeprecations = new TreeMultimap<AdministrativeActivity,WellKey>();
-    for (ScreenerCherryPick screenerCherryPick : cherryPickRequest.getScreenerCherryPicks()) {
-      Well well = screenerCherryPick.getScreenedWell();
+    for (LabCherryPick LabCherryPick : cherryPickRequest.getLabCherryPicks()) {
+      Well well = LabCherryPick.getSourceWell();
       if (well.isDeprecated()) {
         wellDeprecations.put(well.getDeprecationActivity(),
                              well.getWellKey());

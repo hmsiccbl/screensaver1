@@ -52,6 +52,7 @@ import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
+import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
@@ -552,6 +553,26 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     });
     columns.get(columns.size() - 1).setVisible(false);
     
+    columns.add(new BooleanEntityColumn<Well>(
+      new PropertyPath<Well>(Well.class, "deprecated"),
+      "Deprecated", "Whether the well has been deprecated", TableColumn.UNGROUPED) {
+      @Override
+      public Boolean getCellValue(Well well)
+      {
+        return well.isDeprecated();
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    columns.add(new TextEntityColumn<Well>(
+      new PropertyPath<Well>(Well.class, "deprecationActivity", "comments"),
+      "Deprecation Reason", "Why the well has been deprecated", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Well well)
+      {
+        return well.isDeprecated() ? well.getDeprecationActivity().getComments() : null;
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
   }
 
   private void buildResultValueTypeColumns(List<EntityColumn<Well,?>> columns)
