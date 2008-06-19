@@ -23,6 +23,7 @@ public enum AttachedFileType implements VocabularyTerm
   // the vocabulary
 
   APPLICATION("Application"),
+  PRIMARY_SCREEN_REPORT("Primary Screen Report"), // a document containing both original and publishable protocol, from which the publishable protocol field will ultimately be popuplated (manually)
   LETTER_OF_SUPPORT("Letter of Support"),
   SCREENER_CORRESPONDENCE("Screener Correspondence")
   ;
