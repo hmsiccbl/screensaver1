@@ -88,13 +88,8 @@ TODO:
 				</ui:define>
 			</ss:property>
 
-			<ss:propertyGroup label="Dates"
+			<ss:propertyGroup label="Important Dates"
 				rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
-				<ss:property id="dateCreated" label="Created"
-					description="The date the screen was originally recorded in Screensaver"
-					value="#{screenDetailViewer.screen.dateCreated}" type="Date"
-					rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}" />
-
 				<ss:property id="dateOfApplication" label="Application Date"
 					description="The date the application for the screen was submitted"
 					value="#{screenDetailViewer.screen.dateOfApplication}" type="Date"
@@ -485,6 +480,14 @@ TODO:
 		</t:panelGrid>
 
 		<t:panelGrid id="rightSide" columns="1">
+
+			<t:panelGrid id="dateCreatedPanel" columns="2"
+				styleClass="layoutPanel" columnClasses="propertyLabelColumn,column"
+				rendered="#{screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin']}">
+				<ss:property id="dateCreated" label="Created"
+					description="The date the screen was originally recorded in Screensaver"
+					value="#{screenDetailViewer.screen.dateCreated}" type="Date" />
+			</t:panelGrid>
 
 			<ss:property id="statusItems" label="Status Items"
 				rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
