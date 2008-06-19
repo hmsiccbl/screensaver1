@@ -21,6 +21,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.screens.AttachedFile;
+import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -204,6 +206,39 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     submit("saveCommand");
     assertShowingScreen(_screen.getScreenNumber(), false);
     assertFalse(((Set<ScreeningRoomUser>) getBeanValue("screenDetailViewer.screen.collaborators")).contains(collaborator));
+  }
+
+  public void testAddAndDownloadAndDeleteAttachedFiles() throws Exception
+  {
+    visitScreenViewer(_screen);
+    submit("screenDetailPanelForm:editCommand");
+    assertShowingScreen(_screen.getScreenNumber(), true);
+    submit("attachedFilesTableAddCommand",
+           new Pair<String,String>("newAttachedFileType", Integer.toString(AttachedFileType.APPLICATION.hashCode())),
+           new Pair<String,String>("newAttachedFilename", "test file name"),
+           new Pair<String,String>("newAttachedFileContents", "test file contents"));
+    assertEquals(1, ((Set<AttachedFile>) getBeanValue("screenDetailViewer.screen.attachedFiles")).size());
+    assertPageContainsText("test file name");
+    submit("saveCommand");
+    assertShowingScreen(_screen.getScreenNumber(), false);
+    _client.clickCommandLink("viewAdminOnlyFieldsCommand");
+    assertTrue("admin view mode", ((Boolean) getBeanValue("screenDetailViewer.adminViewMode")));
+    assertEquals(1, ((Set<AttachedFile>) getBeanValue("screenDetailViewer.screen.attachedFiles")).size());
+    assertPageContainsText("test file name");
+    
+    // TODO: test this
+    //_client.clickCommandLink("downloadAttachedFileCommandLink");
+
+    submit("screenDetailPanelForm:editCommand");
+    assertShowingScreen(_screen.getScreenNumber(), true);
+    submit("0:attachedFilesTableDeleteCommand");
+    assertEquals(0, ((Set<AttachedFile>) getBeanValue("screenDetailViewer.screen.attachedFiles")).size());
+    assertPageContainsText("test file name", false);
+    submit("saveCommand");
+    assertEquals(0, ((Set<AttachedFile>) getBeanValue("screenDetailViewer.screen.attachedFiles")).size());
+    assertShowingScreen(_screen.getScreenNumber(), false);
+    assertTrue("admin view mode", ((Boolean) getBeanValue("screenDetailViewer.adminViewMode")));
+    assertPageContainsText("test file name", false);
   }
 
   public void testAddAndDeletePublication() throws Exception

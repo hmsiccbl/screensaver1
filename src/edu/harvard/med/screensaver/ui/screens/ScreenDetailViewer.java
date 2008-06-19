@@ -583,7 +583,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String deleteAttachedFile()
   {
-    AttachedFile attachedFile = (AttachedFile) getRequestMap().get("attachedFile");
+    AttachedFile attachedFile = (AttachedFile) getRequestMap().get("element");
     getScreen().getAttachedFiles().remove(attachedFile);
     _newAttachedFileName = null;
     _newAttachedFileContents = null;
@@ -596,7 +596,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @Transactional
   public String downloadAttachedFile() throws IOException, SQLException
   {
-    AttachedFile attachedFile = (AttachedFile) getRequestMap().get("attachedFile");
+    AttachedFile attachedFile = (AttachedFile) getRequestMap().get("element");
     // attachedFile must be Hibernate-managed in order to access the contents (a LOB type)
     // if attachedFile is transient, we should not attempt to reattach, and contents will be accessible
     if (attachedFile.getAttachedFileId() != null) {

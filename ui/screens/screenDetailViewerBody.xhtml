@@ -249,20 +249,21 @@ TODO:
 								<f:facet name="header">
 									<t:outputText value="Date Added" />
 								</f:facet>
-								<t:outputText value="#{attachedFile.dateCreated}"
+								<t:outputText value="#{element.dateCreated}"
 									converter="#{dateConverter}" />
 							</t:column>
 							<t:column>
 								<f:facet name="header">
 									<t:outputText value="File Type" />
 								</f:facet>
-								<t:outputText value="#{attachedFile.fileType}" />
+								<t:outputText value="#{element.fileType}" />
 							</t:column>
 							<t:column>
 								<f:facet name="header">
 									<t:outputText value="File Name" />
 								</f:facet>
-								<t:commandLink value="#{attachedFile.filename}"
+								<t:commandLink id="downloadAttachedFileCommandLink"
+									value="#{element.filename}"
 									action="#{screenDetailViewer.downloadAttachedFile}"
 									styleClass="dataText" />
 							</t:column>
