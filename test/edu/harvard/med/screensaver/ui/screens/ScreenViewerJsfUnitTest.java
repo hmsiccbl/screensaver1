@@ -215,8 +215,8 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     assertShowingScreen(_screen.getScreenNumber(), true);
     submit("attachedFilesTableAddCommand",
            new Pair<String,String>("newAttachedFileType", Integer.toString(AttachedFileType.APPLICATION.hashCode())),
-           new Pair<String,String>("newAttachedFilename", "test file name"),
-           new Pair<String,String>("newAttachedFileContents", "test file contents"));
+           new Pair<String,String>("newAttachedFilenameTextField", "test file name"),
+           new Pair<String,String>("newAttachedFileContentsTextareaField1", "test file contents"));
     assertEquals(1, ((Set<AttachedFile>) getBeanValue("screenDetailViewer.screen.attachedFiles")).size());
     assertPageContainsText("test file name");
     submit("saveCommand");

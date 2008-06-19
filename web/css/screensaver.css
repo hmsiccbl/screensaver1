@@ -194,7 +194,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	display: none;
 }
 
-.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.column500 {
+.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.column500,.greedyColumn
+	{
 	vertical-align: top;
 	border-style: none;
 	padding-top: 1px;
@@ -249,6 +250,10 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	width: 0px;
 }
 
+.greedyColumn {
+	width: 100%;
+}
+
 .selectMenu {
 	max-width: 400px;
 	min-width: 200px;
@@ -292,7 +297,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .scroller {
-  background-color: #336699;
+	background-color: #336699;
 }
 
 .scroller_activePage {
@@ -307,7 +312,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .menuAndContent {
 	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
 	/*	table-layout: fixed;*/
-
+	
 }
 
 .menuColumn,.contentColumn {
@@ -407,11 +412,11 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 }
 
 .activeTab {
-
+	
 }
 
 .inactiveTab {
-
+	
 }
 
 .newsDate {

@@ -285,20 +285,15 @@ TODO:
 								<t:inputFileUpload id="uploadAttachedFile"
 									value="#{screenDetailViewer.uploadedAttachedFileContents}"
 									maxlength="#{1024 * 1024}" styleClass="inputText" />
-								<t:outputLabel for="uploadScreenAttachedFile"
-									value="Option #2: Enter" styleClass="label" />
-								<t:panelGrid columns="2">
-									<t:outputLabel for="newAttachedFilename" value="Name"
-										styleClass="label propertyLabelColumn" />
-									<t:inputText id="newAttachedFilename"
+								<ss:propertyGroup label="Option #2: Enter" columns="1" columnClasses="column">
+									<ss:property id="newAttachedFilename" label="Name" type="Text"
 										value="#{screenDetailViewer.newAttachedFileName}"
-										styleClass="inputText" />
-									<t:outputLabel for="newAttachedFileContents" value="Contents"
-										styleClass="label propertyLabelColumn" />
-									<t:inputText id="newAttachedFileContents"
+										editWidth="60" />
+									<ss:property id="newAttachedFileContents" label="Contents"
+										type="Textarea"
 										value="#{screenDetailViewer.newAttachedFileContents}"
-										styleClass="inputText" />
-								</t:panelGrid>
+										editWidth="60" editHeight="3" />
+								</ss:propertyGroup>
 							</t:panelGrid>
 						</ui:define>
 					</ss:collectionTable>
