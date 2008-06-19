@@ -12,10 +12,12 @@ package edu.harvard.med.screensaver.ui.namevaluetable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+
+import org.apache.log4j.Logger;
 
 /**
  * A NameValueTable for the well details portion of the Well Viewer.
@@ -35,6 +37,7 @@ public class WellDetailsNameValueTable extends ReagentDetailsNameValueTable
   private static final String PLATE = "Plate";
   private static final String WELL = "Well";
   private static final String WELL_TYPE = "Well Type";
+  private static final String DEPRECATED = "Deprecated";
   private static final String ICCB_NUMBER = "ICCB Number";
 
 
@@ -84,6 +87,9 @@ public class WellDetailsNameValueTable extends ReagentDetailsNameValueTable
     addItem(PLATE, Integer.toString(well.getPlateNumber()), ValueType.TEXT, "The number of the plate the well is located on");
     addItem(WELL, well.getWellName(), ValueType.TEXT, "The plate coordinates of the well");
     addItem(WELL_TYPE, well.getWellType(), ValueType.TEXT, "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.");
+    if (well.isDeprecated()) {
+      addItem(DEPRECATED, well.getDeprecationActivity().getComments(), ValueType.TEXT, "Why the well is deprecated");
+    }
     if (well.getIccbNumber() != null) {
       addItem(ICCB_NUMBER, well.getIccbNumber(), ValueType.TEXT, "The ICCB number for the well contents");
     }
