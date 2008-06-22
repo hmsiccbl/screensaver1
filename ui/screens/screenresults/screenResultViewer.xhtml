@@ -5,108 +5,71 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
 
 <ui:composition>
 
 	<h:form id="screenResultPanelForm">
-		<t:collapsiblePanel id="screenResultPanel"
-			value="#{screenResultViewer.isPanelCollapsedMap['screenResultSummary']}"
-			title="Screen Result Summary" var="isCollapsed" titleVar="title"
+		<ss:collapsiblePanel id="screenResultPanel"
+			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['screenResultSummary']}"
+			label="Screen Result Summary"
 			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
-			<f:facet name="header">
-        <s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"  styleClass="transparentSectionHeader">
-					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
-						<h:graphicImage
-							value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
-							styleClass="icon" />
-						<h:outputText value="Screen Result Summary"
-							styleClass="transparentSectionHeader" />
-					</t:headerLink>
-				</s:roundedDiv>
-			</f:facet>
+			<ui:define name="content">
+				<t:panelGroup rendered="#{screenResultViewer.editable}">
+					<t:commandButton action="#{screenResultViewer.delete}"
+						value="Delete"
+						onclick="javascript: return confirm('Delete this screen result permanently?');"
+						styleClass="command" rendered="#{screenResultViewer.editable}"
+						title="Delete the screen results for this screen" />
+				</t:panelGroup>
 
-			<t:panelGroup
-				rendered="#{screenResultViewer.editable}">
-				<t:commandButton action="#{screenResultViewer.delete}"
-					value="Delete"
-					onclick="javascript: return confirm('Delete this screen result permanently?');"
-					styleClass="command" rendered="#{screenResultViewer.editable}"
-					title="Delete the screen results for this screen" />
-			</t:panelGroup>
+				<t:panelGrid id="screenResultProperties" columns="2"
+					columnClasses="propertyLabelColumn,column500"
+					styleClass="layoutPanel">
 
-			<t:panelGrid columns="2" styleClass="standardTable"
-				columnClasses="keyColumn,textColumn" rowClasses="row1,row2">
+					<ss:property id="screenResultLastImported" label="Last Imported"
+						type="Date"
+						description="The date the current screen results were loaded into the database"
+						value="#{screenResultViewer.screenResult.dateLastImported}" />
 
-				<t:outputLabel for="screenResultLastImported" value="Last Imported"
-					title="The date the current screen results were loaded into the database" />
-				<t:outputText id="screenResultLastImported"
-					value="#{screenResultViewer.screenResult.dateLastImported}"
-					styleClass="dataText" />
+					<ss:property id="screenResultIsShareable" label="Shareable"
+						type="Boolean"
+						description="True when the results are shareable with scientists outside the lab"
+						submitOnChange="true"
+						value="#{screenResultViewer.screenResult.shareable}" />
 
-				<t:outputLabel for="screenResultIsShareable" value="Shareable"
-					title="True when the results are shareable with scientists outside the lab" />
-				<t:div>
-					<t:selectBooleanCheckbox id="screenResultIsShareable"
-						value="#{screenResultViewer.screenResult.shareable}"
-						styleClass="label"
-						displayValueOnly="#{screenResultViewer.readOnly}"
-						displayValueOnlyStyleClass="dataText"
-						onclick="javascript:document.getElementById('saveScreenResultButton').click()" />
-					<t:commandButton id="saveScreenResultButton" forceId="true"
-						action="#{screenResultViewer.saveScreenResult}"
-						styleClass="hiddenCommand" />
-				</t:div>
+					<ss:property id="screenResultPlateCount" label="Plates"
+						description="The number of plates for which we have results"
+						value="#{screenResultViewer.screenResult.plateNumberCount}" />
 
-				<t:outputLabel for="screenResultPlateCount" value="Plates"
-					title="The number of plates for which we have results" />
-				<t:outputText id="screenResultPlateCount"
-					value="#{screenResultViewer.screenResult.plateNumberCount}"
-					styleClass="dataText" />
+					<ss:property id="screenResultReplicateCount" label="Replicates"
+						description="The number of replicates screened"
+						value="#{screenResultViewer.screenResult.replicateCount}" />
 
-				<t:outputLabel for="screenResultReplicateCount" value="Replicates"
-					title="The number of replicates screened" />
-				<t:outputText id="screenResultReplicateCount"
-					value="#{screenResultViewer.screenResult.replicateCount}"
-					styleClass="dataText" />
+					<ss:property id="screenResultExperimentalWellCount"
+						label="Experimental Wells"
+						description="The number of experimental wells for which we have results"
+						value="#{screenResultViewer.screenResult.experimentalWellCount}" />
+				</t:panelGrid>
+			</ui:define>
+		</ss:collapsiblePanel>
 
-				<t:outputLabel for="screenResultExperimentalWellCount"
-					value="Experimental Wells"
-					title="The number of experimental wells for which we have results" />
-				<t:outputText id="screenResultExperimentalWellCount"
-					value="#{screenResultViewer.screenResult.experimentalWellCount}"
-					styleClass="dataText" />
-
-			</t:panelGrid>
-		</t:collapsiblePanel>
-
-		<t:div
-			rendered="#{!empty screenResultViewer.screenResult  &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary']}">
-			<t:collapsiblePanel id="dataHeadersPanel"
-				value="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
-				title="Data Headers" var="isCollapsed" titleVar="title">
-				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4" 
-						styleClass="transparentSubsectionHeader">
-						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
-							<h:graphicImage
-								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
-								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
-						</t:headerLink>
-					</s:roundedDiv>
-				</f:facet>
-
+		<ss:collapsiblePanel id="dataHeadersPanel" label="Data Headers"
+			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
+			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
+			<ui:define name="content">
 				<t:dataTable id="dataHeadersTable"
 					value="#{screenResultViewer.dataHeadersTable.dataModel}" var="row"
-					rendered="#{!isCollapsed}" styleClass="standardTable"
-					headerClass="tableHeader" rowClasses="row1,row2">
+					styleClass="standardTable" headerClass="tableHeader"
+					rowClasses="row1,row2">
 					<t:column styleClass="keyColumn">
 						<f:facet name="header">
 							<t:outputText value="Data Header Name" />
 						</f:facet>
 						<t:outputText value="#{row.rowLabel}" escape="false"
-							title="#{row.rowDescription}" />
+							styleClass="dataText" title="#{row.rowDescription}" />
 					</t:column>
 					<t:columns
 						value="#{screenResultViewer.dataHeadersTable.columnModel}"
@@ -115,32 +78,22 @@
 							<t:outputText value="#{columnName}" />
 						</f:facet>
 						<t:outputText
-							value="#{screenResultViewer.dataHeadersTable.cellValue}" />
+							value="#{screenResultViewer.dataHeadersTable.cellValue}"
+							styleClass="dataText" />
 					</t:columns>
 				</t:dataTable>
-			</t:collapsiblePanel>
+			</ui:define>
+		</ss:collapsiblePanel>
 
-			<t:collapsiblePanel id="dataTablePanel"
-				value="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
-				title="Data" var="isCollapsed" titleVar="title">
-				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
-						styleClass="transparentSubsectionHeader">
-						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
-							<h:graphicImage
-								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
-								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
-						</t:headerLink>
-					</s:roundedDiv>
-				</f:facet>
-			</t:collapsiblePanel>
-		</t:div>
+		<ss:collapsiblePanel id="dataTablePanel"
+			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
+			title="Data"
+			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}" />
 	</h:form>
 
 	<!-- Warning: wellSearchResultsBody.xhtml must be included outside of h:form elements -->
 	<t:div
-		rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary'] &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
+		rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
 		<ui:include src="/libraries/wellSearchResultsBody.xhtml">
 			<ui:param name="wellsBrowser"
 				value="#{screenResultViewer.resultValueTable}" />
@@ -148,38 +101,23 @@
 	</t:div>
 
 	<h:form id="heatMapsPanelForm">
-		<t:div
-			rendered="#{! screenResultViewer.isPanelCollapsedMap['screenResultSummary']}">
-			<t:collapsiblePanel id="heatMapsPanel"
-				value="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
-				title="Heat Maps" var="isCollapsed" titleVar="title"
-				rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
-				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
-						styleClass="transparentSubsectionHeader">
-						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
-							<h:graphicImage
-								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
-								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
-						</t:headerLink>
-					</s:roundedDiv>
-				</f:facet>
-				<t:panelGroup rendered="#{!isCollapsed}">
-					<ui:include src="heatMapViewer.xhtml" />
-				</t:panelGroup>
-			</t:collapsiblePanel>
-		</t:div>
+		<ss:collapsiblePanel id="heatMapsPanel"
+			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
+			label="Heat Maps"
+			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary']}">
+			<ui:include src="heatMapViewer.xhtml" />
+		</ss:collapsiblePanel>
 	</h:form>
 
 	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
-	<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeHeaderColor}" radius="4"
+	<s:roundedDiv borderWidth="4"
+		color="#{appInfo.screensaverThemeHeaderColor}" radius="4"
 		rendered="#{empty screenResultViewer.screenResult}">
 		<t:outputText value="Screen result not available"
 			styleClass="transparentSectionHeader" />
 	</s:roundedDiv>
 	<t:panelGroup
-			rendered="#{!screenResultViewer.readOnly &amp;&amp; empty screenResultViewer.screenResult}">
+		rendered="#{!screenResultViewer.readOnly &amp;&amp; empty screenResultViewer.screenResult}">
 		<ui:include src="admin/screenResultUploader.xhtml" />
 	</t:panelGroup>
 

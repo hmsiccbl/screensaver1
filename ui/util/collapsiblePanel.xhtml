@@ -8,17 +8,19 @@
 	xmlns:s="http://myfaces.apache.org/sandbox"
 	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
-<!-- 
- facelets parameters: 
+<!--
+ facelets parameters:
   - id
   - label: text to appear in the panel header
 	- isCollapsed: boolean
+	- rendered
 -->
 
 <ui:composition>
 
 	<t:collapsiblePanel id="#{id}Panel" value="#{isCollapsed}"
-		title="#{label}" var="isCollapsed" titleVar="title">
+		title="#{label}" var="isCollapsed" titleVar="title"
+		rendered="#{empty rendered ? true : rendered}">
 		<f:facet name="header">
 			<s:roundedDiv borderWidth="4"
 				color="#{appInfo.screensaverThemeHeaderColor}" radius="4"
@@ -34,7 +36,7 @@
 		</f:facet>
 
 		<f:facet name="closedContent">
-		  <ui:insert name="closedContent" />
+			<ui:insert name="closedContent" />
 		</f:facet>
 
 		<ui:insert name="content" />
