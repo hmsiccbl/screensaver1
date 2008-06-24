@@ -190,43 +190,44 @@ TODO:
 					</ss:collectionTable>
 				</ui:define>
 				<ui:define name="addProperties">
-					<t:panelGrid columns="2">
-						<t:outputText value="PubMed ID" styleClass="label" />
-						<t:panelGroup styleClass="layoutPanel">
-							<t:inputText id="publicationPubMedId"
-								value="#{screenDetailViewer.newPublication.pubmedId}">
-								<f:converter converterId="javax.faces.Integer" />
-							</t:inputText>
-							<t:commandButton id="#{id}LookupPubMedIdCommand"
-								value="Lookup PubMed ID"
-								action="#{screenDetailViewer.lookupPublicationByPubMedId}"
-								styleClass="command" />
-						</t:panelGroup>
-						<t:outputText value="Title" styleClass="label" />
-						<t:inputText id="publicationTitle"
-							value="#{screenDetailViewer.newPublication.title}" size="80"
-							styleClass="inputText" />
-						<t:outputText value="Authors" styleClass="label" />
-						<t:inputText id="publicationAuthors"
-							value="#{screenDetailViewer.newPublication.authors}" size="80"
-							styleClass="inputText" />
-						<t:outputText value="Journal" styleClass="label" />
-						<t:inputText id="publicationJournal"
-							value="#{screenDetailViewer.newPublication.journal}" size="80"
-							styleClass="inputText" />
-						<t:outputText value="Volume" styleClass="label" />
-						<t:inputText id="publicationVolume"
-							value="#{screenDetailViewer.newPublication.volume}"
-							styleClass="inputText" />
-						<t:outputText value="Year" styleClass="label" />
-						<t:inputText id="publicationYear"
-							value="#{screenDetailViewer.newPublication.yearPublished}"
-							maxlength="4" styleClass="inputText" />
-						<t:outputText value="Pages" styleClass="label" />
-						<t:inputText id="publicationPages"
-							value="#{screenDetailViewer.newPublication.pages}"
-							styleClass="inputText" />
-					</t:panelGrid>
+					<t:panelGrid columns="2" styleClass="layoutPanel"
+							columnClasses="propertyLabelColumn,column">
+							<t:outputText value="PubMed ID" styleClass="label" />
+							<t:panelGroup styleClass="layoutPanel">
+								<t:inputText id="publicationPubMedId"
+									value="#{screenDetailViewer.newPublication.pubmedId}">
+									<f:converter converterId="javax.faces.Integer" />
+								</t:inputText>
+								<t:commandButton id="#{id}LookupPubMedIdCommand"
+									value="Lookup PubMed ID"
+									action="#{screenDetailViewer.lookupPublicationByPubMedId}"
+									styleClass="command" />
+							</t:panelGroup>
+							<t:outputText value="Title" styleClass="label" />
+							<t:inputText id="publicationTitle"
+								value="#{screenDetailViewer.newPublication.title}" size="80"
+								styleClass="inputText" />
+							<t:outputText value="Authors" styleClass="label" />
+							<t:inputText id="publicationAuthors"
+								value="#{screenDetailViewer.newPublication.authors}" size="80"
+								styleClass="inputText" />
+							<t:outputText value="Journal" styleClass="label" />
+							<t:inputText id="publicationJournal"
+								value="#{screenDetailViewer.newPublication.journal}" size="80"
+								styleClass="inputText" />
+							<t:outputText value="Volume" styleClass="label" />
+							<t:inputText id="publicationVolume"
+								value="#{screenDetailViewer.newPublication.volume}"
+								styleClass="inputText" />
+							<t:outputText value="Year" styleClass="label" />
+							<t:inputText id="publicationYear"
+								value="#{screenDetailViewer.newPublication.yearPublished}"
+								maxlength="4" styleClass="inputText" />
+							<t:outputText value="Pages" styleClass="label" />
+							<t:inputText id="publicationPages"
+								value="#{screenDetailViewer.newPublication.pages}"
+								styleClass="inputText" />
+						</t:panelGrid>
 				</ui:define>
 			</ss:property>
 
