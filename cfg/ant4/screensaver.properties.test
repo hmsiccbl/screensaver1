@@ -12,6 +12,6 @@ babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
-SCREENSAVER_PGSQL_DB=testscreensaver1
-SCREENSAVER_PGSQL_USER=testscreensaver1
+SCREENSAVER_PGSQL_DB=testscreensaver
+SCREENSAVER_PGSQL_USER=testscreensaver
 SCREENSAVER_PGSQL_PASSWORD=
