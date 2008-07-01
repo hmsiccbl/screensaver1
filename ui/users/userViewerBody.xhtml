@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition>
+
+	<h:form id="userViewerForm">
+		<t:div rendered="#{!empty userViewer.user}">
+
+			<t:panelGroup id="commandPanel" rendered="#{userViewer.editable}">
+				<ss:editSaveCancel viewer="#{userViewer}" />
+			</t:panelGroup>
+
+			<t:panelGrid id="userProperties" columns="2"
+				columnClasses="propertyLabelColumn,column" styleClass="layoutPanel">
+
+				<ss:property id="userId" label="User #"
+					description="The number used to uniquely identify the user"
+					value="#{userViewer.user.screensaverUserId}" />
+
+				<ss:property id="dateCreated" label="Created"
+					description="The date the user was originally recorded in Screensaver"
+					value="#{userViewer.user.dateCreated}" type="Date" />
+
+				<ss:property id="fullName" label="Name"
+					description="The name and email of the user"
+					value="#{userViewer.user.fullNameFirstLast}"
+					rendered="#{!userViewer.editMode}"/>
+
+				<ss:property id="firstName" label="First Name"
+					description="The user's first name"
+					value="#{userViewer.user.firstName}"
+					rendered="#{userViewer.editMode}" editable="#{userViewer.editMode}" editWidth="60"/>
+
+				<ss:property id="lastName" label="Last Name"
+					description="The user's last name (surname)"
+					value="#{userViewer.user.lastName}"
+					rendered="#{userViewer.editMode}" editable="#{userViewer.editable}" editWidth="60"/>
+
+				<ss:property id="email" label="Email"
+					description="The user's email address "
+					value="#{userViewer.user.email}" editable="#{userViewer.editMode}"
+					editWidth="60" />
+
+				<ss:property id="ecommonsId" label="eCommons ID"
+					description="The user's eCommons ID "
+					value="#{userViewer.user.ECommonsId}"
+					editable="#{userViewer.editMode}" />
+
+				<ss:property id="harvardId" label="Havard ID"
+					description="The user " value="#{userViewer.user.harvardId}"
+					editable="#{userViewer.editMode}" />
+
+				<ss:property id="harvardIdExpiration" type="Date"
+					label="Harvard ID Initial Expiration Date"
+					description="The date when the user's Harvard ID will expire"
+					value="#{userViewer.user.harvardIdExpirationDate}"
+					editable="#{userViewer.editMode}">
+					<!-- TODO: ui:define name="valueFooter">
+					  <t:outputText id="harvardIdExpirationWarning" value="#{userViewer.harvardIdExpired ? 'Expired!' : userViewer.harvardIdDaysUntilExpiration}"/>
+					</ui:define -->
+				</ss:property>
+
+				<ss:property id="phone" label="Phone"
+					description="The user's phone number"
+					value="#{userViewer.user.phone}" editable="#{userViewer.editMode}" />
+
+				<ss:property id="mailingAddress" label="Mailing Address"
+					type="Textarea" description="The user's mailing address"
+					value="#{userViewer.user.mailingAddress}"
+					editable="#{userViewer.editMode}" editWidth="80" editHeight="4" />
+
+        <ss:property id="comments" label="Comments"
+          type="Textarea" description="Comments about this user"
+          value="#{userViewer.user.comments}"
+          rendered="#{userViewer.readAdmin}"
+          editable="#{userViewer.editMode}" editWidth="80" editHeight="4" />
+
+				<ss:property id="classification" label="Classification"
+					description="The user's classification"
+					value="#{userViewer.user.userClassification}"
+					editable="#{userViewer.editMode}"
+					converter="#{screeningRoomUserClassificationConverter}"
+					required="true">
+					<ui:define name="editableData">
+						<t:selectOneMenu id="classificationMenu"
+							value="#{userViewer.user.userClassification}"
+							converter="#{screeningRoomUserClassificationConverter}"
+							required="true"
+							styleClass="inputText selectMenu">
+							<f:selectItems value="#{userViewer.userClassificationSelections}" />
+						</t:selectOneMenu>
+					</ui:define>
+				</ss:property>
+
+				<ss:property id="labName" label="Lab Name"
+					description="The name of the user's current lab"
+					value="#{userViewer.user.labName}"
+					editable="#{userViewer.editMode}">
+					<ui:define name="editableData">
+						<t:selectOneMenu id="labNameMenu"
+							value="#{userViewer.labName.value}"
+							styleClass="inputText selectMenu">
+							<f:selectItems value="#{userViewer.labName.selectItems}" />
+						</t:selectOneMenu>
+					</ui:define>
+				</ss:property>
+
+				<ss:property id="labAffiliation"
+					label="#{'Lab Affiliation'}"
+					description="The organization the user is affiliated with (usually via his/her lab)"
+					value="#{userViewer.user.labAffiliation.affiliationName}"
+					rendered="#{(!userViewer.user.headOfLab &amp;&amp; !empty userViewer.user.labAffiliation &amp;&amp; userViewer.user.labAffiliation.entityId != userViewer.user.labHead.labAffiliation.entityId) || userViewer.editMode}"
+					editable="#{userViewer.editMode}">
+					<ui:define name="editableData">
+            <t:selectOneMenu id="labAffiliationMenu"
+              value="#{userViewer.labAffiliation.value}"
+              styleClass="inputText selectMenu">
+              <f:selectItems value="#{userViewer.labAffiliation.selectItems}" />
+            </t:selectOneMenu>
+					  <!-- ui:insert src="addLabAffiliation.xhtml"/-->
+					</ui:define>
+				</ss:property>
+
+				<ss:property id="roles" label="Roles"
+					description="The roles of this user"
+					value="#{userViewer.user.screensaverUserRoles}">
+					<ui:define name="valueHeader">
+						<t:outputText value="Non-screening user of our facility"
+							styleClass="dataText errorMessage"
+							rendered="#{!userViewer.editMode &amp;&amp; !userViewer.user.isUserInRoleOfNameMap['readEverythingAdmin'] &amp;&amp; !userViewer.user.isUserInRoleOfNameMap['screeningRoomUser']}" />
+					</ui:define>
+					<ui:define name="data">
+						<ss:collectionTable id="rolesTable"
+							editable="#{userViewer.editMode}"
+							dataModel="#{userViewer.userRolesDataModel}"
+							actionBean="#{userViewer}" addAction="addUserRole"
+							deleteAction="deleteUserRole">
+							<ui:define name="columns">
+                <t:column>
+                  <f:facet name="header">
+										<t:outputText value="Role" styleClass="label" />
+									</f:facet>
+									<t:outputText
+                    value="#{element.displayableRoleName}"
+                    styleClass="dataText" />
+                </t:column>
+							</ui:define>
+							<ui:define name="addProperties">
+								<t:panelGrid columns="2">
+									<ss:property id="newrole" label="Role" editable="true">
+										<ui:define name="editableData">
+											<t:selectOneMenu id="newUserRole"
+												value="#{userViewer.newUserRole.value}"
+												styleClass="inputText selectMenu">
+												<f:selectItems value="#{userViewer.newUserRole.selectItems}" />
+											</t:selectOneMenu>
+										</ui:define>
+									</ss:property>
+								</t:panelGrid>
+							</ui:define>
+						</ss:collectionTable>
+					</ui:define>
+				</ss:property>
+
+			</t:panelGrid>
+		</t:div>
+	</h:form>
+
+</ui:composition>
+
+</html>

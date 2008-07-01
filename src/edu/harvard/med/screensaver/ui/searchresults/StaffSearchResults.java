@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 public class StaffSearchResults extends UserSearchResults<AdministratorUser>
 {
@@ -18,8 +19,9 @@ public class StaffSearchResults extends UserSearchResults<AdministratorUser>
   {
   }
 
-  public StaffSearchResults(GenericEntityDAO dao)
+  public StaffSearchResults(GenericEntityDAO dao,
+                            UserViewer userViewer)
   {
-    super(AdministratorUser.class, dao);
+    super(AdministratorUser.class, dao, userViewer);
   }
 }

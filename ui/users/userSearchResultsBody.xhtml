@@ -12,11 +12,7 @@
 
 	<ss:searchResult searchResults="#{userSearchResults}">
 		<ui:define name="entityViewer">
-			<ui:remove>
-				<ui:include src="userViewerBody.xhtml">
-					<ui:param name="userViewer" value="#{userViewer}" />
-				</ui:include>
-			</ui:remove>
+			<ui:include src="userViewerBody.xhtml" />
 		</ui:define>
 	</ss:searchResult>
 

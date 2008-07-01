@@ -5,18 +5,15 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox"
-	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+	xmlns:s="http://myfaces.apache.org/sandbox">
 
 <ui:composition template="/main/template.xhtml">
 
-	<ui:param name="pageTitle" value="Screeners Browser" />
-	<!-- ui:param name="pageHelpURL" value="screens/screenersBrowserHelp.jsf" /-->
+	<ui:param name="pageTitle" value="User Viewer" />
+	<ui:param name="pageHelpURL" value="users/userViewerHelp.jsf" />
 
 	<ui:define name="body">
-		<ui:include src="userSearchResultsBody.xhtml">
-			<ui:param name="userSearchResults" value="#{screenersBrowser}" />
-		</ui:include>
+		<ui:include src="userViewerBody.xhtml" />
 	</ui:define>
 
 </ui:composition>

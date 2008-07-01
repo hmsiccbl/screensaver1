@@ -25,6 +25,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
@@ -60,12 +61,20 @@ public class ScreeningRoomUser extends ScreensaverUser
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensCollaborated = new HashSet<Screen>();
   private ScreeningRoomUserClassification _userClassification;
-  private boolean _isNonScreeningUser;
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
 
 
   // public constructor
+
+  /**
+   * Construct an uninitialized <code>ScreeningRoomUser</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
+
+   * @motivation for new ScreeningRoomUser creation via user interface, where even required
+   *             fields are allowed to be uninitialized, initially
+   */
+   public ScreeningRoomUser() {}
 
   /**
    * Construct an initialized <code>ScreeningRoomUser</code>.
@@ -79,7 +88,6 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @param eCommonsId the eCommonds ID
    * @param harvardId the harvard ID
    * @param userClassification the user classification
-   * @param isNonScreeningUser does not perform any screening, but is otherwise associated with Screens in this system
    */
   public ScreeningRoomUser(
     String firstName,
@@ -90,8 +98,7 @@ public class ScreeningRoomUser extends ScreensaverUser
     String comments,
     String eCommonsId,
     String harvardId,
-    ScreeningRoomUserClassification userClassification,
-    boolean isNonScreeningUser)
+    ScreeningRoomUserClassification userClassification)
   {
     super(firstName,
           lastName,
@@ -102,7 +109,6 @@ public class ScreeningRoomUser extends ScreensaverUser
     setECommonsId(eCommonsId);
     setHarvardId(harvardId);
     setUserClassification(userClassification);
-    setNonScreeningUser(isNonScreeningUser);
   }
 
   public ScreeningRoomUser(String firstName,
@@ -117,8 +123,7 @@ public class ScreeningRoomUser extends ScreensaverUser
          "",
          "",
          "",
-         ScreeningRoomUserClassification.UNASSIGNED,
-         false);
+         ScreeningRoomUserClassification.UNASSIGNED);
   }
 
   // public instance methods
@@ -158,6 +163,9 @@ public class ScreeningRoomUser extends ScreensaverUser
     }
     if (labHead != null && labHead.equals(_labHead)) {
       return;
+    }
+    if (labHead != null && !getLabMembers().isEmpty()) {
+      throw new DataModelViolationException("a lab head (with lab members) cannot itself have a lab head");
     }
     if (_labHead != null) {
       _labHead.getLabMembers().remove(this);
@@ -221,8 +229,15 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get the lab affiliation. The lab affiliation should always be present, whether this user
-   * is a lab head or a lab member.
+   * Get the lab affiliation. The lab affiliation should always be present,
+   * whether this user is a lab head or a lab member:
+   * <ul>
+   * <li>This allows a new user to be created even if her lab head is not yet
+   * known at the time of creation.</li>
+   * <li>For billing purposes sometimes a non-lab head user will have a
+   * different lab affiliation, although this is very rare.</li>
+   * </ul>
+   *
    * @return the lab affiliation
    */
   @ManyToOne(fetch=FetchType.EAGER,
@@ -465,25 +480,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get non-screening flag, indicating whether this user performs screening.
-   * @return a flag indicating whether this user performs screening
-   */
-  @Column(nullable=false, name="isNonScreeningUser")
-  public boolean isNonScreeningUser()
-  {
-    return _isNonScreeningUser;
-  }
-
-  /**
-   * Set the non-screening flag.
-   * @param isNonScreeningUser a flag indicating whether this user performs screening.
-   */
-  public void setNonScreeningUser(boolean isNonScreeningUser)
-  {
-    _isNonScreeningUser = isNonScreeningUser;
-  }
-
-  /**
    * Get the COMS-CRHBA permit number.
    * @return the COMS-CRHBA permit number
    */
@@ -573,15 +569,6 @@ public class ScreeningRoomUser extends ScreensaverUser
     }
     return ! role.isAdministrative();
   }
-
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>ScreeningRoomUser</code>.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected ScreeningRoomUser() {}
 
 
   // private constructor and instance methods

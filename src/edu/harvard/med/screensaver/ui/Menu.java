@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.apache.log4j.Logger;
 
@@ -47,6 +48,7 @@ public class Menu extends AbstractBackingBean
   private UserSearchResults<ScreeningRoomUser> _screenersBrowser;
   private ActivitySearchResults _activitiesBrowser;
   private ScreenDetailViewer _screenDetailViewer;
+  private UserViewer _userViewer;
 
 
   // public methods
@@ -67,7 +69,8 @@ public class Menu extends AbstractBackingBean
               UserSearchResults<ScreeningRoomUser> screenersBrowser,
               UserSearchResults<AdministratorUser> staffBrowser,
               ActivitySearchResults activitiesBrowser,
-              ScreenDetailViewer screenDetailViewer)
+              ScreenDetailViewer screenDetailViewer,
+              UserViewer userViewer)
   {
     _dao = dao;
     _librariesDao = librariesDao;
@@ -79,6 +82,7 @@ public class Menu extends AbstractBackingBean
     _screenersBrowser = screenersBrowser;
     _activitiesBrowser = activitiesBrowser;
     _screenDetailViewer = screenDetailViewer;
+    _userViewer = userViewer;
   }
 
   // JSF application methods
@@ -230,7 +234,13 @@ public class Menu extends AbstractBackingBean
   @UIControllerMethod
   public String addScreen()
   {
-    return _screenDetailViewer.editNewScreen(this);
+    return _screenDetailViewer.editNewScreen();
+  }
+  
+  @UIControllerMethod
+  public String addScreeningRoomUser()
+  {
+    return _userViewer.editNewUser(new ScreeningRoomUser());
   }
   
   @Override

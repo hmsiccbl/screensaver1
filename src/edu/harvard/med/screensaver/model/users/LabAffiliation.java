@@ -33,7 +33,7 @@ import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-public class LabAffiliation extends SemanticIDAbstractEntity
+public class LabAffiliation extends SemanticIDAbstractEntity implements Comparable<LabAffiliation>
 {
 
   // static fields
@@ -174,5 +174,14 @@ public class LabAffiliation extends SemanticIDAbstractEntity
   private void setAffiliationName(String affiliationName)
   {
     _affiliationName = affiliationName;
+  }
+
+
+  public int compareTo(LabAffiliation other)
+  {
+    if (other == null) {
+      return 1;
+    }
+    return other.getAffiliationName().compareTo(other.getAffiliationName());
   }
 }

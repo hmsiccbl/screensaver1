@@ -10,10 +10,13 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 import edu.harvard.med.screensaver.model.libraries.IsScreenable;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 
@@ -30,19 +33,19 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
 
   // the vocabulary
 
-  DEVELOPER("developer", true, "Special users that have permission to invoke development-related functionality and view low-level system information."),
-  READ_EVERYTHING_ADMIN("readEverythingAdmin", true, "Read-everything administrators will have the ability to view and search over data of all categories, except a screen\'s billing information. In addition, they will have the ability to generate various reports on screens."),
-  LIBRARIES_ADMIN("librariesAdmin", true, "Administrators that can create and modify libraries."),
-  USERS_ADMIN("usersAdmin", true, "Administrators that can create and modify user accounts."),
-  SCREENS_ADMIN("screensAdmin", true, "Administrators that can create and modify screens."),
-  SCREEN_RESULTS_ADMIN("screenResultsAdmin", true, "Administrators that can create and modify screen results."),
-  CHERRY_PICK_ADMIN("cherryPickAdmin", true, "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
-  BILLING_ADMIN("billingAdmin", true, "Administrators that can view, create, and modify billing information for a screen."),
-  SCREENING_ROOM_USER("screeningRoomUser", false, "Users that have permission to view and search over non-administrative information for certain data records."),
-  COMPOUND_SCREENING_ROOM_USER("compoundScreeningRoomUser", false, "Users that have permission to view and search over non-administrative information for all compound screens and any compound screen results which are demarked \'shareable\'."),
-  RNAI_SCREENING_ROOM_USER("rnaiScreeningRoomUser", false, "Users that have permission to view and search over non-administrative information for all RNAi screens."),
-  MEDICINAL_CHEMIST_USER("medicinalChemistUser", false, "Users that are medicinal chemists."),
-  GUEST_USER("guestUser", false, "External users that have permission to view our libraries and studies.");
+  READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read-everything administrators will have the ability to view and search over data of all categories, except a screen\'s billing information. In addition, they will have the ability to generate various reports on screens."),
+  LIBRARIES_ADMIN("librariesAdmin", READ_EVERYTHING_ADMIN, "Administrators that can create and modify libraries."),
+  USERS_ADMIN("usersAdmin", READ_EVERYTHING_ADMIN, "Administrators that can create and modify user accounts."),
+  SCREENS_ADMIN("screensAdmin", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screens."),
+  SCREEN_RESULTS_ADMIN("screenResultsAdmin", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screen results."),
+  CHERRY_PICK_ADMIN("cherryPickAdmin", READ_EVERYTHING_ADMIN, "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
+  BILLING_ADMIN("billingAdmin", SCREENS_ADMIN, "Administrators that can view, create, and modify billing information for a screen."),
+  SCREENING_ROOM_USER("screeningRoomUser", "Users that have permission to view and search over non-administrative information for certain data records."),
+  COMPOUND_SCREENING_ROOM_USER("compoundScreeningRoomUser", SCREENING_ROOM_USER, "Users that have permission to view and search over non-administrative information for all compound screens and any compound screen results which are demarked \'shareable\'."),
+  RNAI_SCREENING_ROOM_USER("rnaiScreeningRoomUser", SCREENING_ROOM_USER, "Users that have permission to view and search over non-administrative information for all RNAi screens."),
+  MEDICINAL_CHEMIST_USER("medicinalChemistUser", SCREENING_ROOM_USER, "Users that are medicinal chemists."),
+  GUEST_USER("guestUser", "External users that have permission to view our libraries and studies."),
+  DEVELOPER("developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information.")
   ;
 
   // static inner class
@@ -67,20 +70,41 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   // private instance field and constructor
 
   private String _roleName;
+  private String _displayableRoleName;
   private boolean _isAdministrative;
   private String _comment;
+  private ScreensaverUserRole _impliedRole;
+  private List<ScreensaverUserRole> _impliedRoles;
+
 
   /**
    * Constructs a <code>ScreensaverUserRole</code> vocabulary term.
    * @param value The value of the term.
    */
-  private ScreensaverUserRole(String roleName, boolean isAdministrative, String comment)
+  private ScreensaverUserRole(String roleName, ScreensaverUserRole impliedRole, String comment)
   {
     _roleName = roleName;
+    _displayableRoleName = StringUtils.capitalize(_roleName).replaceAll("(.)([A-Z])", "$1 $2");
     _comment = comment;
-    _isAdministrative = isAdministrative;
+    _impliedRole = impliedRole;
+    _impliedRoles = calcImpliedRoles();
   }
 
+  private ScreensaverUserRole(String roleName, String comment)
+  {
+    this(roleName, null, comment);
+  }
+
+  private List<ScreensaverUserRole> calcImpliedRoles()
+  {
+    List<ScreensaverUserRole> impliedRoles = new ArrayList<ScreensaverUserRole>();
+    ScreensaverUserRole impliedRole = getImpliedRole();
+    while (impliedRole != null && !impliedRoles.contains(impliedRole)) {
+      impliedRoles.add(impliedRole);
+      impliedRole = impliedRole.getImpliedRole();
+    }
+    return impliedRoles;
+  }
 
   // public instance methods
 
@@ -97,12 +121,27 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   {
     return _roleName;
   }
+  
+  public String getDisplayableRoleName()
+  {
+    return _displayableRoleName;
+  }
 
   public String getComment()
   {
     return _comment;
   }
-
+  
+  public ScreensaverUserRole getImpliedRole()
+  {
+    return _impliedRole;
+  }
+  
+  public List<ScreensaverUserRole> getImpliedRoles()
+  {
+    return _impliedRoles;
+  }
+  
   @Override
   public String toString()
   {
@@ -121,6 +160,6 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
 
   public boolean isAdministrative()
   {
-    return _isAdministrative;
+    return this == READ_EVERYTHING_ADMIN || _impliedRoles.contains(READ_EVERYTHING_ADMIN);
   }
 }

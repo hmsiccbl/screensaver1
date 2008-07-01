@@ -191,6 +191,10 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
   public boolean addScreensaverUserRole(ScreensaverUserRole role)
   {
     boolean result = _roles.add(role);
+    for (ScreensaverUserRole impliedRole : role.getImpliedRoles()) {
+      _roles.add(impliedRole);
+    }
+
     validateRoles();
     return result;
   }
@@ -202,7 +206,14 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
    */
   public boolean removeScreensaverUserRole(ScreensaverUserRole role)
   {
-    return _roles.remove(role);
+    boolean result = _roles.remove(role);
+    
+    for (ScreensaverUserRole otherRole : _roles) {
+      if (otherRole.getImpliedRoles().contains(role)) {
+        _roles.remove(otherRole);
+      }
+    }
+    return result;
   }
 
   /**

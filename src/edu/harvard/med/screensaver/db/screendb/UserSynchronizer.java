@@ -182,7 +182,7 @@ public class UserSynchronizer
 
     if (user == null) {
       user = new ScreeningRoomUser(firstName, lastName, email, phone,
-        mailingAddress, comments, ecommonsId, harvardId, classification, isNonScreeningUser);
+        mailingAddress, comments, ecommonsId, harvardId, classification);
       user.setDateCreated(dateCreated);
     }
     else {
@@ -194,15 +194,15 @@ public class UserSynchronizer
       user.setECommonsId(ecommonsId);
       user.setHarvardId(harvardId);
       user.setUserClassification(classification);
-      user.setNonScreeningUser(isNonScreeningUser);
     }
 
-    user.addScreensaverUserRole(ScreensaverUserRole.SCREENING_ROOM_USER);
-    if (isRnaiUser) {
-      user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
-    }
-    else {
-      user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+    if (!isNonScreeningUser) {
+      if (isRnaiUser) {
+        user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+      }
+      else {
+        user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+      }
     }
 
     // TODO: in Screensaver data model, only the lab head (whose entity also

@@ -47,7 +47,7 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
   {
     super.onSetUp();
 
-    _screenerSearchResults = new ScreenerSearchResults(genericEntityDao);
+    _screenerSearchResults = new ScreenerSearchResults(genericEntityDao, null);
     _screenerSearchResults.searchUsers();
     TableColumnManager<ScreeningRoomUser> columnManager = _screenerSearchResults.getColumnManager();
     _screenerSearchResults.getColumnManager().addCompoundSortColumns(columnManager.getColumn("User"),
@@ -93,11 +93,11 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     ((UserNameColumn<ScreeningRoomUser>) _screenerSearchResults.getColumnManager().getColumn("User"))
     .clearCriteria().addCriterion(criterion);
     DataTableModel<ScreeningRoomUser> dataTableModel = _screenerSearchResults.getDataTableModel();
-    
+
     assertEquals("filtered result size", 1, dataTableModel.getRowCount());
     _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(0);
     assertEquals("filtered data", _admin2.getFullNameLastFirst(), _screenerSearchResults.getCellValue());
-    
+
     _screenerSearchResults.resetFilter();
     assertEquals("full result size, after filter reset", 3, dataTableModel.getRowCount());
   }

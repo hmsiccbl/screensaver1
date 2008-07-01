@@ -195,6 +195,17 @@
 				</t:panelGrid>
 			</h:form>
 
+      <h:form id="usersForm"
+        title="User commands">
+        <t:panelGrid columns="1"
+          rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
+          <t:commandButton action="#{menu.addScreeningRoomUser}"
+            id="addScreeningRoomUserCommand" value="Add Screener"
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['usersAdmin']}"
+            styleClass="command" />
+        </t:panelGrid>
+      </h:form>
+
 		</t:panelGrid>
 
 	</s:roundedDiv>

@@ -14,8 +14,6 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 import org.apache.log4j.Logger;
 

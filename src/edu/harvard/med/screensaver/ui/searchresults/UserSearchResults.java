@@ -20,7 +20,9 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.joda.time.LocalDate;
 
@@ -29,7 +31,6 @@ import org.joda.time.LocalDate;
  * A {@link SearchResults} for {@link ScreensaverUser Users}.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchResults<E,Integer>
 {
@@ -41,7 +42,7 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
 
   private GenericEntityDAO _dao;
   private Class<E> _type;
-  /*private UserViewer _screenViewer;*/
+  private UserViewer _userViewer;
 
 
   // public constructor
@@ -54,12 +55,12 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
   }
 
   public UserSearchResults(Class<E> type,
-                           GenericEntityDAO dao
-                           /*, ScreensaverUserViewer userViewer*/)
+                           GenericEntityDAO dao,
+                           UserViewer userViewer)
   {
     _type = type;
     _dao = dao;
-    //_userViewer = userViewer;
+    _userViewer = userViewer;
   }
 
   public void searchUsers()
@@ -74,6 +75,20 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
   protected List<? extends TableColumn<E,?>> buildColumns()
   {
     ArrayList<EntityColumn<E,?>> columns = new ArrayList<EntityColumn<E,?>>();
+    columns.add(new IntegerEntityColumn<E>(
+      new PropertyPath<E>(_type, "userId"),
+      "User ID",
+      "The user ID",
+      TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(E user) { return user.getScreensaverUserId(); }
+
+      @Override
+      public Object cellAction(E activity) { return viewSelectedEntity(); }
+
+      @Override
+      public boolean isCommandLink() { return true; }
+    });
     columns.add(new UserNameColumn<E>(
       new RelationshipPath<E>(_type, ""),
       "User", "The name of the user (last, first)", TableColumn.UNGROUPED) {
@@ -102,6 +117,6 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
   @Override
   protected void setEntityToView(ScreensaverUser user)
   {
-//    _userViewer.viewScreensaverUser(user);
+    _userViewer.setUser(user);
   }
 }

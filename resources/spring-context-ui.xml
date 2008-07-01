@@ -157,6 +157,7 @@
     <constructor-arg ref="staffBrowser" />
     <constructor-arg ref="labActivitiesBrowser" />
     <constructor-arg ref="screenDetailViewer" />
+    <constructor-arg ref="userViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -560,7 +561,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults">
     <constructor-arg ref="genericEntityDao" />
-    <!-- constructor-arg ref="userViewer" /-->
+    <constructor-arg ref="userViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -570,18 +571,22 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults">
     <constructor-arg ref="genericEntityDao" />
-    <!-- constructor-arg ref="userViewer" /-->
+    <constructor-arg ref="userViewer" />
     <aop:scoped-proxy/>
   </bean>
 
-  <!--bean
+  <bean
     id="userViewer"
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.users.UserViewer">
+    <constructor-arg ref="userViewer" />
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="usersDao" />
+    <constructor-arg ref="screenersBrowser" />
+    <constructor-arg ref="staffBrowser" />
     <aop:scoped-proxy/>
-  </bean-->
+  </bean>
 
   <!-- === activities backing beans === -->
 
@@ -631,6 +636,8 @@
   <bean id="statusValueConverter" class="edu.harvard.med.screensaver.ui.util.StatusValueConverter" />
 
   <bean id="fundingSupportConverter" class="edu.harvard.med.screensaver.ui.util.FundingSupportConverter" />
+
+  <bean id="screeningRoomUserClassificationConverter" class="edu.harvard.med.screensaver.ui.util.ScreeningRoomUserClassificationConverter" />
 
 
   <!-- Development/Debug related beans -->

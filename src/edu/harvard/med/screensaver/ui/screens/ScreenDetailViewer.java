@@ -45,7 +45,6 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
@@ -87,7 +86,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
 
   private Screen _screen;
-  private AbstractBackingBean _returnToViewAfterEdit;
   private boolean _isEditMode = true;
   private boolean _isAdminViewMode = false;
   private boolean _isPublishableProtocolDetailsCollapsed = true;
@@ -418,12 +416,13 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
-  public String editNewScreen(AbstractBackingBean returnToViewerAfterEdit)
+  public String editNewScreen()
   {
     ScreensaverUser user = getScreensaverUser();
     if (!(user instanceof AdministratorUser &&
       ((AdministratorUser) user).isUserInRole(ScreensaverUserRole.SCREENS_ADMIN))) {
-      showMessage("unauthorizedOperation", "add a new screen");
+      showMessage("restrictedOperation", "add a new screen");
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
     Screen screen = new Screen();
@@ -431,7 +430,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     screen.setScreenNumber(_screenDao.findNextScreenNumber());
     setScreen(screen);
     _isEditMode = true;
-    _returnToViewAfterEdit = returnToViewerAfterEdit;
     return VIEW_SCREEN_DETAIL;
   }
 
@@ -446,8 +444,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   public String cancel()
   {
     _isEditMode = false;
-    if (_returnToViewAfterEdit != null) {
-      return _returnToViewAfterEdit.reload();
+    if (_screen.getEntityId() == null) {
+      return VIEW_MAIN;
     }
     return _screenViewer.viewScreen(_screen);
   }
@@ -771,7 +769,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
     super.resetView();
     _isEditMode = false;
-    _returnToViewAfterEdit = null;
     //_isAdminViewMode = false; // maintain this setting when viewing a new screen
     //_isPublishableProtocolDetailsCollapsed = true; // maintain this setting when viewing a new screen
     //_isBillingInformationCollapsed = true; // maintain this setting when viewing a new screen
