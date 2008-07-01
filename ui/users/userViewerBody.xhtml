@@ -22,11 +22,13 @@
 
 				<ss:property id="userId" label="User #"
 					description="The number used to uniquely identify the user"
-					value="#{userViewer.user.screensaverUserId}" />
+					value="#{userViewer.user.screensaverUserId}"
+					rendered="#{userViewer.readAdmin}" />
 
 				<ss:property id="dateCreated" label="Created"
 					description="The date the user was originally recorded in Screensaver"
-					value="#{userViewer.user.dateCreated}" type="Date" />
+					value="#{userViewer.user.dateCreated}" type="Date"
+					rendered="#{userViewer.readAdmin}" />
 
 				<ss:property id="fullName" label="Name"
 					description="The name and email of the user"
@@ -51,16 +53,19 @@
 				<ss:property id="ecommonsId" label="eCommons ID"
 					description="The user's eCommons ID "
 					value="#{userViewer.user.ECommonsId}"
+					rendered="#{userViewer.readAdmin}"
 					editable="#{userViewer.editMode}" />
 
 				<ss:property id="harvardId" label="Havard ID"
 					description="The user " value="#{userViewer.user.harvardId}"
+					rendered="#{userViewer.readAdmin}"
 					editable="#{userViewer.editMode}" />
 
 				<ss:property id="harvardIdExpiration" type="Date"
 					label="Harvard ID Initial Expiration Date"
 					description="The date when the user's Harvard ID will expire"
 					value="#{userViewer.user.harvardIdExpirationDate}"
+					rendered="#{userViewer.readAdmin}"
 					editable="#{userViewer.editMode}">
 					<!-- TODO: ui:define name="valueFooter">
 					  <t:outputText id="harvardIdExpirationWarning" value="#{userViewer.harvardIdExpired ? 'Expired!' : userViewer.harvardIdDaysUntilExpiration}"/>
@@ -133,7 +138,8 @@
 
 				<ss:property id="roles" label="Roles"
 					description="The roles of this user"
-					value="#{userViewer.user.screensaverUserRoles}">
+					value="#{userViewer.user.screensaverUserRoles}"
+					rendered="#{userViewer.readAdmin}">
 					<ui:define name="valueHeader">
 						<t:outputText value="Non-screening user of our facility"
 							styleClass="dataText errorMessage"

@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 
 /**
@@ -49,6 +50,7 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
   // instance fields
 
   private StudyViewer _studyViewer;
+  private UserViewer _userViewer;
   private GenericEntityDAO _dao;
 
 
@@ -61,9 +63,12 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
   {
   }
 
-  public StudySearchResults(StudyViewer studyViewer, GenericEntityDAO dao)
+  public StudySearchResults(StudyViewer studyViewer, 
+                            UserViewer userViewer, 
+                            GenericEntityDAO dao)
   {
     _studyViewer = studyViewer;
+    _userViewer = userViewer;
     _dao = dao;
   }
 
@@ -108,13 +113,13 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
     });
     columns.add(new UserNameColumn<Screen>(
       new RelationshipPath(Screen.class, "labHead"),
-      "Lab Head", "The head of the lab performing the study", TableColumn.UNGROUPED) {
+      "Lab Head", "The head of the lab performing the study", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(Screen study) { return study.getLabHead(); }
     });
     columns.add(new UserNameColumn<Screen>(
       new RelationshipPath(Screen.class, "leadScreener"),
-      "Study Head", "The scientist primarily responsible for running the study", TableColumn.UNGROUPED) {
+      "Study Head", "The scientist primarily responsible for running the study", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(Screen study) { return study.getLeadScreener(); }
     });

@@ -42,6 +42,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
@@ -61,6 +62,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
   // instance fields
 
   private ScreenViewer _screenViewer;
+  private UserViewer _userViewer;
   protected GenericEntityDAO _dao;
 
 
@@ -74,9 +76,11 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
   }
 
   public ScreenSearchResults(ScreenViewer screenViewer,
+                             UserViewer userViewer,
                              GenericEntityDAO dao)
   {
     _screenViewer = screenViewer;
+    _userViewer = userViewer;
     _dao = dao;
   }
 
@@ -153,7 +157,8 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     });
     columns.add(new UserNameColumn<Screen>(
       new RelationshipPath(Screen.class, "labHead"),
-      "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED) {
+      "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED, _userViewer) {
+
       @Override
       public ScreensaverUser getUser(Screen screen) { return screen.getLabHead(); }
     });
@@ -166,7 +171,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     columns.get(columns.size() - 1).setVisible(false);
     columns.add(new UserNameColumn<Screen>(
       new RelationshipPath(Screen.class, "leadScreener"),
-      "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED) {
+      "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(Screen screen) { return screen.getLeadScreener(); }
     });
@@ -267,8 +272,8 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       "Funding Supports", "The list of funding supports for the screen",
       TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
-      public List<String> getCellValue(Screen screen) 
-      { 
+      public List<String> getCellValue(Screen screen)
+      {
         return new ArrayList<String>(
           org.apache.commons.collections.CollectionUtils.collect(screen.getFundingSupports(), new Transformer() {
             public Object transform(Object e) { return ((FundingSupport) e).getValue(); }
@@ -276,7 +281,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    
+
 
 //    TableColumnManager<Screen> columnManager = getColumnManager();
 //    columnManager.addCompoundSortColumns(columnManager.getColumn("Lab Head"),

@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 
@@ -91,26 +92,60 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
     });
     columns.add(new UserNameColumn<E>(
       new RelationshipPath<E>(_type, ""),
-      "User", "The name of the user (last, first)", TableColumn.UNGROUPED) {
+      "Name", "The full name of the user (last, first)", TableColumn.UNGROUPED, _userViewer) {
       @Override
       protected ScreensaverUser getUser(ScreensaverUser user)
       {
         return user;
       }
     });
+    columns.add(new TextEntityColumn<E>(
+      new PropertyPath<E>(_type, "email"),
+      "Email", "The email of the user", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(ScreensaverUser user) { return user.getEmail(); }
+    });
+    columns.add(new TextEntityColumn<E>(
+      new PropertyPath<E>(_type, "phone"),
+      "Phone", "The phone number for this user", TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public String getCellValue(ScreensaverUser user) { return user.getPhone(); }
+    });
+    columns.add(new TextEntityColumn<E>(
+      new PropertyPath<E>(_type, "mailingAddress"),
+      "Mailing Address", "The mailing address of the user", TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public String getCellValue(ScreensaverUser user) { return user.getMailingAddress(); }
+    });
+    columns.add(new TextEntityColumn<E>(
+      new PropertyPath<E>(_type, "ECommonsId"),
+      "eCommons ID", "The eCommons ID of the user", TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public String getCellValue(ScreensaverUser user) { return user.getECommonsId(); }
+    });
+    columns.add(new TextEntityColumn<E>(
+      new PropertyPath<E>(_type, "loginId"),
+      "Login ID", "The login ID of the user", TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public String getCellValue(ScreensaverUser user) { return user.getLoginId(); }
+    });
+    columns.add(new TextEntityColumn<E>(
+      new PropertyPath<E>(_type, "harvardId"),
+      "Harvard ID", "The Harvard ID of the user", TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public String getCellValue(ScreensaverUser user) { return user.getHarvardId(); }
+    });
+    columns.add(new DateEntityColumn<E>(
+      new PropertyPath<E>(_type, "harvardIdExpirationDate"),
+      "Harvard ID Initial Expiration Date", "The date this user's Harvard ID is initially set to expire", TableColumn.ADMIN_COLUMN_GROUP) {
+      protected LocalDate getDate(E user) { return user.getHarvardIdExpirationDate(); }
+    });
     columns.add(new DateEntityColumn<E>(
       new PropertyPath<E>(_type, "dateCreated"),
       "Date Created",
-      "The date the user's account was created", TableColumn.UNGROUPED) {
+      "The date the user's account was created", TableColumn.ADMIN_COLUMN_GROUP) {
       public LocalDate getDate(ScreensaverUser user) { return user.getDateCreated().toLocalDate(); }
     });
-
-//    TableColumnManager<ScreensaverUser> columnManager = getColumnManager();
-//    columnManager.addCompoundSortColumns(columnManager.getColumn("User"),
-//                                         columnManager.getColumn("Date Created"));
-//    columnManager.addCompoundSortColumns(columnManager.getColumn("Date Created"),
-//                                         columnManager.getColumn("User"));
-
     return columns;
   }
 

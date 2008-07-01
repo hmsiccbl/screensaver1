@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.ui.util.VocabularlyConverter;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 
@@ -54,6 +55,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
 
   protected GenericEntityDAO _dao;
   protected ActivityViewer _activityViewer;
+  protected UserViewer _userViewer;
   private Class<A> _type;
 
 
@@ -67,10 +69,12 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   }
 
   public ActivitySearchResults(ActivityViewer activityViewer,
+                               UserViewer userViewer,
                                Class<A> type,
                                GenericEntityDAO dao)
   {
     _activityViewer = activityViewer;
+    _userViewer = userViewer;
     _type = type;
     _dao = dao;
   }
@@ -153,7 +157,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
     columns.get(columns.size() - 1).setVisible(showAdminStatusFields());
     columns.add(new UserNameColumn<A>(
       new RelationshipPath<A>(_type, "performedBy"),
-      "Performed By", "The person that performed the activity", TableColumn.UNGROUPED) {
+      "Performed By", "The person that performed the activity", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(A activity) { return activity.getPerformedBy(); }
     });

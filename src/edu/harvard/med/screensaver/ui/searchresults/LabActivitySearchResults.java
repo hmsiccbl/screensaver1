@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.apache.log4j.Logger;
 
@@ -53,9 +54,10 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
 
   public LabActivitySearchResults(ActivityViewer activityViewer,
                                   ScreenViewer screenViewer,
+                                  UserViewer userViewer,
                                   GenericEntityDAO dao)
   {
-    super(activityViewer, LabActivity.class, dao);
+    super(activityViewer, userViewer, LabActivity.class, dao);
     _screenViewer = screenViewer;
   }
 

@@ -29,12 +29,14 @@ import edu.harvard.med.screensaver.ui.table.column.entity.FixedDecimalEntityColu
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.joda.time.LocalDate;
 
 public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellVolumeAdjustment,Integer>
 {
   private CherryPickRequestViewer _cherryPickRequestViewer;
+  private UserViewer _userViewer;
   private GenericEntityDAO _dao;
 
   /**
@@ -45,9 +47,11 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
   }
 
   public WellVolumeAdjustmentSearchResults(CherryPickRequestViewer cherryPickRequestViewer,
+                                           UserViewer userViewer,
                                            GenericEntityDAO dao)
   {
     _cherryPickRequestViewer = cherryPickRequestViewer;
+    _userViewer = userViewer;
     _dao = dao;
   }
 
@@ -77,7 +81,7 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
     performedByPropertyPaths.add(new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "activity.performedBy", "firstName"));
     columns.add(new UserNameColumn<WellVolumeAdjustment>(
       new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "activity.performedBy"),
-      "Performed By", "The person that performed the volume adjustment", TableColumn.UNGROUPED) {
+      "Performed By", "The person that performed the volume adjustment", TableColumn.UNGROUPED, _userViewer) {
       @Override
       protected ScreensaverUser getUser(WellVolumeAdjustment wva)
       {

@@ -305,7 +305,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   {
     // TODO: implement as aspect
     if (user.isRestricted()) {
-      showMessage("restrictedEntity", "User " + user.getEntityId());
+      showMessage("restrictedEntity", "user " + user.getFullNameFirstLast());
       log.warn("user unauthorized to view " + user);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }

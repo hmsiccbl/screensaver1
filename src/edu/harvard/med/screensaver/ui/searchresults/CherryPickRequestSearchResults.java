@@ -35,6 +35,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VolumeEntityColumn;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.joda.time.LocalDate;
 
@@ -55,6 +56,7 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
 
   private CherryPickRequestViewer _cprViewer;
   private ScreenViewer _screenViewer;
+  private UserViewer _userViewer;
   private GenericEntityDAO _dao;
 
 
@@ -69,10 +71,12 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
 
   public CherryPickRequestSearchResults(CherryPickRequestViewer cprViewer,
                                         ScreenViewer screenViewer,
+                                        UserViewer userViewer,
                                         GenericEntityDAO dao)
   {
     _cprViewer = cprViewer;
     _screenViewer = screenViewer;
+    _userViewer = userViewer;
     _dao = dao;
   }
 
@@ -159,7 +163,7 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
     });
     columns.add(new UserNameColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "requestedBy"),
-      "Requested By", "The person that requested the cherry picks", TableColumn.UNGROUPED) {
+      "Requested By", "The person that requested the cherry picks", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getRequestedBy(); }
     });
@@ -209,13 +213,13 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
 
     columns.add(new UserNameColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen.labHead"),
-      "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED) {
+      "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLabHead(); }
     });
     columns.add(new UserNameColumn<CherryPickRequest>(
       new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen.leadScreener"),
-      "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED) {
+      "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLeadScreener(); }
     });
