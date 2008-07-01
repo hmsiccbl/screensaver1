@@ -82,7 +82,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
                          List<? extends TableColumn<R,?>> columns,
                          RowsPerPageSelector rowsPerPageSelector)
   {
-    _columnManager = new TableColumnManager<R>(columns);
+    _columnManager = new TableColumnManager<R>(columns, getCurrentScreensaverUser());
     _columnManager.addObserver(this);
     _rowsPerPageSelector = rowsPerPageSelector;
 

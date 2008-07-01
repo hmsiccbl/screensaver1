@@ -26,6 +26,8 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.table.ColumnVisibilityChangedEvent;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -58,6 +60,7 @@ public class TableColumnManager<R> extends Observable implements Observer
 
   // instance data
 
+  private CurrentScreensaverUser _currentScreensaverUser;
   private List<TableColumn<R,?>> _columns = new ArrayList<TableColumn<R,?>>();
   private List<TableColumn<R,?>> _visibleColumns = new ArrayList<TableColumn<R,?>>();
   private ListDataModel _columnModel; // contains visible columns only
@@ -68,10 +71,13 @@ public class TableColumnManager<R> extends Observable implements Observer
   private Map<String,TableColumn<R,?>> _name2Column = new HashMap<String,TableColumn<R,?>>();
 
 
+
   // public constructors and methods
 
-  public TableColumnManager(List<? extends TableColumn<R,?>> columns)
+  public TableColumnManager(List<? extends TableColumn<R,?>> columns,
+                            CurrentScreensaverUser currentScreensaverUser)
   {
+    _currentScreensaverUser = currentScreensaverUser;
     setColumns(columns);
   }
 
@@ -124,8 +130,10 @@ public class TableColumnManager<R> extends Observable implements Observer
       TreeNodeBase root = new TreeNodeBase("root", "Columns", false);
       Map<String,TreeNode> groups = new HashMap<String,TreeNode>();
       for (TableColumn<R,?> column : _columns) {
-        TreeNode groupNode = getOrCreateGroupNode(root, groups, column.getGroup());
-        groupNode.getChildren().add(new SelectableColumnTreeNode<R>(column));
+        if (!isColumnRestricted(column)) {
+          TreeNode groupNode = getOrCreateGroupNode(root, groups, column.getGroup());
+          groupNode.getChildren().add(new SelectableColumnTreeNode<R>(column));
+        }
       }
       _columnsSelectionTree = new TreeModelBase(root);
     }
@@ -403,7 +411,7 @@ public class TableColumnManager<R> extends Observable implements Observer
       // we ignore the event's take on added & removed columns, since we can determine this reliably by inspecting each column
       _visibleColumns.clear();
       for (TableColumn<R,?> column : getAllColumns()) {
-        if (column.isVisible()) {
+        if (column.isVisible() && !isColumnRestricted(column)) {
           _visibleColumns.add(column);
         }
       }
@@ -413,6 +421,13 @@ public class TableColumnManager<R> extends Observable implements Observer
       setChanged();
       notifyObservers(event);
     }
+  }
+
+  private boolean isColumnRestricted(TableColumn<?,?> column)
+  {
+    if (!column.isAdministrative()) { return false; }
+    if (_currentScreensaverUser != null && _currentScreensaverUser.getScreensaverUser().isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) { return false; }
+    return true;
   }
 
   private TreeNode getOrCreateGroupNode(TreeNodeBase root,

@@ -40,7 +40,7 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   private static Logger log = Logger.getLogger(TableColumn.class);
 
   public static final String UNGROUPED = "";
-  /** The Administrative group of columns is available only to readAdmin role.  Enforced in searchResults.jspf. */
+  /** The Administrative group of columns is available only to readAdmin role.  Enforced by {@link TableColumnManager#updateVisibleColumns}. */
   public static final String ADMIN_COLUMN_GROUP = "Administrative";
 
 
@@ -372,6 +372,11 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   public String getGroup()
   {
     return _group;
+  }
+
+  public boolean isAdministrative()
+  {
+    return getGroup().equals(ADMIN_COLUMN_GROUP);
   }
 
   // private methods
