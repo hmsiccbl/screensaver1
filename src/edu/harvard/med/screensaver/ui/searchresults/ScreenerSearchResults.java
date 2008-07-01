@@ -12,11 +12,15 @@ package edu.harvard.med.screensaver.ui.searchresults;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
+import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserClassificationConverter;
 
 public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
 {
@@ -41,6 +45,17 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
       public String getCellValue(ScreeningRoomUser user)
       {
         return user.getLabName();
+      }
+    });
+    columns.add(4, new VocabularyEntityColumn<ScreeningRoomUser,ScreeningRoomUserClassification>(
+      new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "userClassification"),
+      "User Classification", "The user's classsification", TableColumn.UNGROUPED,
+      new ScreeningRoomUserClassificationConverter(),
+      ScreeningRoomUserClassification.values()) {
+      @Override
+      public ScreeningRoomUserClassification getCellValue(ScreeningRoomUser user)
+      {
+        return user.getUserClassification();
       }
     });
     return columns;
