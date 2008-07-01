@@ -32,6 +32,11 @@
     </tag>
 
     <tag>
+        <tag-name>labName</tag-name>
+        <source>../users/labName.xhtml</source>
+    </tag>
+
+    <tag>
       <tag-name>property</tag-name>
       <source>../util/property.xhtml</source>
     </tag>

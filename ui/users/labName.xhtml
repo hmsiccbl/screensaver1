@@ -7,21 +7,18 @@
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox">
 
-<!-- facelet params:
+	<!-- facelet params:
 	       - id
 	       - user
 	 -->
 
 <ui:component>
 	<span class="propertyValue">
-	 <t:commandLink id="#{id}User" value="#{user.fullNameLastFirst}"
-		action="#{userViewer.viewUser}" styleClass="entityLink"
-		style="margin-right: 4px">
-		<f:param name="entityId" value="#{user.entityId}" />
-	</t:commandLink> 
-	<t:outputText rendered="#{! empty user.email}"
-		value="&lt;#{user.email}&gt;" /> 
-  </span>
+		<t:commandLink id="#{id}LabName" value="#{user.labName}"
+			action="#{userViewer.viewUser}" styleClass="entityLink" style="margin-right: 4px" >
+			<f:param name="entityId" value="#{user.lab.entityId}" />
+	</t:commandLink>
+	</span>
 </ui:component>
 
 </html>

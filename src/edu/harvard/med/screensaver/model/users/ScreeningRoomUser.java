@@ -136,14 +136,18 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   /**
    * Get the ScreeningRoomUser that is the head of this user's lab. If this user
-   * is the lab head, return this user.
+   * is the lab head, return null.
+   * 
+   * @see #getLab()
+   * @see #getLabName()
+   * 
    * @return the lab head; null if this user is the head of her own lab.
    */
-  @ManyToOne(fetch=FetchType.LAZY)
-  @JoinColumn(name="labHeadId", nullable=true)
-  @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_head")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="labMembers")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "labHeadId", nullable = true)
+  @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_lab_head")
+  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty = "labMembers")
   public ScreeningRoomUser getLabHead()
   {
     return _labHead;
@@ -516,10 +520,32 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     _comsCrhbaPermitPrincipalInvestigator = comsCrhbaPermitPrincipalInvestigator;
   }
+  
+  /**
+   * Get the ScreeningRoomUser that represents the lab of this user, even if
+   * this user is the head of the lab.
+   * 
+   * @see #getLabHead()
+   * @return the ScreeningRoomUser that represents the lab of this user
+   * @motivation provide a convenient way to determine the ScreeningRoomUser
+   *             that represents the lab, keeping this logic out of client code
+   */
+  @Transient
+  public ScreeningRoomUser getLab()
+  {
+    if (isHeadOfLab()) {
+      return this;
+    }
+    else {
+      return getLabHead().getLab();
+    }
+  }
 
   /**
-   * Get the lab name. This is a combination of the name of the lab head, last and first, and
-   * the lab affiliation name.
+   * Get the name of the lab this user is associated with. The user may be
+   * either a lab head or a lab member. This is a combination of the name of
+   * the lab head, last and first, and the lab affiliation name.
+   * 
    * @return the lab name
    */
   @Transient
@@ -529,7 +555,8 @@ public class ScreeningRoomUser extends ScreensaverUser
       StringBuilder labName = new StringBuilder(getFullNameLastFirst());
       String labAffiliation = getLabAffiliationName();
       if (labAffiliation.length() > 0) {
-        labName.append(" - ").append(labAffiliation);
+        labName.append(" - ")
+               .append(labAffiliation);
       }
       return labName.toString();
     }

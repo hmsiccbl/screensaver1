@@ -50,10 +50,7 @@
 		description="The name of the lab carrying out the screen"
 		value="#{screen.labHead}" editable="#{editable}">
 		<ui:define name="data">
-		  <t:panelGroup>
-		  <ss:user user="#{screen.labHead}" />
-		  <t:outputText value="(#{screen.labHead.labAffiliationName})" styleClass="dataText" />
-		  </t:panelGroup>
+			<ss:labName user="#{screen.labHead}" />
 		</ui:define>
 		<ui:define name="editableData">
 		  <ui:insert name="editableLabHead" >

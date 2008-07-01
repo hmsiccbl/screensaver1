@@ -103,6 +103,9 @@
 					description="The name of the user's current lab"
 					value="#{userViewer.user.labName}"
 					editable="#{userViewer.editMode}">
+					<ui:define name="data">
+						<ss:labName user="#{userViewer.user}" />
+					</ui:define>
 					<ui:define name="editableData">
 						<t:selectOneMenu id="labNameMenu"
 							value="#{userViewer.labName.value}"
