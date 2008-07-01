@@ -16,12 +16,12 @@ import javax.faces.convert.ConverterException;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * Base class for Converters that convert between an AbstractEntity and its entity ID.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 public class AbstractEntityConverter<E extends AbstractEntity> implements Converter
 {
@@ -38,22 +38,16 @@ public class AbstractEntityConverter<E extends AbstractEntity> implements Conver
                             UIComponent uiComponent,
                             String entityId) throws ConverterException
   {
-    if (_dao == null) {
-      FacesContext facesCtx = FacesContext.getCurrentInstance();
-      _dao = (GenericEntityDAO) facesCtx.getApplication()
-                           .getVariableResolver()
-                           .resolveVariable(facesCtx, "genericEntityDao");
-    }
-    if (entityId == null) {
+    if (StringUtils.isEmpty(entityId)) {
       return null;
     }
     try {
-      E entity = _dao.findEntityById(_entityType,
-                                     Integer.parseInt(entityId));
+      E entity = getDao().findEntityById(_entityType,
+                                         Integer.parseInt(entityId));
       if (entity == null) {
-        throw new ConverterException("cannot find ScreeningRoomUser for id="
-                                     + entityId + " for component "
-                                     + uiComponent.getId());
+        throw new ConverterException("no such " + _entityType.getSimpleName() + 
+                                     " with id=" + entityId + 
+                                     " for component " + uiComponent.getId());
       }
       return entity;
     }
@@ -62,20 +56,28 @@ public class AbstractEntityConverter<E extends AbstractEntity> implements Conver
     }
   }
 
+  private GenericEntityDAO getDao()
+  {
+    if (_dao == null) {
+      FacesContext facesCtx = FacesContext.getCurrentInstance();
+      _dao = (GenericEntityDAO) facesCtx.getApplication().getVariableResolver().resolveVariable(facesCtx, "genericEntityDao");
+    }
+    return _dao;
+  }
+
   @SuppressWarnings("unchecked")
-  public String getAsString(FacesContext arg0, UIComponent arg1, Object entity)
+  public String getAsString(FacesContext arg0, UIComponent arg1, Object value)
     throws ConverterException
   {
-    if (entity == null) {
-      return null;
+    if (value == null) {
+      return "";
     }
-    if (!(_entityType.isInstance(entity))) {
-      throw new ConverterException(_entityType.getSimpleName()
-                                   + " object expected: cannot convert object of type "
-                                   + entity.getClass()
-                                   + " to ID string for component "
-                                   + arg1.getId());
+    if (value.equals("")) {
+      return ""; // handle conversion of "empty" SelectItem.value, which is not allowed to be null
     }
-    return ((E) entity).getEntityId().toString();
+    if (!(_entityType.isInstance(value))) {
+      throw new ConverterException("expected type " + _entityType);
+    }
+    return ((E) value).getEntityId().toString();
   }
 }
