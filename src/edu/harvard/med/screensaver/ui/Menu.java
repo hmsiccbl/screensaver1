@@ -192,7 +192,7 @@ public class Menu extends AbstractBackingBean
   {
     if (getScreensaverUser() instanceof AdministratorUser &&
       (getScreensaverUser().isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
-      getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_ADMIN))) {
+      getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN))) {
       _cherryPickRequestsBrowser.searchAll();
     }
     else {
@@ -222,7 +222,7 @@ public class Menu extends AbstractBackingBean
     ScreensaverUser user = getScreensaverUser();
     if (user instanceof AdministratorUser &&
       (user.isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
-      user.isUserInRole(ScreensaverUserRole.CHERRY_PICK_ADMIN))) {
+      user.isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN))) {
       _activitiesBrowser.searchAllActivities();
     }
     else {

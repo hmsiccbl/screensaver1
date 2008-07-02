@@ -183,10 +183,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   public boolean isScreener()
   {
-    return isUserInRole(ScreensaverUserRole.SCREENING_ROOM_USER) ||
-    // the above should be sufficient, but we haven't settled on (or enforced) convention that one of the below roles ensures the existence of the above role
-    isUserInRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER) ||
-    isUserInRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+    return isUserInRole(ScreensaverUserRole.SCREENING_ROOM_USER);
   }
 
   // TODO: consider moving to the Login Bean

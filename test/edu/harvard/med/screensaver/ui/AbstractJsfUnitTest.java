@@ -120,7 +120,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
     user.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
     user.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
     user.addScreensaverUserRole(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
-    user.addScreensaverUserRole(ScreensaverUserRole.CHERRY_PICK_ADMIN);
+    user.addScreensaverUserRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN);
     user.addScreensaverUserRole(ScreensaverUserRole.BILLING_ADMIN);
     _dao.persistEntity(user);
     log.debug("created test user " + user);

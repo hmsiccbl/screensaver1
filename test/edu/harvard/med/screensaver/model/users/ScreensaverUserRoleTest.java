@@ -32,7 +32,7 @@ public class ScreensaverUserRoleTest extends TestCase
     assertEquals(Arrays.asList(ScreensaverUserRole.SCREENING_ROOM_USER),
                  ScreensaverUserRole.RNAI_SCREENING_ROOM_USER.getImpliedRoles());
     assertEquals(Arrays.asList(ScreensaverUserRole.SCREENING_ROOM_USER),
-                 ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER.getImpliedRoles());
+                 ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER.getImpliedRoles());
     assertEquals(Collections.emptyList(),
                  ScreensaverUserRole.SCREENING_ROOM_USER.getImpliedRoles());
   }
@@ -44,12 +44,12 @@ public class ScreensaverUserRoleTest extends TestCase
     assertTrue(ScreensaverUserRole.SCREENS_ADMIN.isAdministrative());
     assertTrue(ScreensaverUserRole.BILLING_ADMIN.isAdministrative());
     assertFalse(ScreensaverUserRole.SCREENING_ROOM_USER.isAdministrative());
-    assertFalse(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER.isAdministrative());
+    assertFalse(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER.isAdministrative());
   }
   
   public void testDisplayableRoleName()
   {
-    assertEquals("Compound Screening Room User", ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER.getDisplayableRoleName());
+    assertEquals("Compound Screening Room User", ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER.getDisplayableRoleName());
   }
 
 }

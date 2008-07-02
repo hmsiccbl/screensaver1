@@ -146,7 +146,7 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     _validUser.setECommonsId(TEST_VALID_ECOMMONS_USER_LOGIN);
     _validUser.setLoginId(TEST_VALID_SCREENSAVER_USER_LOGIN);
     _validUser.updateScreensaverPassword(new String(TEST_VALID_SCREENSAVER_PASSWORD));
-    _validUser.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+    _validUser.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
     _validUser.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     genericEntityDao.saveOrUpdateEntity(_validUser);
   }
@@ -275,8 +275,8 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     assertEquals("principals count", 3, _subject.getPrincipals().size());
     assertTrue("subject contains \"user\" Principal",
                _subject.getPrincipals().contains(new ScreensaverUserPrincipal(_validUser)));
-    assertTrue("subject contains user role compoundScreeningRoomUser Principal",
-                 _subject.getPrincipals().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
+    assertTrue("subject contains user role smallMoleculeScreeningRoomUser Principal",
+                 _subject.getPrincipals().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER));
     assertTrue("subject contains user role rnaiScreeningRoomUser Principal",
                _subject.getPrincipals().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER));
     assertFalse("subject does not contain user role userAdmin Principal",

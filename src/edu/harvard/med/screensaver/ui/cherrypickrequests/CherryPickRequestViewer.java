@@ -107,7 +107,7 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
 
   private static Logger log = Logger.getLogger(CherryPickRequestViewer.class);
 
-  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.CHERRY_PICK_ADMIN;
+  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN;
 
   private static final String VALIDATE_SELECTED_PLATES_FOR_LIQUID_TRANSFER = "for_liquid_transfer";
   private static final String VALIDATE_SELECTED_PLATES_FOR_DOWNLOAD = "for_download";

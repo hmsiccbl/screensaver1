@@ -169,7 +169,7 @@ public class ScreenSynchronizer
       user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
     }
     else if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-      user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+      user.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
     }
   }
 

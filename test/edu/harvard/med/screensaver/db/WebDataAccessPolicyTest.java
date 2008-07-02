@@ -81,10 +81,10 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        users[0] = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-        users[1] = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-        users[2] = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-        users[3] = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+        users[0] = makeUserWithRoles(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
+        users[1] = makeUserWithRoles(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
+        users[2] = makeUserWithRoles(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
+        users[3] = makeUserWithRoles(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
         users[1].setLabHead(users[0]);
         users[2].setLabHead(users[0]);
       }
@@ -155,8 +155,8 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
   public void testScreenPermissions()
   {
     ScreeningRoomUser rnaiUser = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
-    ScreeningRoomUser compoundUser = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
-    ScreeningRoomUser compoundRnaiUser = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER, 
+    ScreeningRoomUser compoundUser = makeUserWithRoles(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
+    ScreeningRoomUser compoundRnaiUser = makeUserWithRoles(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER, 
                                                            ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
 
     Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
@@ -238,8 +238,8 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush();
 
-        ScreensaverUserRole role = screenType.equals(ScreenType.SMALL_MOLECULE) ? ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER : ScreensaverUserRole.RNAI_SCREENING_ROOM_USER;
-        ScreensaverUserRole otherRole = screenType.equals(ScreenType.SMALL_MOLECULE) ? ScreensaverUserRole.RNAI_SCREENING_ROOM_USER : ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER;
+        ScreensaverUserRole role = screenType.equals(ScreenType.SMALL_MOLECULE) ? ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER : ScreensaverUserRole.RNAI_SCREENING_ROOM_USER;
+        ScreensaverUserRole otherRole = screenType.equals(ScreenType.SMALL_MOLECULE) ? ScreensaverUserRole.RNAI_SCREENING_ROOM_USER : ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER;
         users[0] = makeUserWithRoles(role); // lead screener for screen 115
         users[1] = makeUserWithRoles(role); // collaborator for screen 115
         users[2] = makeUserWithRoles(role); // lab member with above users, but not associated with screen 115, and no deposited screen result data
@@ -377,7 +377,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         users[2] = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER); // lab member with above users, but not associated with screen 115
         users[3] = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER); // lab head of above users, not otherwise associated with screen 115
         users[4] = makeUserWithRoles(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER); // unaffiliated with previous users
-        users[5] = makeUserWithRoles(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER); // unaffiliated with previous users, compound screener role only
+        users[5] = makeUserWithRoles(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER); // unaffiliated with previous users, compound screener role only
         
         users[3].addLabMember(users[0]);
         users[3].addLabMember(users[1]);

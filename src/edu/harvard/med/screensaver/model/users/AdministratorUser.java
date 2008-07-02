@@ -129,12 +129,10 @@ public class AdministratorUser extends ScreensaverUser
    */
   protected AdministratorUser() {}
 
-    @Override
+  @Override
   protected boolean validateRole(ScreensaverUserRole role)
   {
-    // TODO: reinstate once production database has been corrected: some admins have *User roles
-    //return role.isAdministrative();
-    return true;
+    return role.isAdministrative();
   }
 
 

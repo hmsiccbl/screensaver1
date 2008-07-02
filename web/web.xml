@@ -438,7 +438,7 @@
 
     <auth-constraint>
       <role-name>guestUser</role-name>
-      <role-name>compoundScreeningRoomUser</role-name>
+      <role-name>smallMoleculeScreeningRoomUser</role-name>
       <role-name>rnaiScreeningRoomUser</role-name>
       <role-name>readEverythingAdmin</role-name>
       <role-name>developer</role-name>
@@ -459,7 +459,7 @@
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>compoundScreeningRoomUser</role-name>
+      <role-name>smallMoleculeScreeningRoomUser</role-name>
       <role-name>rnaiScreeningRoomUser</role-name>
       <role-name>readEverythingAdmin</role-name>
       <role-name>developer</role-name>
@@ -489,12 +489,12 @@
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>cherryPickAdmin</web-resource-name>
+      <web-resource-name>cherryPickRequestsAdmin</web-resource-name>
       <url-pattern>/cherryPickRequests/admin/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>cherryPickAdmin</role-name>
+      <role-name>cherryPickRequestsAdmin</role-name>
     </auth-constraint>
 
     <user-data-constraint>

@@ -582,7 +582,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   @Transient
   public boolean isCompoundUser()
   {
-    return getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
   }
 
 

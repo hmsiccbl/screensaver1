@@ -23,9 +23,9 @@ public enum ScreeningRoomUserClassification implements VocabularyTerm
 
   // the vocabulary
   
-  PRINCIPAL_INVESTIGATOR("Principal Investigator"),
+  PRINCIPAL_INVESTIGATOR("Principal Investigator"), // only Principal Investigators can be lab heads
   GRADUATE_STUDENT("Graduate Student"),
-  ICCB_FELLOW("ICCB Fellow"),
+  ICCB_FELLOW("ICCB Fellow"), // legacy value, deprecated
   RESEARCH_ASSISTANT("Research Assistant"),
   POSTDOC("Postdoc"),
   ICCBL_NSRB_STAFF("ICCB-L/NSRB staff"),

@@ -79,7 +79,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
   private String _phone;
   private String _mailingAddress;
   private String _comments;
-  private Set<ScreensaverUserRole> _roles = new HashSet<ScreensaverUserRole>(); //ValidatingScreensaverUserRoleSet();
+  private Set<ScreensaverUserRole> _roles = new HashSet<ScreensaverUserRole>();
   private String _loginId;
   private String _digestedPassword;
   private String _eCommonsId;
@@ -166,20 +166,12 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
    * @return the set of user roles that this user belongs to
    */
   @Column(name = "screensaverUserRole", nullable = false)
-  @JoinTable(name = "screensaverUserRoleType", joinColumns = @JoinColumn(name = "screensaverUserId"))
+  @JoinTable(name = "screensaverUserRole", joinColumns = @JoinColumn(name = "screensaverUserId"))
   @org.hibernate.annotations.CollectionOfElements
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.users.ScreensaverUserRole$UserType")
   @org.hibernate.annotations.ForeignKey(name = "fk_screensaver_user_role_type_to_screensaver_user")
-  @OrderBy("screensaverUserRole")
   public Set<ScreensaverUserRole> getScreensaverUserRoles()
   {
-    // TODO: reinstate this logic, but not this way, since it causes Hibernate
-    // to believe the entity has been modified, and is thus updated at flush
-    // time; this is turn causes erroneous concurrent mod exceptions to occur
-    // throughout the application.
-    // if (! (_roles instanceof ValidatingScreensaverUserRoleSet)) {
-    // _roles = new ValidatingScreensaverUserRoleSet(_roles);
-    // }
     return _roles;
   }
 
@@ -630,38 +622,4 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
       }
     }
   }
-
-  /**
-   * A set of screensaver user roles that validates roles every time a role is added. Makes
-   * sure administrative roles are only assigned to {@link AdministratorUser AdministratorUsers},
-   * and screener roles are only assigned to {@link ScreensaverUser ScreensaverUsers}.
-   * <p>
-   * Implementation notes:
-   * <p>
-   * Andrew (@) makes a good point that this might gum up the works when
-   * persisting - it may possibly cause hibernate to consider the role set dirty when it
-   * actually is clean, forcing database save ops. Which could be pretty painful, since various
-   * operations load all the users into the session. We should watch out for this and consider
-   * reworking.
-   * <p>
-   * I was considering using AOP to implement a whole validation layer. This would give us the
-   * ability to replace this <code>ValidatingScreensaverUserRoleSet</code> approach, as well as
-   * removing various hacks and special in the test suite for working around data model
-   * integrity (in situations where something else entirely is being tested).
-   */
-  private class ValidatingScreensaverUserRoleSet extends HashSet<ScreensaverUserRole>
-  {
-    private static final long serialVersionUID = 1L;
-    public ValidatingScreensaverUserRoleSet() {}
-    public ValidatingScreensaverUserRoleSet(Set<ScreensaverUserRole> roles)
-    {
-      addAll(roles);
-    }
-    public boolean add(ScreensaverUserRole role)
-    {
-      boolean isAdded = super.add(role);
-      validateRoles();
-      return isAdded;
-    }
-  };
 }

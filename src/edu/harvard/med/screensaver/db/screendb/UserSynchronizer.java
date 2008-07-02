@@ -201,7 +201,7 @@ public class UserSynchronizer
         user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
       }
       else {
-        user.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+        user.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
       }
     }
 

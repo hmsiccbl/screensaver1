@@ -51,10 +51,10 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
       public void runTransaction()
       {
         ScreensaverUser user1 = new ScreeningRoomUser("First1", "Last1", userEmail1);
-        user1.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+        user1.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
         genericEntityDao.saveOrUpdateEntity(user1);
         ScreensaverUser user2 = new ScreeningRoomUser("First2", "Last2", userEmail2);
-        user2.addScreensaverUserRole(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER);
+        user2.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
         genericEntityDao.saveOrUpdateEntity(user2);
       }
     });
@@ -64,11 +64,11 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
       {
         ScreensaverUser user1 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail1);
         assertEquals(user1.getScreensaverUserRoles().size(), 1);
-        assertTrue(user1.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
+        assertTrue(user1.getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER));
         
         ScreensaverUser user2 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail2);
         assertEquals(user2.getScreensaverUserRoles().size(), 1);
-        assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.COMPOUND_SCREENING_ROOM_USER));
+        assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER));
         
         assertEquals(user1.getScreensaverUserRoles().iterator().next(),
                      user2.getScreensaverUserRoles().iterator().next());

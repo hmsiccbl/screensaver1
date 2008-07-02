@@ -156,7 +156,7 @@ public class BoutrosAnnotationImporter
                                    email);
       user.setLoginId(loginId);
       user.updateScreensaverPassword(password);
-      user.addScreensaverUserRole(ScreensaverUserRole.GUEST_USER);
+      user.addScreensaverUserRole(ScreensaverUserRole.SCREENING_ROOM_USER);
       user.setLabAffiliation(labAffiliation);
     }
     else {
