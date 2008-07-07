@@ -36,6 +36,9 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.AffiliationCategory;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -53,6 +56,14 @@ public class MakeDummyEntities
                                  first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu");
   }
 
+  public static LabHead makeDummyLabHead(int screenNumber, String first, String last)
+  {
+    return new LabHead(first,
+                       last + "_" + screenNumber,
+                       first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu",
+                       new LabAffiliation("affiliation " + screenNumber, AffiliationCategory.HMS));
+  }
+
   public static Screen makeDummyScreen(int screenNumber, ScreenType screenType)
   {
     return makeDummyScreen(screenNumber, screenType, StudyType.IN_VITRO);
@@ -67,10 +78,10 @@ public class MakeDummyEntities
                                        ScreenType screenType,
                                        StudyType studyType)
   {
-    ScreeningRoomUser labHead = makeDummyUser(screenNumber, "Lab", "Head");
+    LabHead labHead = makeDummyLabHead(screenNumber, "Lab", "Head");
     ScreeningRoomUser leadScreener = makeDummyUser(screenNumber, "Lead", "Screener");
-    Screen screen = new Screen(labHead,
-                               leadScreener,
+    Screen screen = new Screen(leadScreener,
+                               labHead,
                                screenNumber,
                                screenType,
                                studyType,

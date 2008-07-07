@@ -290,7 +290,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
         ScreeningRoomUser labMember = new ScreeningRoomUser("Lab",
                                                             "Member",
                                                             "lab_member@hms.harvard.edu");
-        screen.getLabHead().addLabMember(labMember);
+        labMember.setLab(screen.getLabHead().getLab());
         screen.addKeyword("keyword1");
         screen.addKeyword("keyword2");
         genericEntityDao.saveOrUpdateEntity(labMember);
@@ -317,9 +317,9 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     Screen screen = screenOut[0];
     try {
       assertEquals("keywords size", 2, screen.getKeywords().size());
-      assertEquals("labHead last name", "Screener_1", screen.getLabHead().getLastName());
-      assertEquals("labHead.LabMembers size", 1, screen.getLabHead().getLabMembers().size());
-      assertEquals("labHead.LabMembers[0].lastName", "Member", screen.getLabHead().getLabMembers().iterator().next().getLastName());
+      assertEquals("labHead last name", "Head_1", screen.getLabHead().getLastName());
+      assertEquals("labHead.labMembers size", 1, screen.getLabHead().getLab().getLabMembers().size());
+      assertEquals("labHead.labMembers[0].lastName", "Member", screen.getLabHead().getLab().getLabMembers().iterator().next().getLastName());
     }
     catch (LazyInitializationException e) {
       e.printStackTrace();

@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
@@ -95,20 +96,24 @@ public class BoutrosAnnotationImporter
       {
         try {
           LabAffiliation labAffiliation = findOrCreateLabAffiliation(dao);
-          ScreeningRoomUser labHead = findOrCreateUser("Michael",
-                                                       "Boutros",
-                                                       LAB_HEAD_EMAIL,
-                                                       "mboutros",
-                                                       studyUserAccountPassword,
-                                                       labAffiliation,
-                                                       dao);
+          LabHead labHead = (LabHead)
+          findOrCreateUser("Michael",
+                           "Boutros",
+                           LAB_HEAD_EMAIL,
+                           "mboutros",
+                           studyUserAccountPassword,
+                           true, 
+                           labAffiliation,
+                           dao);
           ScreeningRoomUser leadScreener = findOrCreateUser("Thomas",
                                                             "Horn",
                                                             SCREENER_EMAIL,
                                                             "thorn",
                                                             studyUserAccountPassword,
-                                                            labAffiliation,
+                                                            false,
+                                                            null,
                                                             dao);
+          leadScreener.setLab(labHead.getLab());
           Screen screen = new Screen(leadScreener,
                                      labHead,
                                      STUDY_NUMBER,
@@ -124,6 +129,7 @@ public class BoutrosAnnotationImporter
                                                                 RNAI_GLOBAL_EMAIL,
                                                                 RNAIGLOBAL_LOGIN,
                                                                 rnaiGlobalUserPassword,
+                                                                false,
                                                                 null,
                                                                 dao);
           rnaiGlobalMember.setComments("RNAi Global group account");
@@ -144,6 +150,7 @@ public class BoutrosAnnotationImporter
                                                     String email,
                                                     String loginId,
                                                     String password,
+                                                    boolean isLabHead,
                                                     LabAffiliation labAffiliation,
                                                     GenericEntityDAO dao)
   {
@@ -151,13 +158,15 @@ public class BoutrosAnnotationImporter
                                                       "email",
                                                       email);
     if (user == null) {
-      user = new ScreeningRoomUser(firstName,
-                                   lastName,
-                                   email);
+      if (isLabHead) {
+        user = new LabHead(firstName, lastName, email, labAffiliation);
+      }
+      else {
+        user = new ScreeningRoomUser(firstName, lastName, email);
+      }
       user.setLoginId(loginId);
       user.updateScreensaverPassword(password);
       user.addScreensaverUserRole(ScreensaverUserRole.SCREENING_ROOM_USER);
-      user.setLabAffiliation(labAffiliation);
     }
     else {
       log.warn("user with email " + email +

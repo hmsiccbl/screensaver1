@@ -50,6 +50,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
@@ -274,6 +275,11 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   public boolean visit(Study study)
   {
     return true;
+  }
+
+  public boolean visit(LabHead labHead)
+  {
+    return false;
   }
 }
 

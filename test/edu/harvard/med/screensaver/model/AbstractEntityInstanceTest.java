@@ -70,6 +70,7 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -1202,6 +1203,10 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       }
       if (type.equals(WellType.class)) {
         return WellType.LIBRARY_CONTROL;
+      }
+      if (type.equals(ScreeningRoomUserClassification.class)) {
+        // avoid selecting SRUC.PRINCIPAL_INVESTIGATOR, since this value cannot be used for non-lab head ScreeningRoomUsers
+        return ScreeningRoomUserClassification.ICCBL_NSRB_STAFF;
       }
       try {
         Method valuesMethod = type.getMethod("values");

@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.commons.cli.ParseException;
@@ -30,11 +32,14 @@ public class IccbCompoundsStudyCreator
 
   // static members
 
+
   private static Logger log = Logger.getLogger(IccbCompoundsStudyCreator.class);
 
   private static final int STUDY_NUMBER = 100001;
   private static final String TITLE = "Annotations on Suitability of Compounds: Miscellaneous Sources";
   private static final String SUMMARY = "Annotations for ICCB-L compounds, from sources other than Kyungae Lee and Greg Cuny";
+  private static final String LAB_AFFILIATION_NAME = "Harvard Medical School, Institute of Chemistry and Cell Biology";
+
   public static void main(String[] args)
   {
     CommandLineApplication app = new CommandLineApplication(args);
@@ -54,7 +59,11 @@ public class IccbCompoundsStudyCreator
             screenDao.deleteStudy(study);
           }
 
-          ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu");
+          LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class, "affiliationName", LAB_AFFILIATION_NAME);
+          if (labAffiliation == null) {
+            throw new RuntimeException("expected lab affiliation " + LAB_AFFILIATION_NAME + " to exist");
+          }
+          LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu", true, labAffiliation);
           ScreeningRoomUser leadScreener = labHead;
 
           study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);

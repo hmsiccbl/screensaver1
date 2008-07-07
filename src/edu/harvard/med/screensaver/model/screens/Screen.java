@@ -52,6 +52,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -90,7 +91,7 @@ public class Screen extends Study
   private Integer _version;
   private String _title;
   private ScreeningRoomUser _leadScreener; // should rename
-  private ScreeningRoomUser _labHead;
+  private LabHead _labHead;
   private Set<ScreeningRoomUser> _collaborators = new HashSet<ScreeningRoomUser>();
   private Set<Publication> _publications = new HashSet<Publication>();
   private String _url;
@@ -151,7 +152,7 @@ public class Screen extends Study
    */
   public Screen(
     ScreeningRoomUser leadScreener,
-    ScreeningRoomUser labHead,
+    LabHead labHead,
     Integer screenNumber,
     ScreenType screenType,
     String title)
@@ -182,7 +183,7 @@ public class Screen extends Study
    */
   public Screen(
     ScreeningRoomUser leadScreener,
-    ScreeningRoomUser labHead,
+    LabHead labHead,
     Integer screenNumber,
     ScreenType screenType,
     StudyType studyType,
@@ -220,7 +221,7 @@ public class Screen extends Study
    */
   public Screen(
     ScreeningRoomUser leadScreener,
-    ScreeningRoomUser labHead,
+    LabHead labHead,
     Integer screenNumber,
     ScreenType screenType,
     StudyType studyType,
@@ -329,15 +330,12 @@ public class Screen extends Study
    * @return the lab head
    */
   @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="labHeadId", nullable=false)
+  @JoinColumn(name="labHeadId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensHeaded")
-  public ScreeningRoomUser getLabHead()
+  public LabHead getLabHead()
   {
     return _labHead;
   }
@@ -346,7 +344,7 @@ public class Screen extends Study
    * Set the lab head.
    * @param labHead the new lab head
    */
-  public void setLabHead(ScreeningRoomUser labHead)
+  public void setLabHead(LabHead labHead)
   {
     if (isHibernateCaller()) {
       _labHead = labHead;

@@ -36,7 +36,7 @@
 							styleClass="dataText" />
 					<t:div>
 						<t:outputText value="Lab:" styleClass="label" />
-						<t:outputText value="#{studyDetailViewer.study.labHead.labName}"
+						<t:outputText value="#{studyDetailViewer.study.labHead.lab.labName}"
 							styleClass="dataText" />
 						<t:outputText value="&#160;&#160;Study Lead:" styleClass="label"
 							escape="false" />
@@ -96,7 +96,7 @@
 					title="The name of the lab carrying out the study" />
 				<h:panelGroup>
 					<t:outputText id="labName"
-						value="#{studyDetailViewer.study.labHead.labName}"
+						value="#{studyDetailViewer.study.labHead.lab.labName}"
 						styleClass="dataText" style="margin-right: 4px" />
 					<t:outputText value=" (" styleClass="dataText" />
 					<h:outputLink
@@ -137,7 +137,7 @@
 							<t:outputText value="#{collaborator.fullNameLastFirst}"
 								styleClass="dataText" />
 							<t:outputText value=" (" styleClass="dataText" />
-							<t:outputText value="#{collaborator.labName}"
+							<t:outputText value="#{collaborator.lab.labName}"
 								styleClass="dataText" />
 							<t:outputText value=")" styleClass="dataText" />
 						</t:column>

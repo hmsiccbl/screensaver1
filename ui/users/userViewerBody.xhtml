@@ -106,8 +106,8 @@
 
 				<ss:property id="labName" label="Lab Name"
 					description="The name of the user's current lab"
-					value="#{userViewer.user.labName}"
-					editable="#{userViewer.editMode}">
+					value="#{userViewer.user.lab.labName}"
+					editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}">
 					<ui:define name="data">
 						<ss:labName user="#{userViewer.user}" />
 					</ui:define>
@@ -123,9 +123,8 @@
 				<ss:property id="labAffiliation"
 					label="#{'Lab Affiliation'}"
 					description="The organization the user is affiliated with (usually via his/her lab)"
-					value="#{userViewer.user.labAffiliation.affiliationName}"
-					rendered="#{(!userViewer.user.headOfLab &amp;&amp; !empty userViewer.user.labAffiliation &amp;&amp; userViewer.user.labAffiliation.entityId != userViewer.user.labHead.labAffiliation.entityId) || userViewer.editMode}"
-					editable="#{userViewer.editMode}">
+					value="#{userViewer.user.lab.labAffiliation.affiliationName}"
+					editable="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}">
 					<ui:define name="editableData">
             <t:selectOneMenu id="labAffiliationMenu"
               value="#{userViewer.labAffiliation.value}"

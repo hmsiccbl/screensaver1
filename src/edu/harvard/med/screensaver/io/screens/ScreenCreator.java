@@ -24,6 +24,8 @@ import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -87,7 +89,7 @@ public class ScreenCreator
 
       final String labHeadFirstName = app.getCommandLineOptionValue("hf");
       final String labHeadLastName = app.getCommandLineOptionValue("hl");
-      final String labHeadEmail= app.getCommandLineOptionValue("he");
+      final String labHeadEmail = app.getCommandLineOptionValue("he");
 
       final String leadScreenerFirstName = app.getCommandLineOptionValue("lf");
       final String leadScreenerLastName = app.getCommandLineOptionValue("ll");
@@ -96,10 +98,10 @@ public class ScreenCreator
       dao.doInTransaction(new DAOTransaction() {
         public void runTransaction() {
           try {
-            ScreeningRoomUser labHead = findOrCreateScreeningRoomUser(dao, labHeadFirstName, labHeadLastName, labHeadEmail);
-            ScreeningRoomUser leadScreener = findOrCreateScreeningRoomUser(dao, leadScreenerFirstName, leadScreenerLastName, leadScreenerEmail);
-            if (leadScreener.getLabHead() == null) {
-              leadScreener.setLabHead(labHead);
+            LabHead labHead = (LabHead) findOrCreateScreeningRoomUser(dao, labHeadFirstName, labHeadLastName, labHeadEmail, true, null);
+            ScreeningRoomUser leadScreener = findOrCreateScreeningRoomUser(dao, leadScreenerFirstName, leadScreenerLastName, leadScreenerEmail, false, null);
+            if (leadScreener.getLab().getLabHead() == null) {
+              leadScreener.setLab(labHead.getLab());
               log.info("set lab head for lead screener");
             }
 
@@ -152,9 +154,11 @@ public class ScreenCreator
   }
 
   public static ScreeningRoomUser findOrCreateScreeningRoomUser(GenericEntityDAO dao,
-                                                                 String firstName,
-                                                                 String lastName,
-                                                                 String email)
+                                                                String firstName,
+                                                                String lastName,
+                                                                String email,
+                                                                boolean isLabHead,
+                                                                LabAffiliation labAffiliation)
     throws Exception
   {
     Map<String,Object> props = new HashMap<String,Object>();
@@ -169,7 +173,13 @@ public class ScreenCreator
       log.info("found existing user " + users.get(0) + " for " + firstName + " " + lastName + " (" + email + ")");
       return users.get(0);
     }
-    ScreeningRoomUser newUser = new ScreeningRoomUser(firstName, lastName, email);
+    ScreeningRoomUser newUser;
+    if (isLabHead) {
+      newUser = new LabHead(firstName, lastName, email, labAffiliation);
+    }
+    else {
+      newUser = new ScreeningRoomUser(firstName, lastName, email);
+    }
     log.info("created new user " + newUser + " for " + firstName + " " + lastName + " (" + email + ")");
     return newUser;
   }

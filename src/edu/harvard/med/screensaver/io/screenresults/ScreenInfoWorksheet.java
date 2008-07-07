@@ -47,7 +47,7 @@ public class ScreenInfoWorksheet implements ScreenResultWorkbookSpecification
     }
     row2Value.put(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING, screenResult.getDateCreated());
     row2Value.put(ScreenInfoRow.EMAIL, screen.getLabHead().getEmail());
-    row2Value.put(ScreenInfoRow.LAB_AFFILIATION, screen.getLabHead().getLabAffiliationName());
+    row2Value.put(ScreenInfoRow.LAB_AFFILIATION, screen.getLabHead().getLab().getLabAffiliationName());
 
     for (ScreenInfoRow screenInfoRow : ScreenInfoRow.values()) {
       HSSFRow row = HSSFCellUtil.getRow(screenInfoRow.ordinal() + SCREENINFO_FIRST_DATA_ROW_INDEX, sheet);

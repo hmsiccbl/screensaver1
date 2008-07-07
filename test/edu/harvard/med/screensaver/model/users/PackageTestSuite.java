@@ -35,6 +35,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(LabAffiliationTest.class);
     addTestSuite(ScreensaverUserTest.class);
     addTestSuite(ScreeningRoomUserTest.class);
+    addTestSuite(LabHeadTest.class);
     addTestSuite(AdministratorUserTest.class);
   }
 }

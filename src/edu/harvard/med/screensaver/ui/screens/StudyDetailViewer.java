@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.EntityViewer;
@@ -53,7 +54,7 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
   private UsersDAO _usersDao;
 
   private Study _study;
-  private UISelectOneEntityBean<ScreeningRoomUser> _labName;
+  private UISelectOneEntityBean<LabHead> _labName;
   private UISelectOneEntityBean<ScreeningRoomUser> _leadScreener;
   private UISelectOneBean<ScreeningRoomUser> _newCollaborator;
   private boolean _isPanelCollapsed;
@@ -115,15 +116,13 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
                                         _study.getScreenType() == null);
   }
 
-  public UISelectOneBean<ScreeningRoomUser> getLabName()
+  public UISelectOneBean<LabHead> getLabName()
   {
     if (_labName == null) {
-      SortedSet<ScreeningRoomUser> labHeads = _usersDao.findAllLabHeads();
-      if (_study.getLabHead() == null) {
-        labHeads.add(null);
-      }
-      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(labHeads, _study.getLabHead(), _dao) {
-        protected String getLabel(ScreeningRoomUser t) { return t == null ? "" : t.getLabName(); }
+      SortedSet<LabHead> labHeads = _usersDao.findAllLabHeads();
+      labHeads.add(null);
+      _labName = new UISelectOneEntityBean<LabHead>(labHeads, _study.getLabHead(), _dao) {
+        protected String getLabel(LabHead t) { return t == null ? "" : t.getLab().getLabName(); }
       };
     }
     return _labName;
@@ -228,13 +227,20 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
         ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
         if (labHead != null) {
           leadScreenerCandidates.add(labHead);
-          leadScreenerCandidates.addAll(labHead.getLabMembers());
+          leadScreenerCandidates.addAll(labHead.getLab()
+                                               .getLabMembers());
         }
-        if (_study.getLeadScreener() == null) {
-          leadScreenerCandidates.add(null);
-        }
-        _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates, _study.getLeadScreener(), _dao) {
-          protected String getLabel(ScreeningRoomUser t) { return t == null ? "" : t.getFullNameLastFirst(); }
+        // at least allow the existing lead screener to be selected, even if we
+        // don't yet know the labHead; and if we don't even know the lead
+        // screener yet, allow null
+        leadScreenerCandidates.add(_study.getLeadScreener());
+        _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates,
+                                                                     _study.getLeadScreener(),
+                                                                     _dao) {
+          protected String getLabel(ScreeningRoomUser t)
+          {
+            return t == null ? "" : t.getFullNameLastFirst();
+          }
         };
       }
     });

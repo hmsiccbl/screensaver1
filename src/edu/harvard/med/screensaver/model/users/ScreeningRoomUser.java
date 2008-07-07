@@ -25,6 +25,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
@@ -35,13 +36,13 @@ import org.joda.time.LocalDate;
 /**
  * A Hibernate entity bean representing a screening room user.
  *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @PrimaryKeyJoinColumn(name="screensaverUserId")
 @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_screensaver_user")
-@org.hibernate.annotations.Proxy()//lazy=false)
+@org.hibernate.annotations.Proxy
 public class ScreeningRoomUser extends ScreensaverUser
 {
 
@@ -53,16 +54,15 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   // private instance data
 
-  private ScreeningRoomUser _labHead;
-  private Set<ScreeningRoomUser> _labMembers = new HashSet<ScreeningRoomUser>();
-  private LabAffiliation _labAffiliation;
   private Set<ChecklistItem> _checklistItems = new HashSet<ChecklistItem>();
-  private Set<Screen> _screensHeaded = new HashSet<Screen>();
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensCollaborated = new HashSet<Screen>();
-  private ScreeningRoomUserClassification _userClassification;
+  protected ScreeningRoomUserClassification _userClassification;
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
+
+  private LabHead _labHead;
+  protected Lab _lab;
 
 
   // public constructor
@@ -135,159 +135,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get the ScreeningRoomUser that is the head of this user's lab. If this user
-   * is the lab head, return null.
-   * 
-   * @see #getLab()
-   * @see #getLabName()
-   * 
-   * @return the lab head; null if this user is the head of her own lab.
-   */
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "labHeadId", nullable = true)
-  @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_lab_head")
-  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty = "labMembers")
-  public ScreeningRoomUser getLabHead()
-  {
-    return _labHead;
-  }
-
-  /**
-   * Set the lab head.
-   * @param labHead the new lab head
-   */
-  public void setLabHead(ScreeningRoomUser labHead)
-  {
-    // hibernate callers do not need maintenance of bi-directional integrity. they also crash
-    // when you call getLabMembers from within setLabHead
-    if (isHibernateCaller()) {
-      _labHead = labHead;
-      return;
-    }
-    if (labHead != null && labHead.equals(_labHead)) {
-      return;
-    }
-    if (labHead != null && !getLabMembers().isEmpty()) {
-      throw new DataModelViolationException("a lab head (with lab members) cannot itself have a lab head");
-    }
-    if (_labHead != null) {
-      _labHead.getLabMembers().remove(this);
-    }
-    _labHead = labHead;
-    if (_labHead != null) {
-      _labHead.getLabMembers().add(this);
-    }
-  }
-
-  /**
-   * Return true iff this user is the head of a lab. Users are considered lab heads whenever
-   * they do not themselves have any lab head.
-   * @return true iff this user is the head of a lab
-   * @motivation cannot name this method isLabHead or java.beans.BeanInfo classes get confused
-   * about the appropriate type and getter method for property labHead, screwing up our model
-   * unit tests
-   */
-  @Transient
-  public boolean isHeadOfLab()
-  {
-    return _labHead == null;
-  }
-
-  /**
-   * Get the set of lab members. If this ScreeningRoomUser is also the lab head, the result
-   * will <i>not</i> contain this ScreeningRoomUser (i.e., the lab head is not considered a
-   * lab member).
-   * <p>
-   * Note there is no corresponding <code>removeLabMember(ScreeningRoomUser)</code> here. This
-   * is intentional, as opposed to other places in the code where the absence of such a remove
-   * method is just sloppy. <code>b.setLabHead(a)</code> should really be called instead of
-   * <code>a.removeLabMember(b)</code>, so we can appropriately set the new lab head for
-   * <code>b</code>. It probably makes sense to not remove a lab member unless and until that
-   * screener is a member of another lab. But adding a <code>previousLabMembers</code> property
-   * is probably overkill :)
-   *
-   * @return the set of lab members
-   */
-  @OneToMany(
-    mappedBy="labHead",
-    fetch=FetchType.LAZY
-  )
-  public Set<ScreeningRoomUser> getLabMembers()
-  {
-    return _labMembers;
-  }
-
-  /**
-   * Add the lab member.
-   * @param labMember the lab member to add
-   * @return true iff the screening room user did not already have the lab member
-   */
-  public boolean addLabMember(ScreeningRoomUser labMember)
-  {
-    if (getLabMembers().add(labMember)) {
-      labMember.setLabHead(this);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Get the lab affiliation. The lab affiliation should always be present,
-   * whether this user is a lab head or a lab member:
-   * <ul>
-   * <li>This allows a new user to be created even if her lab head is not yet
-   * known at the time of creation.</li>
-   * <li>For billing purposes sometimes a non-lab head user will have a
-   * different lab affiliation, although this is very rare.</li>
-   * </ul>
-   *
-   * @return the lab affiliation
-   */
-  @ManyToOne(fetch=FetchType.EAGER,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="labAffiliationId", nullable=true)
-  @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_lab_affiliation")
-  //@org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE
-  })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
-  public LabAffiliation getLabAffiliation()
-  {
-    return _labAffiliation;
-  }
-
-  /**
-   * Set the lab affiliation. Update the lab name.
-   * @param labAffiliation the new lab affiliation
-   */
-  public void setLabAffiliation(LabAffiliation labAffiliation)
-  {
-    _labAffiliation = labAffiliation;
-  }
-
-  /**
-   * Get the name of the lab affiliation.
-   * @return the lab affiliation name
-   */
-  @Transient
-  public String getLabAffiliationName()
-  {
-    LabAffiliation labAffiliation;
-    if (isHeadOfLab()) {
-      labAffiliation = getLabAffiliation();
-    }
-    else {
-      labAffiliation = getLabHead().getLabAffiliation();
-    }
-    if (labAffiliation == null) {
-      return "";
-    }
-    return labAffiliation.getAffiliationName();
-  }
-
-  /**
    * Get the set of checklist items.
    * @return the checklist items
    */
@@ -357,35 +204,6 @@ public class ScreeningRoomUser extends ScreensaverUser
       deactivationInitials);
     _checklistItems.add(checklistItem);
     return checklistItem;
-  }
-
-  /**
-   * Get the set of screens for which this user was the lab head.
-   * @return the set of screens for which this user was the lab head
-   */
-  @OneToMany(
-    mappedBy="labHead",
-    fetch=FetchType.LAZY
-  )
-  @OrderBy("screenNumber")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="screenHeaded")
-  public Set<Screen> getScreensHeaded()
-  {
-    return _screensHeaded;
-  }
-
-  /**
-   * Add the screens for which this user was the lab head.
-   * @param screenHeaded the screens for which this user was the lab hea to add
-   * @return true iff the screening room user did not already have the screens for which this user was the lab hea
-   */
-  public boolean addScreenHeaded(Screen screenHeaded)
-  {
-    if (_screensHeaded.add(screenHeaded)) {
-      screenHeaded.setLabHead(this);
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -480,6 +298,9 @@ public class ScreeningRoomUser extends ScreensaverUser
   public void setUserClassification(ScreeningRoomUserClassification userClassification)
   {
     assert userClassification != null : "user classification must be non-null";
+    if (userClassification == ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR) {
+      throw new BusinessRuleViolationException("cannot change the classification of a non-lab head to principal investigator");
+    }
     _userClassification = userClassification;
   }
 
@@ -520,50 +341,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     _comsCrhbaPermitPrincipalInvestigator = comsCrhbaPermitPrincipalInvestigator;
   }
-  
-  /**
-   * Get the ScreeningRoomUser that represents the lab of this user, even if
-   * this user is the head of the lab.
-   * 
-   * @see #getLabHead()
-   * @return the ScreeningRoomUser that represents the lab of this user
-   * @motivation provide a convenient way to determine the ScreeningRoomUser
-   *             that represents the lab, keeping this logic out of client code
-   */
-  @Transient
-  public ScreeningRoomUser getLab()
-  {
-    if (isHeadOfLab()) {
-      return this;
-    }
-    else {
-      return getLabHead().getLab();
-    }
-  }
-
-  /**
-   * Get the name of the lab this user is associated with. The user may be
-   * either a lab head or a lab member. This is a combination of the name of
-   * the lab head, last and first, and the lab affiliation name.
-   * 
-   * @return the lab name
-   */
-  @Transient
-  public String getLabName()
-  {
-    if (isHeadOfLab()) {
-      StringBuilder labName = new StringBuilder(getFullNameLastFirst());
-      String labAffiliation = getLabAffiliationName();
-      if (labAffiliation.length() > 0) {
-        labName.append(" - ")
-               .append(labAffiliation);
-      }
-      return labName.toString();
-    }
-    else {
-      return getLabHead().getLabName();
-    }
-  }
 
   /**
    * Get whether this user is an RNAi screener.
@@ -601,16 +378,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   // private constructor and instance methods
 
   /**
-   * Set the lab members.
-   * @param labMembers the new lab members
-   * @motivation for hibernate
-   */
-  private void setLabMembers(Set<ScreeningRoomUser> labMembers)
-  {
-    _labMembers = labMembers;
-  }
-
-  /**
    * Set the checklist items.
    * @param checklistItems the new checklist items
    * @motivation for hibernate
@@ -618,16 +385,6 @@ public class ScreeningRoomUser extends ScreensaverUser
   private void setChecklistItems(Set<ChecklistItem> checklistItems)
   {
     _checklistItems = checklistItems;
-  }
-
-  /**
-   * Set the screens for which this user was the lab head.
-   * @param screensHeaded the new screens for which this user was the lab head
-   * @motivation for hibernate
-   */
-  private void setScreensHeaded(Set<Screen> screensHeaded)
-  {
-    _screensHeaded = screensHeaded;
   }
 
   /**
@@ -648,5 +405,105 @@ public class ScreeningRoomUser extends ScreensaverUser
   private void setScreensCollaborated(Set<Screen> screensCollaborated)
   {
     _screensCollaborated = screensCollaborated;
+  }
+
+  // public lab methods
+
+  /**
+   * Get the Lab to which this user belongs. This is an abstraction of the
+   * labHead relationship, as the labHead "is" the lab, but that concept is
+   * confusing from the perspective of client code, so we provide an explicit
+   * Lab object instead.
+   *
+   * @return the ScreeningRoomUser that represents the lab of this user; since a
+   *         non-lab head is allowed to not have a lab at all, in this case a
+   *         Lab will be returned that has a null labHead and empty labName and
+   *         labAffiliation; modifying its labMembers collection will have not
+   *         effect on persisted data.
+   * @motivation prevents client code from being able to set properties that
+   *             should only be set on the labHead (e.g. labAffiliation).
+   */
+  @Transient
+  public Lab getLab()
+  {
+    if (_lab == null) {
+      if (_labHead != null) {
+        _lab = _labHead.getLab();
+      }
+      else {
+        _lab = new Lab(null);
+      }
+    }
+    return _lab;
+  }
+
+  /**
+   * Set or change the lab of a non-lab head (i.e., non-Prinicipal Investigator) screening
+   * room user.
+   *
+   * @param lab the new lab; null if the user is no longer a member of any lab
+   */
+  public void setLab(Lab lab)
+  {
+    if (isHeadOfLab()) {
+      throw new DataModelViolationException("cannot modify the lab of a lab head");
+    }
+
+    // remove from existing lab
+    getLab().getLabMembers().remove(this);
+
+    _lab = lab;
+    _labHead = null;
+
+    // add to new lab
+    getLab().getLabMembers().add(this);
+    _labHead = getLab().getLabHead();
+  }
+
+  /**
+   * Return true iff this user is the head of a lab. Users are considered a lab
+   * heads if they have
+   * {@link ScreeningRoomUserClassification#PRINCIPAL_INVESTIGATOR}
+   * classification.
+   *
+   * @return true iff this user is the head of a lab
+   * @motivation cannot name this method isLabHead or java.beans.BeanInfo
+   *             classes get confused about the appropriate type and getter
+   *             method for property labHead, screwing up our model unit tests
+   */
+  @Transient
+  public boolean isHeadOfLab()
+  {
+    return false;
+  }
+
+
+  // private lab methods
+
+  /**
+   * Get the ScreeningRoomUser that is the head of this user's lab, which may be
+   * this user.
+   *
+   * @see #getLab()
+   * @return the lab head; <code>this</code>, if the this user is the lab head.
+   */
+  @ManyToOne(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name = "labHeadId", nullable = true)
+  @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_lab_head")
+  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty = "labMembers")
+  private LabHead getLabHead()
+  {
+    return _labHead;
+  }
+
+  /**
+   * Set the lab head.
+   * @param labHead the new lab head
+   */
+  protected void setLabHead(LabHead labHead)
+  {
+    _labHead = labHead;
   }
 }

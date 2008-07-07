@@ -16,6 +16,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.model.users.AffiliationCategory;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
@@ -42,46 +45,41 @@ public class UsersDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        ScreeningRoomUser user1 = new ScreeningRoomUser (
+        ScreeningRoomUser user1 = new LabHead(
           "first1",
           "last1",
-          "email1@hms.harvard.edu");
+          "email1@hms.harvard.edu",
+          new LabAffiliation("organization1", AffiliationCategory.HMS));
         genericEntityDao.saveOrUpdateEntity(user1);
-        ScreeningRoomUser user2 = new ScreeningRoomUser (
+        ScreeningRoomUser user2 = new ScreeningRoomUser(
           "first2",
           "last2",
           "email2@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user2);
-        ScreeningRoomUser user3 = new ScreeningRoomUser (
+        ScreeningRoomUser user3 = new ScreeningRoomUser(
           "first3",
           "last3",
           "email3@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user3);
-        ScreeningRoomUser user4 = new ScreeningRoomUser (
+        ScreeningRoomUser user4 = new ScreeningRoomUser(
           "first4",
           "last4",
           "email4@hms.harvard.edu");
         genericEntityDao.saveOrUpdateEntity(user4);
-        ScreeningRoomUser user5 = new ScreeningRoomUser (
+        ScreeningRoomUser user5 = new LabHead(
           "first5",
           "last5",
-          "email5@hms.harvard.edu");
+          "email5@hms.harvard.edu",
+          new LabAffiliation("organization3", AffiliationCategory.HMS));
         genericEntityDao.saveOrUpdateEntity(user5);
-        ScreeningRoomUser user6 = new ScreeningRoomUser (
-          "first6",
-          "last6",
-          "email6@hms.harvard.edu");
-        genericEntityDao.saveOrUpdateEntity(user6);
-        user2.setLabHead(user1);
-        user3.setLabHead(user1);
-        user5.setLabHead(user4);
+        user2.setLab(user1.getLab());
+        user3.setLab(user1.getLab());
         expectedLabHeads.add(user1);
-        expectedLabHeads.add(user4);
-        expectedLabHeads.add(user6);
+        expectedLabHeads.add(user5);
       }
     });
 
-    Set<ScreeningRoomUser> actualLabHeads = usersDao.findAllLabHeads();
-    assertTrue(expectedLabHeads.containsAll(actualLabHeads) && actualLabHeads.containsAll(expectedLabHeads));
+    Set<LabHead> actualLabHeads = usersDao.findAllLabHeads();
+    assertEquals(expectedLabHeads, actualLabHeads);
   }
 }

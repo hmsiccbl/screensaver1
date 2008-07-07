@@ -50,8 +50,6 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.lang.math.IntRange;
@@ -507,9 +505,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   private void doTestScreenResult115ParseResult(ScreenResult screenResult)
   {
-    ScreenResult expectedScreenResult = makeScreenResult();
     assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
 
+    ScreenResult expectedScreenResult = makeScreenResult();
     Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
 
     ResultValueType rvt;
@@ -682,15 +680,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
   private static Screen makeScreen()
   {
-    ScreeningRoomUser screener = new ScreeningRoomUser("first",
-                                                       "last",
-                                                       "first_last@hms.harvard.edu");
-    Screen screen = new Screen(screener,
-                               screener,
-                               1,
-                               ScreenType.SMALL_MOLECULE,
-                               "test screen");
-    return screen;
+    return MakeDummyEntities.makeDummyScreen(1);
   }
 
 }

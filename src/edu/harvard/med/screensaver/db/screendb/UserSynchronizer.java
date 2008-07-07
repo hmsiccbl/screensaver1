@@ -208,7 +208,13 @@ public class UserSynchronizer
     // TODO: in Screensaver data model, only the lab head (whose entity also
     // represents the "lab" as a whole), should have the lab affiliation;
     // non-lab heads' labAffiliation properties are ignored.
-    user.setLabAffiliation(getLabAffiliation(affiliationName));
+    LabAffiliation labAffiliation = getLabAffiliation(affiliationName);
+    if (user.isHeadOfLab()) {
+      user.getLab().setLabAffiliation(labAffiliation);
+    }
+    else if (labAffiliation != null) {
+      throw new ScreenDBSynchronizationException("non-lab heads should have null labAffiliation; correct by moving this user's alternate lab affiliation to comments, and set labAffiliation to null"); 
+    }
 
     user.setComsCrhbaPermitNumber(comsCrhbaPermitNumber);
     user.setComsCrhbaPermitPrincipalInvestigator(comsCrhbaPermitPrincipalInvestigator);
@@ -370,10 +376,10 @@ public class UserSynchronizer
       ScreeningRoomUser member = _screenDBUserIdToScreeningRoomUserMap.get(memberId);
       ScreeningRoomUser head = _screenDBUserIdToScreeningRoomUserMap.get(headId);
       if (head != null && head != member) {
-        member.setLabHead(head);
+        member.setLab(head.getLab());
       }
       else {
-        member.setLabHead(null);
+        member.setLab(null);
       }
     }
   }

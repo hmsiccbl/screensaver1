@@ -10,19 +10,16 @@
 package edu.harvard.med.screensaver.model.users;
 
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -45,7 +42,6 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
   // instance fields
 
   private Integer _version;
-  private Set<ScreeningRoomUser> _screeningRoomUsers = new HashSet<ScreeningRoomUser>();
   private String _affiliationName;
   private AffiliationCategory _affiliationCategory;
 

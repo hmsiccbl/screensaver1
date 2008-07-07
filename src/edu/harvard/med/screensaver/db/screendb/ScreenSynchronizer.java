@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -107,7 +108,7 @@ public class ScreenSynchronizer
       "SELECT * FROM screens");
     while (resultSet.next()) {
       ScreeningRoomUser leadScreener = getLeadScreener(resultSet);
-      ScreeningRoomUser labHead = getLabHead(leadScreener);
+      LabHead labHead = getLabHead(leadScreener);
       Integer screenNumber = resultSet.getInt("id");
       DateTime dateCreated = ResultSetUtil.getDateTime(resultSet, "date_created");
       ScreenType screenType = _screenUserType.getTermForValue(resultSet.getString("screen_type"));
@@ -179,11 +180,8 @@ public class ScreenSynchronizer
     return leadScreener;
   }
 
-  private ScreeningRoomUser getLabHead(ScreeningRoomUser leadScreener) {
-    ScreeningRoomUser labHead = leadScreener.getLabHead();
-    if (labHead == null) {
-      labHead = leadScreener;
-    }
+  private LabHead getLabHead(ScreeningRoomUser leadScreener) {
+    LabHead labHead = leadScreener.getLab().getLabHead();
     return labHead;
   }
 

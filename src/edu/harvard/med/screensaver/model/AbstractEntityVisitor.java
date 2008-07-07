@@ -49,6 +49,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
@@ -89,6 +90,7 @@ public interface AbstractEntityVisitor
   public boolean visit(Gene entity);
   public boolean visit(LabAffiliation entity);
   public boolean visit(LabCherryPick entity);
+  public boolean visit(LabHead labHead);
   public boolean visit(Library entity);
   public boolean visit(LibraryScreening entity);
   public boolean visit(PlatesUsed entity);

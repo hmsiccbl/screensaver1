@@ -10,8 +10,12 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.beans.IntrospectionException;
+import java.util.List;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 
 import org.apache.log4j.Logger;
@@ -37,32 +41,18 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     super(ScreeningRoomUser.class);
   }
 
-  public void testDerivedLabName()
+  public void testLabName()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        ScreeningRoomUser labMember = new ScreeningRoomUser("Lab", "Member", "lab_member@hms.harvard.edu");
-        genericEntityDao.saveOrUpdateEntity(labMember);
-        assertNotNull("lab member without lab head", labMember.getLabName());
-
-        ScreeningRoomUser labHead = new ScreeningRoomUser("Lab", "Head", "lab_head@hms.harvard.edu");
-        labHead.setLabAffiliation(new LabAffiliation("LabAffiliation", AffiliationCategory.HMS));
-        labMember.setLabHead(labHead);
-        genericEntityDao.saveOrUpdateEntity(labHead);
-      }
-    });
+    initLab();
 
     ScreeningRoomUser labMember = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
                                                                         "lastName",
                                                                         "Member",
                                                                         true,
                                                                         "labHead.labAffiliation");
-    ScreeningRoomUser labHead = labMember.getLabHead();
-    assertEquals("lab member with lab head", "Head, Lab - LabAffiliation", labMember.getLabName());
-    assertEquals("lab head", "Head, Lab - LabAffiliation", labHead.getLabName());
+    assertEquals("lab member with lab head", "Head, Lab - LabAffiliation", labMember.getLab().getLabName());
+    ScreeningRoomUser labHead = labMember.getLab().getLabHead();
+    assertEquals("lab head", "Head, Lab - LabAffiliation", labHead.getLab().getLabName());
   }
 
   public void testAdministrativeRoleNotAllowed() {
@@ -75,8 +65,9 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     genericEntityDao.saveOrUpdateEntity(user);
 
     ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-    assertEquals(1, user2.getScreensaverUserRoles().size());
-    assertEquals(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER, user2.getScreensaverUserRoles().iterator().next());
+    assertEquals(2, user2.getScreensaverUserRoles().size());
+    assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER));
+    assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENING_ROOM_USER));
 
     try {
       genericEntityDao.doInTransaction(new DAOTransaction() {
@@ -91,21 +82,177 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     catch (Exception e) {
       assertTrue(e instanceof DataModelViolationException);
     }
+  }
 
-    // commenting this out, since we commented out the use of ValidatingScreensaverUserRoleSet in ScreensaverUser (it caused problems with Hibernate)
-//    try {
-//      genericEntityDao.doInTransaction(new DAOTransaction() {
-//        public void runTransaction()
-//        {
-//          ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-//          user3.getScreensaverUserRoles().add(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-//        };
-//      });
-//      fail("expected DataModelViolationException during flush after adding administrative role to screening room user");
-//    }
-//    catch (Exception e) {
-//      assertTrue(e instanceof DataModelViolationException);
-//    }
+  public void testOnlyLabHeadHasLabAffiliation()
+  {
+    initLab();
+    ScreeningRoomUser labMember =
+      genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                            "lastName",
+                                            "Member");
+    ScreeningRoomUser labHead =
+      genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                            "lastName",
+                                            "Head");
+    List<ScreeningRoomUser> screeningRoomUsers =
+      genericEntityDao.findEntitiesByHql(ScreeningRoomUser.class,
+                                         "from ScreeningRoomUser sru where sru.labAffiliation is not null");
+    assertTrue(screeningRoomUsers.contains(labHead));
+    assertFalse(screeningRoomUsers.contains(labMember));
+  }
+
+  public void testOnlyLabMembersHaveLabHead()
+  {
+    initLab();
+    List<ScreeningRoomUser> labMembers =
+      genericEntityDao.findEntitiesByHql(ScreeningRoomUser.class,
+                                         "from ScreeningRoomUser sru where sru.labHead is not null");
+    ScreeningRoomUser labHead =
+      genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                            "lastName",
+                                            "Head");
+    ScreeningRoomUser labMember =
+      genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                            "lastName",
+                                            "Member");
+    assertTrue(labMembers.contains(labMember));
+    assertFalse(labMembers.contains(labHead));
+  }
+
+  public void testSameLabForAllLabMembersAndLabHead()
+  {
+    initLab();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ScreeningRoomUser labMember =
+          genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                                "lastName",
+                                                "Member");
+        ScreeningRoomUser labHead =
+          genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                                "lastName",
+                                                "Head");
+        assertSame(labHead.getLab(), labMember.getLab());
+      }
+    });
+  }
+
+  public void testUserWithoutLab()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreeningRoomUser labMember = new ScreeningRoomUser("Independent", "User", "not_in_a_lab@hms.harvard.edu");
+        genericEntityDao.saveOrUpdateEntity(labMember);
+        assertEquals("", labMember.getLab().getLabName());
+        assertEquals("", labMember.getLab().getLabAffiliationName());
+        assertNull(labMember.getLab().getLabAffiliation());
+        assertNull(labMember.getLab().getLabHead());
+      }
+    });
+  }
+
+  public void testLabMemberChangesLab()
+  {
+    initLab();
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreeningRoomUser labMember =
+          genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                                "lastName",
+                                                "Member");
+        assertEquals("Head, Lab - LabAffiliation", labMember.getLab().getLabName());
+
+        LabHead labHead2 = new LabHead("Lab", "Head2", "lab_head2@hms.harvard.edu", new LabAffiliation("LabAffiliation2", AffiliationCategory.HMS));
+        genericEntityDao.persistEntity(labHead2);
+
+        labMember.setLab(labHead2.getLab());
+      }
+    });
+
+    ScreeningRoomUser labMember =
+      genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                            "lastName",
+                                            "Member",
+                                            true,
+                                            "labHead.labAffiliation");
+    assertEquals("Head2, Lab - LabAffiliation2", labMember.getLab().getLabName());
+
+  }
+
+  public void testLabMemberBecomesLabIndependent()
+  {
+    initLab();
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        ScreeningRoomUser labMember =
+          genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                                "lastName",
+                                                "Member",
+                                                false,
+                                                "labHead.labAffiliation");
+        assertEquals("Head, Lab - LabAffiliation", labMember.getLab().getLabName());
+        labMember.setLab(null);
+      }
+    });
+
+    ScreeningRoomUser labMember =
+      genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                            "lastName",
+                                            "Member",
+                                            true,
+                                            "labHead.labAffiliation");
+    assertEquals("", labMember.getLab().getLabName());
+    assertEquals("", labMember.getLab().getLabAffiliationName());
+    assertNull(labMember.getLab().getLabAffiliation());
+    assertNull(labMember.getLab().getLabHead());
+  }
+
+  public void testLabMemberClassificationCannotBecomePrincipalInvestigator()
+  {
+    initLab();
+    ScreeningRoomUser labMember =
+      genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
+                                            "lastName",
+                                            "Member",
+                                            false,
+                                            "labHead.labAffiliation");
+    try {
+      assertFalse(labMember.isHeadOfLab());
+      labMember.setUserClassification(ScreeningRoomUserClassification.GRADUATE_STUDENT); // allowed
+      labMember.setUserClassification(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR); // not allowed
+      fail("expected BusinessRuleViolationException when attempting to change classification of a lab head");
+    }
+    catch (BusinessRuleViolationException e) {}
+  }
+
+  private void initLab()
+  {
+    initLab(genericEntityDao);
+  }
+  
+  static void initLab(final GenericEntityDAO dao) 
+  {
+    dao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        LabHead labHead = new LabHead("Lab", "Head", "lab_head@hms.harvard.edu", new LabAffiliation("LabAffiliation", AffiliationCategory.HMS));
+        ScreeningRoomUser labMember = new ScreeningRoomUser("Lab", "Member", "lab_member@hms.harvard.edu");
+        labMember.setLab(labHead.getLab());
+
+        dao.saveOrUpdateEntity(labMember);
+        dao.saveOrUpdateEntity(labHead);
+      }
+    });
   }
 }
 

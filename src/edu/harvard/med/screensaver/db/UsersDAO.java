@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
@@ -50,17 +51,16 @@ public class UsersDAO extends AbstractDAO
    * @return a List of {@link ScreeningRoomUser}s.
    */
   @SuppressWarnings("unchecked")
-  public SortedSet<ScreeningRoomUser> findAllLabHeads()
+  public SortedSet<LabHead> findAllLabHeads()
   {
     // note: we perform sorting via a TreeSet, rather than asking persistence
     // layer to do sorting, as this keeps sorting order policy in
     // ScreensaverUserComparator, and also keeps our query simpler. Also, the
     // SortedSet return type makes return value more explicit
     String hql =
-      "select distinct lh from ScreeningRoomUser " +
+      "select distinct lh from LabHead " +
       "lh left outer join lh.labHead " +
-      "left outer join fetch lh.labAffiliation " +
-      "where lh.labHead is null";
+      "left outer join fetch lh.labAffiliation";
     SortedSet labHeads = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
     labHeads.addAll((List<ScreeningRoomUser>) getHibernateTemplate().find(hql));
     return labHeads;

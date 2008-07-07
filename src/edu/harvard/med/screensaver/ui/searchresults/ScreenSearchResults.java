@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
@@ -89,7 +90,9 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     Set<Screen> screens = new HashSet<Screen>();
     if (getScreensaverUser() instanceof ScreeningRoomUser) {
       ScreeningRoomUser screener = (ScreeningRoomUser) getScreensaverUser();
-      screens.addAll(screener.getScreensHeaded());
+      if (screener instanceof LabHead) { 
+        screens.addAll(((LabHead) screener).getScreensHeaded());
+      }
       screens.addAll(screener.getScreensLed());
       screens.addAll(screener.getScreensCollaborated());
       if (screens.isEmpty()) {
@@ -166,7 +169,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       new PropertyPath(Screen.class, "labHead.labAffiliation", "affiliationName"),
       "Lab Affiliation", "The affiliation of the lab performing the screen", TableColumn.UNGROUPED) {
       @Override
-      public String getCellValue(Screen screen) { return screen.getLabHead().getLabAffiliation().getAffiliationName(); }
+      public String getCellValue(Screen screen) { return screen.getLabHead().getLab().getLabAffiliationName(); }
     });
     columns.get(columns.size() - 1).setVisible(false);
     columns.add(new UserNameColumn<Screen>(

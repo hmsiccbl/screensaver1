@@ -56,7 +56,8 @@ public abstract class UserNameColumn<E extends AbstractEntity> extends TextEntit
   @Override
   public String/*List<String>*/ getCellValue(E t)
   {
-    return getUser(t).getFullNameLastFirst();
+    ScreensaverUser user = getUser(t);
+    return user == null ? null : user.getFullNameLastFirst();
 //    return Arrays.asList(getUser(t).getLastName(),
 //                         getUser(t).getFirstName());
   }

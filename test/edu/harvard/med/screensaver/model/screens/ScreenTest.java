@@ -133,15 +133,15 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     Screen screen1a = MakeDummyEntities.makeDummyScreen(1);
     genericEntityDao.persistEntity(screen1a);
     Screen screen1b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(1), true, "labHead", "leadScreener");
-    assertEquals(screen1a.getLabHead(), screen1b.getLabHead());
-    assertEquals(screen1a.getLeadScreener(), screen1b.getLeadScreener());
+    assertEquals(screen1a.getLabHead().getEntityId(), screen1b.getLabHead().getEntityId());
+    assertEquals(screen1a.getLeadScreener().getEntityId(), screen1b.getLeadScreener().getEntityId());
 
     Screen screen2a = MakeDummyEntities.makeDummyScreen(2);
     screen2a.setLeadScreener(screen2a.getLabHead());
     genericEntityDao.persistEntity(screen2a);
     Screen screen2b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(2), true, "labHead", "leadScreener");
-    assertEquals(screen2a.getLabHead(), screen2b.getLabHead());
-    assertEquals(screen2a.getLabHead(), screen2b.getLeadScreener());
+    assertEquals(screen2a.getLabHead().getEntityId(), screen2b.getLabHead().getEntityId());
+    assertEquals(screen2a.getLabHead().getEntityId(), screen2b.getLeadScreener().getEntityId());
   }
 
   public void testCandidateStatusItems()

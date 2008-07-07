@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -77,7 +78,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private AbstractBackingBean _returnToViewAfterEdit;
   private DataModel _userRolesDataModel;
   private UISelectOneBean<ScreensaverUserRole> _newUserRole;
-  private UISelectOneEntityBean<ScreeningRoomUser> _labName;
+  private UISelectOneEntityBean<LabHead> _labName;
   private UISelectOneEntityBean<LabAffiliation> _labAffiliation;
 
 
@@ -199,15 +200,15 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     ScreeningRoomUser user = getScreeningRoomUser();
     if (user != null) {
       if (user.getEntityId() == null) {
-        user.setLabHead(getLabName().getSelection());
+        user.setLab(getLabName().getSelection().getLab());
         _dao.persistEntity(user);
       }
       else {
         _dao.reattachEntity(user);
-        user.setLabHead(getLabName().getSelection());
+        user.setLab(getLabName().getSelection().getLab());
       }
       
-      user.setLabAffiliation(getLabAffiliation().getSelection());
+      user.getLab().setLabAffiliation(getLabAffiliation().getSelection());
     }
     else {
       _dao.saveOrUpdateEntity(getUser());
@@ -218,17 +219,28 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
 
   public List<SelectItem> getUserClassificationSelections()
   {
-    return JSFUtils.createUISelectItems(Arrays.asList(ScreeningRoomUserClassification.values()),
-                                        _user.getEntityId() == null);
+    List<ScreeningRoomUserClassification> userClassifications;
+    // handle the special Principal Investigator classification, since this
+    // value must be selected at creation time only, as it affects lab
+    // affiliation and lab members editable
+    if (((ScreeningRoomUser) getUser()).isHeadOfLab()) {
+      userClassifications = Arrays.asList(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
+    }
+    else {
+      userClassifications = new ArrayList<ScreeningRoomUserClassification>(Arrays.asList(ScreeningRoomUserClassification.values()));
+      userClassifications.remove(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
+    }
+    return JSFUtils.createUISelectItems(userClassifications, _user.getEntityId() == null);
   }
 
-  public UISelectOneEntityBean<ScreeningRoomUser> getLabName()
+  public UISelectOneEntityBean<LabHead> getLabName()
   {
     if (_labName == null) {
-      SortedSet<ScreeningRoomUser> labHeads = _usersDao.findAllLabHeads();
+      SortedSet<LabHead> labHeads = _usersDao.findAllLabHeads();
       labHeads.add(null);
-      _labName = new UISelectOneEntityBean<ScreeningRoomUser>(labHeads, getScreeningRoomUser().getLabHead(), _dao) {
-        protected String getLabel(ScreeningRoomUser t) { return t == null ? "<Lab Head>" : t.getLabName(); }
+      _labName = new UISelectOneEntityBean<LabHead>(labHeads, getScreeningRoomUser().getLab().getLabHead(), _dao) {
+        @Override
+        protected String getLabel(LabHead t) { return t == null ? "<missing>" : t.getLab().getLabName(); }
       };
     }
     return _labName;
@@ -246,7 +258,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       });
       labAffiliations.addAll(_dao.findAllEntitiesOfType(LabAffiliation.class));
       labAffiliations.add(null);
-      _labAffiliation = new UISelectOneEntityBean<LabAffiliation>(labAffiliations, getScreeningRoomUser().getLabAffiliation(), _dao) {
+      _labAffiliation = new UISelectOneEntityBean<LabAffiliation>(labAffiliations, getScreeningRoomUser().getLab().getLabAffiliation(), _dao) {
         protected String getLabel(LabAffiliation t) { return t == null ? "<none>" : (t.getAffiliationName() + " (" + t.getAffiliationCategory() + ")"); }
       };
     }

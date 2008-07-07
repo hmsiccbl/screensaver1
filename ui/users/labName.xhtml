@@ -14,9 +14,10 @@
 
 <ui:component>
 	<span class="propertyValue">
-		<t:commandLink id="#{id}LabName" value="#{user.labName}"
-			action="#{userViewer.viewUser}" styleClass="entityLink" style="margin-right: 4px" >
-			<f:param name="entityId" value="#{user.lab.entityId}" />
+		<t:commandLink id="#{id}LabName" value="#{user.lab.labName}"
+		action="#{userViewer.viewUser}" rendered="#{!empty user.lab.labHead}"
+		styleClass="entityLink" style="margin-right: 4px">
+		<f:param name="entityId" value="#{user.lab.labHead.entityId}" />
 	</t:commandLink>
 	</span>
 </ui:component>

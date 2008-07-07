@@ -61,6 +61,7 @@
     <mapping class="edu.harvard.med.screensaver.model.users.ChecklistItem" />
     <mapping class="edu.harvard.med.screensaver.model.users.ChecklistItemType" />
     <mapping class="edu.harvard.med.screensaver.model.users.LabAffiliation" />
+    <mapping class="edu.harvard.med.screensaver.model.users.LabHead" />
     <mapping class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser" />
     <mapping class="edu.harvard.med.screensaver.model.users.ScreensaverUser" />
 	</session-factory>

@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 public abstract class Study extends TimeStampedAbstractEntity
@@ -27,7 +28,7 @@ public abstract class Study extends TimeStampedAbstractEntity
 
   abstract public Set<ScreeningRoomUser> getCollaborators();
 
-  abstract public ScreeningRoomUser getLabHead();
+  abstract public LabHead getLabHead();
 
   abstract public ScreeningRoomUser getLeadScreener();
 

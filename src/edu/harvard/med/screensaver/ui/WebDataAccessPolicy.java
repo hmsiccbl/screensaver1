@@ -54,6 +54,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -286,6 +287,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return visit((ScreensaverUser) screeningRoomUser);
   }
 
+  public boolean visit(LabHead labHead)
+  {
+    return visit((ScreeningRoomUser) labHead);
+  }
+
   public boolean visit(AdministratorUser administratorUser)
   {
     return visit((ScreensaverUser) administratorUser);
@@ -355,21 +361,13 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     }
     if (loggedInUser instanceof ScreeningRoomUser) {
       ScreeningRoomUser loggedInScreener = (ScreeningRoomUser) loggedInUser;
-      if (loggedInScreener.isHeadOfLab()) {
-        if (loggedInScreener.getLabMembers().contains(screensaverUser)) {
-          // lab head can view her lab members
-          return true;
-        }
+      if (loggedInScreener.getLab().getLabMembers().contains(screensaverUser)) {
+        // lab head and lab members can view their fellow lab members
+        return true;
       }
-      else {
-        if (loggedInScreener.getLabHead().equals(screensaverUser)) {
-          // non-lab head can view his lab head
-          return true;
-        }
-        if (loggedInScreener.getLabHead().getLabMembers().contains(screensaverUser)) {
-          // non-lab head can view his fellow lab members
-          return true;
-        }
+      if (screensaverUser.equals(loggedInScreener.getLab().getLabHead())) {
+        // non-members can view their lab head
+        return true;
       }
     }
     return false;
@@ -395,9 +393,9 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     if (user instanceof ScreeningRoomUser) {
       ScreeningRoomUser screeningUser = (ScreeningRoomUser) user;
       return
-      screeningUser.getScreensHeaded().contains(screen) ||
       screeningUser.getScreensLed().contains(screen) ||
-      screeningUser.getScreensCollaborated().contains(screen);
+      screeningUser.getScreensCollaborated().contains(screen) ||
+      ((user instanceof LabHead) ? ((LabHead) screeningUser).getScreensHeaded().contains(screen) : false);
     }
     return false;
   }
@@ -408,9 +406,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
         return true;
       }
     }
-    for (Screen screen : screener.getScreensHeaded()) {
-      if (screen.getScreenResult() != null) {
-        return true;
+    if (screener instanceof LabHead) {
+      for (Screen screen : ((LabHead) screener).getScreensHeaded()) {
+        if (screen.getScreenResult() != null) {
+          return true;
+        }
       }
     }
     for (Screen screen : screener.getScreensCollaborated()) {

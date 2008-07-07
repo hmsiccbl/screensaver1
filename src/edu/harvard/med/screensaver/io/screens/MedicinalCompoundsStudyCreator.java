@@ -36,6 +36,8 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.commons.cli.OptionBuilder;
@@ -77,6 +79,7 @@ public class MedicinalCompoundsStudyCreator
   private static final String VENDOR_COLUMN_HEADER = "Vendor";
   private static final String PLATE_COLUMN_HEADER = "Plate";
   private static final String WELL_COLUMN_HEADER = "Well";
+  private static final String LAB_AFFILIATION_NAME = "Brigham and Women's Hospital";
 
   public static void main(String[] args)
   {
@@ -98,8 +101,12 @@ public class MedicinalCompoundsStudyCreator
             screenDao.deleteStudy(study);
           }
 
-          ScreeningRoomUser labHead = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu");
-          ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu");
+          LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class, "affiliationName", LAB_AFFILIATION_NAME);
+          if (labAffiliation == null) {
+            throw new RuntimeException("expected lab affiliation " + LAB_AFFILIATION_NAME + " to exist");
+          }
+          LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu", true, labAffiliation);
+          ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu", false, null);
 
           study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO, TITLE);
           study.setSummary(SUMMARY);

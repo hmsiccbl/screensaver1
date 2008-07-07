@@ -44,7 +44,7 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
       @Override
       public String getCellValue(ScreeningRoomUser user)
       {
-        return user.getLabName();
+        return user.getLab().getLabName();
       }
     });
     columns.add(4, new VocabularyEntityColumn<ScreeningRoomUser,ScreeningRoomUserClassification>(
