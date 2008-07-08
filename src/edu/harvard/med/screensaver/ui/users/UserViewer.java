@@ -129,6 +129,11 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     return getScreeningRoomUser() != null;
   }
   
+  public boolean islabHeadViewMode()
+  {
+    return getLabHead() != null;
+  }
+  
   public boolean isAdministratorUserViewMode()
   {
     return getAdministratorUser() != null;
@@ -138,6 +143,14 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   {
     if (_user instanceof ScreeningRoomUser) {
       return (ScreeningRoomUser) _user;
+    }
+    return null;
+  }
+
+  public LabHead getLabHead()
+  {
+    if (_user instanceof LabHead) {
+      return (LabHead) _user;
     }
     return null;
   }
@@ -156,12 +169,12 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     if (user.getEntityId() != null) {
       user = _dao.reloadEntity(user,
                                true,
-      "screensaverUserRoles");
+                               "screensaverUserRoles");
       if (user instanceof ScreeningRoomUser) {
         _dao.need(user,
                   "labHead.labAffiliation",
                   "labAffiliation",
-        "labMembers");
+                  "labMembers");
         _dao.need(user, "screensLed");
         _dao.need(user, "screensHeaded");
         _dao.need(user, "screensCollaborated");
@@ -261,7 +274,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
 
   public UISelectOneEntityBean<LabHead> getLabName()
   {
-    assert _user instanceof ScreeningRoomUser && !(_user instanceof LabHead); 
+    assert isScreeningRoomUserViewMode() && !islabHeadViewMode();
     if (_labName == null) {
       SortedSet<LabHead> labHeads = _usersDao.findAllLabHeads();
       labHeads.add(null);
@@ -275,7 +288,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
 
   public UISelectOneEntityBean<LabAffiliation> getLabAffiliation()
   {
-    assert _user instanceof LabHead; 
+    assert islabHeadViewMode();
     if (_labAffiliation == null) {
       SortedSet<LabAffiliation> labAffiliations = new TreeSet<LabAffiliation>(new NullSafeComparator<LabAffiliation>() {
         @Override
@@ -367,7 +380,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     setUser(user);
 
     UserSearchResults searchResults =
-      user instanceof ScreeningRoomUser ? _screenerSearchResults : _staffSearchResults;
+      isScreeningRoomUserViewMode() ? _screenerSearchResults : _staffSearchResults;
     // calling viewUser() is a request to view the most up-to-date, persistent
     // version of the user, which means the usersBrowser must also be
     // updated to reflect the persistent version of the user
@@ -452,9 +465,23 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
   
-
   @UIControllerMethod
-  @Transactional // for reloading of user with additional eager relationships
+  public String addLabMember()
+  {
+    if (!islabHeadViewMode()) {
+      reportApplicationError("cannot only create lab members for lab heads");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    if (isEditMode()) {
+      reportApplicationError("cannot add lab members while editing lab head");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    ScreeningRoomUser newLabMember = new ScreeningRoomUser();
+    newLabMember.setLab(((LabHead) _user).getLab());
+    return _thisProxy.editNewUser(newLabMember);
+  }
+  
+  @UIControllerMethod
   public String addScreen()
   {
     if (!isScreeningRoomUserViewMode()) {

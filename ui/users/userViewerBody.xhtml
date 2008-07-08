@@ -17,7 +17,11 @@
 				<ss:editSaveCancel viewer="#{userViewer}" />
           <t:commandButton action="#{userViewer.addScreen}"
             id="addScreenCommand" value="Add Screen"
-            rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode &amp;&amp; !empty userViewer.user.entityId}"
+            rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
+            styleClass="command" />
+          <t:commandButton action="#{userViewer.addLabMember}"
+            id="addLabMember" value="Add Lab Member"
+            rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['usersAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.labHeadViewMode}"
             styleClass="command" />
 			</t:panelGroup>
 
