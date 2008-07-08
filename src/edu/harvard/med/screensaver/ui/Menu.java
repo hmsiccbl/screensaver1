@@ -235,7 +235,7 @@ public class Menu extends AbstractBackingBean
   @UIControllerMethod
   public String addScreen()
   {
-    return _screenDetailViewer.editNewScreen();
+    return _screenDetailViewer.editNewScreen(null);
   }
   
   @UIControllerMethod

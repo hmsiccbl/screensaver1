@@ -357,7 +357,7 @@ public class ScreeningRoomUser extends ScreensaverUser
    * @return <code>true</code> iff this user is a small compound screener.
    */
   @Transient
-  public boolean isCompoundUser()
+  public boolean isSmallMoleculeUser()
   {
     return getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
   }

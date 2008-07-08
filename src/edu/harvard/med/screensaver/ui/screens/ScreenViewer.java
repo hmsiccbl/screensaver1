@@ -82,6 +82,10 @@ public class ScreenViewer extends StudyViewer
   @Override
   public String reload()
   {
+    if (_screen == null || _screen.getEntityId() == null) {
+      _screen = null;
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     return viewScreen(getScreen());
   }
 

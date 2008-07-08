@@ -330,7 +330,7 @@ public class Screen extends Study
    * @return the lab head
    */
   @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="labHeadId", nullable=true)
+  @JoinColumn(name="labHeadId", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })

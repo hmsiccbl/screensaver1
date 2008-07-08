@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
@@ -71,6 +72,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   // instance data members
 
   private UserViewer _thisProxy;
+  private ScreenDetailViewer _screenDetailViewer;
   private GenericEntityDAO _dao;
   private UsersDAO _usersDao;
   private ScreenerSearchResults _screenerSearchResults;
@@ -78,7 +80,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
 
   private ScreensaverUser _user;
   private boolean _isEditMode;
-  private AbstractBackingBean _returnToViewAfterEdit;
   private DataModel _userRolesDataModel;
   private UISelectOneBean<ScreensaverUserRole> _newUserRole;
   private UISelectOneEntityBean<LabHead> _labName;
@@ -96,13 +97,14 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   }
 
   public UserViewer(UserViewer _userViewerProxy,
+                    ScreenDetailViewer screenDetailViewer,
                     GenericEntityDAO dao,
                     UsersDAO usersDao,
                     ScreenerSearchResults screenerSearchResults,
                     StaffSearchResults staffSearchResults)
   {
     _thisProxy = _userViewerProxy;
-    _returnToViewAfterEdit = _thisProxy;
+    _screenDetailViewer = screenDetailViewer;
     _dao = dao;
     _usersDao = usersDao;
     _screenerSearchResults = screenerSearchResults;
@@ -120,6 +122,16 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public ScreensaverUser getUser()
   {
     return _user;
+  }
+  
+  public boolean isScreeningRoomUserViewMode()
+  {
+    return getScreeningRoomUser() != null;
+  }
+  
+  public boolean isAdministratorUserViewMode()
+  {
+    return getAdministratorUser() != null;
   }
 
   public ScreeningRoomUser getScreeningRoomUser()
@@ -164,6 +176,10 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   @Override
   public String reload()
   {
+    if (_user == null || _user.getEntityId() == null) {
+      _user = null;
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     return _thisProxy.viewUser(_user);
   }
 
@@ -182,7 +198,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public String edit()
   {
     _isEditMode = true;
-    _returnToViewAfterEdit = _thisProxy;
     return VIEW_USER;
   }
 
@@ -202,32 +217,29 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   {
     _isEditMode = false;
     
-    ScreeningRoomUser user = getScreeningRoomUser();
-    if (user != null) {
-      if (user.getEntityId() == null) {
-        setUserValues(user);
-        _dao.persistEntity(user);
-      }
-      else {
-        _dao.reattachEntity(user);
-        setUserValues(user);
-      }
+    if (_user.getEntityId() == null) {
+      updateUserProperties();
+      _dao.persistEntity(_user);
     }
     else {
-      _dao.saveOrUpdateEntity(getUser());
+      _dao.reattachEntity(_user);
+      updateUserProperties();
     }
     _dao.flush();
     return _thisProxy.viewUser(_user);
   }
 
-  private void setUserValues(ScreeningRoomUser user)
+  private void updateUserProperties()
   {
-    if (user.isHeadOfLab()) {
-      user.getLab().setLabAffiliation(getLabAffiliation().getSelection());
-    }
-    else {
-      Lab lab = getLabName().getSelection() == null ? null : getLabName().getSelection().getLab();
-      user.setLab(lab);
+    if (isScreeningRoomUserViewMode()) {
+      ScreeningRoomUser user = getScreeningRoomUser();
+      if (user.isHeadOfLab()) {
+        user.getLab().setLabAffiliation(getLabAffiliation().getSelection());
+      }
+      else {
+        Lab lab = getLabName().getSelection() == null ? null : getLabName().getSelection().getLab();
+        user.setLab(lab);
+      }
     }
   }
 
@@ -439,14 +451,28 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _newLabAffiliation = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+  
 
-
+  @UIControllerMethod
+  @Transactional // for reloading of user with additional eager relationships
+  public String addScreen()
+  {
+    if (!isScreeningRoomUserViewMode()) {
+      reportApplicationError("cannot create screen for administrator user");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    if (isEditMode()) {
+      reportApplicationError("cannot create screen while editing user");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    return _screenDetailViewer.editNewScreen(getScreeningRoomUser());
+  }
+  
   // private methods
 
   private void resetView()
   {
     _isEditMode = false;
-    _returnToViewAfterEdit = _thisProxy;
     _userRolesDataModel = null;
     _newUserRole = null;
     _labName = null;

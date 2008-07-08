@@ -145,6 +145,10 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   @Override
   public String reload()
   {
+    if (_activity == null || _activity.getEntityId() == null) {
+      _activity = null;
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     return _thisProxy.viewActivity(_activity);
   }
 

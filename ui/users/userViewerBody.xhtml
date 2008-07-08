@@ -15,6 +15,10 @@
 
 			<t:panelGroup id="commandPanel" rendered="#{userViewer.editable}">
 				<ss:editSaveCancel viewer="#{userViewer}" />
+          <t:commandButton action="#{userViewer.addScreen}"
+            id="addScreenCommand" value="Add Screen"
+            rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode &amp;&amp; !empty userViewer.user.entityId}"
+            styleClass="command" />
 			</t:panelGroup>
 
 			<t:panelGrid id="userProperties" columns="2"

@@ -227,13 +227,11 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
         ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
         if (labHead != null) {
           leadScreenerCandidates.add(labHead);
-          leadScreenerCandidates.addAll(labHead.getLab()
-                                               .getLabMembers());
+          leadScreenerCandidates.addAll(labHead.getLab().getLabMembers());
         }
-        // at least allow the existing lead screener to be selected, even if we
-        // don't yet know the labHead; and if we don't even know the lead
-        // screener yet, allow null
-        leadScreenerCandidates.add(_study.getLeadScreener());
+        if (_study.getLeadScreener() == null) {
+          leadScreenerCandidates.add(null);
+        }
         _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates,
                                                                      _study.getLeadScreener(),
                                                                      _dao) {

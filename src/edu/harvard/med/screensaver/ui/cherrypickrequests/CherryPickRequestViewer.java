@@ -739,6 +739,10 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
   @Override
   public String reload()
   {
+    if (_cherryPickRequest == null || _cherryPickRequest.getEntityId() == null) {
+      _cherryPickRequest = null;
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     return viewCherryPickRequest(_cherryPickRequest);
   }
 

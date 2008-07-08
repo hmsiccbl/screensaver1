@@ -585,6 +585,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.users.UserViewer">
     <constructor-arg ref="userViewer" />
+    <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="usersDao" />
     <constructor-arg ref="screenersBrowser" />

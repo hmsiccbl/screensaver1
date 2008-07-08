@@ -38,11 +38,13 @@ import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
@@ -158,6 +160,10 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @Override
   public String reload()
   {
+    if (_screen == null || _screen.getEntityId() == null) {
+      _screen = null;
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     return _screenViewer.reload();
   }
 
@@ -416,7 +422,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
-  public String editNewScreen()
+  @Transactional
+  public String editNewScreen(ScreeningRoomUser leadScreener)
   {
     ScreensaverUser user = getScreensaverUser();
     if (!(user instanceof AdministratorUser &&
@@ -426,9 +433,32 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     }
 
     Screen screen = new Screen();
-    screen.setStudyType(StudyType.IN_VITRO);
-    screen.setScreenNumber(_screenDao.findNextScreenNumber());
+    if (screen.getScreenNumber() == null) {
+      screen.setScreenNumber(_screenDao.findNextScreenNumber());
+    }
+    if (screen.getStudyType() == null) {
+      screen.setStudyType(StudyType.IN_VITRO);
+    }
     setScreen(screen);
+    if (leadScreener != null) {
+      if (leadScreener.getLab().getLabHead() == null) {
+        showMessage("screens.leadScreenerRequiresLab");
+        return REDISPLAY_PAGE_ACTION_RESULT;
+      }
+      leadScreener = _dao.reloadEntity(leadScreener,
+                                       false,
+                                       "labHead",
+                                       "screensaverUserRoles");
+      // note: we cannot set these values directly on the screen object, as it
+      // causes Hibernate exceptions (the 'managed' instances returned by the
+      // UISelectOneEntityBeans will not replace the instances in the screen
+      // object (being equal), thus causing detached entity exceptions)
+      getLabName().setSelection(leadScreener.getLab().getLabHead());
+      getLeadScreener().setSelection(leadScreener);
+      // infer appropriate screen type from user roles
+      ScreenType screenType = leadScreener.isRnaiUser() && !leadScreener.isSmallMoleculeUser() ? ScreenType.RNAI : !leadScreener.isRnaiUser() && leadScreener.isSmallMoleculeUser() ? ScreenType.SMALL_MOLECULE : null;
+      screen.setScreenType(screenType);
+    }
     _isEditMode = true;
     return VIEW_SCREEN_DETAIL;
   }
@@ -458,23 +488,26 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     // TODO: would like to use this code, since it handles both new and extant
     // Screens, but I think UISelectOneEntityBean's auto-loading of entities is
     // actually getting in the way, since it causes NonUniqueObjectException
-//  getScreen().setLabHead(getLabName().getSelection());
-//  getScreen().setLeadScreener(getLeadScreener().getSelection());
-//  _dao.saveOrUpdateEntity(getScreen());
+    // updateScreenProperties();
+    // _dao.saveOrUpdateEntity(getScreen());
     // instead, we handle each case separately:
     if (getScreen().getEntityId() == null) {
-      getScreen().setLabHead(getLabName().getSelection());
-      getScreen().setLeadScreener(getLeadScreener().getSelection());
+      updateScreenProperties();
       _dao.persistEntity(getScreen());
     }
     else {
       _dao.reattachEntity(getScreen());
-      getScreen().setLabHead(getLabName().getSelection());
-      getScreen().setLeadScreener(getLeadScreener().getSelection());
+      updateScreenProperties();
     }
 
     _dao.flush();
     return _screenViewer.viewScreen(_screen);
+  }
+
+  private void updateScreenProperties()
+  {
+    getScreen().setLabHead(getLabName().getSelection());
+    getScreen().setLeadScreener(getLeadScreener().getSelection());
   }
 
   @UIControllerMethod
@@ -801,5 +834,4 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     currentScreening.setNumberOfReplicates(previousScreening.getNumberOfReplicates());
     currentScreening.setVolumeTransferredPerWell(previousScreening.getVolumeTransferredPerWell());
   }
-
 }
