@@ -204,6 +204,10 @@
             id="addScreeningRoomUserCommand" value="Add Screener"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['usersAdmin']}"
             styleClass="command" />
+          <t:commandButton action="#{menu.addLabHead}"
+            id="addLabHeadCommand" value="Add Lab Head"
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['labHeadsAdmin']}"
+            styleClass="command" />
         </t:panelGrid>
       </h:form>
 

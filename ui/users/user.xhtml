@@ -15,7 +15,8 @@
 <ui:component>
 	<span class="propertyValue">
 	 <t:commandLink id="#{id}User" value="#{user.fullNameLastFirst}"
-		action="#{userViewer.viewUser}" styleClass="entityLink"
+		action="#{userViewer.viewUser}"
+		rendered="#{!empty user.fullNameLastFirst}" styleClass="entityLink"
 		style="margin-right: 4px">
 		<f:param name="entityId" value="#{user.entityId}" />
 	</t:commandLink> 

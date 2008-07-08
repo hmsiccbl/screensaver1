@@ -48,6 +48,14 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
 
   // public constructor
 
+
+  /**
+   * Construct an uninitialized <code>LabAffiliation</code>.
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   * @motivation for UI entity creation
+   */
+  public LabAffiliation() {}
+
   /**
    * Construct an initialized <code>LabAffiliation</code>.
    * @param affiliationName the affiliation name
@@ -90,12 +98,20 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
    * Get the affiliation name.
    * @return the affiliation name
    */
-  @org.hibernate.annotations.Immutable
   @Column(nullable=false, unique=true)
   @org.hibernate.annotations.Type(type="text")
   public String getAffiliationName()
   {
     return _affiliationName;
+  }
+
+  /**
+   * Set the affiliation name.
+   * @param affiliationName the new affiliation name
+   */
+  public void setAffiliationName(String affiliationName)
+  {
+    _affiliationName = affiliationName;
   }
 
   /**
@@ -117,15 +133,6 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
   {
     _affiliationCategory = affiliationCategory;
   }
-
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>LabAffiliation</code>.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected LabAffiliation() {}
 
 
   // private instance methods
@@ -160,18 +167,6 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
   {
     _version = version;
   }
-
-  /**
-   * Set the affiliation name.
-   * @param affiliationName the new affiliation name
-   * @motivation for hibernate - nobody but hibernate would think of calling a setter on an
-   * Immutable property!
-   */
-  private void setAffiliationName(String affiliationName)
-  {
-    _affiliationName = affiliationName;
-  }
-
 
   public int compareTo(LabAffiliation other)
   {

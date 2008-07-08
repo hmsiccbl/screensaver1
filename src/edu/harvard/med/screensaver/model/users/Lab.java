@@ -59,8 +59,7 @@ public class Lab
     StringBuilder labName = new StringBuilder(getLabHead().getFullNameLastFirst());
     String labAffiliation = getLabAffiliationName();
     if (labAffiliation != null && labAffiliation.length() > 0) {
-      labName.append(" - ")
-             .append(labAffiliation);
+      labName.append(" - ").append(labAffiliation);
     }
     return labName.toString();
   }

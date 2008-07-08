@@ -56,17 +56,18 @@ public class LabHead extends ScreeningRoomUser
 
   public LabHead()
   {
+    setUserClassification(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
   }
 
   public LabHead(String firstName,
-                               String lastName,
-                               String email,
-                               String phone,
-                               String mailingAddress,
-                               String comments,
-                               String commonsId,
-                               String harvardId,
-                               LabAffiliation labAffilliation)
+                 String lastName,
+                 String email,
+                 String phone,
+                 String mailingAddress,
+                 String comments,
+                 String commonsId,
+                 String harvardId,
+                 LabAffiliation labAffilliation)
   {
     super(firstName,
           lastName,
@@ -87,9 +88,9 @@ public class LabHead extends ScreeningRoomUser
   }
 
   public LabHead(String firstName,
-                               String lastName,
-                               String email,
-                               LabAffiliation labAffilliation)
+                 String lastName,
+                 String email,
+                 LabAffiliation labAffilliation)
   {
     this(firstName,
          lastName,

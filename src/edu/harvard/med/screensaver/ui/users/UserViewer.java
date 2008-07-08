@@ -26,6 +26,8 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.AffiliationCategory;
+import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -42,6 +44,7 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,6 +83,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private UISelectOneBean<ScreensaverUserRole> _newUserRole;
   private UISelectOneEntityBean<LabHead> _labName;
   private UISelectOneEntityBean<LabAffiliation> _labAffiliation;
+  private LabAffiliation _newLabAffiliation;
 
 
   // constructors
@@ -153,6 +157,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       }
     }
     _user = user;
+    
     resetView();
   }
 
@@ -196,25 +201,34 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public String save()
   {
     _isEditMode = false;
-
+    
     ScreeningRoomUser user = getScreeningRoomUser();
     if (user != null) {
       if (user.getEntityId() == null) {
-        user.setLab(getLabName().getSelection().getLab());
+        setUserValues(user);
         _dao.persistEntity(user);
       }
       else {
         _dao.reattachEntity(user);
-        user.setLab(getLabName().getSelection().getLab());
+        setUserValues(user);
       }
-      
-      user.getLab().setLabAffiliation(getLabAffiliation().getSelection());
     }
     else {
       _dao.saveOrUpdateEntity(getUser());
     }
     _dao.flush();
     return _thisProxy.viewUser(_user);
+  }
+
+  private void setUserValues(ScreeningRoomUser user)
+  {
+    if (user.isHeadOfLab()) {
+      user.getLab().setLabAffiliation(getLabAffiliation().getSelection());
+    }
+    else {
+      Lab lab = getLabName().getSelection() == null ? null : getLabName().getSelection().getLab();
+      user.setLab(lab);
+    }
   }
 
   public List<SelectItem> getUserClassificationSelections()
@@ -235,6 +249,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
 
   public UISelectOneEntityBean<LabHead> getLabName()
   {
+    assert _user instanceof ScreeningRoomUser && !(_user instanceof LabHead); 
     if (_labName == null) {
       SortedSet<LabHead> labHeads = _usersDao.findAllLabHeads();
       labHeads.add(null);
@@ -248,6 +263,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
 
   public UISelectOneEntityBean<LabAffiliation> getLabAffiliation()
   {
+    assert _user instanceof LabHead; 
     if (_labAffiliation == null) {
       SortedSet<LabAffiliation> labAffiliations = new TreeSet<LabAffiliation>(new NullSafeComparator<LabAffiliation>() {
         @Override
@@ -263,6 +279,20 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       };
     }
     return _labAffiliation;
+  }
+  
+  public LabAffiliation getNewLabAffiliation()
+  {
+    if (_newLabAffiliation == null) {
+      _newLabAffiliation = new LabAffiliation();
+      _newLabAffiliation.setAffiliationCategory(AffiliationCategory.OTHER);
+    }
+    return _newLabAffiliation;
+  }
+  
+  public List<SelectItem> getAffiliationCategorySelections()
+  {
+    return JSFUtils.createUISelectItems(Arrays.asList(AffiliationCategory.values()));
   }
 
   public DataModel getUserRolesDataModel()
@@ -348,6 +378,12 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public String editNewUser(ScreensaverUser newUser)
   {
     ScreensaverUser currentUser = getScreensaverUser();
+    if (newUser instanceof LabHead &&
+      !(currentUser instanceof AdministratorUser &&
+      ((AdministratorUser) currentUser).isUserInRole(ScreensaverUserRole.LAB_HEADS_ADMIN))) {
+      showMessage("restrictedOperation", "add a new lab head");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     if (!(currentUser instanceof AdministratorUser &&
       ((AdministratorUser) currentUser).isUserInRole(ScreensaverUserRole.USERS_ADMIN))) {
       showMessage("restrictedOperation", "add a new user");
@@ -376,6 +412,33 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _userRolesDataModel = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+  
+  @UIControllerMethod
+  @Transactional
+  public String addNewLabAffiliation()
+  {
+    if (StringUtils.isEmpty(_newLabAffiliation.getAffiliationName())) {
+      reportApplicationError("new lab affiliation name is required");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    if (_dao.findEntityByProperty(LabAffiliation.class, 
+                                  "affiliationName", 
+                                  _newLabAffiliation.getAffiliationName()) != null) {
+      showMessage("duplicateEntity", "lab affiliation");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    _dao.persistEntity(_newLabAffiliation);
+    _dao.flush();
+    
+    // force reload of lab affiliation selections
+    _labAffiliation = null; 
+
+    // set user's lab affiliation to new affiliation
+    getLabAffiliation().setSelection(_newLabAffiliation);
+    
+    _newLabAffiliation = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
 
 
   // private methods
@@ -388,6 +451,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _newUserRole = null;
     _labName = null;
     _labAffiliation = null;
+    _newLabAffiliation = null;
   }
 }
 

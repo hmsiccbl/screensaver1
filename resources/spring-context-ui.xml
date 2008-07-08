@@ -644,6 +644,7 @@
 
   <bean id="screeningRoomUserClassificationConverter" class="edu.harvard.med.screensaver.ui.util.ScreeningRoomUserClassificationConverter" />
 
+  <bean id="affiliationCategoryConverter" class="edu.harvard.med.screensaver.ui.util.AffiliationCategoryConverter" />
 
   <!-- Development/Debug related beans -->
 

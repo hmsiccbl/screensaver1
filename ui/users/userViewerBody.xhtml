@@ -33,6 +33,7 @@
 				<ss:property id="fullName" label="Name"
 					description="The name and email of the user"
 					value="#{userViewer.user.fullNameFirstLast}"
+					required="true"
 					rendered="#{!userViewer.editMode}"/>
 
 				<ss:property id="firstName" label="First Name"
@@ -43,6 +44,7 @@
 				<ss:property id="lastName" label="Last Name"
 					description="The user's last name (surname)"
 					value="#{userViewer.user.lastName}"
+					required="true"
 					rendered="#{userViewer.editMode}" editable="#{userViewer.editable}" editWidth="60"/>
 
 				<ss:property id="email" label="Email"
@@ -90,7 +92,7 @@
 				<ss:property id="classification" label="Classification"
 					description="The user's classification"
 					value="#{userViewer.user.userClassification}"
-					editable="#{userViewer.editMode}"
+					editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}"
 					converter="#{screeningRoomUserClassificationConverter}"
 					required="true">
 					<ui:define name="editableData">
@@ -126,12 +128,38 @@
 					value="#{userViewer.user.lab.labAffiliation.affiliationName}"
 					editable="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}">
 					<ui:define name="editableData">
-            <t:selectOneMenu id="labAffiliationMenu"
-              value="#{userViewer.labAffiliation.value}"
-              styleClass="inputText selectMenu">
-              <f:selectItems value="#{userViewer.labAffiliation.selectItems}" />
-            </t:selectOneMenu>
-					  <!-- ui:insert src="addLabAffiliation.xhtml"/-->
+						<t:selectOneMenu id="labAffiliationMenu"
+							value="#{userViewer.labAffiliation.value}"
+							styleClass="inputText selectMenu">
+							<f:selectItems value="#{userViewer.labAffiliation.selectItems}" />
+						</t:selectOneMenu>
+
+						<t:div id="newLabAffiliationDiv" styleClass="groupingPanel">
+							<t:panelGrid columns="1" columnClasses="column">
+								<ss:propertyGroup id="newLabAffiliationGroup"
+									label="New Affiliation (optional)">
+									<ss:property id="newLabAffiliationName" label="Name"
+										description="The name of the new affiliation to be created"
+										value="#{userViewer.newLabAffiliation.affiliationName}"
+										editable="true" editWidth="60" />
+									<ss:property id="newLabAffiliationCategory" label="Category"
+										description="The name of the new affiliation to be created"
+										value="#{userViewer.newLabAffiliation.affiliationCategory}"
+										editable="true">
+										<ui:define name="editableData">
+											<t:selectOneMenu id="affiliationCategoryMenu"
+												value="#{value}" styleClass="inputText selectMenu"
+												converter="#{affiliationCategoryConverter}">
+												<f:selectItems
+													value="#{userViewer.affiliationCategorySelections}" />
+											</t:selectOneMenu>
+										</ui:define>
+									</ss:property>
+								</ss:propertyGroup>
+							</t:panelGrid>
+							<t:commandButton id="addNewLabAffiliation" value="Add"
+								action="#{userViewer.addNewLabAffiliation}" />
+						</t:div>
 					</ui:define>
 				</ss:property>
 

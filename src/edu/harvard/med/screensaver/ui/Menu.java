@@ -14,6 +14,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -241,6 +242,12 @@ public class Menu extends AbstractBackingBean
   public String addScreeningRoomUser()
   {
     return _userViewer.editNewUser(new ScreeningRoomUser());
+  }
+  
+  @UIControllerMethod
+  public String addLabHead()
+  {
+    return _userViewer.editNewUser(new LabHead());
   }
   
   @Override
