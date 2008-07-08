@@ -9,8 +9,11 @@
 
 package edu.harvard.med.screensaver.model.users;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,11 +36,14 @@ import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.util.CryptoUtils;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import com.google.common.base.Join;
 
 
 /**
@@ -308,7 +314,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
   }
 
   /**
-   * Get the full name ("last, first').
+   * Get the full name "Last, First".
    * @return the full name
    */
   @Transient
@@ -318,7 +324,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
   }
 
   /**
-   * Get the full name ("first, last").
+   * Get the full name as "First Last".
    * @return the full name
    */
   @Transient
@@ -329,18 +335,23 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
 
   /**
    * Get the full name.
-   * @param lastFirst true if desired format is "Last, First", false if desiried format is "First Last"
+   * @param lastFirst true if desired format is "Last, First", false if desired format is "First Last"
    * @return the full name
    */
   @Transient
   public String getFullName(boolean lastFirst)
   {
+    List<String> nameParts = new ArrayList<String>();
+    if (!StringUtils.isEmpty(_firstName)) {
+      nameParts.add(_firstName);
+    }
+    if (!StringUtils.isEmpty(_lastName)) {
+      nameParts.add(_lastName);
+    }
     if (lastFirst) {
-      return _lastName + ", " + _firstName;
+      Collections.reverse(nameParts);
     }
-    else {
-      return _firstName + " " + _lastName;
-    }
+    return Join.join(lastFirst ? ", " : " ", nameParts);
   }
 
   /**

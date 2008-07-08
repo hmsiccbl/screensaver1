@@ -76,4 +76,34 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
       }
     });
   }
+  
+  
+  public void testFullName() 
+  {
+    ScreensaverUser user = new ScreeningRoomUser("First", "Last", null);
+    assertEquals("Last, First", user.getFullNameLastFirst());
+    assertEquals("First Last", user.getFullNameFirstLast());
+
+    user = new ScreeningRoomUser("First", "", null);
+    assertEquals("First", user.getFullNameLastFirst());
+    assertEquals("First", user.getFullNameFirstLast());
+    user = new ScreeningRoomUser("First", null, null);
+    assertEquals("First", user.getFullNameLastFirst());
+    assertEquals("First", user.getFullNameFirstLast());
+
+    user = new ScreeningRoomUser("", "Last", null);
+    assertEquals("Last", user.getFullNameLastFirst());
+    assertEquals("Last", user.getFullNameFirstLast());
+    user = new ScreeningRoomUser(null, "Last", null);
+    assertEquals("Last", user.getFullNameLastFirst());
+    assertEquals("Last", user.getFullNameFirstLast());
+
+    user = new ScreeningRoomUser("", "", null);
+    assertEquals("", user.getFullNameLastFirst());
+    assertEquals("", user.getFullNameFirstLast());
+    user = new ScreeningRoomUser(null, null, null);
+    assertEquals("", user.getFullNameLastFirst());
+    assertEquals("", user.getFullNameFirstLast());
+  }
+ 
 }
