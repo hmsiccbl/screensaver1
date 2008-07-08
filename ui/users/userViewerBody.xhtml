@@ -130,7 +130,8 @@
 					label="#{'Lab Affiliation'}"
 					description="The organization the user is affiliated with (usually via his/her lab)"
 					value="#{userViewer.user.lab.labAffiliation.affiliationName}"
-					editable="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}">
+					rendered="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}"
+					editable="true">
 					<ui:define name="editableData">
 						<t:selectOneMenu id="labAffiliationMenu"
 							value="#{userViewer.labAffiliation.value}"
