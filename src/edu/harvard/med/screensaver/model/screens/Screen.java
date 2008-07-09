@@ -330,7 +330,7 @@ public class Screen extends Study
    * @return the lab head
    */
   @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="labHeadId", nullable=false)
+  @JoinColumn(name="labHeadId")
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
@@ -350,17 +350,17 @@ public class Screen extends Study
       _labHead = labHead;
       return;
     }
-    if (labHead == null) {
-      throw new NullPointerException();
-    }
-    if (labHead.equals(_labHead)) {
+    if ((labHead == null && _labHead == null) ||
+      (labHead != null && labHead.equals(_labHead))) {
       return;
     }
     if (_labHead != null) {
       _labHead.getScreensHeaded().remove(this);
     }
     _labHead = labHead;
-    _labHead.getScreensHeaded().add(this);
+    if (_labHead != null) {
+      _labHead.getScreensHeaded().add(this);
+    }
   }
 
   /**
@@ -463,7 +463,9 @@ public class Screen extends Study
   public Set<ScreeningRoomUser> getAssociatedScreeningRoomUsers()
   {
     Set<ScreeningRoomUser> users = new HashSet<ScreeningRoomUser>();
-    users.add(getLabHead());
+    if (getLabHead() != null) {
+      users.add(getLabHead());
+    }
     users.add(getLeadScreener());
     users.addAll(getCollaborators());
     return users;

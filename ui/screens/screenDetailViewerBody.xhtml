@@ -45,9 +45,7 @@ TODO:
 					<t:commandButton id="submitLabHead" immediate="true"
 						styleClass="hiddenCommand" />
 					<t:selectOneMenu id="labNameMenu"
-						value="#{screenDetailViewer.labName.value}" required="true"
-						onchange="javascript:submit()" immediate="true"
-						valueChangeListener="#{screenDetailViewer.update}"
+						value="#{screenDetailViewer.labName.value}"
 						styleClass="inputText selectMenu">
 						<f:selectItems value="#{screenDetailViewer.labName.selectItems}" />
 					</t:selectOneMenu>

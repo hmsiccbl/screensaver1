@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -22,14 +22,14 @@ import org.joda.time.LocalDate;
 public class AssayInfoProducer
 {
   private static Logger log = Logger.getLogger(AssayInfoProducer.class);
-  
+
   public AssayInfo getAssayInfoForScreen(Screen screen)
   {
     AssayInfo assayInfo = new AssayInfo();
     assayInfo.setAssayName("ICCBL" + screen.getScreenNumber());
     assayInfo.setProtocolDescription(screen.getTitle());
     assayInfo.setPNote(screen.getSummary());
-    assayInfo.setInvestigator(screen.getLabHead().getLastName().toUpperCase());
+    assayInfo.setInvestigator(screen.getLabHead() == null ? "" : screen.getLabHead().getLastName().toUpperCase());
 
     String assayCategoryText = "";
     for (String keyword : screen.getKeywords()) {
@@ -45,20 +45,20 @@ public class AssayInfoProducer
         assayDate = statusItemDate;
       }
     }
-    
+
     assayInfo.setAssayDate(
       assayDate.getMonthOfYear() + "/" +
       assayDate.getDayOfMonth() + "/" +
       (assayDate.getYear()));
     assert assayDate.getYear() >= 1900 : "year should include century";
-    
+
     return assayInfo;
   }
 
   private void setAssayCategory(AssayInfo assayInfo, String assayCategoryText)
   {
     // TODO: the just HAS to be a better way to do this. July!
-    
+
     // NOTE: assayCategory is a CHAR(30) in NAPIS. some existing values are getting truncated in the
     // ICBG report.
     if (

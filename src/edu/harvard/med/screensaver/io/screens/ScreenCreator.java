@@ -122,7 +122,9 @@ public class ScreenCreator
                 log.info("screen result successfully imported");
               }
             }
-            dao.persistEntity(screen.getLabHead());
+            if (screen.getLabHead() != null) {
+              dao.persistEntity(screen.getLabHead());
+            }
             dao.persistEntity(screen.getLeadScreener());
             dao.persistEntity(screen);
           }

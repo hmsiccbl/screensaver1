@@ -551,7 +551,9 @@ public class CherryPickRequestViewer extends AbstractBackingBean implements Edit
     };
 
     SortedSet<ScreeningRoomUser> candidateRequestors = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
-    candidateRequestors.add(_cherryPickRequest.getScreen().getLabHead());
+    if (_cherryPickRequest.getScreen().getLabHead() != null) {
+      candidateRequestors.add(_cherryPickRequest.getScreen().getLabHead());
+    }
     candidateRequestors.add(_cherryPickRequest.getScreen().getLeadScreener());
     candidateRequestors.addAll(_cherryPickRequest.getScreen().getCollaborators());
     _requestedBy = new UISelectOneEntityBean<ScreeningRoomUser>(candidateRequestors,

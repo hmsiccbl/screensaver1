@@ -223,15 +223,12 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
     {
       public void runTransaction()
       {
-        ScreeningRoomUser labHead = getLabName().getSelection();
         ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
-        if (labHead != null) {
-          leadScreenerCandidates.add(labHead);
-          leadScreenerCandidates.addAll(labHead.getLab().getLabMembers());
-        }
-        if (_study.getLeadScreener() == null) {
+        leadScreenerCandidates.addAll(_dao.findAllEntitiesOfType(ScreeningRoomUser.class));
+        if (_study == null || _study.getLeadScreener() == null) {
           leadScreenerCandidates.add(null);
         }
+        Collections.sort(leadScreenerCandidates, ScreensaverUserComparator.getInstance());
         _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates,
                                                                      _study.getLeadScreener(),
                                                                      _dao) {

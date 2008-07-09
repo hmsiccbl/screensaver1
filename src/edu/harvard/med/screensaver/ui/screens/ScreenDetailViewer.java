@@ -441,10 +441,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     }
     setScreen(screen);
     if (leadScreener != null) {
-      if (leadScreener.getLab().getLabHead() == null) {
-        showMessage("screens.leadScreenerRequiresLab");
-        return REDISPLAY_PAGE_ACTION_RESULT;
-      }
       leadScreener = _dao.reloadEntity(leadScreener,
                                        false,
                                        "labHead",

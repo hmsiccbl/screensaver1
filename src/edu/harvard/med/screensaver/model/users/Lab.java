@@ -18,7 +18,10 @@ import org.apache.log4j.Logger;
  * Abstraction of a Lab. At the physical schema layer, a lab is represented by a
  * LabHead. However, at the logical entity model layer, it is conceptually
  * clearer to model a Lab as its own class. This allows the lab head and its lab
- * members to all share and reference the same Lab object.
+ * members to all share and reference the same Lab object. In particular, this
+ * allows the lab head to be determined for either a lab member or a lab head in
+ * the same way:
+ * <code>labMember.getLab().getLabHead() == labHead.getLab().getLabHead()</code>
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */

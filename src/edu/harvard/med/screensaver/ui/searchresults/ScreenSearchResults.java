@@ -90,7 +90,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     Set<Screen> screens = new HashSet<Screen>();
     if (getScreensaverUser() instanceof ScreeningRoomUser) {
       ScreeningRoomUser screener = (ScreeningRoomUser) getScreensaverUser();
-      if (screener instanceof LabHead) { 
+      if (screener instanceof LabHead) {
         screens.addAll(((LabHead) screener).getScreensHeaded());
       }
       screens.addAll(screener.getScreensLed());

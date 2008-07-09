@@ -84,7 +84,9 @@ public class BoutrosAnnotationImporter
                                                STUDY_NUMBER);
         if (study != null) {
           log.info("deleting existing screen " + study);
-          study.getLabHead().getScreensHeaded().remove(study);
+          if (study.getLabHead() != null) {
+            study.getLabHead().getScreensHeaded().remove(study);
+          }
           study.getLeadScreener().getScreensLed().remove(study);
           dao.deleteEntity(study);
         }
@@ -102,7 +104,7 @@ public class BoutrosAnnotationImporter
                            LAB_HEAD_EMAIL,
                            "mboutros",
                            studyUserAccountPassword,
-                           true, 
+                           true,
                            labAffiliation,
                            dao);
           ScreeningRoomUser leadScreener = findOrCreateUser("Thomas",
