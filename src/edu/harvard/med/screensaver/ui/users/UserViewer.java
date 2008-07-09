@@ -67,6 +67,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       return ((Integer) r1.ordinal()).compareTo(r2.ordinal());
     }
   };
+  private static final AffiliationCategory DEFAULT_NEW_LAB_AFFILIATION_CATEGORY = AffiliationCategory.HMS;
 
 
   // instance data members
@@ -310,7 +311,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   {
     if (_newLabAffiliation == null) {
       _newLabAffiliation = new LabAffiliation();
-      _newLabAffiliation.setAffiliationCategory(AffiliationCategory.OTHER);
+      _newLabAffiliation.setAffiliationCategory(DEFAULT_NEW_LAB_AFFILIATION_CATEGORY);
     }
     return _newLabAffiliation;
   }
