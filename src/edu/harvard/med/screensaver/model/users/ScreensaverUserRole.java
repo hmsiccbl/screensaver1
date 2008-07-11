@@ -42,7 +42,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   // 2) guest accounts to be created (i.e., with no other roles) 
   SCREENSAVER_USER("screensaverUser", "Screensaver User", "Basic role for users, admins, and guests that have login privileges to Screensaver.  The person may or may not be a user of the screening facility."),
 
-  READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", SCREENSAVER_USER, "Administrators that can view and search over data of all categories, except screen billing information."),
+  READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", "Administrators that can view and search over data of all categories, except screen billing information."),
   LIBRARIES_ADMIN("librariesAdmin", "Libraries Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify libraries."),
   USERS_ADMIN("usersAdmin", "Users Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify user accounts that are not lab heads."),
   LAB_HEADS_ADMIN("labHeadsAdmin", "Lab Heads Administrator", USERS_ADMIN, "Administrators that can create and modify user accounts that are lab heads."),
@@ -56,7 +56,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   RNAI_SCREENER("rnaiScreener", "RNAi Screener", SCREENER, "Users that are conducting RNAi screens at the facility."),
   // note: nonScreeningUser is *not* mutually exclusive with screener roles; user may have been a nonScreeningUser initially, then became screener later on
   NON_SCREENER("nonScreeningUser", "Non-screening User", "Users that are using the facility for purposes other than conducting a screen."),
-  MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemist User", SCREENSAVER_USER, "Users that are medicinal chemists."),
+  MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemist User", "Users that are medicinal chemists."),
 
   // note: developers do not automatically get admin roles (other than readEverythingAdmin), allowing developers to restrict themselves from mutating data in production environments
   DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information.")
