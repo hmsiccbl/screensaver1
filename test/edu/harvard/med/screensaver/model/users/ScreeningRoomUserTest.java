@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
 
@@ -64,10 +66,8 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     genericEntityDao.saveOrUpdateEntity(user);
 
     ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-    assertEquals(new HashSet<ScreensaverUserRole>(Arrays.asList(ScreensaverUserRole.SCREENSAVER_USER,
-                                                                ScreensaverUserRole.RNAI_SCREENER, 
-                                                                ScreensaverUserRole.SCREENER, 
-                                                                ScreensaverUserRole.SCREENSAVER_USER)),
+    assertEquals(new HashSet<ScreensaverUserRole>(Arrays.asList(ScreensaverUserRole.RNAI_SCREENER, 
+                                                                ScreensaverUserRole.SCREENER)),
                  user2.getScreensaverUserRoles());
 
     try {
@@ -233,6 +233,26 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
       fail("expected BusinessRuleViolationException when attempting to change classification of a lab head");
     }
     catch (BusinessRuleViolationException e) {}
+  }
+  
+  public void testAllAssociatedScreens()
+  {
+    LabHead labHead = new LabHead("Lab", "Head", "lab_head@hms.harvard.edu", new LabAffiliation("LabAffiliation", AffiliationCategory.HMS));
+    ScreeningRoomUser labMember1 = new ScreeningRoomUser("Lab", "Member1", "lab_member@hms.harvard.edu");
+    ScreeningRoomUser labMember2 = new ScreeningRoomUser("Lab", "Member2", "lab_member@hms.harvard.edu");
+    labMember1.setLab(labHead.getLab());
+    
+    Screen screen1 = new Screen(labMember1, labHead, 1, ScreenType.RNAI, "1");
+    Screen screen2 = new Screen(labHead, labHead, 1, ScreenType.RNAI, "2");
+    Screen screen3 = new Screen(labMember1, null, 1, ScreenType.RNAI, "3");
+    Screen screen4 = new Screen(labMember1, null, 1, ScreenType.RNAI, "4");
+    screen4.addCollaborator(labMember2);
+    Screen screen5 = new Screen(labMember2, labHead, 1, ScreenType.RNAI, "5");
+    screen5.addCollaborator(labMember1);
+    
+    assertEquals(new HashSet<Screen>(Arrays.asList(screen1, screen2, screen5)), labHead.getAllAssociatedScreens());
+    assertEquals(new HashSet<Screen>(Arrays.asList(screen1, screen3, screen4, screen5)), labMember1.getAllAssociatedScreens());
+    assertEquals(new HashSet<Screen>(Arrays.asList(screen4, screen5)), labMember2.getAllAssociatedScreens());
   }
 
   private void initLab()

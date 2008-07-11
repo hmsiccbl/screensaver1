@@ -590,6 +590,7 @@
     <constructor-arg ref="usersDao" />
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="staffBrowser" />
+    <constructor-arg ref="screensBrowser" />
     <aop:scoped-proxy/>
   </bean>
 

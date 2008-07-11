@@ -233,7 +233,7 @@ public class Screen extends Study
     String abaseStudyId,
     String abaseProtocolId)
   {
-    if (leadScreener == null || labHead == null) {
+    if (leadScreener == null) {
       throw new NullPointerException();
     }
     _leadScreener = leadScreener;
@@ -242,7 +242,9 @@ public class Screen extends Study
     _screenType = screenType;
     _title = title;
     _leadScreener.getScreensLed().add(this);
-    _labHead.getScreensHeaded().add(this);
+    if (_labHead != null) {
+      _labHead.getScreensHeaded().add(this);
+    }
     _studyType = studyType;
     _dataMeetingScheduled = dataMeetingScheduled;
     _dataMeetingComplete = dataMeetingComplete;
@@ -530,6 +532,15 @@ public class Screen extends Study
   public SortedSet<StatusItem> getStatusItems()
   {
     return _statusItems;
+  }
+  
+  @Transient
+  public StatusItem getCurrentStatusItem()
+  {
+    if (_statusItems.isEmpty()) {
+      return null;
+    }
+    return _statusItems.last();
   }
 
   /**

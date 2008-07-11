@@ -279,6 +279,18 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
+   * @return a Set of Screens comprised of the screens this user has led and collaborated on.
+   */
+  @Transient
+  public Set<Screen> getAllAssociatedScreens()
+  {
+    Set<Screen> screens = new HashSet<Screen>();
+    screens.addAll(getScreensLed());
+    screens.addAll(getScreensCollaborated());
+    return screens;
+  }
+
+  /**
    * Get the user classification.
    * @return the user classification
    */

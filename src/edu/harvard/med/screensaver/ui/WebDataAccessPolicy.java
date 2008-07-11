@@ -391,11 +391,8 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
     if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screeningUser = (ScreeningRoomUser) user;
-      return
-      screeningUser.getScreensLed().contains(screen) ||
-      screeningUser.getScreensCollaborated().contains(screen) ||
-      ((user instanceof LabHead) ? ((LabHead) screeningUser).getScreensHeaded().contains(screen) : false);
+      ScreeningRoomUser screener = (ScreeningRoomUser) user;
+      return screener.getAllAssociatedScreens().contains(screen);
     }
     return false;
   }

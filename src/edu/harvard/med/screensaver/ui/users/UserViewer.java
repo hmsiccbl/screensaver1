@@ -14,7 +14,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -25,6 +27,8 @@ import javax.faces.model.SelectItem;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.Lab;
@@ -37,11 +41,15 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
+import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
@@ -49,6 +57,9 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * User Viewer backing bean.
@@ -86,6 +97,10 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private UISelectOneEntityBean<LabHead> _labName;
   private UISelectOneEntityBean<LabAffiliation> _labAffiliation;
   private LabAffiliation _newLabAffiliation;
+  private HashMap<ScreenType,DataModel> _screensDataModel;
+  private DataModel _labMembersDataModel;
+  private DataModel _screenCollaboratorsDataModel;
+  private ScreenSearchResults _screensBrowser;
 
 
   // constructors
@@ -102,7 +117,8 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
                     GenericEntityDAO dao,
                     UsersDAO usersDao,
                     ScreenerSearchResults screenerSearchResults,
-                    StaffSearchResults staffSearchResults)
+                    StaffSearchResults staffSearchResults,
+                    ScreenSearchResults screensBrowser)
   {
     _thisProxy = _userViewerProxy;
     _screenDetailViewer = screenDetailViewer;
@@ -110,6 +126,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _usersDao = usersDao;
     _screenerSearchResults = screenerSearchResults;
     _staffSearchResults = staffSearchResults;
+    _screensBrowser = screensBrowser;
   }
 
 
@@ -123,6 +140,15 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public ScreensaverUser getUser()
   {
     return _user;
+  }
+  
+  /**
+   * @return true if the logged in user is the same as the user being shown by the user viewer
+   * 
+   */
+  public boolean isMe()
+  {
+    return _user.equals(getScreensaverUser());
   }
   
   public boolean isScreeningRoomUserViewMode()
@@ -176,9 +202,9 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
                   "labHead.labAffiliation",
                   "labAffiliation",
                   "labMembers");
-        _dao.need(user, "screensLed");
-        _dao.need(user, "screensHeaded");
-        _dao.need(user, "screensCollaborated");
+        _dao.need(user, "screensLed.statusItems");
+        _dao.need(user, "screensHeaded.statusItems");
+        _dao.need(user, "screensCollaborated.statusItems");
         _dao.need(user, "checklistItems");
       }
     }
@@ -350,7 +376,76 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     return _newUserRole;
   }
 
+  public DataModel getRnaiScreensDataModel()
+  {
+    initScreensDataModels();
+    return _screensDataModel.get(ScreenType.RNAI);
+  }
 
+  public DataModel getSmallMoleculeScreensDataModel()
+  {
+    initScreensDataModels();
+    return _screensDataModel.get(ScreenType.SMALL_MOLECULE);
+  }
+
+  private void initScreensDataModels()
+  {
+    if (_screensDataModel == null && isScreeningRoomUserViewMode())
+    {
+      List<ScreenAndRole> screensAndRoles = new ArrayList<ScreenAndRole>();
+      for (Screen screen : getScreeningRoomUser().getAllAssociatedScreens()) {
+        // note: if both Lead Screener and PI, show Lead Screener
+        String role = 
+        getScreeningRoomUser().getScreensLed().contains(screen) ? "Lead Screener" :
+          (getLabHead() != null && getLabHead().getScreensHeaded().contains(screen)) ? "Lab Head (PI)" : 
+            "Collaborator";
+        screensAndRoles.add(new ScreenAndRole(screen, role));
+      }
+      Multimap<ScreenType,ScreenAndRole> screenType2ScreenAndRole = new HashMultimap<ScreenType,ScreenAndRole>();
+      for (ScreenAndRole screenAndRole : screensAndRoles) {
+        screenType2ScreenAndRole.put(screenAndRole.getScreen().getScreenType(),
+                                     screenAndRole);
+      }
+      _screensDataModel = new HashMap<ScreenType,DataModel>();
+      for (ScreenType screenType : ScreenType.values()) {
+        if (screenType2ScreenAndRole.containsKey(screenType)) {
+          ArrayList<ScreenAndRole> screensAndRolesOfType = new ArrayList<ScreenAndRole>(screenType2ScreenAndRole.get(screenType));
+          Collections.sort(screensAndRolesOfType);
+          _screensDataModel.put(screenType, 
+                                new ListDataModel(screensAndRolesOfType));
+        }
+      }
+    }
+  }
+  
+  public DataModel getLabMembersDataModel()
+  {
+    if (_labMembersDataModel == null && isScreeningRoomUserViewMode())
+    {
+      List<ScreeningRoomUser> labMembers = new ArrayList<ScreeningRoomUser>();
+      labMembers.add(getScreeningRoomUser().getLab().getLabHead());
+      labMembers.addAll(getScreeningRoomUser().getLab().getLabMembers());
+      labMembers.remove(getScreeningRoomUser());
+      _labMembersDataModel = new ListDataModel(labMembers);
+    }
+    return _labMembersDataModel;
+  }
+
+  public DataModel getScreenCollaboratorsDataModel()
+  {
+    if (_screenCollaboratorsDataModel == null && isScreeningRoomUserViewMode())
+    {
+      Set<ScreeningRoomUser> collaborators = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
+      for (Screen screen : getScreeningRoomUser().getAllAssociatedScreens()) {
+        collaborators.addAll(screen.getCollaborators());
+      }
+      collaborators.remove(getScreeningRoomUser());
+      _screenCollaboratorsDataModel = new ListDataModel(new ArrayList<ScreeningRoomUser>(collaborators));
+    }
+    return _screenCollaboratorsDataModel;
+  }
+
+  
   /* JSF Application methods */
 
   @UIControllerMethod
@@ -416,7 +511,9 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       showMessage("restrictedOperation", "add a new user");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-
+    // by default, we add login privileges for any new user
+    newUser.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+    
     setUser(newUser);
     _isEditMode = true;
     return VIEW_USER;
@@ -486,6 +583,23 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   @UIControllerMethod
   public String addScreen()
   {
+    return doAddScreen(null);
+  }
+  
+  @UIControllerMethod
+  public String addRnaiScreen()
+  {
+    return doAddScreen(ScreenType.RNAI);
+  }
+
+  @UIControllerMethod
+  public String addSmallMoleculeScreen()
+  {
+    return doAddScreen(ScreenType.SMALL_MOLECULE);
+  }
+
+  private String doAddScreen(ScreenType screenType)
+  {
     if (!isScreeningRoomUserViewMode()) {
       reportApplicationError("cannot create screen for administrator user");
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -494,8 +608,37 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       reportApplicationError("cannot create screen while editing user");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    return _screenDetailViewer.editNewScreen(getScreeningRoomUser());
+    return _screenDetailViewer.editNewScreen(getScreeningRoomUser(), 
+                                             screenType);
   }
+  
+  @UIControllerMethod
+  public String viewAllScreens()
+  {
+    return doViewAllScreens(null);
+  }
+  
+  @UIControllerMethod
+  public String viewAllRnaiScreens()
+  {
+    return doViewAllScreens(ScreenType.RNAI);
+  }
+
+  @UIControllerMethod
+  public String viewAllSmallMoleculeScreens()
+  {
+    return doViewAllScreens(ScreenType.SMALL_MOLECULE);
+  }
+
+  private String doViewAllScreens(ScreenType screenType)
+  {
+    _screensBrowser.searchScreensForUser(getScreeningRoomUser());
+    if (screenType != null) {
+      _screensBrowser.getColumnManager().getColumn("Screen Type").clearCriteria().addCriterion(new Criterion(Operator.EQUAL, screenType));
+    }
+    return BROWSE_SCREENS;
+  }
+  
   
   // private methods
 
@@ -507,6 +650,9 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _labName = null;
     _labAffiliation = null;
     _newLabAffiliation = null;
+    _screensDataModel = null;
+    _labMembersDataModel = null;
+    _screenCollaboratorsDataModel = null;
   }
 }
 

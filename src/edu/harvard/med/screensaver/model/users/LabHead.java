@@ -159,6 +159,17 @@ public class LabHead extends ScreeningRoomUser
     return false;
   }
 
+  /**
+   * @return a Set of Screens comprised of the screens this user has headed, led and collaborated on.
+   */
+  @Transient
+  @Override
+  public Set<Screen> getAllAssociatedScreens()
+  {
+    Set<Screen> screens = super.getAllAssociatedScreens();
+    screens.addAll(getScreensHeaded());
+    return screens;
+  }
 
   // private methods
 

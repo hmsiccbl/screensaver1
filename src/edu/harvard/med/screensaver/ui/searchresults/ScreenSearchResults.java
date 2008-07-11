@@ -30,7 +30,6 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
@@ -85,25 +84,17 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     _dao = dao;
   }
 
-  public void searchScreensForUser(ScreensaverUser screensaverUser)
+  public void searchScreensForUser(ScreeningRoomUser screener)
   {
     Set<Screen> screens = new HashSet<Screen>();
-    if (getScreensaverUser() instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) getScreensaverUser();
-      if (screener instanceof LabHead) {
-        screens.addAll(((LabHead) screener).getScreensHeaded());
-      }
-      screens.addAll(screener.getScreensLed());
-      screens.addAll(screener.getScreensCollaborated());
-      if (screens.isEmpty()) {
-        showMessage("screens.noScreensForUser");
-      }
-      else {
-        initialize(new EntitySetDataFetcher<Screen,Integer>(Screen.class, CollectionUtils.<Integer>entityIds(screens), _dao));
-        // default to descending sort order on screen number
-        getColumnManager().setSortAscending(false);
-      }
-
+    screens.addAll(screener.getAllAssociatedScreens());
+    if (screens.isEmpty()) {
+      showMessage("screens.noScreensForUser");
+    }
+    else {
+      initialize(new EntitySetDataFetcher<Screen,Integer>(Screen.class, CollectionUtils.<Integer>entityIds(screens), _dao));
+      // default to descending sort order on screen number
+      getColumnManager().setSortAscending(false);
     }
   }
 

@@ -423,7 +423,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
 
   @UIControllerMethod
   @Transactional
-  public String editNewScreen(ScreeningRoomUser leadScreener)
+  public String editNewScreen(ScreeningRoomUser leadScreener, ScreenType screenType)
   {
     ScreensaverUser user = getScreensaverUser();
     if (!(user instanceof AdministratorUser &&
@@ -433,12 +433,8 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     }
 
     Screen screen = new Screen();
-    if (screen.getScreenNumber() == null) {
-      screen.setScreenNumber(_screenDao.findNextScreenNumber());
-    }
-    if (screen.getStudyType() == null) {
-      screen.setStudyType(StudyType.IN_VITRO);
-    }
+    screen.setScreenNumber(_screenDao.findNextScreenNumber());
+    screen.setStudyType(StudyType.IN_VITRO);
     setScreen(screen);
     if (leadScreener != null) {
       leadScreener = _dao.reloadEntity(leadScreener,
@@ -452,7 +448,9 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
       getLabName().setSelection(leadScreener.getLab().getLabHead());
       getLeadScreener().setSelection(leadScreener);
       // infer appropriate screen type from user roles
-      ScreenType screenType = leadScreener.isRnaiUser() && !leadScreener.isSmallMoleculeUser() ? ScreenType.RNAI : !leadScreener.isRnaiUser() && leadScreener.isSmallMoleculeUser() ? ScreenType.SMALL_MOLECULE : null;
+      if (screenType == null) {
+        screenType = leadScreener.isRnaiUser() && !leadScreener.isSmallMoleculeUser() ? ScreenType.RNAI : !leadScreener.isRnaiUser() && leadScreener.isSmallMoleculeUser() ? ScreenType.SMALL_MOLECULE : null;
+      }
       screen.setScreenType(screenType);
     }
     _isEditMode = true;

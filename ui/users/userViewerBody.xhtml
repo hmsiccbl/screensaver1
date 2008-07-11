@@ -15,7 +15,10 @@
 
 			<t:panelGroup id="commandPanel" rendered="#{userViewer.editable}">
 				<ss:editSaveCancel viewer="#{userViewer}" />
-          <t:commandButton action="#{userViewer.addScreen}"
+				<t:commandButton id="viewAllScreensCommand"
+					value="Browse Screens" action="#{userViewer.viewAllScreens}"
+					styleClass="command" />
+				<t:commandButton action="#{userViewer.addScreen}"
             id="addScreenCommand" value="Add Screen"
             rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
             styleClass="command" />
@@ -208,6 +211,46 @@
 						</ss:collectionTable>
 					</ui:define>
 				</ss:property>
+
+				<ss:property id="smallMoleculeScreens" label="Small Molecule Screens"
+					description="The small molecule screens this user is associated with"
+					rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me)}">
+					<ui:define name="data">
+						<ss:userScreensTable
+							screensDataModel="#{userViewer.smallMoleculeScreensDataModel}"
+							screenTitleColumnHeader="A screen for compounds that..." addAction="" />
+					</ui:define>
+					<ui:define name="valueFooter">
+						<t:commandButton id="viewAllSmallMoleculeScreensCommand"
+							value="Browse..."
+							action="#{userViewer.viewAllSmallMoleculeScreens}"
+							rendered="#{userViewer.smallMoleculeScreensDataModel.rowCount > 0}"
+							styleClass="command" />
+						<t:commandButton id="addSmallMoleculeScreenCommand"
+							value="Add Small Molecule Screen"
+							action="#{userViewer.addSmallMoleculeScreen}"
+							styleClass="command" />
+					</ui:define>
+				</ss:property>
+
+        <ss:property id="rnaiScreens" label="RNAi Screens"
+          description="The RNAi screens this user is associated with"
+          rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me)}">
+          <ui:define name="data">
+						<ss:userScreensTable
+							screensDataModel="#{userViewer.rnaiScreensDataModel}"
+							screenTitleColumnHeader="A screen for RNAi reagents that..."
+							addAction="" />
+					</ui:define>
+          <ui:define name="valueFooter">
+						<t:commandButton id="viewAllRnaiScreensCommand" value="Browse..."
+							action="#{userViewer.viewAllRnaiScreens}"
+							rendered="#{userViewer.rnaiScreensDataModel.rowCount > 0}"
+							styleClass="command" />
+						<t:commandButton id="addRnaiScreenCommand" value="Add RNAi Screen"
+							action="#{userViewer.addRnaiScreen}" styleClass="command" />
+					</ui:define>
+        </ss:property>
 
 			</t:panelGrid>
 		</t:div>

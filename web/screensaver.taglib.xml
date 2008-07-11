@@ -30,6 +30,11 @@
         <tag-name>user</tag-name>
         <source>../users/user.xhtml</source>
     </tag>
+    
+    <tag>
+        <tag-name>userScreensTable</tag-name>
+        <source>../users/userScreensTable.xhtml</source>
+    </tag>
 
     <tag>
         <tag-name>labName</tag-name>

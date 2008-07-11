@@ -184,7 +184,11 @@ public class Menu extends AbstractBackingBean
   @UIControllerMethod
   public String browseMyScreens()
   {
-    _screensBrowser.searchScreensForUser(getScreensaverUser());
+    if (!(getScreensaverUser() instanceof ScreeningRoomUser)) {
+      reportSystemError("invalid user type");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    _screensBrowser.searchScreensForUser((ScreeningRoomUser) getScreensaverUser());
     return BROWSE_MY_SCREENS;
   }
 
@@ -235,7 +239,7 @@ public class Menu extends AbstractBackingBean
   @UIControllerMethod
   public String addScreen()
   {
-    return _screenDetailViewer.editNewScreen(null);
+    return _screenDetailViewer.editNewScreen(null, null);
   }
   
   @UIControllerMethod
