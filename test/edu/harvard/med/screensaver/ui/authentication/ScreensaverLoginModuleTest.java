@@ -27,6 +27,7 @@ import edu.harvard.med.authentication.AuthenticationResponseException;
 import edu.harvard.med.authentication.AuthenticationResult;
 import edu.harvard.med.authentication.Credentials;
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -146,8 +147,9 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     _validUser.setECommonsId(TEST_VALID_ECOMMONS_USER_LOGIN);
     _validUser.setLoginId(TEST_VALID_SCREENSAVER_USER_LOGIN);
     _validUser.updateScreensaverPassword(new String(TEST_VALID_SCREENSAVER_PASSWORD));
-    _validUser.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
-    _validUser.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+    _validUser.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+    _validUser.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+    _validUser.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENER);
     genericEntityDao.saveOrUpdateEntity(_validUser);
   }
   
@@ -255,6 +257,35 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
     }
   }
   
+  public void testLoginValidUserWithoutLoginPrivileges()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ScreensaverUser user = genericEntityDao.findEntityByProperty(ScreensaverUser.class,
+                                                                     "email",
+                                                                     _validUser.getEmail());
+        user.getScreensaverUserRoles().remove(ScreensaverUserRole.SCREENSAVER_USER);
+      }
+    });
+
+    try {
+      screensaverLoginModule.initialize(_subject,
+                                        _mockCallbackHandlerForValidScreensaverUserAndPassword,
+                                        new HashMap(),
+                                        new HashMap());
+      screensaverLoginModule.login();
+      fail("expected login failure");
+    }
+    catch (FailedLoginException e) {
+      assertEquals("principals count", 0, _subject.getPrincipals().size());
+      // test passed!
+    }
+    catch (LoginException e) {
+      e.printStackTrace();
+      fail("login failed due to exception " + e.getMessage());
+    }
+  }
   
   public void testLoginWithAbort()
   {
@@ -272,15 +303,17 @@ public class ScreensaverLoginModuleTest extends AbstractSpringTest
 
     boolean commitResult = screensaverLoginModule.commit();
     assertTrue("LoginModule's commit succeeded", commitResult);
-    assertEquals("principals count", 4, _subject.getPrincipals().size());
+    assertEquals("principals count", 5, _subject.getPrincipals().size());
     assertTrue("subject contains \"user\" Principal",
                _subject.getPrincipals().contains(new ScreensaverUserPrincipal(_validUser)));
-    assertTrue("subject contains user role screeningRoomUser Principal",
-               _subject.getPrincipals().contains(ScreensaverUserRole.SCREENING_ROOM_USER));
+    assertTrue("subject contains user role screensaverUser Principal",
+               _subject.getPrincipals().contains(ScreensaverUserRole.SCREENSAVER_USER));
+    assertTrue("subject contains user role screener Principal",
+               _subject.getPrincipals().contains(ScreensaverUserRole.SCREENER));
     assertTrue("subject contains user role smallMoleculeScreeningRoomUser Principal",
-                 _subject.getPrincipals().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER));
+                 _subject.getPrincipals().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENER));
     assertTrue("subject contains user role rnaiScreeningRoomUser Principal",
-               _subject.getPrincipals().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER));
+               _subject.getPrincipals().contains(ScreensaverUserRole.RNAI_SCREENER));
     assertFalse("subject does not contain user role userAdmin Principal",
                 _subject.getPrincipals().contains(ScreensaverUserRole.USERS_ADMIN));
 

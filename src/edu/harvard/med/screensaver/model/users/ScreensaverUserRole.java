@@ -37,7 +37,12 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
 
   // the vocabulary
 
-  READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", "Administrators that can view and search over data of all categories, except screen billing information."),
+  // note: having the root 'screensaverUser' role allows:
+  // 1) accounts to be activated and deactivated
+  // 2) guest accounts to be created (i.e., with no other roles) 
+  SCREENSAVER_USER("screensaverUser", "Screensaver User", "Basic role for users, admins, and guests that have login privileges to Screensaver.  The person may or may not be a user of the screening facility."),
+
+  READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", SCREENSAVER_USER, "Administrators that can view and search over data of all categories, except screen billing information."),
   LIBRARIES_ADMIN("librariesAdmin", "Libraries Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify libraries."),
   USERS_ADMIN("usersAdmin", "Users Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify user accounts that are not lab heads."),
   LAB_HEADS_ADMIN("labHeadsAdmin", "Lab Heads Administrator", USERS_ADMIN, "Administrators that can create and modify user accounts that are lab heads."),
@@ -45,10 +50,15 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   SCREEN_RESULTS_ADMIN("screenResultsAdmin", "Screen Results Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screen results."),
   CHERRY_PICK_REQUESTS_ADMIN("cherryPickRequestsAdmin", "Cherry Pick Requests Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
   BILLING_ADMIN("billingAdmin", "Billing Information Administrator", SCREENS_ADMIN, "Administrators that can view, create, and modify billing information for a screen."),
-  SCREENING_ROOM_USER("screeningRoomUser", "Screening Room User", "Users that have permission to view libraries and studies, but not screen information."),
-  SMALL_MOLECULE_SCREENING_ROOM_USER("smallMoleculeScreeningRoomUser", "Small Molecule Screening Room User", SCREENING_ROOM_USER, "Users that have permission to view and search over non-administrative information for all small molecule screens, and associated public screen results'."),
-  RNAI_SCREENING_ROOM_USER("rnaiScreeningRoomUser", "RNAi Screening Room User", SCREENING_ROOM_USER, "Users that have permission to view and search over non-administrative information for all RNAi screens, and associated public screen results"),
-  MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemist User", SCREENING_ROOM_USER, "Users that are medicinal chemists."),
+
+  SCREENER("screener", "Screener", "Generic role for  users that are performing screens."),
+  SMALL_MOLECULE_SCREENER("smallMoleculeScreener", "Small Molecule Screener", SCREENER, "Users that are conducting small molecule screens at the facility.'."),
+  RNAI_SCREENER("rnaiScreener", "RNAi Screener", SCREENER, "Users that are conducting RNAi screens at the facility."),
+  // note: nonScreeningUser is *not* mutually exclusive with screener roles; user may have been a nonScreeningUser initially, then became screener later on
+  NON_SCREENER("nonScreeningUser", "Non-screening User", "Users that are using the facility for purposes other than conducting a screen."),
+  MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemist User", SCREENSAVER_USER, "Users that are medicinal chemists."),
+
+  // note: developers do not automatically get admin roles (other than readEverythingAdmin), allowing developers to restrict themselves from mutating data in production environments
   DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information.")
   ;
 

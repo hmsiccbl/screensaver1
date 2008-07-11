@@ -349,7 +349,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   @Transient
   public boolean isRnaiUser()
   {
-    return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENER);
   }
 
   /**
@@ -359,7 +359,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   @Transient
   public boolean isSmallMoleculeUser()
   {
-    return getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
   }
 
 

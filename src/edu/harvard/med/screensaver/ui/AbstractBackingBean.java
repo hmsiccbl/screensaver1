@@ -183,7 +183,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   public boolean isScreener()
   {
-    return isUserInRole(ScreensaverUserRole.SCREENING_ROOM_USER);
+    return isUserInRole(ScreensaverUserRole.SCREENER);
   }
 
   // TODO: consider moving to the Login Bean

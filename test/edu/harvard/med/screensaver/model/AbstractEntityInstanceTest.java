@@ -75,6 +75,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
 
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
@@ -120,7 +121,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
   public void testEqualsAndHashCode()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    initSchema();
     E transientEntity = _bean;
     Set<E> set = new HashSet<E>();
     set.add(transientEntity);
@@ -562,7 +563,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       // for these tests
       if (propertyType.equals(ScreensaverUserRole.class)) {
         if (beanClass.isAssignableFrom(ScreeningRoomUser.class)) {
-          testValue = ScreensaverUserRole.RNAI_SCREENING_ROOM_USER;
+          testValue = ScreensaverUserRole.RNAI_SCREENER;
         }
         else {
           testValue = ScreensaverUserRole.BILLING_ADMIN;
@@ -736,10 +737,9 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       });
   }
 
-
   protected void createPersistentBeanForTest()
   {
-    schemaUtil.truncateTablesOrCreateSchema();
+    initSchema();
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -747,6 +747,14 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
         _bean = newInstance(_entityClass, true);
       }
     });
+  }
+
+  private void initSchema()
+  {
+//    if (!_initializked) {
+      schemaUtil.truncateTablesOrCreateSchema();
+//      _initialized = true;
+//    }
   }
 
   protected void persistEntityNetwork(final AbstractEntity root)

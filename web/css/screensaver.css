@@ -77,6 +77,11 @@ form {
 	border: 1px;
 }
 
+.eyeCatcher {
+	color: fuchsia;
+	background-color: yellow;
+}
+
 a,a:link,a:visited,a:active {
 	color: inherit;
 	background-color: inherit;

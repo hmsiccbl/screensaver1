@@ -184,13 +184,14 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
     Connection connection = session.connection();
 
     try {
-      String sql = "TRUNCATE TABLE " + Join.join(",", getSchemaTableNames());
-      if (sql.equals("TRUNCATE TABLE ")) { // no tables in the schema
+      List<String> tables = getSchemaTableNames();
+      if (tables.isEmpty()) {
         createSchema();
         return;
       }
 
       Statement statement = connection.createStatement();
+      String sql = "TRUNCATE TABLE " + Join.join(",", tables);
       statement.execute(sql);
       statement.close();
 

@@ -39,7 +39,7 @@ public class LabHeadTest extends AbstractEntityInstanceTest<LabHead>
 
   public void testLabHeadClassificationImmutable()
   {
-    ScreeningRoomUserTest.initLab(genericEntityDao);
+    ScreeningRoomUserTest.initLab(genericEntityDao, schemaUtil);
     ScreeningRoomUser labHead =
       genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
                                             "lastName",

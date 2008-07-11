@@ -167,10 +167,10 @@ public class ScreenSynchronizer
   private void addScreensaverUserRoleForScreenType(ScreensaverUser user, Screen screen)
   {
     if (screen.getScreenType().equals(ScreenType.RNAI)) {
-      user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+      user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENER);
     }
     else if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-      user.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER);
+      user.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
     }
   }
 

@@ -65,6 +65,7 @@ public class ScreensaverLoginModule implements LoginModule
   private static final Logger log = Logger.getLogger(ScreensaverLoginModule.class);
 
   private static final String NO_SUCH_USER = "No such user";
+  private static final String NO_LOGIN_PRIVILEGES = "User does not have login privileges";
   private static final String FOUND_SCREENSAVER_USER = "Found Screensaver user";
   private static final String FOUND_ECOMMONS_USER = "Found eCommons user";
   
@@ -74,9 +75,7 @@ public class ScreensaverLoginModule implements LoginModule
   // initial state
   private Subject _subject;
   private CallbackHandler _callbackHandler;
-  @SuppressWarnings("unchecked")
   private Map _sharedState;
-  @SuppressWarnings("unchecked")
   private Map _options;
   
   // the authentication status
@@ -132,7 +131,6 @@ public class ScreensaverLoginModule implements LoginModule
    *          <code>Configuration</pcode> for this particular
    *      <code>LoginModule</code>.
    */
-  @SuppressWarnings("unchecked")
   public void initialize(
     Subject subject,
     CallbackHandler callbackHandler,
@@ -219,6 +217,7 @@ public class ScreensaverLoginModule implements LoginModule
       _user = findUserByLoginId(username);
       if (_user != null) {
         log.info(FOUND_SCREENSAVER_USER + " '" + username + "'");
+        verifyLoginPrivilege(username);
         if (_user.getDigestedPassword().equals(CryptoUtils.digest(password))) {
           _isAuthenticated = true;
           _authenticationResult = new SimpleAuthenticationResult(username,
@@ -242,6 +241,7 @@ public class ScreensaverLoginModule implements LoginModule
         _user = findUserByECommonsId(username);
         if (_user != null) {
           log.info(FOUND_ECOMMONS_USER + " '" + _user.getECommonsId() + "'");
+          verifyLoginPrivilege(username);
           _authenticationResult = _authenticationClient.authenticate(new Credentials(_user.getECommonsId(),
                                                                                      new String(password)));
           _isAuthenticated = _authenticationResult.isAuthenticated();
@@ -276,6 +276,16 @@ public class ScreensaverLoginModule implements LoginModule
     catch (AuthenticationResponseException e) {
       log.error("error during login with authentication server response: " + e.getMessage());
       throw new LoginException(e.getMessage());
+    }
+  }
+
+  private void verifyLoginPrivilege(String username)
+    throws FailedLoginException
+  {
+    if (!_user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENSAVER_USER)) {
+      String message = NO_LOGIN_PRIVILEGES + " '" + username + "'";
+      log.info(message);
+      throw new FailedLoginException(message);
     }
   }
 

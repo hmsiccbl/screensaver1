@@ -249,11 +249,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
       return true;
     }
     if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) &&
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENING_ROOM_USER)) {
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENER)) {
       return true;
     }
     if (screen.getScreenType().equals(ScreenType.RNAI) &&
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER)) {
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENER)) {
       return true;
     }
     return false;

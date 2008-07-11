@@ -437,11 +437,7 @@
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>guestUser</role-name>
-      <role-name>smallMoleculeScreeningRoomUser</role-name>
-      <role-name>rnaiScreeningRoomUser</role-name>
-      <role-name>readEverythingAdmin</role-name>
-      <role-name>developer</role-name>
+      <role-name>screensaverUser</role-name>
     </auth-constraint>
 
     <user-data-constraint>
@@ -459,10 +455,8 @@
     </web-resource-collection>
 
     <auth-constraint>
-      <role-name>smallMoleculeScreeningRoomUser</role-name>
-      <role-name>rnaiScreeningRoomUser</role-name>
+      <role-name>screener</role-name>
       <role-name>readEverythingAdmin</role-name>
-      <role-name>developer</role-name>
     </auth-constraint>
 
     <user-data-constraint>

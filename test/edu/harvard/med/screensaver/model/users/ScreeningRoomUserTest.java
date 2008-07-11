@@ -10,10 +10,13 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.beans.IntrospectionException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -31,10 +34,6 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
 
 
   // public constructors and methods
-
-  protected void onSetUp() {
-    schemaUtil.truncateTablesOrCreateSchema();
-  }
 
   public ScreeningRoomUserTest() throws IntrospectionException
   {
@@ -61,13 +60,15 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                                          "first_last@hms.harvard.edu");
     user.setECommonsId("ec1");
 
-    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER);
+    user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENER);
     genericEntityDao.saveOrUpdateEntity(user);
 
     ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-    assertEquals(2, user2.getScreensaverUserRoles().size());
-    assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENING_ROOM_USER));
-    assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENING_ROOM_USER));
+    assertEquals(new HashSet<ScreensaverUserRole>(Arrays.asList(ScreensaverUserRole.SCREENSAVER_USER,
+                                                                ScreensaverUserRole.RNAI_SCREENER, 
+                                                                ScreensaverUserRole.SCREENER, 
+                                                                ScreensaverUserRole.SCREENSAVER_USER)),
+                 user2.getScreensaverUserRoles());
 
     try {
       genericEntityDao.doInTransaction(new DAOTransaction() {
@@ -236,11 +237,13 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
 
   private void initLab()
   {
-    initLab(genericEntityDao);
+    initLab(genericEntityDao, schemaUtil);
   }
-  
-  static void initLab(final GenericEntityDAO dao) 
+
+  static void initLab(final GenericEntityDAO dao,
+                      SchemaUtil schemaUtil)
   {
+    schemaUtil.truncateTablesOrCreateSchema();
     dao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()

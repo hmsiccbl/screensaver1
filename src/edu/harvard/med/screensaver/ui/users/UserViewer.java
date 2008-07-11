@@ -326,6 +326,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     if (_userRolesDataModel == null) {
       List<ScreensaverUserRole> userRoles = new ArrayList<ScreensaverUserRole>();
       userRoles.addAll(_user.getScreensaverUserRoles());
+      userRoles.remove(ScreensaverUserRole.SCREENER); // hide this implicit role, per requirements
       Collections.sort(userRoles, USER_ROLE_COMPARATOR);
       _userRolesDataModel = new ListDataModel(userRoles);
     }

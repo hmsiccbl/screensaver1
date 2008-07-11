@@ -26,7 +26,6 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    addTestSuite(NaturalProductsLibraryContentsParserTest.class);
     addTestSuite(SDFileCompoundLibraryContentsParserTest.class);
   }
 }

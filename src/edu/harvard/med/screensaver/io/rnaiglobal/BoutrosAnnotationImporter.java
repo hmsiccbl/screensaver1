@@ -168,7 +168,7 @@ public class BoutrosAnnotationImporter
       }
       user.setLoginId(loginId);
       user.updateScreensaverPassword(password);
-      user.addScreensaverUserRole(ScreensaverUserRole.SCREENING_ROOM_USER);
+      user.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
     }
     else {
       log.warn("user with email " + email +

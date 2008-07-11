@@ -176,11 +176,6 @@
 					description="The roles of this user"
 					value="#{userViewer.user.screensaverUserRoles}"
 					rendered="#{userViewer.readAdmin}">
-					<ui:define name="valueHeader">
-						<t:outputText value="Non-screening user of our facility"
-							styleClass="dataText errorMessage"
-							rendered="#{!userViewer.editMode &amp;&amp; !userViewer.user.isUserInRoleOfNameMap['readEverythingAdmin'] &amp;&amp; !userViewer.user.isUserInRoleOfNameMap['screeningRoomUser']}" />
-					</ui:define>
 					<ui:define name="data">
 						<ss:collectionTable id="rolesTable"
 							editable="#{userViewer.editMode}"
@@ -194,7 +189,7 @@
 									</f:facet>
 									<t:outputText
                     value="#{element.displayableRoleName}"
-                    styleClass="dataText" />
+                    styleClass="dataText #{element.roleName == 'nonScreeningUser' ? 'eyeCatcher' : ''}" />
                 </t:column>
 							</ui:define>
 							<ui:define name="addProperties">
