@@ -11,11 +11,14 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
@@ -24,6 +27,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
+import edu.harvard.med.screensaver.util.CollectionUtils;
 
 import org.joda.time.LocalDate;
 
@@ -69,7 +73,14 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
     initialize(new AllEntitiesOfTypeDataFetcher<E,Integer>(_type, _dao));
   }
 
+  public void searchUsers(Set<ScreeningRoomUser> users)
+  {
+    initialize(new EntitySetDataFetcher<E,Integer>(_type,
+      CollectionUtils.<Integer>entityIds(users),
+      _dao));
+  }
 
+  
   // implementations of the SearchResults abstract methods
 
    @Override

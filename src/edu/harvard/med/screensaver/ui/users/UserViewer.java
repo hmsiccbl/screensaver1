@@ -59,7 +59,9 @@ import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 /**
  * User Viewer backing bean.
@@ -99,8 +101,12 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private LabAffiliation _newLabAffiliation;
   private HashMap<ScreenType,DataModel> _screensDataModel;
   private DataModel _labMembersDataModel;
-  private DataModel _screenCollaboratorsDataModel;
+  private DataModel _screenAssociatesDataModel;
   private ScreenSearchResults _screensBrowser;
+  private boolean _isLabMembersCollapsed = true;
+  private boolean _isScreenAssociatesCollapsed = true;
+  private boolean _isSmallMoleculeScreensCollapsed = true;
+  private boolean _isRnaiScreensCollapsed = true;
 
 
   // constructors
@@ -165,6 +171,46 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   {
     return getAdministratorUser() != null;
   }
+  
+  public boolean isLabMembersCollapsed()
+  {
+    return _isLabMembersCollapsed;
+  }
+
+  public void setLabMembersCollapsed(boolean isLabMembersCollapsed)
+  {
+    _isLabMembersCollapsed = isLabMembersCollapsed;
+  }
+
+  public boolean isScreenAssociatesCollapsed()
+  {
+    return _isScreenAssociatesCollapsed;
+  }
+
+  public void setScreenAssociatesCollapsed(boolean isScreenAssociatesCollapsed)
+  {
+    _isScreenAssociatesCollapsed = isScreenAssociatesCollapsed;
+  }
+
+  public boolean isSmallMoleculeScreensCollapsed()
+  {
+    return _isSmallMoleculeScreensCollapsed;
+  }
+
+  public void setSmallMoleculeScreensCollapsed(boolean isSmallMoleculeScreensCollapsed)
+  {
+    _isSmallMoleculeScreensCollapsed = isSmallMoleculeScreensCollapsed;
+  }
+
+  public boolean isRnaiScreensCollapsed()
+  {
+    return _isRnaiScreensCollapsed;
+  }
+
+  public void setRnaiScreensCollapsed(boolean isRnaiScreensCollapsed)
+  {
+    _isRnaiScreensCollapsed = isRnaiScreensCollapsed;
+  }
 
   public ScreeningRoomUser getScreeningRoomUser()
   {
@@ -198,13 +244,27 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
                                true,
                                "screensaverUserRoles");
       if (user instanceof ScreeningRoomUser) {
+        // note: no cross-product problem with dual labMembers associations, since only one will have size > 0
         _dao.need(user,
                   "labHead.labAffiliation",
+                  "labHead.labMembers", 
                   "labAffiliation",
                   "labMembers");
         _dao.need(user, "screensLed.statusItems");
         _dao.need(user, "screensHeaded.statusItems");
         _dao.need(user, "screensCollaborated.statusItems");
+        _dao.need(user, 
+                  "screensLed.collaborators", 
+                  "screensLed.labHead", 
+                  "screensLed.leadScreener");
+        _dao.need(user, 
+                  "screensHeaded.collaborators", 
+                  "screensHeaded.labHead", 
+                  "screensHeaded.leadScreener");
+        _dao.need(user, 
+                  "screensCollaborated.collaborators", 
+                  "screensCollaborated.labHead", 
+                  "screensCollaborated.leadScreener");
         _dao.need(user, "checklistItems");
       }
     }
@@ -422,27 +482,24 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   {
     if (_labMembersDataModel == null && isScreeningRoomUserViewMode())
     {
-      List<ScreeningRoomUser> labMembers = new ArrayList<ScreeningRoomUser>();
-      labMembers.add(getScreeningRoomUser().getLab().getLabHead());
-      labMembers.addAll(getScreeningRoomUser().getLab().getLabMembers());
-      labMembers.remove(getScreeningRoomUser());
-      _labMembersDataModel = new ListDataModel(labMembers);
+      _labMembersDataModel = new ListDataModel(Lists.sortedCopy(getScreeningRoomUser().getLab().getLabMembers(),
+                                               ScreensaverUserComparator.getInstance()));
     }
     return _labMembersDataModel;
   }
 
-  public DataModel getScreenCollaboratorsDataModel()
+  public DataModel getScreenAssociatesDataModel()
   {
-    if (_screenCollaboratorsDataModel == null && isScreeningRoomUserViewMode())
+    if (_screenAssociatesDataModel == null && isScreeningRoomUserViewMode())
     {
-      Set<ScreeningRoomUser> collaborators = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
+      Set<ScreeningRoomUser> screenAssociates = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
       for (Screen screen : getScreeningRoomUser().getAllAssociatedScreens()) {
-        collaborators.addAll(screen.getCollaborators());
+        screenAssociates.addAll(screen.getAssociatedScreeningRoomUsers());
       }
-      collaborators.remove(getScreeningRoomUser());
-      _screenCollaboratorsDataModel = new ListDataModel(new ArrayList<ScreeningRoomUser>(collaborators));
+      screenAssociates.remove(getScreeningRoomUser());
+      _screenAssociatesDataModel = new ListDataModel(Lists.newArrayList(screenAssociates));
     }
-    return _screenCollaboratorsDataModel;
+    return _screenAssociatesDataModel;
   }
 
   
@@ -639,6 +696,24 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     return BROWSE_SCREENS;
   }
   
+  @UIControllerMethod
+  public String viewAllLabMembers()
+  {
+    return doViewAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData()));
+  }
+  
+  @UIControllerMethod
+  public String viewAllScreenAssociates()
+  {
+    return doViewAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData()));
+  }
+  
+  private String doViewAssociates(Set<ScreeningRoomUser> associates)
+  {
+    _screenerSearchResults.searchUsers(associates);
+    return BROWSE_SCREENERS;
+  }
+
   
   // private methods
 
@@ -652,7 +727,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _newLabAffiliation = null;
     _screensDataModel = null;
     _labMembersDataModel = null;
-    _screenCollaboratorsDataModel = null;
+    _screenAssociatesDataModel = null;
   }
 }
 

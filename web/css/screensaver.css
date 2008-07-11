@@ -82,6 +82,10 @@ form {
 	background-color: yellow;
 }
 
+.subdued {
+	color: graytext;
+}
+
 a,a:link,a:visited,a:active {
 	color: inherit;
 	background-color: inherit;

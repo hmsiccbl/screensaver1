@@ -32,6 +32,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Sets;
+
 
 /**
  * A Hibernate entity bean representing a screening room user.
@@ -288,6 +290,22 @@ public class ScreeningRoomUser extends ScreensaverUser
     screens.addAll(getScreensLed());
     screens.addAll(getScreensCollaborated());
     return screens;
+  }
+  
+  /**
+   * @return the Set of ScreeningRoomUsers that are lab members or the lab head
+   *         of this user's lab, and all collaborators on screens this user is
+   *         associated with.  This uses is not included in the returned Set.
+   */
+  @Transient
+  public Set<ScreeningRoomUser> getAssociatedUsers()
+  {
+    Set<ScreeningRoomUser> associates = Sets.newHashSet(getLab().getLabMembersAndLabHead());
+    for (Screen screen : getAllAssociatedScreens()) {
+      associates.addAll(screen.getCollaborators());
+    }
+    associates.remove(this);
+    return associates;
   }
 
   /**

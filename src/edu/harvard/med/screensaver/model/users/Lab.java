@@ -14,6 +14,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Sets;
+
 /**
  * Abstraction of a Lab. At the physical schema layer, a lab is represented by a
  * LabHead. However, at the logical entity model layer, it is conceptually
@@ -90,9 +92,25 @@ public class Lab
     return _labAffiliation.getAffiliationName();
   }
 
+  /**
+   * @return the members of this lab, which does not include the lab
+   *          head
+   */
   public Set<ScreeningRoomUser> getLabMembers()
   {
     return _labMembers;
+  }
+
+  /**
+   * @return the members of this lab, including the lab head
+   */
+  public Set<ScreeningRoomUser> getLabMembersAndLabHead()
+  {
+    Set<ScreeningRoomUser> everyone = Sets.newHashSet(_labMembers);
+    if (getLabHead() != null) {
+      everyone.add(getLabHead());
+    }
+    return everyone;
   }
 
   /**
