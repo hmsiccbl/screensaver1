@@ -15,14 +15,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
-import edu.harvard.med.screensaver.model.users.ChecklistItemType;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
+import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
@@ -78,6 +80,30 @@ public class UserSynchronizer
     "Image Xpress Micro Training",
     "Evotech Opera Training",
   };
+  private static final Map<String,String> ADMIN_INITIALS_TO_ECOMMONS_ID = new HashMap<String,String>();
+  private static final String DEFAULT_CHECKLIST_ITEM_ENTERED_BY_ADMIN_INITIALS = "KLS";
+  static {
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("CS", "ces6");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("CES", "ces6");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("KLS", "kls4");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("KLR", "kls4");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("SC", "slc9");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("SLC", "slc9");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("SMJ", "smj9");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("SJ", "smj9");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("SPR", "sr50");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("SR", "sr50");
+    ADMIN_INITIALS_TO_ECOMMONS_ID.put("DJW", "djw11");
+    
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("DG", ""); // Dara Greenhouse (164)
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("DH", ""); // Dara Greenhouse? (47)
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("JVF", ""); // (162)
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("JF", ""); // (162)
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("CR", ""); // (16)
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("NT", ""); // (9)
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("DAH", ""); // (5)
+//    ADMIN_INITIALS_TO_ECOMMONS_ID.put("RK", ""); // (3)
+  }
 
 
   // instance data members
@@ -296,10 +322,9 @@ public class UserSynchronizer
 
   private void synchronizeChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
   {
-    user.getChecklistItems().clear();
+    user.getChecklistItemEvents().clear();
     _dao.flush(); // force db deletes before inserts
     addScreenDBChecklistItems(screendbUserId, user);
-    addNonScreenDBChecklistItems(user);
   }
 
   private void addScreenDBChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
@@ -309,7 +334,6 @@ public class UserSynchronizer
       "WHERE ci.user_id = ? AND ci.item_type_id = cit.id");
     statement.setInt(1, screendbUserId);
     ResultSet resultSet = statement.executeQuery();
-    Set<String> screendbChecklistItemTypeNamesFound = new HashSet<String>();
     while (resultSet.next()) {
       LocalDate activationDate = ResultSetUtil.getDate(resultSet, "activate_date");
       String activationInitials = resultSet.getString("activate_initials");
@@ -317,56 +341,67 @@ public class UserSynchronizer
       String deactivationInitials = resultSet.getString("deactivate_initials");
 
       String screendbChecklistItemName = resultSet.getString("name");
-      ChecklistItemType checklistItemType =
+      ChecklistItem checklistItemType =
         getChecklistItemTypeForScreenDBChecklistItemName(screendbChecklistItemName);
 
-      user.createChecklistItem(
-        checklistItemType, activationDate, activationInitials, deactivationDate, deactivationInitials);
-      screendbChecklistItemTypeNamesFound.add(screendbChecklistItemName);
-    }
-
-    // go back and fill in anything missing in ScreenDB
-    for (String screendbChecklistItemTypeName : CHECKLIST_ITEM_TYPE_MAP.keySet()) {
-      if (screendbChecklistItemTypeNamesFound.contains(screendbChecklistItemTypeName)) {
-        continue;
+      AdministratorUser enteredByAdmin = findAdminUserByInitials(activationInitials);
+      String comments = null;
+      if (enteredByAdmin == null) {
+        enteredByAdmin = findAdminUserByInitials(DEFAULT_CHECKLIST_ITEM_ENTERED_BY_ADMIN_INITIALS);
+        comments = "initials: " + activationInitials;
       }
-      String screensaverChecklistItemTypeName =
-        CHECKLIST_ITEM_TYPE_MAP.get(screendbChecklistItemTypeName);
-      addEmptyChecklistItem(user, screensaverChecklistItemTypeName);
+      ChecklistItemEvent checklistItemActivation = 
+        user.createChecklistItemActivationEvent(checklistItemType, 
+                                           activationDate,
+                                           new AdministrativeActivity(enteredByAdmin, 
+                                                                      activationDate, // best guess 
+                                                                      AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+      if (comments != null) {
+        checklistItemActivation.getEntryActivity().setComments(comments);
+      }
+
+      if (deactivationDate != null) {
+        enteredByAdmin = findAdminUserByInitials(deactivationInitials);
+        comments = null;
+        if (enteredByAdmin == null) {
+          enteredByAdmin = findAdminUserByInitials(DEFAULT_CHECKLIST_ITEM_ENTERED_BY_ADMIN_INITIALS);
+          comments = "initials: " + activationInitials;
+        }
+        
+        ChecklistItemEvent checklistItemDeactivation = 
+          checklistItemActivation.createChecklistItemExpirationEvent(deactivationDate,
+                                                                  new AdministrativeActivity(enteredByAdmin, 
+                                                                                             deactivationDate, // best guess 
+                                                                                             AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+        if (comments != null) {
+          checklistItemDeactivation.getEntryActivity().setComments(comments);
+        }
+      }
     }
   }
 
-  private ChecklistItemType getChecklistItemTypeForScreenDBChecklistItemName(String screendbChecklistItemName) throws ScreenDBSynchronizationException {
+  private AdministratorUser findAdminUserByInitials(String initials)
+  {
+    return 
+    _dao.findEntityByProperty(AdministratorUser.class,
+                              "ecommonsId",
+                              ADMIN_INITIALS_TO_ECOMMONS_ID.get(initials.toUpperCase()));
+  }
+
+  private ChecklistItem getChecklistItemTypeForScreenDBChecklistItemName(String screendbChecklistItemName) throws ScreenDBSynchronizationException {
     String screensaverChecklistItemName = CHECKLIST_ITEM_TYPE_MAP.get(screendbChecklistItemName);
     if (screensaverChecklistItemName == null) {
       throw new ScreenDBSynchronizationException(
         "couldn't find Screensaver checklist item corresponding to ScreenDB checklist item \"" +
         screendbChecklistItemName + "\"");
     }
-    ChecklistItemType checklistItemType = _dao.findEntityByProperty(
-      ChecklistItemType.class, "itemName", screensaverChecklistItemName);
+    ChecklistItem checklistItemType = _dao.findEntityByProperty(
+      ChecklistItem.class, "itemName", screensaverChecklistItemName);
     if (checklistItemType == null) {
       throw new ScreenDBSynchronizationException(
         "couldn't find Screensaver checklist item type for \"" + screensaverChecklistItemName + "\"");
     }
     return checklistItemType;
-  }
-
-  private void addNonScreenDBChecklistItems(ScreeningRoomUser user) throws ScreenDBSynchronizationException
-  {
-    for (String checklistItemTypeName : NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES) {
-      addEmptyChecklistItem(user, checklistItemTypeName);
-    }
-  }
-
-  private void addEmptyChecklistItem(ScreeningRoomUser user, String checklistItemTypeName) throws ScreenDBSynchronizationException {
-    ChecklistItemType checklistItemType = _dao.findEntityByProperty(
-      ChecklistItemType.class, "itemName", checklistItemTypeName);
-    if (checklistItemType == null) {
-      throw new ScreenDBSynchronizationException(
-        "couldn't find Screensaver checklist item type for \"" + checklistItemTypeName + "\"");
-    }
-    user.createChecklistItem(checklistItemType);
   }
 
   private void connectUsersToLabHeads()

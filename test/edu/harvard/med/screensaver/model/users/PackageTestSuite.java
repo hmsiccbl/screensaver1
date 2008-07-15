@@ -30,8 +30,8 @@ public class PackageTestSuite extends TestSuite
     // addTestSuite(ScreensaverUserTest.class);
     
     // test entity model classes
+    addTestSuite(ChecklistItemEventTest.class);
     addTestSuite(ChecklistItemTest.class);
-    addTestSuite(ChecklistItemTypeTest.class);
     addTestSuite(LabAffiliationTest.class);
     addTestSuite(ScreensaverUserTest.class);
     addTestSuite(ScreeningRoomUserTest.class);

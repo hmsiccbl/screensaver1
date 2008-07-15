@@ -25,6 +25,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -56,7 +57,7 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   // private instance data
 
-  private Set<ChecklistItem> _checklistItems = new HashSet<ChecklistItem>();
+  private Set<ChecklistItemEvent> _checklistItemEvents = new HashSet<ChecklistItemEvent>();
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensCollaborated = new HashSet<Screen>();
   protected ScreeningRoomUserClassification _userClassification;
@@ -137,75 +138,43 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get the set of checklist items.
-   * @return the checklist items
+   * Get the set of checklist item events.
+   * @return the checklist item events
    */
   @OneToMany(
     mappedBy="screeningRoomUser",
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  @OrderBy("checklistItemType") // TODO: would like this to be checklistItemType.orderStatistic
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
-  public Set<ChecklistItem> getChecklistItems()
+  public Set<ChecklistItemEvent> getChecklistItemEvents()
   {
-    return _checklistItems;
+    return _checklistItemEvents;
   }
 
   /**
-   * Create a new checklist item for the user.
-   * @param checklistItemType the checklist item type
+   * Create a new checklist item activation/completed event for the user.
+   * @param checklistItem the checklist item
+   * @param datePerformed the date the checklist item was performed by the user or otherwise enacted
+   * @param entryActivity the administrative activity that tracks the who/when/why of this checklist item information  
    * @return the new checklist item for the user
+   * @see ChecklistItemEvent#createChecklistItemExpirationEvent(LocalDate, AdministrativeActivity)
    */
-  public ChecklistItem createChecklistItem(ChecklistItemType checklistItemType)
+  public ChecklistItemEvent createChecklistItemActivationEvent(ChecklistItem checklistItem,
+                                                               LocalDate datePerformed,
+                                                               AdministrativeActivity entryActivity)
   {
-    return createChecklistItem(checklistItemType, null, null, null, null);
-  }
-
-  /**
-   * Create a new checklist item for the user.
-   * @param checklistItemType the checklist item type
-   * @param activationDate the activation date
-   * @param activationInitials the activation initials
-   * @return the new checklist item for the user
-   */
-  public ChecklistItem createChecklistItem(
-    ChecklistItemType checklistItemType,
-    LocalDate activationDate,
-    String activationInitials)
-  {
-    return createChecklistItem(checklistItemType, activationDate, activationInitials, null, null);
-  }
-
-  /**
-   * Create a new checklist item for the user.
-   * @param checklistItemType the checklist item type
-   * @param activationDate the activation date
-   * @param activationInitials the activation initials
-   * @param deactivationDate the deactivation date
-   * @param deactivationInitials the deactivation initials
-   * @return the new checklist item for the user
-   */
-  public ChecklistItem createChecklistItem(
-    ChecklistItemType checklistItemType,
-    LocalDate activationDate,
-    String activationInitials,
-    LocalDate deactivationDate,
-    String deactivationInitials)
-  {
-    ChecklistItem checklistItem = new ChecklistItem(
-      checklistItemType,
-      this,
-      activationDate,
-      activationInitials,
-      deactivationDate,
-      deactivationInitials);
-    _checklistItems.add(checklistItem);
-    return checklistItem;
+    ChecklistItemEvent checklistItemEvent = 
+      new ChecklistItemEvent(checklistItem,
+                             this,
+                             datePerformed,
+                             entryActivity);
+    _checklistItemEvents.add(checklistItemEvent);
+    return checklistItemEvent;
   }
 
   /**
@@ -408,13 +377,11 @@ public class ScreeningRoomUser extends ScreensaverUser
   // private constructor and instance methods
 
   /**
-   * Set the checklist items.
-   * @param checklistItems the new checklist items
    * @motivation for hibernate
    */
-  private void setChecklistItems(Set<ChecklistItem> checklistItems)
+  private void setChecklistItemEvents(Set<ChecklistItemEvent> checklistItemEvents)
   {
-    _checklistItems = checklistItems;
+    _checklistItemEvents = checklistItemEvents;
   }
 
   /**

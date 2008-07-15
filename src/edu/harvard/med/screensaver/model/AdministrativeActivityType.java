@@ -23,7 +23,8 @@ public enum AdministrativeActivityType implements VocabularyTerm
   // the vocabulary
 
   WELL_VOLUME_CORRECTION("Well Volume Correction"),
-  WELL_DEPRECATION("Well Deprecation")
+  WELL_DEPRECATION("Well Deprecation"), 
+  CHECKLIST_ITEM_EVENT("Checklist Item Event")
   ;
 
 

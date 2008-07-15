@@ -47,8 +47,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
-import edu.harvard.med.screensaver.model.users.ChecklistItemType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -97,12 +97,12 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(ChecklistItem entity)
+  public boolean visit(ChecklistItemEvent entity)
   {
     return true;
   }
 
-  public boolean visit(ChecklistItemType entity)
+  public boolean visit(ChecklistItem entity)
   {
     return true;
   }

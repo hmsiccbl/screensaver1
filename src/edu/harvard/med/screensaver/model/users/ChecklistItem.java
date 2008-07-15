@@ -9,66 +9,81 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
-
 
 /**
- * A Hibernate entity bean representing a checklist item.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * ScreeningRoomUsers may have zero or more {@link ChecklistItems ChecklistItem}
+ * for each ChecklistItem that is defined. A given ChecklistItem may be
+ * "expirable", in which case multiple ChecklistItemEvents may be exist
+ * for a user, where each pair activates and then expires the ChecklistItem.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "screeningRoomUserId", "checklistItemTypeId" }) })
 @org.hibernate.annotations.Proxy
-@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreeningRoomUser.class)
-public class ChecklistItem extends AbstractEntity
+public class ChecklistItem extends AbstractEntity implements Comparable<ChecklistItem>
 {
 
-  // static fields
+  // private static fields
 
   private static final Logger log = Logger.getLogger(ChecklistItem.class);
   private static final long serialVersionUID = 0L;
 
 
-  // instance fields
+  // private instance fields
 
   private Integer _checklistItemId;
   private Integer _version;
-  private ChecklistItemType _checklistItemType;
-  private ScreeningRoomUser _screeningRoomUser;
-  private LocalDate _activationDate;
-  private String _activationInitials;
-  private LocalDate _deactivationDate;
-  private String _deactivationInitials;
+  private Integer _orderStatistic;
+  private String _itemName;
+  private boolean _isExpirable;
 
 
-  // public instance methods
+  // public constructor
+
+  /**
+   * Construct an initialized <code>ChecklistItem</code>.
+   * 
+   * @param orderStatistic the order statistic
+   * @param itemName the item name
+   * @param isExpirable whether this type of checklist item can be activated and
+   *          then expired (repeatedly)
+   */
+  public ChecklistItem(Integer orderStatistic,
+                       String itemName,
+                       boolean isExpirable)
+  {
+    _orderStatistic = orderStatistic;
+    _itemName = itemName;
+    _isExpirable = isExpirable;
+  }
+
+
+  // public methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
+  }
+
+  public int compareTo(ChecklistItem other)
+  {
+    return getOrderStatistic().compareTo(other.getOrderStatistic());
   }
 
   @Override
@@ -80,179 +95,66 @@ public class ChecklistItem extends AbstractEntity
 
   /**
    * Get the id for the checklist item.
+   * 
    * @return the id for the checklist item
    */
   @Id
-  @org.hibernate.annotations.GenericGenerator(
-    name="checklist_item_id_seq",
-    strategy="sequence",
-    parameters = { @Parameter(name="sequence", value="checklist_item_id_seq") }
-  )
-  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="checklist_item_id_seq")
+  @org.hibernate.annotations.GenericGenerator(name = "checklist_item_id_seq", strategy = "sequence", parameters = { @Parameter(name = "sequence", value = "checklist_item_id_seq") })
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "checklist_item_id_seq")
   public Integer getChecklistItemId()
   {
     return _checklistItemId;
   }
 
   /**
-   * Get the checklist item type.
-   * @return the checklist item type
+   * Get the order statistic.
+   * 
+   * @return the order statistic
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="checklistItemTypeId", nullable=false, updatable=false)
+  @Column(nullable = false, unique = true)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_checklist_item_to_checklist_item_type")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
-  public ChecklistItemType getChecklistItemType()
+  public Integer getOrderStatistic()
   {
-    return _checklistItemType;
+    return _orderStatistic;
   }
 
   /**
-   * Get the screening room user.
-   * @return the screening room user
+   * Get the item name.
+   * 
+   * @return the item name
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="screeningRoomUserId", nullable=false, updatable=false)
+  @Column(nullable = false, unique = true)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_checklist_item_to_screening_room_user")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  public ScreeningRoomUser getScreeningRoomUser()
+  @org.hibernate.annotations.Type(type = "text")
+  public String getItemName()
   {
-    return _screeningRoomUser;
+    return _itemName;
   }
 
   /**
-   * Get the activation date.
-   * @return the activation date
+   * Get whether this checklist item can be activated and then
+   * expired (repeatedly)
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
-  public LocalDate getActivationDate()
+  @Column(nullable = false, name = "isExpirable")
+  @org.hibernate.annotations.Immutable
+  public boolean isExpirable()
   {
-    return _activationDate;
-  }
-
-  /**
-   * Set the activation date.
-   * @param activationDate the new activation date
-   */
-  public void setActivationDate(LocalDate activationDate)
-  {
-    _activationDate = activationDate;
-  }
-
-  /**
-   * Get the activation initials.
-   * @return the activation initials
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getActivationInitials()
-  {
-    return _activationInitials;
-  }
-
-  /**
-   * Set the activation initials.
-   * @param activationInitials the new activation initials
-   */
-  public void setActivationInitials(String activationInitials)
-  {
-    _activationInitials = activationInitials;
-  }
-
-  /**
-   * Get the deactivation date.
-   * @return the deactivation date
-   */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
-  public LocalDate getDeactivationDate()
-  {
-    return _deactivationDate;
-  }
-
-  /**
-   * Set the deactivation date.
-   * @param deactivationDate the new deactivation date
-   */
-  public void setDeactivationDate(LocalDate deactivationDate)
-  {
-    _deactivationDate = deactivationDate;
-  }
-
-  /**
-   * Get the deactivation initials.
-   * @return the deactivation initials
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getDeactivationInitials()
-  {
-    return _deactivationInitials;
-  }
-
-  /**
-   * Set the deactivation initials.
-   * @param deactivationInitials the new deactivation initials
-   */
-  public void setDeactivationInitials(String deactivationInitials)
-  {
-    _deactivationInitials = deactivationInitials;
-  }
-
-
-  // package constructor
-
-  /**
-   * Construct an initialized <code>ChecklistItem</code>.
-   * <p>
-   * Intended only for use by {@link
-   * ScreeningRoomUser#createChecklistItem(ChecklistItemType, LocalDate, String, LocalDate, String)}.
-   * @param checklistItemType the checklist item type
-   * @param screeningRoomUser the screening room user
-   * @param activationDate the activation date
-   * @param activationInitials the activation initials
-   * @param deactivationDate the deactivation date
-   * @param deactivationInitials the deactivation initials
-   */
-  ChecklistItem(
-    ChecklistItemType checklistItemType,
-    ScreeningRoomUser screeningRoomUser,
-    LocalDate activationDate,
-    String activationInitials,
-    LocalDate deactivationDate,
-    String deactivationInitials)
-  {
-    if (checklistItemType == null || screeningRoomUser == null) {
-      throw new NullPointerException();
-    }
-    _checklistItemType = checklistItemType;
-    _screeningRoomUser = screeningRoomUser;
-    _activationDate = activationDate;
-    _activationInitials = activationInitials;
-    _deactivationDate = deactivationDate;
-    _deactivationInitials = deactivationInitials;
+    return _isExpirable;
   }
 
 
   // protected constructor
 
   /**
-   * Construct an uninitialized <code>ChecklistItem</code> object.
-   *
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  protected ChecklistItem() {}
+  protected ChecklistItem()
+  {}
 
 
   // private constructor and instance methods
 
   /**
-   * Set the id for the checklist item.
-   *
-   * @param checklistItemId the new id for the checklist item
    * @motivation for hibernate
    */
   private void setChecklistItemId(Integer checklistItemId)
@@ -261,20 +163,16 @@ public class ChecklistItem extends AbstractEntity
   }
 
   /**
-   * Get the version for the checklist item.
-   * @return the version for the checklist item
    * @motivation for hibernate
    */
   @Version
-  @Column(nullable=false)
+  @Column(nullable = false)
   private Integer getVersion()
   {
     return _version;
   }
 
   /**
-   * Set the version for the checklist item.
-   * @param version the new version for the checklist item
    * @motivation for hibernate
    */
   private void setVersion(Integer version)
@@ -283,22 +181,26 @@ public class ChecklistItem extends AbstractEntity
   }
 
   /**
-   * Set the checklist item type.
-   * @param checklistItemType the new checklist item type
    * @motivation for hibernate
    */
-  private void setChecklistItemType(ChecklistItemType checklistItemType)
+  private void setOrderStatistic(Integer orderStatistic)
   {
-    _checklistItemType = checklistItemType;
+    _orderStatistic = orderStatistic;
   }
 
   /**
-   * Set the screening room user.
-   * @param screeningRoomUser the new screening room user
    * @motivation for hibernate
    */
-  private void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
+  private void setItemName(String itemName)
   {
-    _screeningRoomUser = screeningRoomUser;
+    _itemName = itemName;
+  }
+
+  /**
+   * @motivation for hibernate
+   */
+  private void setExpirable(boolean isExpirable)
+  {
+    _isExpirable = isExpirable;
   }
 }

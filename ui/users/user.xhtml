@@ -10,6 +10,7 @@
 <!-- facelet params:
 	       - id
 	       - user
+	       - showEmail
 	 -->
 
 <ui:component>
@@ -20,7 +21,7 @@
 		style="margin-right: 4px">
 		<f:param name="entityId" value="#{user.entityId}" />
 	</t:commandLink> 
-	<t:outputText rendered="#{! empty user.email}"
+	<t:outputText rendered="#{(empty showEmail || showEmail) &amp;&amp; !empty user.email}"
 		value="&lt;#{user.email}&gt;" /> 
   </span>
 </ui:component>

@@ -341,6 +341,79 @@
           </ui:define>
         </ss:property>
 
+				<ss:property id="checklistItems" label="Checklist Items"
+					description="The checklist item statuses for this user"
+					rendered="#{userViewer.readAdmin}">
+          <ui:define name="data">
+            <t:collapsiblePanel var="isChecklistItemsCollapsed"
+              value="#{userViewer.checklistItemsCollapsed}">
+              <f:facet name="header">
+                <t:headerLink immediate="true">
+                  <t:outputText id="checklistItemsToggleText"
+                    value="#{isChecklistItemsCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+                    styleClass="dataText" />
+                </t:headerLink>
+              </f:facet>
+							<ss:collectionTable id="checklistItemsTable"
+								dataModel="#{userViewer.checklistItemsDataModel}">
+								<ui:define name="columns">
+									<t:column>
+										<f:facet name="header">
+											<t:outputText value="Item" styleClass="label" />
+										</f:facet>
+										<t:outputText id="checklistItemType"
+											value="#{element.key.itemName}"
+											styleClass="dataText" />
+									</t:column>
+									<t:column>
+										<f:facet name="header">
+											<t:outputText value="Item" styleClass="label" />
+										</f:facet>
+										<t:outputText id="checklistItemStatus"
+											value="#{empty element.value ? (element.key.expirable ? 'Not yet activated' : 'Pending') : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')}"
+											styleClass="dataText" />
+									</t:column>
+									<t:column>
+										<f:facet name="header">
+											<t:outputText value="Date" styleClass="label" />
+										</f:facet>
+										<t:outputText id="checklistItemDatePerformed"
+											value="#{empty element.value ? null : element.value.datePerformed}"
+											styleClass="dataText" />
+									</t:column>
+									<t:column>
+										<f:facet name="header">
+											<t:outputText value="Entered By" styleClass="label" />
+										</f:facet>
+										<ss:user id="checklistItemEnteredBy" showEmail="false"
+											user="#{empty element.value ? null : element.value.entryActivity.performedBy}" />
+									</t:column>
+									<t:column rendered="#{userViewer.editMode}"> 
+                    <f:facet name="header">
+                      <t:outputText value="Action" styleClass="label" />
+										</f:facet>
+										<t:commandButton id="activateChecklistItemCommand"
+											rendered="#{element.key.expirable &amp;&amp; (empty element.value || element.value.expiration)}"
+											value="Activate"
+											action="#{userViewer.checklistItemActivated}"
+											styleClass="command" />
+										<t:commandButton id="deactivateChecklistItemCommand"
+											rendered="#{element.key.expirable  &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration)}"
+											value="Deactivate"
+											action="#{userViewer.checklistItemDeactivated}"
+											styleClass="command" />
+										<t:commandButton id="completedChecklistItemCommand"
+											rendered="#{!element.key.expirable &amp;&amp; empty element.value}"
+											value="Completed"
+											action="#{userViewer.checklistItemCompleted}"
+											styleClass="command" />
+									</t:column>
+								</ui:define>
+							</ss:collectionTable>
+						</t:collapsiblePanel>
+          </ui:define>
+				</ss:property>
+
 			</t:panelGrid>
 		</t:div>
 	</h:form>

@@ -15,11 +15,11 @@ import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 import org.apache.log4j.Logger;
 
-public class ChecklistItemTypeTest extends AbstractEntityInstanceTest<ChecklistItemType>
+public class ChecklistItemEventTest extends AbstractEntityInstanceTest<ChecklistItemEvent>
 {
   // static members
 
-  private static Logger log = Logger.getLogger(ChecklistItemTypeTest.class);
+  private static Logger log = Logger.getLogger(ChecklistItemEventTest.class);
 
 
   // instance data members
@@ -27,9 +27,9 @@ public class ChecklistItemTypeTest extends AbstractEntityInstanceTest<ChecklistI
   
   // public constructors and methods
 
-  public ChecklistItemTypeTest() throws IntrospectionException
+  public ChecklistItemEventTest() throws IntrospectionException
   {
-    super(ChecklistItemType.class);
+    super(ChecklistItemEvent.class);
   }
 }
 

@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.BuildNumber;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.aspects.UIControllerMethodExceptionHandlerAspect;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
 
@@ -227,8 +228,13 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   /**
    * Override this method to allow the backing bean to recover from an operation
-   * that threw an exception that requires reloading of the data.
-   * @see ConcurrencyFailureException
+   * that threw an exception that requires reloading of the data. The
+   * implementation must guarantee (directly or indirectly) that a new
+   * transaction will be started in which to perform the reload, even if an
+   * existing "outer" transaction is in effect (which may be in rollback-only
+   * mode); otherwise infinite recursion may occur, if the reload attempt is
+   * being called by {@link UIControllerMethodExceptionHandlerAspect} in
+   * response to a persistence-related exception.
    */
   public String reload()
   {
