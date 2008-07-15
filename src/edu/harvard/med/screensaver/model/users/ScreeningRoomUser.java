@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.model.users;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,6 +33,8 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 import org.joda.time.LocalDate;
 
 import com.google.common.collect.Sets;
@@ -57,7 +61,7 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   // private instance data
 
-  private Set<ChecklistItemEvent> _checklistItemEvents = new HashSet<ChecklistItemEvent>();
+  private SortedSet<ChecklistItemEvent> _checklistItemEvents = new TreeSet<ChecklistItemEvent>();
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensCollaborated = new HashSet<Screen>();
   protected ScreeningRoomUserClassification _userClassification;
@@ -151,11 +155,24 @@ public class ScreeningRoomUser extends ScreensaverUser
     org.hibernate.annotations.CascadeType.DELETE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
-  public Set<ChecklistItemEvent> getChecklistItemEvents()
+  @Sort(type=SortType.NATURAL)
+  public SortedSet<ChecklistItemEvent> getChecklistItemEvents()
   {
     return _checklistItemEvents;
   }
 
+  @Transient
+  public SortedSet<ChecklistItemEvent> getChecklistItemEvents(ChecklistItem checklistItem)
+  {
+    SortedSet<ChecklistItemEvent> result = new TreeSet<ChecklistItemEvent>();
+    for (ChecklistItemEvent itemEvent : getChecklistItemEvents()) {
+      if (itemEvent.getChecklistItem().equals(checklistItem)) {
+        result.add(itemEvent);
+      }
+    }
+    return result;
+  }
+  
   /**
    * Create a new checklist item activation/completed event for the user.
    * @param checklistItem the checklist item
@@ -168,6 +185,15 @@ public class ScreeningRoomUser extends ScreensaverUser
                                                                LocalDate datePerformed,
                                                                AdministrativeActivity entryActivity)
   {
+    SortedSet<ChecklistItemEvent> checklistItemEvents = getChecklistItemEvents(checklistItem);
+    if (checklistItemEvents.size() > 0) {
+      if (!checklistItemEvents.last().isExpiration()) {
+        throw new DataModelViolationException("cannot add checklist item activation when checklist item is already activated");
+      }
+      if (datePerformed.compareTo(checklistItemEvents.last().getDatePerformed()) < 0) {
+        throw new DataModelViolationException("checklist item activation date must be on or after the previous expiration date");
+      }
+    }
     ChecklistItemEvent checklistItemEvent = 
       new ChecklistItemEvent(checklistItem,
                              this,
@@ -379,7 +405,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   /**
    * @motivation for hibernate
    */
-  private void setChecklistItemEvents(Set<ChecklistItemEvent> checklistItemEvents)
+  private void setChecklistItemEvents(SortedSet<ChecklistItemEvent> checklistItemEvents)
   {
     _checklistItemEvents = checklistItemEvents;
   }

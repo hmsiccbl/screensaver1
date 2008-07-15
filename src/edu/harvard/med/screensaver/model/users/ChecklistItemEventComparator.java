@@ -7,9 +7,8 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui.users;
+package edu.harvard.med.screensaver.model.users;
 
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 class ChecklistItemEventComparator extends NullSafeComparator<ChecklistItemEvent>

@@ -18,12 +18,15 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningRoomUser>
 {
@@ -253,6 +256,65 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     assertEquals(new HashSet<Screen>(Arrays.asList(screen1, screen2, screen5)), labHead.getAllAssociatedScreens());
     assertEquals(new HashSet<Screen>(Arrays.asList(screen1, screen3, screen4, screen5)), labMember1.getAllAssociatedScreens());
     assertEquals(new HashSet<Screen>(Arrays.asList(screen4, screen5)), labMember2.getAllAssociatedScreens());
+  }
+  
+  public void testChecklistItemEvents()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        genericEntityDao.persistEntity(new ChecklistItem(1, "trained", false));
+        genericEntityDao.persistEntity(new ChecklistItem(2, "lab access", true));
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
+        ScreeningRoomUser user = new ScreeningRoomUser("Lab", "User", "lab_user@hms.harvard.edu");
+        genericEntityDao.persistEntity(admin);
+        genericEntityDao.persistEntity(user);
+      }
+    });
+    ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Lab", false, "checklistItemEvents");
+    AdministratorUser admin = genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin", false, "activitiesPerformed");
+    ChecklistItem checklistItem = genericEntityDao.findEntityByProperty(ChecklistItem.class, "itemName", "lab access");
+    LocalDate today = new LocalDate();
+    ChecklistItemEvent activationEvent = 
+      user.createChecklistItemActivationEvent(checklistItem,
+                                              today,
+                                              new AdministrativeActivity(admin, 
+                                                                         today, 
+                                                                         AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+    
+    try {
+      activationEvent.createChecklistItemExpirationEvent(today.minusDays(1), 
+                                                         new AdministrativeActivity(admin, 
+                                                                                    today, 
+                                                                                    AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+      fail("expected DataModelViolationException");
+    }
+    catch (DataModelViolationException e) {}
+    ChecklistItemEvent expirationEvent = 
+      activationEvent.createChecklistItemExpirationEvent(today.plusDays(1), 
+                                                         new AdministrativeActivity(admin, 
+                                                                                    today, 
+                                                                                    AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+    try {
+      expirationEvent.createChecklistItemExpirationEvent(today,
+                                                         new AdministrativeActivity(admin, 
+                                                                                    today, 
+                                                                                    AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+      fail("expected DataModelViolationException");
+    }
+    catch (DataModelViolationException e) {}
+    assertEquals(2, user.getChecklistItemEvents(checklistItem).size());
+    assertFalse(user.getChecklistItemEvents(checklistItem).first().isExpiration());
+    assertTrue(user.getChecklistItemEvents(checklistItem).last().isExpiration());
+    try {
+      expirationEvent.createChecklistItemExpirationEvent(today.minusDays(1),
+                                                         new AdministrativeActivity(admin, 
+                                                                                    today, 
+                                                                                    AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+      fail("expected DataModelViolationException");
+    }
+    catch (DataModelViolationException e) {}
   }
 
   private void initLab()

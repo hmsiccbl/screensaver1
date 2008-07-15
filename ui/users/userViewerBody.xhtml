@@ -392,6 +392,10 @@
                     <f:facet name="header">
                       <t:outputText value="Action" styleClass="label" />
 										</f:facet>
+                    <t:inputText id="newChecklistItemDatePerformedField"
+                      value="#{userViewer.newChecklistItemDatePerformed[rowIndex]}"
+                      rendered="#{element.key.expirable || empty element.value}"
+                      size="10" styleClass="inputText" converter="#{dateConverter}" />
 										<t:commandButton id="activateChecklistItemCommand"
 											rendered="#{element.key.expirable &amp;&amp; (empty element.value || element.value.expiration)}"
 											value="Activate"

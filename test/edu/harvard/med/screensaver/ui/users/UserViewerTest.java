@@ -20,8 +20,8 @@ import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
@@ -91,7 +91,6 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
     final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null);
     userViewer.setCurrentScreensaverUser(_currentScreensaverUser);
     genericEntityDao.doInTransaction(new DAOTransaction() {
-
       public void runTransaction()
       {
         ScreeningRoomUser user = new ScreeningRoomUser("Test", "User", "test_user@hms.harvard.edu");
@@ -117,6 +116,28 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
     assertEquals("ID assigned", data.get(1).getKey().getItemName());
     assertEquals(today, data.get(1).getValue().getDatePerformed());
     assertEquals("Admin User", data.get(1).getValue().getEntryActivity().getPerformedBy().getFullNameFirstLast());
+    assertFalse(data.get(1).getValue().isExpiration());
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ChecklistItemEvent activation = genericEntityDao.findAllEntitiesOfType(ChecklistItemEvent.class).get(0);
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        ChecklistItemEvent expirationEvent = activation.createChecklistItemExpirationEvent(today,  
+                                                      new AdministrativeActivity(_admin, 
+                                                                                 today, 
+                                                                                 AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+        genericEntityDao.saveOrUpdateEntity(expirationEvent);
+        genericEntityDao.flush();
+        userViewer.setUser(activation.getScreeningRoomUser());
+      }
+    });
+    DataModel checklistItemDataModel2 = userViewer.getChecklistItemsDataModel();
+    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> data2 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModel2.getWrappedData();
+    assertEquals("ID assigned", data2.get(1).getKey().getItemName());
+    assertEquals(today, data2.get(1).getValue().getDatePerformed());
+    assertEquals("Admin User", data2.get(1).getValue().getEntryActivity().getPerformedBy().getFullNameFirstLast());
+    assertTrue(data2.get(1).getValue().isExpiration());
   }
 
   // private methods

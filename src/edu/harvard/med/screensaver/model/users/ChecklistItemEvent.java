@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model.users;
 
+import java.util.SortedSet;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,7 +49,7 @@ import org.joda.time.LocalDate;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass = ScreeningRoomUser.class)
-public class ChecklistItemEvent extends AbstractEntity
+public class ChecklistItemEvent extends AbstractEntity implements Comparable<ChecklistItemEvent>
 {
 
   // static fields
@@ -146,7 +148,9 @@ public class ChecklistItemEvent extends AbstractEntity
    * @return the date the checklist item was performed by the user or otherwise
    *         enacted
    */
+  @Column(updatable=false)
   @Type(type = "edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Immutable
   public LocalDate getDatePerformed()
   {
     return _datePerformed;
@@ -157,7 +161,7 @@ public class ChecklistItemEvent extends AbstractEntity
    * 
    * @param datePerformed the new date of the event
    */
-  public void setDatePerformed(LocalDate datePerformed)
+  private void setDatePerformed(LocalDate datePerformed)
   {
     _datePerformed = datePerformed;
   }
@@ -211,17 +215,28 @@ public class ChecklistItemEvent extends AbstractEntity
                                                                AdministrativeActivity entryActivity)
   {
     if (!getChecklistItem().isExpirable()) {
-      throw new DataModelViolationException("cannot expire checklist item " +
-                                            getChecklistItem().getItemName());
+      throw new DataModelViolationException("cannot expire checklist item " + getChecklistItem().getItemName());
+    }
+    SortedSet<ChecklistItemEvent> checklistItemEvents = getScreeningRoomUser().getChecklistItemEvents(getChecklistItem());
+    if (checklistItemEvents.isEmpty()) {
+      throw new DataModelViolationException("cannot add checklist item expiration when checklist item has not yet been activated");
+    }
+    ChecklistItemEvent previousEvent = checklistItemEvents.last();
+    if (!previousEvent.equals(this)) {
+      throw new DataModelViolationException("can only apply expiration to the last checklist event of this type");
+    }
+    if (previousEvent.isExpiration()) {
+      throw new DataModelViolationException("can only expire a previously active checklist item");
+    }
+    if (datePerformed.compareTo(previousEvent.getDatePerformed()) < 0) {
+      throw new DataModelViolationException("checklist item expiration date must be on or after the previous activation date");
     }
     ChecklistItemEvent checklistItemExpiration = new ChecklistItemEvent(this.getChecklistItem(),
                                                                         this.getScreeningRoomUser(),
                                                                         datePerformed,
                                                                         entryActivity);
     checklistItemExpiration._isExpiration = true;
-    this.getScreeningRoomUser()
-        .getChecklistItemEvents()
-        .add(checklistItemExpiration);
+    this.getScreeningRoomUser().getChecklistItemEvents().add(checklistItemExpiration);
     return checklistItemExpiration;
   }
 
@@ -295,5 +310,12 @@ public class ChecklistItemEvent extends AbstractEntity
   private void setExpiration(boolean isExpiration)
   {
     _isExpiration = isExpiration;
+  }
+
+  private static ChecklistItemEventComparator _checklistItemEventComparator = new ChecklistItemEventComparator();
+
+  public int compareTo(ChecklistItemEvent other)
+  {
+    return _checklistItemEventComparator.compare(this, other);
   }
 }

@@ -35,8 +35,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -58,12 +58,12 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.HashMultimap;
@@ -88,7 +88,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       return ((Integer) r1.ordinal()).compareTo(r2.ordinal());
     }
   };
-  private static ChecklistItemEventComparator _checklistItemEventComparator = new ChecklistItemEventComparator();
   private static final AffiliationCategory DEFAULT_NEW_LAB_AFFILIATION_CATEGORY = AffiliationCategory.HMS;
 
   // instance data members
@@ -118,6 +117,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private boolean _isChecklistItemsCollapsed = true;
   private DataModel _checklistItemDataModel;
   private AdministratorUser _checklistItemEventEnteredBy;
+  private List<LocalDate> _newChecklistItemDatePerformed;
 
 
 
@@ -749,26 +749,33 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
         checklistItemsMap.put(type, null);
       }
       for (ChecklistItemEvent checklistItemEvent : getScreeningRoomUser().getChecklistItemEvents()) {
-        NullSafeComparator<ChecklistItemEvent> checklistItemEventComparator;
-        if (_checklistItemEventComparator.compare(checklistItemEvent, checklistItemsMap.get(checklistItemEvent.getChecklistItem())) >= 0) {
-          checklistItemsMap.put(checklistItemEvent.getChecklistItem(), checklistItemEvent);
-        }
+        checklistItemsMap.put(checklistItemEvent.getChecklistItem(), checklistItemEvent);
       }
       _checklistItemDataModel = new ListDataModel(Lists.newArrayList(checklistItemsMap.entrySet()));
     }
     return _checklistItemDataModel;
   }
   
+  public List<LocalDate> getNewChecklistItemDatePerformed()
+  {
+    if (_newChecklistItemDatePerformed == null) {
+      _newChecklistItemDatePerformed = new ArrayList<LocalDate>();
+      CollectionUtils.fill(_newChecklistItemDatePerformed, new LocalDate(), getChecklistItemsDataModel().getRowCount());
+    }
+    return _newChecklistItemDatePerformed;
+  }
+
   @UIControllerMethod
   public String checklistItemActivated()
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
+    Integer rowIndex = (Integer) getRequestMap().get("rowIndex");
     assert entry.getKey().isExpirable() && (entry.getValue() == null || entry.getValue().isExpiration());
     getScreeningRoomUser().createChecklistItemActivationEvent(entry.getKey(), 
-                                                         new LocalDate(), 
-                                                         new AdministrativeActivity(_checklistItemEventEnteredBy, 
-                                                                                    new LocalDate(), 
-                                                                                    AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+                                                              getNewChecklistItemDatePerformed().get(rowIndex), 
+                                                              new AdministrativeActivity(_checklistItemEventEnteredBy, 
+                                                                                         new LocalDate(), 
+                                                                                         AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
     _checklistItemDataModel = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -777,11 +784,12 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public String checklistItemDeactivated()
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
+    Integer rowIndex = (Integer) getRequestMap().get("rowIndex");
     assert entry.getKey().isExpirable() && entry.getValue() != null && !entry.getValue().isExpiration();
-    entry.getValue().createChecklistItemExpirationEvent(new LocalDate(),  
-                                                   new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                              new LocalDate(), 
-                                                                              AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+    entry.getValue().createChecklistItemExpirationEvent(getNewChecklistItemDatePerformed().get(rowIndex),
+                                                        new AdministrativeActivity(_checklistItemEventEnteredBy,
+                                                                                   new LocalDate(), 
+                                                                                   AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
     _checklistItemDataModel = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -790,12 +798,13 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public String checklistItemCompleted()
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
+    Integer rowIndex = (Integer) getRequestMap().get("rowIndex");
     assert !entry.getKey().isExpirable() && entry.getValue() == null;
     getScreeningRoomUser().createChecklistItemActivationEvent(entry.getKey(), 
-                                                         new LocalDate(), 
-                                                         new AdministrativeActivity(_checklistItemEventEnteredBy, 
-                                                                                    new LocalDate(), 
-                                                                                    AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+                                                              getNewChecklistItemDatePerformed().get(rowIndex),
+                                                              new AdministrativeActivity(_checklistItemEventEnteredBy, 
+                                                                                         new LocalDate(), 
+                                                                                         AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
     _checklistItemDataModel = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
@@ -815,6 +824,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _labMembersDataModel = null;
     _screenAssociatesDataModel = null;
     _checklistItemDataModel = null;
+    _newChecklistItemDatePerformed = null;
   }
 }
 

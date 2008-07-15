@@ -25,10 +25,10 @@
 
 	<t:outputText value="&lt;none&gt;" styleClass="dataText"
 		rendered="#{(empty rendered || rendered) &amp;&amp; dataModel.rowCount == 0}" />
-	<t:dataTable id="#{id}CollectionTable" var="element"
+	<t:dataTable id="#{id}CollectionTable" var="element" rowIndexVar="rowIndex"
 		value="#{dataModel}" preserveDataModel="false"
 		rendered="#{(empty rendered || rendered) &amp;&amp; dataModel.rowCount > 0}" styleClass="standardTable"
-		rowClasses="row1,row2" columnClasses="column"
+		rowClasses="row1,row2" columnClasses="column" 
 		headerClass="tableHeader">
 		<ui:insert name="columns">
 			<t:column>
