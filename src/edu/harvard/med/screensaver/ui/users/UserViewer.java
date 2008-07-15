@@ -115,6 +115,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private boolean _isSmallMoleculeScreensCollapsed = true;
   private boolean _isRnaiScreensCollapsed = true;
   private boolean _isChecklistItemsCollapsed = true;
+  private boolean _isScreensCollapsed = true;
   private DataModel _checklistItemDataModel;
   private AdministratorUser _checklistItemEventEnteredBy;
   private List<LocalDate> _newChecklistItemDatePerformed;
@@ -232,6 +233,16 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public void setChecklistItemsCollapsed(boolean isChecklistItemsCollapsed)
   {
     _isChecklistItemsCollapsed = isChecklistItemsCollapsed;
+  }
+
+  public boolean isScreensCollapsed()
+  {
+    return _isScreensCollapsed;
+  }
+
+  public void setScreensCollapsed(boolean isScreensCollapsed)
+  {
+    _isScreensCollapsed = isScreensCollapsed;
   }
 
   public ScreeningRoomUser getScreeningRoomUser()

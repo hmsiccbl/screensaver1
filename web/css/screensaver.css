@@ -203,7 +203,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 	display: none;
 }
 
-.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.column500,.greedyColumn
+.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.column500,.greedyColumn,.collectionTableColumn
 	{
 	vertical-align: top;
 	border-style: none;
@@ -214,7 +214,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .column500 {
-	width: 500px;
+	width: 300px;
 }
 
 /* table columns that contain text should have a min width to make text readable (not too vertical) */
@@ -261,6 +261,11 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .greedyColumn {
 	width: 100%;
+}
+
+.collectionTableColumn {
+	width: 100%;
+  padding-bottom: 3px;
 }
 
 .selectMenu {

@@ -8,419 +8,411 @@
 	xmlns:s="http://myfaces.apache.org/sandbox"
 	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
-<ui:composition>
+<ui:composition template="/util/entityViewerDetails.xhtml">
 
-	<h:form id="userViewerForm">
-		<t:div rendered="#{!empty userViewer.user}">
+	<ui:param name="entity" value="#{userViewer.user}" />
+	<ui:param name="viewer" value="#{userViewer}" />
 
-			<t:panelGroup id="commandPanel">
-				<ss:editSaveCancel viewer="#{userViewer}" />
-				<t:commandButton id="viewAllScreensCommand" value="Browse Screens"
-					action="#{userViewer.viewAllScreens}"
-					rendered="#{!userViewer.editMode}" styleClass="command" />
-				<t:commandButton action="#{userViewer.addScreen}"
-					id="addScreenCommand" value="Add Screen"
-					rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
-					styleClass="command" />
-			</t:panelGroup>
+	<ui:define name="entityCommands">
+		<t:commandButton id="viewAllScreensCommand" value="Browse Screens"
+			action="#{userViewer.viewAllScreens}"
+			rendered="#{!userViewer.editMode}" styleClass="command" />
+		<t:commandButton action="#{userViewer.addScreen}"
+			id="addScreenCommand" value="Add Screen"
+			rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
+			styleClass="command" />
+	</ui:define>
 
-			<t:panelGrid id="userProperties" columns="2"
-				columnClasses="propertyLabelColumn,column" styleClass="layoutPanel">
+	<ui:define name="propertiesContent">
 
-				<ss:property id="userId" label="User #"
-					description="The number used to uniquely identify the user"
-					value="#{userViewer.user.screensaverUserId}"
-					rendered="#{userViewer.readAdmin}" />
+		<ss:property id="fullName" label="Name"
+			description="The name and email of the user"
+			value="#{userViewer.user.fullNameFirstLast}" required="true"
+			rendered="#{!userViewer.editMode}" />
 
-				<ss:property id="dateCreated" label="Created"
-					description="The date the user was originally recorded in Screensaver"
-					value="#{userViewer.user.dateCreated}" type="Date"
-					rendered="#{userViewer.readAdmin}" />
+		<ss:property id="firstName" label="First Name"
+			description="The user's first name"
+			value="#{userViewer.user.firstName}"
+			rendered="#{userViewer.editMode}" editable="#{userViewer.editMode}"
+			editWidth="60" />
 
-				<ss:property id="fullName" label="Name"
-					description="The name and email of the user"
-					value="#{userViewer.user.fullNameFirstLast}"
-					required="true"
-					rendered="#{!userViewer.editMode}"/>
+		<ss:property id="lastName" label="Last Name"
+			description="The user's last name (surname)"
+			value="#{userViewer.user.lastName}" required="true"
+			rendered="#{userViewer.editMode}" editable="#{userViewer.editable}"
+			editWidth="60" />
 
-				<ss:property id="firstName" label="First Name"
-					description="The user's first name"
-					value="#{userViewer.user.firstName}"
-					rendered="#{userViewer.editMode}" editable="#{userViewer.editMode}" editWidth="60"/>
+		<ss:property id="email" label="Email"
+			description="The user's email address "
+			value="#{userViewer.user.email}" editable="#{userViewer.editMode}"
+			editWidth="60" />
 
-				<ss:property id="lastName" label="Last Name"
-					description="The user's last name (surname)"
-					value="#{userViewer.user.lastName}"
-					required="true"
-					rendered="#{userViewer.editMode}" editable="#{userViewer.editable}" editWidth="60"/>
+		<ss:property id="ecommonsId" label="eCommons ID"
+			description="The user's eCommons ID "
+			value="#{userViewer.user.ECommonsId}"
+			rendered="#{userViewer.readAdmin}" editable="#{userViewer.editMode}" />
 
-				<ss:property id="email" label="Email"
-					description="The user's email address "
-					value="#{userViewer.user.email}" editable="#{userViewer.editMode}"
-					editWidth="60" />
+		<ss:property id="harvardId" label="Harvard ID" description="The user "
+			value="#{userViewer.user.harvardId}"
+			rendered="#{userViewer.readAdmin}" editable="#{userViewer.editMode}" />
 
-				<ss:property id="ecommonsId" label="eCommons ID"
-					description="The user's eCommons ID "
-					value="#{userViewer.user.ECommonsId}"
-					rendered="#{userViewer.readAdmin}"
-					editable="#{userViewer.editMode}" />
-
-				<ss:property id="harvardId" label="Harvard ID"
-					description="The user " value="#{userViewer.user.harvardId}"
-					rendered="#{userViewer.readAdmin}"
-					editable="#{userViewer.editMode}" />
-
-				<ss:property id="harvardIdExpiration" type="Date"
-					label="Harvard ID Initial Expiration Date"
-					description="The date when the user's Harvard ID will expire"
-					value="#{userViewer.user.harvardIdExpirationDate}"
-					rendered="#{userViewer.readAdmin}"
-					editable="#{userViewer.editMode}">
-					<!-- TODO: ui:define name="valueFooter">
+		<ss:property id="harvardIdExpiration" type="Date"
+			label="Harvard ID Initial Expiration Date"
+			description="The date when the user's Harvard ID will expire"
+			value="#{userViewer.user.harvardIdExpirationDate}"
+			rendered="#{userViewer.readAdmin}" editable="#{userViewer.editMode}">
+			<!-- TODO: ui:define name="valueFooter">
 					  <t:outputText id="harvardIdExpirationWarning" value="#{userViewer.harvardIdExpired ? 'Expired!' : userViewer.harvardIdDaysUntilExpiration}"/>
 					</ui:define -->
-				</ss:property>
+		</ss:property>
 
-				<ss:property id="phone" label="Phone"
-					description="The user's phone number"
-					value="#{userViewer.user.phone}" editable="#{userViewer.editMode}" />
+		<ss:property id="phone" label="Phone"
+			description="The user's phone number"
+			value="#{userViewer.user.phone}" editable="#{userViewer.editMode}" />
 
-				<ss:property id="mailingAddress" label="Mailing Address"
-					type="Textarea" description="The user's mailing address"
-					value="#{userViewer.user.mailingAddress}"
-					editable="#{userViewer.editMode}" editWidth="80" editHeight="4" />
+		<ss:property id="mailingAddress" label="Mailing Address"
+			type="Textarea" description="The user's mailing address"
+			value="#{userViewer.user.mailingAddress}"
+			editable="#{userViewer.editMode}" editWidth="60" editHeight="4" />
 
-        <ss:property id="comments" label="Comments"
-          type="Textarea" description="Comments about this user"
-          value="#{userViewer.user.comments}"
-          rendered="#{userViewer.readAdmin}"
-          editable="#{userViewer.editMode}" editWidth="80" editHeight="4" />
+		<ss:property id="comments" label="Comments" type="Textarea"
+			description="Comments about this user"
+			value="#{userViewer.user.comments}"
+			rendered="#{userViewer.readAdmin}" editable="#{userViewer.editMode}"
+			editWidth="60" editHeight="4" />
 
-				<ss:property id="classification" label="Classification"
-					description="The user's classification"
+		<ss:property id="classification" label="Classification"
+			description="The user's classification"
+			value="#{userViewer.user.userClassification}"
+			editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}"
+			converter="#{screeningRoomUserClassificationConverter}"
+			required="true">
+			<ui:define name="editableData">
+				<t:selectOneMenu id="classificationMenu"
 					value="#{userViewer.user.userClassification}"
-					editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}"
 					converter="#{screeningRoomUserClassificationConverter}"
-					required="true">
-					<ui:define name="editableData">
-						<t:selectOneMenu id="classificationMenu"
-							value="#{userViewer.user.userClassification}"
-							converter="#{screeningRoomUserClassificationConverter}"
-							required="true"
-							styleClass="inputText selectMenu">
-							<f:selectItems value="#{userViewer.userClassificationSelections}" />
-						</t:selectOneMenu>
-					</ui:define>
-				</ss:property>
+					required="true" styleClass="inputText selectMenu">
+					<f:selectItems value="#{userViewer.userClassificationSelections}" />
+				</t:selectOneMenu>
+			</ui:define>
+		</ss:property>
 
-        <ss:property id="roles" label="Roles"
-          description="The roles of this user"
-          value="#{userViewer.user.screensaverUserRoles}"
-          rendered="#{userViewer.readAdmin}">
-          <ui:define name="data">
-            <ss:collectionTable id="rolesTable"
-              editable="#{userViewer.editMode}"
-              dataModel="#{userViewer.userRolesDataModel}"
-              actionBean="#{userViewer}" addAction="addUserRole"
-              deleteAction="deleteUserRole">
-              <ui:define name="columns">
-                <t:column>
-                  <f:facet name="header">
-                    <t:outputText value="Role" styleClass="label" />
-                  </f:facet>
-                  <t:outputText
-                    value="#{element.displayableRoleName}"
-                    styleClass="dataText #{element.roleName == 'nonScreeningUser' ? 'eyeCatcher' : ''}" />
-                </t:column>
-              </ui:define>
-              <ui:define name="addProperties">
-                <t:panelGrid columns="2">
-                  <ss:property id="newrole" label="Role" editable="true">
-                    <ui:define name="editableData">
-                      <t:selectOneMenu id="newUserRole"
-                        value="#{userViewer.newUserRole.value}"
-                        styleClass="inputText selectMenu">
-                        <f:selectItems value="#{userViewer.newUserRole.selectItems}" />
-                      </t:selectOneMenu>
-                    </ui:define>
-                  </ss:property>
-                </t:panelGrid>
-              </ui:define>
-            </ss:collectionTable>
-          </ui:define>
-        </ss:property>
+		<ss:property id="labName" label="Lab Name"
+			description="The name of the user's current lab"
+			value="#{userViewer.user.lab.labName}"
+			editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}">
+			<ui:define name="data">
+				<ss:labName user="#{userViewer.user}" />
+			</ui:define>
+			<ui:define name="editableData">
+				<t:selectOneMenu id="labNameMenu"
+					value="#{userViewer.labName.value}"
+					styleClass="inputText selectMenu">
+					<f:selectItems value="#{userViewer.labName.selectItems}" />
+				</t:selectOneMenu>
+			</ui:define>
+		</ss:property>
 
-				<ss:property id="labName" label="Lab Name"
-					description="The name of the user's current lab"
-					value="#{userViewer.user.lab.labName}"
-					editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}">
-					<ui:define name="data">
-						<ss:labName user="#{userViewer.user}" />
-					</ui:define>
-					<ui:define name="editableData">
-						<t:selectOneMenu id="labNameMenu"
-							value="#{userViewer.labName.value}"
-							styleClass="inputText selectMenu">
-							<f:selectItems value="#{userViewer.labName.selectItems}" />
-						</t:selectOneMenu>
-					</ui:define>
-				</ss:property>
+		<ss:property id="labAffiliation" label="#{'Lab Affiliation'}"
+			description="The organization the user is affiliated with (usually via his/her lab)"
+			value="#{userViewer.user.lab.labAffiliation.affiliationName}"
+			rendered="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}"
+			editable="true">
+			<ui:define name="editableData">
+				<t:selectOneMenu id="labAffiliationMenu"
+					value="#{userViewer.labAffiliation.value}"
+					styleClass="inputText selectMenu">
+					<f:selectItems value="#{userViewer.labAffiliation.selectItems}" />
+				</t:selectOneMenu>
 
-				<ss:property id="labAffiliation"
-					label="#{'Lab Affiliation'}"
-					description="The organization the user is affiliated with (usually via his/her lab)"
-					value="#{userViewer.user.lab.labAffiliation.affiliationName}"
-					rendered="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}"
-					editable="true">
-					<ui:define name="editableData">
-						<t:selectOneMenu id="labAffiliationMenu"
-							value="#{userViewer.labAffiliation.value}"
-							styleClass="inputText selectMenu">
-							<f:selectItems value="#{userViewer.labAffiliation.selectItems}" />
-						</t:selectOneMenu>
-
-						<t:div id="newLabAffiliationDiv" styleClass="groupingPanel">
-							<t:panelGrid columns="1" columnClasses="column">
-								<ss:propertyGroup id="newLabAffiliationGroup"
-									label="New Affiliation (optional)">
-									<ss:property id="newLabAffiliationName" label="Name"
-										description="The name of the new affiliation to be created"
-										value="#{userViewer.newLabAffiliation.affiliationName}"
-										editable="true" editWidth="60" />
-									<ss:property id="newLabAffiliationCategory" label="Category"
-										description="The name of the new affiliation to be created"
-										value="#{userViewer.newLabAffiliation.affiliationCategory}"
-										editable="true">
-										<ui:define name="editableData">
-											<t:selectOneMenu id="affiliationCategoryMenu"
-												value="#{value}" styleClass="inputText selectMenu"
-												converter="#{affiliationCategoryConverter}">
-												<f:selectItems
-													value="#{userViewer.affiliationCategorySelections}" />
-											</t:selectOneMenu>
-										</ui:define>
-									</ss:property>
-								</ss:propertyGroup>
-							</t:panelGrid>
-							<t:commandButton id="addNewLabAffiliation" value="Add"
-								action="#{userViewer.addNewLabAffiliation}" />
-						</t:div>
-					</ui:define>
-				</ss:property>
-
-        <ss:property id="labMembers" label="Lab Members"
-          description="The other members of the lab this user belongs to, including the lab head"
-          rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
-          <ui:define name="data">
-						<t:collapsiblePanel var="isLabMembersCollapsed"
-							value="#{userViewer.labMembersCollapsed}">
-							<f:facet name="header">
-								<t:headerLink immediate="true">
-									<t:outputText id="labMembersToggleText"
-										value="#{isLabMembersCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-										styleClass="dataText" />
-								</t:headerLink>
-							</f:facet>
-							<ss:collectionTable dataModel="#{userViewer.labMembersDataModel}">
-								<ui:define name="columns">
-									<t:column>
-										<f:facet name="header">
-											<t:outputText value="Lab Member" styleClass="label" />
-										</f:facet>
-										<t:div
-											styleClass="#{element == userViewer.user ? 'subdued' : ''}">
-											<ss:user id="labMember" user="#{element}" />
-										</t:div>
-									</t:column>
+				<t:div id="newLabAffiliationDiv" styleClass="groupingPanel">
+					<t:panelGrid columns="1" columnClasses="column">
+						<ss:propertyGroup id="newLabAffiliationGroup"
+							label="New Affiliation (optional)">
+							<ss:property id="newLabAffiliationName" label="Name"
+								description="The name of the new affiliation to be created"
+								value="#{userViewer.newLabAffiliation.affiliationName}"
+								editable="true" editWidth="60" />
+							<ss:property id="newLabAffiliationCategory" label="Category"
+								description="The name of the new affiliation to be created"
+								value="#{userViewer.newLabAffiliation.affiliationCategory}"
+								editable="true">
+								<ui:define name="editableData">
+									<t:selectOneMenu id="affiliationCategoryMenu" value="#{value}"
+										styleClass="inputText selectMenu"
+										converter="#{affiliationCategoryConverter}">
+										<f:selectItems
+											value="#{userViewer.affiliationCategorySelections}" />
+									</t:selectOneMenu>
 								</ui:define>
-							</ss:collectionTable>
-						</t:collapsiblePanel>
-					</ui:define>
-          <ui:define name="valueFooter">
-            <t:commandButton id="viewAllLabMembers" value="Browse..."
-              action="#{userViewer.viewAllLabMembers}"
-              rendered="#{userViewer.labMembersDataModel.rowCount > 0}"
-              styleClass="command" />
-            <t:commandButton action="#{userViewer.addLabMember}"
-              id="addLabMember" value="Add Lab Member"
-              rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['usersAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.labHeadViewMode}"
-              styleClass="command" />
-          </ui:define>
-        </ss:property>
+							</ss:property>
+						</ss:propertyGroup>
+					</t:panelGrid>
+					<t:commandButton id="addNewLabAffiliation" value="Add"
+						action="#{userViewer.addNewLabAffiliation}" />
+				</t:div>
+			</ui:define>
+		</ss:property>
 
-				<ss:property id="smallMoleculeScreens" label="Small Molecule Screens"
-					description="The small molecule screens this user is associated with"
-					rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
-					<ui:define name="data">
-						<t:collapsiblePanel var="isSmallMoleculeScreensCollapsed"
-							value="#{userViewer.smallMoleculeScreensCollapsed}">
-							<f:facet name="header">
-								<t:headerLink immediate="true">
-									<t:outputText id="SmallMoleculeScreensToggleText"
-										value="#{isSmallMoleculeScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-										styleClass="dataText" />
-								</t:headerLink>
-							</f:facet>
-							<ss:userScreensTable
-								screensDataModel="#{userViewer.smallMoleculeScreensDataModel}"
-								screenTitleColumnHeader="A screen for compounds that..." />
-						</t:collapsiblePanel>
-					</ui:define>
-					<ui:define name="valueFooter">
-						<t:commandButton id="viewAllSmallMoleculeScreensCommand"
-							value="Browse..."
-							action="#{userViewer.viewAllSmallMoleculeScreens}"
-							rendered="#{userViewer.smallMoleculeScreensDataModel.rowCount > 0}"
-							styleClass="command" />
-						<t:commandButton id="addSmallMoleculeScreenCommand"
-							value="Add Small Molecule Screen"
-							action="#{userViewer.addSmallMoleculeScreen}"
-							styleClass="command" />
-					</ui:define>
-				</ss:property>
+		<ss:property id="labMembers" label="Lab Members"
+			description="The other members of the lab this user belongs to, including the lab head"
+			rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
+			<ui:define name="data">
+				<t:collapsiblePanel var="isLabMembersCollapsed"
+					value="#{userViewer.labMembersCollapsed}">
+					<f:facet name="header">
+						<t:headerLink immediate="true">
+							<t:outputText id="labMembersToggleText"
+								value="#{isLabMembersCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+								styleClass="dataText" />
+						</t:headerLink>
+					</f:facet>
+					<ss:collectionTable dataModel="#{userViewer.labMembersDataModel}">
+						<ui:define name="columns">
+							<t:column>
+								<f:facet name="header">
+									<t:outputText value="Lab Member" styleClass="label" />
+								</f:facet>
+								<t:div
+									styleClass="#{element == userViewer.user ? 'subdued' : ''}">
+									<ss:user id="labMember" user="#{element}" />
+								</t:div>
+							</t:column>
+						</ui:define>
+					</ss:collectionTable>
+				</t:collapsiblePanel>
+			</ui:define>
+			<ui:define name="valueFooter">
+				<t:commandButton id="viewAllLabMembers" value="Browse..."
+					action="#{userViewer.viewAllLabMembers}"
+					rendered="#{userViewer.labMembersDataModel.rowCount > 0}"
+					styleClass="command" />
+				<t:commandButton action="#{userViewer.addLabMember}"
+					id="addLabMember" value="Add Lab Member"
+					rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['usersAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.labHeadViewMode}"
+					styleClass="command" />
+			</ui:define>
+		</ss:property>
+	</ui:define>
 
-        <ss:property id="rnaiScreens" label="RNAi Screens"
-          description="The RNAi screens this user is associated with"
-          rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
-          <ui:define name="data">
-            <t:collapsiblePanel var="isRnaiScreensCollapsed"
-              value="#{userViewer.rnaiScreensCollapsed}">
-              <f:facet name="header">
-                <t:headerLink immediate="true">
-                  <t:outputText id="rnaiScreensToggleText"
-                    value="#{isRnaiScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-                    styleClass="dataText" />
-                </t:headerLink>
-              </f:facet>
-							<ss:userScreensTable
-								screensDataModel="#{userViewer.rnaiScreensDataModel}"
-								screenTitleColumnHeader="A screen for RNAi reagents that..." />
-						</t:collapsiblePanel>
-					</ui:define>
-          <ui:define name="valueFooter">
-						<t:commandButton id="viewAllRnaiScreensCommand" value="Browse..."
-							action="#{userViewer.viewAllRnaiScreens}"
-							rendered="#{userViewer.rnaiScreensDataModel.rowCount > 0}"
-							styleClass="command" />
-						<t:commandButton id="addRnaiScreenCommand" value="Add RNAi Screen"
-							action="#{userViewer.addRnaiScreen}" styleClass="command" />
-					</ui:define>
-        </ss:property>
+	<ui:define name="tablesContent">
 
-        <ss:property id="screenAssociates" label="Screen Associates"
-          description="The associated of the screens that this user is associated with"
-          rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
-          <ui:define name="data">
-						<t:collapsiblePanel var="isScreenAssociatesCollapsed"
-							value="#{userViewer.screenAssociatesCollapsed}">
-							<f:facet name="header">
-								<t:headerLink immediate="true">
-									<t:outputText id="screenAssociatesToggleText"
-										value="#{isScreenAssociatesCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-										styleClass="dataText" />
-								</t:headerLink>
-							</f:facet>
-							<ss:collectionTable
-								dataModel="#{userViewer.screenAssociatesDataModel}">
-								<ui:define name="columns">
-									<t:column>
-										<f:facet name="header">
-											<t:outputText value="Screen Associate" styleClass="label" />
-										</f:facet>
-										<ss:user id="screenAssociate" user="#{element}" />
-									</t:column>
+		<ss:property id="checklistItems" label="Checklist Items"
+			description="The checklist item statuses for this user"
+			rendered="#{userViewer.readAdmin}">
+			<ui:define name="data">
+				<t:collapsiblePanel var="isChecklistItemsCollapsed"
+					value="#{userViewer.checklistItemsCollapsed}">
+					<f:facet name="header">
+						<t:headerLink immediate="true">
+							<t:outputText id="checklistItemsToggleText"
+								value="#{isChecklistItemsCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+								styleClass="dataText" />
+						</t:headerLink>
+					</f:facet>
+					<ss:collectionTable id="checklistItemsTable"
+						dataModel="#{userViewer.checklistItemsDataModel}">
+						<ui:define name="columns">
+							<t:column>
+								<f:facet name="header">
+									<t:outputText value="Item" styleClass="label" />
+								</f:facet>
+								<t:outputText id="checklistItemType"
+									value="#{element.key.itemName}" styleClass="dataText" />
+							</t:column>
+							<t:column>
+								<f:facet name="header">
+									<t:outputText value="Item" styleClass="label" />
+								</f:facet>
+								<t:outputText id="checklistItemStatus"
+									value="#{empty element.value ? (element.key.expirable ? 'Not yet activated' : 'Pending') : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')}"
+									styleClass="dataText" />
+							</t:column>
+							<t:column>
+								<f:facet name="header">
+									<t:outputText value="Date" styleClass="label" />
+								</f:facet>
+								<t:outputText id="checklistItemDatePerformed"
+									value="#{empty element.value ? null : element.value.datePerformed}"
+									styleClass="dataText" />
+							</t:column>
+							<t:column>
+								<f:facet name="header">
+									<t:outputText value="Entered By" styleClass="label" />
+								</f:facet>
+								<ss:user id="checklistItemEnteredBy" showEmail="false"
+									user="#{empty element.value ? null : element.value.entryActivity.performedBy}" />
+							</t:column>
+							<t:column rendered="#{userViewer.editMode}">
+								<f:facet name="header">
+									<t:outputText value="Action" styleClass="label" />
+								</f:facet>
+								<t:inputText id="newChecklistItemDatePerformedField"
+									value="#{userViewer.newChecklistItemDatePerformed[rowIndex]}"
+									rendered="#{element.key.expirable || empty element.value}"
+									size="10" styleClass="inputText" converter="#{dateConverter}" />
+								<t:commandButton id="activateChecklistItemCommand"
+									rendered="#{element.key.expirable &amp;&amp; (empty element.value || element.value.expiration)}"
+									value="Activate" action="#{userViewer.checklistItemActivated}"
+									styleClass="command" />
+								<t:commandButton id="deactivateChecklistItemCommand"
+									rendered="#{element.key.expirable  &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration)}"
+									value="Deactivate"
+									action="#{userViewer.checklistItemDeactivated}"
+									styleClass="command" />
+								<t:commandButton id="completedChecklistItemCommand"
+									rendered="#{!element.key.expirable &amp;&amp; empty element.value}"
+									value="Completed" action="#{userViewer.checklistItemCompleted}"
+									styleClass="command" />
+							</t:column>
+						</ui:define>
+					</ss:collectionTable>
+				</t:collapsiblePanel>
+			</ui:define>
+		</ss:property>
+
+		<ss:property id="roles" label="Roles"
+			description="The roles of this user"
+			value="#{userViewer.user.screensaverUserRoles}"
+			rendered="#{userViewer.readAdmin}">
+			<ui:define name="data">
+				<ss:collectionTable id="rolesTable"
+					editable="#{userViewer.editMode}"
+					dataModel="#{userViewer.userRolesDataModel}"
+					actionBean="#{userViewer}" addAction="addUserRole"
+					deleteAction="deleteUserRole">
+					<ui:define name="columns">
+						<t:column>
+							<t:outputText value="#{element.displayableRoleName}"
+								styleClass="dataText #{element.roleName == 'nonScreeningUser' ? 'eyeCatcher' : ''}" />
+						</t:column>
+					</ui:define>
+					<ui:define name="addProperties">
+						<t:panelGrid columns="2">
+							<ss:property id="newrole" label="Role" editable="true">
+								<ui:define name="editableData">
+									<t:selectOneMenu id="newUserRole"
+										value="#{userViewer.newUserRole.value}"
+										styleClass="inputText selectMenu">
+										<f:selectItems value="#{userViewer.newUserRole.selectItems}" />
+									</t:selectOneMenu>
 								</ui:define>
-							</ss:collectionTable>
-						</t:collapsiblePanel>
+							</ss:property>
+						</t:panelGrid>
 					</ui:define>
-          <ui:define name="valueFooter">
-            <t:commandButton id="viewAllScreenAssociates" value="Browse..."
-              action="#{userViewer.viewAllScreenAssociates}"
-              rendered="#{userViewer.screenAssociatesDataModel.rowCount > 0}"
-              styleClass="command" />
-          </ui:define>
-        </ss:property>
+				</ss:collectionTable>
+			</ui:define>
+		</ss:property>
 
-				<ss:property id="checklistItems" label="Checklist Items"
-					description="The checklist item statuses for this user"
-					rendered="#{userViewer.readAdmin}">
-          <ui:define name="data">
-            <t:collapsiblePanel var="isChecklistItemsCollapsed"
-              value="#{userViewer.checklistItemsCollapsed}">
-              <f:facet name="header">
-                <t:headerLink immediate="true">
-                  <t:outputText id="checklistItemsToggleText"
-                    value="#{isChecklistItemsCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-                    styleClass="dataText" />
-                </t:headerLink>
-              </f:facet>
-							<ss:collectionTable id="checklistItemsTable"
-								dataModel="#{userViewer.checklistItemsDataModel}">
-								<ui:define name="columns">
-									<t:column>
-										<f:facet name="header">
-											<t:outputText value="Item" styleClass="label" />
-										</f:facet>
-										<t:outputText id="checklistItemType"
-											value="#{element.key.itemName}"
-											styleClass="dataText" />
-									</t:column>
-									<t:column>
-										<f:facet name="header">
-											<t:outputText value="Item" styleClass="label" />
-										</f:facet>
-										<t:outputText id="checklistItemStatus"
-											value="#{empty element.value ? (element.key.expirable ? 'Not yet activated' : 'Pending') : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')}"
-											styleClass="dataText" />
-									</t:column>
-									<t:column>
-										<f:facet name="header">
-											<t:outputText value="Date" styleClass="label" />
-										</f:facet>
-										<t:outputText id="checklistItemDatePerformed"
-											value="#{empty element.value ? null : element.value.datePerformed}"
-											styleClass="dataText" />
-									</t:column>
-									<t:column>
-										<f:facet name="header">
-											<t:outputText value="Entered By" styleClass="label" />
-										</f:facet>
-										<ss:user id="checklistItemEnteredBy" showEmail="false"
-											user="#{empty element.value ? null : element.value.entryActivity.performedBy}" />
-									</t:column>
-									<t:column rendered="#{userViewer.editMode}"> 
-                    <f:facet name="header">
-                      <t:outputText value="Action" styleClass="label" />
-										</f:facet>
-                    <t:inputText id="newChecklistItemDatePerformedField"
-                      value="#{userViewer.newChecklistItemDatePerformed[rowIndex]}"
-                      rendered="#{element.key.expirable || empty element.value}"
-                      size="10" styleClass="inputText" converter="#{dateConverter}" />
-										<t:commandButton id="activateChecklistItemCommand"
-											rendered="#{element.key.expirable &amp;&amp; (empty element.value || element.value.expiration)}"
-											value="Activate"
-											action="#{userViewer.checklistItemActivated}"
-											styleClass="command" />
-										<t:commandButton id="deactivateChecklistItemCommand"
-											rendered="#{element.key.expirable  &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration)}"
-											value="Deactivate"
-											action="#{userViewer.checklistItemDeactivated}"
-											styleClass="command" />
-										<t:commandButton id="completedChecklistItemCommand"
-											rendered="#{!element.key.expirable &amp;&amp; empty element.value}"
-											value="Completed"
-											action="#{userViewer.checklistItemCompleted}"
-											styleClass="command" />
-									</t:column>
-								</ui:define>
-							</ss:collectionTable>
-						</t:collapsiblePanel>
-          </ui:define>
-				</ss:property>
+	</ui:define>
 
-			</t:panelGrid>
-		</t:div>
-	</h:form>
+	<ui:define name="footerContent">
+		<ss:collapsiblePanel id="userScreenInfo" label="Screens"
+			isCollapsed="#{userViewer.screensCollapsed}"
+			rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; !userViewer.editMode}">
+			<ui:define name="content">
+				<t:panelGrid id="screensPropertiesPanel" columns="2"
+					columnClasses="propertyLabelColumn,column"
+					styleClass="layoutPanel">
+
+					<ss:property id="smallMoleculeScreens"
+						label="Small Molecule Screens"
+						description="The small molecule screens this user is associated with"
+						rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
+						<ui:define name="data">
+							<t:collapsiblePanel var="isSmallMoleculeScreensCollapsed"
+								value="#{userViewer.smallMoleculeScreensCollapsed}">
+								<f:facet name="header">
+									<t:headerLink immediate="true">
+										<t:outputText id="SmallMoleculeScreensToggleText"
+											value="#{isSmallMoleculeScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+											styleClass="dataText" />
+									</t:headerLink>
+								</f:facet>
+								<ss:userScreensTable
+									screensDataModel="#{userViewer.smallMoleculeScreensDataModel}"
+									screenTitleColumnHeader="A screen for compounds that..." />
+							</t:collapsiblePanel>
+						</ui:define>
+						<ui:define name="valueFooter">
+							<t:commandButton id="viewAllSmallMoleculeScreensCommand"
+								value="Browse..."
+								action="#{userViewer.viewAllSmallMoleculeScreens}"
+								rendered="#{userViewer.smallMoleculeScreensDataModel.rowCount > 0}"
+								styleClass="command" />
+							<t:commandButton id="addSmallMoleculeScreenCommand"
+								value="Add Small Molecule Screen"
+								action="#{userViewer.addSmallMoleculeScreen}"
+								styleClass="command" />
+						</ui:define>
+					</ss:property>
+
+					<ss:property id="rnaiScreens" label="RNAi Screens"
+						description="The RNAi screens this user is associated with"
+						rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
+						<ui:define name="data">
+							<t:collapsiblePanel var="isRnaiScreensCollapsed"
+								value="#{userViewer.rnaiScreensCollapsed}">
+								<f:facet name="header">
+									<t:headerLink immediate="true">
+										<t:outputText id="rnaiScreensToggleText"
+											value="#{isRnaiScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+											styleClass="dataText" />
+									</t:headerLink>
+								</f:facet>
+								<ss:userScreensTable
+									screensDataModel="#{userViewer.rnaiScreensDataModel}"
+									screenTitleColumnHeader="A screen for RNAi reagents that..." />
+							</t:collapsiblePanel>
+						</ui:define>
+						<ui:define name="valueFooter">
+							<t:commandButton id="viewAllRnaiScreensCommand" value="Browse..."
+								action="#{userViewer.viewAllRnaiScreens}"
+								rendered="#{userViewer.rnaiScreensDataModel.rowCount > 0}"
+								styleClass="command" />
+							<t:commandButton id="addRnaiScreenCommand"
+								value="Add RNAi Screen" action="#{userViewer.addRnaiScreen}"
+								styleClass="command" />
+						</ui:define>
+					</ss:property>
+
+					<ss:property id="screenAssociates" label="Screen Associates"
+						description="The associated of the screens that this user is associated with"
+						rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
+						<ui:define name="data">
+							<t:collapsiblePanel var="isScreenAssociatesCollapsed"
+								value="#{userViewer.screenAssociatesCollapsed}">
+								<f:facet name="header">
+									<t:headerLink immediate="true">
+										<t:outputText id="screenAssociatesToggleText"
+											value="#{isScreenAssociatesCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+											styleClass="dataText" />
+									</t:headerLink>
+								</f:facet>
+								<ss:collectionTable
+									dataModel="#{userViewer.screenAssociatesDataModel}">
+									<ui:define name="columns">
+										<t:column>
+											<f:facet name="header">
+												<t:outputText value="Screen Associate" styleClass="label" />
+											</f:facet>
+											<ss:user id="screenAssociate" user="#{element}" />
+										</t:column>
+									</ui:define>
+								</ss:collectionTable>
+							</t:collapsiblePanel>
+						</ui:define>
+						<ui:define name="valueFooter">
+							<t:commandButton id="viewAllScreenAssociates" value="Browse..."
+								action="#{userViewer.viewAllScreenAssociates}"
+								rendered="#{userViewer.screenAssociatesDataModel.rowCount > 0}"
+								styleClass="command" />
+						</ui:define>
+					</ss:property>
+					</t:panelGrid>
+			</ui:define>
+		</ss:collapsiblePanel>
+	</ui:define>
 
 </ui:composition>
 

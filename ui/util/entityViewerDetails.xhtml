@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<!-- facelet params:
+	        - viewer
+	        - entity
+          - entityCommands: UI fragment
+	        - propertiesContent: UI fragment
+	        - tablesContent: UI fragment
+	        - footerContent: UI fragment 
+	 -->
+
+<ui:composition>
+
+	<h:form id="entityViewerForm">
+		<t:div rendered="#{!empty entity}">
+
+			<t:panelGrid columns="2" styleClass="layoutPanel" style="width: 100%">
+				<t:panelGroup id="commandPanel">
+					<ss:editSaveCancel viewer="#{viewer}" />
+					<ui:insert name="entityCommands" />
+				</t:panelGroup>
+
+				<t:panelGrid columns="4" columnClasses="propertyColumn,column"
+					styleClass="layoutPanel" style="float: right">
+					<ss:property id="entityId" label="#"
+						description="The number used to uniquely identify the entity"
+						value="#{viewer.user.screensaverUserId}"
+						rendered="#{viewer.readAdmin}" />
+
+					<ss:property id="dateCreated" label="Created"
+						description="The date the entity was originally recorded in Screensaver"
+						value="#{entity.dateCreated}" type="Date"
+						rendered="#{viewer.readAdmin}" />
+				</t:panelGrid>
+			</t:panelGrid>
+
+			<t:panelGrid id="leftAndRightSides" columns="2"
+				columnClasses="column,greedyColumn" styleClass="layoutPanel" style="width: 100%">
+
+				<t:panelGrid id="propertiesPanel" columns="2"
+					columnClasses="propertyLabelColumn,column" styleClass="layoutPanel">
+					<ui:insert name="propertiesContent" />
+				</t:panelGrid>
+
+				<t:panelGrid id="tablesPanel" columns="1"
+					columnClasses="collectionTableColumn" styleClass="layoutPanel" style="width: 100%">
+					<ui:insert name="tablesContent" />
+				</t:panelGrid>
+			</t:panelGrid>
+			
+			<ui:insert name="footerContent" />
+		</t:div>
+	</h:form>
+
+</ui:composition>
+
+</html>
