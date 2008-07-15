@@ -13,6 +13,8 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
+import com.google.common.collect.Sets;
+
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -51,10 +53,10 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
       public void runTransaction()
       {
         ScreensaverUser user1 = new ScreeningRoomUser("First1", "Last1", userEmail1);
-        user1.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+        user1.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
         genericEntityDao.saveOrUpdateEntity(user1);
         ScreensaverUser user2 = new ScreeningRoomUser("First2", "Last2", userEmail2);
-        user2.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+        user2.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
         genericEntityDao.saveOrUpdateEntity(user2);
       }
     });
@@ -63,16 +65,11 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
       public void runTransaction()
       {
         ScreensaverUser user1 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail1);
-        assertEquals(user1.getScreensaverUserRoles().size(), 1);
-        assertTrue(user1.getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENER));
+        assertEquals(Sets.immutableSortedSet(ScreensaverUserRole.SCREENSAVER_USER), user1.getScreensaverUserRoles());
         
         ScreensaverUser user2 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail2);
-        assertEquals(user2.getScreensaverUserRoles().size(), 1);
-        assertTrue(user2.getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENER));
-        
-        assertEquals(user1.getScreensaverUserRoles().iterator().next(),
-                     user2.getScreensaverUserRoles().iterator().next());
-        
+        assertEquals(Sets.immutableSortedSet(ScreensaverUserRole.SCREENSAVER_USER), user2.getScreensaverUserRoles());
+        assertEquals(user1.getScreensaverUserRoles(), user2.getScreensaverUserRoles());
       }
     });
   }
