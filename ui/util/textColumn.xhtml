@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+	
+	<!-- facelet params:
+	     id
+       columnName
+       description
+	     cellValue
+       show: boolean
+	     <unnamed UI fragment>: optional (cell content)
+	 -->
+
+<ui:composition>
+	<t:column id="#{id}Column" rendered="#{empty rendered ? true : rendered}">
+		<f:facet name="header">
+			<ss:popup popupText="#{description}" value="#{columnName}" />
+		</f:facet>
+		<ui:insert name="content">
+			<t:outputText id="#{id}Cell" value="#{cellValue}"
+				styleClass="dataText" />
+		</ui:insert>
+	</t:column>
+</ui:composition>
+</html>

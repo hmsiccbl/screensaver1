@@ -50,6 +50,16 @@
       <tag-name>collapsiblePanel</tag-name>
       <source>../util/collapsiblePanel.xhtml</source>
     </tag>
+    
+    <tag>
+      <tag-name>popup</tag-name>
+      <source>../util/popup.xhtml</source>
+    </tag>
+
+    <tag>
+      <tag-name>textColumn</tag-name>
+      <source>../util/textColumn.xhtml</source>
+    </tag>
 
     <tag>
       <tag-name>editSaveCancel</tag-name>
