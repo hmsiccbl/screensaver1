@@ -100,6 +100,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     return _activity;
   }
 
+  @Transactional
   public void setActivity(Activity activity)
   {
     if (activity.getEntityId() != null) {
@@ -192,7 +193,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   {
     _isEditMode = true;
     _returnToViewAfterEdit = _thisProxy;
-    return REDISPLAY_PAGE_ACTION_RESULT;
+    return VIEW_ACTIVITY;
   }
 
   @UIControllerMethod

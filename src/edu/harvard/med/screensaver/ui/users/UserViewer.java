@@ -705,24 +705,24 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   }
   
   @UIControllerMethod
-  public String viewAllScreens()
+  public String browseScreens()
   {
-    return doViewAllScreens(null);
+    return doBrowseScreens(null);
   }
   
   @UIControllerMethod
-  public String viewAllRnaiScreens()
+  public String browseRnaiScreens()
   {
-    return doViewAllScreens(ScreenType.RNAI);
+    return doBrowseScreens(ScreenType.RNAI);
   }
 
   @UIControllerMethod
-  public String viewAllSmallMoleculeScreens()
+  public String browseSmallMoleculeScreens()
   {
-    return doViewAllScreens(ScreenType.SMALL_MOLECULE);
+    return doBrowseScreens(ScreenType.SMALL_MOLECULE);
   }
 
-  private String doViewAllScreens(ScreenType screenType)
+  private String doBrowseScreens(ScreenType screenType)
   {
     _screensBrowser.searchScreensForUser(getScreeningRoomUser());
     if (screenType != null) {
@@ -732,18 +732,18 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   }
   
   @UIControllerMethod
-  public String viewAllLabMembers()
+  public String browseLabMembers()
   {
-    return doViewAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData()));
+    return doBrowseAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData()));
   }
   
   @UIControllerMethod
-  public String viewAllScreenAssociates()
+  public String browseScreenAssociates()
   {
-    return doViewAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData()));
+    return doBrowseAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData()));
   }
   
-  private String doViewAssociates(Set<ScreeningRoomUser> associates)
+  private String doBrowseAssociates(Set<ScreeningRoomUser> associates)
   {
     _screenerSearchResults.searchUsers(associates);
     return BROWSE_SCREENERS;

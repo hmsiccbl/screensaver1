@@ -557,7 +557,8 @@ TODO:
                 <t:outputText value="#" />
               </f:facet>
               <ss:entityLink entity="#{activityItem}"
-                bean="#{activityViewer}" action="viewActivity" />
+                bean="#{screenDetailViewer}"
+                action="viewActivityWithinScreen" />
             </t:column>
             <t:column>
               <f:facet name="header">
@@ -586,9 +587,9 @@ TODO:
           </t:dataTable>
           <t:panelGroup styleClass="commandPanel"
             rendered="#{screenDetailViewer.editable}">
-            <t:commandButton id="showAllLabActivities"
+            <t:commandButton id="browseLabActivities"
               value="Browse All..."
-              action="#{screenDetailViewer.showAllLabActivities}"
+              action="#{screenDetailViewer.browseLabActivities}"
               disabled="#{screenDetailViewer.labActivitiesDataModel.rowCount == 0}"
               styleClass="command" />
             <t:commandButton id="addLibraryScreeningCommand"
@@ -648,10 +649,10 @@ TODO:
           </t:dataTable>
           <t:panelGroup styleClass="commandPanel"
             rendered="#{cherryPickRequestViewer.editable}">
-            <t:commandButton id="showAllCherryPickRequests"
+            <t:commandButton id="browseCherryPickRequests"
               value="Browse All..."
               disabled="#{screenDetailViewer.cherryPickRequestsDataModel.rowCount == 0}"
-              action="#{screenDetailViewer.showAllCherryPickRequests}"
+              action="#{screenDetailViewer.browseCherryPickRequests}"
               styleClass="command" />
             <t:commandButton value="Add Cherry Pick Request..."
               action="#{screenDetailViewer.addCherryPickRequest}"

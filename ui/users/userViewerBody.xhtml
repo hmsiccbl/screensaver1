@@ -14,8 +14,8 @@
 	<ui:param name="viewer" value="#{userViewer}" />
 
 	<ui:define name="entityCommands">
-		<t:commandButton id="viewAllScreensCommand" value="Browse Screens"
-			action="#{userViewer.viewAllScreens}"
+		<t:commandButton id="browseScreensCommand" value="Browse Screens"
+			action="#{userViewer.browseScreens}"
 			rendered="#{!userViewer.editMode}" styleClass="command" />
 		<t:commandButton action="#{userViewer.addScreen}"
 			id="addScreenCommand" value="Add Screen"
@@ -183,8 +183,8 @@
 				</t:collapsiblePanel>
 			</ui:define>
 			<ui:define name="valueFooter">
-				<t:commandButton id="viewAllLabMembers" value="Browse..."
-					action="#{userViewer.viewAllLabMembers}"
+				<t:commandButton id="browseLabMembers" value="Browse..."
+					action="#{userViewer.browseLabMembers}"
 					rendered="#{userViewer.labMembersDataModel.rowCount > 0}"
 					styleClass="command" />
 				<t:commandButton action="#{userViewer.addLabMember}"
@@ -323,9 +323,9 @@
 							</t:collapsiblePanel>
 						</ui:define>
 						<ui:define name="valueFooter">
-							<t:commandButton id="viewAllSmallMoleculeScreensCommand"
+							<t:commandButton id="browseSmallMoleculeScreensCommand"
 								value="Browse..."
-								action="#{userViewer.viewAllSmallMoleculeScreens}"
+								action="#{userViewer.browseSmallMoleculeScreens}"
 								rendered="#{userViewer.smallMoleculeScreensDataModel.rowCount > 0}"
 								styleClass="command" />
 							<t:commandButton id="addSmallMoleculeScreenCommand"
@@ -354,8 +354,8 @@
 							</t:collapsiblePanel>
 						</ui:define>
 						<ui:define name="valueFooter">
-							<t:commandButton id="viewAllRnaiScreensCommand" value="Browse..."
-								action="#{userViewer.viewAllRnaiScreens}"
+							<t:commandButton id="browseRnaiScreensCommand" value="Browse..."
+								action="#{userViewer.browseRnaiScreens}"
 								rendered="#{userViewer.rnaiScreensDataModel.rowCount > 0}"
 								styleClass="command" />
 							<t:commandButton id="addRnaiScreenCommand"
@@ -391,8 +391,8 @@
 							</t:collapsiblePanel>
 						</ui:define>
 						<ui:define name="valueFooter">
-							<t:commandButton id="viewAllScreenAssociates" value="Browse..."
-								action="#{userViewer.viewAllScreenAssociates}"
+							<t:commandButton id="browseScreenAssociates" value="Browse..."
+								action="#{userViewer.browseScreenAssociates}"
 								rendered="#{userViewer.screenAssociatesDataModel.rowCount > 0}"
 								styleClass="command" />
 						</ui:define>

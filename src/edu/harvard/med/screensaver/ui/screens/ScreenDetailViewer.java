@@ -763,18 +763,28 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String showAllLabActivities()
+  @UIControllerMethod
+  public String browseLabActivities()
   {
     _labActivitySearchResults.searchLabActivitiesForScreen(_screen);
     return BROWSE_ACTIVITIES;
   }
 
-  public String showAllCherryPickRequests()
+  @UIControllerMethod
+  public String browseCherryPickRequests()
   {
     _cherryPickRequestSearchResults.searchForScreen(_screen);
     return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
+  @UIControllerMethod
+  public String viewActivityWithinScreen()
+  {
+    _labActivitySearchResults.searchLabActivitiesForScreen(_screen);
+    return _activityViewer.viewActivity();
+  }
+
+  
   // protected methods
 
   protected ScreensaverUserRole getEditableAdminRole()
