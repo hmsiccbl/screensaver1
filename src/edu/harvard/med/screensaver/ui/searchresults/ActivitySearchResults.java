@@ -171,4 +171,10 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
     return isUserInRole(ScreensaverUserRole.SCREENS_ADMIN) ||
       isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
+  
+  @Override
+  protected void setEntityToView(A activity)
+  {
+    _activityViewer.setActivity(activity);
+  }
 }

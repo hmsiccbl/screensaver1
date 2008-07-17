@@ -586,7 +586,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       searchResults.viewEntity(user);
     }
     return BROWSE_SCREENERS;
-
   }
 
   @UIControllerMethod

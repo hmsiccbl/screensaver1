@@ -34,6 +34,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
@@ -62,6 +63,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   private DataModel _libraryAndPlatesScreenedDataModel;
   private PlatesUsed _newPlatesScreened;
   private AbstractBackingBean _returnToViewAfterEdit;
+  private LabActivitySearchResults _labActivitiesBrowser;
 
 
   // constructors
@@ -75,12 +77,14 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
 
   public ActivityViewer(ActivityViewer _activityViewerProxy,
                         GenericEntityDAO dao,
-                        LibrariesDAO librariesDao)
+                        LibrariesDAO librariesDao,
+                        LabActivitySearchResults labActivitiesBrowser)
   {
     _thisProxy = _activityViewerProxy;
     _returnToViewAfterEdit = _thisProxy;
     _dao = dao;
     _librariesDao = librariesDao;
+    _labActivitiesBrowser = labActivitiesBrowser;
   }
 
 
@@ -98,6 +102,26 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
 
   public void setActivity(Activity activity)
   {
+    if (activity.getEntityId() != null) {
+      activity = _dao.reloadEntity(activity,
+                                   true,
+                                   "screen.labHead",
+                                   "screen.leadScreener",
+                                   "screen.collaborators",
+                                   "performedBy");
+      // HACK: performedBy is not being eager fetched when this method is called
+      // from viewActivity(); chalking this up to a Hibernate bug for now, since
+      // the relationships *are* being eager fetched; problem manifests in
+      // ActivityViewer.getPerformedBy() method
+      activity.getPerformedBy().getEntityId();
+
+      if (activity instanceof LibraryScreening) {
+        _dao.need(activity, "platesUsed");
+      }
+      if (activity instanceof RNAiCherryPickScreening) {
+        _dao.need(activity, "rnaiCherryPickRequest");
+      }
+    }
     _activity = activity;
     resetView();
   }
@@ -208,7 +232,6 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   /* JSF Application methods */
 
   @UIControllerMethod
-  @Transactional
   public String viewActivity()
   {
     Integer entityId = Integer.parseInt(getRequestParameter("entityId").toString());
@@ -233,26 +256,23 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
-    activity = _dao.reloadEntity(activity,
-                                 true,
-                                 "screen.labHead",
-                                 "screen.leadScreener",
-                                 "screen.collaborators",
-                                 "performedBy");
-    // HACK: performedBy is not being eager fetched when this method is called
-    // from viewActivity(); chalking this up to a Hibernate bug for now, since
-    // the relationships *are* being eager fetched; problem manifests in
-    // ActivityViewer.getPerformedBy() method
-    activity.getPerformedBy().getEntityId();
-
-    if (activity instanceof LibraryScreening) {
-      _dao.need(activity, "platesUsed");
-    }
-    if (activity instanceof RNAiCherryPickScreening) {
-      _dao.need(activity, "rnaiCherryPickRequest");
-    }
     setActivity(activity);
-    return VIEW_ACTIVITY;
+        
+    // calling viewActivity() is a request to view the most up-to-date, persistent
+    // version of the activity, which means the labActivitesBrowser must also be
+    // updated to reflect the persistent version of the user
+    _labActivitiesBrowser.refetch();
+
+    // all activities are viewed within the context of a search results, providing
+    // the user with activity search options at all times
+    // ActivitySearchResults will call our setActivity() method
+    if (!_labActivitiesBrowser.viewEntity((LabActivity) activity)) {
+      _labActivitiesBrowser.searchAllActivities();
+      // note: calling viewEntity(user) will only work as long as
+      // ActivitySearchResults continues to use InMemoryDataTableModel
+      _labActivitiesBrowser.viewEntity((LabActivity) activity);
+    }
+    return BROWSE_ACTIVITIES;
   }
 
   @UIControllerMethod

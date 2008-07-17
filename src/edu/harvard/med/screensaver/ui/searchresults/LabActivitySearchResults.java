@@ -95,11 +95,4 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   {
     return ACTIVITY_TYPES;
   }
-
-  @Override
-  protected void setEntityToView(LabActivity activity)
-  {
-    _activityViewer.viewActivity(activity);
-  }
-
 }

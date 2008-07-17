@@ -616,6 +616,7 @@
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="labActivitiesBrowser" />
     <aop:scoped-proxy />
   </bean>
 
