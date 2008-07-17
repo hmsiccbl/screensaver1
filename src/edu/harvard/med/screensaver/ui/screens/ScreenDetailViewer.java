@@ -415,13 +415,6 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
-  public String cancelAdminViewMode()
-  {
-    _isAdminViewMode = false;
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
   @Transactional
   public String editNewScreen(ScreeningRoomUser leadScreener, ScreenType screenType)
   {

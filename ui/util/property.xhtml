@@ -16,6 +16,7 @@
 	     - value
 	     - editable: boolean, (optional, defaults to false)
 	     - rendered: boolean, (optional, defaults to true)
+       - adminOnly: boolean (optional, defaults to false)
 	     - required: boolean, (optional, defaults to false)
 	     - editWidth
 	     - editHeight ('Textarea' type only)
@@ -24,18 +25,20 @@
 	 -->
 
 <ui:composition>
-	<t:div rendered="#{empty rendered ? true : rendered}"
+	<t:div
+		rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}"
 		styleClass="propertyLabel">
 		<ui:insert name="label">
 			<t:popup>
 				<f:facet name="popup">
 					<t:div styleClass="popupHelp popupText">#{description}</t:div>
 				</f:facet>
-				<t:outputText value="#{label}" styleClass="label" />
+				<t:outputText value="#{label}"
+					styleClass="label #{adminOnly ? 'adminOnly' : ''}" />
 			</t:popup>
 		</ui:insert>
 	</t:div>
-	<t:div rendered="#{empty rendered ? true : rendered}">
+	<t:div rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}">
 		<ui:insert name="valueHeader" />
 		<t:div rendered="#{!editable}">
 			<ui:insert name="data">
@@ -51,8 +54,8 @@
 			<ui:insert name="editableData">
 				<t:inputText id="#{id}#{type}Field"
 					rendered="#{!(type == 'Textarea' || type == 'Boolean')}"
-					required="#{required}"
-					value="#{value}" size="#{editWidth}" styleClass="inputText"
+					required="#{required}" value="#{value}" size="#{editWidth}"
+					styleClass="inputText"
 					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
 				<t:inputTextarea id="#{id}#{type}Field1"
 					rendered="#{type == 'Textarea'}" required="#{required}"
@@ -64,7 +67,7 @@
 					immediate="#{submitOnChange}" />
 			</ui:insert>
 		</t:div>
-    <ui:insert name="valueFooter" />
+		<ui:insert name="valueFooter" />
 	</t:div>
 </ui:composition>
 

@@ -1,471 +1,475 @@
 /* $HeadURL$                                                                   */
-	/* $Id$                                                                        */
-	/*                                                                              */
-	/* Copyright 2006 by the President and Fellows of Harvard College.              */
-	/*                                                                              */
-	/* Screensaver is an open-source project developed by the ICCB-L and NSRB labs  */
-	/* at Harvard Medical School. This software is distributed under the terms of   */
-	/* the GNU General Public License. */
+  /* $Id$                                                                        */
+  /*                                                                              */
+  /* Copyright 2006 by the President and Fellows of Harvard College.              */
+  /*                                                                              */
+  /* Screensaver is an open-source project developed by the ICCB-L and NSRB labs  */
+  /* at Harvard Medical School. This software is distributed under the terms of   */
+  /* the GNU General Public License. */
 body {
-	font-family: helvetica, arial, sans-serif;
-	font-size: medium;
-	font-weight: normal;
-	color: #000000;
-	background-color: #ffffff;
+  font-family: helvetica, arial, sans-serif;
+  font-size: medium;
+  font-weight: normal;
+  color: #000000;
+  background-color: #ffffff;
 }
 
 h1,.title {
-	font-size: x-large;
-	font-weight: bold;
+  font-size: x-large;
+  font-weight: bold;
 }
 
 .transparentSectionHeader,h2,.sectionHeader {
-	font-weight: bold;
-	font-variant: small-caps;
-	font-size: large;
-	color: white;
-	text-decoration: none;
-	width: 100%;
-	padding: 0px;
-	margin-top: 0px;
-	margin-bottom: 0px;
-	margin-left: 0px;
-	margin-right: 0px;
-	padding-left: 1px;
+  font-weight: bold;
+  font-variant: small-caps;
+  font-size: large;
+  color: white;
+  text-decoration: none;
+  width: 100%;
+  padding: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-left: 1px;
 }
 
 h2,.sectionHeader,h3,.subsectionHeader {
-	background-color: #0094C4;
+  background-color: #0094C4;
 }
 
 .transparentSubsectionHeader,h3,.subsectionHeader {
-	font-weight: normal;
-	font-variant: small-caps;
-	font-size: medium;
-	color: white;
-	text-decoration: none;
-	width: 100%;
-	padding: 2px 2px 2px 2px;
-	margin-top: 2px;
-	margin-bottom: 2px;
+  font-weight: normal;
+  font-variant: small-caps;
+  font-size: medium;
+  color: white;
+  text-decoration: none;
+  width: 100%;
+  padding: 2px 2px 2px 2px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 form {
-	margin: 0px 0px 0px 0px;
-	padding: 0px 0px 0px 0px;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
 }
 
 .icon {
-	border: none
+  border: none
 }
 
 .footer {
-	text-align: center;
-	color: graytext;
-	font-size: small;
+  text-align: center;
+  color: graytext;
+  font-size: small;
 }
 
 .userName {
-	font-weight: bold;
-	font-style: italic;
+  font-weight: bold;
+  font-style: italic;
 }
 
 .errorMessage {
-	font-weight: bold;
-	font-size: large;
-	color: fuchsia;
-	border: 1px;
+  font-weight: bold;
+  font-size: large;
+  color: fuchsia;
+  border: 1px;
 }
 
 .eyeCatcher {
-	color: fuchsia;
-	background-color: yellow;
+  color: fuchsia;
+  background-color: yellow;
 }
 
 .subdued {
-	color: graytext;
+  color: graytext;
+}
+
+.adminOnly {
+  color: maroon;
 }
 
 a,a:link,a:visited,a:active {
-	color: inherit;
-	background-color: inherit;
+  color: inherit;
+  background-color: inherit;
 }
 
 a:hover {
-	color: fuchsia;
-	background-color: inherit;
-	text-decoration: underline;
+  color: fuchsia;
+  background-color: inherit;
+  text-decoration: underline;
 }
 
 hr {
-	height: 1px;
-	border-style: dotted;
-	border-color: #000000;
-	border-width: 0px 0px 1px 0px;
+  height: 1px;
+  border-style: dotted;
+  border-color: #000000;
+  border-width: 0px 0px 1px 0px;
 }
 
 .spacer {
-	margin-left: 4px;
-	margin-right: 4px;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 
 .standardTable {
-	color: #000000;
-	border-style: none;
-	/* note: IE doesn't support border-spacing, seems to default to 1 */
-	border-spacing: 1px;
-	/*width: 100%;*/
+  color: #000000;
+  border-style: none;
+  /* note: IE doesn't support border-spacing, seems to default to 1 */
+  border-spacing: 1px;
+  /*width: 100%;*/
 }
 
 /* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
 .commandPanel {
-	float: left;
+  float: left;
 }
 
 /* groupingPanel is for panelGrid that is being used to visually associate a set of related components */
 .groupingPanel {
-	padding: 1px;
-	border-width: 2px;
-	border-style: solid;
-	border-color: #dddddd;
-	/*	width: 100%;*/
+  padding: 1px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #dddddd;
+  /*	width: 100%;*/
 }
 
 .searchResultsNavPanelStatus {
-	font-weight: bold;
-	font-size: large;
-	margin-left: 4px;
-	margin-right: 4px;
-	vertical-align: middle;
+  font-weight: bold;
+  font-size: large;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
 }
 
 /* for panels used for layout purposes only, and that should not introduce any additional spacing around their child components */
 .layoutPanel {
-	border-style: none;
-	border-spacing: 0px;
+  border-style: none;
+  border-spacing: 0px;
 }
 
 .heatMapsTable {
-	border-style: solid;
-	border-width: 1px;
-	border-color: gray;
+  border-style: solid;
+  border-width: 1px;
+  border-color: gray;
 }
 
 .heatMapTable {
-	border-style: none;
-	/* controls space between cells */
-	border-spacing: 1px;
-	font-size: xx-small;
-	text-align: center;
+  border-style: none;
+  /* controls space between cells */
+  border-spacing: 1px;
+  font-size: xx-small;
+  text-align: center;
 }
 
 .heatMapCell {
-	border-style: none;
-	width: 20px;
-	height: 20px;
-	/* must match border width for control cells; see HeatMapCell.getStyle() */
-	padding: 4px;
+  border-style: none;
+  width: 20px;
+  height: 20px;
+  /* must match border width for control cells; see HeatMapCell.getStyle() */
+  padding: 4px;
 }
 
 a.heatMapValue:link,a.heatMapValue:visited {
-	text-decoration: none;
-	color: black;
-	vertical-align: bottom;
+  text-decoration: none;
+  color: black;
+  vertical-align: bottom;
 }
 
 .dataText,.inputText,.label,.inverseLabel,.propertyValue,.dataHeader {
-	font-family: sans-serif;
-	font-size: small;
+  font-family: sans-serif;
+  font-size: small;
 }
 
 .dataText,.inputText {
-	font-weight: normal;
+  font-weight: normal;
 }
 
 .label,.inverseLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .inverseLabel {
-	color: white;
+  color: white;
 }
 
 .bigLabel {
-	font-size: medium;
+  font-size: medium;
 }
 
 .command,.inputText,.label {
-	margin-right: 4px;
-	vertical-align: middle;
+  margin-right: 4px;
+  vertical-align: middle;
 }
 
 .hiddenCommand {
-	display: none;
+  display: none;
 }
 
 .column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.column500,.greedyColumn,.collectionTableColumn
-	{
-	vertical-align: top;
-	border-style: none;
-	padding-top: 1px;
-	padding-bottom: 0px;
-	padding-left: 3px;
-	padding-right: 3px;
+  {
+  vertical-align: top;
+  border-style: none;
+  padding-top: 1px;
+  padding-bottom: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
 }
 
 .column500 {
-	width: 300px;
+  width: 300px;
 }
 
 /* table columns that contain text should have a min width to make text readable (not too vertical) */
 .textColumn {
-	min-width: 100px;
+  min-width: 100px;
 }
 
 .keyColumn {
-	font-weight: bold;
-	/* allows data columns to dominate the table width; still given the width it needs */
-	/* use non-breaking spaces (&nbsp;) if you do not want words to wrap in a key column */
-	width: 1px;
+  font-weight: bold;
+  /* allows data columns to dominate the table width; still given the width it needs */
+  /* use non-breaking spaces (&nbsp;) if you do not want words to wrap in a key column */
+  width: 1px;
 }
 
 .propertyLabelColumn,.propertyLabel {
-	font-weight: bold;
-	background-color: #dddddd;
+  font-weight: bold;
+  background-color: #dddddd;
 }
 
 .propertyLabelColumn {
-	width: 160px;
-	padding-bottom: 4px;
-	border-width: 2px;
-	border-style: solid;
-	border-color: white;
+  width: 160px;
+  padding-bottom: 4px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: white;
 }
 
 .column,.textColumn,.keyColumn {
-	text-align: left;
+  text-align: left;
 }
 
 .numericColumn {
-	text-align: right;
+  text-align: right;
 }
 
 .narrowColumn,.numericColumn {
-	/* allows text columns to dominate the table width; still given the width it needs */
-	width: 1px;
+  /* allows text columns to dominate the table width; still given the width it needs */
+  width: 1px;
 }
 
 .hiddenColumn {
-	width: 0px;
+  width: 0px;
 }
 
 .greedyColumn {
-	width: 100%;
+  width: 100%;
 }
 
 .collectionTableColumn {
-	width: 100%;
+  width: 100%;
   padding-bottom: 3px;
 }
 
 .selectMenu {
-	max-width: 400px;
-	min-width: 200px;
+  max-width: 400px;
+  min-width: 200px;
 }
 
 .excludedValue {
-	text-decoration: line-through;
+  text-decoration: line-through;
 }
 
 .tableHeader,.heatMapTableHeader {
-	font-size: small;
-	font-weight: bold;
-	color: black;
-	background-color: #f0f0f0;
-	padding-left: 1px;
-	padding-right: 1px;
-	vertical-align: top;
+  font-size: small;
+  font-weight: bold;
+  color: black;
+  background-color: #f0f0f0;
+  padding-left: 1px;
+  padding-right: 1px;
+  vertical-align: top;
 }
 
 .tableHeader {
-	text-align: left;
-	font-family: sans-serif;
+  text-align: left;
+  font-family: sans-serif;
 }
 
 .heatMapTableHeader {
-	text-align: center;
+  text-align: center;
 }
 
 .row1,.row2 {
-	font-size: small;
-	border-top: none;
-	border-bottom: none;
+  font-size: small;
+  border-top: none;
+  border-bottom: none;
 }
 
 .row1 {
-	background-color: #ffffff;
+  background-color: #ffffff;
 }
 
 .row2 {
-	background-color: #f8f8f8;
+  background-color: #f8f8f8;
 }
 
 .scroller {
-	background-color: #336699;
+  background-color: #336699;
 }
 
 .scroller_activePage {
-	font-weight: bold;
-	color: white;
+  font-weight: bold;
+  color: white;
 }
 
 .scroller_inactivePage {
-	color: gray;
+  color: gray;
 }
 
 .menuAndContent {
-	/* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
-	/*	table-layout: fixed;*/
-	
+  /* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
+  /*	table-layout: fixed;*/
+  
 }
 
 .menuColumn,.contentColumn {
-	vertical-align: top;
+  vertical-align: top;
 }
 
 .menuColumn {
-	background: transparent;
-	color: white;
-	font-size: small;
-	/* prevents menu from consuming 50% width (with content panel consuming other 50%) on IE */
-	width: 180px;
+  background: transparent;
+  color: white;
+  font-size: small;
+  /* prevents menu from consuming 50% width (with content panel consuming other 50%) on IE */
+  width: 180px;
 }
 
 .contentColumn {
-	width: 100%;
+  width: 100%;
 }
 
 .menuItem,.menuItemActive,.submenuItem {
-	color: white;
+  color: white;
 }
 
 .submenuItem {
-	font-size: x-small;
+  font-size: x-small;
 }
 
 .menuItemActive,.submenuItemActive {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited
-	{
-	color: white;
-	text-decoration: none;
-	vertical-align: bottom;
+  {
+  color: white;
+  text-decoration: none;
+  vertical-align: bottom;
 }
 
 a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:hover
-	{
-	color: inherit;
-	text-decoration: underline;
+  {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .entityLink,.labLink {
-	text-decoration: none;
-	/* cause bottom of text to align with non-link text around it (rather than bottom of where link underline would appear) */
-	vertical-align: bottom;
+  text-decoration: none;
+  /* cause bottom of text to align with non-link text around it (rather than bottom of where link underline would appear) */
+  vertical-align: bottom;
 }
 
 .labLink {
-	color: gray;
+  color: gray;
 }
 
 .navSeparator {
-	line-height: 12px;
-	border-bottom: 1px solid white;
+  line-height: 12px;
+  border-bottom: 1px solid white;
 }
 
 .stackTraceException {
-	font-size: medium;
-	font-weight: bold;
+  font-size: medium;
+  font-weight: bold;
 }
 
 .stackTraceDetail {
-	font-size: x-small;
+  font-size: x-small;
 }
 
 .highlightedStackTraceDetail {
-	font-size: x-small;
-	font-weight: bold;
+  font-size: x-small;
+  font-weight: bold;
 }
 
 .helpIcon {
-	border: none;
-	border-width: 0px 0px 0px 0px;
-	padding: 0px 0px 0px 0px;
-	margin: 0px 0px 0px 8px;
-	vertical-align: top;
+  border: none;
+  border-width: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  margin: 0px 0px 0px 8px;
+  vertical-align: top;
 }
 
 .helpIconHover {
-	border: fuchsia;
-	border-style: solid;
-	border-width: 1px 1px 1px 1px;
-	padding: 0px 0px 0px 0px;
-	margin: -1px 0px 0px 7px;
-	vertical-align: top;
+  border: fuchsia;
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 0px 0px 0px 0px;
+  margin: -1px 0px 0px 7px;
+  vertical-align: top;
 }
 
 .helpTip,.helpNB {
-	font-style: italic;
-	font-weight: bold;
+  font-style: italic;
+  font-weight: bold;
 }
 
 .nowrap {
-	white-space: nowrap;
+  white-space: nowrap;
 }
 
 .activeTab {
-	
+  
 }
 
 .inactiveTab {
-	
+  
 }
 
 .newsDate {
-	font-family: monospace;
-	font: Courier;
-	font-weight: bold;
+  font-family: monospace;
+  font: Courier;
+  font-weight: bold;
 }
 
 .example {
-	font-family: monospace;
-	background-color: #eeeeee;
+  font-family: monospace;
+  background-color: #eeeeee;
 }
 
 .topAlignedPanelRow {
-	vertical-align: top;
+  vertical-align: top;
 }
 
 .popupHelp {
-	background: #fffccc;
-	border-style: solid;
-	border-width: 1px;
+  background: #fffccc;
+  border-style: solid;
+  border-width: 1px;
 }
 
 .popupText {
-	font-family: sans-serif;
-	font-size: small;
-	font-weight: normal;
+  font-family: sans-serif;
+  font-size: small;
+  font-weight: normal;
 }
 
 .tableFilterPanel {
-	vertical-align: bottom;
+  vertical-align: bottom;
 }
 
 .new {
-	color: fuchsia;
-	font-style: italic;
-	font-weight: bold;
+  color: fuchsia;
+  font-style: italic;
+  font-weight: bold;
 }
