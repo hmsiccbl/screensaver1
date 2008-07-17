@@ -112,8 +112,8 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private ScreenSearchResults _screensBrowser;
   private boolean _isLabMembersCollapsed = true;
   private boolean _isScreenAssociatesCollapsed = true;
-  private boolean _isSmallMoleculeScreensCollapsed = true;
-  private boolean _isRnaiScreensCollapsed = true;
+  private boolean _isSmallMoleculeScreensCollapsed = false;
+  private boolean _isRnaiScreensCollapsed = false;
   private boolean _isChecklistItemsCollapsed = true;
   private boolean _isScreensCollapsed = true;
   private DataModel _checklistItemDataModel;
