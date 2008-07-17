@@ -19,6 +19,7 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -46,40 +47,42 @@ public class UserSynchronizer
   // static members
 
   private static Logger log = Logger.getLogger(UserSynchronizer.class);
-  private static Map<String,String> CHECKLIST_ITEM_TYPE_MAP = new HashMap<String,String>();
+  private static Map<String,ChecklistItem> CHECKLIST_ITEM_TYPE_MAP = new HashMap<String,ChecklistItem>();
   static {
-    CHECKLIST_ITEM_TYPE_MAP.put(
-      "ID submitted for access to screening room",
-      "ID submitted for access to screening room");
-    CHECKLIST_ITEM_TYPE_MAP.put(
-      "ICCB server account requested",
-      "Historical - ICCB server account requested");
-    CHECKLIST_ITEM_TYPE_MAP.put(
-      "ICCB server account set up",
-      "ICCB-L/NSRB server account set up (general account)");
-    CHECKLIST_ITEM_TYPE_MAP.put(
-      "Added to ICCB screening users list",
-      "Added to ICCB-L/NSRB screening users list");
-    CHECKLIST_ITEM_TYPE_MAP.put(
-      "Added to autoscope users list",
-      "Added to autoscope users list");
-    CHECKLIST_ITEM_TYPE_MAP.put(
-      "Added to PI email list",
-      "Added to PI email list");
-    CHECKLIST_ITEM_TYPE_MAP.put(
-      "Data sharing agreement signed",
-      "Data sharing agreement signed");
+    CHECKLIST_ITEM_TYPE_MAP.put("ID submitted for access to screening room",
+                                new ChecklistItem(20, "ID submitted for access to screening room", false));
+    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account requested",
+                                new ChecklistItem(20, "Historical - ICCB server account requested", false));
+    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account set up",
+                                new ChecklistItem(20, "ICCB-L/NSRB server account set up (general account)", true));
+    CHECKLIST_ITEM_TYPE_MAP.put("Added to ICCB screening users list",
+                                new ChecklistItem(20, "Added to ICCB-L/NSRB screening users list", true));
+    CHECKLIST_ITEM_TYPE_MAP.put("Data sharing agreement signed",
+                                new ChecklistItem(20, "Data sharing agreement signed", false));
+//    CHECKLIST_ITEM_TYPE_MAP.put(
+//      "Added to autoscope users list",
+//      null);
+//    CHECKLIST_ITEM_TYPE_MAP.put(
+//      "Added to PI email list",
+//      null);
   }
-  private static final String [] NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES = {
-    "ID submitted for C-607 access",
-    "ICCB-L/NSRB image file server access set up",
-    "Non-HMS Biosafety Training Form on File",
-    "CellWoRx training",
-    "Autoscope training",
-    "Image Analysis I training",
-    "Image Xpress Micro Training",
-    "Evotech Opera Training",
+  private static final ChecklistItem[] NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES = {
+    new ChecklistItem(20, "ID submitted for C-607 access", false),
+    new ChecklistItem(20, "Added to users email list", true),
+    new ChecklistItem(20, "Added to RNAi email list", true),
+    new ChecklistItem(20, "Granted RNAi wiki access", true),
+    new ChecklistItem(20, "Granted QPCR wiki access", true),
+    new ChecklistItem(20, "Temporary ID requested", false),
+    new ChecklistItem(20, "Invited user eCommons account requested", false),
+    new ChecklistItem(20, "ICCB-L/NSRB image file server access set up", true),
+    new ChecklistItem(20, "Non-HMS Biosafety Training Form on File", false),
+    new ChecklistItem(20, "CellWoRx training", false),
+    new ChecklistItem(20, "Autoscope training", false),
+    new ChecklistItem(20, "Image Analysis I training", false),
+    new ChecklistItem(20, "Image Xpress Micro Training", false),
+    new ChecklistItem(20, "Evotech Opera Training", false),
   };
+  
   private static final Map<String,String> ADMIN_INITIALS_TO_ECOMMONS_ID = new HashMap<String,String>();
   private static final String DEFAULT_CHECKLIST_ITEM_ENTERED_BY_ADMIN_INITIALS = "KLS";
   static {
@@ -323,7 +326,21 @@ public class UserSynchronizer
   private void synchronizeChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
   {
     user.getChecklistItemEvents().clear();
+    _dao.runQuery(new Query() { 
+      public java.util.List execute(org.hibernate.Session session) { 
+        session.createQuery("delete from ChecklistItem;");
+        return null;
+      }
+    });
     _dao.flush(); // force db deletes before inserts
+    for (ChecklistItem checklistItem : CHECKLIST_ITEM_TYPE_MAP.values()) {
+      _dao.persistEntity(checklistItem);
+      log.info("created new checklist item " + checklistItem + ": " + checklistItem.getItemName()); 
+    }
+    for (ChecklistItem checklistItem : NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES) {
+      _dao.persistEntity(checklistItem);
+      log.info("created new checklist item " + checklistItem + ": " + checklistItem.getItemName()); 
+    }
     addScreenDBChecklistItems(screendbUserId, user);
   }
 
@@ -343,7 +360,6 @@ public class UserSynchronizer
       String screendbChecklistItemName = resultSet.getString("name");
       ChecklistItem checklistItemType =
         getChecklistItemTypeForScreenDBChecklistItemName(screendbChecklistItemName);
-
       AdministratorUser enteredByAdmin = findAdminUserByInitials(activationInitials);
       String comments = null;
       if (enteredByAdmin == null) {
@@ -352,10 +368,10 @@ public class UserSynchronizer
       }
       ChecklistItemEvent checklistItemActivation = 
         user.createChecklistItemActivationEvent(checklistItemType, 
-                                           activationDate,
-                                           new AdministrativeActivity(enteredByAdmin, 
-                                                                      activationDate, // best guess 
-                                                                      AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+                                                activationDate,
+                                                new AdministrativeActivity(enteredByAdmin, 
+                                                                           activationDate, // best guess 
+                                                                           AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
       if (comments != null) {
         checklistItemActivation.getEntryActivity().setComments(comments);
       }
@@ -367,12 +383,12 @@ public class UserSynchronizer
           enteredByAdmin = findAdminUserByInitials(DEFAULT_CHECKLIST_ITEM_ENTERED_BY_ADMIN_INITIALS);
           comments = "initials: " + activationInitials;
         }
-        
+
         ChecklistItemEvent checklistItemDeactivation = 
           checklistItemActivation.createChecklistItemExpirationEvent(deactivationDate,
-                                                                  new AdministrativeActivity(enteredByAdmin, 
-                                                                                             deactivationDate, // best guess 
-                                                                                             AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+                                                                     new AdministrativeActivity(enteredByAdmin, 
+                                                                                                deactivationDate, // best guess 
+                                                                                                AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
         if (comments != null) {
           checklistItemDeactivation.getEntryActivity().setComments(comments);
         }
@@ -389,19 +405,12 @@ public class UserSynchronizer
   }
 
   private ChecklistItem getChecklistItemTypeForScreenDBChecklistItemName(String screendbChecklistItemName) throws ScreenDBSynchronizationException {
-    String screensaverChecklistItemName = CHECKLIST_ITEM_TYPE_MAP.get(screendbChecklistItemName);
-    if (screensaverChecklistItemName == null) {
-      throw new ScreenDBSynchronizationException(
-        "couldn't find Screensaver checklist item corresponding to ScreenDB checklist item \"" +
-        screendbChecklistItemName + "\"");
+    ChecklistItem checklistItem = CHECKLIST_ITEM_TYPE_MAP.get(screendbChecklistItemName);
+    if (checklistItem == null) {
+      throw new ScreenDBSynchronizationException("couldn't find Screensaver ChecklistItem corresponding to ScreenDB checklist item \"" +
+                                                 screendbChecklistItemName + "\"");
     }
-    ChecklistItem checklistItemType = _dao.findEntityByProperty(
-      ChecklistItem.class, "itemName", screensaverChecklistItemName);
-    if (checklistItemType == null) {
-      throw new ScreenDBSynchronizationException(
-        "couldn't find Screensaver checklist item type for \"" + screensaverChecklistItemName + "\"");
-    }
-    return checklistItemType;
+    return checklistItem;
   }
 
   private void connectUsersToLabHeads()
