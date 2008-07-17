@@ -12,8 +12,10 @@
 
 	<ss:searchResult searchResults="#{labActivitiesBrowser}">
 		<ui:define name="entityViewer">
-			<ui:include src="activityViewerBody.xhtml" />
-		</ui:define>
+      <h:form id="activityViewerForm">
+        <ui:include src="activityViewerBody.xhtml" />
+      </h:form>
+    </ui:define>
 	</ss:searchResult>
 
 </ui:composition>
