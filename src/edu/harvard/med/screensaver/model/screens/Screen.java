@@ -560,7 +560,7 @@ public class Screen extends Study
     }
     if (!tailSet.isEmpty()) {
       if (tailSet.first().compareTo(newStatusItem) == 0) {
-        throw new BusinessRuleViolationException("status item is mutually exclusive with existing status item " + tailSet.first().getStatusValue());
+        throw new BusinessRuleViolationException("status value " + statusValue + " is mutually exclusive with existing status item value " + tailSet.first().getStatusValue());
       }
       if (tailSet.first().getStatusDate().compareTo(newStatusItem.getStatusDate()) < 0) {
         throw new BusinessRuleViolationException("date of new status item must not be after date of subsequent status item");

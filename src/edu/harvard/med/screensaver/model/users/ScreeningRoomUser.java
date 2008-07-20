@@ -461,7 +461,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Set or change the lab of a non-lab head (i.e., non-Prinicipal Investigator) screening
+   * Set or change the lab of a non-lab head (i.e., non-Principal Investigator) screening
    * room user.
    *
    * @param lab the new lab; null if the user is no longer a member of any lab

@@ -24,9 +24,10 @@ import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -49,16 +50,16 @@ public class UserSynchronizer
   private static Logger log = Logger.getLogger(UserSynchronizer.class);
   private static Map<String,ChecklistItem> CHECKLIST_ITEM_TYPE_MAP = new HashMap<String,ChecklistItem>();
   static {
-    CHECKLIST_ITEM_TYPE_MAP.put("ID submitted for access to screening room",
-                                new ChecklistItem(20, "ID submitted for access to screening room", false));
-    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account requested",
-                                new ChecklistItem(20, "Historical - ICCB server account requested", false));
-    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account set up",
-                                new ChecklistItem(20, "ICCB-L/NSRB server account set up (general account)", true));
-    CHECKLIST_ITEM_TYPE_MAP.put("Added to ICCB screening users list",
-                                new ChecklistItem(20, "Added to ICCB-L/NSRB screening users list", true));
     CHECKLIST_ITEM_TYPE_MAP.put("Data sharing agreement signed",
-                                new ChecklistItem(20, "Data sharing agreement signed", false));
+                                new ChecklistItem(1, "Data sharing agreement signed", false));
+    CHECKLIST_ITEM_TYPE_MAP.put("ID submitted for access to screening room",
+                                new ChecklistItem(5, "ID submitted for access to screening room", true));
+    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account set up",
+                                new ChecklistItem(7, "ICCB-L/NSRB server account set up (general account)", true));
+    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account requested",
+                                new ChecklistItem(8, "Historical - ICCB server account requested", true));
+    CHECKLIST_ITEM_TYPE_MAP.put("Added to ICCB screening users list",
+                                new ChecklistItem(9, "Added to ICCB-L/NSRB screening users list", true));
 //    CHECKLIST_ITEM_TYPE_MAP.put(
 //      "Added to autoscope users list",
 //      null);
@@ -67,20 +68,22 @@ public class UserSynchronizer
 //      null);
   }
   private static final ChecklistItem[] NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES = {
-    new ChecklistItem(20, "ID submitted for C-607 access", false),
-    new ChecklistItem(20, "Added to users email list", true),
-    new ChecklistItem(20, "Added to RNAi email list", true),
-    new ChecklistItem(20, "Granted RNAi wiki access", true),
-    new ChecklistItem(20, "Granted QPCR wiki access", true),
-    new ChecklistItem(20, "Temporary ID requested", false),
-    new ChecklistItem(20, "Invited user eCommons account requested", false),
-    new ChecklistItem(20, "ICCB-L/NSRB image file server access set up", true),
-    new ChecklistItem(20, "Non-HMS Biosafety Training Form on File", false),
-    new ChecklistItem(20, "CellWoRx training", false),
-    new ChecklistItem(20, "Autoscope training", false),
-    new ChecklistItem(20, "Image Analysis I training", false),
-    new ChecklistItem(20, "Image Xpress Micro Training", false),
+    new ChecklistItem(2, "Non-HMS Biosafety Training Form on File", false),
+    new ChecklistItem(3, "Invited user eCommons account requested", false),
+    new ChecklistItem(4, "Temporary ID requested", false),
+    new ChecklistItem(6, "Screener given a copy of 'What Every New Screener Needs to Know'", false),
+    new ChecklistItem(10, "Added to users email list", true),
+    new ChecklistItem(11, "Added to RNAi email list", true),
+    new ChecklistItem(12, "Granted RNAi wiki access", true),
+    new ChecklistItem(13, "Granted QPCR wiki access", true),
+    new ChecklistItem(14, "ID submitted for C-607 access", false),
+    new ChecklistItem(15, "ICCB-L/NSRB image file server access set up", true),
+    new ChecklistItem(16, "Image Xpress Micro Training", false),
+    new ChecklistItem(17, "CellWoRx training", false),
+    new ChecklistItem(18, "Autoscope training", false),
+    new ChecklistItem(19, "Image Analysis I training", false),
     new ChecklistItem(20, "Evotech Opera Training", false),
+    
   };
   
   private static final Map<String,String> ADMIN_INITIALS_TO_ECOMMONS_ID = new HashMap<String,String>();
@@ -139,7 +142,8 @@ public class UserSynchronizer
       public void runTransaction()
       {
         try {
-          constructMappings();
+          recreateChecklistItems();
+          synchronizeUsersProper();
           connectUsersToLabHeads();
           persistScreeningRoomUsers();
         }
@@ -152,6 +156,7 @@ public class UserSynchronizer
           _synchronizationException = e;
         }
       }
+
     });
     if (_synchronizationException != null) {
       throw _synchronizationException;
@@ -166,26 +171,42 @@ public class UserSynchronizer
 
   // private methods
 
-  /**
-   * Construct the {@link #_screenDBUserIdToLabHeadIdMap} and
-   * {@link #_screenDBUserIdToScreensaverUserMap} maps.
-   * @throws SQLException
-   * @throws ScreenDBSynchronizationException
-   */
-  private void constructMappings() throws SQLException, ScreenDBSynchronizationException
+  private void recreateChecklistItems()
+  {
+    _dao.runQuery(new Query() { 
+      public java.util.List execute(org.hibernate.Session session) { 
+        int n = session.createQuery("delete from ChecklistItemEvent").executeUpdate();
+        log.info("deleted " + n + " ChecklistItemEvent(s)");
+        n = session.createQuery("delete from ChecklistItem").executeUpdate();
+        log.info("deleted " + n + " ChecklistItem(s)");
+        return null;
+      }
+    });
+    _dao.flush(); // force db deletes before inserts
+    for (ChecklistItem checklistItem : CHECKLIST_ITEM_TYPE_MAP.values()) {
+      _dao.persistEntity(checklistItem);
+      log.info("created new checklist item " + checklistItem + ": " + checklistItem.getItemName()); 
+    }
+    for (ChecklistItem checklistItem : NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES) {
+      _dao.persistEntity(checklistItem);
+      log.info("created new checklist item " + checklistItem + ": " + checklistItem.getItemName()); 
+    }
+  }
+
+  private void synchronizeUsersProper() throws SQLException, ScreenDBSynchronizationException
   {
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
     while (resultSet.next()) {
-      ScreeningRoomUser user = constructScreeningRoomUser(resultSet);
+      ScreeningRoomUser user = createOrUpdateUser(resultSet);
       Integer id = resultSet.getInt("id");
       _screenDBUserIdToLabHeadIdMap.put(id, resultSet.getInt("lab_name"));
       _screenDBUserIdToScreeningRoomUserMap.put(id, user);
       synchronizeChecklistItems(id, user);
     }
   }
-
-  private ScreeningRoomUser constructScreeningRoomUser(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException
+ 
+  private ScreeningRoomUser createOrUpdateUser(ResultSet resultSet) throws SQLException, ScreenDBSynchronizationException
   {
     DateTime dateCreated = ResultSetUtil.getDateTime(resultSet, "date_created");
     String firstName = resultSet.getString("first");
@@ -206,12 +227,23 @@ public class UserSynchronizer
     boolean isRnaiUser = resultSet.getBoolean("rani_user" /*[sic]*/);
     String comsCrhbaPermitNumber = resultSet.getString("permit_no");
     String comsCrhbaPermitPrincipalInvestigator = resultSet.getString("permit_pi");
-
+    
     ScreeningRoomUser user = getExistingUser(firstName, lastName);
-
     if (user == null) {
-      user = new ScreeningRoomUser(firstName, lastName, email, phone,
-        mailingAddress, comments, ecommonsId, harvardId, classification);
+      if (classification == ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR) {
+        LabAffiliation labAffiliation = getLabAffiliation(affiliationName);
+        user = new LabHead(firstName, lastName, email, phone, mailingAddress, comments, ecommonsId, harvardId, labAffiliation);
+      } 
+      else {
+        user = new ScreeningRoomUser(firstName, lastName, email, phone,
+                                     mailingAddress, comments, ecommonsId, harvardId, classification);
+        // note: in Screensaver data model, only the lab head (whose entity also
+        // represents the "lab" as a whole), should have the lab affiliation
+        if (affiliationName != null) {
+          comments = comments + "\nScreenDB import: user has alternate affiliation from lab affiliation: " + affiliationName;
+          log.info("added alternate affiliation '" + affiliationName + "' for non-lab head user " + user.getFullNameLastFirst());  
+        }
+      }
       user.setDateCreated(dateCreated);
     }
     else {
@@ -232,17 +264,6 @@ public class UserSynchronizer
       else {
         user.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
       }
-    }
-
-    // TODO: in Screensaver data model, only the lab head (whose entity also
-    // represents the "lab" as a whole), should have the lab affiliation;
-    // non-lab heads' labAffiliation properties are ignored.
-    LabAffiliation labAffiliation = getLabAffiliation(affiliationName);
-    if (user.isHeadOfLab()) {
-      user.getLab().setLabAffiliation(labAffiliation);
-    }
-    else if (labAffiliation != null) {
-      throw new ScreenDBSynchronizationException("non-lab heads should have null labAffiliation; correct by moving this user's alternate lab affiliation to comments, and set labAffiliation to null"); 
     }
 
     user.setComsCrhbaPermitNumber(comsCrhbaPermitNumber);
@@ -325,27 +346,6 @@ public class UserSynchronizer
 
   private void synchronizeChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
   {
-    user.getChecklistItemEvents().clear();
-    _dao.runQuery(new Query() { 
-      public java.util.List execute(org.hibernate.Session session) { 
-        session.createQuery("delete from ChecklistItem;");
-        return null;
-      }
-    });
-    _dao.flush(); // force db deletes before inserts
-    for (ChecklistItem checklistItem : CHECKLIST_ITEM_TYPE_MAP.values()) {
-      _dao.persistEntity(checklistItem);
-      log.info("created new checklist item " + checklistItem + ": " + checklistItem.getItemName()); 
-    }
-    for (ChecklistItem checklistItem : NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES) {
-      _dao.persistEntity(checklistItem);
-      log.info("created new checklist item " + checklistItem + ": " + checklistItem.getItemName()); 
-    }
-    addScreenDBChecklistItems(screendbUserId, user);
-  }
-
-  private void addScreenDBChecklistItems(Integer screendbUserId, ScreeningRoomUser user) throws SQLException, ScreenDBSynchronizationException
-  {
     PreparedStatement statement = _connection.prepareStatement(
       "SELECT * FROM checklist_item AS ci, checklist_item_type AS cit\n" +
       "WHERE ci.user_id = ? AND ci.item_type_id = cit.id");
@@ -357,15 +357,43 @@ public class UserSynchronizer
       LocalDate deactivationDate = ResultSetUtil.getDate(resultSet, "deactivate_date");
       String deactivationInitials = resultSet.getString("deactivate_initials");
 
+      if (activationInitials == null && deactivationInitials == null && activationDate == null && deactivationDate == null) {
+        continue;
+      }
+
+      StringBuilder comments = new StringBuilder();
+      if (activationDate == null) {
+        activationDate = new LocalDate(0);
+        comments.append("ScreenDB import: activation date missing, setting to ").append(activationDate).append("\n");
+      }
+      if (deactivationInitials != null && deactivationDate == null) {
+        deactivationDate = new LocalDate();
+        comments.append("ScreenDB import: deactivation date missing, setting to ").append(deactivationDate).append("\n");
+      }
+      if (deactivationDate != null && deactivationDate.compareTo(activationDate) < 0) {
+        comments.append("ScreenDB import: deactivation date ").append(deactivationDate).append(" is before activation date ").append(activationDate).append("; swapping dates & initials");
+        LocalDate oldDeactivationDate = deactivationDate;
+        String oldDeactivationInitials = deactivationInitials;
+        deactivationDate = activationDate;
+        deactivationInitials = activationInitials;
+        activationDate = oldDeactivationDate;
+        activationInitials = oldDeactivationInitials;
+      }
+
       String screendbChecklistItemName = resultSet.getString("name");
       ChecklistItem checklistItemType =
         getChecklistItemTypeForScreenDBChecklistItemName(screendbChecklistItemName);
       AdministratorUser enteredByAdmin = findAdminUserByInitials(activationInitials);
-      String comments = null;
       if (enteredByAdmin == null) {
         enteredByAdmin = findAdminUserByInitials(DEFAULT_CHECKLIST_ITEM_ENTERED_BY_ADMIN_INITIALS);
-        comments = "initials: " + activationInitials;
+        if (activationInitials == null) {
+          comments.append("ScreenDB import: activation initials missing; setting to ").append(enteredByAdmin.getFullNameFirstLast()).append("\n");
+        }
+        else {
+          comments.append("ScreenDB import: activation initials '").append(activationInitials).append("' unknown; setting to ").append(enteredByAdmin.getFullNameFirstLast()).append("\n");
+        }
       }
+
       ChecklistItemEvent checklistItemActivation = 
         user.createChecklistItemActivationEvent(checklistItemType, 
                                                 activationDate,
@@ -373,15 +401,21 @@ public class UserSynchronizer
                                                                            activationDate, // best guess 
                                                                            AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
       if (comments != null) {
-        checklistItemActivation.getEntryActivity().setComments(comments);
+        checklistItemActivation.getEntryActivity().setComments(comments.toString());
+        log.info(comments);
       }
 
       if (deactivationDate != null) {
         enteredByAdmin = findAdminUserByInitials(deactivationInitials);
-        comments = null;
+        comments = new StringBuilder();
         if (enteredByAdmin == null) {
           enteredByAdmin = findAdminUserByInitials(DEFAULT_CHECKLIST_ITEM_ENTERED_BY_ADMIN_INITIALS);
-          comments = "initials: " + activationInitials;
+          if (activationInitials == null) {
+            comments.append("ScreenDB import: deactivation initials missing; setting to ").append(enteredByAdmin.getFullNameFirstLast()).append("\n");
+          }
+          else {
+            comments.append("ScreenDB import: deactivation initials '").append(deactivationInitials).append("' unknown; setting to ").append(enteredByAdmin.getFullNameFirstLast()).append("\n");
+          }
         }
 
         ChecklistItemEvent checklistItemDeactivation = 
@@ -390,7 +424,8 @@ public class UserSynchronizer
                                                                                                 deactivationDate, // best guess 
                                                                                                 AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
         if (comments != null) {
-          checklistItemDeactivation.getEntryActivity().setComments(comments);
+          checklistItemDeactivation.getEntryActivity().setComments(comments.toString());
+          log.info(comments);
         }
       }
     }
@@ -398,10 +433,17 @@ public class UserSynchronizer
 
   private AdministratorUser findAdminUserByInitials(String initials)
   {
+    if (initials == null) { 
+      return null;
+    }
+    String eCommonsId = ADMIN_INITIALS_TO_ECOMMONS_ID.get(initials.toUpperCase());
+    if (eCommonsId == null) {
+      return null;
+    }
     return 
     _dao.findEntityByProperty(AdministratorUser.class,
-                              "ecommonsId",
-                              ADMIN_INITIALS_TO_ECOMMONS_ID.get(initials.toUpperCase()));
+                              "ECommonsId",
+                              eCommonsId);
   }
 
   private ChecklistItem getChecklistItemTypeForScreenDBChecklistItemName(String screendbChecklistItemName) throws ScreenDBSynchronizationException {
@@ -416,14 +458,24 @@ public class UserSynchronizer
   private void connectUsersToLabHeads()
   {
     for (Integer memberId : _screenDBUserIdToLabHeadIdMap.keySet()) {
-      Integer headId = _screenDBUserIdToLabHeadIdMap.get(memberId);
       ScreeningRoomUser member = _screenDBUserIdToScreeningRoomUserMap.get(memberId);
-      ScreeningRoomUser head = _screenDBUserIdToScreeningRoomUserMap.get(headId);
-      if (head != null && head != member) {
-        member.setLab(head.getLab());
+      Integer headId = _screenDBUserIdToLabHeadIdMap.get(memberId);
+      if (member.getUserClassification() == ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR) {
+        continue;
+      }
+      if (headId == null || headId == 0) {
+        member.setLab(null);
       }
       else {
-        member.setLab(null);
+        ScreeningRoomUser head = _screenDBUserIdToScreeningRoomUserMap.get(headId);
+        if (!(member instanceof LabHead)) {
+          if (head != member) {
+            if (!(head instanceof LabHead)) {
+              throw new ScreenDBSynchronizationException("lab member " + memberId + " has lab head " + headId + " that is not a PI");
+            }
+            member.setLab(head.getLab());
+          }
+        }
       }
     }
   }

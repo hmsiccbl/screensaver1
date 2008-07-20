@@ -141,7 +141,9 @@ public class ScreenSynchronizer
         screen.setLeadScreener(leadScreener);
         addScreensaverUserRoleForScreenType(leadScreener, screen);
         screen.setLabHead(labHead);
-        addScreensaverUserRoleForScreenType(labHead, screen);
+        if (labHead != null) {
+          addScreensaverUserRoleForScreenType(labHead, screen);
+        }
         screen.setDateCreated(dateCreated);
         screen.setTitle(screenTitle);
         screen.setDataMeetingScheduled(dataMeetingScheduled);
@@ -266,13 +268,7 @@ public class ScreenSynchronizer
       Screen screen = getScreenFromTable("screen_status", screenNumber);
       LocalDate statusDate = ResultSetUtil.getDate(resultSet, "status_date");
       StatusValue statusValue = getStatusValue(resultSet);
-      try {
-        screen.createStatusItem(statusDate, statusValue);
-      }
-      catch (DuplicateEntityException e) {
-        throw new ScreenDBSynchronizationException(
-          "duplicate status item for screen number " + screenNumber, e);
-      }
+      screen.createStatusItem(statusDate, statusValue);
     }
     statement.close();
   }
@@ -292,6 +288,9 @@ public class ScreenSynchronizer
     String statusValueString = resultSet.getString("status");
     if (statusValueString.equals("Moved to Broad Institute")) {
       statusValueString = "Transferred to Broad Institute";
+    }
+    else if (statusValueString.equals("Pending")) {
+      statusValueString = "Pending - Legacy";
     }
     StatusValue statusValue = _statusValueUserType.getTermForValue(statusValueString);
     if (statusValue == null) {
