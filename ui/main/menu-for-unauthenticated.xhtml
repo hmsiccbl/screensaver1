@@ -5,25 +5,25 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
 
-	<s:roundedDiv borderWidth="8" color="#{appInfo.screensaverThemeColor}" radius="8"
-		style="height: 300px">
-		<t:panelGrid columns="1">
+  <ss:roundedDiv radius="8" style="height: 300px">
+    <t:panelGrid columns="1">
 
-			<h:form id="titleForm">
-				<t:outputText id="menuTitle" value="#{appInfo.applicationName}"
-					styleClass="menuItem title" />
-				<t:htmlTag value="br" />
-				<t:outputText id="version" value="#{appInfo.applicationVersion}"
-					styleClass="menuItem label"
-					title="The current version of Screensaver" />
-			</h:form>
+      <h:form id="titleForm">
+        <t:outputText id="menuTitle" value="#{appInfo.applicationName}"
+          styleClass="menuItem title" />
+        <t:htmlTag value="br" />
+        <t:outputText id="version" value="#{appInfo.applicationVersion}"
+          styleClass="menuItem label"
+          title="The current version of Screensaver" />
+      </h:form>
 
-		</t:panelGrid>
-	</s:roundedDiv>
+    </t:panelGrid>
+  </ss:roundedDiv>
 
 </ui:composition>
 

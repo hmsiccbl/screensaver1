@@ -5,7 +5,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
 
@@ -17,16 +18,17 @@
 				value="#{studyViewer.isPanelCollapsedMap['annotationTypes']}"
 				title="Annotation Types" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
-						styleClass="transparentSubsectionHeader">
-						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
-							<h:graphicImage
-								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
-								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
-						</t:headerLink>
-						</s:roundedDiv>
-				</f:facet>
+          <ss:roundedDiv>
+            <t:headerLink immediate="true"
+              styleClass="transparentSubsectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon" />
+              <h:outputText value="#{title}"
+                styleClass="transparentSubsectionHeader" />
+            </t:headerLink>
+          </ss:roundedDiv>
+        </f:facet>
 
 				<t:dataTable id="annotationTypesTable"
 					value="#{studyViewer.annotationTypesTable.dataModel}" var="row"
@@ -55,16 +57,17 @@
 				value="#{studyViewer.isPanelCollapsedMap['reagentsData']}"
 				title="Reagents" var="isCollapsed" titleVar="title">
 				<f:facet name="header">
-					<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
-						styleClass="transparentSubsectionHeader">
-						<t:headerLink immediate="true" styleClass="transparentSubsectionHeader">
-							<h:graphicImage
-								value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
-								styleClass="icon" />
-							<h:outputText value="#{title}" styleClass="transparentSubsectionHeader" />
-						</t:headerLink>
-					</s:roundedDiv>
-				</f:facet>
+          <ss:roundedDiv>
+            <t:headerLink immediate="true"
+              styleClass="transparentSubsectionHeader">
+              <h:graphicImage
+                value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+                styleClass="icon" />
+              <h:outputText value="#{title}"
+                styleClass="transparentSubsectionHeader" />
+            </t:headerLink>
+          </ss:roundedDiv>
+        </f:facet>
 			</t:collapsiblePanel>
 
 		</h:form>

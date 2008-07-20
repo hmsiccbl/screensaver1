@@ -5,7 +5,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <!-- TODO: share common code with screenDetailViewer -->
 
@@ -16,8 +17,7 @@
 			value="#{studyDetailViewer.panelCollapsed}"
 			title="Study Summary" var="isCollapsed" titleVar="title">
 			<f:facet name="header">
-				<s:roundedDiv borderWidth="4" color="#{appInfo.screensaverThemeColor}" radius="4"
-					styleClass="transparentSectionHeader">
+				<ss:roundedDiv>
 					<t:headerLink immediate="true" styleClass="transparentSectionHeader">
 						<h:graphicImage
 							value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
@@ -27,7 +27,7 @@
 						<h:outputText value="Study Details" styleClass="transparentSectionHeader"
 							rendered="#{!isCollapsed}" />
 					</t:headerLink>
-				</s:roundedDiv>
+				</ss:roundedDiv>
 			</f:facet>
 
 			<f:facet name="closedContent">

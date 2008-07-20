@@ -4,200 +4,205 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
 
-	<s:roundedDiv borderWidth="8" radius="8"
-		color="#{appInfo.screensaverThemeColor}" style="height: 100%">
+  <ss:roundedDiv radius="8" style="height: 100%">
 
-		<t:panelGrid columns="1">
+    <t:panelGrid columns="1">
 
-			<h:form id="titleForm">
-				<t:commandLink id="menuTitle" action="#{menu.viewMain}"
-					value="#{menu.applicationName}" styleClass="menuItem title"
-					title="Go to the Screensaver main page" />
-				<t:htmlTag value="br" />
-				<t:outputText id="version" value="#{menu.applicationVersion}"
-					styleClass="menuItem label"
-					title="The current version of Screensaver" />
-				<t:outputText id="buildNumber"
-					value="(#{menu.applicationBuildNumber})"
-					styleClass="menuItem label" visibleOnUserRole="developer"
-					title="The build number" />
-			</h:form>
+      <h:form id="titleForm">
+        <t:commandLink id="menuTitle" action="#{menu.viewMain}"
+          value="#{menu.applicationName}" styleClass="menuItem title"
+          title="Go to the Screensaver main page" />
+        <t:htmlTag value="br" />
+        <t:outputText id="version" value="#{menu.applicationVersion}"
+          styleClass="menuItem label"
+          title="The current version of Screensaver" />
+        <t:outputText id="buildNumber"
+          value="(#{menu.applicationBuildNumber})"
+          styleClass="menuItem label" visibleOnUserRole="developer"
+          title="The build number" />
+      </h:form>
 
-			<t:htmlTag id="menuSectionSeparator0" value="hr"
-				rendered="#{menu.authenticatedUser}" />
+      <t:htmlTag id="menuSectionSeparator0" value="hr"
+        rendered="#{menu.authenticatedUser}" />
 
-			<t:panelGroup rendered="#{menu.authenticatedUser}">
-				<h:form id="userForm">
-					<!--t:outputText value="User " styleClass="label"/-->
-					<t:outputText id="userName"
-						value="#{menu.screensaverUser.fullNameFirstLast}"
-						styleClass="menuItem userName"
-						title="The name of the logged in user" />
-					<t:div />
-					<t:commandLink id="logout" action="#{menu.logout}" value="Logout"
-						styleClass="menuItem" title="Click here to log out" />
-				</h:form>
-			</t:panelGroup>
+      <t:panelGroup rendered="#{menu.authenticatedUser}">
+        <h:form id="userForm">
+          <!--t:outputText value="User " styleClass="label"/-->
+          <t:outputText id="userName"
+            value="#{menu.screensaverUser.fullNameFirstLast}"
+            styleClass="menuItem userName"
+            title="The name of the logged in user" />
+          <t:div />
+          <t:commandLink id="logout" action="#{menu.logout}"
+            value="Logout" styleClass="menuItem"
+            title="Click here to log out" />
+        </h:form>
+      </t:panelGroup>
 
-			<t:htmlTag id="menuSectionSeparator1" value="hr" />
+      <t:htmlTag id="menuSectionSeparator1" value="hr" />
 
-			<h:form id="navForm">
-				<t:panelNavigation2 id="navMenu" layout="table" itemClass="menuItem"
-					openItemClass="menuItem" activeItemClass="menuItemActive"
-					rendered="#{menu.authenticatedUser}">
-					<t:commandNavigation2 action="#{menu.findWells}" value="Find Wells"
-						styleClass="menuItem" accesskey="W"
-						title="Look up one or more library wells by plate number and well name"
-						rendered="#{menu.screener || menu.readAdmin}" />
-					<t:commandNavigation2 action="#{menu.findReagents}"
-						styleClass="menuItem" value="Find Reagents" accesskey="R"
-						title="Look up one or more reagents by vendor reagent ID" />
-					<t:commandNavigation2 action="#{menu.browseLibraries}"
-						styleClass="menuItem" value="Browse Libraries" accesskey="L"
-						title="Browse the currently available libraries" />
-					<t:panelNavigation2 id="libraryNavMenu" layout="table"
-						itemClass="submenuItem" openItemClass="submenuItem"
-						activeItemClass="menuItemActive">
-						<t:commandNavigation2 action="#{menu.browseRnaiLibraries}"
-							styleClass="submenuItem" value="RNAi"
-							title="Browse the currently available RNAi libraries" />
-						<t:commandNavigation2 styleClass="submenuItem"
-							action="#{menu.browseSmallMoleculeLibraries}"
-							value="Small Molecule"
-							title="Browse the currently available small molecule libraries" />
-					</t:panelNavigation2>
-					<t:commandNavigation2 id="browseScreensCommand"
-						action="#{menu.browseScreens}" styleClass="menuItem"
-						value="Browse Screens" accesskey="S"
-						title="Browse the screens currently available and accessible to you"
-						rendered="#{menu.screener || menu.readAdmin}" />
-					<t:commandNavigation2 action="#{menu.browseMyScreens}"
-						styleClass="menuItem" value="My Screens" accesskey="M"
-						title="Browse the screens that you headed, led or collaborated on"
-						rendered="#{menu.screener}" />
-					<t:commandNavigation2 action="#{menu.browseStudies}"
-						styleClass="menuItem" value="Browse Studies" accesskey="T"
-						title="Browse the studies currently available and accessible to you" />
+      <h:form id="navForm">
+        <t:panelNavigation2 id="navMenu" layout="table"
+          itemClass="menuItem" openItemClass="menuItem"
+          activeItemClass="menuItemActive"
+          rendered="#{menu.authenticatedUser}">
+          <t:commandNavigation2 action="#{menu.findWells}"
+            value="Find Wells" styleClass="menuItem" accesskey="W"
+            title="Look up one or more library wells by plate number and well name"
+            rendered="#{menu.screener || menu.readAdmin}" />
+          <t:commandNavigation2 action="#{menu.findReagents}"
+            styleClass="menuItem" value="Find Reagents" accesskey="R"
+            title="Look up one or more reagents by vendor reagent ID" />
+          <t:commandNavigation2 action="#{menu.browseLibraries}"
+            styleClass="menuItem" value="Browse Libraries" accesskey="L"
+            title="Browse the currently available libraries" />
+          <t:panelNavigation2 id="libraryNavMenu" layout="table"
+            itemClass="submenuItem" openItemClass="submenuItem"
+            activeItemClass="menuItemActive">
+            <t:commandNavigation2 action="#{menu.browseRnaiLibraries}"
+              styleClass="submenuItem" value="RNAi"
+              title="Browse the currently available RNAi libraries" />
+            <t:commandNavigation2 styleClass="submenuItem"
+              action="#{menu.browseSmallMoleculeLibraries}"
+              value="Small Molecule"
+              title="Browse the currently available small molecule libraries" />
+          </t:panelNavigation2>
+          <t:commandNavigation2 id="browseScreensCommand"
+            action="#{menu.browseScreens}" styleClass="menuItem"
+            value="Browse Screens" accesskey="S"
+            title="Browse the screens currently available and accessible to you"
+            rendered="#{menu.screener || menu.readAdmin}" />
+          <t:commandNavigation2 action="#{menu.browseMyScreens}"
+            styleClass="menuItem" value="My Screens" accesskey="M"
+            title="Browse the screens that you headed, led or collaborated on"
+            rendered="#{menu.screener}" />
+          <t:commandNavigation2 action="#{menu.browseStudies}"
+            styleClass="menuItem" value="Browse Studies" accesskey="T"
+            title="Browse the studies currently available and accessible to you" />
 
-					<t:commandNavigation2 action="#{menu.browseCherryPickRequests}"
-						styleClass="menuItem" value="Browse CPRs" accesskey="C"
-						title="Browse the cherry pick requests currently available and accessible to you"
-						rendered="#{menu.readAdmin}" />
-					<t:panelNavigation2 id="cprNavMenu" layout="table"
-						itemClass="submenuItem" openItemClass="submenuItem"
-						activeItemClass="menuItemActive" rendered="#{menu.readAdmin}">
-						<t:commandNavigation2
-							action="#{menu.browseRnaiCherryPickRequests}"
-							styleClass="submenuItem" value="RNAi"
-							title="Browse the RNAi Cherry Pick Requests" />
-						<t:commandNavigation2 styleClass="submenuItem"
-							action="#{menu.browseSmallMoleculeCherryPickRequests}"
-							value="Small Molecule"
-							title="Browse the Small Molecule Cherry Pick Requests" />
-					</t:panelNavigation2>
+          <t:commandNavigation2
+            action="#{menu.browseCherryPickRequests}"
+            styleClass="menuItem" value="Browse CPRs" accesskey="C"
+            title="Browse the cherry pick requests currently available and accessible to you"
+            rendered="#{menu.readAdmin}" />
+          <t:panelNavigation2 id="cprNavMenu" layout="table"
+            itemClass="submenuItem" openItemClass="submenuItem"
+            activeItemClass="menuItemActive"
+            rendered="#{menu.readAdmin}">
+            <t:commandNavigation2
+              action="#{menu.browseRnaiCherryPickRequests}"
+              styleClass="submenuItem" value="RNAi"
+              title="Browse the RNAi Cherry Pick Requests" />
+            <t:commandNavigation2 styleClass="submenuItem"
+              action="#{menu.browseSmallMoleculeCherryPickRequests}"
+              value="Small Molecule"
+              title="Browse the Small Molecule Cherry Pick Requests" />
+          </t:panelNavigation2>
 
-					<t:commandNavigation2 styleClass="menuItem"
-						action="#{menu.browseLabActivities}" value="Browse Lab Activities"
-						accesskey="A"
-						title="Browse the lab activities currently available and accessible to you" />
-					<t:commandNavigation2 action="#{menu.browseScreeners}"
-						styleClass="menuItem"
-						value="Browse #{menu.readAdmin ? 'Screeners' : 'Collaborators'}"
-						title="Browse #{menu.readAdmin ? 'the screeners' : ' my collaborators'}"
-						accesskey="U" />
-					<t:commandNavigation2 action="#{menu.browseStaff}"
-						styleClass="menuItem" rendered="#{menu.readAdmin}"
-						value="Browse Staff" title="Browse the staff members of the lab" />
-					<t:commandNavigation2 />
-					<t:commandNavigation2 action="#{menu.viewNews}" value="Latest News"
-						styleClass="menuItem" accesskey="N"
-						title="The latest Screensaver news" />
-					<t:commandNavigation2 action="#{menu.viewDownloads}"
-						styleClass="menuItem" value="Data Downloads" accesskey="D"
-						title="Download SD Files for small molecule libraries" />
-					<t:commandNavigation2 action="#{menu.viewHelp}" value="View Help"
-						styleClass="menuItem" accesskey="H"
-						title="View the Screensaver help page" />
-					<t:commandNavigation2 />
-					<t:commandNavigation2 action="goEnvironmentInfo"
-						styleClass="menuItem" value="Environment"
-						visibleOnUserRole="developer"
-						title="Access information about the environment that Screensaver is running in" />
-				</t:panelNavigation2>
-			</h:form>
+          <t:commandNavigation2 styleClass="menuItem"
+            action="#{menu.browseLabActivities}"
+            value="Browse Lab Activities" accesskey="A"
+            title="Browse the lab activities currently available and accessible to you" />
+          <t:commandNavigation2 action="#{menu.browseScreeners}"
+            styleClass="menuItem"
+            value="Browse #{menu.readAdmin ? 'Screeners' : 'Collaborators'}"
+            title="Browse #{menu.readAdmin ? 'the screeners' : ' my collaborators'}"
+            accesskey="U" />
+          <t:commandNavigation2 action="#{menu.browseStaff}"
+            styleClass="menuItem" rendered="#{menu.readAdmin}"
+            value="Browse Staff"
+            title="Browse the staff members of the lab" />
+          <t:commandNavigation2 />
+          <t:commandNavigation2 action="#{menu.viewNews}"
+            value="Latest News" styleClass="menuItem" accesskey="N"
+            title="The latest Screensaver news" />
+          <t:commandNavigation2 action="#{menu.viewDownloads}"
+            styleClass="menuItem" value="Data Downloads" accesskey="D"
+            title="Download SD Files for small molecule libraries" />
+          <t:commandNavigation2 action="#{menu.viewHelp}"
+            value="View Help" styleClass="menuItem" accesskey="H"
+            title="View the Screensaver help page" />
+          <t:commandNavigation2 />
+          <t:commandNavigation2 action="goEnvironmentInfo"
+            styleClass="menuItem" value="Environment"
+            visibleOnUserRole="developer"
+            title="Access information about the environment that Screensaver is running in" />
+        </t:panelNavigation2>
+      </h:form>
 
-			<t:htmlTag id="menuSectionSeparator2" value="hr"
-				rendered="#{menu.authenticatedUser}" />
+      <t:htmlTag id="menuSectionSeparator2" value="hr"
+        rendered="#{menu.authenticatedUser}" />
 
-			<h:form id="findWellForm">
-				<t:panelGrid columns="2"
-					rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}"
-					title="Look up a library well by plate number and well name">
-					<t:outputLabel id="plateNumberLabel" for="plateNumber"
-						value="Plate" styleClass="menuItem label" />
-					<t:outputLabel id="wellNameLabel" for="wellName" value="Well"
-						styleClass="menuItem label" />
-					<t:inputText id="plateNumber" value="#{wellFinder.plateNumber}"
-						size="5" styleClass="inputText" />
-					<t:inputText id="wellName" value="#{wellFinder.wellName}" size="3"
-						styleClass="inputText" />
-					<t:commandButton action="#{wellFinder.findWell}"
-						id="findWellCommand" value="Go" styleClass="command"
-						rendered="#{menu.authenticatedUser}" />
-					<t:outputText id="nowPanelGridHasEvenChildCount" value="" />
-				</t:panelGrid>
-			</h:form>
+      <h:form id="findWellForm">
+        <t:panelGrid columns="2"
+          rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}"
+          title="Look up a library well by plate number and well name">
+          <t:outputLabel id="plateNumberLabel" for="plateNumber"
+            value="Plate" styleClass="menuItem label" />
+          <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
+            styleClass="menuItem label" />
+          <t:inputText id="plateNumber"
+            value="#{wellFinder.plateNumber}" size="5"
+            styleClass="inputText" />
+          <t:inputText id="wellName" value="#{wellFinder.wellName}"
+            size="3" styleClass="inputText" />
+          <t:commandButton action="#{wellFinder.findWell}"
+            id="findWellCommand" value="Go" styleClass="command"
+            rendered="#{menu.authenticatedUser}" />
+          <t:outputText id="nowPanelGridHasEvenChildCount" value="" />
+        </t:panelGrid>
+      </h:form>
 
-			<h:form id="screensForm"
-				title="Screen commands">
-				<t:panelGrid columns="1"
-					rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
-					<t:commandButton action="#{screenFinder.findScreen}"
-						id="defaultCommand" styleClass="hiddenCommand" />
-					<t:commandButton action="#{menu.addScreen}"
-						id="addScreenCommand" value="Add Screen"
-						rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
-						styleClass="command" />
-					<t:outputLabel id="screenNumberLabel" for="screenNumber"
-						value="Screen #" styleClass="menuItem label" />
-					<t:inputText id="screenNumber" value="#{screenFinder.screenNumber}"
-						size="5" styleClass="inputText" />
-					<t:commandButton action="#{screenFinder.findScreen}"
-						id="findScreenCommand" value="Go" styleClass="command" />
-					<t:commandButton action="#{screenFinder.addLibraryScreening}"
-						id="addLibraryScreening" value="Add Library Screening"
-						rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
-						styleClass="command" />
+      <h:form id="screensForm" title="Screen commands">
+        <t:panelGrid columns="1"
+          rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
+          <t:commandButton action="#{screenFinder.findScreen}"
+            id="defaultCommand" styleClass="hiddenCommand" />
+          <t:commandButton action="#{menu.addScreen}"
+            id="addScreenCommand" value="Add Screen"
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
+            styleClass="command" />
+          <t:outputLabel id="screenNumberLabel" for="screenNumber"
+            value="Screen #" styleClass="menuItem label" />
+          <t:inputText id="screenNumber"
+            value="#{screenFinder.screenNumber}" size="5"
+            styleClass="inputText" />
+          <t:commandButton action="#{screenFinder.findScreen}"
+            id="findScreenCommand" value="Go" styleClass="command" />
+          <t:commandButton action="#{screenFinder.addLibraryScreening}"
+            id="addLibraryScreening" value="Add Library Screening"
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
+            styleClass="command" />
           <t:commandButton action="#{screenFinder.addCherryPickRequest}"
             id="addCherryPickRequest" value="Add CP Request"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['cherryPickRequestsAdmin']}"
             styleClass="command" />
-				</t:panelGrid>
-			</h:form>
+        </t:panelGrid>
+      </h:form>
 
-			<h:form id="findCherryPickRequestForm"
-				title="Look up a cherry pick request by cherry pick request number">
-				<t:panelGrid columns="1"
-					rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
-					<t:outputLabel id="cherryPickRequestNumberLabel"
-						for="cherryPickRequestNumber" value="CPR #"
-						styleClass="menuItem label" />
-					<t:inputText id="cherryPickRequestNumber"
-						value="#{cherryPickRequestFinder.cherryPickRequestNumber}"
-						size="5" styleClass="inputText" />
-					<t:commandButton
-						action="#{cherryPickRequestFinder.findCherryPickRequest}"
-						id="findCherryPickRequestCommand" value="Go"
-						rendered="#{menu.authenticatedUser}" styleClass="command" />
-				</t:panelGrid>
-			</h:form>
+      <h:form id="findCherryPickRequestForm"
+        title="Look up a cherry pick request by cherry pick request number">
+        <t:panelGrid columns="1"
+          rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
+          <t:outputLabel id="cherryPickRequestNumberLabel"
+            for="cherryPickRequestNumber" value="CPR #"
+            styleClass="menuItem label" />
+          <t:inputText id="cherryPickRequestNumber"
+            value="#{cherryPickRequestFinder.cherryPickRequestNumber}"
+            size="5" styleClass="inputText" />
+          <t:commandButton
+            action="#{cherryPickRequestFinder.findCherryPickRequest}"
+            id="findCherryPickRequestCommand" value="Go"
+            rendered="#{menu.authenticatedUser}" styleClass="command" />
+        </t:panelGrid>
+      </h:form>
 
-      <h:form id="usersForm"
-        title="User commands">
+      <h:form id="usersForm" title="User commands">
         <t:panelGrid columns="1"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
           <t:commandButton action="#{menu.addScreeningRoomUser}"
@@ -211,9 +216,9 @@
         </t:panelGrid>
       </h:form>
 
-		</t:panelGrid>
+    </t:panelGrid>
 
-	</s:roundedDiv>
+  </ss:roundedDiv>
 
 </ui:composition>
 

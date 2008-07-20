@@ -338,7 +338,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .menuColumn {
-  background: transparent;
+/*  background: transparent;*/
   color: white;
   font-size: small;
   /* prevents menu from consuming 50% width (with content panel consuming other 50%) on IE */

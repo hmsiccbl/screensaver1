@@ -110,12 +110,10 @@
 	</h:form>
 
 	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
-	<s:roundedDiv borderWidth="4"
-		color="#{appInfo.screensaverThemeHeaderColor}" radius="4"
-		rendered="#{empty screenResultViewer.screenResult}">
+	<ss:roundedDiv rendered="#{empty screenResultViewer.screenResult}">
 		<t:outputText value="Screen result not available"
 			styleClass="transparentSectionHeader" />
-	</s:roundedDiv>
+	</ss:roundedDiv>
 	<t:panelGroup
 		rendered="#{!screenResultViewer.readOnly &amp;&amp; empty screenResultViewer.screenResult}">
 		<ui:include src="admin/screenResultUploader.xhtml" />

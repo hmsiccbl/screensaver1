@@ -22,18 +22,17 @@
 		title="#{label}" var="isCollapsed" titleVar="title"
 		rendered="#{empty rendered ? true : rendered}">
 		<f:facet name="header">
-			<s:roundedDiv borderWidth="4"
-				color="#{appInfo.screensaverThemeHeaderColor}" radius="4"
-				styleClass="transparentSectionHeader">
-				<t:headerLink immediate="true" styleClass="transparentSectionHeader">
-					<t:graphicImage
-						value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
-						styleClass="icon" />
-					<t:outputText value="#{title}"
-						styleClass="transparentSectionHeader" />
-				</t:headerLink>
-			</s:roundedDiv>
-		</f:facet>
+      <ss:roundedDiv>
+        <t:headerLink immediate="true"
+          styleClass="transparentSectionHeader">
+          <t:graphicImage
+            value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
+            styleClass="icon" />
+          <t:outputText value="#{title}"
+            styleClass="transparentSectionHeader" />
+        </t:headerLink>
+      </ss:roundedDiv>
+    </f:facet>
 
 		<f:facet name="closedContent">
 			<ui:insert name="closedContent" />

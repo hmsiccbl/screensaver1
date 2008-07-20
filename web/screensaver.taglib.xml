@@ -57,6 +57,11 @@
     </tag>
 
     <tag>
+      <tag-name>roundedDiv</tag-name>
+      <source>../util/roundedDiv.xhtml</source>
+    </tag>
+
+    <tag>
       <tag-name>textColumn</tag-name>
       <source>../util/textColumn.xhtml</source>
     </tag>

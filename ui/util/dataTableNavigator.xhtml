@@ -4,7 +4,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 	<!--
 	facelets params:
@@ -21,79 +22,82 @@
 	<t:saveState value="#{dataTable.rowsPerPageSelector.value}" />
 	<!--t:saveState value="#{dataTable.dataTableModel.rowIndex}"/-->
 
-	<s:roundedDiv color="#{appInfo.screensaverThemeColor}" radius="8" borderWidth="1" style="height: 100%">
-		<t:panelGrid id="dataTableNavPanel" columns="9" width="100%"
-			rendered="#{dataTable.rowCount > 0}">
+  <ss:roundedDiv style="height: 100%">
+    <t:panelGrid id="dataTableNavPanel" columns="9" width="100%"
+      rendered="#{dataTable.rowCount > 0}">
 
-      <ui:insert name="custom0"/>
+      <ui:insert name="custom0" />
 
-			<t:dataScroller id="dataTableScroller" for=":#{dataTable.clientId}"
-				immediate="true" actionListener="#{dataTable.dataScrollerListener}"
-				firstRowIndexVar="fromRow" lastRowIndexVar="toRow"
-				rowsCountVar="rowCount" fastStep="10"
-				renderFacetsIfSinglePage="false" styleClass="scroller">
-				<f:facet name="first">
-					<t:graphicImage url="/images/arrow-first.png" border="0"
-						title="First page" />
-				</f:facet>
-				<f:facet name="last">
-					<t:graphicImage url="/images/arrow-last.png" border="0"
-						title="Last page" />
-				</f:facet>
-				<f:facet name="previous">
-					<t:graphicImage url="/images/arrow-previous.png" border="0"
-						title="Previous page" />
-				</f:facet>
-				<f:facet name="next">
-					<t:graphicImage url="/images/arrow-next.png" border="0"
-						title="Next page" />
-				</f:facet>
-				<f:facet name="fastforward">
-					<t:graphicImage url="/images/arrow-fastforward.png" border="0"
-						title="Forward 10 pages" />
-				</f:facet>
-				<f:facet name="fastrewind">
-					<t:graphicImage url="/images/arrow-fastrewind.png" border="0"
-						title="Back 10 pages" />
-				</f:facet>
-			</t:dataScroller>
+      <t:dataScroller id="dataTableScroller"
+        for=":#{dataTable.clientId}" immediate="true"
+        actionListener="#{dataTable.dataScrollerListener}"
+        firstRowIndexVar="fromRow" lastRowIndexVar="toRow"
+        rowsCountVar="rowCount" fastStep="10"
+        renderFacetsIfSinglePage="false" styleClass="scroller">
+        <f:facet name="first">
+          <t:graphicImage url="/images/arrow-first.png" border="0"
+            title="First page" />
+        </f:facet>
+        <f:facet name="last">
+          <t:graphicImage url="/images/arrow-last.png" border="0"
+            title="Last page" />
+        </f:facet>
+        <f:facet name="previous">
+          <t:graphicImage url="/images/arrow-previous.png" border="0"
+            title="Previous page" />
+        </f:facet>
+        <f:facet name="next">
+          <t:graphicImage url="/images/arrow-next.png" border="0"
+            title="Next page" />
+        </f:facet>
+        <f:facet name="fastforward">
+          <t:graphicImage url="/images/arrow-fastforward.png" border="0"
+            title="Forward 10 pages" />
+        </f:facet>
+        <f:facet name="fastrewind">
+          <t:graphicImage url="/images/arrow-fastrewind.png" border="0"
+            title="Back 10 pages" />
+        </f:facet>
+      </t:dataScroller>
 
-			<ui:insert name="custom1"/>
+      <ui:insert name="custom1" />
 
-			<t:dataScroller id="dataTableScroller2" for=":#{dataTable.clientId}"
-				pageCountVar="pages" pageIndexVar="page" firstRowIndexVar="fromRow"
-				lastRowIndexVar="toRow" rowsCountVar="rowCount"
-				paginator="false" paginatorMaxPages="9" paginatorColumnClass="scroller_inactivePage"
+      <t:dataScroller id="dataTableScroller2"
+        for=":#{dataTable.clientId}" pageCountVar="pages"
+        pageIndexVar="page" firstRowIndexVar="fromRow"
+        lastRowIndexVar="toRow" rowsCountVar="rowCount"
+        paginator="false" paginatorMaxPages="9"
+        paginatorColumnClass="scroller_inactivePage"
         paginatorActiveColumnClass="scroller_activePage">
-				<t:div styleClass="inverseLabel bigLabel">
+        <t:div styleClass="inverseLabel bigLabel">
           Page&#160;#{page}&#160;of&#160;#{pages} (#{rowCount}&#160;#{rowCount == 1 ? &quot;row&quot; : &quot;rows&quot;})
         </t:div>
-			</t:dataScroller>
+      </t:dataScroller>
 
-      <ui:insert name="custom2"/>
+      <ui:insert name="custom2" />
 
-			<t:panelGroup id="rowsPerPagePanel" styleClass="commandPanel">
-				<t:div styleClass="inverseLabel">
+      <t:panelGroup id="rowsPerPagePanel" styleClass="commandPanel">
+        <t:div styleClass="inverseLabel">
           Rows&#160;
 					<t:selectOneMenu id="rowsPerPageList"
-						value="#{dataTable.rowsPerPageSelector.value}"
-						binding="#{dataTable.rowsPerPageUIComponent}"
-						valueChangeListener="#{dataTable.rowsPerPageListener}"
-						onchange="javascript:submit()" styleClass="data"
-						title="Number of rows to display per page">
-						<f:selectItems
-							value="#{dataTable.rowsPerPageSelector.selectItems}" />
-					</t:selectOneMenu>
-				</t:div>
-				<t:commandButton id="updateRowsPerPageButton" value="Go"
-					styleClass="hiddenCommand" />
-			</t:panelGroup>
+            value="#{dataTable.rowsPerPageSelector.value}"
+            binding="#{dataTable.rowsPerPageUIComponent}"
+            valueChangeListener="#{dataTable.rowsPerPageListener}"
+            onchange="javascript:submit()" styleClass="data"
+            title="Number of rows to display per page">
+            <f:selectItems
+              value="#{dataTable.rowsPerPageSelector.selectItems}" />
+          </t:selectOneMenu>
+        </t:div>
+        <t:commandButton id="updateRowsPerPageButton" value="Go"
+          styleClass="hiddenCommand" />
+      </t:panelGroup>
 
-			<ui:insert name="custom3"/>
+      <ui:insert name="custom3" />
 
       <t:panelGrid columns="2" title="The sort column and direction">
         <t:outputLabel for="sortColumnMenu" value="Sort by"
-          styleClass="inverseLabel"/>
+          styleClass="inverseLabel" />
         <t:panelGroup>
           <t:selectOneMenu id="sortColumnMenu"
             value="#{dataTable.columnManager.sortColumnSelector.value}"
@@ -109,14 +113,15 @@
             <f:selectItems
               value="#{dataTable.columnManager.sortDirectionSelector.selectItems}" />
           </t:selectOneMenu>
-          <t:commandButton id="updateSortButton" styleClass="hiddenCommand" />
+          <t:commandButton id="updateSortButton"
+            styleClass="hiddenCommand" />
         </t:panelGroup>
       </t:panelGrid>
 
-      <ui:insert name="custom4"/>
+      <ui:insert name="custom4" />
 
-		</t:panelGrid>
-	</s:roundedDiv>
+    </t:panelGrid>
+  </ss:roundedDiv>
 
 </ui:component>
 
