@@ -170,6 +170,9 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     assertEquals(expected, new HashSet<StatusValue>(screen.getCandidateStatusValues()));
 
     screen.createStatusItem(today, StatusValue.COMPLETED);
+    assertEquals(3, screen.getCandidateStatusValues().size());
+    
+    screen.createStatusItem(today, StatusValue.DROPPED_RESOURCES);
     assertEquals(0, screen.getCandidateStatusValues().size());
   }
 
@@ -205,7 +208,8 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       fail("expected BusinessRuleViolationException");
     }
     catch (BusinessRuleViolationException e) {
-      assertEquals("status item is mutually exclusive with existing status item " + StatusValue.PENDING_ICCB, e.getMessage());
+      assertEquals("status value Pending - NSRB is mutually exclusive with existing status item value Pending - ICCB-L",
+                   e.getMessage());    
     }
   }
 
