@@ -400,7 +400,7 @@ public class UserSynchronizer
                                                 new AdministrativeActivity(enteredByAdmin, 
                                                                            activationDate, // best guess 
                                                                            AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
-      if (comments != null) {
+      if (comments.length() > 0) {
         checklistItemActivation.getEntryActivity().setComments(comments.toString());
         log.info(comments);
       }
@@ -423,7 +423,7 @@ public class UserSynchronizer
                                                                      new AdministrativeActivity(enteredByAdmin, 
                                                                                                 deactivationDate, // best guess 
                                                                                                 AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
-        if (comments != null) {
+        if (comments.length() > 0) {
           checklistItemDeactivation.getEntryActivity().setComments(comments.toString());
           log.info(comments);
         }
