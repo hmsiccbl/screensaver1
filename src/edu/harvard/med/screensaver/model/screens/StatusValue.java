@@ -43,10 +43,10 @@ public enum StatusValue implements VocabularyTerm
   ONGOING("Ongoing", 3),
   COMPLETED("Completed", 4),
   COMPLETED_DUPLICATE_WITH_ONGOING("Completed - Duplicate with Ongoing", 4),
-  DROPPED_TECHNICAL("Dropped - Technical", 4),
-  DROPPED_RESOURCES("Dropped - Resources", 4),
   NEVER_INITIATED("Never Initiated", 4),
-  TRANSFERRED_TO_BROAD_INSTITUTE("Transferred to Broad Institute", 4)
+  DROPPED_TECHNICAL("Dropped - Technical", 5),
+  DROPPED_RESOURCES("Dropped - Resources", 5),
+  TRANSFERRED_TO_BROAD_INSTITUTE("Transferred to Broad Institute", 5)
   ;
 
 
