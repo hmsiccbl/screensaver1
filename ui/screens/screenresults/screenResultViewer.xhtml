@@ -101,13 +101,15 @@
 	</t:div>
 
 	<h:form id="heatMapsPanelForm">
-		<ss:collapsiblePanel id="heatMapsPanel"
-			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
-			label="Heat Maps"
-			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['screenResultSummary']}">
-			<ui:include src="heatMapViewer.xhtml" />
-		</ss:collapsiblePanel>
-	</h:form>
+    <ss:collapsiblePanel id="heatMapsPanel"
+      isCollapsed="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
+      label="Heat Maps"
+      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
+      <ui:define name="content">
+        <ui:include src="heatMapViewer.xhtml" />
+      </ui:define>
+    </ss:collapsiblePanel>
+  </h:form>
 
 	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
 	<ss:roundedDiv rendered="#{empty screenResultViewer.screenResult}">
