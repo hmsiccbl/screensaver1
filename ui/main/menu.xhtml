@@ -32,11 +32,13 @@
 
       <t:panelGroup rendered="#{menu.authenticatedUser}">
         <h:form id="userForm">
-          <!--t:outputText value="User " styleClass="label"/-->
-          <t:outputText id="userName"
-            value="#{menu.screensaverUser.fullNameFirstLast}"
-            styleClass="menuItem userName"
-            title="The name of the logged in user" />
+          <t:commandLink id="viewSelfCommand" action="#{userViewer.viewUser}">
+            <f:param name="entityId" value="#{menu.screensaverUser.entityId}" />
+            <t:outputText id="userName"
+              value="#{menu.screensaverUser.fullNameFirstLast}"
+              styleClass="menuItem userName"
+              title="The the logged in user (yes, you!)" />
+          </t:commandLink>
           <t:div />
           <t:commandLink id="logout" action="#{menu.logout}"
             value="Logout" styleClass="menuItem"

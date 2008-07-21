@@ -14,10 +14,11 @@
 	<ui:param name="viewer" value="#{userViewer}" />
 
 	<ui:define name="entityCommands">
-		<t:commandButton id="browseScreensCommand" value="Browse Screens"
-			action="#{userViewer.browseScreens}"
-			rendered="#{!userViewer.editMode}" styleClass="command" />
-		<t:commandButton action="#{userViewer.addScreen}"
+    <t:commandButton id="browseScreensCommand" value="Browse Screens"
+      action="#{userViewer.browseScreens}"
+      rendered="#{userViewer.readAdmin &amp;&amp; !userViewer.editMode}"
+      styleClass="command" />
+    <t:commandButton action="#{userViewer.addScreen}"
 			id="addScreenCommand" value="Add Screen"
 			rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin'] &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
 			styleClass="command" />
@@ -50,17 +51,17 @@
 		<ss:property id="ecommonsId" label="eCommons ID"
 			description="The user's eCommons ID "
 			value="#{userViewer.user.ECommonsId}"
-			rendered="#{userViewer.readAdmin}" editable="#{userViewer.editMode}" />
+			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}" />
 
 		<ss:property id="harvardId" label="Harvard ID" description="The user "
 			value="#{userViewer.user.harvardId}"
-			rendered="#{userViewer.readAdmin}" editable="#{userViewer.editMode}" />
+			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}" />
 
 		<ss:property id="harvardIdExpiration" type="Date"
 			label="Harvard ID Initial Expiration Date"
 			description="The date when the user's Harvard ID will expire"
 			value="#{userViewer.user.harvardIdExpirationDate}"
-			rendered="#{userViewer.readAdmin}" editable="#{userViewer.editMode}">
+			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}">
 			<!-- TODO: ui:define name="valueFooter">
 					  <t:outputText id="harvardIdExpirationWarning" value="#{userViewer.harvardIdExpired ? 'Expired!' : userViewer.harvardIdDaysUntilExpiration}"/>
 					</ui:define -->
@@ -297,107 +298,108 @@
 	<ui:define name="footerContent">
 		<ss:collapsiblePanel id="userScreenInfo" label="Screens"
 			isCollapsed="#{userViewer.screensCollapsed}"
-			rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; !userViewer.editMode}">
+			rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
 			<ui:define name="content">
 				<t:panelGrid id="screensPropertiesPanel" columns="2"
 					columnClasses="propertyLabelColumn,column"
 					styleClass="layoutPanel">
 
-					<ss:property id="smallMoleculeScreens"
-						label="Small Molecule Screens"
-						description="The small molecule screens this user is associated with"
-						rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
-						<ui:define name="data">
-							<t:collapsiblePanel var="isSmallMoleculeScreensCollapsed"
-								value="#{userViewer.smallMoleculeScreensCollapsed}">
-								<f:facet name="header">
-									<t:headerLink immediate="true">
-										<t:outputText id="SmallMoleculeScreensToggleText"
-											value="#{isSmallMoleculeScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-											styleClass="dataText" />
-									</t:headerLink>
-								</f:facet>
-								<ss:userScreensTable
-									screensDataModel="#{userViewer.smallMoleculeScreensDataModel}"
-									screenTitleColumnHeader="A screen for compounds that..." />
-							</t:collapsiblePanel>
-						</ui:define>
-						<ui:define name="valueFooter">
-							<t:commandButton id="browseSmallMoleculeScreensCommand"
-								value="Browse..."
-								action="#{userViewer.browseSmallMoleculeScreens}"
-								rendered="#{userViewer.smallMoleculeScreensDataModel.rowCount > 0}"
-								styleClass="command" />
-							<t:commandButton id="addSmallMoleculeScreenCommand"
-								value="Add Small Molecule Screen"
-								action="#{userViewer.addSmallMoleculeScreen}"
-								styleClass="command" />
-						</ui:define>
-					</ss:property>
+          <ss:property id="smallMoleculeScreens"
+            label="Small Molecule Screens"
+            description="The small molecule screens this user is associated with">
+            <ui:define name="data">
+              <t:collapsiblePanel var="isSmallMoleculeScreensCollapsed"
+                value="#{userViewer.smallMoleculeScreensCollapsed}">
+                <f:facet name="header">
+                  <t:headerLink immediate="true">
+                    <t:outputText id="SmallMoleculeScreensToggleText"
+                      value="#{isSmallMoleculeScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+                      styleClass="dataText" />
+                  </t:headerLink>
+                </f:facet>
+                <ss:userScreensTable
+                  screensDataModel="#{userViewer.smallMoleculeScreensDataModel}"
+                  screenTitleColumnHeader="A screen for compounds that..." />
+              </t:collapsiblePanel>
+            </ui:define>
+            <ui:define name="valueFooter">
+              <t:commandButton id="browseSmallMoleculeScreensCommand"
+                value="Browse..."
+                action="#{userViewer.browseSmallMoleculeScreens}"
+                rendered="#{userViewer.smallMoleculeScreensDataModel.rowCount > 0}"
+                styleClass="command" />
+              <t:commandButton id="addSmallMoleculeScreenCommand"
+                value="Add Small Molecule Screen"
+                action="#{userViewer.addSmallMoleculeScreen}"
+                styleClass="command" />
+            </ui:define>
+          </ss:property>
 
-					<ss:property id="rnaiScreens" label="RNAi Screens"
-						description="The RNAi screens this user is associated with"
-						rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
-						<ui:define name="data">
-							<t:collapsiblePanel var="isRnaiScreensCollapsed"
-								value="#{userViewer.rnaiScreensCollapsed}">
-								<f:facet name="header">
-									<t:headerLink immediate="true">
-										<t:outputText id="rnaiScreensToggleText"
-											value="#{isRnaiScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-											styleClass="dataText" />
-									</t:headerLink>
-								</f:facet>
-								<ss:userScreensTable
-									screensDataModel="#{userViewer.rnaiScreensDataModel}"
-									screenTitleColumnHeader="A screen for RNAi reagents that..." />
-							</t:collapsiblePanel>
-						</ui:define>
-						<ui:define name="valueFooter">
-							<t:commandButton id="browseRnaiScreensCommand" value="Browse..."
-								action="#{userViewer.browseRnaiScreens}"
-								rendered="#{userViewer.rnaiScreensDataModel.rowCount > 0}"
-								styleClass="command" />
-							<t:commandButton id="addRnaiScreenCommand"
-								value="Add RNAi Screen" action="#{userViewer.addRnaiScreen}"
-								styleClass="command" />
-						</ui:define>
-					</ss:property>
+          <ss:property id="rnaiScreens" label="RNAi Screens"
+            description="The RNAi screens this user is associated with">
+            <ui:define name="data">
+              <t:collapsiblePanel var="isRnaiScreensCollapsed"
+                value="#{userViewer.rnaiScreensCollapsed}">
+                <f:facet name="header">
+                  <t:headerLink immediate="true">
+                    <t:outputText id="rnaiScreensToggleText"
+                      value="#{isRnaiScreensCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+                      styleClass="dataText" />
+                  </t:headerLink>
+                </f:facet>
+                <ss:userScreensTable
+                  screensDataModel="#{userViewer.rnaiScreensDataModel}"
+                  screenTitleColumnHeader="A screen for RNAi reagents that..." />
+              </t:collapsiblePanel>
+            </ui:define>
+            <ui:define name="valueFooter">
+              <t:commandButton id="browseRnaiScreensCommand"
+                value="Browse..."
+                action="#{userViewer.browseRnaiScreens}"
+                rendered="#{userViewer.rnaiScreensDataModel.rowCount > 0}"
+                styleClass="command" />
+              <t:commandButton id="addRnaiScreenCommand"
+                value="Add RNAi Screen"
+                action="#{userViewer.addRnaiScreen}"
+                styleClass="command" />
+            </ui:define>
+          </ss:property>
 
-					<ss:property id="screenAssociates" label="Screen Associates"
-						description="The associated of the screens that this user is associated with"
-						rendered="#{userViewer.screeningRoomUserViewMode &amp;&amp; (userViewer.readAdmin || userViewer.me) &amp;&amp; !userViewer.editMode}">
-						<ui:define name="data">
-							<t:collapsiblePanel var="isScreenAssociatesCollapsed"
-								value="#{userViewer.screenAssociatesCollapsed}">
-								<f:facet name="header">
-									<t:headerLink immediate="true">
-										<t:outputText id="screenAssociatesToggleText"
-											value="#{isScreenAssociatesCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-											styleClass="dataText" />
-									</t:headerLink>
-								</f:facet>
-								<ss:collectionTable
-									dataModel="#{userViewer.screenAssociatesDataModel}">
-									<ui:define name="columns">
-										<t:column>
-											<f:facet name="header">
-												<t:outputText value="Screen Associate" styleClass="label" />
-											</f:facet>
-											<ss:user id="screenAssociate" user="#{element}" />
-										</t:column>
-									</ui:define>
-								</ss:collectionTable>
-							</t:collapsiblePanel>
-						</ui:define>
-						<ui:define name="valueFooter">
-							<t:commandButton id="browseScreenAssociates" value="Browse..."
-								action="#{userViewer.browseScreenAssociates}"
-								rendered="#{userViewer.screenAssociatesDataModel.rowCount > 0}"
-								styleClass="command" />
-						</ui:define>
-					</ss:property>
-					</t:panelGrid>
+          <ss:property id="screenAssociates" label="Screen Associates"
+            description="The collaborators, lead screeners, and lab heads of the screens that this user is associated with">
+            <ui:define name="data">
+              <t:collapsiblePanel var="isScreenAssociatesCollapsed"
+                value="#{userViewer.screenAssociatesCollapsed}">
+                <f:facet name="header">
+                  <t:headerLink immediate="true">
+                    <t:outputText id="screenAssociatesToggleText"
+                      value="#{isScreenAssociatesCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+                      styleClass="dataText" />
+                  </t:headerLink>
+                </f:facet>
+                <ss:collectionTable
+                  dataModel="#{userViewer.screenAssociatesDataModel}">
+                  <ui:define name="columns">
+                    <t:column>
+                      <f:facet name="header">
+                        <t:outputText value="Screen Associate"
+                          styleClass="label" />
+                      </f:facet>
+                      <ss:user id="screenAssociate" user="#{element}" />
+                    </t:column>
+                  </ui:define>
+                </ss:collectionTable>
+              </t:collapsiblePanel>
+            </ui:define>
+            <ui:define name="valueFooter">
+              <t:commandButton id="browseScreenAssociates"
+                value="Browse..."
+                action="#{userViewer.browseScreenAssociates}"
+                rendered="#{userViewer.screenAssociatesDataModel.rowCount > 0}"
+                styleClass="command" />
+            </ui:define>
+          </ss:property>
+        </t:panelGrid>
 			</ui:define>
 		</ss:collapsiblePanel>
 	</ui:define>
