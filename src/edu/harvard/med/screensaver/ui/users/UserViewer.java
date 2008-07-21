@@ -566,11 +566,16 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       log.warn("user unauthorized to view " + user);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
+    
+    if (user instanceof AdministratorUser) {
+      reportSystemError("Sorry, viewing of administrator users (staff) is not yet implemented");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
 
     setUser(user);
 
-    UserSearchResults searchResults =
-      isScreeningRoomUserViewMode() ? _screenerSearchResults : _staffSearchResults;
+    UserSearchResults<ScreensaverUser> searchResults =
+      (UserSearchResults<ScreensaverUser>) (isScreeningRoomUserViewMode() ? _screenerSearchResults : _staffSearchResults);
     // calling viewUser() is a request to view the most up-to-date, persistent
     // version of the user, which means the usersBrowser must also be
     // updated to reflect the persistent version of the user
