@@ -130,13 +130,19 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   public UISelectOneBean<ScreensaverUser> getPerformedBy()
   {
     if (_performedBy == null) {
-      Set<ScreensaverUser> performedByCandidates;
-      if (_activity instanceof LabActivity) {
+      Set<ScreensaverUser> performedByCandidates = null;
+      if (_activity instanceof Screening) {
          performedByCandidates = new HashSet<ScreensaverUser>(((LabActivity) _activity).getScreen().getAssociatedScreeningRoomUsers());
+         // existing performedBy user of a Screening should be associated with Screen, but if not, load all ScreensaverUsers
+         if (_activity.getPerformedBy() != null && 
+           !performedByCandidates.contains(_activity.getPerformedBy())) {
+           performedByCandidates = null;
+         }
       }
-      else {
+      if (performedByCandidates == null) {
         performedByCandidates = new HashSet<ScreensaverUser>(_dao.findAllEntitiesOfType(ScreensaverUser.class));
       }
+      assert _activity.getPerformedBy() == null || performedByCandidates.contains(_activity.getPerformedBy());
       _performedBy = new UISelectOneEntityBean<ScreensaverUser>(
         performedByCandidates,
         _activity.getPerformedBy(),
