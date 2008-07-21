@@ -112,7 +112,7 @@ public class ScreenViewer extends StudyViewer
                       "keywords",
                       "publications");
     _dao.needReadOnly(screen, "statusItems");
-    _dao.needReadOnly(screen, "cherryPickRequests");
+    _dao.needReadOnly(screen, "cherryPickRequests.requestedBy");
     _dao.needReadOnly(screen, "annotationTypes.annotationValues");
     _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
     _dao.needReadOnly(screen.getScreenResult(),
