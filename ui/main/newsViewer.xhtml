@@ -9,13 +9,23 @@
 
 <ui:composition template="/main/template.xhtml">
 
-  <ui:param name="pageTitle" value="Latest News" />
+  <ui:param name="pageTitle" value="Release Notes" />
 
 	<ui:define name="body">
 
-		<p>Check back here regularly for the latest Screensaver news and
-		gossip!</p>
+		<p>Check back here regularly for the latest Screensaver updates!</p>
 		<dl>
+
+      <dt><span class="newsDate">2008.Jul.21, v1.6.3</span></dt>
+      <dd>
+      <p>New screeners can now be added to Screensaver via the web user interface!</p>
+      <p>A screener name search feature has been added to the menu panel.</p>
+      <p>Improvements to domain model for lab heads and labs, for better conceptual separation of lab members from labs/lab heads.  Lab Head is now a first-class entity type.  Assigning a lab to a screener or screen is now optional.  Only lab heads can have lab members and lab affiliations, and only lab members can have lab heads.</p>
+      <p>New lab affiliations can be added via the web user interface (in Screen Viewer).</p>
+      <p>Improvements to the role mechanism, which now supports a hierarchy of "implied" roles.  Added ScreensaverUser role, which is necessary for account login rights (allowing accounts to be enabled/disabled).  Added LabHeadAdmin and NonScreener roles, and renamed some existing roles for clarity.</p>  
+      <p>Most entity viewers now exclusively exist within the context of a search result, allowing the user to quickly search for and browse through other entities of the same type being viewed.</p>
+      <p>Wells can be flagged as 'deprecated', allowing Screensaver to warn (and potentially prevents) users from screening or cherry picking arbitrary sets of wells.</p>
+      </dd>
 
       <dt><span class="newsDate">2008.Jun.17, v1.6.2</span></dt>
       <dd>

@@ -171,11 +171,12 @@
 							<!-- this restricted field is a "last line of defense" against displaying data
                  that should not be viewable by the user; in general, a search result should
                  never contain restricted data to begin with -->
-							<t:outputText id="restricted" value="- - -" />
-							<!-- note: for editable input columns, we set tabindex to ensure tab behavior only moves between input fields (and not links in other non-editable columns) -->
+              <t:outputText id="restricted" value="- - -"
+                styleClass="dataText" />
+              <!-- note: for editable input columns, we set tabindex to ensure tab behavior only moves between input fields (and not links in other non-editable columns) -->
 							<t:inputText id="input" value="#{searchResults.cellValue}"
 								rendered="#{column.editable &amp;&amp; searchResults.editMode}"
-								immediate="true" converter="#{column.converter}"
+								immediate="true" converter="#{column.converter}" styleClass="inputText"
 								tabindex="#{rowIndex + searchResults.columnManager.currentColumnIndex + 1}" />
 							<!-- both single-valued and collection column types are displayed in dataList -->
 							<t:dataList id="output" var="item"
@@ -185,10 +186,14 @@
 									action="#{searchResults.cellAction}">
 									<f:param name="commandValue"
 										value="#{searchResults.escapeBackslashes[item]}" />
-									<t:outputText id="text" value="#{item}" converter="#{column.converter}" />
-								</t:commandLink>
-								<t:outputText value=", " rendered="#{itemIndex &lt; itemCount - 1}" />
-							</t:dataList>
+                  <t:outputText id="text" value="#{item}"
+                    converter="#{column.converter}"
+                    styleClass="dataText" />
+                </t:commandLink>
+                <t:outputText value=", "
+                  rendered="#{itemIndex &lt; itemCount - 1}"
+                  styleClass="dataText" />
+              </t:dataList>
 						</t:panelStack>
 					</t:columns>
 				</t:dataTable>
