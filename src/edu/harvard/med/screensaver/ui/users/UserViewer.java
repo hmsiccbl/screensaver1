@@ -302,8 +302,10 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
                   "checklistItemEvents.checklistItem",
                   "checklistItemEvents.screeningRoomUser",
                   "checklistItemEvents.entryActivity.performedBy");
-        // must find the admin user now, so we can re-use same instance, if multiple activations/expirations are entered before save()
-        _checklistItemEventEnteredBy = _dao.reloadEntity((AdministratorUser) getScreensaverUser(), false, "activitiesPerformed");
+        // HACK: must find the logged in admin user now, so we can re-use same instance, if multiple activations/expirations are entered before save()
+        if (getScreensaverUser() instanceof AdministratorUser) {
+          _checklistItemEventEnteredBy = _dao.reloadEntity((AdministratorUser) getScreensaverUser(), false, "activitiesPerformed");
+        }
       }
     }
     _user = user;
@@ -531,6 +533,10 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     if (_screenAssociatesDataModel == null && isScreeningRoomUserViewMode())
     {
       Set<ScreeningRoomUser> screenAssociates = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
+      // note: we only want associates from the user's screens, and not *all* of
+      // his associates, as returned by user.getAssociatedUsers(), since this
+      // also returns lab members and lab head (which are shown elsewhere by
+      // this viewer)
       for (Screen screen : getScreeningRoomUser().getAllAssociatedScreens()) {
         screenAssociates.addAll(screen.getAssociatedScreeningRoomUsers());
       }

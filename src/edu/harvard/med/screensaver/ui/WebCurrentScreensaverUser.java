@@ -31,9 +31,9 @@ import org.apache.log4j.Logger;
  * the user being serviced in the current HTTP request). We can't just inject a
  * ScreensaverUser instance directly, since a user hasn't necessarily
  * authenticated themselves when Spring session-scoped beans are instantiated.
- * 
+ *
  * @see WebDataAccessPolicy
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -61,9 +61,9 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
   {
     ScreensaverUser screensaverUser = super.getScreensaverUser();
     if (screensaverUser == null) {
-      _dao.doInTransaction(new DAOTransaction() 
+      _dao.doInTransaction(new DAOTransaction()
       {
-        public void runTransaction() 
+        public void runTransaction()
         {
           FacesContext facesContext = FacesContext.getCurrentInstance();
           if (facesContext == null) {
@@ -93,17 +93,29 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
                   "screensCollaborated",
                   "labHead.labMembers",
                   "labMembers");
+        _dao.need(user, 
+                  "screensLed.collaborators", 
+                  "screensLed.labHead", 
+                  "screensLed.leadScreener");
+        _dao.need(user, 
+                  "screensHeaded.collaborators", 
+                  "screensHeaded.labHead", 
+                  "screensHeaded.leadScreener");
+        _dao.need(user, 
+                  "screensCollaborated.collaborators", 
+                  "screensCollaborated.labHead", 
+                  "screensCollaborated.leadScreener");
       }
     }
     super.setScreensaverUser(user);
   }
-  
+
   @Override
   public void logActivity(String s)
   {
     super.logActivity(s);
   }
-    
+
   public String toString()
   {
     String sessionId = ((HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false)).getId();
@@ -111,19 +123,19 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
     builder.append("[...").append(sessionId.substring(sessionId.length() - 6)).append(']').append(' ');
     if (super.getScreensaverUser() == null) {
       builder.append("<unauthenticated>");
-    } 
+    }
     else {
       builder.append(super.toString());
     }
     return builder.toString();
   }
-  
+
   // private methods
 
   // TODO: make this into a service, and use in ScreensaverLoginModule
   /**
    * Returns a ScreensaverUser object for the specified Principal.
-   * 
+   *
    * @motivation Normally, the ScreensaverUser instance would be the same object
    *             as the Principal instance, but
    *             <code>getExternalContext().getUserPrincipal()</code> does not
@@ -142,21 +154,21 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
       return null;
     }
     int switchToUserPos = username.indexOf(':');
-    
-    ScreensaverUser user = null;    
+
+    ScreensaverUser user = null;
     if (switchToUserPos > 0) {
       username = username.substring(switchToUserPos + 1);
-      user = _dao.findEntityByProperty(ScreensaverUser.class, 
-                                       "ECommonsId", 
+      user = _dao.findEntityByProperty(ScreensaverUser.class,
+                                       "ECommonsId",
                                        username.toLowerCase());
     }
     else {
-      user = _dao.findEntityByProperty(ScreensaverUser.class, 
-                                       "loginId", 
+      user = _dao.findEntityByProperty(ScreensaverUser.class,
+                                       "loginId",
                                        username);
       if (user == null) {
-        user = _dao.findEntityByProperty(ScreensaverUser.class, 
-                                         "ECommonsId", 
+        user = _dao.findEntityByProperty(ScreensaverUser.class,
+                                         "ECommonsId",
                                          username.toLowerCase());
       }
     }

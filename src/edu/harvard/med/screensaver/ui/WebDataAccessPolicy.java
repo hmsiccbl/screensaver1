@@ -284,7 +284,17 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(ScreeningRoomUser screeningRoomUser)
   {
-    return visit((ScreensaverUser) screeningRoomUser);
+    ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
+    if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
+      return true;
+    }
+    if (loggedInUser.equals(screeningRoomUser)) {
+      return true;
+    }
+    if (loggedInUser instanceof ScreeningRoomUser) {
+      return ((ScreeningRoomUser) loggedInUser).getAssociatedUsers().contains(screeningRoomUser);
+    }
+    return false;
   }
 
   public boolean visit(LabHead labHead)
@@ -294,7 +304,14 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(AdministratorUser administratorUser)
   {
-    return visit((ScreensaverUser) administratorUser);
+    ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
+    if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
+      return true;
+    }
+    if (loggedInUser.equals(administratorUser)) {
+      return true;
+    }
+    return false;
   }
 
   public boolean visit(SilencingReagent entity)
@@ -347,31 +364,8 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return false;
   }
 
+  
   // private methods
-
-  private boolean visit(ScreensaverUser screensaverUser)
-  {
-    ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
-    if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
-      loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.USERS_ADMIN)) {
-      return true;
-    }
-    if (screensaverUser.equals(loggedInUser)) {
-      return true;
-    }
-    if (loggedInUser instanceof ScreeningRoomUser) {
-      ScreeningRoomUser loggedInScreener = (ScreeningRoomUser) loggedInUser;
-      if (loggedInScreener.getLab().getLabMembers().contains(screensaverUser)) {
-        // lab head and lab members can view their fellow lab members
-        return true;
-      }
-      if (screensaverUser.equals(loggedInScreener.getLab().getLabHead())) {
-        // non-members can view their lab head
-        return true;
-      }
-    }
-    return false;
-  }
 
   private boolean visit(CherryPickRequest entity) {
     return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());

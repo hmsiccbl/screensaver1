@@ -109,9 +109,14 @@
             value="Browse Lab Activities" accesskey="A"
             title="Browse the lab activities currently available and accessible to you" />
           <t:commandNavigation2 action="#{menu.browseScreeners}"
+            styleClass="menuItem" rendered="#{menu.readAdmin}"
+            value="Browse Screeners" title="Browse the screeners"
+            accesskey="U" />
+          <t:commandNavigation2 action="#{menu.browseAssociates}"
             styleClass="menuItem"
-            value="Browse #{menu.readAdmin ? 'Screeners' : 'Collaborators'}"
-            title="Browse #{menu.readAdmin ? 'the screeners' : ' my collaborators'}"
+            rendered="#{menu.screener}"
+            value="Browse Associates"
+            title="Browse my associates (lab members, screen collaborators, etc.)"
             accesskey="U" />
           <t:commandNavigation2 action="#{menu.browseStaff}"
             styleClass="menuItem" rendered="#{menu.readAdmin}"

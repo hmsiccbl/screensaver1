@@ -80,7 +80,7 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
       _dao));
   }
 
-  
+
   // implementations of the SearchResults abstract methods
 
    @Override

@@ -23,6 +23,8 @@ import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
@@ -45,8 +47,8 @@ public class Menu extends AbstractBackingBean
   private StudySearchResults _studiesBrowser;
   private CherryPickRequestSearchResults _cherryPickRequestsBrowser;
   private LibrarySearchResults _librariesBrowser;
-  private UserSearchResults<AdministratorUser> _staffBrowser;
-  private UserSearchResults<ScreeningRoomUser> _screenersBrowser;
+  private StaffSearchResults _staffBrowser;
+  private ScreenerSearchResults _screenersBrowser;
   private ActivitySearchResults _activitiesBrowser;
   private ScreenDetailViewer _screenDetailViewer;
   private UserViewer _userViewer;
@@ -67,8 +69,8 @@ public class Menu extends AbstractBackingBean
               StudySearchResults studiesBrowser,
               CherryPickRequestSearchResults cherryPickRequestsBrowser,
               LibrarySearchResults librariesBrowser,
-              UserSearchResults<ScreeningRoomUser> screenersBrowser,
-              UserSearchResults<AdministratorUser> staffBrowser,
+              ScreenerSearchResults screenersBrowser,
+              StaffSearchResults staffBrowser,
               ActivitySearchResults activitiesBrowser,
               ScreenDetailViewer screenDetailViewer,
               UserViewer userViewer)
@@ -156,7 +158,22 @@ public class Menu extends AbstractBackingBean
   @UIControllerMethod
   public String browseScreeners()
   {
+    if (!(getScreensaverUser() instanceof AdministratorUser)) {
+      reportSystemError("invalid user type");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     _screenersBrowser.searchUsers();
+    return BROWSE_SCREENERS;
+  }
+
+  @UIControllerMethod
+  public String browseAssociates()
+  {
+    if (!(getScreensaverUser() instanceof ScreeningRoomUser)) {
+      reportSystemError("invalid user type");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
+    _screenersBrowser.searchAssociatedUsers((ScreeningRoomUser) getScreensaverUser());
     return BROWSE_SCREENERS;
   }
 
@@ -235,25 +252,25 @@ public class Menu extends AbstractBackingBean
     }
     return BROWSE_ACTIVITIES;
   }
-  
+
   @UIControllerMethod
   public String addScreen()
   {
     return _screenDetailViewer.editNewScreen(null, null);
   }
-  
+
   @UIControllerMethod
   public String addScreeningRoomUser()
   {
     return _userViewer.editNewUser(new ScreeningRoomUser());
   }
-  
+
   @UIControllerMethod
   public String addLabHead()
   {
     return _userViewer.editNewUser(new LabHead());
   }
-  
+
   @Override
   public String reload()
   {

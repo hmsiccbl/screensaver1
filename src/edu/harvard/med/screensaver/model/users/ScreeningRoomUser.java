@@ -297,7 +297,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   {
     Set<ScreeningRoomUser> associates = Sets.newHashSet(getLab().getLabMembersAndLabHead());
     for (Screen screen : getAllAssociatedScreens()) {
-      associates.addAll(screen.getCollaborators());
+      associates.addAll(screen.getAssociatedScreeningRoomUsers());
     }
     associates.remove(this);
     return associates;

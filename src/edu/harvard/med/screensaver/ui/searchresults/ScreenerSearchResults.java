@@ -22,8 +22,12 @@ import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.ui.util.ScreeningRoomUserClassificationConverter;
 
+import org.springframework.transaction.annotation.Transactional;
+
 public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
 {
+  private GenericEntityDAO _dao;
+
   protected ScreenerSearchResults()
   {
   }
@@ -32,8 +36,28 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
                                UserViewer userViewer)
   {
     super(ScreeningRoomUser.class, dao, userViewer);
+    _dao = dao;
   }
-  
+
+  @Transactional
+  public void searchAssociatedUsers(ScreeningRoomUser screener)
+  {
+    screener = _dao.reloadEntity(screener, true, "labHead", "labMembers");
+    _dao.need(screener, 
+              "screensLed.collaborators", 
+              "screensLed.labHead", 
+              "screensLed.leadScreener");
+    _dao.need(screener, 
+              "screensHeaded.collaborators", 
+              "screensHeaded.labHead", 
+              "screensHeaded.leadScreener");
+    _dao.need(screener, 
+              "screensCollaborated.collaborators", 
+              "screensCollaborated.labHead", 
+              "screensCollaborated.leadScreener");
+    searchUsers(screener.getAssociatedUsers());
+  }
+
   @Override
   protected List<? extends TableColumn<ScreeningRoomUser,?>> buildColumns()
   {
