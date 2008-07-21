@@ -145,6 +145,11 @@ public class DataTableModelLazyUpdateDecorator<R> extends DataTableModel<R>
     _base.removeDataModelListener(listener);
   }
 
+  @Override
+  public DataTableModelType getModelType()
+  {
+    return _base.getModelType();
+  }
 
   // private methods
 

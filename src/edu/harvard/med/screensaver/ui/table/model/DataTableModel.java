@@ -16,6 +16,7 @@ import java.util.List;
 import javax.faces.model.DataModel;
 
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 /**
@@ -46,4 +47,10 @@ public abstract class DataTableModel<R> extends DataModel
   
   // TODO
   // public abstract Iterator<R> iterator();
+  
+  
+  /**
+   * @motivation for unit tests
+   */
+  public abstract DataTableModelType getModelType();
 }

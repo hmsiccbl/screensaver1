@@ -49,13 +49,11 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
-import edu.harvard.med.screensaver.ui.table.model.VirtualPagingDataModel;
-import edu.harvard.med.screensaver.ui.table.model.VirtualPagingEntityDataModel;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -165,7 +163,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     _wellSearchResults.clearFilter();
     DataTableModel model = _wellSearchResults.getDataTableModel();
     assertTrue("VirtualPagingDataModel used",
-               _wellSearchResults.getBaseDataTableModel() instanceof VirtualPagingDataModel);
+               model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
     doTestSearchResult(model, _allWellKeys);
   }
 
@@ -175,7 +173,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     setOrderBy();
     DataTableModel model = _wellSearchResults.getDataTableModel();
     assertTrue("InMemoryDataModel used",
-               _wellSearchResults.getBaseDataTableModel() instanceof InMemoryEntityDataModel);
+               model.getModelType() == DataTableModelType.IN_MEMORY);
     doTestSearchResult(model, _smallWellKeys);
   }
 
@@ -185,7 +183,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     setOrderBy();
     DataTableModel model = _wellSearchResults.getDataTableModel();
     assertTrue("VirtualPagingDataModel used",
-               _wellSearchResults.getBaseDataTableModel() instanceof VirtualPagingDataModel);
+               model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
     doTestSearchResult(model, _bigWellKeys);
   }
 
@@ -196,7 +194,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     setOrderBy();
     DataTableModel model = _wellSearchResults.getDataTableModel();
     assertTrue("InMemoryDataModel used",
-               _wellSearchResults.getBaseDataTableModel() instanceof InMemoryEntityDataModel);
+               model.getModelType() == DataTableModelType.IN_MEMORY);
     doTestSearchResult(model, _smallWellKeys);
   }
 
@@ -206,7 +204,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     setOrderBy();
     DataTableModel model = _wellSearchResults.getDataTableModel();
     assertTrue("VirtualPagingDataModel used",
-               _wellSearchResults.getBaseDataTableModel() instanceof VirtualPagingDataModel);
+               model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
     doTestSearchResult(model, _bigWellKeys);
   }
 
@@ -256,7 +254,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
     // test with InMemoryDataModel
     doTestScreenResult(_bigWellKeys,
-                       VirtualPagingEntityDataModel.class,
+                       DataTableModelType.VIRTUAL_PAGING,
                        columnsAndValueGetters);
 
     SortedSet<WellKey> expectedWellKeys = _bigWellKeys.headSet(new WellKey("01001:A01"));
@@ -283,18 +281,18 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                  AnnotationValue av = annotType1.getAnnotationValues().get(well.getReagent());
                                  return av == null ? av : new BigDecimal(av.getNumericValue()).setScale(3, RoundingMode.HALF_UP); }; });
     doTestScreenResult(expectedWellKeys,
-                       InMemoryEntityDataModel.class,
+                       DataTableModelType.IN_MEMORY,
                        columnsAndValueGetters);
   }
 
   public void doTestScreenResult(SortedSet<WellKey> expectedKeys,
-                                 Class<? extends DataTableModel> expectedDataTableModelClass,
+                                 DataTableModelType expectedDataTableModelType,
                                  Map<TableColumn<?,?>,Getter<Well,?>> addColumns)
   {
     setOrderBy();
     DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertEquals("DataTableModel in use", expectedDataTableModelClass,
-                 _wellSearchResults.getBaseDataTableModel().getClass());
+    assertEquals("DataTableModel in use", expectedDataTableModelType,
+                 model.getModelType());
     doTestSearchResult(model, expectedKeys);
 
     // now add the extra columns and test them
@@ -354,45 +352,39 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     // TODO: also test a numeric ResultValueType column
 
     DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertTrue("VirtualPagingDataModel used", _wellSearchResults.getBaseDataTableModel() instanceof VirtualPagingDataModel);
+    assertTrue("VirtualPagingDataModel used", model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
     doTestSearchResult(model, _expectedKeys);
   }
 
-  public void testEntityModeScrolling()
-  {
-    {
-      _wellSearchResults.searchAllWells();
-      setOrderBy();
-      _wellSearchResults.getRowsPerPageSelector().setSelection(_wellSearchResults.getRowsPerPageSelector().getDefaultSelection());
-      assertFalse("summary view mode", _wellSearchResults.isEntityView());
-      _wellSearchResults.getRowsPerPageSelector().setSelection(1);
-      assertTrue("entity view mode", _wellSearchResults.isEntityView());
-
-      DataTableModel model = _wellSearchResults.getDataTableModel();
-      assertTrue("VirtualPagingDataModel used",
-                 _wellSearchResults.getBaseDataTableModel() instanceof VirtualPagingDataModel);
-      List<WellKey> expectedWellKeys = new ArrayList<WellKey>(_allWellKeys).subList(0, 3);
-      model.setRowIndex(0);
-      assertEquals("entity 0", expectedWellKeys.get(0), _wellViewer.getWell().getWellKey());
-      model.setRowIndex(1);
-      assertEquals("entity 1", expectedWellKeys.get(1), _wellViewer.getWell().getWellKey());
-      model.setRowIndex(2);
-      assertEquals("entity 2", expectedWellKeys.get(2), _wellViewer.getWell().getWellKey());
-
-      _wellSearchResults.getRowsPerPageSelector().setSelection(_wellSearchResults.getRowsPerPageSelector().getDefaultSelection());
-      assertEquals("returning to summary mode, with last-viewed entity shown as first row",
-                   2,
-                   _wellSearchResults.getDataTableUIComponent().getFirst());
-      assertEquals("last-viewed entity shown as first row",
-                   expectedWellKeys.get(2),
-                   ((Well) _wellSearchResults.getDataTableModel().getRowData()).getWellKey());
-    }
-
-    // TODO: should test all of above again, but using InMemoryDataModel (since
-    // both of these data models use different code to implement DataModel
-    // listener notifications)
-
-  }
+  // TODO: must test via a JSFUnit test, since entity viewer updates only occur from UI data table scrolling events, not model.setRowIndex()
+//  public void testEntityModeScrolling()
+//  {
+//    _wellSearchResults.searchAllWells();
+//    setOrderBy();
+//    _wellSearchResults.getRowsPerPageSelector().setSelection(_wellSearchResults.getRowsPerPageSelector().getDefaultSelection());
+//    assertFalse("summary view mode", _wellSearchResults.isEntityView());
+//    _wellSearchResults.getRowsPerPageSelector().setSelection(1);
+//    assertTrue("entity view mode", _wellSearchResults.isEntityView());
+//
+//    DataTableModel model = _wellSearchResults.getDataTableModel();
+//    assertTrue("VirtualPagingDataModel used",
+//               _wellSearchResults.getBaseDataTableModel() == DataTableModelType.VIRTUAL_PAGING);
+//    List<WellKey> expectedWellKeys = new ArrayList<WellKey>(_allWellKeys).subList(0, 3);
+//    model.setRowIndex(0);
+//    assertEquals("entity 0", expectedWellKeys.get(0), _wellViewer.getWell().getWellKey());
+//    model.setRowIndex(1);
+//    assertEquals("entity 1", expectedWellKeys.get(1), _wellViewer.getWell().getWellKey());
+//    model.setRowIndex(2);
+//    assertEquals("entity 2", expectedWellKeys.get(2), _wellViewer.getWell().getWellKey());
+//
+//    _wellSearchResults.getRowsPerPageSelector().setSelection(_wellSearchResults.getRowsPerPageSelector().getDefaultSelection());
+//    assertEquals("returning to summary mode, with last-viewed entity shown as first row",
+//                 2,
+//                 _wellSearchResults.getDataTableUIComponent().getFirst());
+//    assertEquals("last-viewed entity shown as first row",
+//                 expectedWellKeys.get(2),
+//                 ((Well) _wellSearchResults.getDataTableModel().getRowData()).getWellKey());
+//  }
 
   public void testValidColumnSelections()
   {

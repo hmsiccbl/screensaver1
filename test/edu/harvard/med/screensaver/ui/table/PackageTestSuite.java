@@ -29,5 +29,6 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(CriterionTest.class);
     addTestSuite(TableColumnManagerTest.class);
     addTestSuite(DataTableTest.class);
+    addTest(edu.harvard.med.screensaver.ui.table.model.PackageTestSuite.suite());
   }
 }

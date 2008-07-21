@@ -17,11 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.faces.model.DataModelEvent;
-import javax.faces.model.DataModelListener;
-
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.util.ValueReference;
 
 import org.apache.log4j.Logger;
@@ -74,6 +72,12 @@ public abstract class VirtualPagingDataModel<K,E> extends DataTableModel<E>
 
   // public methods
 
+  @Override
+  public DataTableModelType getModelType()
+  {
+    return DataTableModelType.VIRTUAL_PAGING;
+  }
+
   /**
    * Subclass should call this method to determine how many rows of data need to
    * be fetched in order to populate the visible rows of the data table.
@@ -110,19 +114,7 @@ public abstract class VirtualPagingDataModel<K,E> extends DataTableModel<E>
   @Override
   public void setRowIndex(int rowIndex)
   {
-    int oldRowIndex = _rowIndex;
     _rowIndex = rowIndex;
-    notifyListenersOfRowIndexChange(oldRowIndex);
-  }
-
-  private void notifyListenersOfRowIndexChange(int oldRowIndex)
-  {
-    if (oldRowIndex != _rowIndex) {
-      DataModelEvent event = new DataModelEvent(this, _rowIndex, null /*TODO*/);
-      for (DataModelListener listener : getDataModelListeners()) {
-        listener.rowSelected(event);
-      }
-    }
   }
 
   @Override

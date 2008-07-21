@@ -29,11 +29,11 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.VirtualPagingDataModel;
 
 import org.apache.log4j.Logger;
 
@@ -107,7 +107,7 @@ public class ReagentsSearchResultTest extends AbstractSpringPersistenceTest
                                          Map<String,Object> columnNameToExpectedValue)
   {
     DataTableModel<R> model = searchResults.getDataTableModel();
-    assertTrue("using VirtualPagingDataModel", searchResults.getBaseDataTableModel() instanceof VirtualPagingDataModel);
+    assertTrue("using VirtualPagingDataModel", model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
     TableColumnManager<R> columnManager = searchResults.getColumnManager();
     DataModel columnModel = columnManager.getVisibleColumnModel();
     for (String columnName : columnNameToExpectedValue.keySet()) {

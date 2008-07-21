@@ -24,6 +24,7 @@ import java.util.Observer;
 import javax.faces.component.UIData;
 import javax.faces.event.ActionEvent;
 
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
@@ -32,6 +33,7 @@ import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
@@ -184,18 +186,6 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     super(CAPABILITIES);
     _dataExporters.add(new GenericDataExporter<E>("searchResult"));
     _dataExporters.addAll(dataExporters);
-  }
-
-  @Override
-  public void resort()
-  {
-    super.resort();
-    if (isEntityView()) {
-      if (getDataTableUIComponent() != null) {
-        getDataTableModel().setRowIndex(getDataTableUIComponent().getFirst());
-      }
-      viewSelectedEntity();
-    }
   }
 
   public boolean isRowRestricted()
@@ -469,21 +459,61 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       else {
         log.debug("using InMemoryDataModel due to domain size");
       }
-      model = new InMemoryEntityDataModel<E>(dataFetcher);
+      model = new InMemoryEntityDataModel<E>(dataFetcher) {
+        @Override
+        public void filter(List<? extends TableColumn<E,?>> columns)
+        {
+          super.filter(columns);
+          updateEntityView();
+        }
+        
+        @Override
+        public void sort(List<? extends TableColumn<E,?>> sortColumns,
+                         SortDirection sortDirection)
+        {
+          super.sort(sortColumns, sortDirection);
+          updateEntityView();
+        }
+      };
     }
     else {
       log.debug("using VirtualPagingDataModel (sweet!)");
       model = new VirtualPagingEntityDataModel<K,E>(dataFetcher,
         new ValueReference<Integer>() { public Integer value() { return getRowsPerPage(); }
-      });
+      }) {
+        @Override
+        public void filter(List<? extends TableColumn<E,?>> columns)
+        {
+          super.filter(columns);
+          updateEntityView();
+        }
+        
+        @Override
+        public void sort(List<? extends TableColumn<E,?>> sortColumns,
+                         SortDirection sortDirection)
+        {
+          super.sort(sortColumns, sortDirection);
+          updateEntityView();
+        }
+      };
     }
     return model;
+  }
+  
+  private void updateEntityView()
+  {
+    if (isEntityView()) {
+      if (getDataTableUIComponent() != null) {
+        getDataTableModel().setRowIndex(getDataTableUIComponent().getFirst());
+      }
+      viewSelectedEntity();
+    }
   }
 
   private int findRowOfEntity(E entity)
   {
-    if (getBaseDataTableModel() instanceof InMemoryDataModel) {
-      DataTableModel model = (DataTableModel) getDataTableModel();
+    DataTableModel model = (DataTableModel) getDataTableModel();
+    if (model.getModelType() == DataTableModelType.IN_MEMORY) { 
       List<E> data = (List<E>) model.getWrappedData();
       for (int i = 0; i < data.size(); i++) {
         if (data.get(i).equals(entity)) {

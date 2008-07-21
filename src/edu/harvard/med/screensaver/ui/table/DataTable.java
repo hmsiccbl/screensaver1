@@ -134,15 +134,6 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     return _dataTableModel;
   }
 
-  /**
-   * @motivation for unit tests
-   */
-  public DataTableModel<R> getBaseDataTableModel()
-  {
-    verifyIsInitialized();
-    return _baseDataTableModel;
-  }
-
   public TableColumnManager<R> getColumnManager()
   {
     verifyIsInitialized();
@@ -353,20 +344,22 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
       }
     }
   }
+  
+  // making the refetch(), refilter(), and resort() methods final prevents subclasses from side-stepping the "lazy benefits" DTMLUD   
 
-  public void refetch()
+  final public void refetch()
   {
     getDataTableModel().fetch(getColumnManager().getVisibleColumns());
   }
 
-  public void refilter()
+  final public void refilter()
   {
     getDataTableModel().filter(getColumnManager().getVisibleColumns());
-    // note: we cannot call gotoRowIndex(), as this will cause DTMLUD to trigger
+    // note: we cannot call {@link #scrollToRow}, as this will cause DTMLUD to trigger
     setRowIndex(0);
   }
 
-  public void resort()
+  final public void resort()
   {
     getDataTableModel().sort(getColumnManager().getSortColumns(),
                              getColumnManager().getSortDirection());
@@ -387,7 +380,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
 
   /**
    * Low-level setter method for changing the current row index. Client code
-   * should call gotoRowIndex()
+   * should call {@link #scrollToRow(int)}
    *
    * @motivation handle the case where client code wants to goto a row index,
    *             but the _dataTableUIComponent has not yet been set by JSF

@@ -52,7 +52,7 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     TableColumnManager<ScreeningRoomUser> columnManager = _screenerSearchResults.getColumnManager();
     _screenerSearchResults.getColumnManager().addCompoundSortColumns(columnManager.getColumn("User"),
                                                                      columnManager.getColumn("Date Created"));
-    _screenerSearchResults.getColumnManager().setSortColumnName("User");
+    _screenerSearchResults.getColumnManager().setSortColumnName("Name");
 
     _admin1 = MakeDummyEntities.makeDummyUser(1, "Al", "Capone");
     _admin1.setDateCreated(new DateTime(2007, 1, 1, 0, 0, 0, 0));
@@ -78,10 +78,8 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     for (int rowIndex = 0; rowIndex < _expectedUsers.size(); rowIndex++) {
       ScreeningRoomUser user = _expectedUsers.get(rowIndex);
       dataTableModel.setRowIndex(rowIndex);
-      _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(0);
-      assertEquals("row " + rowIndex + ", col 0", user.getFullNameLastFirst(), _screenerSearchResults.getCellValue());
       _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(1);
-      assertEquals("row " + rowIndex + ", col 1", user.getDateCreated().toLocalDate(), _screenerSearchResults.getCellValue());
+      assertEquals("row " + rowIndex + ", col 0", user.getFullNameLastFirst(), _screenerSearchResults.getCellValue());
     }
   }
 
@@ -90,12 +88,12 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
   {
     //_screenerSearchResults.searchUsers();
     Criterion<String> criterion = new Criterion<String>(Operator.TEXT_STARTS_WITH, "Mal");
-    ((UserNameColumn<ScreeningRoomUser>) _screenerSearchResults.getColumnManager().getColumn("User"))
+    ((UserNameColumn<ScreeningRoomUser>) _screenerSearchResults.getColumnManager().getColumn("Name"))
     .clearCriteria().addCriterion(criterion);
     DataTableModel<ScreeningRoomUser> dataTableModel = _screenerSearchResults.getDataTableModel();
 
     assertEquals("filtered result size", 1, dataTableModel.getRowCount());
-    _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(0);
+    _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(1);
     assertEquals("filtered data", _admin2.getFullNameLastFirst(), _screenerSearchResults.getCellValue());
 
     _screenerSearchResults.resetFilter();

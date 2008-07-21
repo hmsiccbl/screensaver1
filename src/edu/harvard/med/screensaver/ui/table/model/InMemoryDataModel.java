@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.CriterionMatchException;
+import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.column.CompoundColumnComparator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
@@ -42,6 +43,12 @@ public class InMemoryDataModel<R> extends DataTableModel<R>
   public InMemoryDataModel(DataFetcher<R,?,?> dataFetcher)
   {
     _dataFetcher = dataFetcher;
+  }
+
+  @Override
+  public DataTableModelType getModelType()
+  {
+    return DataTableModelType.IN_MEMORY;
   }
 
   @Override
