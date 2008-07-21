@@ -151,12 +151,13 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       public void update(Observable obs, Object o)
       {
         if (((Integer) o) == 1) {
+          int firstRow = 0;
           if (getDataTableUIComponent() != null) {
-            log.debug("entering 'entity view' mode; setting data table row to first row on page:" +
-                      getDataTableUIComponent().getFirst());
-            getDataTableModel().setRowIndex(getDataTableUIComponent().getFirst());
-            viewSelectedEntity();
+            firstRow = getDataTableUIComponent().getFirst();
           }
+          log.debug("entering 'entity view' mode; setting data table row to first row on page:" + firstRow);
+          getDataTableModel().setRowIndex(firstRow);
+          viewSelectedEntity();
         }
       }
     };

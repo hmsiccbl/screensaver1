@@ -546,6 +546,15 @@
   </bean>
 
   <bean
+    id="screenerFinder"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.users.ScreenerFinder">
+    <constructor-arg ref="screenersBrowser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
     id="heatMapViewer"
     parent="uiBean"
     scope="session"

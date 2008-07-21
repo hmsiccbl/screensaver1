@@ -27,8 +27,7 @@
           title="The build number" />
       </h:form>
 
-      <t:htmlTag id="menuSectionSeparator0" value="hr"
-        rendered="#{menu.authenticatedUser}" />
+      <t:htmlTag value="hr" rendered="#{menu.authenticatedUser}" />
 
       <t:panelGroup rendered="#{menu.authenticatedUser}">
         <h:form id="userForm">
@@ -46,7 +45,7 @@
         </h:form>
       </t:panelGroup>
 
-      <t:htmlTag id="menuSectionSeparator1" value="hr" />
+      <t:htmlTag value="hr" />
 
       <h:form id="navForm">
         <t:panelNavigation2 id="navMenu" layout="table"
@@ -142,26 +141,51 @@
         </t:panelNavigation2>
       </h:form>
 
-      <t:htmlTag id="menuSectionSeparator2" value="hr"
-        rendered="#{menu.authenticatedUser}" />
+      <t:htmlTag value="hr" rendered="#{menu.authenticatedUser}" />
 
       <h:form id="findWellForm">
+        <t:commandButton action="#{wellFinder.findWell}"
+          id="findWellCommand" value="Go" styleClass="hiddenCommand"
+          rendered="#{menu.authenticatedUser}" />
         <t:panelGrid columns="2"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}"
           title="Look up a library well by plate number and well name">
           <t:outputLabel id="plateNumberLabel" for="plateNumber"
-            value="Plate" styleClass="menuItem label" />
+            value="Plate" styleClass="label" />
           <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
-            styleClass="menuItem label" />
+            styleClass="label" />
           <t:inputText id="plateNumber"
             value="#{wellFinder.plateNumber}" size="5"
             styleClass="inputText" />
           <t:inputText id="wellName" value="#{wellFinder.wellName}"
             size="3" styleClass="inputText" />
-          <t:commandButton action="#{wellFinder.findWell}"
-            id="findWellCommand" value="Go" styleClass="command"
-            rendered="#{menu.authenticatedUser}" />
-          <t:outputText id="nowPanelGridHasEvenChildCount" value="" />
+        </t:panelGrid>
+      </h:form>
+
+      <h:form id="screenerSearchForm"
+        title="Search for a screener by name, matching a name pattern against 'Last, First' (use * as wildcard)">
+        <t:commandButton
+          action="#{screenerFinder.findScreenerByNamePattern}"
+          id="findScreenerCommand" value="Go"
+          rendered="#{menu.authenticatedUser}"
+          styleClass="hiddenCommand" />
+        <t:panelGrid columns="1" styleClass="layoutPanel"
+          rendered="#{menu.authenticatedUser &amp;&amp; menu.readAdmin}">
+          <t:outputText id="screenerNamePatternLabel"
+            for="screenerNamePattern" value="Screener Name"
+            styleClass="label" />
+          <t:panelGrid columns="3" styleClass="layoutPanel">
+            <t:outputText value="Last" styleClass="submenuItem" />
+            <t:outputText value="" />
+            <t:outputText value="First" styleClass="submenuItem" />
+            <t:inputText id="screenerLastNamePattern"
+              value="#{screenerFinder.lastNamePattern}" size="5"
+              styleClass="inputText" />
+              ,
+            <t:inputText id="screenerFirstNamePattern"
+              value="#{screenerFinder.firstNamePattern}" size="4"
+              styleClass="inputText" />
+          </t:panelGrid>
         </t:panelGrid>
       </h:form>
 
@@ -169,31 +193,30 @@
         <t:panelGrid columns="1"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
           <t:commandButton action="#{screenFinder.findScreen}"
-            id="defaultCommand" styleClass="hiddenCommand" />
-          <t:commandButton action="#{menu.addScreen}"
-            id="addScreenCommand" value="Add Screen"
-            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
-            styleClass="command" />
+            id="findScreenCommand" value="Go" styleClass="hiddenCommand" />
           <t:outputLabel id="screenNumberLabel" for="screenNumber"
             value="Screen #" styleClass="menuItem label" />
           <t:inputText id="screenNumber"
             value="#{screenFinder.screenNumber}" size="5"
             styleClass="inputText" />
-          <t:commandButton action="#{screenFinder.findScreen}"
-            id="findScreenCommand" value="Go" styleClass="command" />
-          <t:commandButton action="#{screenFinder.addLibraryScreening}"
+          <!-- t:commandButton action="#{screenFinder.addLibraryScreening}"
             id="addLibraryScreening" value="Add Library Screening"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
             styleClass="command" />
           <t:commandButton action="#{screenFinder.addCherryPickRequest}"
             id="addCherryPickRequest" value="Add CP Request"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['cherryPickRequestsAdmin']}"
-            styleClass="command" />
+            styleClass="command" /-->
         </t:panelGrid>
       </h:form>
 
       <h:form id="findCherryPickRequestForm"
         title="Look up a cherry pick request by cherry pick request number">
+        <t:commandButton
+          action="#{cherryPickRequestFinder.findCherryPickRequest}"
+          id="findCherryPickRequestCommand" value="Go"
+          rendered="#{menu.authenticatedUser}"
+          styleClass="hiddenCommand" />
         <t:panelGrid columns="1"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
           <t:outputLabel id="cherryPickRequestNumberLabel"
@@ -202,16 +225,18 @@
           <t:inputText id="cherryPickRequestNumber"
             value="#{cherryPickRequestFinder.cherryPickRequestNumber}"
             size="5" styleClass="inputText" />
-          <t:commandButton
-            action="#{cherryPickRequestFinder.findCherryPickRequest}"
-            id="findCherryPickRequestCommand" value="Go"
-            rendered="#{menu.authenticatedUser}" styleClass="command" />
         </t:panelGrid>
       </h:form>
 
-      <h:form id="usersForm" title="User commands">
+      <t:htmlTag value="hr" rendered="#{menu.authenticatedUser}" />
+
+      <h:form id="entityCreationForm" title="Entity creation commands">
         <t:panelGrid columns="1"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
+          <t:commandButton action="#{menu.addScreen}"
+            id="addScreenCommand" value="Add Screen"
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
+            styleClass="command" />
           <t:commandButton action="#{menu.addScreeningRoomUser}"
             id="addScreeningRoomUserCommand" value="Add Screener"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['usersAdmin']}"

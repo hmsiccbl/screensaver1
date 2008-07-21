@@ -26,7 +26,6 @@ import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.apache.log4j.Logger;
