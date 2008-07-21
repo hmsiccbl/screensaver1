@@ -47,6 +47,8 @@ public class ICBGReportGenerator
   private static Logger log = Logger.getLogger(ICBGReportGenerator.class);
   private static final String REPORT_FILENAME = "report.xls";
   
+  private static final int MAX_ROWS_PER_SHEET = /*10 DEBUG ONLY!*/ 65000;
+  
   
   // public static methods
   
@@ -91,6 +93,8 @@ public class ICBGReportGenerator
   private HSSFWorkbook _report;
   private int _currentBioactivityRow = 1;
   private int _currentProtocolRow = 1;
+  private int _currentBioactivitySheetIndex = 1;
+  private HSSFSheet _currentBioactivitySheet;
   
   
   // public constructor and instance methods
@@ -122,7 +126,25 @@ public class ICBGReportGenerator
     _report = new HSSFWorkbook();
     HSSFSheet sheet;
     HSSFRow row;
-    sheet = _report.createSheet("BIOACTIVITY");
+    sheet = _report.createSheet("PROTOCOL");
+    row = sheet.createRow(0);
+    row.createCell((short) 0).setCellValue("PROTOCOL_ID");
+    row.createCell((short) 1).setCellValue("PROTOCOL_TYPE");
+    row.createCell((short) 2).setCellValue("PROTOCOL_DESCR");
+    row.createCell((short) 3).setCellValue("P_NOTE");
+    sheet = _report.createSheet("COMPOUND");
+    row = sheet.createRow(0);
+    row.createCell((short) 0).setCellValue("COMPOUND_ID");
+    row.createCell((short) 1).setCellValue("MATERIAL_ID");
+    row.createCell((short) 2).setCellValue("CL_EXTRA_1");
+    row.createCell((short) 3).setCellValue("MOLSTRUCTURE_FILE");
+  }
+  
+  private HSSFSheet createBioactivitySheet()
+  {
+   HSSFSheet sheet;
+    HSSFRow row;
+    sheet = _report.createSheet("BIOACTIVITY" + _currentBioactivitySheetIndex);
     row = sheet.createRow(0);
     row.createCell((short) 0).setCellValue("MATERIAL_ID");
     row.createCell((short) 1).setCellValue("PLATE_ID");
@@ -142,19 +164,8 @@ public class ICBGReportGenerator
     row.createCell((short) 15).setCellValue("NOTEBOOK");
     row.createCell((short) 16).setCellValue("COMMENTS");
     row.createCell((short) 17).setCellValue("EXTRA");
-    sheet = _report.createSheet("PROTOCOL");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("PROTOCOL_ID");
-    row.createCell((short) 1).setCellValue("PROTOCOL_TYPE");
-    row.createCell((short) 2).setCellValue("PROTOCOL_DESCR");
-    row.createCell((short) 3).setCellValue("P_NOTE");
-    sheet = _report.createSheet("COMPOUND");
-    row = sheet.createRow(0);
-    row.createCell((short) 0).setCellValue("COMPOUND_ID");
-    row.createCell((short) 1).setCellValue("MATERIAL_ID");
-    row.createCell((short) 2).setCellValue("CL_EXTRA_1");
-    row.createCell((short) 3).setCellValue("MOLSTRUCTURE_FILE");
-  }
+   return sheet;
+}
   
   private void parseScreenResults()
   {
@@ -163,6 +174,12 @@ public class ICBGReportGenerator
         List<ScreenResult> screenResults = _dao.findAllEntitiesOfType(ScreenResult.class);
         for (ScreenResult screenResult : screenResults) {
           parseScreenResult(screenResult);
+	// DEBUG ONLY!
+/*
+	  if (_currentBioactivitySheetIndex > 1) {
+		break;
+	  }
+*/
         }
       }
     });
@@ -207,6 +224,7 @@ public class ICBGReportGenerator
       rvts.add(numericalRVT);
     }
 
+    _currentBioactivitySheet = createBioactivitySheet();
     for (Integer plateNumber : _mapper.getMappedPlates()) {
       Set<WellKey> mappedKeys = new HashSet<WellKey>();
       Map<WellKey,ResultValue> scaledOrBooleanRVMap = null;
@@ -222,6 +240,10 @@ public class ICBGReportGenerator
         mappedKeys.addAll(numericalRVMap.keySet());
       }
       for (WellKey wellKey : mappedKeys) {
+/*		// DEBUG ONLY!
+		if (_currentBioactivityRow > 20) break;
+*/
+		
         ResultValue scaledOrBooleanRV = (scaledOrBooleanRVT == null) ? null :
           scaledOrBooleanRVMap.get(wellKey);
         ResultValue numericalRV = (numericalRVT == null) ? null :
@@ -291,7 +313,7 @@ public class ICBGReportGenerator
     String plateName = "P" + wellKey.getPlateNumber();
     String wellName = wellKey.getWellName();
     
-    HSSFSheet sheet = _report.getSheet("BIOACTIVITY");
+    HSSFSheet sheet = _currentBioactivitySheet;
     HSSFRow row = sheet.createRow(_currentBioactivityRow);
 
     row.createCell((short) 0).setCellValue(lq);
@@ -339,8 +361,12 @@ public class ICBGReportGenerator
     //row.createCell((short) 15).setCellValue("NOTEBOOK");
     //row.createCell((short) 16).setCellValue("COMMENTS");
     //row.createCell((short) 17).setCellValue("EXTRA");
-    _currentBioactivityRow++;
-    return true;
+   	if (_currentBioactivityRow++ % MAX_ROWS_PER_SHEET == 0) {
+	  ++_currentBioactivitySheetIndex;
+	  _currentBioactivitySheet = createBioactivitySheet();
+	  _currentBioactivityRow = 1;
+	}
+	return true;
   }
 
   private void printProtocolRow(AssayInfo assayInfo)

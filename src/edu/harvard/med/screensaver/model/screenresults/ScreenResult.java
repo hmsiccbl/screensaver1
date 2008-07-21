@@ -373,7 +373,13 @@ public class ScreenResult extends TimeStampedAbstractEntity
   {
     _plateNumbers.add(well.getPlateNumber());
     if (_wells.add(well)) {
-      well.addScreenResult(this);
+      // TODO: HACK: removing this update as it causes memory/performance
+      // problems when loading ScreenResults; fortunately, when ScreenResult is
+      // read in from database from a new Hibernate session, the in-memory
+      // associations will be correct; these in-memory associations will only be
+      // missing within the Hibernate session that was used to import the
+      // ScreenResult
+      //well.addScreenResult(this);
       return true;
     }
     return false;
