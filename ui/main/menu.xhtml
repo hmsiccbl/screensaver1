@@ -19,11 +19,11 @@
           title="Go to the Screensaver main page" />
         <t:htmlTag value="br" />
         <t:outputText id="version" value="#{menu.applicationVersion}"
-          styleClass="menuItem label"
+          styleClass="menuItem"
           title="The current version of Screensaver" />
         <t:outputText id="buildNumber"
           value="(#{menu.applicationBuildNumber})"
-          styleClass="menuItem label" visibleOnUserRole="developer"
+          styleClass="menuItem" visibleOnUserRole="developer"
           title="The build number" />
       </h:form>
 
@@ -31,11 +31,10 @@
 
       <t:panelGroup rendered="#{menu.authenticatedUser}">
         <h:form id="userForm">
-          <t:commandLink id="viewSelfCommand" action="#{userViewer.viewUser}">
+          <t:commandLink id="viewSelfCommand" action="#{userViewer.viewUser}" styleClass="menuItem userName">
             <f:param name="entityId" value="#{menu.screensaverUser.entityId}" />
             <t:outputText id="userName"
               value="#{menu.screensaverUser.fullNameFirstLast}"
-              styleClass="menuItem userName"
               title="The the logged in user (yes, you!)" />
           </t:commandLink>
           <t:div />
@@ -144,40 +143,37 @@
       <t:htmlTag value="hr" rendered="#{menu.authenticatedUser}" />
 
       <h:form id="findWellForm">
-        <t:commandButton action="#{wellFinder.findWell}"
-          id="findWellCommand" value="Go" styleClass="hiddenCommand"
-          rendered="#{menu.authenticatedUser}" />
-        <t:panelGrid columns="2"
+        <t:panelGrid columns="3"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}"
           title="Look up a library well by plate number and well name">
           <t:outputLabel id="plateNumberLabel" for="plateNumber"
-            value="Plate" styleClass="label" />
+            value="Plate" styleClass="menuItem" />
           <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
-            styleClass="label" />
+            styleClass="menuItem" />
+	  <t:outputText id="filler" value=""/>
           <t:inputText id="plateNumber"
             value="#{wellFinder.plateNumber}" size="5"
             styleClass="inputText" />
           <t:inputText id="wellName" value="#{wellFinder.wellName}"
             size="3" styleClass="inputText" />
+          <t:commandButton action="#{wellFinder.findWell}"
+            id="findWellCommand" value="Go" image="/images/arrow-next.png"
+            rendered="#{menu.authenticatedUser}" />
         </t:panelGrid>
       </h:form>
 
       <h:form id="screenerSearchForm"
         title="Search for a screener by name, matching a name pattern against 'Last, First' (use * as wildcard)">
-        <t:commandButton
-          action="#{screenerFinder.findScreenerByNamePattern}"
-          id="findScreenerCommand" value="Go"
-          rendered="#{menu.authenticatedUser}"
-          styleClass="hiddenCommand" />
         <t:panelGrid columns="1" styleClass="layoutPanel"
           rendered="#{menu.authenticatedUser &amp;&amp; menu.readAdmin}">
           <t:outputText id="screenerNamePatternLabel"
             for="screenerNamePattern" value="Screener Name"
-            styleClass="label" />
-          <t:panelGrid columns="3" styleClass="layoutPanel">
+            styleClass="menuItem" />
+          <t:panelGrid columns="4" styleClass="layoutPanel">
             <t:outputText value="Last" styleClass="submenuItem" />
             <t:outputText value="" />
             <t:outputText value="First" styleClass="submenuItem" />
+            <t:outputText value="" />
             <t:inputText id="screenerLastNamePattern"
               value="#{screenerFinder.lastNamePattern}" size="5"
               styleClass="inputText" />
@@ -185,20 +181,26 @@
             <t:inputText id="screenerFirstNamePattern"
               value="#{screenerFinder.firstNamePattern}" size="4"
               styleClass="inputText" />
+	     <t:commandButton
+	       action="#{screenerFinder.findScreenerByNamePattern}"
+	       id="findScreenerCommand" value="Go"
+	       image="/images/arrow-next.png"
+	       rendered="#{menu.authenticatedUser}" />
           </t:panelGrid>
         </t:panelGrid>
       </h:form>
 
       <h:form id="screensForm" title="Screen commands">
-        <t:panelGrid columns="1"
+        <t:panelGrid columns="2"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
-          <t:commandButton action="#{screenFinder.findScreen}"
-            id="findScreenCommand" value="Go" styleClass="hiddenCommand" />
           <t:outputLabel id="screenNumberLabel" for="screenNumber"
-            value="Screen #" styleClass="menuItem label" />
+            value="Screen #" styleClass="menuItem" />
+          <t:outputText value="" />
           <t:inputText id="screenNumber"
             value="#{screenFinder.screenNumber}" size="5"
             styleClass="inputText" />
+          <t:commandButton action="#{screenFinder.findScreen}"
+            id="findScreenCommand" value="Go" image="/images/arrow-next.png" />
           <!-- t:commandButton action="#{screenFinder.addLibraryScreening}"
             id="addLibraryScreening" value="Add Library Screening"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
@@ -212,19 +214,19 @@
 
       <h:form id="findCherryPickRequestForm"
         title="Look up a cherry pick request by cherry pick request number">
-        <t:commandButton
-          action="#{cherryPickRequestFinder.findCherryPickRequest}"
-          id="findCherryPickRequestCommand" value="Go"
-          rendered="#{menu.authenticatedUser}"
-          styleClass="hiddenCommand" />
-        <t:panelGrid columns="1"
+        <t:panelGrid columns="2"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
           <t:outputLabel id="cherryPickRequestNumberLabel"
             for="cherryPickRequestNumber" value="CPR #"
-            styleClass="menuItem label" />
+            styleClass="menuItem" />
+          <t:outputText value="" />
           <t:inputText id="cherryPickRequestNumber"
             value="#{cherryPickRequestFinder.cherryPickRequestNumber}"
             size="5" styleClass="inputText" />
+	  <t:commandButton
+	    action="#{cherryPickRequestFinder.findCherryPickRequest}"
+	    id="findCherryPickRequestCommand" value="Go" image="/images/arrow-next.png"
+	    rendered="#{menu.authenticatedUser}" />
         </t:panelGrid>
       </h:form>
 
