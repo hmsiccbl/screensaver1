@@ -291,6 +291,7 @@
       <bean
         class="edu.harvard.med.screensaver.ui.libraries.WellVolumeAdjustmentSearchResults">
         <constructor-arg ref="cherryPickRequestViewer" />
+        <constructor-arg ref="userViewer" />
         <constructor-arg ref="genericEntityDao" />
       </bean>
     </constructor-arg>
