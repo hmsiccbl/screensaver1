@@ -9,72 +9,79 @@
 
 <ui:composition template="/main/template.xhtml">
 
-	<ui:define name="body">
+  <ui:define name="body">
 
-		<t:outputText
-		  id="welcomeMessage"
-			value="Welcome to Screensaver, #{menu.screensaverUser.fullNameFirstLast}!"
-			styleClass="title" />
+    <t:outputText id="welcomeMessage"
+      value="Welcome to Screensaver, #{menu.screensaverUser.fullNameFirstLast}!"
+      styleClass="title" />
 
-		<div id="ie_detection_message" style="display: none; color: fuchsia;">
-		The Screensaver development team recommends the <a
-			href="www.mozilla.com">Mozilla Firefox Browser</a> (version 1.5 or
-		higher). While we work to support other browsers, it's not always
-		possible for us to test every feature across all browser types. <script
-			type="text/javascript">
+    <div id="ie_detection_message"
+      style="display: none; color: fuchsia;">The Screensaver
+    development team recommends the <a href="www.mozilla.com">Mozilla
+    Firefox Browser</a> (version 1.5 or higher). While we work to support
+    other browsers, it's not always possible for us to test every
+    feature across all browser types. <script type="text/javascript">
             if (! Array.every) { // if not firefox >=1.5
               document.getElementById("ie_detection_message").style.display = "block";
             }
           </script></div>
 
-		<p>To get started, try clicking some of the items in the left menu
-		bar. For a detailed description of what you can do, see our <a
-			href="../help/helpViewer.jsf">help</a> page. Here are a few highlights:</p>
-
-		<ul>
-			<li>Use "Browse Libraries" to view the contents of ICCB-L
-			compound and RNAi libraries, including structures, SMILES strings,
-			vendor information, and when possible, links to PubChem (or GenBank
-			for RNAi libraries).</li>
-			<t:htmlTag value="li" rendered="#{menu.screener || menu.readAdmin}">
-				Use "Find Wells" to search for information on a particular
-				set of wells, such as those that scored as positive (or potentially
-				positive) in your screen.
+    <t:div id="screenerWelcomeMessage" rendered="#{!menu.readAdmin}">
+      <ul>
+        <li>Use "Browse Libraries" to view the contents of ICCB-L
+        small molecule and RNAi libraries, including structures, SMILES
+        strings, vendor information, and links to PubChem, ChemBank, and
+        GenBank.</li>
+        <t:htmlTag value="li" rendered="#{menu.screener}">
+      Use "Find Wells" or "Find Reagents" to search for information on library reagents,
+      using ICCB-L library plate/well designations or vendor reagent identifiers,
+      respectively.
 			</t:htmlTag>
-			<li>Use "Browse Studies" to view the studies that have been
-			added to Screensaver. Studies associate biologically significant
-			annotations with library reagents.</li>
+        <t:htmlTag value="li"
+          rendered="#{menu.screener}">Use
+				"My Screens" to view your own screens and result
+				data, and "Browse Screens" to view basic information about other screens 
+        performed at ICCB-L. For your own screens, you can browse, filter, sort, 
+        and export your result data, and compare it to other public screen results 
+        and studies.  You can also view each screening data plate with a heat map 
+        viewer and export the screen result data as a spreadsheet.
         <ul>
-          <li><span class="new">New!</span>&#160;&#160;<b>Study 100002: "Annotations on Suitability of Compounds: G. Cuny &amp; K. Lee".</b></li>
-        </ul>
-			<t:htmlTag value="li" rendered="#{menu.screener || menu.readAdmin}">
-				"My Screens" permits access to your personal screen result
-				data, if it has been loaded into the database. We are endeavoring to
-				load all available screen result data, so if you find that your
-				screen's result data is not available for viewing, please contact <a
-					href="mailto:david_wrobel@hms.harvard.edu">David Wrobel</a> and we
-				will make it a priority. Among the more useful features are the
-				ability to view each screening data plate with a heat map viewer and
-				to download the screen result data as a spreadsheet. Note that you
-				will not be able to view screen results from any screens other than
-				your own unless they have been classified as "shared" by the
-				screener, in which case they are available for viewing. ICCB-L is in
-				the process of developing guidelines for data sharing. Please
-				contact <a href="mailto:caroline_shamu@hms.harvard.edu">Caroline
-				Shamu</a> or <a href="mailto:su_chiang@hms.harvard.edu">Su Chiang</a> if
-				you have any questions.</t:htmlTag>
-			<li>From "Data Downloads" you can download SD files for all
-			ICCB-L libraries, either as a single file or as individual library
-			files (note that natural product extracts do not have SD files or
-			structural information).</li>
-		</ul>
+            <li style="font-size: small">If your screen result
+            data is not shown, please contact <a
+              href="mailto:david_wrobel@hms.harvard.edu">David
+            Wrobel</a> and we will make it a priority to import your data.</li>
+            <li style="font-size: small">Note that you will
+            not be able to view screen results from any screens other
+            than your own unless they have been classified as "shared"
+            by the screener, in which case they are available for
+            viewing. ICCB-L is in the process of developing guidelines
+            for data sharing. Please contact <a
+              href="mailto:caroline_shamu@hms.harvard.edu">Caroline
+            Shamu</a> or <a href="mailto:su_chiang@hms.harvard.edu">Su
+            Chiang</a> if you have any questions.</li>
+          </ul>
+        </t:htmlTag>
+        <li>Use "Browse Studies" to view the studies that have been
+        added to Screensaver. Studies associate biologically significant
+        annotations with library reagents.</li>
+        <li>Use "Browse Lab Activities" to view the activities you
+        have performed at our facility.</li>
+        <li>Use "Browse Associates" to view the individuals you
+        have been working with, including your fellow lab members and
+        screen collaborators. Click on your account name (at the top of
+        the menu panel) to view your own information, including screens,
+        lab members, etc.</li>
+        <li>Use "Data Downloads" to download SD files for all
+        ICCB-L libraries, either as a single file or as individual
+        library files.</li>
+      </ul>
 
-		<p>The development team will be continuing to add features and
-		enhancements, so your questions and feedback are welcome! Please use
-		the feedback link at bottom of the page to contact the development
-		team.</p>
-
-	</ui:define>
+      <p style="font-weight: bold; font-style: italic">Questions?
+      Suggestions? Problems?<f:verbatim>&amp;nbsp;</f:verbatim><h:outputLink
+        value="#{appInfo.feedbackUrl}" title="Contact us!">Contact us!</h:outputLink>
+      </p>
+      </t:div>
+  </ui:define>
 
 </ui:composition>
 
