@@ -19,46 +19,45 @@
 
 <ui:composition>
 
-    <t:div rendered="#{!empty entity}">
+  <t:div rendered="#{!empty entity}">
 
-      <t:panelGrid columns="2" styleClass="layoutPanel"
-        style="width: 100%">
-        <t:panelGroup id="commandPanel">
-          <ss:editSaveCancel viewer="#{viewer}" />
-          <ui:insert name="entityCommands" />
-        </t:panelGroup>
+    <t:panelGrid columns="2" styleClass="layoutPanel"
+      style="width: 100%">
+      <t:panelGroup id="commandPanel">
+        <ss:editSaveCancel viewer="#{viewer}" />
+        <ui:insert name="entityCommands" />
+      </t:panelGroup>
 
-        <t:panelGrid columns="4" columnClasses="propertyColumn,column"
-          styleClass="layoutPanel" style="float: right">
-          <ss:property id="entityId" label="#"
-            description="The number used to uniquely identify the entity"
-            value="#{entity.entityId}" adminOnly="true" />
+      <t:panelGrid columns="4" columnClasses="propertyColumn,column"
+        styleClass="layoutPanel" style="float: right">
+        <ss:property id="entityId" label="#"
+          description="The number used to uniquely identify the entity"
+          value="#{entity.entityId}" adminOnly="true" />
 
-          <ss:property id="dateCreated" label="Created"
-            description="The date the entity was originally recorded in Screensaver"
-            value="#{entity.dateCreated}" type="Date" adminOnly="true" />
-        </t:panelGrid>
+        <ss:property id="dateCreated" label="Created"
+          description="The date the entity was originally recorded in Screensaver"
+          value="#{entity.dateCreated}" type="Date" adminOnly="true" />
+      </t:panelGrid>
+    </t:panelGrid>
+
+    <t:panelGrid id="leftAndRightSides" columns="2"
+      columnClasses="column,column"
+      styleClass="layoutPanel" style="width: 100%">
+
+      <t:panelGrid id="propertiesPanel" columns="2"
+        columnClasses="propertyLabelColumn,column"
+        styleClass="layoutPanel">
+        <ui:insert name="propertiesContent" />
       </t:panelGrid>
 
-      <t:panelGrid id="leftAndRightSides" columns="2"
-        columnClasses="fixedColumn500,greedyColumn" styleClass="layoutPanel"
-        style="width: 100%">
-
-        <t:panelGrid id="propertiesPanel" columns="2"
-          columnClasses="propertyLabelColumn,column"
-          styleClass="layoutPanel">
-          <ui:insert name="propertiesContent" />
-        </t:panelGrid>
-
-        <t:panelGrid id="tablesPanel" columns="1"
-          columnClasses="collectionTableColumn" styleClass="layoutPanel"
-          style="width: 100%">
-          <ui:insert name="tablesContent" />
-        </t:panelGrid>
+      <t:panelGrid id="tablesPanel" columns="1"
+        columnClasses="collectionTableColumn" styleClass="layoutPanel">
+        <ui:insert name="tablesContent" />
       </t:panelGrid>
+    </t:panelGrid>
 
-      <ui:insert name="footerContent" />
-    </t:div>
+    <ui:insert name="footerContent" />
+  </t:div>
 
 </ui:composition>
 

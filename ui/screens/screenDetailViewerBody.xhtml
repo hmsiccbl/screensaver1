@@ -26,7 +26,7 @@ TODO:
       styleClass="dataText adminOnly"
       title="Show or hide administrative fields for the screen" />
   </ui:define>
-  
+
   <ui:define name="propertiesContent">
     <ss:screenSummaryProperties screen="#{screenDetailViewer.screen}"
       editable="#{screenDetailViewer.editMode}">
@@ -551,7 +551,7 @@ TODO:
             preserveDataModel="false"
             rendered="#{!empty screenDetailViewer.screen.labActivities}"
             styleClass="standardTable" rowClasses="row1,row2"
-            columnClasses="column" headerClass="tableHeader">
+            columnClasses="numericColumn,fixedColumn100,fixedColumn100,fixedColumn200" headerClass="tableHeader">
             <t:column>
               <f:facet name="header">
                 <t:outputText value="#" />
@@ -613,7 +613,7 @@ TODO:
             preserveDataModel="false"
             rendered="#{!empty screenDetailViewer.screen.cherryPickRequests}"
             styleClass="standardTable" rowClasses="row1,row2"
-            columnClasses="column" headerClass="tableHeader">
+            columnClasses="numericColumn,fixedColumn100,fixedColumn200,column" headerClass="tableHeader">
             <t:column>
               <f:facet name="header">
                 <t:outputText value="#" />
