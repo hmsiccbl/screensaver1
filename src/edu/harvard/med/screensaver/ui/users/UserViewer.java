@@ -90,8 +90,11 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     }
   };
   private static final AffiliationCategory DEFAULT_NEW_LAB_AFFILIATION_CATEGORY = AffiliationCategory.HMS;
+  /** checklist item groups to show in user interface, per requirements */
   private static final List<ChecklistItemGroup> CHECKLIST_ITEM_GROUPS = Lists.newArrayList(ChecklistItemGroup.values());
   static { CHECKLIST_ITEM_GROUPS.remove(ChecklistItemGroup.LEGACY); }
+  /** roles to hide in user interface, per requirements */
+  private static final Set<ScreensaverUserRole> HIDDEN_ROLES = Sets.immutableSortedSet(ScreensaverUserRole.SCREENER);
 
   // instance data members
 
@@ -455,7 +458,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     if (_userRolesDataModel == null) {
       List<ScreensaverUserRole> userRoles = new ArrayList<ScreensaverUserRole>();
       userRoles.addAll(_user.getScreensaverUserRoles());
-      userRoles.remove(ScreensaverUserRole.SCREENER); // hide this implicit role, per requirements
+      userRoles.removeAll(HIDDEN_ROLES); 
       Collections.sort(userRoles, USER_ROLE_COMPARATOR);
       _userRolesDataModel = new ListDataModel(userRoles);
     }
@@ -467,7 +470,9 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     if (_newUserRole == null) {
       Collection<ScreensaverUserRole> candidateNewUserRoles = new TreeSet<ScreensaverUserRole>();
       for (ScreensaverUserRole userRole : ScreensaverUserRole.values()) {
-        if (!userRole.isAdministrative() && !_user.getScreensaverUserRoles().contains(userRole)) {
+        if (!userRole.isAdministrative() && 
+          !_user.getScreensaverUserRoles().contains(userRole) &&
+          !HIDDEN_ROLES.contains(userRole)) {
           candidateNewUserRoles.add(userRole);
         }
       }
