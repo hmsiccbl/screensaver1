@@ -87,6 +87,11 @@ form {
   color: graytext;
 }
 
+.primaryPropertyValue {
+  font-family: sans-serif;
+  font-size: medium;
+}
+
 .adminOnly {
   color: maroon;
 }
@@ -208,7 +213,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   display: none;
 }
 
-.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.column500,.greedyColumn,.collectionTableColumn
+.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.fixedColumn300,.greedyColumn,.collectionTableColumn
   {
   vertical-align: top;
   border-style: none;
@@ -218,8 +223,20 @@ a.heatMapValue:link,a.heatMapValue:visited {
   padding-right: 3px;
 }
 
-.column500 {
+.fixedColumn500 {
   width: 300px;
+}
+
+.fixedColumn300 {
+  width: 300px;
+}
+
+.fixedColumn200 {
+  width: 200px;
+}
+
+.fixedColumn100 {
+  width: 100px;
 }
 
 /* table columns that contain text should have a min width to make text readable (not too vertical) */
@@ -331,15 +348,14 @@ a.heatMapValue:link,a.heatMapValue:visited {
 .menuAndContent {
   /* using fixed table layout prevents horiz scrollbar to appear on IE when content column width is at minimum */
   /*	table-layout: fixed;*/
-  
+
 }
 
 .menuColumn,.contentColumn {
   vertical-align: top;
 }
 
-.menuColumn {
-/*  background: transparent;*/
+.menuColumn { /*  background: transparent;*/
   color: white;
   font-size: small;
   /* prevents menu from consuming 50% width (with content panel consuming other 50%) on IE */
@@ -362,13 +378,15 @@ a.heatMapValue:link,a.heatMapValue:visited {
   font-weight: bold;
 }
 
-a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited {
+a.menuItem:link,a.menuItem:visited,a.menuItemActive:link,a.menuItemActive:visited,a.submenuItem:link,a.submenuItem:visited,a.submenuItemActive:link,a.submenuItemActive:visited
+  {
   color: white;
   text-decoration: none;
   vertical-align: bottom;
 }
 
-a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:hover {
+a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:hover
+  {
   color: inherit;
   text-decoration: underline;
 }
@@ -429,11 +447,11 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 }
 
 .activeTab {
-  
+
 }
 
 .inactiveTab {
-  
+
 }
 
 .newsDate {

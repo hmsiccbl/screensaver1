@@ -17,6 +17,7 @@
 	     - editable: boolean, (optional, defaults to false)
 	     - rendered: boolean, (optional, defaults to true)
        - adminOnly: boolean (optional, defaults to false)
+       - primary: boolean (optional, defaults to false)
 	     - required: boolean, (optional, defaults to false)
 	     - editWidth
 	     - editHeight ('Textarea' type only)
@@ -40,15 +41,15 @@
 	</t:div>
 	<t:div rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}">
 		<ui:insert name="valueHeader" />
-		<t:div rendered="#{!editable}">
+		<t:div rendered="#{!editable}" styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}">
 			<ui:insert name="data">
-				<t:outputText id="#{id}#{type}Value" value="#{value}"
-					rendered="#{type != 'Textarea'}" styleClass="propertyValue"
-					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
-				<t:inputTextarea id="#{id}#{type}Value1"
-					rendered="#{type == 'Textarea'}" value="#{value}" readonly="true"
-					cols="#{editWidth}" rows="#{editHeight}" styleClass="propertyValue" />
-			</ui:insert>
+        <t:outputText id="#{id}#{type}Value" value="#{value}"
+          rendered="#{type != 'Textarea'}"
+          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
+        <t:inputTextarea id="#{id}#{type}Value1"
+          rendered="#{type == 'Textarea'}" value="#{value}"
+          readonly="true" cols="#{editWidth}" rows="#{editHeight}" />
+      </ui:insert>
 		</t:div>
 		<t:div rendered="#{editable}">
 			<ui:insert name="editableData">

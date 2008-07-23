@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/model/users/ChecklistItem.java $
+// $Id: ChecklistItem.java 2562 2008-07-15 15:17:04Z ant4 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
@@ -14,10 +14,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -29,12 +32,13 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
  * for each ChecklistItem that is defined. A given ChecklistItem may be
  * "expirable", in which case multiple ChecklistItemEvents may be exist
  * for a user, where each pair activates and then expires the ChecklistItem.
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @org.hibernate.annotations.Proxy
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={"checklistItemGroup", "orderStatistic"}) })
 public class ChecklistItem extends AbstractEntity implements Comparable<ChecklistItem>
 {
 
@@ -48,28 +52,31 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
 
   private Integer _checklistItemId;
   private Integer _version;
-  private Integer _orderStatistic;
   private String _itemName;
   private boolean _isExpirable;
+  private ChecklistItemGroup _group;
+  private Integer _orderStatistic;
 
 
   // public constructor
 
   /**
    * Construct an initialized <code>ChecklistItem</code>.
-   * 
-   * @param orderStatistic the order statistic
    * @param itemName the item name
    * @param isExpirable whether this type of checklist item can be activated and
    *          then expired (repeatedly)
+   * @param the group it belongs to
+   * @param orderStatistic the order of the item within its group, 1-based
    */
-  public ChecklistItem(Integer orderStatistic,
-                       String itemName,
-                       boolean isExpirable)
+  public ChecklistItem(String itemName,
+                       boolean isExpirable,
+                       ChecklistItemGroup group,
+                       Integer orderStatistic)
   {
-    _orderStatistic = orderStatistic;
     _itemName = itemName;
     _isExpirable = isExpirable;
+    _group = group;
+    _orderStatistic = orderStatistic;
   }
 
 
@@ -83,7 +90,11 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
 
   public int compareTo(ChecklistItem other)
   {
-    return getOrderStatistic().compareTo(other.getOrderStatistic());
+    int result = getChecklistItemGroup().compareTo(other.getChecklistItemGroup());
+    if (result == 0) {
+      result = getOrderStatistic().compareTo(other.getOrderStatistic());
+    }
+    return result;
   }
 
   @Override
@@ -95,7 +106,7 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
 
   /**
    * Get the id for the checklist item.
-   * 
+   *
    * @return the id for the checklist item
    */
   @Id
@@ -108,10 +119,10 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
 
   /**
    * Get the order statistic.
-   * 
+   *
    * @return the order statistic
    */
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false)
   @org.hibernate.annotations.Immutable
   public Integer getOrderStatistic()
   {
@@ -120,7 +131,7 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
 
   /**
    * Get the item name.
-   * 
+   *
    * @return the item name
    */
   @Column(nullable = false, unique = true)
@@ -142,6 +153,13 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
     return _isExpirable;
   }
 
+  @Column(nullable=false, updatable=false)
+  @Immutable
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.users.ChecklistItemGroup$UserType")
+  public ChecklistItemGroup getChecklistItemGroup()
+  {
+    return _group;
+  }
 
   // protected constructor
 
@@ -202,5 +220,10 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
   private void setExpirable(boolean isExpirable)
   {
     _isExpirable = isExpirable;
+  }
+
+  private void setChecklistItemGroup(ChecklistItemGroup group)
+  {
+    _group = group;
   }
 }

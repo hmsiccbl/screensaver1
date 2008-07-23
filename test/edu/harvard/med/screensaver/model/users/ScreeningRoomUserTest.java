@@ -264,8 +264,8 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        genericEntityDao.persistEntity(new ChecklistItem(1, "trained", false));
-        genericEntityDao.persistEntity(new ChecklistItem(2, "lab access", true));
+        genericEntityDao.persistEntity(new ChecklistItem("trained", false, ChecklistItemGroup.NON_HARVARD_SCREENERS, 1));
+        genericEntityDao.persistEntity(new ChecklistItem("lab access", true, ChecklistItemGroup.NON_HARVARD_SCREENERS, 2));
         AdministratorUser admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
         ScreeningRoomUser user = new ScreeningRoomUser("Lab", "User", "lab_user@hms.harvard.edu");
         genericEntityDao.persistEntity(admin);

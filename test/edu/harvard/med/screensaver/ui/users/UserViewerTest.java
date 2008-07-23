@@ -22,6 +22,7 @@ import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
+import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
@@ -63,26 +64,29 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        genericEntityDao.persistEntity(new ChecklistItem(1, "trained", false));
-        genericEntityDao.persistEntity(new ChecklistItem(2, "ID assigned", true));
-        genericEntityDao.persistEntity(new ChecklistItem(3, "lab access", true));
+        genericEntityDao.persistEntity(new ChecklistItem("lab access", true, ChecklistItemGroup.FORMS, 1));
+        genericEntityDao.persistEntity(new ChecklistItem("trained", false, ChecklistItemGroup.NON_HARVARD_SCREENERS, 1));
+        genericEntityDao.persistEntity(new ChecklistItem("ID assigned", true, ChecklistItemGroup.NON_HARVARD_SCREENERS, 2));
+        genericEntityDao.persistEntity(new ChecklistItem("legacy", true, ChecklistItemGroup.LEGACY, 1));
         ScreeningRoomUser user = new ScreeningRoomUser("Test", "User", "test_user@hms.harvard.edu");
         genericEntityDao.persistEntity(user);
         genericEntityDao.flush();
         userViewer.setUser(user);
       }
     });
-    DataModel checklistItemDataModel = userViewer.getChecklistItemsDataModel();
-    assertEquals(3, checklistItemDataModel.getRowCount());
-    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> data = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModel.getWrappedData();
-    assertEquals("trained", data.get(0).getKey().getItemName());
-    assertNull("trained", data.get(0).getValue());
-    assertEquals("ID assigned", data.get(1).getKey().getItemName());
-    assertNull("ID assigned", data.get(1).getValue());
-    assertEquals("trained", data.get(0).getKey().getItemName());
-    assertNull("trained", data.get(0).getValue());
-    assertEquals("lab access", data.get(2).getKey().getItemName());
-    assertNull("lab access", data.get(2).getValue());
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItemsDataModelMap();
+    assertEquals(4, checklistItemDataModels.size());
+    assertFalse(checklistItemDataModels.containsKey(ChecklistItemGroup.LEGACY));
+    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group1 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels.get(ChecklistItemGroup.FORMS).getWrappedData();
+    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group2 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels.get(ChecklistItemGroup.NON_HARVARD_SCREENERS).getWrappedData();
+    assertNotNull(group1);
+    assertNotNull(group2);
+    assertEquals("lab access", group1.get(0).getKey().getItemName());
+    assertNull("lab access", group1.get(0).getValue());
+    assertEquals("trained", group2.get(0).getKey().getItemName());
+    assertNull("trained", group2.get(0).getValue());
+    assertEquals("ID assigned", group2.get(1).getKey().getItemName());
+    assertNull("ID assigned", group2.get(1).getValue());
   }
   
   public void testPopulatedChecklistItemsDataModel()
@@ -95,9 +99,9 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
       {
         ScreeningRoomUser user = new ScreeningRoomUser("Test", "User", "test_user@hms.harvard.edu");
         genericEntityDao.persistEntity(user);
-        ChecklistItem checklistItemType = new ChecklistItem(2, "ID assigned", true);
+        ChecklistItem checklistItemType = new ChecklistItem("ID assigned", true, ChecklistItemGroup.NON_HARVARD_SCREENERS, 2);
         genericEntityDao.persistEntity(checklistItemType);
-        genericEntityDao.persistEntity(new ChecklistItem(1, "trained", false));
+        genericEntityDao.persistEntity(new ChecklistItem("trained", false, ChecklistItemGroup.NON_HARVARD_SCREENERS, 1));
         ChecklistItemEvent item = 
           user.createChecklistItemActivationEvent(checklistItemType,
                                              today,
@@ -109,14 +113,14 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
         userViewer.setUser(user);
       }
     });
-    DataModel checklistItemDataModel = userViewer.getChecklistItemsDataModel();
-    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> data = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModel.getWrappedData();
-    assertEquals("trained", data.get(0).getKey().getItemName());
-    assertNull("trained", data.get(0).getValue());
-    assertEquals("ID assigned", data.get(1).getKey().getItemName());
-    assertEquals(today, data.get(1).getValue().getDatePerformed());
-    assertEquals("Admin User", data.get(1).getValue().getEntryActivity().getPerformedBy().getFullNameFirstLast());
-    assertFalse(data.get(1).getValue().isExpiration());
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItemsDataModelMap();
+    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels.get(ChecklistItemGroup.NON_HARVARD_SCREENERS).getWrappedData();
+    assertEquals("trained", group.get(0).getKey().getItemName());
+    assertNull("trained", group.get(0).getValue());
+    assertEquals("ID assigned", group.get(1).getKey().getItemName());
+    assertEquals(today, group.get(1).getValue().getDatePerformed());
+    assertEquals("Admin User", group.get(1).getValue().getEntryActivity().getPerformedBy().getFullNameFirstLast());
+    assertFalse(group.get(1).getValue().isExpiration());
     
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -132,12 +136,12 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
         userViewer.setUser(activation.getScreeningRoomUser());
       }
     });
-    DataModel checklistItemDataModel2 = userViewer.getChecklistItemsDataModel();
-    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> data2 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModel2.getWrappedData();
-    assertEquals("ID assigned", data2.get(1).getKey().getItemName());
-    assertEquals(today, data2.get(1).getValue().getDatePerformed());
-    assertEquals("Admin User", data2.get(1).getValue().getEntryActivity().getPerformedBy().getFullNameFirstLast());
-    assertTrue(data2.get(1).getValue().isExpiration());
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels2 = userViewer.getChecklistItemsDataModelMap();
+    final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group2 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels2.get(ChecklistItemGroup.NON_HARVARD_SCREENERS).getWrappedData();
+    assertEquals("ID assigned", group2.get(1).getKey().getItemName());
+    assertEquals(today, group2.get(1).getValue().getDatePerformed());
+    assertEquals("Admin User", group2.get(1).getValue().getEntryActivity().getPerformedBy().getFullNameFirstLast());
+    assertTrue(group2.get(1).getValue().isExpiration());
   }
 
   // private methods

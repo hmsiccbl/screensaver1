@@ -29,7 +29,7 @@
 		<ss:property id="fullName" label="Name"
 			description="The name and email of the user"
 			value="#{userViewer.user.fullNameFirstLast}" required="true"
-			rendered="#{!userViewer.editMode}" />
+			rendered="#{!userViewer.editMode}" primary="true"/>
 
 		<ss:property id="firstName" label="First Name"
 			description="The user's first name"
@@ -42,6 +42,63 @@
 			value="#{userViewer.user.lastName}" required="true"
 			rendered="#{userViewer.editMode}" editable="#{userViewer.editable}"
 			editWidth="60" />
+
+    <ss:property id="labName" label="Lab Name"
+      description="The name of the user's current lab"
+      value="#{userViewer.user.lab.labName}" primary="true"
+      editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}">
+      <ui:define name="data">
+        <ss:labName user="#{userViewer.user}" />
+      </ui:define>
+      <ui:define name="editableData">
+        <t:selectOneMenu id="labNameMenu"
+          value="#{userViewer.labName.value}"
+          styleClass="inputText selectMenu">
+          <f:selectItems value="#{userViewer.labName.selectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="labAffiliation" label="#{'Lab Affiliation'}"
+      description="The organization the user is affiliated with (usually via his/her lab)"
+      value="#{userViewer.user.lab.labAffiliation.affiliationName}"
+      rendered="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}"
+      editable="true">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="labAffiliationMenu"
+          value="#{userViewer.labAffiliation.value}"
+          styleClass="inputText selectMenu">
+          <f:selectItems value="#{userViewer.labAffiliation.selectItems}" />
+        </t:selectOneMenu>
+
+        <t:div id="newLabAffiliationDiv" styleClass="groupingPanel">
+          <t:panelGrid columns="1" columnClasses="column">
+            <ss:propertyGroup id="newLabAffiliationGroup"
+              label="New Affiliation (optional)">
+              <ss:property id="newLabAffiliationName" label="Name"
+                description="The name of the new affiliation to be created"
+                value="#{userViewer.newLabAffiliation.affiliationName}"
+                editable="true" editWidth="60" />
+              <ss:property id="newLabAffiliationCategory" label="Category"
+                description="The name of the new affiliation to be created"
+                value="#{userViewer.newLabAffiliation.affiliationCategory}"
+                editable="true">
+                <ui:define name="editableData">
+                  <t:selectOneMenu id="affiliationCategoryMenu" value="#{value}"
+                    styleClass="inputText selectMenu"
+                    converter="#{affiliationCategoryConverter}">
+                    <f:selectItems
+                      value="#{userViewer.affiliationCategorySelections}" />
+                  </t:selectOneMenu>
+                </ui:define>
+              </ss:property>
+            </ss:propertyGroup>
+          </t:panelGrid>
+          <t:commandButton id="addNewLabAffiliation" value="Add"
+            action="#{userViewer.addNewLabAffiliation}" />
+        </t:div>
+      </ui:define>
+    </ss:property>
 
 		<ss:property id="email" label="Email"
 			description="The user's email address "
@@ -98,62 +155,38 @@
 			</ui:define>
 		</ss:property>
 
-		<ss:property id="labName" label="Lab Name"
-			description="The name of the user's current lab"
-			value="#{userViewer.user.lab.labName}"
-			editable="#{userViewer.editMode &amp;&amp; !userViewer.user.headOfLab}">
-			<ui:define name="data">
-				<ss:labName user="#{userViewer.user}" />
-			</ui:define>
-			<ui:define name="editableData">
-				<t:selectOneMenu id="labNameMenu"
-					value="#{userViewer.labName.value}"
-					styleClass="inputText selectMenu">
-					<f:selectItems value="#{userViewer.labName.selectItems}" />
-				</t:selectOneMenu>
-			</ui:define>
-		</ss:property>
-
-		<ss:property id="labAffiliation" label="#{'Lab Affiliation'}"
-			description="The organization the user is affiliated with (usually via his/her lab)"
-			value="#{userViewer.user.lab.labAffiliation.affiliationName}"
-			rendered="#{userViewer.editMode &amp;&amp; userViewer.user.headOfLab}"
-			editable="true">
-			<ui:define name="editableData">
-				<t:selectOneMenu id="labAffiliationMenu"
-					value="#{userViewer.labAffiliation.value}"
-					styleClass="inputText selectMenu">
-					<f:selectItems value="#{userViewer.labAffiliation.selectItems}" />
-				</t:selectOneMenu>
-
-				<t:div id="newLabAffiliationDiv" styleClass="groupingPanel">
-					<t:panelGrid columns="1" columnClasses="column">
-						<ss:propertyGroup id="newLabAffiliationGroup"
-							label="New Affiliation (optional)">
-							<ss:property id="newLabAffiliationName" label="Name"
-								description="The name of the new affiliation to be created"
-								value="#{userViewer.newLabAffiliation.affiliationName}"
-								editable="true" editWidth="60" />
-							<ss:property id="newLabAffiliationCategory" label="Category"
-								description="The name of the new affiliation to be created"
-								value="#{userViewer.newLabAffiliation.affiliationCategory}"
-								editable="true">
-								<ui:define name="editableData">
-									<t:selectOneMenu id="affiliationCategoryMenu" value="#{value}"
-										styleClass="inputText selectMenu"
-										converter="#{affiliationCategoryConverter}">
-										<f:selectItems
-											value="#{userViewer.affiliationCategorySelections}" />
-									</t:selectOneMenu>
-								</ui:define>
-							</ss:property>
-						</ss:propertyGroup>
-					</t:panelGrid>
-					<t:commandButton id="addNewLabAffiliation" value="Add"
-						action="#{userViewer.addNewLabAffiliation}" />
-				</t:div>
-			</ui:define>
-		</ss:property>
+    <ss:property id="roles" label="Roles"
+      description="The roles of this user"
+      value="#{userViewer.user.screensaverUserRoles}"
+      rendered="#{userViewer.readAdmin}">
+      <ui:define name="data">
+        <ss:collectionTable id="rolesTable"
+          editable="#{userViewer.editMode}"
+          dataModel="#{userViewer.userRolesDataModel}"
+          actionBean="#{userViewer}" addAction="addUserRole"
+          deleteAction="deleteUserRole">
+          <ui:define name="columns">
+            <t:column>
+              <t:outputText value="#{element.displayableRoleName}"
+                styleClass="dataText #{element.roleName == 'nonScreeningUser' ? 'eyeCatcher' : ''}" />
+            </t:column>
+          </ui:define>
+          <ui:define name="addProperties">
+            <t:panelGrid columns="2">
+              <ss:property id="newrole" label="Role" editable="true">
+                <ui:define name="editableData">
+                  <t:selectOneMenu id="newUserRole"
+                    value="#{userViewer.newUserRole.value}"
+                    styleClass="inputText selectMenu">
+                    <f:selectItems value="#{userViewer.newUserRole.selectItems}" />
+                  </t:selectOneMenu>
+                </ui:define>
+              </ss:property>
+            </t:panelGrid>
+          </ui:define>
+        </ss:collectionTable>
+      </ui:define>
+    </ss:property>
 
 		<ss:property id="labMembers" label="Lab Members"
 			description="The other members of the lab this user belongs to, including the lab head"
@@ -205,91 +238,73 @@
 				<t:collapsiblePanel var="isChecklistItemsCollapsed"
 					value="#{userViewer.checklistItemsCollapsed}">
 					<f:facet name="header">
-						<t:headerLink immediate="true">
-							<t:outputText id="checklistItemsToggleText"
-								value="#{isChecklistItemsCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-								styleClass="dataText" />
-						</t:headerLink>
-					</f:facet>
-					<ss:collectionTable id="checklistItemsTable"
-						dataModel="#{userViewer.checklistItemsDataModel}">
-						<ui:define name="columns">
-							<ss:textColumn columnName="Item" description="The checklist item"
-								cellValue="#{element.key.itemName}" />
-							<ss:textColumn columnName="Status"
-								description="Checklist item status"
-								cellValue="#{empty element.value ? (element.key.expirable ? 'Not yet activated' : 'Pending') : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')}" />
-							<ss:textColumn columnName="Date"
-								description="The date the checklist item event was performed"
-								cellValue="#{empty element.value ? null : element.value.datePerformed}" />
-							<t:column id="enteredByColumn">
-								<f:facet name="header">
-									<ss:popup popupText="Entered By"
-										description="The administrator that recorded this checklist item event"
-										value="#{columnName}" />
-								</f:facet>
-								<ui:insert name="content">
-									<ss:user showEmail="false"
-										user="#{empty element.value ? null : element.value.entryActivity.performedBy}" />
-								</ui:insert>
-							</t:column>
-							<t:column columnName="Action"
-								description="Actions to update the checklist item"
-								rendered="#{userViewer.editMode}">
-								<t:inputText id="newChecklistItemDatePerformedField"
-									value="#{userViewer.newChecklistItemDatePerformed[rowIndex]}"
-									rendered="#{element.key.expirable || empty element.value}"
-									size="10" styleClass="inputText" converter="#{dateConverter}" />
-								<t:commandButton id="activateChecklistItemCommand"
-									rendered="#{element.key.expirable &amp;&amp; (empty element.value || element.value.expiration)}"
-									value="Activate" action="#{userViewer.checklistItemActivated}"
-									styleClass="command" />
-								<t:commandButton id="deactivateChecklistItemCommand"
-									rendered="#{element.key.expirable  &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration)}"
-									value="Deactivate"
-									action="#{userViewer.checklistItemDeactivated}"
-									styleClass="command" />
-								<t:commandButton id="completedChecklistItemCommand"
-									rendered="#{!element.key.expirable &amp;&amp; empty element.value}"
-									value="Completed" action="#{userViewer.checklistItemCompleted}"
-									styleClass="command" />
-								</t:column>
-						</ui:define>
-					</ss:collectionTable>
-				</t:collapsiblePanel>
-			</ui:define>
-		</ss:property>
-
-		<ss:property id="roles" label="Roles"
-			description="The roles of this user"
-			value="#{userViewer.user.screensaverUserRoles}"
-			rendered="#{userViewer.readAdmin}">
-			<ui:define name="data">
-				<ss:collectionTable id="rolesTable"
-					editable="#{userViewer.editMode}"
-					dataModel="#{userViewer.userRolesDataModel}"
-					actionBean="#{userViewer}" addAction="addUserRole"
-					deleteAction="deleteUserRole">
-					<ui:define name="columns">
-						<t:column>
-							<t:outputText value="#{element.displayableRoleName}"
-								styleClass="dataText #{element.roleName == 'nonScreeningUser' ? 'eyeCatcher' : ''}" />
-						</t:column>
-					</ui:define>
-					<ui:define name="addProperties">
-						<t:panelGrid columns="2">
-							<ss:property id="newrole" label="Role" editable="true">
-								<ui:define name="editableData">
-									<t:selectOneMenu id="newUserRole"
-										value="#{userViewer.newUserRole.value}"
-										styleClass="inputText selectMenu">
-										<f:selectItems value="#{userViewer.newUserRole.selectItems}" />
-									</t:selectOneMenu>
-								</ui:define>
-							</ss:property>
-						</t:panelGrid>
-					</ui:define>
-				</ss:collectionTable>
+            <t:headerLink immediate="true">
+              <t:outputText id="checklistItemsToggleText"
+                value="#{isChecklistItemsCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+                styleClass="dataText" />
+            </t:headerLink>
+          </f:facet>
+          <ui:repeat value="#{userViewer.checklistItemGroups}"
+            var="group">
+            <t:outputText value="#{group}" styleClass="propertyLabel" />
+            <ss:collectionTable id="checklistItemsTable"
+              dataModel="#{userViewer.checklistItemsDataModelMap[group]}"
+              columnClasses="fixedColumn200,fixedColumn100,fixedColumn100,fixedColumn100">
+              <ui:define name="columns">
+                <ss:textColumn columnName="Item"
+                  description="The checklist item"
+                  cellValue="#{element.key.itemName}" />
+                <t:column id="statusColumn">
+                  <f:facet name="header">
+                    <ss:popup value="Status"
+                      popupText="The checklist item status" />
+                  </f:facet>
+                  <t:outputText
+                    value="#{empty element.value ? 'Not Completed' : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')}"
+                    styleClass="dataText #{empty element.value || element.value.expiration ? 'subdued' : 'eyeCatcher'}" />
+                </t:column>
+                <ss:textColumn columnName="Date"
+                  description="The date the checklist item event was performed"
+                  cellValue="#{empty element.value ? null : element.value.datePerformed}" />
+                <t:column id="enteredByColumn">
+                  <f:facet name="header">
+                    <ss:popup popupText="The administrator that recorded this checklist item event"
+                      value="Entered By" >
+                      </ss:popup>
+                  </f:facet>
+                  <ss:user showEmail="false"
+                    user="#{empty element.value ? null : element.value.entryActivity.performedBy}" />
+                </t:column>
+                <t:column columnName="Action"
+                  description="Actions to update the checklist item"
+                  rendered="#{userViewer.editMode}">
+                  <t:panelGrid columns="2">
+                    <t:inputText id="newChecklistItemDatePerformedField"
+                      value="#{userViewer.newChecklistItemDatePerformed[rowIndex]}"
+                      rendered="#{element.key.expirable || empty element.value}"
+                      size="8" styleClass="inputText"
+                      converter="#{dateConverter}" />
+                    <t:commandButton id="activateChecklistItemCommand"
+                      rendered="#{element.key.expirable &amp;&amp; (empty element.value || element.value.expiration)}"
+                      value="Activate"
+                      action="#{userViewer.checklistItemActivated}"
+                      styleClass="command" />
+                    <t:commandButton id="deactivateChecklistItemCommand"
+                      rendered="#{element.key.expirable  &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration)}"
+                      value="Deactivate"
+                      action="#{userViewer.checklistItemDeactivated}"
+                      styleClass="command" />
+                    <t:commandButton id="completedChecklistItemCommand"
+                      rendered="#{!element.key.expirable &amp;&amp; empty element.value}"
+                      value="Completed"
+                      action="#{userViewer.checklistItemCompleted}"
+                      styleClass="command" />
+                  </t:panelGrid>
+                </t:column>
+              </ui:define>
+            </ss:collectionTable>
+          </ui:repeat>
+        </t:collapsiblePanel>
 			</ui:define>
 		</ss:property>
 

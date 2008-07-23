@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
+import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -50,39 +51,32 @@ public class UserSynchronizer
   private static Logger log = Logger.getLogger(UserSynchronizer.class);
   private static Map<String,ChecklistItem> CHECKLIST_ITEM_TYPE_MAP = new HashMap<String,ChecklistItem>();
   static {
-    CHECKLIST_ITEM_TYPE_MAP.put("Data sharing agreement signed",
-                                new ChecklistItem(1, "Data sharing agreement signed", false));
-    CHECKLIST_ITEM_TYPE_MAP.put("ID submitted for access to screening room",
-                                new ChecklistItem(5, "ID submitted for access to screening room", true));
-    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account set up",
-                                new ChecklistItem(7, "ICCB-L/NSRB server account set up (general account)", true));
-    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account requested",
-                                new ChecklistItem(8, "Historical - ICCB server account requested", true));
     CHECKLIST_ITEM_TYPE_MAP.put("Added to ICCB screening users list",
-                                new ChecklistItem(9, "Added to ICCB-L/NSRB screening users list", true));
-//    CHECKLIST_ITEM_TYPE_MAP.put(
-//      "Added to autoscope users list",
-//      null);
-//    CHECKLIST_ITEM_TYPE_MAP.put(
-//      "Added to PI email list",
-//      null);
+                                new ChecklistItem("Added to ICCB-L/NSRB email list", true, ChecklistItemGroup.MAILING_LISTS_AND_WIKIS, 1));
+    CHECKLIST_ITEM_TYPE_MAP.put("ID submitted for access to screening room",
+                                new ChecklistItem("ID submitted for access to screening room", true, ChecklistItemGroup.MAILING_LISTS_AND_WIKIS, 6));
+    CHECKLIST_ITEM_TYPE_MAP.put("Data sharing agreement signed",
+                                new ChecklistItem("Data sharing agreement signed", false, ChecklistItemGroup.FORMS, 1));
+    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account set up",
+                                new ChecklistItem("Historical - ICCB-L/NSRB server account set up (general account)", true, ChecklistItemGroup.LEGACY, 1));
+    CHECKLIST_ITEM_TYPE_MAP.put("ICCB server account requested",
+                                new ChecklistItem("Historical - ICCB server account requested", true, ChecklistItemGroup.LEGACY, 2));
   }
   private static final ChecklistItem[] NON_SCREENDB_CHECKLIST_ITEM_TYPE_NAMES = {
-    new ChecklistItem(2, "Non-HMS Biosafety Training Form on File", false),
-    new ChecklistItem(3, "Invited user eCommons account requested", false),
-    new ChecklistItem(4, "Temporary ID requested", false),
-    new ChecklistItem(6, "Screener given a copy of 'What Every New Screener Needs to Know'", false),
-    new ChecklistItem(10, "Added to users email list", true),
-    new ChecklistItem(11, "Added to RNAi email list", true),
-    new ChecklistItem(12, "Granted RNAi wiki access", true),
-    new ChecklistItem(13, "Granted QPCR wiki access", true),
-    new ChecklistItem(14, "ID submitted for C-607 access", false),
-    new ChecklistItem(15, "ICCB-L/NSRB image file server access set up", true),
-    new ChecklistItem(16, "Image Xpress Micro Training", false),
-    new ChecklistItem(17, "CellWoRx training", false),
-    new ChecklistItem(18, "Autoscope training", false),
-    new ChecklistItem(19, "Image Analysis I training", false),
-    new ChecklistItem(20, "Evotech Opera Training", false),
+    new ChecklistItem("Added to RNAi email list", true, ChecklistItemGroup.MAILING_LISTS_AND_WIKIS, 2),
+    new ChecklistItem("Added to Imaging email list", true, ChecklistItemGroup.MAILING_LISTS_AND_WIKIS, 3),
+    new ChecklistItem("RNAi wiki access set up", true, ChecklistItemGroup.MAILING_LISTS_AND_WIKIS, 4),
+    new ChecklistItem("QPCR wiki access set up", true, ChecklistItemGroup.MAILING_LISTS_AND_WIKIS, 5),
+    new ChecklistItem("Non-HMS Biosafety Training Form on File", false, ChecklistItemGroup.FORMS, 2),
+    new ChecklistItem("Screener given a copy of 'What Every New Screener Needs to Know'", false, ChecklistItemGroup.FORMS, 3),
+    new ChecklistItem("Invited user eCommons account requested", false, ChecklistItemGroup.NON_HARVARD_SCREENERS, 1),
+    new ChecklistItem("Temporary ID requested", false, ChecklistItemGroup.NON_HARVARD_SCREENERS, 2),
+    new ChecklistItem("ID submitted for C-607 access", false, ChecklistItemGroup.IMAGING, 1),
+    new ChecklistItem("Image Xpress Micro Training", false, ChecklistItemGroup.IMAGING, 2),
+    new ChecklistItem("CellWoRx training", false, ChecklistItemGroup.IMAGING, 3),
+    new ChecklistItem("Opera Training", false, ChecklistItemGroup.IMAGING, 4),
+    new ChecklistItem("Image Analysis training", false, ChecklistItemGroup.IMAGING, 5),
+    new ChecklistItem("ICCB-L/NSRB image file server access set up", true, ChecklistItemGroup.IMAGING, 6),
     
   };
   
@@ -461,6 +455,9 @@ public class UserSynchronizer
       ScreeningRoomUser member = _screenDBUserIdToScreeningRoomUserMap.get(memberId);
       Integer headId = _screenDBUserIdToLabHeadIdMap.get(memberId);
       if (member.getUserClassification() == ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR) {
+        if (headId != null && headId != 0) {
+          throw new ScreenDBSynchronizationException("lab head " + memberId + " is not allowed to have a lab head (" + headId + ")");
+        }
         continue;
       }
       if (headId == null || headId == 0) {
