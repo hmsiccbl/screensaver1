@@ -194,6 +194,7 @@ public class UserSynchronizer
     while (resultSet.next()) {
       ScreeningRoomUser user = createOrUpdateUser(resultSet);
       Integer id = resultSet.getInt("id");
+      log.info("synchronizing ScreenDB user " + id);
       _screenDBUserIdToLabHeadIdMap.put(id, resultSet.getInt("lab_name"));
       _screenDBUserIdToScreeningRoomUserMap.put(id, user);
       synchronizeChecklistItems(id, user);
@@ -453,6 +454,7 @@ public class UserSynchronizer
   {
     for (Integer memberId : _screenDBUserIdToLabHeadIdMap.keySet()) {
       ScreeningRoomUser member = _screenDBUserIdToScreeningRoomUserMap.get(memberId);
+      log.info("setting lab for ScreenDB user " + memberId);
       Integer headId = _screenDBUserIdToLabHeadIdMap.get(memberId);
       if (member.getUserClassification() == ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR) {
         if (headId != null && headId != 0) {
