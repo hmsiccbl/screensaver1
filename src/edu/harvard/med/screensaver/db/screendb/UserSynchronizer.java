@@ -148,6 +148,7 @@ public class UserSynchronizer
         }
         catch (ScreenDBSynchronizationException e) {
           _synchronizationException = e;
+          log.error(e.toString());
         }
       }
 
@@ -192,9 +193,9 @@ public class UserSynchronizer
     Statement statement = _connection.createStatement();
     ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
     while (resultSet.next()) {
+      log.info("synchronizing ScreenDB user " + resultSet.getInt("id"));
       ScreeningRoomUser user = createOrUpdateUser(resultSet);
       Integer id = resultSet.getInt("id");
-      log.info("synchronizing ScreenDB user " + id);
       _screenDBUserIdToLabHeadIdMap.put(id, resultSet.getInt("lab_name"));
       _screenDBUserIdToScreeningRoomUserMap.put(id, user);
       synchronizeChecklistItems(id, user);
@@ -457,8 +458,8 @@ public class UserSynchronizer
       log.info("setting lab for ScreenDB user " + memberId);
       Integer headId = _screenDBUserIdToLabHeadIdMap.get(memberId);
       if (member.getUserClassification() == ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR) {
-        if (headId != null && headId != 0) {
-          throw new ScreenDBSynchronizationException("lab head " + memberId + " is not allowed to have a lab head (" + headId + ")");
+        if (headId != null && headId != 0 && !headId.equals(memberId)) {
+          throw new ScreenDBSynchronizationException("lab head " + memberId + " is not allowed to have another lab head (" + headId + ")");
         }
         continue;
       }
