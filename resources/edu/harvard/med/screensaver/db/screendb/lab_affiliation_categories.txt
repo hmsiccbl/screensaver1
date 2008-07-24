@@ -125,5 +125,6 @@ Other	University of Wisconsin
 Other	Vanderbilt University Medical Center, Cell and Developmental Biology
 Other	Vanderbilt University Medical Center, Departments of Microbiology and Immunology
 Other	Wadsworth Center
+Other Walter Reed Army Institute for Research
 Other	Washington University School of Medicine
 Other	Yale University
