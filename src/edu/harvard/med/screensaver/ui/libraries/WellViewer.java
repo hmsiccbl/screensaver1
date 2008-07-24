@@ -31,8 +31,9 @@ public class WellViewer extends ReagentViewer
 {
 
   private static final Logger log = Logger.getLogger(WellViewer.class);
-  
-  private static final String SPECIAL_NOVARTIS_LIBRARY_NAME = "Novartis1";
+
+  // HACK: for special case message
+  private static final String SPECIAL_CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
 
 
   // private instance fields
@@ -76,7 +77,7 @@ public class WellViewer extends ReagentViewer
                _well.getGenes(),
                _well.getCompounds());
   }
-  
+
   public Well getWell()
   {
     return _well;
@@ -96,16 +97,17 @@ public class WellViewer extends ReagentViewer
       return null;
     }
     Library library = _well.getLibrary();
+    // HACK: special case messages
     if (library.getLibraryType().equals(LibraryType.NATURAL_PRODUCTS)) {
       return "Structure information is unavailable for compounds in natural products libraries.";
     }
-    if (library.getLibraryName().equals(SPECIAL_NOVARTIS_LIBRARY_NAME)) {
-      return "Structure information for compounds in the " + SPECIAL_NOVARTIS_LIBRARY_NAME +
+    if (library.getLibraryName().equals(SPECIAL_CHEMDIV6_LIBRARY_NAME)) {
+      return "Structure information for compounds in the " + SPECIAL_CHEMDIV6_LIBRARY_NAME +
         " library are available via ICCB-L staff.";
     }
     return null;
   }
-  
+
   @UIControllerMethod
   public String viewWell()
   {
