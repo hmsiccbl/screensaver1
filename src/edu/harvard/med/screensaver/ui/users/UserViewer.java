@@ -413,7 +413,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
       labHeads.add(null);
       _labName = new UISelectOneEntityBean<LabHead>(labHeads, getScreeningRoomUser().getLab().getLabHead(), _dao) {
         @Override
-        protected String getLabel(LabHead t) { return t == null ? "<missing>" : t.getLab().getLabName(); }
+        protected String getLabel(LabHead t) { return t == null ? "<lab head not yet in system>" : t.getLab().getLabName(); }
       };
     }
     return _labName;
