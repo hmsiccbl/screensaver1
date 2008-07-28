@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.FatalParseException;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -125,7 +126,15 @@ public class WellDeprecator
     Set<WellKey> wellKeys = new HashSet<WellKey>();
     LineIterator lines = FileUtils.lineIterator(new File(app.getCommandLineOptionValue("f")), null);
     while (lines.hasNext()) {
-      wellKeys.add(new WellKey(lines.nextLine()));
+      String line = lines.nextLine().trim();
+      if (line.length() > 0) {
+        try {
+          wellKeys.add(new WellKey(line));
+        }
+        catch (Exception e) {
+          throw new FatalParseException("invalid well key '" + line + "': " + e);
+        }
+      }
     }
     return wellKeys;
   }
