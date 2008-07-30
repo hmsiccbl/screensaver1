@@ -116,7 +116,6 @@
            description="JAR library files needed to build the project."
   >
     <include name="**/*.jar" />
-    <exclude name="**/unused/**" />
   </fileset>
 
   <fileset id="deploy.lib.fileset"
@@ -124,9 +123,8 @@
            description="JAR library files needed to run the project on a web application server (may exclude JAR files that are known to be provided by the web application server)."
   >
     <include name="**/*.jar" />
-    <exclude name="**/unused/**" />
     <!-- exclude libs that are only needed during development/testing/etc. -->
-    <exclude name="**/dev/**" />
+    <exclude name="**/.dev/**" />
     <!-- javax.servlet.jar will be explicitly ignored by any servlet container
     that obeys the 2.3 Servlet specification (sec 9.7.2). We should exclude
     it, but command line apps currently have a (unwanted) dependency on it
