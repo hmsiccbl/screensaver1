@@ -18,9 +18,9 @@
   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
 	http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-  <display-name>Screensaver 1.x</display-name>
+  <display-name>Screensaver</display-name>
 
-  <description>ICCB-L Screensaver 1.x</description>
+  <description>Screensaver Lab Information Management System (LIMS) for High Througput Screening (HTS).</description>
 
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
