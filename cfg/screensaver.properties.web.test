@@ -1,14 +1,14 @@
-# screensaver.properties
+# screensaver.properties.web.test
+#
+# to be deployed to Tomcat when running JSFUnit tests
 
 
 ### build-time properties
 
-#servlet.authentication.method=FORM
+test-ui=true
 servlet.authentication.method=BASIC
 appserver.dir=/usr/local/tomcat
-#log4j.properties.file=cfg/ant4/log4j.properties.web
-log4j.properties.file=cfg/ant4/log4j.properties.debug
-test-ui=true
+log4j.properties.file=cfg/log4j.properties.debug
 
 ### run-time properties
 
