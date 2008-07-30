@@ -1,4 +1,0 @@
-# Recreates Screensaver development database and initializes users and
-# roles, w/o requiring any database connection arguments from user.
-
-~/bin/ss-recreate-schema dev
