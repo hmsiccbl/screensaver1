@@ -29,13 +29,14 @@ log4j.logger.userActivity=info
 ### Screensaver application
 
 log4j.logger.edu.harvard.med.screensaver=info
-log4j.logger.edu.harvard.med.screensaver.db=info
-log4j.logger.edu.harvard.med.screensaver.ui=info
-log4j.logger.edu.harvard.med.screensaver.io=info
-log4j.logger.edu.harvard.med.screensaver.ui.table=info
-log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=info
-log4j.logger.edu.harvard.med.screensaver.model=info
-log4j.logger.edu.harvard.med.screensaver.util.eutils=info
+#log4j.logger.edu.harvard.med.screensaver.db=debug
+#log4j.logger.edu.harvard.med.screensaver.ui=debug
+#log4j.logger.edu.harvard.med.screensaver.io=debug
+#log4j.logger.edu.harvard.med.screensaver.ui.table=debug
+#log4j.logger.edu.harvard.med.screensaver.ui.searchresults=debug
+#log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=debug
+#log4j.logger.edu.harvard.med.screensaver.model=debug
+#log4j.logger.edu.harvard.med.screensaver.util.eutils=debug
 
 #log4j.logger.org.apache.commons.dbcp=debug
 #log4j.logger.springframework.jdbc=debug
@@ -92,7 +93,6 @@ log4j.logger.org.apache.myfaces.lifecycle.LifecycleImpl=warn
 #log4j.logger.org.apache.myfaces.webapp.MyFacesServlet=warn
 #log4j.logger.javax.faces.webapp.FacesServlet=trace
 #log4j.logger.org.apache.myfaces.share_tomahawk.taglib=error
-#log4j.logger.org.apache.myfaces.tomahawk.application.jsp.JspTilesViewHandlerImpl=warn
 
 # Facelets
 
