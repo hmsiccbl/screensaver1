@@ -98,7 +98,7 @@
             location="${appserver.dir}/conf/${loginmodule.config.filename}"
   />
   <property name="dev.loginmodule.config.file"
-            location="web/tomcat/conf/${loginmodule.config.filename}"
+            location="cfg/tomcat/conf/${loginmodule.config.filename}"
   />
   <property name="svnversion.cmd" value="svnversion" />
   <!-- The servlet authentication method to use.  If set to BASIC, faciliates UI testing by not requiring re-login,
