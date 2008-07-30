@@ -22,9 +22,6 @@ Directory Contents
 .eclipse.classes/  The place for Eclipse to build its own versions of the .class
                    files.
                   
-.eclipse.prefs/    Contains developer-exported preference files from the Eclipse IDE, 
-                   which are intended to be shared among the project's developers.
-
 .settings/         The Eclipse .settings directory.
 
 bin/               Executable scripts for development, deployment, etc.
@@ -54,9 +51,7 @@ licenses/          Software licenses for redistributed software.
 
 resources/         Java resource files; i.e., files that can found within the 
                    project's Java classpath via Java's resource loading
-                   mechanism.  Many files in this directory tree are generated
-                   (Hibernate mapping files, build-number.txt, schema
-                   create/drop scripts).
+                   mechanism.
 
 src/               Java source code (only! see resources/).
 
