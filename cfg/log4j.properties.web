@@ -1,4 +1,6 @@
 # Log4J configuration, to be used in production
+#
+# Note: update the log file locations for your deployment enviroment
 
 log4j.appender.fileLog=org.apache.log4j.DailyRollingFileAppender
 log4j.appender.fileLog.DatePattern='.'yyyy-MM-dd
