@@ -30,27 +30,29 @@ import org.hibernate.proxy.HibernateProxyHelper;
 
 import sun.reflect.Reflection;
 
-
 /**
  * An abstract superclass for the entity beans in the domain model. Provides an
  * abstract method {@link #getEntityId()} to define an entity id for all entity
  * classes.
  * <p>
+ * Provides a passive mechanism for enforcing a data access policy via the
+ * {@link #isRestricted()} method.
+ * <p>
  * Provides abstract method {@link #acceptVisitor(AbstractEntityVisitor)} to
  * implement a visitor pattern over the entity classes. The visitor pattern is
  * currently used to implement a core part of the data access policy for the
- * entity model. In the future, we may also use a similar AOP-style visitor
- * pattern to implement business rule violation checks.
+ * entity model. (In the future, we may also use a similar AOP to implement
+ * business rule violation checks.)
+ * <p>
+ * See {@link #equals} and {@link #hashCode()} for important information on
+ * determining equality of AbstractEntity objects.
  * <p>
  * Provides various helper methods, including
  * {@link #isEquivalent(AbstractEntity) a way to compare to entities for
- * equivalence}, and methods for truncating dates. (These date truncation
- * methods should be replaced in the future by fixing the data model to use a
- * type-mapping for date properties that does not include time-of-day.)
- * <p>
- * See {@link #equals} for important information on determining equality of
- * AbstractEntity objects.
- *
+ * equivalence}, and a way to {@link #isHibernateCaller() determine if a
+ * subclasses's setter or getter methods are being called by Hibernate}, both of
+ * which happen to be hacks.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -61,12 +63,10 @@ public abstract class AbstractEntity implements Serializable
 
   private static Logger log = Logger.getLogger(AbstractEntity.class);
 
-
   // instance fields
 
   private DataAccessPolicy _dataAccessPolicy;
   private Integer _hashCode;
-
 
   // protected methods
 
@@ -76,7 +76,7 @@ public abstract class AbstractEntity implements Serializable
    * property is generally named by postfixing the entity name with "Id". For
    * instance, for {@link Compound}, this method delegates to the property read
    * method {@link Compound#getCompoundId()}.
-   *
+   * 
    * @return the entity id
    */
   abstract public Serializable getEntityId();
@@ -96,7 +96,7 @@ public abstract class AbstractEntity implements Serializable
    * Obeying this rule avoids the unexpected result of two different entity
    * objects that represent the "same" entity (in terms of ID) being considered
    * unequal.
-   *
+   * 
    * @see #hashCode
    */
   @Override
@@ -120,7 +120,7 @@ public abstract class AbstractEntity implements Serializable
    * change even if the entity later becomes persistent and acquires an ID. This
    * is necessary to obey the contract of hashCode(). See equals() for the
    * implications of this design.
-   *
+   * 
    * @see #equals
    */
   @Override
@@ -138,13 +138,12 @@ public abstract class AbstractEntity implements Serializable
   }
 
   /**
-   * Performs a shallow compare of this <code>AbstractEntity</code> with
-   * another and returns <code>true</code> iff they are the exact same class
-   * and have matching values for each property, excluding properties that
-   * return <code>Collection</code>, <code>Map</code>, and
-   * <code>AbstractEntity</code>, which, presumably, return entity
-   * relationships.
-   *
+   * Performs a shallow compare of this <code>AbstractEntity</code> with another
+   * and returns <code>true</code> iff they are the exact same class and have
+   * matching values for each property, excluding properties that return
+   * <code>Collection</code>, <code>Map</code>, and <code>AbstractEntity</code>,
+   * which, presumably, return entity relationships.
+   * 
    * @motivation for comparing entities in test code
    * @param that the other AbstractEntity to compare equivalency with
    * @return true iff the two AbstractEntities are equivalent
@@ -163,10 +162,8 @@ public abstract class AbstractEntity implements Serializable
         try {
           Object thisValue = beanProperty.getReadMethod().invoke(this);
           Object thatValue = beanProperty.getReadMethod().invoke(that);
-          if (thisValue == null ^ thatValue == null || thisValue != null &&
-              !thisValue.equals(thatValue)) {
-            log.debug("property '" + propertyName + "' differs: this='" +
-                      thisValue + "', that='" + thatValue + "'");
+          if (thisValue == null ^ thatValue == null || thisValue != null && !thisValue.equals(thatValue)) {
+            log.debug("property '" + propertyName + "' differs: this='" + thisValue + "', that='" + thatValue + "'");
             return false;
           }
         }
@@ -188,7 +185,7 @@ public abstract class AbstractEntity implements Serializable
   /**
    * To enable visitor to visit a particular subclass, override this method and
    * insert <code>visitor.acceptVisitor(this);</code>
-   *
+   * 
    * @param visitor
    * @motivation to keep most of our AbstractEntity subclasses clean, as we
    *             currently only have the DataAccessPolicy visitor, which does
@@ -198,12 +195,13 @@ public abstract class AbstractEntity implements Serializable
 
   /**
    * Get whether this entity is restricted, based upon the data access policy
-   * that was provided (if any). It is up to the controller and/or UI layers to
+   * that was provided (if any). This is a passive data access policy
+   * enforcement mechanism, in that it is up to the service and/or UI layers to
    * check for and determine how to handle restricted entities. In general, a
    * restricted entity is one whose data cannot be displayed to the current
    * user. However, the semantics of "restricted" is really defined by the data
    * access policy that is in force.
-   *
+   * 
    * @see DataAccessPolicyInjectorPostLoadEventListener
    */
   @Transient
@@ -246,14 +244,13 @@ public abstract class AbstractEntity implements Serializable
     return HibernateProxyHelper.getClassWithoutInitializingProxy(this);
   }
 
-
   // protected methods
 
   /**
    * Return true iff the caller of the method that is calling this method is
    * from the hibernate world. Specifically, we test the package name of the
    * calling class for a "org.hibernate." prefix.
-   *
+   * 
    * @return true iff the caller of the method that is calling this method is
    *         from the hibernate world
    */
@@ -268,8 +265,7 @@ public abstract class AbstractEntity implements Serializable
   public <P> P getPropertyValue(String propertyName, Class<P> propertyType)
   {
     try {
-      PropertyDescriptor propertyDescriptor =
-        PropertyUtils.getPropertyDescriptor(this, propertyName);
+      PropertyDescriptor propertyDescriptor = PropertyUtils.getPropertyDescriptor(this, propertyName);
       return (P) propertyDescriptor.getReadMethod().invoke(this);
     }
     catch (Exception e) {
@@ -278,12 +274,11 @@ public abstract class AbstractEntity implements Serializable
     }
   }
 
-
   // private methods
 
   /**
    * Determine if a given property should be used in determining equivalence.
-   *
+   * 
    * @return boolean (see code, since this is private method)
    * @see #isEquivalent(AbstractEntity)
    */
@@ -296,27 +291,21 @@ public abstract class AbstractEntity implements Serializable
     if (method == null) {
       // this can occur if there is a public setter method, but a non-public
       // getter method
-      log.debug("no corresponding getter method for property " +
-                property.getDisplayName());
+      log.debug("no corresponding getter method for property " + property.getDisplayName());
       return false;
     }
     // only test methods that are declared by subclasses of AbstractEntity
-    if (method.getDeclaringClass()
-              .equals(AbstractEntity.class) ||
-        !AbstractEntity.class.isAssignableFrom(method.getDeclaringClass())) {
+    if (method.getDeclaringClass().equals(AbstractEntity.class) || !AbstractEntity.class.isAssignableFrom(method.getDeclaringClass())) {
       return false;
     }
     if (method.getAnnotation(Transient.class) != null) {
       return false;
     }
-    if (method.getAnnotation(Column.class) != null &&
-        method.getAnnotation(Column.class)
-              .isNotEquivalenceProperty()) {
+    if (method.getAnnotation(Column.class) != null && method.getAnnotation(Column.class).isNotEquivalenceProperty()) {
       return false;
     }
 
-    return !(Collection.class.isAssignableFrom(property.getPropertyType()) ||
-             Map.class.isAssignableFrom(property.getPropertyType()) || AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
+    return !(Collection.class.isAssignableFrom(property.getPropertyType()) || Map.class.isAssignableFrom(property.getPropertyType()) || AbstractEntity.class.isAssignableFrom(property.getPropertyType()));
   }
 
   /**
@@ -325,7 +314,7 @@ public abstract class AbstractEntity implements Serializable
    * the caller of this method to be {@link #isHibernateCaller()} or
    * {@link #isTestCaller()}, and the caller of that method to be an entity
    * method that is trying to determine <i>its</i> caller.
-   *
+   * 
    * @return the name of the calling class of the caller of the method of the
    *         caller of this method that is calling this method
    */
