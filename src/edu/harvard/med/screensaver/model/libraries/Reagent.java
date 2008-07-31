@@ -38,16 +38,16 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 
 
 /**
- * A substance used to test the response of a biological system, such a
- * {@link Compound} or {@link SilencingReagent}. Reagents are contained in
- * {@link #Library Library} {@link Well wells}.
+ * A substance, such as a {@link Compound} or {@link SilencingReagent}, used to
+ * test the response of a biological system to a specific perturbation. Reagents
+ * are contained in {@link #Library Library} {@link Well wells}.
  * <p>
  * <i>Note: The Reagent entity has been recently added to the data model, and
- * will eventually become the parent of {@link Compound} and
- * {@link SilencingReagent} . This entity currently only maintains a
- * {@link ReagentVendorIdentifier} property, and all other useful properties
- * about a Well's reagent(s) can be found in the aforementioned entity
- * types.</i>
+ * will ultimately be renamed to LibraryReagent and will become the parent of
+ * {@link Compound} and {@link SilencingReagent}. This entity currently only
+ * maintains a {@link ReagentVendorIdentifier} property, and all other useful
+ * properties about a Well's reagent(s) can be found in the aforementioned
+ * entity types.</i>
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
