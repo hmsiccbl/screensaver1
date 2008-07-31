@@ -38,13 +38,22 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 
 
 /**
- * A Hibernate entity bean representing a reagent.
- *
+ * A substance used to test the response of a biological system, such a
+ * {@link Compound} or {@link SilencingReagent}. Reagents are contained in
+ * {@link #Library Library} {@link Well wells}.
+ * <p>
+ * <i>Note: The Reagent entity has been recently added to the data model, and
+ * will eventually become the parent of {@link Compound} and
+ * {@link SilencingReagent} . This entity currently only maintains a
+ * {@link ReagentVendorIdentifier} property, and all other useful properties
+ * about a Well's reagent(s) can be found in the aforementioned entity
+ * types.</i>
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Table(uniqueConstraints={  })
+@Table(uniqueConstraints = {})
 @org.hibernate.annotations.Proxy
 public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reagent>
 {
@@ -67,6 +76,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Construct an initialized <code>Reagent</code> object.
+   * 
    * @param reagentVendorIdentifier
    * @motivation for {@link Library#createWell}
    */
@@ -95,6 +105,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Get the well id for the well.
+   * 
    * @return the well id for the well
    */
   @Id
@@ -119,25 +130,23 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
    *             Source ID" column.
    * @return reagent ID as a String
    */
-  @Column(name="reagentId", updatable=false, insertable=false)
+  @Column(name = "reagentId", updatable = false, insertable = false)
   public String getReagentIdString()
   {
     return _reagentId.getReagentId();
   }
-  
+
   public void setReagentIdString(String reagentIdString)
   {
-    // do nothing; set by setReagentId()
+  // do nothing; set by setReagentId()
   }
 
   /**
    * Get the set of wells.
+   * 
    * @return the set of wells
    */
-  @OneToMany(
-    mappedBy="reagent",
-    fetch=FetchType.LAZY
-  )
+  @OneToMany(mappedBy = "reagent", fetch = FetchType.LAZY)
   public Set<Well> getWells()
   {
     return _wells;
@@ -145,6 +154,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Add the well.
+   * 
    * @param well the well to add
    * @return true iff the reagent did not already have the well
    */
@@ -159,6 +169,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Remove the well.
+   * 
    * @param well the well to remove
    * @return true iff the reagent previously had the well
    */
@@ -173,23 +184,22 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Get the set of annotation values.
+   * 
    * @return the set of annotation values
    */
-  @OneToMany(fetch=FetchType.LAZY, mappedBy="reagent")
-  /*@LazyCollection(LazyCollectionOption.EXTRA)*/
-  @MapKeyManyToMany(joinColumns={ @JoinColumn(name="annotationTypeId") }, targetEntity=AnnotationType.class)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "reagent")
+  /* @LazyCollection(LazyCollectionOption.EXTRA) */
+  @MapKeyManyToMany(joinColumns = { @JoinColumn(name = "annotationTypeId") }, targetEntity = AnnotationType.class)
   public Map<AnnotationType,AnnotationValue> getAnnotationValues()
   {
     return _annotationValues;
   }
 
-  @ManyToMany(targetEntity=Screen.class,
-              mappedBy="reagents",
-              fetch=FetchType.LAZY)
-  @JoinColumn(name="studyId", nullable=false, updatable=false)
-  @org.hibernate.annotations.ForeignKey(name="fk_reagent_to_study")
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName="study")
+  @ManyToMany(targetEntity = Screen.class, mappedBy = "reagents", fetch = FetchType.LAZY)
+  @JoinColumn(name = "studyId", nullable = false, updatable = false)
+  @org.hibernate.annotations.ForeignKey(name = "fk_reagent_to_study")
+  @org.hibernate.annotations.LazyCollection(value = org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName = "study")
   public Set<Screen> getStudies()
   {
     return _studies;
@@ -218,15 +228,18 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Construct an uninitialized <code>Reagent</code> object.
+   * 
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  protected Reagent() {}
+  protected Reagent()
+  {}
 
 
   // private methods
 
   /**
    * Set the reagent id for the reagent.
+   * 
    * @param reagentId the new reagent id for the reagent
    * @motivation for hibernate
    */
@@ -237,11 +250,12 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Get the version of the reagent.
+   * 
    * @return the version of the reagent
    * @motivation for hibernate
    */
   @Version
-  @Column(nullable=false)
+  @Column(nullable = false)
   private Integer getVersion()
   {
     return _version;
@@ -249,6 +263,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Set the version of the reagent.
+   * 
    * @param version the new version of the reagent
    * @motivation for hibernate
    */
@@ -259,6 +274,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Set the set of wells
+   * 
    * @param wells the new set of wells
    * @motivation for hibernate
    */
@@ -269,6 +285,7 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
 
   /**
    * Set the set of annotation values
+   * 
    * @param annotationValues the new set of annotation values
    * @motivation for hibernate
    */
