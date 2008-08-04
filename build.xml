@@ -263,8 +263,8 @@
       Generate the schema create and drop DDL files from the Hibernate-annotated entity model bean classes.
     </description>
 
-    <antcall target="build">
-      <param name="build.dir" location="${ddl.build.dir}" />
+    <antcall target="compile">
+      <param name="classes.dir" location="${ddl.build.dir}/classes" />
     </antcall>
 
     <taskdef name="hibernatetool"
@@ -367,6 +367,19 @@
     </junit>
   </target>
 
+  <target name="compile">
+    <mkdir dir="${classes.dir}" />
+    <!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
+    <javac srcdir="${src.dir}"
+           destdir="${classes.dir}"
+           classpathref="build.library.path"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           listfiles="${verbose}"
+    >
+    </javac>
+  </target>
+
 
   <!-- build -->
 
@@ -378,16 +391,10 @@
 
     <property name="classes.dir" value="${build.dir}/classes" />
 
-    <mkdir dir="${classes.dir}" />
-    <!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
-    <javac srcdir="${src.dir}"
-           destdir="${classes.dir}"
-           classpathref="build.library.path"
-           debug="${javac.debug}"
-           optimize="${javac.optimize}"
-           listfiles="${verbose}"
-    >
-    </javac>
+    <antcall target="compile">
+      <param name="classes.dir" location="${classes.dir}" />
+    </antcall>
+
 
     <copy todir="${build.dir}/lib" flatten="true" verbose="${verbose}">
       <fileset refid="deploy.lib.fileset" />
