@@ -19,10 +19,10 @@
 
   <!-- properties -->
 
- <property name="screensaver.properties.file"
-           description="A properties file to use for build and runtime screensaver properties. Must be specified on the command line!"
-  >
- <property name="app.name"
+  <property name="screensaver.properties.file"
+            description="A properties file to use for build and runtime screensaver properties. Must be specified on the command line!"
+  />
+  <property name="app.name"
             value="screensaver"
             description="used to define distribution file names, deployment directories, default database name, etc."
   />
