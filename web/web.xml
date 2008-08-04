@@ -342,11 +342,12 @@
 
   <!-- JNDI setup -->
 
-  <resource-env-ref>
+  <resource-ref>
     <description>Mutable capsule that allows us to store a LoginModuleFactory in JNDI, which is instantiated by our web app, and not available at Tomcat initialization time.</description>
-    <resource-env-ref-name>bean/loginModuleFactoryCapsule</resource-env-ref-name>
-    <resource-env-ref-type>edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule</resource-env-ref-type>
-  </resource-env-ref>
+    <res-ref-name>bean/loginModuleFactoryCapsule</res-ref-name>
+    <res-type>edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
   
   
   <!-- Authentication/Security configuration -->

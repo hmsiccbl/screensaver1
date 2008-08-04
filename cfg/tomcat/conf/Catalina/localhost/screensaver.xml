@@ -17,25 +17,18 @@
 <Context path="/screensaver" docBase="screensaver" debug="99" >
 
   <!-- note: a 'debug' value greater than 2 will cause passwords to be output to Tomcat's log. -->
-  <Realm 
-    className="org.apache.catalina.realm.JAASRealm"                 
-    appName="Screensaver1"
+  <Realm
+    className="org.apache.catalina.realm.JAASRealm"
+    appName="Screensaver"
     userClassNames="edu.harvard.med.screensaver.model.users.ScreensaverUser"
     roleClassNames="edu.harvard.med.screensaver.model.users.ScreensaverUserRole"
     debug="2"
-    useContextClassLoader="false"
+    useContextClassLoader="true"
     />
 
-  <Resource
-    name="bean/loginModuleFactoryCapsule"
-    auth="Container" 
-    type="edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule">
-  </Resource>
-  <ResourceParams name="bean/loginModuleFactoryCapsule">
-    <parameter>
-      <name>factory</name>
-      <value>org.apache.naming.factory.BeanFactory</value>
-    </parameter>
-  </ResourceParams>
+  <Resource name="bean/loginModuleFactoryCapsule" auth="Container"
+            type="edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule"
+            factory="org.apache.naming.factory.BeanFactory"
+            />
 
 </Context>

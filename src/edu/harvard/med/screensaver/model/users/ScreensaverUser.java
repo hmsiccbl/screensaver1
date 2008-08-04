@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.users;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,7 +65,7 @@ import com.google.common.base.Join;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-abstract public class ScreensaverUser extends TimeStampedAbstractEntity
+abstract public class ScreensaverUser extends TimeStampedAbstractEntity implements Principal
 {
 
   // static fields
@@ -546,6 +547,15 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity
   public void setHarvardIdExpirationDate(LocalDate harvardIdExpirationDate)
   {
     _harvardIdExpirationDate = harvardIdExpirationDate;
+  }
+  
+  
+  // Principal interface 
+  
+  @Transient
+  public String getName()
+  {
+    return getFullNameFirstLast();
   }
 
 
