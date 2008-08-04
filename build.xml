@@ -10,7 +10,7 @@
   the GNU General Public License.
 -->
 
-<project name="Screensaver" default="deploy" basedir=".">
+<project name="Screensaver" default="build" basedir=".">
 
   <description>
     Screensaver build file. Handles 1) build/deploy of Screensaver web application
@@ -19,14 +19,10 @@
 
   <!-- properties -->
 
-  <!--property name="screensaver.properties.file"
-            description="A properties file to use for build and runtime screensaver properties. Must be specified on the command line!"
-   -->
-  <property file="${screensaver.properties.file}"
-            description="loads all build-time properties from specified file"
-  />
-
-  <property name="app.name"
+ <property name="screensaver.properties.file"
+           description="A properties file to use for build and runtime screensaver properties. Must be specified on the command line!"
+  >
+ <property name="app.name"
             value="screensaver"
             description="used to define distribution file names, deployment directories, default database name, etc."
   />
@@ -341,7 +337,7 @@
           description="Stops the web application (running locally on a Tomcat server)"
   >
     <exec executable="${appserver.stop.cmd}">
-      <arg line="-force" />
+      <!--arg line="-force" /-->
     </exec>
   </target>
 
@@ -397,7 +393,7 @@
       <fileset refid="deploy.lib.fileset" />
     </copy>
 
-    <!-- ${log4j.properties.file} is defined in cfg/*/screensaver.properties* -->
+    <!-- ${log4j.properties.file} is defined in ${screensaver.properties.file} file -->
     <copy file="${log4j.properties.file}"
           tofile="${classes.dir}/log4j.properties"
           verbose="${verbose}"
@@ -407,7 +403,7 @@
     <copy file="${screensaver.properties.file}"
           tofile="${classes.dir}/screensaver.properties"
           verbose="${verbose}"
-          failonerror="false"
+          failonerror="true"
     />
 
     <copy todir="${classes.dir}" verbose="${verbose}">
