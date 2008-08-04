@@ -80,12 +80,6 @@ public abstract class CherryPickRequest extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(CherryPickRequest.class);
   private static final long serialVersionUID = 0L;
-  /**
-   * When the {@link #_legacyCherryPickRequestNumber} is not provided to the constructor, add this
-   * offset number to {@link #_ordinal} to determine the cherry pick request number. This value
-   * needs to be bigger than the largest ScreenDB visit_id for Cherry Pick Visits.
-   */
-  private static final int CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET = 10000;
 
   private static final Set<WellName> DEFAULT_EMPTY_WELL_NAMES = new HashSet<WellName>();
   static {
@@ -838,11 +832,6 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   private void setCherryPickRequestId(Integer cherryPickRequestId)
   {
-    if (cherryPickRequestId < CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET) {
-      throw new DataModelViolationException("new cherry pick request entity ID " + cherryPickRequestId +
-                                            " must be >= " +
-                                            CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET );
-    }
     _cherryPickRequestId = cherryPickRequestId;
   }
 
@@ -874,11 +863,6 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   private void setLegacyCherryPickRequestNumber(Integer cherryPickRequestNumber)
   {
-    if (cherryPickRequestNumber != null &&
-      cherryPickRequestNumber >= CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET) {
-      throw new DataModelViolationException("legacy cherry pick request numbers must be < " +
-                                            CHERRY_PICK_REQUEST_NUMBER_GENERATION_OFFSET);
-    }
     _legacyCherryPickRequestNumber = cherryPickRequestNumber;
   }
 
