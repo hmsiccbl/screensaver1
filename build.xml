@@ -19,8 +19,8 @@
 
   <!-- properties -->
 
-  <property name="screensaver.properties.file"
-            description="A properties file to use for build and runtime screensaver properties. Must be specified on the command line!"
+  <property file="${screensaver.properties.file}"
+            description="The properties file that specifies the build and runtime screensaver properties. See examples in cfg/ directory. Must be specified on the command line!"
   />
   <property name="app.name"
             value="screensaver"
@@ -153,7 +153,7 @@
   <!-- build and deploy -->
 
   <target name="tomcat-config" unless="tomcat.configured">
-    <fail message="Tomcat installation (at '${appserver.dir}') has not been properly configured for Screensaver OR Screensaver-specific files in Tomcat installation have become out-of-date, relative to the Screensaver development directory.  Note that configuration of Tomcat cannot be (reliably) automated because it differs depending upon whether you are deploying to a local Tomcat development environment or to an orchestra-hosted Tomcat environment.  Please see https://wiki.med.harvard.edu/ICCBL/TomcatConfiguration.  Good luck!"
+    <fail message="Tomcat installation (at '${appserver.dir}') has not been properly configured for Screensaver OR Screensaver-specific files in Tomcat installation have become out-of-date, relative to the Screensaver development directory.  Please see https://wiki.med.harvard.edu/ICCBL/Screensaver/InstallationGuide."
     />
   </target>
 
