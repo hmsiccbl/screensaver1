@@ -3,6 +3,7 @@
 
 ### build-time properties
 
+debug=true
 servlet.authentication.method=BASIC
 appserver.dir=/usr/local/tomcat
 log4j.properties.file=cfg/ant4/log4j.properties.debug
