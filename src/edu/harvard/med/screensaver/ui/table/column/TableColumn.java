@@ -30,7 +30,7 @@ import edu.harvard.med.screensaver.ui.util.NoOpStringConverter;
 import org.apache.log4j.Logger;
 
 /**
- * @param R the row entity type
+ * @param R the row type
  * @param T the column data type
  */
 public abstract class TableColumn<R,T> extends Observable implements Observer
@@ -255,24 +255,24 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   /**
    * Get the value to be displayed for the current column and cell.
    *
-   * @param entity the entity displayed in the current cell (the row index)
+   * @param row the row displayed in the current cell (the row index)
    * @return the value to be displayed for the current cell
    */
   abstract public T getCellValue(R row);
 
   /**
-   * Set the new value of the entity for the current column and cell.
+   * Set the new value of the row for the current column and cell.
    *
-   * @param entity the entity displayed in the current cell (the row index)
+   * @param row the row displayed in the current cell (the row index)
    * @param value the new value
    */
   public void setCellValue(R row, Object value) {}
 
   /**
    * Get whether this table column is editable by the user. If it is, you must
-   * implement {@link #setCellValue(R, T)}, if submitted values are to update
-   * your data model. Also, {@link #isCommandLink()} and {@link #isCollection()}
-   * should be return false if this method return true.
+   * implement {@link #setCellValue(Object, Object)}, if submitted values are to
+   * update your data model. Also, {@link #isCommandLink()} should return false
+   * if this method returns true.
    */
   public boolean isEditable()
   {
@@ -302,9 +302,7 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
 
   /**
    * Return true whenever the cell values for the column with the specified name
-   * should be a hyperlink. If {@link isCollection} returns true,
-   * {@link #cellAction(R)} is called with a <code>commandValue</code>
-   * parameter equal to the results of {@link #getCellValue(R)}.
+   * should be a hyperlink.
    *
    * @return true whenever the cell values for the column should be a hyperlink.
    */
@@ -318,7 +316,7 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
    * rule to go along with the action for clicking on the current cell. This
    * method is only called when {@link #isCommandLink()} is true.
    *
-   * @param entity the entity displayed in the current cell (the row index)
+   * @param row the row displayed in the current cell (the row index)
    * @return the navigation rule to go along with the action for clicking on the
    *         current cell
    */

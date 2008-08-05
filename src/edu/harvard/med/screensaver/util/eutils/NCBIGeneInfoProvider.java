@@ -20,7 +20,6 @@ public interface NCBIGeneInfoProvider
    * Get the {@link NCBIGeneInfo information needed from NCBI} for a {@link Gene}, based on
    * the EntrezGene ID. If any errors occur, report the error and return null.
    * @param entrezgeneId the EntrezGene ID for the Gene.
-   * @param cell the cell to specify when reporting an error
    * @return the NCBIGeneInfo
    */
   public abstract NCBIGeneInfo getGeneInfoForEntrezgeneId(Integer entrezgeneId) throws EutilsException;

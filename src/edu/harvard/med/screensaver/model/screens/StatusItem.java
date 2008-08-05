@@ -149,8 +149,7 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
   // package constructor
 
   /**
-   * Construct an initialized <code>StatusItem</code>. Intended only for use by {@link
-   * Screen#createStatusItem}.
+   * Construct an initialized <code>StatusItem</code>. Intended only for use by {@link Screen}.
    *
    * @param screen the screen
    * @param statusDate the status date

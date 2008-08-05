@@ -140,7 +140,6 @@ public class CopyInfo extends AbstractEntity
 
   /**
    * Create and return a new copy action for the copy info
-   * @param copyInfo the copy info
    * @param description the description
    * @param date the date
    * @return the newly created copy action for the copy info
@@ -289,14 +288,13 @@ public class CopyInfo extends AbstractEntity
   // package constructor
 
   /**
-   * Construct an initialized <code>CopyInfo</code>. Intended only for use by {@link
-   * Copy#createCopyInfo(Integer, String, PlateType, Volume)}.
+   * Construct an initialized <code>CopyInfo</code>. Intended only for use by {@link Copy}.
    * @param copy the copy
    * @param plateNumber the plate number
    * @param location the location
    * @param plateType the plate type
    * @param volume the volume
-   * @motivation intended only for use by {@link Copy@createCopyInfo}
+   * @motivation intended only for use by {@link Copy}
    */
   CopyInfo(
     Copy copy,

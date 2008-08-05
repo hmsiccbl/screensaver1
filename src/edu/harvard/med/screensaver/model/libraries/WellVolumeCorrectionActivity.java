@@ -65,7 +65,7 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
   /**
    * Construct an initialized <code>WellVolumeCorrectionActivity</code>.
    * @param performedBy the user that performed the activity
-   * @param dateOfActivity the date the activity took place
+   * @param datePerformed the date the activity took place
    */
   public WellVolumeCorrectionActivity(AdministratorUser performedBy, LocalDate datePerformed)
   {

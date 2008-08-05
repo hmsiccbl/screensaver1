@@ -36,7 +36,6 @@ public class WellSdfWriter extends PrintWriter
 
   /**
    * Write the well contents out as an SD file record to the print writer.
-   * @param pw the SD file print writer
    */
   public void write(Well well)
   {

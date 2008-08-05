@@ -15,7 +15,7 @@ import java.util.Comparator;
  * Base class for comparators that want null values to be implicitly handled for
  * them.
  * 
- * @see org.springframework.util.comparator.NullSafeComparator for an alternate implementation
+ * See {@link org.springframework.util.comparator.NullSafeComparator} for an alternate implementation
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

@@ -61,11 +61,11 @@ public class RNAiCherryPickRequest extends CherryPickRequest
 
   /**
    * Construct an initialized <code>RNAiCherryPickRequest</code>. Intended only for use
-   * by {@link Screen#createCherryPickRequest(ScreeningRoomUser, LocalDate, Integer)}.
+   * by {@link Screen}.
    * @param screen the screen
    * @param requestedBy the user that made the request
    * @param dateRequested the date created
-   * @param legacyId the legacy id from ScreenDB
+   * @param legacyCherryPickRequestNumber the legacy ID from ScreenDB
    * @motivation for creating CherryPickRequests from legacy ScreenDB cherry pick visits
    */
   public RNAiCherryPickRequest(

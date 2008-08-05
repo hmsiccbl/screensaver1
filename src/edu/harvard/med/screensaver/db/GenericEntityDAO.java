@@ -72,7 +72,7 @@ public interface GenericEntityDAO
    * be followed at the time this method is called. This ensures that all
    * cascade-reachable transient entities will be added to the session cache,
    * allowing subsequent
-   * {@link #findEntityById(Class, Serializable) to succeed prior to session flush.
+   * {@link #findEntityById(Class, Serializable)} to succeed prior to session flush.
    *
    * @param entity
    */
@@ -180,9 +180,6 @@ public interface GenericEntityDAO
   /**
    * Returns the size of a to-many relationship collection, and does so
    * efficiently, without loading the entities in the relationship.
-   *
-   * @param persistentCollection
-   * @return
    */
   public int relationshipSize(final Object persistentCollection);
 
@@ -190,10 +187,6 @@ public interface GenericEntityDAO
   /**
    * Returns the size of a to-many relationship collection, and does so
    * efficiently, without loading the entities in the relationship.
-   *
-   * @param entity
-   * @param relationship
-   * @return
    */
   public int relationshipSize(final AbstractEntity entity, final String relationship);
 
@@ -210,7 +203,7 @@ public interface GenericEntityDAO
   /**
    * Retrieve and return a list of entities of the specified type.
    *
-   * @param<E> The type of the entity to retrieve
+   * @param <E> the type of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
    */
@@ -218,13 +211,13 @@ public interface GenericEntityDAO
 
 
   /**
-   *
-   * @param <E>
+   * @param <E> the type of the entity to retrieve
+   * @param entityClass the class of the entity to retrieve
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
    * @param relationships the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
-   * @return
+   * @return a list of the entities of the specified type
    */
   public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass,
                                                                   boolean readOnly,
@@ -277,7 +270,7 @@ public interface GenericEntityDAO
    * @param name2Value a <code>Map</code> containing entries for each
    *          property/value pair to query against
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
-   * @param relationships the relationships to loaded, relative to the root
+   * @param relationshipsIn the relationships to loaded, relative to the root
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */

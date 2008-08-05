@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.model.screenresults;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -92,8 +91,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
   // public constructor
 
   /**
-   * Construct an initialized <code>ScreenResult</code>. Intended only for use by {@link
-   * Screen#createScreenResult()} and {@link Screen#createScreenResult(Date, boolean, Integer)}.
+   * Construct an initialized <code>ScreenResult</code>. Intended only for use by {@link Screen}.
    * @param screen the screen
    * @param isShareable whether this screen result can be viewed by all users of the system
    * @param replicateCount
@@ -444,7 +442,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
 
   /**
    * Increment the number of experimental wells that have data in this screen result.
-   * Intended only for use by {@link ResultValueType#createResultValue(ResultValue, Well)}.
+   * Intended only for use by {@link ResultValueType}.
    * @see #getExperimentalWellCount()
    */
   void incrementExperimentalWellCount()

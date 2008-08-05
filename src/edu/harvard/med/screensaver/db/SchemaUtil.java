@@ -142,7 +142,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   /**
    * Drop the schema that is configured for this Spring+Hibernate enabled
    * project. Will only execute if this is a test database (see
-   * {@link #isTestDatabase()}).
+   * {@link #verifyIsTestDatabase()}).
    */
   public void dropSchema() throws DataAccessException
   {
@@ -309,7 +309,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   /**
    * Return true iff the database is fully loaded.
    * 
-   * @motviation Prevent dropping fully loaded databases, or truncating their
+   * @motivation Prevent dropping fully loaded databases, or truncating their
    *             tables, since this is a costly mistake.
    */
   public void verifyIsTestDatabase()

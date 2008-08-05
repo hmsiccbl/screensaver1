@@ -84,7 +84,7 @@ public class LegacyCherryPickAssayPlate extends CherryPickAssayPlate
 
   /**
    * Construct an initialized <code>LegacyCherryPickAssayPlate</code>. Intended only for use
-   * by {@link CherryPickRequest#createLegacyCherryPickAssayPlate(Integer, Integer, PlateType, String)}.
+   * by {@link CherryPickRequest}.
    * @param cherryPickRequest the cherry pick request
    * @param plateOrdinal the plate ordinal
    * @param attemptOrdinal the attempt ordinal

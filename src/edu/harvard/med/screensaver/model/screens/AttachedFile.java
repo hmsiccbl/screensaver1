@@ -171,8 +171,7 @@ public class AttachedFile extends TimeStampedAbstractEntity
   // package constructor
 
   /**
-   * Construct an initialized <code>AttachedFile</code>. Intended only for use by {@link
-   * Screen#createAttachedFile}.
+   * Construct an initialized <code>AttachedFile</code>. Intended only for use by {@link Screen}.
    * @param screen the screen
    * @param filename the filename
    * @param fileContents the file contents

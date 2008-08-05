@@ -191,10 +191,10 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
   public ResultValue createResultValue(Well well,
-                                       Double value,
+                                       Double numericValue,
                                        Integer decimalPrecision)
   {
-    return createResultValue(well, AssayWellType.EXPERIMENTAL, value, decimalPrecision, false);
+    return createResultValue(well, AssayWellType.EXPERIMENTAL, numericValue, decimalPrecision, false);
   }
 
   /**
@@ -358,8 +358,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
   /**
    * Get the set of result value types that this result value type was derived from.
-   * By "derived", we mean that the calculated values of our {@link ResultValues} depend upon
-   * the the {@link ResultValue ResultValues} of other {@link ResultValueType ResultValueTypes}
+   * By "derived", we mean that the calculated values of our {@link ResultValue ResultValues} depend upon
+   * the {@link ResultValue ResultValues} of other {@link ResultValueType ResultValueTypes}
    * (of the same stock plate well). The details of the derivation should be specified via
    * {@link #setHowDerived}.
    * @return the set of result value types that this result value type was derived from
@@ -439,9 +439,9 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
    * @see #setDerived(boolean)
-   * @see #addDerivedTypes()
-   * @see #addDerivedTypeFrom(ResultValueType)
-   * @see #removeDerivedTypeFrom(ResultValueType)
+   * @see #addDerivedType(ResultValueType)
+   * @see #addTypeDerivedFrom(ResultValueType)
+   * @see #removeTypeDerivedFrom(ResultValueType)
    */
   @ManyToMany(
     mappedBy="typesDerivedFrom",
@@ -685,8 +685,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @see #setDerived(boolean)
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
-   * @see #addDerivedTypeFrom(ResultValueType)
-   * @see #removeDerivedTypeFrom(ResultValueType)
+   * @see #addDerivedType(ResultValueType)
+   * @see #removeDerivedType(ResultValueType)
    * @see #addTypeDerivedFrom(ResultValueType)
    * @see #removeTypeDerivedFrom(ResultValueType)
    */
@@ -793,9 +793,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   // package constructor
 
   /**
-   * Construct an initialized <code>ResultValueType</code>. Intended only for use by {@link
-   * ScreenResult#createResultValueType(String)} and {@link
-   * ScreenResult#createResultValueType(String, Integer, boolean, boolean, boolean, String)}.
+   * Construct an initialized <code>ResultValueType</code>. Intended only for use by {@link ScreenResult}.
    * @param screenResult the screen result
    * @param name the name of this result value type
    * @param replicateOrdinal the replicate ordinal

@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentation;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 
 /**
@@ -43,9 +44,9 @@ import edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentatio
  * be screened again for validation purposes. ScreenerCherryPicks are managed by
  * a {@link CherryPickRequest}.
  *
- * @see LabCherryPick, CherryPickRequest
+ * @see LabCherryPick
+ * @see CherryPickRequest
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "cherryPickRequestId", "screenedWellId" }) })
@@ -257,8 +258,7 @@ public class ScreenerCherryPick extends AbstractEntity
   // package instance methods
 
   /**
-   * Construct an initialized <code>ScreenerCherryPick</code>. Intended only for use by {@link
-   * CherryPickRequest#createScreenerCherryPick(Well)}.
+   * Construct an initialized <code>ScreenerCherryPick</code>. Intended only for use by {@link CherryPickRequest}.
    * @param cherryPickRequest the cherry pick request
    * @param screenedWell the screened well
    */

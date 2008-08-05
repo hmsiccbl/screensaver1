@@ -223,7 +223,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * 
    * @param screen the parent Screen of the Screen Result being parsed
    * @param workbookFile the workbook file to be parsed
-   * @param the range of plate numbers to be parsed, allowing for only a subset
+   * @param plateNumberRange the range of plate numbers to be parsed, allowing for only a subset
    *          of the data to be imported. This may be required for resource
    *          utilization purposes, where the ScreenResult must be imported over
    *          multiple passes. If null, well data for all plate will be imported.

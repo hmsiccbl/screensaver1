@@ -381,8 +381,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   // package constructor
 
   /**
-   * Construct an initialized <code>CherryPickAssayPlate</code>. Intended only for use by {@link
-   * CherryPickRequest#createCherryPickAssayPlate(Integer, Integer, PlateType)}.
+   * Construct an initialized <code>CherryPickAssayPlate</code>. Intended only for use by {@link CherryPickRequest}.
    * @param cherryPickRequest the cherry pick request
    * @param plateOrdinal the plate ordinal
    * @param attemptOrdinal the attempt ordinal

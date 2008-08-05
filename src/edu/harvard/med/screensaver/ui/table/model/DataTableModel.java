@@ -32,7 +32,7 @@ public abstract class DataTableModel<R> extends DataModel
    * (but otherwise do not affect the filter or sort order), when domain
    * restrictions have changed, the database has been updated, etc.
    * 
-   * @param allColumns tells the DataTableModel <i>what</i> needs to be fetched
+   * @param columns tells the DataTableModel <i>what</i> needs to be fetched
    *          in order to populate a given row.
    */
   public abstract void fetch(List<? extends TableColumn<R,?>> columns);

@@ -23,14 +23,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Index;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellType;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Index;
 
 
 /**
@@ -153,11 +153,11 @@ public class ResultValue extends AbstractEntity
   // public constructors
 
   /**
-   * Constructs an initialized <code>ResultValue</code> object.
-   * @param resultValueType
-   * @param well
-   * @param value
-   */
+   * Constructs a <code>ResultValue</code>.
+   * @param rvt the parent ResultValueType
+   * @param well the well of this ResultValue
+   * @param value the non-numerical value of the ResultValue
+  */
   ResultValue(ResultValueType rvt,
               Well well,
               String value)
@@ -166,30 +166,34 @@ public class ResultValue extends AbstractEntity
   }
 
   /**
-   * Constructs a numeric ResultValue object, using a Double to specify the
-   * numeric value.
+   * Constructs a numeric ResultValue object
    *
-   * @param value
-   * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
+   * @param rvt the parent ResultValueType
+   * @param well the well of this ResultValue
+   * @param numericValue the numerical value of the ResultValue
+   * @param decimalPrecision the number of digits to appear after the decimal
+   *          point, when displayed
    */
   ResultValue(ResultValueType rvt,
               Well well,
-              Double value,
+              Double numericValue,
               int decimalPrecision)
   {
-    this(rvt, well, AssayWellType.EXPERIMENTAL, null, value, decimalPrecision, false, false);
+    this(rvt, well, AssayWellType.EXPERIMENTAL, null, numericValue, decimalPrecision, false, false);
   }
 
   /**
    * Construct a numerical <code>ResultValue</code>. Intended for use only
    * for creating result values that will not need to be persisted.
    *
-   * @param assayWellType the AssayWellType of the new ResultValue
-   * @param value the non-numerical value of the new result value
-   * @param numericalValue the value of the new ResultValue
+   * @param rvt the parent ResultValueType
+   * @param well the well of this ResultValue
+   * @param assayWellType the AssayWellType of the ResultValue
+   * @param numericalValue the numerical value of the ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal
    *          point, when displayed
-   * @param exclude the exclude flag of the new ResultValue
+   * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
+   * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   public ResultValue(ResultValueType rvt,
                      Well well,
@@ -206,12 +210,12 @@ public class ResultValue extends AbstractEntity
    * Construct a non-numerical <code>ResultValue</code>. Intended for use
    * only for creating result values that will not need to be persisted.
    *
-   * @param assayWellType the AssayWellType of the new ResultValue
-   * @param value the non-numerical value of the new result value
-   * @param numericalValue the value of the new ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal
-   *          point, when displayed
-   * @param exclude the exclude flag of the new ResultValue
+   * @param rvt the parent ResultValueType
+   * @param well the well of this ResultValue
+   * @param assayWellType the AssayWellType of the ResultValue
+   * @param value the non-numerical value of the ResultValue
+   * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
+   * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   public ResultValue(ResultValueType rvt,
                      Well well,
@@ -464,19 +468,18 @@ public class ResultValue extends AbstractEntity
   // package constructor and instance method
 
   /**
-   * Construct an initialized <code>ResultValue</code>. Intended only for use
-   * with {@link #ResultValue(AssayWellType, String, boolean, boolean)},
-   * {@link #ResultValue(AssayWellType, Double, int, boolean, boolean)}, and
-   * {@link
-   * ResultValueType#createResultValue(edu.harvard.med.screensaver.model.libraries.Well,
-   * AssayWellType, Double, int, boolean)}.
-   *
-   * @param assayWellType the AssayWellType of the new ResultValue
-   * @param value the non-numerical value of the new result value
-   * @param numericalValue the value of the new ResultValue
+   * Construct an initialized <code>ResultValue</code>. Intended only for use by
+   * this class's constructors and {@link ResultValueType}.
+   * 
+   * @param rvt the parent ResultValueType
+   * @param well the well of this ResultValue
+   * @param assayWellType the AssayWellType of the ResultValue
+   * @param value the non-numerical value of the ResultValue
+   * @param numericalValue the numerical value of the ResultValue
    * @param decimalPrecision the number of digits to appear after the decimal
    *          point, when displayed
-   * @param exclude the exclude flag of the new ResultValue
+   * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
+   * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   ResultValue(ResultValueType rvt,
               Well well,
@@ -524,12 +527,10 @@ public class ResultValue extends AbstractEntity
 
   /**
    * Set whether this result value is a positive. Intended only for use by
-   * hibernate and {@link
-   * ResultValueType#createResultValue(edu.harvard.med.screensaver.model.libraries.Well,
-   * AssayWellType, Double, int, boolean)}.
-   *
+   * hibernate and {@link ResultValueType}.
+   * 
    * @param isPositive true iff this result value is a positive
-   * @motivation for hibernate and ResultValueType.addResultValue
+   * @motivation for hibernate and ResultValueType
    */
   void setPositive(boolean isPositive)
   {

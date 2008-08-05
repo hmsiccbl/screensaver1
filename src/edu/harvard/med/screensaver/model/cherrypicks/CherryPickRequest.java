@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,9 +64,10 @@ import org.joda.time.LocalDate;
  * Two types of CPs are managed: {@link ScreenerCherryPick ScreenerCherryPicks}
  * ("SCP") and {@link LabCherryPick LabCherryPicks} ("LCP").
  *
- * @see ScreenerCherryPick, LabCherryPick, CherryPickAssayPlate
+ * @see ScreenerCherryPick
+ * @see LabCherryPick
+ * @see CherryPickAssayPlate
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -790,7 +790,7 @@ public abstract class CherryPickRequest extends AbstractEntity
 
   /**
    * Construct an initialized <code>CherryPickRequest</code>. Intended only for use by {@link
-   * Screen#createCherryPickRequest(ScreeningRoomUser, Date, Integer)}.
+   * Screen}.
    * @param screen the screen
    * @param requestedBy the user that made the request
    * @param dateRequested the date created

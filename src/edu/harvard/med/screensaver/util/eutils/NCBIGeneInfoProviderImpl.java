@@ -38,7 +38,6 @@ public class NCBIGeneInfoProviderImpl extends EutilsUtils implements NCBIGeneInf
   
   /**
    * Construct a <code>NCBIGeneInfoProvider</code> object.
-   * @param errorManager
    */
   public NCBIGeneInfoProviderImpl()
   {

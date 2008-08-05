@@ -5,7 +5,7 @@
  * 
  * <dl>
  * 
- * <dt>{@link edu.harvard.med.screensaver.model.cherrypicks cherrypicks}
+ * <dt>{@link edu.harvard.med.screensaver.model.cherrypick cherrypicks}
  * <dd>Models the cherrypicks for a screen. Screeners choose their best and most interesting
  * hits for confirmation screens and other followup studies.
  * 
@@ -107,11 +107,8 @@
  * 
  * For every containment relationship, there are one or more methods that match the pattern
  * <code>public Contained Container.createContained(...)</code>. For example, see
- * {@link edu.harvard.med.screensaver.model.libraries.Library#createWell(Integer, String)},
- * {@link edu.harvard.med.screensaver.model.libraries.Library#createWell(WellKey, WellType)},
- * and {@link
- * edu.harvard.med.screensaver.model.libraries.Library#createWell(Integer, String, WellType)}.
- * These factory methods are
+ * {@link edu.harvard.med.screensaver.model.libraries.Library#createWell(edu.harvard.med.screensaver.model.libraries.WellKey, edu.harvard.med.screensaver.model.libraries.WellType)},
+ * This factory method is
  * responsible for adding the newly created entity into any bidirectional relationships,
  * almost always including the classes own
  * <code>public Set<Contained> Container.getContaineds()</code>. The factory methods are

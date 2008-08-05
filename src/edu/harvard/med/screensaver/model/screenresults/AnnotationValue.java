@@ -170,11 +170,7 @@ public class AnnotationValue extends AbstractEntity
 
   /**
    * Construct an initialized <code>AnnotationValue</code>. Intended only for use by
-   * {@link AnnotationType#createAnnotationValue(Reagent, String)}.
-   * @param annotationType the annotation type
-   * @param reagentVendorIdentifier the reagent vendor identifier
-   * @param value the value
-   * @param numericValue the numerical value
+   * {@link AnnotationType}.
    */
   AnnotationValue(
     AnnotationType annotationType,

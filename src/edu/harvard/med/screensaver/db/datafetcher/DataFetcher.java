@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.ui.table.Criterion;
 /**
  * General purpose interface for fetch a set of objects from persistent storage,
  * supporting both lazy or eager fetching strategies. Eager fetching of all
- * objects is performed via {@link fetchAllData}. Lazy fetching of root objects
+ * objects is performed via {@link #fetchAllData()}. Lazy fetching of root objects
  * is performed by calling these methods:
  * <ul>
  * <li>(optional) {@link #setFilteringCriteria(Map)}</li>
@@ -33,7 +33,7 @@ import edu.harvard.med.screensaver.ui.table.Criterion;
  * Note that the filtering and ordering requests only need to be respected by
  * {@link #findAllKeys()}, and not {@link #fetchAllData()}. Presumably, if all
  * data is eagerly fetched via
- * {@link #fetchAllData()), ordering and filtering can be handled by the client
+ * {@link #fetchAllData()}, ordering and filtering can be handled by the client
  * code, as all required data is in memory. Of course, when data is lazily
  * fetched, the client code needs to be provided an ordered, filtered list of
  * keys, since it cannot possibly perform a total ordering and filtering on only

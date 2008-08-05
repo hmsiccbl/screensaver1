@@ -40,7 +40,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 /**
  * A substance, such as a {@link Compound} or {@link SilencingReagent}, used to
  * test the response of a biological system to a specific perturbation. Reagents
- * are contained in {@link #Library Library} {@link Well wells}.
+ * are contained in {@link Library} {@link Well wells}.
  * <p>
  * <i>Note: The Reagent entity has been recently added to the data model, and
  * will ultimately be renamed to LibraryReagent and will become the parent of

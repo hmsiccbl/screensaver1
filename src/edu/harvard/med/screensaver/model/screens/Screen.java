@@ -512,9 +512,9 @@ public class Screen extends Study
 
   /**
    * Get the status items. A Screen may only contain one status with a given
-   * {@link StatusItem#rank} value (StatusItems with the same rank are mutually
+   * {@link StatusValue#getRank() rank} value (StatusItems with the same rank are mutually
    * exclusive). Ordering of StatusItems must be equivalent whether by
-   * {@link StatusItem#rank} or {@link StatusItem#date}.
+   * {@link StatusValue#getRank() rank} or {@link StatusItem#getStatusDate() date}.
    *
    * @return the status items
    */
@@ -613,7 +613,7 @@ public class Screen extends Study
   /**
    * Create and return a new library screening for the screen.
    * @param performedBy the user that performed the screening
-   * @param assayProtocolType the assay protocol type
+   * @param dateOfActivity the date the lab activity took place
    * @return the new library screening
    */
   public LibraryScreening createLibraryScreening(
@@ -903,7 +903,7 @@ public class Screen extends Study
 
   /**
    * Set the billing information.
-   * @param billingInformation the new billing information
+   * @param toBeRequested
    */
   public BillingInformation createBillingInformation(boolean toBeRequested)
   {
@@ -944,8 +944,7 @@ public class Screen extends Study
    * Get whether this <code>Screen</code> can be viewed by all users of
    * the system; that is,
    * {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser}s other
-   * than those associated with the
-   * {@link edu.harvard.med.screensaver.screens.Screen}.
+   * than those associated with the Screen.
    *
    * @return <code>true</code> iff this <code>ScreenResult</code> is
    *         shareable among all users

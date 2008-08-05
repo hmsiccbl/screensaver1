@@ -85,7 +85,6 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   /**
    * Construct an initialized <code>ScreeningRoomUser</code>.
-   * @param dateCreated the date created
    * @param firstName the first name
    * @param lastName the last name
    * @param email the email
@@ -360,7 +359,7 @@ public class ScreeningRoomUser extends ScreensaverUser
 
   /**
    * Set the COMS-CRHBA permit principal investigator.
-   * @param comsCrhbaPermitNumber the new COMS-CRHBA permit principal investigator
+   * @param comsCrhbaPermitPrincipalInvestigator the new COMS-CRHBA permit principal investigator
    */
   public void setComsCrhbaPermitPrincipalInvestigator(String comsCrhbaPermitPrincipalInvestigator)
   {

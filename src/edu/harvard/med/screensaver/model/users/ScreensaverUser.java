@@ -96,16 +96,6 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
 
   // public constructors
 
-  /**
-   * Construct an initialized <code>ScreensaverUser</code>.
-   * @param dateCreated the date created
-   * @param firstName the first name
-   * @param lastName the last name
-   * @param email the email
-   * @param phone the phone number
-   * @param mailingAddress the mailing address
-   * @param comments the comments
-   */
   public ScreensaverUser(
     String firstName,
     String lastName,
@@ -116,15 +106,6 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
     setEmail(email);
   }
 
-  /**
-   * Construct an initialized <code>ScreensaverUser</code>.
-   * @param firstName the first name
-   * @param lastName the last name
-   * @param email the email
-   * @param phone the phone number
-   * @param mailingAddress the mailing address
-   * @param comments the comments
-   */
   public ScreensaverUser(
     String firstName,
     String lastName,
@@ -217,7 +198,6 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
 
   /**
    * Remove this user from all roles.
-   * @param well the role to remove this user from
    */
   public void removeScreensaverUserRoles()
   {
@@ -444,7 +424,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
 
   /**
    * Set the user's Screensaver-managed login ID.
-   * @param loginID the new Screensaver login ID
+   * @param loginId the new Screensaver login ID
    */
   public void setLoginId(String loginId)
   {

@@ -22,7 +22,7 @@ import org.joda.time.LocalDate;
  * A screening room activity representing a screener screening various assay
  * plates. These assay plates could be plated from a library, as with a
  * {@link LibraryScreening}, or from a set of cherry picks, as with a
- * {@link RnaiCherryPickScreening}).
+ * {@link RNAiCherryPickScreening}).
  * <p>
  * <small>Note that at ICCB-L, RNAi cherry pick plates are screened at the
  * ICCB-L facility, explaining why we have an explicit
@@ -137,7 +137,6 @@ public abstract class Screening extends LabActivity
    * Construct an initialized <code>Screening</code>.
    * @param screen the screen
    * @param performedBy the user that performed the screening
-   * @param dateCreated the date created
    * @param dateOfActivity the date the screening took place
    */
   protected Screening(

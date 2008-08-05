@@ -52,7 +52,7 @@ import org.hibernate.Session;
 
 
 /**
- * A {@link SearchResults} for {@link Reagents Reagents}. Provides
+ * A {@link SearchResults} for {@link Reagent Reagents}. Provides
  * user-selectable annotation type columns.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

@@ -186,7 +186,6 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
   /**
    * Construct an initialized <code>Activity</code>.
    * @param performedBy the user that performed the activity
-   * @param dateCreated the date created
    * @param dateOfActivity the date the activity took place
    */
   protected Activity(ScreensaverUser performedBy, LocalDate dateOfActivity)

@@ -71,10 +71,10 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
    * Allows subclass to add a fixed set of restrictions that will narrow the
    * query result to a particular entity domain. For example, entities sharing
    * the same parent, an arbitrary set of entity keys, etc. This restriction is
-   * effectively AND'ed with the criteria set via {@link setFilteringCriteria}.
+   * effectively AND'ed with the criteria set via {@link #setFilteringCriteria(Map)}.
    *
    * @motivation This method is a convenience to the client code, which will
-   *             usually use {@link setFilteringCriteria} for user-specified,
+   *             usually use {@link #setFilteringCriteria(Map)} for user-specified,
    *             column-associated criteria. Use of this method allows the
    *             client code to set a top-level restriction that is respected
    *             even as the user modifies column-based filtering criteria.
@@ -182,7 +182,6 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
   /**
    * @param keys if null, fetches all entities for the root entity type (subject
    *          to normal column criteria)
-   * @return
    */
   protected Query buildFetchDataQuery(final Set<K> keys)
   {
@@ -308,7 +307,8 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
    * @param path the relationship path, from the root entity of this
    *          DataFetcher, that will be represented by the returned Criteria
    *          object
-   * @param path2Criteria
+   * @param path2Alias
+   * @param joinType
    * @return the alias for leaf node in the relationship path
    */
   protected String getOrCreateJoin(HqlBuilder hql,
@@ -372,11 +372,6 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
    *             we must create a disjunction of restrictions for each join
    *             alias, since we're "stacking" multiple, distinct paths (of the
    *             same type, but of different restrictions)
-   * @param hql
-   * @param path
-   * @param path2Alias
-   * @param alias2Restriction
-   * @return
    */
   protected String getOrCreateFetchJoin(HqlBuilder hql,
                                         RelationshipPath<E> path,

@@ -74,7 +74,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
 
   /**
    * Construct an initialized <code>AnnotationType</code>. Intended only for use by {@link
-   * Screen#createAnnotationType(String, String, boolean)}.
+   * Screen}.
    * @param study the study
    * @param name the name of the annotation type
    * @param description the description for the annotation type
@@ -188,9 +188,8 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
 
   /**
    * Create and return an annotation value for the annotation type.
-   * @param reagentVendorIdentifier the reagent vendor identifier
+   * @param reagent the reagent vendor identifier
    * @param value the value
-   * @param isNumeric true iff the annotation value is numeric
    * @return the new annotation value
    */
   public AnnotationValue createAnnotationValue(

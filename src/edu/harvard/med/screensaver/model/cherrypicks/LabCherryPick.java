@@ -130,9 +130,10 @@ import org.hibernate.annotations.Parameter;
  * </tr>
  * </table>
  *
- * @see ScreenerCherryPick, CherryPickRequest, CherryPickAssayPlate
+ * @see ScreenerCherryPick
+ * @see CherryPickRequest
+ * @see CherryPickAssayPlate
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @org.hibernate.annotations.Proxy
@@ -543,8 +544,7 @@ public class LabCherryPick extends AbstractEntity
 
   /**
    * Construct an initialized <code>LabCherryPick</code> with an association to the
-   * <code>ScreenerCherryPick</code>. Intended only for use by {@link
-   * CherryPickRequest#createLabCherryPick(ScreenerCherryPick, Well)}.
+   * <code>ScreenerCherryPick</code>. Intended only for use by {@link CherryPickRequest}.
    * @param sourceWell the source well
    * @param screenerCherryPick the screener cherry pick
    */

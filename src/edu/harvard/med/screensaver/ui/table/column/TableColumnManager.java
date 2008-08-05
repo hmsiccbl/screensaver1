@@ -185,7 +185,7 @@ public class TableColumnManager<R> extends Observable implements Observer
    *
    * @motivation allow sort column to be set from a drop-down list UI component
    *             (in addition to clicking on table column headers)
-   * @param currentSortColumn the new current sort column
+   * @param newSortColumn the new current sort column
    */
   public void setSortColumn(TableColumn<R,?> newSortColumn)
   {

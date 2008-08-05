@@ -122,7 +122,7 @@ public class WellFinder extends AbstractBackingBean
   }
 
   /**
-   * Find the wells specified in the plate-well list, and go to the {@link WellSearchResultsViewer}
+   * Find the wells specified in the plate-well list, and go to the {@link WellSearchResults}
    * page.
    * @return the controller code for the next appropriate page
    */
@@ -172,7 +172,7 @@ public class WellFinder extends AbstractBackingBean
 
   /**
    * Find the volumes for all copies of the wells specified in the plate-well
-   * list, and go to the {@link WellSearchResultsViewer} page.
+   * list, and go to the {@link WellSearchResults} page.
    *
    * @return the controller code for the next appropriate page
    */

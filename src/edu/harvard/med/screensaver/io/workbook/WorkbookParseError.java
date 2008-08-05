@@ -26,7 +26,7 @@ public class WorkbookParseError implements ParseError
   /**
    * Constructs a ParseError object, associated with a particular cell location.
    *
-   * @param errorMessage the error message
+   * @param message the error message
    * @param atCell the cell associated with the error message
    */
   public WorkbookParseError(String message, Cell atCell)

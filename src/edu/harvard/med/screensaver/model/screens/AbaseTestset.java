@@ -168,8 +168,7 @@ public class AbaseTestset extends AbstractEntity
   // protected constructor
 
   /**
-   * Construct an initialized <code>AbaseTestset</code>. Intended only for use with {@link
-   * Screen#createAbaseTestset}.
+   * Construct an initialized <code>AbaseTestset</code>. Intended only for use with {@link Screen}.
    * @param screen the screen
    * @param testsetDate the testset date
    * @param testsetName the testset name

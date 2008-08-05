@@ -54,7 +54,6 @@ public class AdministratorUser extends ScreensaverUser
   /**
    * Constructs an initialized <code>ScreensaverUser</code> object.
    *
-   * @param dateCreated the date created
    * @param firstName the first name
    * @param lastName the last name
    * @param email the email

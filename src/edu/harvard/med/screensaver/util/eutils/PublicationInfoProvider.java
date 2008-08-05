@@ -20,7 +20,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Retrieves the information needed from PubMed for a {@link Gene}, based on the PubMed ID.
- * The information needed from PubMed is encapsulated in an {@link PublicationInfo} object.
+ * The information needed from PubMed is encapsulated in an {@link Publication} object.
  * <p>
  * Uses <a href="http://eutils.ncbi.nlm.nih.gov/entrez/query/static/eutils_help.html">NCBI
  * E-utilities</a> to gather the necessary information.
@@ -47,10 +47,10 @@ public class PublicationInfoProvider extends EutilsUtils
   }
   
   /**
-   * Get the {@link PublicationInfo information needed from PubChem} for a {@link Publication},
+   * Get the {@link Publication},
    * based on the PubMed ID. If any errors occur, report the error and return null.
-   * @param pubmedId the EntrezGene ID for the Gene.
-   * @return the publication info
+   * @param pubmedId the PubMed ID for the publication
+   * @return the Publication
    * @throws EutilsException 
    */
   public synchronized Publication getPublicationForPubmedId(Integer pubmedId) throws EutilsException

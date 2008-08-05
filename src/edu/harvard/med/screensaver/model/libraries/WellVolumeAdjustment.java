@@ -83,7 +83,7 @@ public class WellVolumeAdjustment extends AbstractEntity
 
   /**
    * Construct an initialized <code>WellVolumeAdjustment</code>. Intended only for use by
-   * {@link LabCherryPick#createWellVolumeAdjustment(WellVolumeAdjustment)}.
+   * {@link LabCherryPick}.
    * @param copy the copy
    * @param well the well
    * @param volume the volume
@@ -239,7 +239,7 @@ public class WellVolumeAdjustment extends AbstractEntity
 
   /**
    * Construct an initialized <code>WellVolumeAdjustment</code>. Intended only for use by
-   * {@link WellVolumeCorrectionActivity#createWellVolumeAdjustment(Copy, Well, Volume)}.
+   * {@link WellVolumeCorrectionActivity}.
    * @param copy the copy
    * @param well the well
    * @param volume the volume
@@ -264,10 +264,7 @@ public class WellVolumeAdjustment extends AbstractEntity
   // private constructor
 
   /**
-   * Construct a partially initialized <code>WellVolumeAdjustment</code>. Intended only for
-   * use by
-   * {@link #WellVolumeAdjustment(Copy, Well, Volume, LabCherryPick)} and
-   * {@link #WellVolumeAdjustment(Copy, Well, Volume, WellVolumeCorrectionActivity)}.
+   * Construct a partially initialized <code>WellVolumeAdjustment</code>. 
    * @param copy the copy
    * @param well the well
    * @param volume the volume

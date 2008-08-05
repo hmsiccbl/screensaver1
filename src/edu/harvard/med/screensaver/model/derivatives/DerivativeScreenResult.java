@@ -146,7 +146,7 @@ public class DerivativeScreenResult extends AbstractEntity
 
   /**
    * Construct an initialized <code>DerivativeScreenResult</code>. Intended only for use by
-   * {@link Derivative#createDerivativeScreenResult}.
+   * {@link Derivative}.
    * @param derivative the derivative
    * @param activityLevel the activity level
    * @param activityType the activity type

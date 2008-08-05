@@ -189,8 +189,7 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
 
   /**
    * Construct an initialized <code>RNAiKnockdownConfirmation</code>. Intended only for use with
-   * {@link ScreenerCherryPick#createRnaiKnockdownConfirmation(Double, MethodOfQuantification,
-   * String, String)}.
+   * {@link ScreenerCherryPick}.
    * @param screenerCherryPick the screener cherry pick
    * @param percentKnockdown the percent knockdown
    * @param methodOfQuantification the method of quantification

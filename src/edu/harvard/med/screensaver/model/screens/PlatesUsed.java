@@ -176,8 +176,7 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
   // package constructor
 
   /**
-   * Construct an initialized <code>PlatesUsed</code>. Intended only for use with {@link
-   * LibraryScreening#createPlatesUsed(Integer, Integer, String)}.
+   * Construct an initialized <code>PlatesUsed</code>. Intended only for use with {@link LibraryScreening}.
    * @param libraryScreening the library screening
    * @param startPlate the start plate
    * @param endPlate the end plate

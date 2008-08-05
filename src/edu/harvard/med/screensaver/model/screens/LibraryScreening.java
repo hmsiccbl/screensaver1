@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Date;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -35,7 +34,7 @@ import org.joda.time.LocalDate;
  * that is performed against <i>full copies</i> of the plates of one or more
  * libraries. (Consider that a screening could also be performed against a
  * selected subset of the wells from a library, as is the case with
- * {@link RnaiCherryPickScreening}.
+ * {@link RNAiCherryPickScreening}.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -158,11 +157,10 @@ public class LibraryScreening extends Screening
   // package constructor
 
   /**
-   * Construct an initialized <code>LibraryScreening</code>. Intended only for use by {@link
-   * Screen#createLibraryScreening(ScreeningRoomUser, Date, Date)}.
+   * Construct an initialized <code>LibraryScreening</code>. Intended only for use by {@link Screen}.
    * @param screen the screen
    * @param performedBy the user that performed the library assay
-   * @param assayProtocolType the assay protocol type
+   * @param dateOfActivity
    */
   LibraryScreening(
     Screen screen,

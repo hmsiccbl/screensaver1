@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -63,8 +62,7 @@ public class CherryPickLiquidTransfer extends LabActivity
 
   /**
    * Construct an initialized <code>CherryPickLiquidTransfer</code>. Intended only for use
-   * with {@link Screen#createCherryPickLiquidTransfer(ScreensaverUser, Date, Date,
-   * CherryPickLiquidTransferStatus)}.
+   * with {@link Screen}.
    * @param screen the screen
    * @param performedBy the user that performed the activity
    * @param dateOfActivity the date the screening room activity took place

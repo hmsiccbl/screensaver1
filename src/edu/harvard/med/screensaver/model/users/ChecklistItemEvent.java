@@ -115,11 +115,9 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   }
 
   /**
-   * For checklist items that are {@link expirable ChecklistItem#isExpirable()},
+   * For checklist items that are {@link ChecklistItem#isExpirable() expirable},
    * get whether this checklist item event represents the activation or the
    * expiration event.
-   * 
-   * @return
    */
   @Column(nullable = false, updatable = false, name = "isExpiration")
   @Immutable
@@ -184,8 +182,7 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   /**
    * Construct an initialized "activation" or "completed" <code>ChecklistItemEvent</code> 
    * <p>
-   * Intended only for use by
-   * {@link ScreeningRoomUser#createChecklistItemActivation(ChecklistItem, ScreeningRoomUser, LocalDate, AdministrativeActivity)}.
+   * Intended only for use by {@link ScreeningRoomUser}.
    * 
    * @param checklistItem the checklist item
    * @param screeningRoomUser the screening room user to which this checklist

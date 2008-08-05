@@ -28,7 +28,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 
 /**
- * ScreeningRoomUsers may have zero or more {@link ChecklistItems ChecklistItem}
+ * ScreeningRoomUsers may have zero or more {@link ChecklistItemEvent ChecklistItemEvents}
  * for each ChecklistItem that is defined. A given ChecklistItem may be
  * "expirable", in which case multiple ChecklistItemEvents may be exist
  * for a user, where each pair activates and then expires the ChecklistItem.
@@ -65,7 +65,7 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
    * @param itemName the item name
    * @param isExpirable whether this type of checklist item can be activated and
    *          then expired (repeatedly)
-   * @param the group it belongs to
+   * @param group the group it belongs to
    * @param orderStatistic the order of the item within its group, 1-based
    */
   public ChecklistItem(String itemName,

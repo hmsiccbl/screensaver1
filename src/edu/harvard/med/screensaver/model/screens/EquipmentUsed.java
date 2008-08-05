@@ -135,8 +135,7 @@ public class EquipmentUsed extends AbstractEntity
   // package constructor
 
   /**
-   * Construct an initialized <code>EquipmentUsed</code>. Intended only for use by {@link
-   * LabActivity#createEquipmentUsed(String, String, String)}.
+   * Construct an initialized <code>EquipmentUsed</code>. Intended only for use by {@link LabActivity}.
    * @param labActivity the screening room activity
    * @param equipment the equipment
    * @param protocol the protocol

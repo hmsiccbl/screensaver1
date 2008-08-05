@@ -178,8 +178,8 @@ public class Criterion<T> extends Observable
   }
 
   /**
-   * An undefined criterion always matches (does not filter out any data).
-   * @return
+   * Get whether this is an an undefined criterion, which always matches (does
+   * not filter out any data).
    */
   public boolean isUndefined()
   {

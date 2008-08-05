@@ -245,7 +245,7 @@ public class Library extends AbstractEntity
   /**
    * Get the number of copies.
    * @return the number of copies
-   * @motivation {@link #getCopis} forces loading of all copies, just to get the
+   * @motivation {@link #getCopies()} forces loading of all copies, just to get the
    *             size; Hibernate can optimize a collection size request, if we
    *             get directly from an underyling extra-lazy persistent collection.
    */
