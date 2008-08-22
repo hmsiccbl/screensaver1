@@ -121,7 +121,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private boolean _isSmallMoleculeScreensCollapsed = false;
   private boolean _isRnaiScreensCollapsed = false;
   private boolean _isChecklistItemsCollapsed = true;
-  private boolean _isScreensCollapsed = true;
+  private boolean _isScreensCollapsed = false;
   private Map<ChecklistItemGroup,DataModel> _checklistItemDataModelMap;
   private AdministratorUser _checklistItemEventEnteredBy;
   private List<LocalDate> _newChecklistItemDatePerformed;
