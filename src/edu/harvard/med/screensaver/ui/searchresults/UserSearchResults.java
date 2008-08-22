@@ -71,6 +71,8 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
   public void searchUsers()
   {
     initialize(new AllEntitiesOfTypeDataFetcher<E,Integer>(_type, _dao));
+    // default to descending sort order on user ID, to show last created first
+    getColumnManager().setSortAscending(false);
   }
 
   public void searchUsers(Set<ScreeningRoomUser> users)
@@ -78,6 +80,9 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
     initialize(new EntitySetDataFetcher<E,Integer>(_type,
       CollectionUtils.<Integer>entityIds(users),
       _dao));
+    // default to ascending sort order on user name
+    getColumnManager().setSortColumnName("Name");
+    getColumnManager().setSortAscending(true);
   }
 
 
