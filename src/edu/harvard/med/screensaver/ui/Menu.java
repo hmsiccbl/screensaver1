@@ -48,7 +48,6 @@ public class Menu extends AbstractBackingBean
   private LibrarySearchResults _librariesBrowser;
   private StaffSearchResults _staffBrowser;
   private ScreenerSearchResults _screenersBrowser;
-  private ScreenerSearchResults _associatesBrowser;
   private ActivitySearchResults _activitiesBrowser;
   private ScreenDetailViewer _screenDetailViewer;
   private UserViewer _userViewer;
@@ -70,7 +69,6 @@ public class Menu extends AbstractBackingBean
               CherryPickRequestSearchResults cherryPickRequestsBrowser,
               LibrarySearchResults librariesBrowser,
               ScreenerSearchResults screenersBrowser,
-              ScreenerSearchResults associatesBrowser,
               StaffSearchResults staffBrowser,
               ActivitySearchResults activitiesBrowser,
               ScreenDetailViewer screenDetailViewer,
@@ -84,7 +82,6 @@ public class Menu extends AbstractBackingBean
     _librariesBrowser = librariesBrowser;
     _staffBrowser = staffBrowser;
     _screenersBrowser = screenersBrowser;
-    _associatesBrowser = associatesBrowser;
     _activitiesBrowser = activitiesBrowser;
     _screenDetailViewer = screenDetailViewer;
     _userViewer = userViewer;
@@ -175,8 +172,8 @@ public class Menu extends AbstractBackingBean
       reportSystemError("invalid user type");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    _associatesBrowser.searchAssociatedUsers((ScreeningRoomUser) getScreensaverUser());
-    return BROWSE_ASSOCIATES;
+    _screenersBrowser.searchAssociatedUsers((ScreeningRoomUser) getScreensaverUser());
+    return BROWSE_SCREENERS;
   }
 
   @UIControllerMethod

@@ -105,7 +105,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private UsersDAO _usersDao;
   private ScreenerSearchResults _screenerSearchResults;
   private StaffSearchResults _staffSearchResults;
-  private ScreenerSearchResults _associatesBrowser;
   private ScreenSearchResults _screensBrowser;
 
   private ScreensaverUser _user;
@@ -143,7 +142,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
                     GenericEntityDAO dao,
                     UsersDAO usersDao,
                     ScreenerSearchResults screenerSearchResults,
-                    ScreenerSearchResults associatesBrowser,
                     StaffSearchResults staffSearchResults,
                     ScreenSearchResults screensBrowser)
   {
@@ -152,7 +150,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _dao = dao;
     _usersDao = usersDao;
     _screenerSearchResults = screenerSearchResults;
-    _associatesBrowser = associatesBrowser;
     _staffSearchResults = staffSearchResults;
     _screensBrowser = screensBrowser;
   }
@@ -461,7 +458,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     if (_userRolesDataModel == null) {
       List<ScreensaverUserRole> userRoles = new ArrayList<ScreensaverUserRole>();
       userRoles.addAll(_user.getScreensaverUserRoles());
-      userRoles.removeAll(HIDDEN_ROLES); 
+      userRoles.removeAll(HIDDEN_ROLES);
       Collections.sort(userRoles, USER_ROLE_COMPARATOR);
       _userRolesDataModel = new ListDataModel(userRoles);
     }
@@ -473,7 +470,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     if (_newUserRole == null) {
       Collection<ScreensaverUserRole> candidateNewUserRoles = new TreeSet<ScreensaverUserRole>();
       for (ScreensaverUserRole userRole : ScreensaverUserRole.values()) {
-        if (!userRole.isAdministrative() && 
+        if (!userRole.isAdministrative() &&
           !_user.getScreensaverUserRoles().contains(userRole) &&
           !HIDDEN_ROLES.contains(userRole)) {
           candidateNewUserRoles.add(userRole);
@@ -758,8 +755,8 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public String browseLabMembers()
   {
     HashSet<ScreeningRoomUser> labMembers = Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData());
-    _associatesBrowser.searchUsers(labMembers);
-    return BROWSE_LAB_MEMBERS;
+    _screenerSearchResults.searchUsers(labMembers);
+    return BROWSE_SCREENERS;
   }
 
   @SuppressWarnings("unchecked")
@@ -767,8 +764,8 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   public String browseScreenAssociates()
   {
     HashSet<ScreeningRoomUser> associates = Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData());
-    _associatesBrowser.searchUsers(associates);
-    return BROWSE_SCREEN_ASSOCIATES;
+    _screenerSearchResults.searchUsers(associates);
+    return BROWSE_SCREENERS;
   }
 
   public List<ChecklistItemGroup> getChecklistItemGroups()

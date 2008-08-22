@@ -59,7 +59,7 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
   
   public void testVirginChecklistItemsDataModel()
   {
-    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null, null);
+    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null);
     userViewer.setCurrentScreensaverUser(_currentScreensaverUser);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
@@ -92,7 +92,7 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
   public void testPopulatedChecklistItemsDataModel()
   {    
     final LocalDate today = new LocalDate();
-    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null, null);
+    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null);
     userViewer.setCurrentScreensaverUser(_currentScreensaverUser);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()

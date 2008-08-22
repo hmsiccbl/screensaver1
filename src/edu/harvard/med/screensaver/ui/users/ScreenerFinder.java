@@ -16,7 +16,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
-import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -105,7 +104,7 @@ public class ScreenerFinder extends AbstractBackingBean
     if (!StringUtils.isEmpty(pattern)) {
       _screenerSearchResults.searchUsers(); // potentially poor performance, but "correct", as it always searches lastest additions and changes to users
       TableColumn<ScreeningRoomUser,String> column = (TableColumn<ScreeningRoomUser,String>) _screenerSearchResults.getColumnManager().getColumn("Name");
-      column.addCriterion(new Criterion<String>(Operator.TEXT_LIKE, pattern));
+      column.resetCriteria().setOperatorAndValue(Operator.TEXT_LIKE, pattern);
       if (_screenerSearchResults.getRowCount() == 0) {
         showMessage("users.noUserWithMatchingName", pattern);
       }
