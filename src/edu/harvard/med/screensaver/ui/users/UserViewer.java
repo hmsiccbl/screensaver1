@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,8 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private UsersDAO _usersDao;
   private ScreenerSearchResults _screenerSearchResults;
   private StaffSearchResults _staffSearchResults;
+  private ScreenerSearchResults _associatesBrowser;
+  private ScreenSearchResults _screensBrowser;
 
   private ScreensaverUser _user;
   private boolean _isEditMode;
@@ -115,7 +118,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private HashMap<ScreenType,DataModel> _screensDataModel;
   private DataModel _labMembersDataModel;
   private DataModel _screenAssociatesDataModel;
-  private ScreenSearchResults _screensBrowser;
   private boolean _isLabMembersCollapsed = true;
   private boolean _isScreenAssociatesCollapsed = true;
   private boolean _isSmallMoleculeScreensCollapsed = false;
@@ -125,7 +127,6 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
   private Map<ChecklistItemGroup,DataModel> _checklistItemDataModelMap;
   private AdministratorUser _checklistItemEventEnteredBy;
   private List<LocalDate> _newChecklistItemDatePerformed;
-
 
 
   // constructors
@@ -142,6 +143,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
                     GenericEntityDAO dao,
                     UsersDAO usersDao,
                     ScreenerSearchResults screenerSearchResults,
+                    ScreenerSearchResults associatesBrowser,
                     StaffSearchResults staffSearchResults,
                     ScreenSearchResults screensBrowser)
   {
@@ -150,6 +152,7 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     _dao = dao;
     _usersDao = usersDao;
     _screenerSearchResults = screenerSearchResults;
+    _associatesBrowser = associatesBrowser;
     _staffSearchResults = staffSearchResults;
     _screensBrowser = screensBrowser;
   }
@@ -750,22 +753,22 @@ public class UserViewer extends AbstractBackingBean implements EditableViewer
     return BROWSE_SCREENS;
   }
 
+  @SuppressWarnings("unchecked")
   @UIControllerMethod
   public String browseLabMembers()
   {
-    return doBrowseAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData()));
+    HashSet<ScreeningRoomUser> labMembers = Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData());
+    _associatesBrowser.searchUsers(labMembers);
+    return BROWSE_LAB_MEMBERS;
   }
 
+  @SuppressWarnings("unchecked")
   @UIControllerMethod
   public String browseScreenAssociates()
   {
-    return doBrowseAssociates(Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData()));
-  }
-
-  private String doBrowseAssociates(Set<ScreeningRoomUser> associates)
-  {
-    _screenerSearchResults.searchUsers(associates);
-    return BROWSE_SCREENERS;
+    HashSet<ScreeningRoomUser> associates = Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData());
+    _associatesBrowser.searchUsers(associates);
+    return BROWSE_SCREEN_ASSOCIATES;
   }
 
   public List<ChecklistItemGroup> getChecklistItemGroups()

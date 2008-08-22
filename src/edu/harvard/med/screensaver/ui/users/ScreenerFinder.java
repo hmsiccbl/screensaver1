@@ -103,7 +103,7 @@ public class ScreenerFinder extends AbstractBackingBean
   {
     String pattern = getFullNamePattern();
     if (!StringUtils.isEmpty(pattern)) {
-      _screenerSearchResults.resetFilter();
+      _screenerSearchResults.searchUsers(); // potentially poor performance, but "correct", as it always searches lastest additions and changes to users
       TableColumn<ScreeningRoomUser,String> column = (TableColumn<ScreeningRoomUser,String>) _screenerSearchResults.getColumnManager().getColumn("Name");
       column.addCriterion(new Criterion<String>(Operator.TEXT_LIKE, pattern));
       if (_screenerSearchResults.getRowCount() == 0) {

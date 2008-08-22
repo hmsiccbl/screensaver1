@@ -251,6 +251,21 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
+      <from-outcome>browseAssociates</from-outcome>
+      <to-view-id>/users/associatesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>browseScreenAssociates</from-outcome>
+      <to-view-id>/users/screenAssociatesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>browseLabMembers</from-outcome>
+      <to-view-id>/users/labMembersBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
       <from-outcome>viewUser</from-outcome>
       <to-view-id>/users/userViewer</to-view-id>
       <redirect/>

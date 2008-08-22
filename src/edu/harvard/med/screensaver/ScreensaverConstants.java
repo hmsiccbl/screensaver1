@@ -71,4 +71,7 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENERS = "browseScreeners";
   public static final String BROWSE_STAFF = "browseStaff";
   public static final String VIEW_USER = "viewUser";
+  public static final String BROWSE_LAB_MEMBERS = "browseLabMembers";
+  public static final String BROWSE_SCREEN_ASSOCIATES = "browseScreenAssociates";
+  public static final String BROWSE_ASSOCIATES = "browseAssociates";
 }
