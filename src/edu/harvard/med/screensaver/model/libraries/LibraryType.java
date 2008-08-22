@@ -31,6 +31,8 @@ public enum LibraryType implements VocabularyTerm
   NCI("NCI"),
   NATURAL_PRODUCTS("Natural Products"),
   SIRNA("siRNA"),
+  MIRNA_INHIBITOR("miRNA Inhibitor"),
+  MIRNA_MIMIC("miRNA Mimic"),
   OTHER("Other")
   ;
 
