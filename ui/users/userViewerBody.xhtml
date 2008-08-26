@@ -346,6 +346,7 @@
               <t:commandButton id="addSmallMoleculeScreenCommand"
                 value="Add Small Molecule Screen"
                 action="#{userViewer.addSmallMoleculeScreen}"
+                rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
                 styleClass="command" />
             </ui:define>
           </ss:property>
@@ -376,6 +377,7 @@
               <t:commandButton id="addRnaiScreenCommand"
                 value="Add RNAi Screen"
                 action="#{userViewer.addRnaiScreen}"
+                rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}" 
                 styleClass="command" />
             </ui:define>
           </ss:property>
