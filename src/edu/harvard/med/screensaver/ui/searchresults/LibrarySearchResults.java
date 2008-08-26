@@ -58,6 +58,8 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
                                            LibraryType.KNOWN_BIOACTIVES,
                                            LibraryType.NATURAL_PRODUCTS,
                                            LibraryType.SIRNA,
+                                           LibraryType.MIRNA_INHIBITOR,
+                                           LibraryType.MIRNA_MIMIC,
                                            LibraryType.OTHER));
 
 
