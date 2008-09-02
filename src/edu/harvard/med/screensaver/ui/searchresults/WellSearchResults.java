@@ -89,6 +89,12 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations";
   private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations (Other Studies)";
 
+  private enum WellSearchResultMode {
+    SCREEN_RESULT_WELLS,
+    LIBRARY_WELLS,
+    ALL_WELLS,
+    SET_OF_WELLS };
+
 
   // instance fields
 
@@ -98,6 +104,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private CompoundViewer _compoundViewer;
   private GeneViewer _geneViewer;
 
+  private WellSearchResultMode _mode;
   private Library _library;
   private ScreenResult _screenResult;
   private Set<Integer> _plateNumbers;
@@ -131,6 +138,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   public void searchAllWells()
   {
+    _mode = WellSearchResultMode.ALL_WELLS;
     _library = null;
     _screenResult = null;
     _plateNumbers = null;
@@ -143,6 +151,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   public void searchWellsForLibrary(Library library)
   {
+    _mode = WellSearchResultMode.LIBRARY_WELLS;
     _library = library;
     _screenResult = null;
     _plateNumbers = null;
@@ -159,6 +168,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   public void searchWellsForScreenResult(ScreenResult screenResult)
   {
+    _mode = WellSearchResultMode.SCREEN_RESULT_WELLS;
     _library = null;
     _screenResult = screenResult;
     _plateNumbers = null;
@@ -187,6 +197,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   public void searchWells(Set<WellKey> wellKeys)
   {
+    _mode = WellSearchResultMode.SET_OF_WELLS;
     _library = null;
     _screenResult = null;
     _plateNumbers = new HashSet<Integer>();
@@ -196,8 +207,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       _plateNumbers.add(wellKey.getPlateNumber());
     }
     initialize(new EntitySetDataFetcher<Well,String>(Well.class,
-                                                         wellKeyStrings,
-                                                         _dao));
+      wellKeyStrings,
+      _dao));
     updateColumnVisibilityForScreenType(true, true);
 
     // start with search panel closed
@@ -379,10 +390,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    
+
     columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.compoundNames", ""),
       "Primary Compound Names",
-      "The names of the primary compound in the well", 
+      "The names of the primary compound in the well",
       COMPOUND_COLUMNS_GROUP) {
       @Override
       public List<String> getCellValue(Well well)
@@ -391,10 +402,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    
+
     columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.casNumbers", ""),
       "CAS Numbers",
-      "The CAS Numbers of the primary compound in the well", 
+      "The CAS Numbers of the primary compound in the well",
       COMPOUND_COLUMNS_GROUP) {
       @Override
       public List<String> getCellValue(Well well)
@@ -403,10 +414,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    
+
     columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.nscNumbers", ""),
       "NSC Numbers",
-      "The NSC Numbers of the primary compound in the well", 
+      "The NSC Numbers of the primary compound in the well",
       COMPOUND_COLUMNS_GROUP) {
       @Override
       public List<String> getCellValue(Well well)
@@ -415,10 +426,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    
+
     columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.pubchemCids", ""),
       "PubChem CIDs",
-      "The PubChem CIDs of the primary compound in the well", 
+      "The PubChem CIDs of the primary compound in the well",
       COMPOUND_COLUMNS_GROUP) {
       @Override
       public List<String> getCellValue(Well well)
@@ -427,10 +438,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    
+
     columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.chembankIds", ""),
       "ChemBank IDs",
-      "The ChemBank IDs of the primary compound in the well", 
+      "The ChemBank IDs of the primary compound in the well",
       COMPOUND_COLUMNS_GROUP) {
       @Override
       public List<String> getCellValue(Well well)
@@ -539,7 +550,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         return well.getWellType();
       }
     });
-    
+
     columns.add(new TextEntityColumn<Well>(new PropertyPath<Well>(Well.class,
       "iccbNumber"),
       "ICCB Number",
@@ -552,7 +563,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    
+
     columns.add(new BooleanEntityColumn<Well>(
       new PropertyPath<Well>(Well.class, "deprecated"),
       "Deprecated", "Whether the well has been deprecated", TableColumn.UNGROUPED) {
@@ -717,17 +728,23 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         hql.select("rvt").select("s", "screenNumber").select("s", "title");
         hql.orderBy("s", "screenNumber").orderBy("rvt", "ordinal");
 
-        if ( _screenResult != null) {
+        if (_mode == WellSearchResultMode.SCREEN_RESULT_WELLS) {
+          if (_screenResult == null) {
+            return Collections.emptyList();
+          }
           hql.from("sr", "plateNumbers", "p1", JoinType.INNER);
           hql.from(ScreenResult.class, "sr0").from("sr0", "plateNumbers", "p0", JoinType.INNER);
           hql.where("p0", Operator.EQUAL, "p1").where("sr0", _screenResult);
         }
-        else if (_library != null) {
+        else if (_mode == WellSearchResultMode.LIBRARY_WELLS) {
+          if (_library == null) {
+            return Collections.emptyList();
+          }
           hql.from("sr", "plateNumbers", "p", JoinType.INNER);
           hql.where("p", Operator.GREATER_THAN_EQUAL, _library.getStartPlate());
           hql.where("p", Operator.LESS_THAN_EQUAL, _library.getEndPlate());
         }
-        else if (_plateNumbers != null) {
+        else if (_mode == WellSearchResultMode.SET_OF_WELLS) {
           if (_plateNumbers.size() == 0) {
             return Collections.emptyList();
           }
@@ -838,13 +855,19 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         hql.select("at").select("s", "screenNumber").select("s", "title");
         hql.orderBy("s", "screenNumber").orderBy("at", "ordinal");
 
-        if ( _screenResult != null) {
+        if (_mode == WellSearchResultMode.SCREEN_RESULT_WELLS) {
+          if (_screenResult == null) {
+            return Collections.emptyList();
+          }
           hql.where("s", "screenType", Operator.EQUAL, _screenResult.getScreen().getScreenType());
         }
-        else if (_library != null) {
+        else if (_mode == WellSearchResultMode.LIBRARY_WELLS) {
+          if (_library == null) {
+            return Collections.emptyList();
+          }
           hql.where("s", "screenType", Operator.EQUAL, _library.getScreenType());
         }
-        else if (_plateNumbers != null) {
+        else if (_mode == WellSearchResultMode.SET_OF_WELLS) {
           if (_plateNumbers.size() == 0) {
             return Collections.emptyList();
           }

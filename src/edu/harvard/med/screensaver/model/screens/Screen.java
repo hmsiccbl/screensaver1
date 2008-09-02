@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.model.screens;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,6 +60,7 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
@@ -118,7 +120,8 @@ public class Screen extends Study
   private SortedSet<LabActivity> _labActivities = new TreeSet<LabActivity>();
   private LocalDate _dataMeetingScheduled;
   private LocalDate _dataMeetingComplete;
-  private BillingInformation _billingInformation;
+  private BillingInformation _billingInformation = new BillingInformation(this, false);
+  private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
   private Set<FundingSupport> _fundingSupports = new HashSet<FundingSupport>();
   private LocalDate _dateOfApplication;
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
@@ -533,7 +536,7 @@ public class Screen extends Study
   {
     return _statusItems;
   }
-  
+
   @Transient
   public StatusItem getCurrentStatusItem()
   {
@@ -886,32 +889,54 @@ public class Screen extends Study
    * Get the billing information.
    * @return the billing information
    */
-  @OneToOne(
-    mappedBy="screen",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
+  @Column
+  @Immutable
   public BillingInformation getBillingInformation()
   {
     return _billingInformation;
   }
+  
+  /**
+   * Get the set of billing items.
+   * @return the billing items
+   */
+  @org.hibernate.annotations.CollectionOfElements
+  @JoinTable(name = "screen_billing_item",
+             joinColumns = @JoinColumn(name = "screen_id"))
+  public Set<BillingItem> getBillingItems()
+  {
+    return _billingItems;
+  }
+  
+  /**
+   * Set the set of billing items.
+   * @param billingItems the new set of billing items
+   * @motivation for hibernate
+   */
+  private void setBillingItems(Set<BillingItem> billingItems)
+  {
+    _billingItems = billingItems;
+  }
 
   /**
-   * Set the billing information.
-   * @param toBeRequested
+   * Create and return a new billing item for this billing information.
+   * @param itemToBeCharged the item to be charged
+   * @param amount the amount
+   * @param dateFaxed the date faxed
+   * @return the new billing item for this billing information
    */
-  public BillingInformation createBillingInformation(boolean toBeRequested)
+  public BillingItem createBillingItem(String itemToBeCharged, BigDecimal amount, LocalDate dateFaxed)
   {
-    if (_billingInformation != null) {
-      throw new DataModelViolationException("attempt to overwrite existing billing info");
-    }
-    _billingInformation = new BillingInformation(this, toBeRequested);
-    return _billingInformation;
+    BillingItem billingItem = new BillingItem(itemToBeCharged, amount, dateFaxed);
+    _billingItems.add(billingItem);
+    return billingItem;
+  }
+
+  public BillingItem createBillingItem(BillingItem dtoBillingItem)
+  {
+    return createBillingItem(dtoBillingItem.getItemToBeCharged(),
+                             dtoBillingItem.getAmount(),
+                             dtoBillingItem.getDateFaxed());
   }
 
   /**

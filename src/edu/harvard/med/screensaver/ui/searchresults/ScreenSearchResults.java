@@ -156,6 +156,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       @Override
       public ScreensaverUser getUser(Screen screen) { return screen.getLabHead(); }
     });
+    columns.get(columns.size() - 1).addRelationshipPath(new RelationshipPath(Screen.class, "labHead.labAffiliation"));
     columns.add(new TextEntityColumn<Screen>(
       new PropertyPath(Screen.class, "labHead.labAffiliation", "affiliationName"),
       "Lab Affiliation", "The affiliation of the lab performing the screen", TableColumn.UNGROUPED) {

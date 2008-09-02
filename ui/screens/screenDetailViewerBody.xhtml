@@ -358,16 +358,8 @@ TODO:
       rendered="#{screenDetailViewer.adminViewMode &amp;&amp; screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['billingAdmin']}"
       description="Information for tracking billing from ICCB-L to the lab performing the screen">
       <ui:define name="data">
-        <t:outputText id="billingInformationUndefined"
-          value="&lt;none&gt;" styleClass="dataText"
-          rendered="#{empty screenDetailViewer.screen.billingInformation &amp;&amp; !screenDetailViewer.editMode}" />
-        <t:commandButton id="addBillingInformationCommand" value="Add"
-          action="#{screenDetailViewer.addBillingInformation}"
-          rendered="#{empty screenDetailViewer.screen.billingInformation &amp;&amp; screenDetailViewer.editMode}" />
-
         <t:collapsiblePanel var="isBillingInformationCollapsed"
-          value="#{screenDetailViewer.billingInformationCollapsed}"
-          rendered="#{!empty screenDetailViewer.screen.billingInformation}">
+          value="#{screenDetailViewer.billingInformationCollapsed}">
           <f:facet name="header">
             <t:headerLink immediate="true">
               <t:outputText id="billingInformationToggleText"
@@ -432,7 +424,7 @@ TODO:
             styleClass="layoutPanel" style="width: 100%">
             <ss:property id="billingInformationComments"
               label="Comments" type="Textarea"
-              value="#{screenDetailViewer.screen.billingInformation.comments}"
+              value="#{screenDetailViewer.screen.billingInformation.billingComments}"
               editWidth="50" editHeight="3"
               editable="#{screenDetailViewer.editMode}" />
             <ss:property id="billingItems" label="Billing Items">

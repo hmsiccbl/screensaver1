@@ -13,21 +13,10 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
-import javax.persistence.Version;
-
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import javax.persistence.JoinTable;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
@@ -40,10 +29,8 @@ import org.joda.time.LocalDate;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-@Entity
-@org.hibernate.annotations.Proxy
-@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class BillingInformation extends AbstractEntity
+@Embeddable
+public class BillingInformation
 {
 
   // static fields
@@ -54,10 +41,7 @@ public class BillingInformation extends AbstractEntity
 
   // instance fields
 
-  private Integer _billingInformationId;
-  private Integer _version;
-  private Screen _screen;
-  private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
+  //private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
   private boolean _toBeRequested;
   private boolean _seeComments;
   private boolean _isBillingForSuppliesOnly;
@@ -70,112 +54,56 @@ public class BillingInformation extends AbstractEntity
   private LocalDate _dateCompleted5KCompounds;
   private LocalDate _dateFaxedToBillingDepartment;
   private LocalDate _dateCharged;
-  private String _comments;
+  private String _billingComments;
 
 
   // public constructor
 
   /**
    * Construct an initialized <code>BillingInformation</code>.
-   * @param screen the screen
    * @param toBeRequested is billing info to be requested
    */
   // TODO make package visible
   public BillingInformation(Screen screen, boolean toBeRequested)
   {
-    if (screen == null) {
-      throw new NullPointerException();
-    }
-    _screen = screen;
     _toBeRequested = toBeRequested;
   }
 
 
   // public methods
 
-  @Override
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
-  {
-    return visitor.visit(this);
-  }
+//  /**
+//   * Get the set of billing items.
+//   * @return the billing items
+//   */
+//  @org.hibernate.annotations.CollectionOfElements
+//  @JoinTable(name = "screen_billing_item",
+//             joinColumns = @JoinColumn(name = "screen_id"))
+//  public Set<BillingItem> getBillingItems()
+//  {
+//    return _billingItems;
+//  }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getBillingInformationId();
-  }
-
-  /**
-   * Get the id for the billing information.
-   * @return the id for the billing information
-   */
-  @Id
-  @org.hibernate.annotations.GenericGenerator(
-    name="billing_information_id_seq",
-    strategy="sequence",
-    parameters = {
-      @org.hibernate.annotations.Parameter(name="sequence", value="billing_information_id_seq")
-    }
-  )
-  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="billing_information_id_seq")
-  public Integer getBillingInformationId()
-  {
-    return _billingInformationId;
-  }
-
-  /**
-   * Get the screen.
-   * @return the screen
-   */
-  @OneToOne(optional=false)
-  @JoinColumn(name="screenId", nullable=false, updatable=false)
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_billing_information_to_screen")
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
-  /**
-   * Get an unmodifiable copy of the set of billing items.
-   * @return the billing items
-   */
-  @OneToMany(
-    mappedBy="billingInformation",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
-  public Set<BillingItem> getBillingItems()
-  {
-    return _billingItems;
-  }
-
-  /**
-   * Create and return a new billing item for this billing information.
-   * @param itemToBeCharged the item to be charged
-   * @param amount the amount
-   * @param dateFaxed the date faxed
-   * @return the new billing item for this billing information
-   */
-  public BillingItem createBillingItem(String itemToBeCharged, BigDecimal amount, LocalDate dateFaxed)
-  {
-    BillingItem billingItem = new BillingItem(this, itemToBeCharged, amount, dateFaxed);
-    _billingItems.add(billingItem);
-    return billingItem;
-  }
-
-  public BillingItem createBillingItem(BillingItem dtoBillingItem)
-  {
-    return createBillingItem(dtoBillingItem.getItemToBeCharged(),
-                             dtoBillingItem.getAmount(),
-                             dtoBillingItem.getDateFaxed());
-  }
+//  /**
+//   * Create and return a new billing item for this billing information.
+//   * @param itemToBeCharged the item to be charged
+//   * @param amount the amount
+//   * @param dateFaxed the date faxed
+//   * @return the new billing item for this billing information
+//   */
+//  public BillingItem createBillingItem(String itemToBeCharged, BigDecimal amount, LocalDate dateFaxed)
+//  {
+//    BillingItem billingItem = new BillingItem(itemToBeCharged, amount, dateFaxed);
+//    _billingItems.add(billingItem);
+//    return billingItem;
+//  }
+//
+//  public BillingItem createBillingItem(BillingItem dtoBillingItem)
+//  {
+//    return createBillingItem(dtoBillingItem.getItemToBeCharged(),
+//                             dtoBillingItem.getAmount(),
+//                             dtoBillingItem.getDateFaxed());
+//  }
 
   @Column(nullable=false)
   public boolean isToBeRequested()
@@ -222,6 +150,7 @@ public class BillingInformation extends AbstractEntity
    * Get the billing info return date.
    * @return the billing info return date
    */
+  @Column
   @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getBillingInfoReturnDate()
   {
@@ -261,8 +190,8 @@ public class BillingInformation extends AbstractEntity
    * Get the facilities and administration charge.
    * @return the facilities and administration charge
    */
-  @org.hibernate.annotations.Type(type="big_decimal")
   @Column(precision=9, scale=2)
+  @org.hibernate.annotations.Type(type="big_decimal")
   public BigDecimal getFacilitiesAndAdministrationCharge()
   {
     return _facilitiesAndAdministrationCharge;
@@ -281,6 +210,7 @@ public class BillingInformation extends AbstractEntity
    * Get the fee form requested date.
    * @return the fee form requested date
    */
+  @Column
   @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getFeeFormRequestedDate()
   {
@@ -300,6 +230,7 @@ public class BillingInformation extends AbstractEntity
    * Get the fee form requested initials.
    * @return the fee form requested initials
    */
+  @Column
   @org.hibernate.annotations.Type(type="text")
   public String getFeeFormRequestedInitials()
   {
@@ -338,6 +269,7 @@ public class BillingInformation extends AbstractEntity
    * Get the date completed 5-10K compounds.
    * @return the date completed 5-10K compounds
    */
+  @Column
   @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateCompleted5KCompounds()
   {
@@ -357,6 +289,7 @@ public class BillingInformation extends AbstractEntity
    * Get the date faxed to billing department.
    * @return the date faxed to billing department
    */
+  @Column
   @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateFaxedToBillingDepartment()
   {
@@ -376,6 +309,7 @@ public class BillingInformation extends AbstractEntity
    * Get the date charged.
    * @return the date charged
    */
+  @Column
   @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
   public LocalDate getDateCharged()
   {
@@ -395,19 +329,20 @@ public class BillingInformation extends AbstractEntity
    * Get the comments.
    * @return the comments
    */
+  @Column
   @org.hibernate.annotations.Type(type="text")
-  public String getComments()
+  public String getBillingComments()
   {
-    return _comments;
+    return _billingComments;
   }
 
   /**
    * Set the comments.
    * @param comments the new comments
    */
-  public void setComments(String comments)
+  public void setBillingComments(String comments)
   {
-    _comments = comments;
+    _billingComments = comments;
   }
 
 
@@ -422,55 +357,13 @@ public class BillingInformation extends AbstractEntity
 
   // private constructor and instance methods
 
-  /**
-   * Set the id for the billing information.
-   * @param billingInformationId the new id for the billing information
-   * @motivation for hibernate
-   */
-  private void setBillingInformationId(Integer billingInformationId)
-  {
-    _billingInformationId = billingInformationId;
-  }
-
-  /**
-   * Get the version for the billing information.
-   * @return the version for the billing information
-   * @motivation for hibernate
-   */
-  @Column(nullable=false)
-  @Version
-  private Integer getVersion()
-  {
-    return _version;
-  }
-
-  /**
-   * Set the version for the billing information.
-   * @param version the new version for the billing information
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version)
-  {
-    _version = version;
-  }
-
-  /**
-   * Set the screen.
-   * @param screen the new screen
-   * @motivation for hibernate
-   */
-  private void setScreen(Screen screen)
-  {
-    _screen = screen;
-  }
-
-  /**
-   * Set the set of billing items.
-   * @param billingItems the new set of billing items
-   * @motivation for hibernate
-   */
-  private void setBillingItems(Set<BillingItem> billingItems)
-  {
-    _billingItems = billingItems;
-  }
+//  /**
+//   * Set the set of billing items.
+//   * @param billingItems the new set of billing items
+//   * @motivation for hibernate
+//   */
+//  private void setBillingItems(Set<BillingItem> billingItems)
+//  {
+//    _billingItems = billingItems;
+//  }
 }

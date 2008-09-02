@@ -33,8 +33,6 @@ public class PackageTestSuite extends TestSuite
     // test entity model classes (ignoring abstract classes)
     addTestSuite(AbaseTestsetTest.class);
     addTestSuite(AttachedFileTest.class);
-    addTestSuite(BillingInformationTest.class);
-    addTestSuite(BillingItemTest.class);
     addTestSuite(EquipmentUsedTest.class);
     addTestSuite(LibraryScreeningTest.class);
     addTestSuite(PlatesUsedTest.class);

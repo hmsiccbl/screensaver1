@@ -100,10 +100,10 @@ public class ScreenViewer extends StudyViewer
     log.debug("setScreen(): loading data for " + screen);
     screen = _dao.reloadEntity(screen,
                                true,
-                               "labHead",
+                               "labHead.labAffiliation",
                                "labHead.labMembers",
                                "leadScreener");
-    _dao.needReadOnly(screen, "billingInformation.billingItems");
+    _dao.needReadOnly(screen, /*"billingInformation.*/"billingItems");
     _dao.needReadOnly(screen, "collaborators.labHead");
     _dao.needReadOnly(screen, "labActivities.performedBy");
     _dao.needReadOnly(screen,

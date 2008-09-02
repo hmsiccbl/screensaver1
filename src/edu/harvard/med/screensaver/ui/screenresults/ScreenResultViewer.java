@@ -49,9 +49,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
 
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
 
-  public static final Integer DATA_TABLE_FILTER_SHOW_ALL = -2;
-  public static final Integer DATA_TABLE_FILTER_SHOW_POSITIVES = -1;
-
 
   // instance data members
 
@@ -65,10 +62,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
 
   private ScreenResult _screenResult;
   private Map<String,Boolean> _isPanelCollapsedMap;
-
-  private UISelectOneBean<Integer> _dataFilter;
-  private UISelectOneBean<ResultValueType> _showPositivesOnlyForDataHeader;
-
+  private boolean _isWellSearchResultsInitialized;
 
 
   // constructors
@@ -118,9 +112,15 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
-    _dataFilter = null;
-    _showPositivesOnlyForDataHeader = null;
-    _wellSearchResults.searchWellsForScreenResult(screenResult);
+
+    // lazy initialization of _wellSearchResults, for performance (avoid expense of determining columns, if not being viewed)
+    _wellSearchResults.searchWellsForScreenResult(null);
+    _isWellSearchResultsInitialized = false;
+
+    // open viewer with dataTable panel closed, to avoid expense of initializing unless user explicitly requests to view it, while scrolling through multiple screen results
+    _isPanelCollapsedMap.put("dataTable", true);
+    _isPanelCollapsedMap.put("heatMaps", true);
+
     if (screenResult == null) {
       _resultValueTypesTable.initialize(Collections.<ResultValueType>emptyList());
     }
@@ -146,6 +146,11 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
 
   public WellSearchResults getResultValueTable()
   {
+    // lazy initialization of _wellSearchResults, for performance (avoid expense of determining columns, if not being viewed)
+    if (!_isWellSearchResultsInitialized && !_isPanelCollapsedMap.get("dataTable")) {
+      _wellSearchResults.searchWellsForScreenResult(_screenResult);
+      _isWellSearchResultsInitialized = true;
+    }
     return _wellSearchResults;
   }
 

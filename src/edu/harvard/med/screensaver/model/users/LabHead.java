@@ -219,7 +219,7 @@ public class LabHead extends ScreeningRoomUser
              cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="labAffiliationId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_lab_head_to_lab_affiliation")
-  //@org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.FALSE)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE
   })

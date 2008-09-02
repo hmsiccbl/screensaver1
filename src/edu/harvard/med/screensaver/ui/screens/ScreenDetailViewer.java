@@ -383,7 +383,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   {
     ArrayList<BillingItem> billingItems = new ArrayList<BillingItem>();
     if (getScreen().getBillingInformation() != null) {
-      billingItems.addAll(getScreen().getBillingInformation().getBillingItems());
+      billingItems.addAll(getScreen()./*getBillingInformation().*/getBillingItems());
     }
     Collections.sort(billingItems,
                      new Comparator<BillingItem>() {
@@ -731,21 +731,11 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   }
 
   @UIControllerMethod
-  public String addBillingInformation()
-  {
-    if (_screen.getBillingInformation() == null) {
-      _screen.createBillingInformation(true);
-      _isBillingInformationCollapsed = false;
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
   public String addBillingItem()
   {
     if (_newBillingItem != null) {
       try {
-        getScreen().getBillingInformation().createBillingItem(_newBillingItem);
+        getScreen()./*getBillingInformation().*/createBillingItem(_newBillingItem);
       }
       catch (BusinessRuleViolationException e) {
         showMessage("businessError", e.getMessage());
@@ -758,7 +748,7 @@ public class ScreenDetailViewer extends StudyDetailViewer implements EditableVie
   @UIControllerMethod
   public String deleteBillingItem()
   {
-    getScreen().getBillingInformation().getBillingItems().remove(getRequestMap().get("element"));
+    getScreen()./*getBillingInformation().*/getBillingItems().remove(getRequestMap().get("element"));
     _newBillingItem = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
