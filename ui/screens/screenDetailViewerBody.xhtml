@@ -121,7 +121,7 @@ TODO:
         type="Textarea" editWidth="80" editHeight="3" />
       <t:panelGrid columns="2"
         columnClasses="propertyLabelColumn,column"
-        rendered="#{screenDetailViewer.adminViewMode}">
+        rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}">
         <ss:property id="publishableProtocolComments" label="Comments"
           value="#{screenDetailViewer.screen.publishableProtocolComments}"
           editable="#{screenDetailViewer.editMode}" adminOnly="true"
@@ -355,7 +355,7 @@ TODO:
       description="A set of keywords associated with the screen" />
 
     <ss:property label="Billing Information" adminOnly="true"
-      rendered="#{screenDetailViewer.adminViewMode &amp;&amp; screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['billingAdmin']}"
+      rendered="#{(screenDetailViewer.editMode || screenDetailViewer.adminViewMode) &amp;&amp; screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['billingAdmin']}"
       description="Information for tracking billing from ICCB-L to the lab performing the screen">
       <ui:define name="data">
         <t:collapsiblePanel var="isBillingInformationCollapsed"
