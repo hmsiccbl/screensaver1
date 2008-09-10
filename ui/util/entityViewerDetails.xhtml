@@ -11,7 +11,8 @@
 <!-- facelet params:
 	        - viewer
 	        - entity
-          - entityCommands: UI fragment
+          - hideId: boolean (useful if entity has a semantic ID in addition to the database ID)
+          - entityCommands: UI fragment for additional commands
 	        - propertiesContent: UI fragment
 	        - tablesContent: UI fragment
 	        - footerContent: UI fragment 
@@ -21,24 +22,12 @@
 
   <t:div rendered="#{!empty entity}">
 
-    <t:panelGrid columns="2" styleClass="layoutPanel"
-      style="width: 100%">
-      <t:panelGroup id="commandPanel">
+    <f:subview id="commandsTop">
+      <t:panelGroup id="commandPanelTop">
         <ss:editSaveCancel viewer="#{viewer}" />
         <ui:insert name="entityCommands" />
       </t:panelGroup>
-
-      <t:panelGrid columns="4" columnClasses="propertyColumn,column"
-        styleClass="layoutPanel" style="float: right">
-        <ss:property id="entityId" label="#"
-          description="The number used to uniquely identify the entity"
-          value="#{entity.entityId}" adminOnly="true" />
-
-        <ss:property id="dateCreated" label="Created"
-          description="The date the entity was originally recorded in Screensaver"
-          value="#{entity.dateCreated}" type="Date" adminOnly="true" />
-      </t:panelGrid>
-    </t:panelGrid>
+    </f:subview>
 
     <t:panelGrid id="leftAndRightSides" columns="2"
       columnClasses="column,column"
@@ -47,6 +36,14 @@
       <t:panelGrid id="propertiesPanel" columns="2"
         columnClasses="propertyLabelColumn,column"
         styleClass="layoutPanel">
+        <ss:property id="entityId" label="#"
+          description="The number used to uniquely identify the entity"
+          value="#{entity.entityId}" adminOnly="true"
+          rendered="#{!hideId}" />
+
+        <ss:property id="dateCreated" label="Created"
+          description="The date the entity was originally recorded in Screensaver"
+          value="#{entity.dateCreated}" type="Date" adminOnly="true" />
         <ui:insert name="propertiesContent" />
       </t:panelGrid>
 
@@ -57,6 +54,15 @@
     </t:panelGrid>
 
     <ui:insert name="footerContent" />
+
+    <f:subview id="commandsBottom">
+      <t:panelGroup id="commandPanelBottom"
+        rendered="#{viewer.editMode}">
+        <ss:editSaveCancel viewer="#{viewer}" />
+        <ui:insert name="entityCommands" />
+      </t:panelGroup>
+    </f:subview>
+    
   </t:div>
 
 </ui:composition>
