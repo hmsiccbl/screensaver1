@@ -21,7 +21,6 @@
 	<classpathentry kind="lib" path="lib/persistence/hibernate-tools-3.2.0.beta9a/freemarker.jar"/>
 	<classpathentry kind="lib" path="lib/persistence/hibernate-tools-3.2.0.beta9a/hibernate-tools.jar"/>
 	<classpathentry kind="lib" path="lib/persistence/hibernate-tools-3.2.0.beta9a/jtidy-r8-20060801.jar"/>
-	<classpathentry kind="lib" path="lib/persistence/postgresql-8.1-405.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/asm-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/asm-commons-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/aspectjrt.jar"/>
@@ -85,5 +84,6 @@
 	<classpathentry kind="lib" path="lib/web/struts-1.2.7.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/.dev/spring-test.jar"/>
 	<classpathentry kind="lib" path="lib/web/.dev/servlet-api-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/persistence/postgresql-8.3-603.jdbc3.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>
