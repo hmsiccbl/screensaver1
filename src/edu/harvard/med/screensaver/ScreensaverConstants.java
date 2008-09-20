@@ -71,4 +71,10 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENERS = "browseScreeners";
   public static final String BROWSE_STAFF = "browseStaff";
   public static final String VIEW_USER = "viewUser";
+  
+  // BII static data members
+  public static final String WEBAPP_ROOT = System.getProperty("webapp.root");
+  
+  // BII JSF Action Results
+  public static final String RUN_CELLHTS2 = "runCellHTS2";
 }

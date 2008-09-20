@@ -9,10 +9,20 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import sg.edu.astar.bii.screensaver.ui.screenresults.cellhts2.CellHTS2Runner;
+import sg.edu.astar.bii.screensaver.util.DeleteDir;
+import edu.harvard.med.screensaver.ScreensaverProperties;
+import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
+import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
+import edu.harvard.med.screensaver.analysis.cellhts2.ScoreReplicatesMethod;
+import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -20,6 +30,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
@@ -28,8 +39,6 @@ import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -49,6 +58,9 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
 
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
 
+  public static final Integer DATA_TABLE_FILTER_SHOW_ALL = -2;
+  public static final Integer DATA_TABLE_FILTER_SHOW_POSITIVES = -1;
+
 
   // instance data members
 
@@ -59,12 +71,20 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   private EditableViewer _screenDetailViewer;
   private ResultValueTypesTable _resultValueTypesTable;
   private WellSearchResults _wellSearchResults;
+  private CellHts2Annotator _cellHts2Annotator;
 
   private ScreenResult _screenResult;
   private Map<String,Boolean> _isPanelCollapsedMap;
   private boolean _isWellSearchResultsInitialized;
 
+  private UISelectOneBean<Integer> _dataFilter;
+  private UISelectOneBean<ResultValueType> _showPositivesOnlyForDataHeader;
 
+  // BII (Siew Cheng)
+  private String _cellHTS2ReportFilePath;
+  private CellHTS2Runner _cellHTS2Runner;
+  // BII ends
+  
   // constructors
 
   /**
@@ -74,13 +94,16 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   {
   }
 
+  // BII (Siew Cheng): added CellHTS2Runner
   public ScreenResultViewer(GenericEntityDAO dao,
                             ScreenResultsDAO screenResultsDao,
                             ScreenSearchResults screensBrowser,
                             ScreenViewer screenViewer,
                             EditableViewer screenDetailViewer,
                             ResultValueTypesTable resultValueTypesTable,
-                            WellSearchResults wellSearchResults)
+                            WellSearchResults wellSearchResults,
+                            CellHts2Annotator cellHts2Annotator,
+                            CellHTS2Runner cellHTS2Runner)
 
   {
     _dao = dao;
@@ -90,6 +113,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
     _screenDetailViewer = screenDetailViewer;
     _resultValueTypesTable = resultValueTypesTable;
     _wellSearchResults = wellSearchResults;
+    _cellHts2Annotator = cellHts2Annotator;
+    _cellHTS2Runner = cellHTS2Runner;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("screenResultSummary", false);
@@ -126,6 +151,8 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
     }
     else {
       _resultValueTypesTable.initialize(screenResult.getResultValueTypesList());
+      // BII (Siew Cheng)
+      _cellHTS2ReportFilePath = WEBAPP_ROOT + ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + screenResult.getScreenResultId();
     }
   }
 
@@ -146,7 +173,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
 
   public WellSearchResults getResultValueTable()
   {
-    // lazy initialization of _wellSearchResults, for performance (avoid expense of determining columns, if not being viewed)
+      // lazy initialization of _wellSearchResults, for performance (avoid expense of determining columns, if not being viewed)
     if (!_isWellSearchResultsInitialized && !_isPanelCollapsedMap.get("dataTable")) {
       _wellSearchResults.searchWellsForScreenResult(_screenResult);
       _isWellSearchResultsInitialized = true;
@@ -167,6 +194,11 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
           _screenResultsDao.deleteScreenResult(screenResult);
         }
       });
+      
+      // BII (Siew Cheng): Delete directory and all files under it
+      DeleteDir.deleteDirectory(new File(_cellHTS2ReportFilePath));
+      log.info("Screen result file deleted");
+      
       return _screenViewer.viewScreen(_screenResult.getScreen());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
@@ -181,7 +213,26 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
     return _screenDetailViewer.save();
   }
 
-
+ 
+  // BII Start: To run and generate cellHTS2 analysis report
+  public boolean isCellHTS2ReportFileExists() 
+  {
+	  File file = new File(_cellHTS2ReportFilePath);
+	  return file.exists();
+  }
+  
+  public String getReportURL() {
+	  String contextRoot = WEBAPP_ROOT.substring(WEBAPP_ROOT.lastIndexOf("/", WEBAPP_ROOT.length()-2), WEBAPP_ROOT.length());
+	  return contextRoot + ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + _screenResult.getScreenResultId()+"/index.html";
+  }
+  
+  @UIControllerMethod
+  public String viewCellHTS2Runner()
+  {
+	  return _cellHTS2Runner.viewCellHTS2Runner(_screenResult);
+  }
+  //BII end
+  
   // result value data table filtering methods
 
   // protected methods
@@ -190,8 +241,5 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   {
     return ScreensaverUserRole.SCREEN_RESULTS_ADMIN;
   }
-
-
-  // private methods
 
 }

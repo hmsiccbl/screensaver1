@@ -1,0 +1,4 @@
+P2R1C1.txt	A01	5
+P2R1C1.txt	A02	6
+P2R1C1.txt	B01	7
+P2R1C1.txt	B02	9

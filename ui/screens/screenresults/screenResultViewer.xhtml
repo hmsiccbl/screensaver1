@@ -24,6 +24,22 @@
 						styleClass="command" rendered="#{screenResultViewer.editable}"
 						title="Delete the screen results for this screen" />
 				</t:panelGroup>
+				<!-- BII Start: Buttons to run cellHTS2 and link to report -->
+				<t:commandButton action="#{screenResultViewer.viewCellHTS2Runner}"
+					value="Click here to enter CellHTS2 parameters" styleClass="command" 
+					rendered="#{screenResultViewer.editable &amp;&amp; !screenResultViewer.cellHTS2ReportFileExists}"
+					title="Run CellHTS2 on the screen result for this screen" />
+				<t:panelGroup id="screenResultReportLink" rendered="#{screenResultViewer.cellHTS2ReportFileExists}">
+					<t:commandButton action="#{screenResultViewer.viewCellHTS2Runner}"
+						value="Click here to reenter CellHTS2 parameters" styleClass="command" 
+						rendered="#{screenResultViewer.editable}"
+						title="Rerun CellHTS2 analysis on the screen result for this screen" /> 
+					<h:outputLink value="#{screenResultViewer.reportURL}" 
+						title="Click here for CellHTS2 report"> 
+						<h:outputText value="CellHTS2 Report" styleClass="dataText"/> 
+					</h:outputLink>
+				</t:panelGroup>
+				<!-- BII End -->
 
 				<t:panelGrid id="screenResultProperties" columns="2"
 					columnClasses="propertyLabelColumn,fixedColumn300"

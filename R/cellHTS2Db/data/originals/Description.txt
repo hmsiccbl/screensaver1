@@ -1,0 +1,22 @@
+[Description]
+Screen: dummy screen
+Screentitle: dummy title 
+Version: 1
+Date: 11 May 2008
+Publicationtitle: 
+Reference: 
+PMID: 
+Screentype: RNA interference
+Organism: Human
+Celltype: Primary Human Fibroblasts (BJ)
+Library: Dharmacon Druggable Genome
+Assay: Dapi stain followed by counting of nuclei
+Assaytype: Immunofluorescence, HCI
+Assaydescription: Automated counting of cells 
+Web: 
+License: 
+
+[Files]
+plateList: Platelist.txt
+plateConf: Plateconf.txt
+screenLog: Screenlog.txt

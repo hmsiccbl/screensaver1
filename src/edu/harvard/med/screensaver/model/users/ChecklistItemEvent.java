@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL:svn+ssh://cl163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/collaboration/src/edu/harvard/med/screensaver/model/users/ChecklistItemEvent.java $
+// $Id:ChecklistItemEvent.java 2585 2008-07-21 10:16:39Z cl163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

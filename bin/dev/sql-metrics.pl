@@ -27,7 +27,7 @@ my %sql_stmts_by_activity;
 
 while (<>) {
   chomp;
-  if (/^(\d+:\d+:\d+,\d+)/) {
+  if (/^\S+\s(\d+:\d+:\d+,\d+)/) {
     $time_stamp = $1;
   }
   if (/>>>>.* @ (\S+)/) {
@@ -116,7 +116,7 @@ sub report {
 
 sub elapsed_seconds {
   my ($start_time, $end_time) = @_;
-  $start_time =~ /([0-9]+):(\d+):(\d+),(\d+)/;
+  $start_time =~ /(\d+):(\d+):(\d+),(\d+)/;
   my $start_time_ms = ($1 * 60*60*1000) + ($2 * 60*1000) + ($3 * 1000) + $4;
   $end_time =~ /(\d+):(\d+):(\d+),(\d+)/;
   my $end_time_ms = ($1 * 60*60*1000) + ($2 * 60*1000) + ($3 * 1000) + $4;

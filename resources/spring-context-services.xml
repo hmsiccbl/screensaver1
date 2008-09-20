@@ -61,7 +61,7 @@
     id="ncbiGeneInfoProvider"
     class="edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProviderImpl"
   />
-  
+
   <bean
     id="publicationInfoProvider"
     class="edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider"
@@ -191,5 +191,11 @@
     <constructor-arg ref="genericEntityDao" />
   </bean>
 
+  <bean
+    id="cellHts2Annotator"
+    class="edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator"
+    scope="prototype">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
 
 </beans>

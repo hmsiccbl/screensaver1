@@ -12,7 +12,9 @@ package edu.harvard.med.screensaver.model.screenresults;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -33,6 +35,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -198,7 +201,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   public SortedSet<ResultValueType> getResultValueTypes()
   {
@@ -244,6 +247,21 @@ public class ScreenResult extends TimeStampedAbstractEntity
       assayPhenotype);
     _resultValueTypes.add(resultValueType);
     return resultValueType;
+  }
+
+  public boolean deleteResultValueType(ResultValueType rvt)
+  {
+    if (!rvt.getDerivedTypes().isEmpty()) {
+      throw new DataModelViolationException("cannot delete " + rvt + " since it is derived from");
+    }
+    Set<ResultValueType> dissociateFrom = new HashSet<ResultValueType>();
+    for (ResultValueType derivedFrom : rvt.getTypesDerivedFrom()) {
+      dissociateFrom.add(derivedFrom);
+    }
+    for (ResultValueType derivedFrom : dissociateFrom) {
+      derivedFrom.removeDerivedType(rvt);
+    }
+    return getResultValueTypes().remove(rvt);
   }
 
   /**
@@ -435,6 +453,22 @@ public class ScreenResult extends TimeStampedAbstractEntity
       }
     }
     return numericResultValueTypes;
+  }
+
+  /**
+   * Return the subset of ResultValueTypes that contain raw, numeric ResultValue data.
+   * @return the subset of ResultValueTypes that contain raw, numeric ResultValue data
+   */
+  @Transient
+  public List<ResultValueType> getRawNumericResultValueTypes()
+  {
+    List<ResultValueType> rawNumericResultValueTypes = new ArrayList<ResultValueType>();
+    for (ResultValueType rvt : getResultValueTypes()) {
+      if (!rvt.isDerived() && rvt.isNumeric()) {
+        rawNumericResultValueTypes.add(rvt);
+      }
+    }
+    return rawNumericResultValueTypes;
   }
 
 

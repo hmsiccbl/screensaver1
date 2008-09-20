@@ -435,6 +435,7 @@
       <url-pattern>/users/*</url-pattern>
       <url-pattern>/activities/*</url-pattern>
       <url-pattern>/help/*</url-pattern>
+      <url-pattern>/cellHTS2/output/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>
@@ -453,6 +454,8 @@
       <url-pattern>/screens/*</url-pattern>
       <url-pattern>/screens/screenresults/*</url-pattern>
       <url-pattern>/cherryPickRequests/*</url-pattern>
+      <url-pattern>/bii/screens/*</url-pattern>
+      <url-pattern>/bii/screens/screenresults/*</url-pattern>
     </web-resource-collection>
 
     <auth-constraint>

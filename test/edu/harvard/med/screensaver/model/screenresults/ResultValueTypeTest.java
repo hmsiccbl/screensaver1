@@ -18,6 +18,7 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -104,6 +105,58 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
                      "1071894");
       }
     });
+  }
+
+  public void testDeleteResultValueTest()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
+        Library library = MakeDummyEntities.makeDummyLibrary(1, screen.getScreenType(), 1);
+        MakeDummyEntities.makeDummyScreenResult(screen, library);
+        genericEntityDao.persistEntity(library);
+        genericEntityDao.persistEntity(screen);
+      }
+    });
+
+    ScreenResult screenResult =
+      genericEntityDao.findEntityByProperty(Screen.class,
+                                            "screenNumber",
+                                            1,
+                                            true,
+                                            "screenResult.resultValueTypes.derivedTypes",
+                                            "screenResult.resultValueTypes.typesDerivedFrom")
+                                            .getScreenResult();
+    assertEquals("pre-delete rvt count", 8, screenResult.getResultValueTypes().size());
+
+    try {
+      screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(1));
+      fail("expected DataModelViolationException when deleting RVT that is derived from");
+    }
+    catch (DataModelViolationException e) {}
+
+    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(6));
+    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(5));
+    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(3));
+    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(1));
+    assertEquals("post-delete rvt count", 4, screenResult.getResultValueTypes().size());
+
+    genericEntityDao.saveOrUpdateEntity(screenResult);
+
+    screenResult =
+      genericEntityDao.findEntityByProperty(Screen.class,
+                                            "screenNumber",
+                                            1,
+                                            true,
+                                            "screenResult.resultValueTypes.derivedTypes",
+                                            "screenResult.resultValueTypes.typesDerivedFrom")
+                                            .getScreenResult();
+    assertEquals("post-delete, post-persist rvt count", 4, screenResult.getResultValueTypes().size());
+
   }
 }
 

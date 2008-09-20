@@ -480,6 +480,8 @@
         parent="uiBean" />
     </constructor-arg>
     <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="cellHts2Annotator" />
+    <constructor-arg ref="cellHTS2Runner" />
     <aop:scoped-proxy />
   </bean>
 
@@ -564,6 +566,16 @@
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+  
+  <!-- BII -->
+  <bean
+  	id="cellHTS2Runner"
+   	parent="uiBean"
+    scope="session"
+    class="sg.edu.astar.bii.screensaver.ui.screenresults.cellhts2.CellHTS2Runner">
+    <constructor-arg ref="cellHts2Annotator" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -658,6 +670,14 @@
   <bean id="screeningRoomUserClassificationConverter" class="edu.harvard.med.screensaver.ui.util.ScreeningRoomUserClassificationConverter" />
 
   <bean id="affiliationCategoryConverter" class="edu.harvard.med.screensaver.ui.util.AffiliationCategoryConverter" />
+  
+  <!-- BII Start -->  
+  <bean id="normalizePlatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.NormalizePlatesMethodConverter" />
+
+  <bean id="scoreReplicatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.ScoreReplicatesMethodConverter" />
+  
+  <bean id="summarizeReplicatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.SummarizeReplicatesMethodConverter" />
+  <!-- BII End -->
 
   <!-- Development/Debug related beans -->
 

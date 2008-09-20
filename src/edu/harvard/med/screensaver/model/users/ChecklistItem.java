@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/model/users/ChecklistItem.java $
-// $Id: ChecklistItem.java 2562 2008-07-15 15:17:04Z ant4 $
+// $HeadURL:http://forge.abcd.harvard.edu/svn/screensaver/trunk/src/edu/harvard/med/screensaver/model/users/ChecklistItem.java $
+// $Id:ChecklistItem.java 2679 2008-08-05 13:34:13Z ant4 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
