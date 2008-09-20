@@ -84,6 +84,8 @@
 	<classpathentry kind="lib" path="lib/web/struts-1.2.7.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/.dev/spring-test.jar"/>
 	<classpathentry kind="lib" path="lib/web/.dev/servlet-api-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/REngine.jar"/>
+	<classpathentry kind="lib" path="lib/Rserve.jar"/>
 	<classpathentry kind="lib" path="lib/persistence/postgresql-8.3-603.jdbc3.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>
