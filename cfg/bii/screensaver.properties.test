@@ -1,0 +1,21 @@
+# screensaver.properties for junit tests
+
+
+### build-time properties
+
+appserver.dir=
+log4j.properties.file=
+
+### run-time properties
+
+babel.executable.path=
+
+# database connection
+SCREENSAVER_PGSQL_SERVER=
+SCREENSAVER_PGSQL_DB=
+SCREENSAVER_PGSQL_USER=
+SCREENSAVER_PGSQL_PASSWORD=
+
+
+### BII: cellHTS2 report properties
+cellHTS2report.filepath.prefix=cellHTS2/output/cellHts2_output_screenResultId_
