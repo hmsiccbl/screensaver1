@@ -135,6 +135,17 @@
     <filter-name>ScreensaverServletFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+  
+  <!--  CellHTS2 report authorization filter -->
+  <filter>
+    <filter-name>CellHTS2ReportAuthorizationFilter</filter-name>
+    <filter-class>edu.harvard.med.screensaver.ui.util.CellHTS2ReportAuthorizationFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>CellHTS2ReportAuthorizationFilter</filter-name>
+    <url-pattern>/cellHTS2/*</url-pattern>
+  </filter-mapping>
 
 
   <!-- JSF/MyFaces configuration -->
