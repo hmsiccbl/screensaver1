@@ -29,7 +29,6 @@ public class CellHTS2ReportAuthorizationFilter extends OncePerRequestFilter {
 
   private static final String CELLHTS2_REPORT_ACCESS_DENIED_URL = "/screensaver/main/cellHTS2ReportAccessDenied.jsf";
 
-
   //instance data members
 
   //methods

@@ -147,7 +147,6 @@
     <url-pattern>/cellHTS2/*</url-pattern>
   </filter-mapping>
 
-
   <!-- JSF/MyFaces configuration -->
 
   <servlet>
