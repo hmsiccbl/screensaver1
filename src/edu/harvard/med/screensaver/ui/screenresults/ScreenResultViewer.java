@@ -58,9 +58,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
 
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
 
-  public static final Integer DATA_TABLE_FILTER_SHOW_ALL = -2;
-  public static final Integer DATA_TABLE_FILTER_SHOW_POSITIVES = -1;
-
 
   // instance data members
 
@@ -76,9 +73,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   private ScreenResult _screenResult;
   private Map<String,Boolean> _isPanelCollapsedMap;
   private boolean _isWellSearchResultsInitialized;
-
-  private UISelectOneBean<Integer> _dataFilter;
-  private UISelectOneBean<ResultValueType> _showPositivesOnlyForDataHeader;
 
   // BII (Siew Cheng)
   private String _cellHTS2ReportFilePath;
