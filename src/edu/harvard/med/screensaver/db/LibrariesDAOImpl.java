@@ -208,8 +208,8 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     // create wells for library, if needed
     if (library.getWells().size() == 0) {
       for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
-        for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
-          for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+        for (int iRow = 0; iRow < library.getPlateRows(); ++iRow) {
+          for (int iCol = 0; iCol < library.getPlateColumns(); ++iCol) {
             library.createWell(new WellKey(iPlate, iRow, iCol), WellType.EMPTY);
           }
         }

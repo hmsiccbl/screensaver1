@@ -118,6 +118,8 @@ public class Library extends AbstractEntity
   private String _chemistDOS;
   private String _chemistryComments;
   private String _screeningSet;
+  private Integer plateRows;
+  private Integer plateColumns;
 
 
   // public constructor
@@ -137,6 +139,25 @@ public class Library extends AbstractEntity
                  ScreenType screenType,
                  LibraryType libraryType,
                  Integer startPlate,
+                 Integer endPlate,
+                 Integer plateRows,
+                 Integer plateColumns )
+  {
+    _libraryName = libraryName;
+    _shortName = shortName;
+    _screenType = screenType;
+    _libraryType = libraryType;
+    _startPlate = startPlate;
+    _endPlate = endPlate;
+    this.plateRows = plateRows;
+    this.plateColumns = plateColumns;
+  }
+
+  public Library(String libraryName,
+                 String shortName,
+                 ScreenType screenType,
+                 LibraryType libraryType,
+                 Integer startPlate,
                  Integer endPlate)
   {
     _libraryName = libraryName;
@@ -145,8 +166,9 @@ public class Library extends AbstractEntity
     _libraryType = libraryType;
     _startPlate = startPlate;
     _endPlate = endPlate;
+    this.plateRows = Well.PLATE_ROWS_DEFAULT;
+    this.plateColumns = Well.PLATE_COLUMNS_DEFAULT;
   }
-
 
   // public instance methods
 
@@ -958,5 +980,29 @@ public class Library extends AbstractEntity
   private void setCopies(Set<Copy> copies)
   {
     _copies = copies;
+  }
+
+
+  public Integer getPlateRows()
+  {
+    return plateRows;
+  }
+
+
+  public void setPlateRows(Integer plateRows)
+  {
+    this.plateRows = plateRows;
+  }
+
+
+  public Integer getPlateColumns()
+  {
+    return plateColumns;
+  }
+
+
+  public void setPlateColumns(Integer plateColumns)
+  {
+    this.plateColumns = plateColumns;
   }
 }

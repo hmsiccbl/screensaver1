@@ -215,7 +215,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
    */
   public ResultValueType createResultValueType(String name)
   {
-    return createResultValueType(name, null, false, false, false, null);
+    return createResultValueType(name, null, false, false, false, null,null);
   }
 
   /**
@@ -236,6 +236,30 @@ public class ScreenResult extends TimeStampedAbstractEntity
     boolean isFollowupData,
     String assayPhenotype)
   {
+    return createResultValueType(name, replicateOrdinal, isDerived, isPositiveIndicator, isFollowupData, assayPhenotype,null);
+  }
+
+  
+  
+  /**
+   * Create and return a new result value type for the screen result.
+   * @param name the name of this result value type
+   * @param replicateOrdinal the replicate ordinal
+   * @param isDerived true iff the result value type is derived from other result value types
+   * @param isPositiveIndicator true iff the result value type is an positive indicator
+   * @param isFollowupData true iff the result value type contains follow up data
+   * @param assayPhenotype the assay phenotype
+   * @return the new result value type
+   */
+  public ResultValueType createResultValueType(
+    String name,
+    Integer replicateOrdinal,
+    boolean isDerived,
+    boolean isPositiveIndicator,
+    boolean isFollowupData,
+    String assayPhenotype,
+    Integer channel)
+  {
     verifyNameIsUnique(name);
     ResultValueType resultValueType = new ResultValueType(
       this,
@@ -244,7 +268,8 @@ public class ScreenResult extends TimeStampedAbstractEntity
       isDerived,
       isPositiveIndicator,
       isFollowupData,
-      assayPhenotype);
+      assayPhenotype,
+      channel);
     _resultValueTypes.add(resultValueType);
     return resultValueType;
   }

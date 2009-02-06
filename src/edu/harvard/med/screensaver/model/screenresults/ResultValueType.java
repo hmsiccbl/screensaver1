@@ -95,9 +95,20 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private String _comments;
   private boolean _isNumeric;
   private Integer _positivesCount;
+  private Integer channel;
 
 
   // public instance methods
+
+  public Integer getChannel()
+  {
+    return channel;
+  }
+
+  public void setChannel(Integer channel)
+  {
+    this.channel = channel;
+  }
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -809,7 +820,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     boolean isDerived,
     boolean isPositiveIndicator,
     boolean isFollowupData,
-    String assayPhenotype)
+    String assayPhenotype,
+    Integer channel)
   {
     if (screenResult == null) {
       throw new NullPointerException();
@@ -825,6 +837,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     }
     setFollowUpData(isFollowupData);
     setAssayPhenotype(assayPhenotype);
+    setChannel(channel);
   }
 
 

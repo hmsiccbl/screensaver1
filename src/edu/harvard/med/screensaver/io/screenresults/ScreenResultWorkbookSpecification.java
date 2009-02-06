@@ -53,6 +53,7 @@ public interface ScreenResultWorkbookSpecification
     PRIMARY_OR_FOLLOWUP("Primary or Follow Up?", 13),
     ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?", 14),
     COMMENTS("Comments", 15),
+    CHANNEL("Channel",16)
     ;
 
 

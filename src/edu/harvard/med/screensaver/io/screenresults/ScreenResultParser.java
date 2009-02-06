@@ -528,7 +528,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         _rawOrDerivedParser.parse(dataHeadersCell(DataHeaderRow.RAW_OR_DERIVED, iDataHeader)),
         _booleanParser.parse(dataHeadersCell(DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR, iDataHeader)),
         _primaryOrFollowUpParser.parse(dataHeadersCell(DataHeaderRow.PRIMARY_OR_FOLLOWUP, iDataHeader)),
-        dataHeadersCell(DataHeaderRow.ASSAY_PHENOTYPE, iDataHeader).getString());
+        dataHeadersCell(DataHeaderRow.ASSAY_PHENOTYPE, iDataHeader).getString(),
+        dataHeadersCell(DataHeaderRow.CHANNEL, iDataHeader).getInteger());
       rvt.setDescription(dataHeadersCell(DataHeaderRow.DESCRIPTION, iDataHeader).getString());
       rvt.setTimePoint(dataHeadersCell(DataHeaderRow.TIME_POINT, iDataHeader).getString());
       if (rvt.isDerived()) {

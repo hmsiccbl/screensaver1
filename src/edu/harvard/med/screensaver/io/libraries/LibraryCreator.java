@@ -14,13 +14,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.io.ParseError;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.util.StringUtils;
-
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
@@ -28,6 +21,14 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * Command-line application that creates a new library and its wells and imports
@@ -59,6 +60,9 @@ public class LibraryCreator
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName(CommandLineApplication.DEFAULT_DATE_PATTERN).withLongOpt("date-received").create("dr"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName(CommandLineApplication.DEFAULT_DATE_PATTERN).withLongOpt("date-screenable").create("ds"));
       app.addCommandLineOption(OptionBuilder.hasArg().withArgName("file").withLongOpt("contents-file").create("f"));
+      app.addCommandLineOption(OptionBuilder.hasArg().withArgName("Number plate rows").withLongOpt("plate-rows").create("pr"));
+      app.addCommandLineOption(OptionBuilder.hasArg().withArgName("Number plate columns").withLongOpt("plate-columns").create("pc"));
+
       if (!app.processOptions(true, true)) {
         System.exit(1);
       }
@@ -74,8 +78,10 @@ public class LibraryCreator
       LocalDate dateReceived = app.isCommandLineFlagSet("dr") ? app.getCommandLineOptionValue("dr", dateFormat).toLocalDate() : null;
       LocalDate dateScreenable = app.isCommandLineFlagSet("ds") ? app.getCommandLineOptionValue("ds", dateFormat).toLocalDate() : null;
       final File libraryContentsFile = app.isCommandLineFlagSet("f") ?  app.getCommandLineOptionValue("f", File.class) : null;
+      int plateRows =  app.isCommandLineFlagSet("pr") ? app.getCommandLineOptionValue("pr",Integer.class) : Well.PLATE_ROWS_DEFAULT;
+      int plateColumns =  app.isCommandLineFlagSet("pc") ? app.getCommandLineOptionValue("pc",Integer.class) : Well.PLATE_COLUMNS_DEFAULT;
 
-      final Library library = new Library(libraryName, shortName, screenType, libraryType, startPlate, endPlate);
+      final Library library = new Library(libraryName, shortName, screenType, libraryType, startPlate, endPlate,plateRows,plateColumns);
       library.setDescription(description);
       library.setVendor(vendor);
       library.setDateReceived(dateReceived);

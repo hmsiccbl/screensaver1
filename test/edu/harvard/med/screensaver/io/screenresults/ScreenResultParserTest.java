@@ -66,7 +66,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
-  public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
+  public static final String SCREEN_RESULT_117_TEST_WORKBOOK_FILE = "ScreenResultTest117.xls";
+    public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
   public static final String SCREEN_RESULT_MISSING_DERIVED_FROM_WORKBOOK_FILE = "ScreenResultTest115-missing-derived-from.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "ScreenResultErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
@@ -381,6 +382,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     doTestScreenResult115ParseResult(screenResult);
   }
+  
+  
 
   public void testParseScreenResultIncremental() throws Exception
   {
@@ -458,6 +461,16 @@ public class ScreenResultParserTest extends AbstractSpringTest
       assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
     }
     assertTrue("last is not derived from any", resultValueTypes.get(30 - 1).getDerivedTypes().isEmpty());
+  }
+  
+  public void testParseScreenResultWithChannels() throws Exception
+  {
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_117_TEST_WORKBOOK_FILE);
+    ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(117),
+                                                             workbookFile);
+    assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
+
+    doTestScreenResult117ParseResult(screenResult);
   }
 
   private void setDefaultValues(ResultValueType rvt)
@@ -667,6 +680,134 @@ public class ScreenResultParserTest extends AbstractSpringTest
       ++iRvt;
     }
   }
+ 
+  private void doTestScreenResult117ParseResult(ScreenResult screenResult)
+  {
+    assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
+
+    ScreenResult expectedScreenResult = makeScreenResult();
+    Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
+
+    ResultValueType rvt;
+
+    rvt = expectedScreenResult.createResultValueType("r1c1");
+    rvt.setReplicateOrdinal(1);
+    rvt.setChannel(1);
+    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    rvt.setAssayPhenotype("Human"); //apparently some default at uploading in case not given
+    rvt.setNumeric(true); //apparently some default at uploading in case not given
+    expectedResultValueTypes.put(0, rvt);
+
+    rvt = expectedScreenResult.createResultValueType("r1c2");
+    rvt.setReplicateOrdinal(1);
+    rvt.setChannel(2);
+    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    rvt.setAssayPhenotype("Human");
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(1, rvt);
+    
+    rvt = expectedScreenResult.createResultValueType("r2c1");
+    rvt.setReplicateOrdinal(2);
+    rvt.setChannel(1);
+    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    rvt.setAssayPhenotype("Human");
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(2, rvt);
+    
+    rvt = expectedScreenResult.createResultValueType("r2c2");
+    rvt.setReplicateOrdinal(2);
+    rvt.setChannel(2);
+    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    rvt.setAssayPhenotype("Human");
+    rvt.setNumeric(true);
+    expectedResultValueTypes.put(3, rvt);
+
+    //check the second result value type
+    Integer[] expectedPlateNumbers = {1,1,1,2,2,2};
+//
+    String[] expectedWellNames = {"A01", "A02", "A03","A01", "A02", "A03"};
+//
+    AssayWellType[] expectedAssayWellTypes = {
+      AssayWellType.ASSAY_POSITIVE_CONTROL,
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.ASSAY_POSITIVE_CONTROL,
+      AssayWellType.EXPERIMENTAL,
+      AssayWellType.EXPERIMENTAL};
+
+    boolean[][] expectedExcludeValues = {
+      {false, false, false, false},
+      {false, false, false, false},
+      {false, false, false, false},
+      {false, false, false, false},
+      {false, false, true, false},
+      {false, false, false, false}
+    };
+
+    Object[][] expectedValues = {
+          {1071894.,100.,7654321.,90.},
+          {1234567.,110.,6543210.,120.},
+          {1174576.,120.,5432109.,80.},
+          {1071896.,101.,7654320.,89.},
+          {1234563.,113.,6543217.,126.},
+          {1174572.,125.,5432105.,89.}
+    };
+
+    SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
+    int iRvt = 0;
+    for (ResultValueType actualRvt : resultValueTypes) {
+      ResultValueType expectedRvt = expectedResultValueTypes.get(iRvt);
+      if (expectedRvt != null) {
+//        setDefaultValues(expectedRvt);
+//        setDefaultValues(actualRvt);
+        log.info("expectedRvt = " + expectedRvt.getName());
+        log.info("actualRvt = " + actualRvt.getName());
+        assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(actualRvt));
+
+        // TODO compare result values
+       assertEquals(6, actualRvt.getResultValues().size());
+        int iWell = 0;
+        Map<WellKey,ResultValue> resultValues = actualRvt.getWellKeyToResultValueMap();
+        for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
+          ResultValue rv = resultValues.get(wellKey);
+         assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
+                       expectedPlateNumbers[iWell],
+                       new Integer(wellKey.getPlateNumber()));
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
+                       expectedWellNames[iWell],
+                       wellKey.getWellName());
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+                       expectedAssayWellTypes[iWell],
+                       rv.getAssayWellType());
+          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+                       expectedExcludeValues[iWell][iRvt],
+                       rv.isExclude());
+        if (expectedValues[iWell][iRvt] == null) {
+            assertTrue("rvt " + iRvt + " well #" + iWell + " result value is null",
+                       rv.isNull());
+          }
+          else {
+            if (expectedRvt.isNumeric()) {
+              double expectedNumericValue = (Double) expectedValues[iWell][iRvt];
+              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric)",
+                           expectedNumericValue,
+                           rv.getNumericValue(),
+                           0.001);
+            }
+            else {
+              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (non-numeric)",
+                           expectedValues[iWell][iRvt].toString(),
+                           rv.getValue());
+            }
+          }
+        ++iWell;
+          if (iWell == expectedPlateNumbers.length) { break; }
+        }
+      }
+      ++iRvt; 
+    }  
+  }
+  
   
 
   // testing  utility methods

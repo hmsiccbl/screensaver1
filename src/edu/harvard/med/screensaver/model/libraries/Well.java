@@ -82,6 +82,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public static final int PLATE_ROWS = (MAX_WELL_ROW - MIN_WELL_ROW) + 1;
   public static final int PLATE_COLUMNS = (MAX_WELL_COLUMN - MIN_WELL_COLUMN) + 1;
   public static final int PLATE_NUMBER_LEN = 5;
+  public static final int PLATE_ROWS_DEFAULT = 16;
+  public static final int PLATE_COLUMNS_DEFAULT = 24;
   /**
    * The number of decimal places used when recording volume values.
    */

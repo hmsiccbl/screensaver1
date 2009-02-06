@@ -654,10 +654,10 @@ public class CellHTS2 {
         // the position in the result matrix is based on the replicateOrdinal
         // value of the rvt: see readPlateListDb
         int r = rvt.getReplicateOrdinal();
-        rvt.getName();
+        //rvt.getName();
 
         ResultValueType rvtNew = screenResult.createResultValueType(rvtPrefix
-            + rvt.getName(), r, true, false, false, "phenotype");
+            + rvt.getName(), r, true, false, false, "phenotype",rvt.getChannel());
         rvtNew.setNumeric(true);
 
         for (int i = 0; i < wells.size(); ++i) {
@@ -670,7 +670,7 @@ public class CellHTS2 {
       result = rserveExtensions.tryEval(rConnection, rExpr2).asDoubles();
 
       ResultValueType rvtSumm = screenResult.createResultValueType(
-          "cellhts2_summarized", null, true, false, false, "phenotype");
+          "cellhts2_summarized", null, true, false, false, "phenotype",null);
       rvtSumm.setNumeric(true);
       for (int i = 0; i < wells.size(); ++i) {
         Well well = wells.get(i);
