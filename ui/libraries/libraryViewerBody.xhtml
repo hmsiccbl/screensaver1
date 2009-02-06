@@ -5,49 +5,64 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
 
-		<ui:include src="/util/nameValueTable.xhtml">
-			<ui:param name="nameValueTable"
-				value="#{libraryViewer.libraryNameValueTable}" />
-		</ui:include>
-
+	<h:form id="libraryDetailForm">
 		<t:panelGroup>
-			<h:form id="libraryCommandsForm">
-				<h:commandButton value="View Library Contents"
-					action="#{libraryViewer.viewLibraryContents}" styleClass="command"
-					title="View a list of all the wells in the library" />
-
-				<h:commandButton value="View Well Volumes"
-					action="#{libraryViewer.viewLibraryWellCopyVolumes}"
-					rendered="#{libraryViewer.editable}" styleClass="command"
-					title="View volume information for all the wells in the library" />
-
-				<h:commandButton value="Import Library Contents"
-					action="#{libraryViewer.viewLibraryContentsImporter}"
-					rendered="#{libraryViewer.editable}" styleClass="command"
-					title="Import the contents of library wells." />
-
-				<h:commandButton value="Unload Library Contents"
-					action="#{libraryViewer.unloadLibraryContents}"
-					onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
-					rendered="#{libraryViewer.editable &amp;&amp; libraryViewer.librarySize &gt; 0}"
-					styleClass="command"
-					title="Mostly useful for reloading data if a problem occurred on a previous load" />
-			</h:form>
+			<ui:include src="/libraries/libraryDetailViewerBody.xhtml" />
+			<t:panelGrid columns="2" styleClass="layoutPanel" columnClasses="propertyLabelColumn,column">
+				<ss:property id="numberOfExptWells" label="Number of Experimental Wells"
+					description="The number of wells in the library with well type 'Experimental'"
+					value="#{libraryViewer.librarySize}" />	
+			</t:panelGrid>
 		</t:panelGroup>
+	</h:form>
 
-		<t:panelGroup rendered="#{libraryViewer.isCompoundLibrary}">
-			<h:form id="viewDownloadsForm" style="margin-top: 10px">
-				<t:outputText value="Visit the " />
-				<t:commandLink action="#{menu.viewDownloads}"
-					value="Data Downloads page" />
-				<t:outputText
-					value=" to download SD Files for the ICCB-L compound libraries." />
-			</h:form>
-		</t:panelGroup>
+	<t:panelGroup>
+		<h:form id="libraryCommandsForm">
+			<h:commandButton value="View Library Contents"
+				action="#{libraryViewer.viewLibraryContents}" styleClass="command"
+				title="View a list of all the wells in the library" />
+	
+			<h:commandButton value="View Well Volumes"
+				action="#{libraryViewer.viewLibraryWellCopyVolumes}"
+				rendered="#{libraryViewer.readAdmin}" styleClass="command"
+				title="View volume information for all the wells in the library" />
+	
+			<h:commandButton value="Import Library Contents"
+				action="#{libraryViewer.viewLibraryContentsImporter}"
+				rendered="#{libraryViewer.editable &amp;&amp; libraryViewer.uploadStatus != 1}" styleClass="command"
+				title="Import the contents of library wells." />
+	
+			<h:commandButton value="Unload Library Contents"
+				action="#{libraryViewer.unloadLibraryContents}"
+				onclick="javascript: return confirm('Are you sure you want to unload the contents of this library?');"
+				rendered="#{libraryViewer.editable &amp;&amp; libraryViewer.librarySize &gt; 0 &amp;&amp; libraryViewer.uploadStatus != 1}"
+				styleClass="command"
+				title="Mostly useful for reloading data if a problem occurred on a previous load" />
+		</h:form>
+	</t:panelGroup>
+
+	<t:panelGroup rendered="#{libraryViewer.isCompoundLibrary}">
+		<h:form id="viewDownloadsForm" style="margin-top: 10px">
+			<t:outputText value="Visit the " />
+			<t:commandLink action="#{menu.viewDownloads}"
+				value="Data Downloads page" />
+			<t:outputText
+				value=" to download SD Files for the ICCB-L compound libraries." />
+		</h:form>
+	</t:panelGroup>
+
+	<!-- Message for upload library content -->
+	<t:panelGroup rendered="#{!empty libraryViewer.uploading}">
+		<f:verbatim>
+			<p></p>
+		</f:verbatim>
+		<t:outputText value="#{libraryViewer.uploading}" styleClass="new"/>
+	</t:panelGroup>
 
 </ui:composition>
 

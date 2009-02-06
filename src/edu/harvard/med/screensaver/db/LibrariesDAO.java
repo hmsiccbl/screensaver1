@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.Volume;
@@ -90,7 +91,7 @@ public interface LibrariesDAO
 
   public void loadOrCreateWellsForLibrary(Library library);
 
-  public Volume findRemainingVolumeInWellCopy(Well well, Copy copy);
+  public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well);
 
   public Collection<String> findAllVendorNames();
 

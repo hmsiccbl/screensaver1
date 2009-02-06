@@ -14,6 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -25,9 +28,6 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
 {

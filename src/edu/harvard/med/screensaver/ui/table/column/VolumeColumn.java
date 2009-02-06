@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.ui.table.column;
 
 import edu.harvard.med.screensaver.model.Volume;
 
-public abstract class VolumeColumn<R> extends TableColumn<R,Volume>
+public abstract class VolumeColumn<R> extends TableColumn<R, Volume>
 {
   public VolumeColumn(String name, String description, String group)
   {

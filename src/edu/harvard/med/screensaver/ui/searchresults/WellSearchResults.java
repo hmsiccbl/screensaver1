@@ -16,11 +16,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
@@ -44,11 +46,14 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
+import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
@@ -136,19 +141,28 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     _geneViewer = geneViewer;
   }
 
+  /**
+   * Called from the top level menu page.
+   * 
+   * @motivation Initializes the DataTable with a NoOpDataFetcher; causing the bean 
+   * to return an empty search result on the first viewing.
+   * 
+   * @see WellSearchResults#searchCommandListener(javax.faces.event.ActionEvent)
+   */
   public void searchAllWells()
   {
     _mode = WellSearchResultMode.ALL_WELLS;
     _library = null;
     _screenResult = null;
     _plateNumbers = null;
-    initialize(new AllEntitiesOfTypeDataFetcher<Well,String>(Well.class, _dao));
+    // initially, show an empty search result
+    initialize(new NoOpDataFetcher<Well,String,PropertyPath<Well>>());
     updateColumnVisibilityForScreenType(true, true);
 
     // start with search panel open
     setTableFilterMode(true);
   }
-
+  
   public void searchWellsForLibrary(Library library)
   {
     _mode = WellSearchResultMode.LIBRARY_WELLS;
@@ -903,6 +917,81 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     _wellViewer.viewWell(well);
   }
 
+  /**
+   * Effects the replacement of the NoOpDataFetcher (set as the default search for 
+   * users entering the page) so that the current search will return results.
+   * 
+   * @motivation to be tied to the actionListener for search field buttons.  
+   *   
+   * Sequence of a user search is:
+   * <ol>
+   * <li>User enters search patterns and submits (by pressing enter or the search button).</li>
+   * <li>The Criteria field notifies the {@link Criterion} of the value change.  This triggers the chain of 
+   * events that causes the table to refresh.  If the table has been initialized with a NoOpDataFetcher (the 
+   * default), then no data is retrieved.</li>
+   * <li>This action listener is invoked; it will call <code>initialize</code> on the parent {@link DataTable} class:</li>
+   * <li>replaces the {@link NoOpDataFetcher} with a valid {@link DataFetcher},</li>
+   * <li>uses the {@link TableColumn}s from the users search set with the proper {@link Criterion},</li>
+   * <li>triggers execution of the search.</li>
+   * </ol>
+   * 
+   * @see WellSearchResults#searchAllWells()
+   */
+  public void searchCommandListener(javax.faces.event.ActionEvent e)
+  {
+    // By looking at this flag, we can tell if the search is being done in some context or not.
+    if (_mode == WellSearchResultMode.ALL_WELLS) {
+      List<TableColumn<Well,?>> columns = new ArrayList<TableColumn<Well,?>>();
+      columns.addAll(getColumnManager().getAllColumns());
+      initialize(
+        new AllEntitiesOfTypeDataFetcher<Well,String>(Well.class, _dao){
+          @Override
+          protected void addDomainRestrictions(HqlBuilder hql,
+                                               Map<RelationshipPath<Well>,String> path2Alias)
+          {
+            hql.from(getRootAlias(), "library", "l");
+            hql.whereIn("l", "libraryType", LibrarySearchResults.LIBRARY_TYPES_TO_DISPLAY);
+          }
+        }, 
+        columns);
+    }
+  }
+
+  /**
+   * Override resetFilter() in order to handle the "reset all" command in
+   * "all wells" mode by resetting to an empty search result.
+   */
+  @UIControllerMethod
+  public String resetFilter()
+  {
+    if (_mode == WellSearchResultMode.ALL_WELLS) {
+      log.info("reverting to empty search result");
+      initialize(new NoOpDataFetcher<Well,String,PropertyPath<Well>>());
+    }
+    return super.resetFilter();
+  }
+  
+  @Override
+  public String resetColumnFilter()
+  {
+    TableColumn<Well,?> resetColumn = (TableColumn<Well,?>) getRequestMap().get("column");
+    if (_mode == WellSearchResultMode.ALL_WELLS) {
+      // if no other columns have criteria defined, reset to empty search result
+      boolean willHaveEmptyCriteria = true;
+      for (TableColumn<Well,?> column : getColumnManager().getAllColumns()) {
+        if (!column.getCriterion().isUndefined() && column != resetColumn) {
+          willHaveEmptyCriteria = false;
+          break;
+        }
+      }
+      if (willHaveEmptyCriteria) {
+        // reset to an empty search result
+        log.info("all columns have empty criteria; reverting to empty search result");
+        initialize(new NoOpDataFetcher<Well,String,PropertyPath<Well>>());
+      }
+    }
+    return super.resetColumnFilter();
+  }
 
   // private instance methods
 
@@ -914,11 +1003,17 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   public static String makeColumnDescription(MetaDataType mdt, Integer parentIdentifier, String parentTitle)
   {
+
+    return makeColumnDescription(mdt.getName(), mdt.getDescription(), parentIdentifier, parentTitle);
+  }  
+  
+  public static String makeColumnDescription(String name, String description, Integer parentIdentifier, String parentTitle)
+  {
     StringBuilder columnDescription = new StringBuilder();
     columnDescription.append("<i>").append(parentIdentifier).append(": ").append(parentTitle).
-    append("</i><br/><b>").append(mdt.getName()).append("</b>");
-    if (mdt.getDescription() != null) {
-      columnDescription.append(": ").append(mdt.getDescription());
+    append("</i><br/><b>").append(name).append("</b>");
+    if (description != null) {
+      columnDescription.append(": ").append(description);
     }
     return columnDescription.toString();
   }

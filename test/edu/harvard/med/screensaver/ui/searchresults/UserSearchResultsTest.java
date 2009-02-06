@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -48,11 +49,13 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     super.onSetUp();
 
     _screenerSearchResults = new ScreenerSearchResults(genericEntityDao, null);
+    _screenerSearchResults.setMessages(messages);
     _screenerSearchResults.searchUsers();
     TableColumnManager<ScreeningRoomUser> columnManager = _screenerSearchResults.getColumnManager();
     _screenerSearchResults.getColumnManager().addCompoundSortColumns(columnManager.getColumn("User"),
                                                                      columnManager.getColumn("Date Created"));
     _screenerSearchResults.getColumnManager().setSortColumnName("Name");
+    _screenerSearchResults.getColumnManager().setSortDirection(SortDirection.DESCENDING);
 
     _admin1 = MakeDummyEntities.makeDummyUser(1, "Al", "Capone");
     _admin1.setDateCreated(new DateTime(2007, 1, 1, 0, 0, 0, 0));
@@ -68,9 +71,9 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
   public void testContents()
   {
     List<ScreeningRoomUser> _expectedUsers = new ArrayList<ScreeningRoomUser>();
-    _expectedUsers.add(_admin1);
-    _expectedUsers.add(_admin3);
     _expectedUsers.add(_admin2);
+    _expectedUsers.add(_admin3);
+    _expectedUsers.add(_admin1);
 
     //_screenerSearchResults.searchUsers();
 

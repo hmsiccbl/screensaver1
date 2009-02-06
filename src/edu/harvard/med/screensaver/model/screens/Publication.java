@@ -10,6 +10,9 @@
 package edu.harvard.med.screensaver.model.screens;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,11 +22,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -59,6 +64,7 @@ public class Publication extends AbstractEntity
   private String _journal;
   private String _volume;
   private String _pages;
+  private AttachedFile _attachedFile;
 
 
   // public instance methods
@@ -183,6 +189,32 @@ public class Publication extends AbstractEntity
   public void setTitle(String title)
   {
     _title = title;
+  }
+  
+  // note: attached file persistence is managed by Screen, and should be created via Screen.createAttachedFile
+  @OneToOne(cascade={}, fetch=FetchType.LAZY)
+  @JoinColumn(name="attachedFileId", nullable=true, updatable=true, unique=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_publication_to_attached_file")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @edu.harvard.med.screensaver.model.annotations.OneToOne(unidirectional=true)
+  public AttachedFile getAttachedFile()
+  {
+    return _attachedFile;
+  }
+  
+  private void setAttachedFile(AttachedFile attachedFile)
+  {
+    _attachedFile = attachedFile; 
+  }
+
+  // note: attached file persistence is managed by Screen, and should be created via Screen.createAttachedFile
+  public void createAttachedFile(String filename, InputStream fileContents) 
+    throws IOException
+  {
+    if (_attachedFile != null) {
+      throw new DataModelViolationException("publication already has an attached file");
+    }
+    _attachedFile = getScreen().createAttachedFile(filename, AttachedFileType.PUBLICATION, fileContents);
   }
 
   /**

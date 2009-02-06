@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox">
+
+<ui:composition>
+
+
+      <i>Note: The information are extracted from <a href="https://wiki.med.harvard.edu/ICCBL/Screensaver/WebHome" target="_blank">HMS Wiki</a>.</i>
+      <p />
+      These are the specifications for the format of RNAi Libraries Excel Files. Screensaver requires the files to be in this format in order to load them properly.
+      <p />
+      The specifications are a little strict, and there are multiple reasons for this. For one, it is a lot easier to parse files that are in a standard format. Second, it should be relatively trivial to modify files that diverge from this format so that they conform to specifications. Third, it should be beneficial for other reasons if all the RNAi library files are in the same format. (For instance, if we ever need to write a Perl script that takes an RNAi library file as an input.)
+      <p />
+      <h3><a name="Excel_file_name"></a> Excel file name </h3>
+      <p />
+      It is recommended but not required that the names of the Excel files matched either the name, or the short name, of the Library as is found in Screensaver.
+      <p />
+      It is recommended but not required that an entire Library is stored in a single Excel file.
+      <p />
+      <h3><a name="Excel_worksheets"></a> Excel worksheets </h3>
+      <p />
+      The Excel file may have multiple worksheets, with a portion of the library contents found on each worksheet. The Excel file must not contain any blank worksheets.
+      <p />
+      It is recommended but not required that the worksheets to have meaningful names (e.g., the plate number).
+      <p />
+      <h3><a name="Column_headers"></a> Column headers </h3>
+      <p />
+      The first row of the worksheet must contain the column headers. Subsequent rows must contain the data. The following table lists the column headers Screensaver tries to parse, an indication of whether they are required or optional, and a list of synonyms for each header name. Each sheet must contain exactly one column for each required column header -  no duplicates are allowed. Optional column headers must contain either zero or one matching columns. Column names are case-insensitive.
+      <p />
+      <table cellspacing="1" cellpadding="1" class="twikiTable" border="0">
+      <tr><th bgcolor="#dadada" class="twikiFirstCol"><font color="#000000">column name</font></th><th bgcolor="#dadada"><font color="#000000">is required?</font></th><th bgcolor="#dadada"><font color="#000000">synonyms</font></th></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> Plate </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> 384 Plate </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> Well </td><td bgcolor="#eaeaea"> yes </td><td bgcolor="#eaeaea"> 384 Well </td></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> Vendor Identifier </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> Catalog Number </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> EntrezGene Symbol </td><td bgcolor="#eaeaea"> yes </td><td bgcolor="#eaeaea"> Gene Symbol </td></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> EntrezGene ID </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> Locus ID </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> Old EntrezGene IDs </td><td bgcolor="#eaeaea"> no </td><td bgcolor="#eaeaea"> Old Locus IDs </td></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> GenBank Accession Number </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> Accession </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> Sequences </td><td bgcolor="#eaeaea"> no </td><td bgcolor="#eaeaea"> Sequence </td></tr>
+      </table>
+      <p />
+      It's very easy to add a new synonym for a required column, but we should try to be conservative about it, especially after the initial implementation is complete, since adding new synonyms can make a previously valid Excel file no longer valid. (This can happen if an older worksheet has a second column that matches the new synonym. In this case, the worksheet would now have a duplicate column header.)
+      <p />
+      <h3><a name="Data_rows"></a> Data rows </h3>
+      <p />
+      If all the parsed columns have empty values, then the row is ignored. If the Plate and Well columns are the only parsed column with non-empty values, Screensaver assumes that the well is a control well. Otherwise, every column marked in the table below as "is required for experimental well?" must be contain a non-empty value matching the specified format.
+      <p />
+      <table cellspacing="1" cellpadding="1" class="twikiTable" border="0">
+      <tr><th bgcolor="#dadada" class="twikiFirstCol"><font color="#000000">column name</font></th><th bgcolor="#dadada"><font color="#000000">is required for control well?</font></th><th bgcolor="#dadada"><font color="#000000">is required for experimental well?</font></th><th bgcolor="#dadada"><font color="#000000">format</font></th></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> Plate </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> the plate number, optionally prefixed with PL- or PL_ </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> Well </td><td bgcolor="#eaeaea"> yes </td><td bgcolor="#eaeaea"> yes </td><td bgcolor="#eaeaea"> the well name, consisting of a letter A-P, followed by a number 01-24 </td></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> Vendor Identifier </td><td bgcolor="#ffffff"> no </td><td bgcolor="#ffffff"> no </td><td bgcolor="#ffffff"> free text </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> EntrezGene Symbol </td><td bgcolor="#eaeaea"> no </td><td bgcolor="#eaeaea"> yes </td><td bgcolor="#eaeaea"> free text </td></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> EntrezGene ID </td><td bgcolor="#ffffff"> no </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> integer </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> Old EntrezGene IDs </td><td bgcolor="#eaeaea"> no </td><td bgcolor="#eaeaea"> no </td><td bgcolor="#eaeaea"> a series of integers separated by commas or semicolons </td></tr>
+      <tr><td bgcolor="#ffffff" class="twikiFirstCol"> GenBank Accession Number </td><td bgcolor="#ffffff"> no </td><td bgcolor="#ffffff"> yes </td><td bgcolor="#ffffff"> free text </td></tr>
+      <tr><td bgcolor="#eaeaea" class="twikiFirstCol"> Sequences </td><td bgcolor="#eaeaea"> no </td><td bgcolor="#eaeaea"> no </td><td bgcolor="#eaeaea"> a series of DNA sequences separated by commas or semicolons </td></tr>
+      </table>
+
+</ui:composition>
+
+</html>

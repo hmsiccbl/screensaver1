@@ -14,10 +14,11 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
@@ -28,8 +29,6 @@ import edu.harvard.med.screensaver.ui.table.column.TextColumn;
 import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-
-import org.apache.log4j.Logger;
 
 /**
  * Aggregates WellVolumeAdjustments into WellVolumes, and provides these
@@ -52,7 +51,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
   private LibraryViewer _libraryViewer;
   private WellViewer _wellViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
-  private TextColumn<Well> _maxRemainingVolumeColumn;
+  //private TextColumn<Well> _maxRemainingVolumeColumn;
 
 
   // constructors
@@ -141,7 +140,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public List<String> getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getCopiesList();
+        return wellVolume.getActiveWellInfo().getCopiesList();
       }
     });
     columns.add(new VolumeColumn<WellVolume>("Total Initial Copy Volume",
@@ -149,7 +148,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getTotalInitialVolume();
+        return wellVolume.getActiveWellInfo().getTotalInitialVolume();
       }
     });
     columns.add(new VolumeColumn<WellVolume>("Consumed Volume",
@@ -157,7 +156,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getConsumedVolume();
+        return wellVolume.getActiveWellInfo().getConsumedVolume();
       }
     });
     columns.add(new VolumeColumn<WellVolume>("Max Remaining Volume",
@@ -165,7 +164,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMaxWellCopyVolume().getRemainingVolume();
+        return wellVolume.getActiveWellInfo().getMaxWellCopyVolume().getRemainingVolume();
       }
     });
     columns.add(new TextColumn<WellVolume>("Max Remaining Volume Copy",
@@ -173,7 +172,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMaxWellCopyVolume().getCopy().getName();
+        return wellVolume.getActiveWellInfo().getMaxWellCopyVolume().getCopy().getName();
       }
     });
     columns.add(new VolumeColumn<WellVolume>("Min Remaining Volume",
@@ -181,7 +180,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public Volume getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMinWellCopyVolume().getRemainingVolume();
+        return wellVolume.getActiveWellInfo().getMinWellCopyVolume().getRemainingVolume();
 
       }
     });
@@ -190,21 +189,104 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public String getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getMinWellCopyVolume().getCopy().getName();
+        return wellVolume.getActiveWellInfo().getMinWellCopyVolume().getCopy().getName();
       }
     });
+
+    // Retired column info (hidden by default) //
+    
+    TableColumn<WellVolume,?> c = new ListColumn<WellVolume>("Copies (Retired)",
+      "The retired copies of this well", TableColumn.UNGROUPED) {
+      @Override
+      public List<String> getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getRetiredWellInfo().getCopiesList();
+      }
+    };
+    c.setVisible(false);
+    columns.add(c);
+
+    c = new VolumeColumn<WellVolume>("Total Initial Copy Volume (Retired)",
+      "The sum of initial volumes from all copies of this well", TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getRetiredWellInfo().getTotalInitialVolume();
+      }
+    };
+    c.setVisible(false);
+    columns.add(c);
+    
+    c = new VolumeColumn<WellVolume>("Consumed Volume (Retired)",
+      "The cumulative volume already used from this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getRetiredWellInfo().getConsumedVolume();
+      }
+    };
+    c.setVisible(false);
+    columns.add(c);
+
+    c = new VolumeColumn<WellVolume>("Max Remaining Volume (Retired)",
+      "The maximum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getRetiredWellInfo().getMaxWellCopyVolume().getRemainingVolume();
+      }
+    };
+    c.setVisible(false);
+    columns.add(c);
+    
+    c = new TextColumn<WellVolume>("Max Remaining Volume Copy (Retired)",
+      "The copy with the maximum remaining volume of this well", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getRetiredWellInfo().getMaxWellCopyVolume().getCopy().getName();
+      }
+    };
+    c.setVisible(false);
+    columns.add(c);
+
+    c = new VolumeColumn<WellVolume>("Min Remaining Volume (Retired)",
+      "The minimum remaining volume of this well, across all copies", TableColumn.UNGROUPED) {
+      @Override
+      public Volume getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getRetiredWellInfo().getMinWellCopyVolume().getRemainingVolume();
+
+      }
+    };
+    c.setVisible(false);
+    columns.add(c);
+
+    c = new TextColumn<WellVolume>("Min Remaining Volume Copy (Retired)",
+      "The copy with the minimum remaining volume of this well", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(WellVolume wellVolume)
+      {
+        return wellVolume.getRetiredWellInfo().getMinWellCopyVolume().getCopy().getName();
+      }
+    };
+    c.setVisible(false);
+    columns.add(c);
+
+    // done - retired hidden columns - //
+    
     columns.add(new IntegerColumn<WellVolume>("Withdrawals/Adjustments",
       "The number of withdrawals and administrative adjustments made from this well, across all copies", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getWellVolumeAdjustments().size();
+        return wellVolume.getWellVolumeAdjustmentCount();
       }
 
       @Override
       public boolean isCommandLink()
       {
-        return getRowData().getWellVolumeAdjustments().size() > 0;
+        return getRowData().getWellVolumeAdjustmentCount() > 0;
       }
 
       @Override

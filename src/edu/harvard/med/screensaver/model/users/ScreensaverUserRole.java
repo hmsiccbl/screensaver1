@@ -15,7 +15,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
-import edu.harvard.med.screensaver.model.libraries.IsScreenable;
+import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 
 
 /**
@@ -65,7 +65,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link IsScreenable} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link LibraryScreeningStatus} vocabulary.
    */
   public static class UserType extends VocabularyUserType<ScreensaverUserRole>
   {

@@ -36,7 +36,12 @@ public class LocalDateConverter implements Converter
     if ( arg2 == null || arg2.length() == 0) {
       return null;
     }
-    return parser.parseDateTime(arg2).toLocalDate();
+    try {
+      return parser.parseDateTime(arg2).toLocalDate();
+    }
+    catch (Exception e) {
+      throw new ConverterException("invalid date format: " + e.getMessage());
+    }
   }
 
   public String getAsString(FacesContext arg0, UIComponent arg1, Object arg2)

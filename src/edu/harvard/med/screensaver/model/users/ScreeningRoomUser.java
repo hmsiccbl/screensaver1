@@ -171,12 +171,12 @@ public class ScreeningRoomUser extends ScreensaverUser
     }
     return result;
   }
-  
+
   /**
    * Create a new checklist item activation/completed event for the user.
    * @param checklistItem the checklist item
    * @param datePerformed the date the checklist item was performed by the user or otherwise enacted
-   * @param entryActivity the administrative activity that tracks the who/when/why of this checklist item information  
+   * @param entryActivity the administrative activity that tracks the who/when/why of this checklist item information
    * @return the new checklist item for the user
    * @see ChecklistItemEvent#createChecklistItemExpirationEvent(LocalDate, AdministrativeActivity)
    */
@@ -193,7 +193,7 @@ public class ScreeningRoomUser extends ScreensaverUser
         throw new DataModelViolationException("checklist item activation date must be on or after the previous expiration date");
       }
     }
-    ChecklistItemEvent checklistItemEvent = 
+    ChecklistItemEvent checklistItemEvent =
       new ChecklistItemEvent(checklistItem,
                              this,
                              datePerformed,
@@ -201,6 +201,36 @@ public class ScreeningRoomUser extends ScreensaverUser
     _checklistItemEvents.add(checklistItemEvent);
     return checklistItemEvent;
   }
+
+  /**
+   * Create a new checklist item "not applicable" event for the user. Onlvy
+   * valid to call this method if no other events exist for this checklist item,
+   * for this user.
+   *
+   * @param checklistItem the checklist item
+   * @param datePerformed the date the checklist item was marked as
+   *          "not applicable"
+   * @param entryActivity the administrative activity that tracks the
+   *          who/when/why of this checklist item information
+   * @return the new checklist item for the user
+   */
+  public ChecklistItemEvent createChecklistItemNotApplicableEvent(ChecklistItem checklistItem,
+                                                                  LocalDate datePerformed,
+                                                                  AdministrativeActivity entryActivity)
+  {
+    SortedSet<ChecklistItemEvent> checklistItemEvents = getChecklistItemEvents(checklistItem);
+    if (checklistItemEvents.size() > 0) {
+        throw new DataModelViolationException("cannot set a checklist item to 'not applicable' if the item is already activated/deactivated/completed");
+    }
+    ChecklistItemEvent checklistItemEvent =
+      new ChecklistItemEvent(checklistItem,
+                             this,
+                             datePerformed,
+                             entryActivity, true);
+    _checklistItemEvents.add(checklistItemEvent);
+    return checklistItemEvent;
+  }
+
 
   /**
    * Get the set of screens for which this user is the lead screener.
@@ -285,11 +315,12 @@ public class ScreeningRoomUser extends ScreensaverUser
     screens.addAll(getScreensCollaborated());
     return screens;
   }
-  
+
   /**
    * @return the Set of ScreeningRoomUsers that are lab members or the lab head
    *         of this user's lab, and all collaborators on screens this user is
-   *         associated with.  This uses is not included in the returned Set.
+   *         associated with. This user himself is not included in the returned
+   *         Set.
    */
   @Transient
   public Set<ScreeningRoomUser> getAssociatedUsers()

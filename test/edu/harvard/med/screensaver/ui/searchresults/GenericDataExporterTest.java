@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -37,19 +37,20 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
 
 
   // instance data members
-  
-  
+
+
   // public constructors and methods
-  
+
   public void testGenericDataExporter() throws Exception
   {
     final Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     genericEntityDao.persistEntity(library);
-  
+
     WellSearchResults wellSearchResults = new WellSearchResults(genericEntityDao, null, null, null, null, Collections.<DataExporter<?>>emptyList());
     GenericDataExporter<Well> exporter = (GenericDataExporter<Well>) wellSearchResults.getDataExporters().get(0);
     wellSearchResults.searchAllWells();
-    
+    wellSearchResults.searchCommandListener(null); // invoke search now (necessary when using searchAllWells(), above
+
     TableColumn<Well,String> wellColumn = (TableColumn<Well,String>) wellSearchResults.getColumnManager().getColumn("Well");
     wellColumn.addCriterion(new Criterion<String>(Operator.TEXT_STARTS_WITH, "B"));
     wellSearchResults.getColumnManager().setSortColumn(wellColumn);
@@ -58,18 +59,17 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
     wellSearchResults.getColumnManager().getColumn("Compounds SMILES").setVisible(true);
     wellSearchResults.getColumnManager().getColumn("PubChem CIDs").setVisible(true);
     exporter.setTableColumns(wellSearchResults.getColumnManager().getVisibleColumns());
-    wellSearchResults.getRowCount(); // necessary to force dataFetcher to be re-initialized
     InputStream exportedData = exporter.export(wellSearchResults.getDataTableModel());
     Workbook workbook = Workbook.getWorkbook(exportedData);
     Sheet sheet = workbook.getSheet(0);
     Cell[] row = sheet.getRow(0);
     assertEquals("row count", 24 + 1, sheet.getRows());
-    assertEquals("column 0 header", "Plate", row[0].getContents()); 
+    assertEquals("column 0 header", "Plate", row[0].getContents());
     assertEquals("column 1 header", "Well", row[1].getContents());
     assertEquals("column 2 header", "Well Type", row[2].getContents());
     assertEquals("column 3 header", "Reagent Source ID", row[3].getContents());
-    assertEquals("column 4 header", "Compounds SMILES", row[4].getContents()); 
-    assertEquals("column 5 header", "PubChem CIDs", row[5].getContents()); 
+    assertEquals("column 4 header", "Compounds SMILES", row[4].getContents());
+    assertEquals("column 5 header", "PubChem CIDs", row[5].getContents());
     for (int rowIndex = 1; rowIndex <= 24; ++rowIndex) {
       assertEquals("filtered, sorted well column desc; rowIndex=" + rowIndex,
                    String.format("B%02d", 25 - rowIndex),

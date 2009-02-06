@@ -40,12 +40,12 @@ public class RowsPerPageSelector extends UISelectOneBean<Integer>
   // public constructors and methods
 
   @Override
-  public String getLabel(Integer value)
+  public String makeLabel(Integer value)
   {
     if (SHOW_ALL_VALUE.equals(value)) {
       return "All";
     }
-    return super.getLabel(value);
+    return super.makeLabel(value);
   }
 
   @Override

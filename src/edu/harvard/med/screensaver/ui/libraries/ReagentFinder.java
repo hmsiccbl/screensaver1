@@ -106,7 +106,10 @@ public class ReagentFinder extends AbstractBackingBean
     _reagentVendorIdentifierList = reagentVendorIdentifierList;
   }
 
-  @Override
+  /**
+   * TODO: this method is _required_ by the UI code, but this dependency is not defined explicitly.
+   *  Should be define explicitly via an interface.
+   */
   protected ScreensaverUserRole getEditableAdminRole()
   {
     return ADMIN_ROLE;
@@ -147,34 +150,40 @@ public class ReagentFinder extends AbstractBackingBean
     {
       public void runTransaction()
       {
-        ReagentVendorIdentifierParserResult parseResult =
-          _reagentVendorIdentifierListParser.parseReagentVendorIdentifiers(_vendorSelector.getSelection(),
-                                                                           _reagentVendorIdentifierList);
-        // display parse errors before proceeding with successfully parsed ReagentVendorIdentifiers
-        for (Pair<Integer,String> error : parseResult.getErrors()) {
-          showMessage("libraries.reagentVendorIdentifierListParseError", error.getSecond());
-        }
-
-        Set<ReagentVendorIdentifier> foundReagentIds = new HashSet<ReagentVendorIdentifier>();
-        for (ReagentVendorIdentifier reagentVendorIdentifier : parseResult.getParsedReagentVendorIdentifiers()) {
-          // TODO: eliminate this dao call here; it's wasteful; make this check when loading the data later on
-          Reagent reagent = _dao.findEntityById(Reagent.class,
-                                                reagentVendorIdentifier,
-                                                true);
-          if (reagent != null) {
-            foundReagentIds.add(reagentVendorIdentifier);
+        try {
+          ReagentVendorIdentifierParserResult parseResult =
+            _reagentVendorIdentifierListParser.parseReagentVendorIdentifiers(_vendorSelector.getSelection(),
+                                                                             _reagentVendorIdentifierList);
+          // display parse errors before proceeding with successfully parsed ReagentVendorIdentifiers
+          for (Pair<Integer,String> error : parseResult.getErrors()) {
+            showMessage("libraries.reagentVendorIdentifierListParseError", error.getSecond());
           }
-          if (reagent == null) {
-            showMessage("libraries.noSuchReagent", reagentVendorIdentifier);
+
+          Set<ReagentVendorIdentifier> foundReagentIds = new HashSet<ReagentVendorIdentifier>();
+          for (ReagentVendorIdentifier reagentVendorIdentifier : parseResult.getParsedReagentVendorIdentifiers()) {
+            // TODO: eliminate this dao call here; it's wasteful; make this check when loading the data later on
+            Reagent reagent = _dao.findEntityById(Reagent.class,
+                                                  reagentVendorIdentifier,
+                                                  true);
+            if (reagent != null) {
+              foundReagentIds.add(reagentVendorIdentifier);
+            }
+            if (reagent == null) {
+              showMessage("libraries.noSuchReagent", reagentVendorIdentifier);
+            }
+          }
+
+          if (foundReagentIds.size() == 0) {
+            result[0] = REDISPLAY_PAGE_ACTION_RESULT;
+          }
+          else {
+            _reagentsBrowser.searchReagents(foundReagentIds);
+            result[0] = VIEW_REAGENT_SEARCH_RESULTS;
           }
         }
-
-        if (foundReagentIds.size() == 0) {
-          result[0] = REDISPLAY_PAGE_ACTION_RESULT;
-        }
-        else {
-          _reagentsBrowser.searchReagents(foundReagentIds);
-          result[0] = VIEW_REAGENT_SEARCH_RESULTS;
+        catch (RuntimeException e) {
+          log.error("on find reagents: ", e);
+          throw e;
         }
       }
     });

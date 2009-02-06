@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.libraries.compound.StructureImageProvider;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -33,7 +34,9 @@ public class CompoundViewer extends AbstractBackingBean implements EntityViewer
   private GenericEntityDAO _dao;
 
   private Compound _compound;
+  private StructureImageProvider _structureImageProvider;
   private CompoundNameValueTable _compoundNameValueTable;
+
 
 
   // constructors
@@ -45,9 +48,11 @@ public class CompoundViewer extends AbstractBackingBean implements EntityViewer
   {
   }
 
-  public CompoundViewer(GenericEntityDAO dao)
+  public CompoundViewer(GenericEntityDAO dao,
+                        StructureImageProvider structureImageProvider)
   {
     _dao = dao;
+    _structureImageProvider = structureImageProvider;
   }
 
 
@@ -93,7 +98,9 @@ public class CompoundViewer extends AbstractBackingBean implements EntityViewer
                             "nscNumbers",
                             "wells.library");
           setCompound(compound);
-          setCompoundNameValueTable(new CompoundNameValueTable(compound, CompoundViewer.this));
+          setCompoundNameValueTable(new CompoundNameValueTable(compound, 
+                                                               CompoundViewer.this, 
+                                                               _structureImageProvider));
         }
         else {
           setCompound(null);

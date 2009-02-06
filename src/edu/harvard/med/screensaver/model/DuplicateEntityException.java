@@ -18,6 +18,11 @@ public class DuplicateEntityException extends DataModelViolationException
   {
     super(entity + " already exists");
   }
+  
+  public DuplicateEntityException(AbstractEntity entity, String propertyName, Object propertyValue )
+  {
+    super(entity + " with the property: " + propertyName + "=\"" + propertyValue + "\" already exists");
+  }
 
   public DuplicateEntityException(AbstractEntity parentEntity,
                                   AbstractEntity duplicatedChildEntity)

@@ -17,10 +17,11 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
-import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.Volume.Units;
-
 import com.google.common.base.Join;
+
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
+
 
 public class VolumeConverter implements Converter
 {
@@ -37,23 +38,23 @@ public class VolumeConverter implements Converter
     if (matcher.matches()) {
       String valueStr = matcher.group(1);
       String unitsStr = matcher.group(2);
-      Units units = parseUnits(arg0, arg1, unitsStr);
+      VolumeUnit units = parseUnits(arg0, arg1, unitsStr);
       return new Volume(valueStr, units).convertToReasonableUnits();
     }
     throw new ConverterException("invalid volume value");
   }
 
-  private Units parseUnits(FacesContext arg0, UIComponent arg1, String unitsStr)
+  private VolumeUnit parseUnits(FacesContext arg0, UIComponent arg1, String unitsStr)
   {
     if (unitsStr != null) {
-      for (Units units : Units.values()) {
+      for (VolumeUnit units : VolumeUnit.values()) {
         if (units.getSymbol().toLowerCase().equalsIgnoreCase(unitsStr)) {
           return units;
         }
       }
-      throw new ConverterException("unknown units (valid units: " + Join.join(", ", Units.values()) + ")");
+      throw new ConverterException("unknown units (valid units: " + Join.join(", ", VolumeUnit.values()) + ")");
     }
-    return Units.MICROLITERS;
+    return VolumeUnit.MICROLITERS;
   }
 
   public String getAsString(FacesContext arg0, UIComponent arg1, Object obj)

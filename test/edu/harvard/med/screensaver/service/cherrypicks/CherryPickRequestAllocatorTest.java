@@ -14,12 +14,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -44,25 +50,22 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
 public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTest
 {
-  // static members
-
   private static Logger log = Logger.getLogger(CherryPickRequestAllocatorTest.class);
 
 
-  // instance data members
-
   protected LibrariesDAO librariesDao;
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
+  protected CherryPickRequestPlateStatusUpdater cherryPickRequestPlateStatusUpdater;
   protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
 
 
-  // public constructors and methods
-
+  /**
+   * Test a single allocation request, focusing on testing the basic volume
+   * comparison logic, using 3 virgin copies. Does not test the
+   * "minimum copy count" logic, as only one cherry pick is created per plate.
+   */
   public void testCherryPickRequestAllocatorSingle()
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
@@ -116,6 +119,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
 
         Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
 
@@ -134,6 +138,11 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     });
   }
 
+  /**
+   * Test multiple, sequential allocation requests, testing whether allocations
+   * for each request are being recorded and considered in subsequent allocation
+   * requests (volumes are cumulatively reduced).
+   */
   public void testCherryPickRequestAllocatorMulti()
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
@@ -192,6 +201,10 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     // allocation 3 is fulfillable (again) by copy 1
   }
 
+  /**
+   * Test multiple, sequential allocation requests, testing whether manual well
+   * volume adjustments considered in allocation requests.
+   */
   public void testCherryPickRequestAllocatorWithAdjustedWellVolumesOnPlate()
   {
     final Volume requestVolume = new Volume(12);
@@ -238,10 +251,102 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
                                       new String[] {"A01", "B02", "C03"});
   }
 
-  public void testAllocateSingleLabCherryPick()
+  /**
+   * Tests the algorithm that selects the minimal number of copies that satisfies all cherry picks.
+   */
+  public void testAllocateWithMinimumCopiesPerPlate()
   {
-    // TODO: implement
-    // cherryPickRequestAllocator.allocate(labCherryPick);
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        genericEntityDao.saveOrUpdateEntity(library);
+
+        Copy copy1 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
+        copy1.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(6).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        Copy copy2 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
+        copy2.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(6).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        Copy copy3 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
+        copy3.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(6).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+      }
+    });
+
+    // note: below operations are cumulative, so that previous operations affect
+    // state being tested by subsequent operations
+
+    Volume requestVolume = new Volume(6);
+    RNAiCherryPickRequest cpr1 = 
+      doTestCherryPickRequestAllocation(1,
+                                        requestVolume,
+                                        new String[] {"A01"},
+                                        new String[] {});
+    assertAllocationsArePreciselyFromCopies(cpr1, "C");
+
+    RNAiCherryPickRequest cpr2 = 
+      doTestCherryPickRequestAllocation(2,
+                                        requestVolume,
+                                        new String[] {"A01", "A02"},
+                                        new String[] {});
+    assertAllocationsArePreciselyFromCopies(cpr2, "D");
+    
+    RNAiCherryPickRequest cpr3 = 
+      doTestCherryPickRequestAllocation(3,
+                                        requestVolume,
+                                        new String[] {"A02", "A03"},
+                                        new String[] {});
+    assertAllocationsArePreciselyFromCopies(cpr3, "C");
+
+    RNAiCherryPickRequest cpr4 = 
+      doTestCherryPickRequestAllocation(4,
+                                        requestVolume,
+                                        new String[] {"A02", "A03"},
+                                        new String[] {});
+    assertAllocationsArePreciselyFromCopies(cpr4, "E");
+    
+    RNAiCherryPickRequest cpr5 = 
+      doTestCherryPickRequestAllocation(5,
+                                        requestVolume,
+                                        new String[] {"A01", "A02", "A03"},
+                                        new String[] {"A02"}); // tests unfulfillable cherry pick
+    assertAllocationsArePreciselyFromCopies(cpr5, "D", "E");
+    
+    // test worst case allocation (unique copy for each cherry pick)
+    doTestCherryPickRequestAllocation(6,
+                                      requestVolume,
+                                      new String[] {"B01", "B05"},
+                                      new String[] {});
+    doTestCherryPickRequestAllocation(7,
+                                      requestVolume,
+                                      new String[] {"B01", "B03", "B05"},
+                                      new String[] {});
+    doTestCherryPickRequestAllocation(8,
+                                      requestVolume,
+                                      new String[] {"B02"},
+                                      new String[] {});
+    doTestCherryPickRequestAllocation(9,
+                                      requestVolume,
+                                      new String[] {"B02", "B03", "B05"},
+                                      new String[] {});
+    RNAiCherryPickRequest cpr11 = 
+      doTestCherryPickRequestAllocation(11,
+                                        requestVolume,
+                                        new String[] {"B01", "B02", "B03"},
+                                        new String[] {});
+    assertAllocationsArePreciselyFromCopies(cpr11, "C", "D", "E");
+  }
+
+  private void assertAllocationsArePreciselyFromCopies(CherryPickRequest cpr, String... copyNamesArray)
+  {
+    Set<String> expectedcopyNames = Sets.newHashSet(copyNamesArray);
+    Set<String> actualCopyNames = Sets.newHashSet();
+    for (LabCherryPick lcp : cpr.getLabCherryPicks()) {
+      Copy actualCopy = lcp.getSourceCopy();
+      if (actualCopy != null) { 
+        actualCopyNames.add(actualCopy.getName());
+      }
+    }
+    assertEquals("allocations are from copies",
+                 expectedcopyNames,
+                 actualCopyNames);
   }
 
   public void testDeallocateAllCherryPicks()
@@ -331,13 +436,19 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       }
     });
 
-    // note: we want detached assay plate entity instances, as the method being test needs to handle this
-    final HashSet<CherryPickAssayPlate> assayPlatesToCancel = new HashSet<CherryPickAssayPlate>(genericEntityDao.reloadEntity(cpr, false, "cherryPickAssayPlates").getActiveCherryPickAssayPlates());
+    // note: we want detached assay plate entity instances, as the methods being tested need to handle this
+    final HashSet<CherryPickAssayPlate> assayPlatesToCancel = 
+      new HashSet<CherryPickAssayPlate>(genericEntityDao.reloadEntity(cpr, false, "cherryPickAssayPlates").getActiveCherryPickAssayPlates());
     assertEquals("assay plates to cancel count", 1, assayPlatesToCancel.size());
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        CherryPickRequest cpr2 = genericEntityDao.reloadEntity(cpr);
-        cherryPickRequestAllocator.cancelAndDeallocateAssayPlates(cpr2, assayPlatesToCancel, adminUser, new LocalDate(), "test comment");
+        // note: must deallocate first, otherwise the 'canceled' status will prevent deallocation from being performed
+        cherryPickRequestAllocator.deallocateAssayPlates(assayPlatesToCancel);
+        cherryPickRequestPlateStatusUpdater.updateAssayPlatesStatus(assayPlatesToCancel, 
+                                                                    adminUser, 
+                                                                    new LocalDate(), 
+                                                                    "test comment", 
+                                                                    CherryPickLiquidTransferStatus.CANCELED);
       }
     });
     
@@ -350,12 +461,15 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         assertEquals("number of unfulfilled lcps (persisted value)", 
                      4,
                      cpr2.getNumberUnfulfilledLabCherryPicks());
+        for (WellVolumeAdjustment wva : wvas) {
+          assertTrue("lab cherry pick is cancelled", wva.getLabCherryPick().isCancelled());
+        }
       }
     });
   }
-
-
-  // static util methods
+  
+  
+  // utility methods
 
   public static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, int wellsPerPlate)
   {
@@ -419,8 +533,6 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   }
 
 
-  // private methods
-
   private RNAiCherryPickRequest doTestCherryPickRequestAllocation(final int screenNumber,
                                                                   final Volume requestVolume,
                                                                   final String[] cherryPickWellNames,
@@ -445,6 +557,8 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+        
         Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
         assertEquals("unfulfillable cherry picks for requested " + Arrays.asList(cherryPickWellNames),
                      expectedUnfulfillableCherryPicks,

@@ -71,8 +71,7 @@ public class PubchemCidListProviderTest extends AbstractSpringTest
     try {
       String inchi = _openBabelClient.convertSmilesToInchi("O=C1CCCC=2OC(=O)C(=CC1=2)NC(=O)c3ccccc3");
       List<String> pubchemCids = _pubchemCidListProvider.getPubchemCidListForInchi(inchi);
-      assertEquals(0, pubchemCids.size());
-      //assertEquals("3822112", pubchemCids.get(0)); // used to return 3822112
+      assertEquals("3822112", pubchemCids.get(0)); 
     }
     catch (EutilsException e) {
       fail("PubchemCidListProvider threw an exception: " + e.getMessage());

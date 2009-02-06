@@ -21,13 +21,15 @@ import javax.faces.component.UIInput;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 
+import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-
-import org.apache.log4j.Logger;
 
 /**
  * JSF backing bean for data tables. Provides the following functionality:
@@ -92,7 +94,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     refetch();
     refilter();
     resort();
-  }
+  } 
 
   public UIData getDataTableUIComponent()
   {
@@ -295,6 +297,22 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   }
 
   /**
+   * Resets the current column's criteria to a single, non-restricting
+   * criterion. This is useful for a user interface that wants to present a
+   * single criterion per column, that can be edited by the user (without having
+   * to explicitly add a criterion first).
+   */
+  @UIControllerMethod
+  public String resetColumnFilter()
+  {
+    TableColumn<R,?> column = (TableColumn<R,?>) getRequestMap().get("column");
+    if (column != null) {
+      column.resetCriteria();
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  /**
    * Delete all criteria from each column.
    */
   @UIControllerMethod
@@ -365,6 +383,12 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
                              getColumnManager().getSortDirection());
     setRowIndex(0);
   }
+
+  /**
+   * This is a design hook that can be used by sub classes to implement Screensaver search workflow.
+   * @see WellSearchResults#searchCommandListener(ActionEvent)
+   */
+  public void searchCommandListener(javax.faces.event.ActionEvent e) {}
 
   // private methods
 

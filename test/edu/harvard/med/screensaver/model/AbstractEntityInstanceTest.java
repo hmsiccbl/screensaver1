@@ -28,7 +28,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Transient;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
+import org.hibernate.SessionFactory;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -36,13 +45,13 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.EntityNetworkPersister.EntityNetworkPersisterException;
-import edu.harvard.med.screensaver.model.Volume.Units;
 import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ManyToMany;
 import edu.harvard.med.screensaver.model.annotations.ManyToOne;
 import edu.harvard.med.screensaver.model.annotations.OneToMany;
+import edu.harvard.med.screensaver.model.annotations.OneToOne;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -74,15 +83,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.hibernate.SessionFactory;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
 {
@@ -531,9 +531,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
 
     RelatedProperty relatedProperty = new RelatedProperty(beanClass, propertyDescriptor);
 
-    // if related _bean cannot exist independently, then
-    // this side should *not* have an add or remove method, since the related
-    // _bean must be associated during instantation only.
+    // this side should *not* have an 'add' or 'remove' method, under the following conditions 
     if (relatedProperty.exists() && relatedProperty.relatedPropertyIsImmutable()) {
       // do nothing
       log.info("testCollectionProperty(): skipping add/remove test for collection " + fullPropName +
@@ -544,6 +542,11 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       // do nothing
       log.info("testCollectionProperty(): skipping add/remove test for collection " + fullPropName +
                ": collection is immutable");
+    }
+    else if (isValueCollection(beanClass, propertyDescriptor)) {
+      // do nothing
+      log.info("testCollectionProperty(): skipping add/remove test for collection " + fullPropName +
+               ": collection of values (not entities)");
     }
     else {
       log.info("testCollectionProperty(): running add/remove test for collection " + fullPropName);
@@ -1169,7 +1172,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
       return val;
     }
     if (type.equals(Volume.class)) {
-      Volume val = new Volume(((Integer) getTestValueForType(Integer.class)).longValue(), Units.MICROLITERS);
+      Volume val = new Volume(((Integer) getTestValueForType(Integer.class)).longValue());
       return val;
     }
     if (type.equals(Boolean.TYPE)) {
@@ -1745,6 +1748,10 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
                propFullName);
       return true;
     }
+    
+    if (isEmbeddableProperty(beanClass, propertyDescriptor)) {
+      return true;
+    }
 
     return false;
   }
@@ -1787,10 +1794,29 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     return getter.isAnnotationPresent(org.hibernate.annotations.Immutable.class);
   }
 
+  protected boolean isEmbeddableProperty(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
+  {
+    Class propertyType = (Class) propertyDescriptor.getPropertyType();
+    if (!AbstractEntity.class.isAssignableFrom(propertyType)) {
+      Embeddable embeddable =
+        propertyType.<Embeddable>getAnnotation(Embeddable.class);
+      return embeddable!= null;
+    }
+    return false;
+  }
+
+  protected boolean isValueCollection(Class<? extends AbstractEntity> beanClass, PropertyDescriptor propertyDescriptor)
+  {
+    Method getter = propertyDescriptor.getReadMethod();
+    return getter.isAnnotationPresent(org.hibernate.annotations.CollectionOfElements.class);
+  }
+
   private boolean isUnidirectionalRelationshipMethod(Method getter)
   {
     ManyToOne manyToOne = getter.getAnnotation(ManyToOne.class);
-    if (manyToOne != null && manyToOne.unidirectional()) {
+    OneToOne oneToOne = getter.getAnnotation(OneToOne.class);
+    if ((manyToOne != null && manyToOne.unidirectional()) ||
+      (oneToOne != null && oneToOne.unidirectional())) {
       return true;
     }
     return false;

@@ -46,7 +46,7 @@
 	</ss:property>
 
 	<!-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design -->
-	<ss:property id="labName" label="Lab Name"
+	<ss:property id="labName" label="Lab Name" primary="true" 
 		description="The name of the lab carrying out the screen"
 		value="#{screen.labHead}" editable="#{editable}">
 		<ui:define name="data">
@@ -59,7 +59,7 @@
 		</ui:define>
 	</ss:property>
 
-	<ss:property id="leadScreener" label="Lead Screener"
+	<ss:property id="leadScreener" label="Lead Screener" primary="true" 
 		description="The scientist primarily responsible for carrying out the screen"
 		value="#{screen.leadScreener}" editable="#{editable}">
 		<ui:define name="data">
@@ -70,9 +70,9 @@
 		</ui:define>
 	</ss:property>
 
-	<ss:property id="title" label="Title" type="Text" required="true"
+	<ss:property id="title" label="Title" type="#{editable ? 'Textarea' : 'Text'}" primary="true" required="true"
 		description="The title of the screen" value="#{screen.title}"
-		editable="#{editable}" editWidth="80">
+		editable="#{editable}" editWidth="80" editHeight="3">
 		<ui:define name="valueHeader">
 			<t:outputText
 				rendered="#{screen.screenType.value== 'Small Molecule'}"

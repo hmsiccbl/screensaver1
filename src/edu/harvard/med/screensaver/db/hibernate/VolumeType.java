@@ -17,19 +17,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.Volume.Units;
-
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
+
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 
 public class VolumeType implements UserType
 {
 
   // static members
 
-  public static Units NORMALIZED_UNITS = Units.LITERS; 
+  public static VolumeUnit NORMALIZED_UNITS = VolumeUnit.LITERS; 
 
 
   // instance data members

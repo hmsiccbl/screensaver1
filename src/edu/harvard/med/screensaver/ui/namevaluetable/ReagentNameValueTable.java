@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.harvard.med.screensaver.io.libraries.compound.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -36,24 +37,27 @@ public class ReagentNameValueTable extends ComboNameValueTable
   public ReagentNameValueTable(Reagent reagent,
                                ReagentViewer reagentViewer,
                                GeneViewer geneViewer,
-                               CompoundViewer compoundViewer)
+                               CompoundViewer compoundViewer,
+                               StructureImageProvider structureImageProvider)
   {
-    initialize(reagent, reagentViewer, geneViewer, compoundViewer, new ReagentDetailsNameValueTable(reagent));
+    initialize(reagent, reagentViewer, geneViewer, compoundViewer, structureImageProvider, new ReagentDetailsNameValueTable(reagent));
   }
 
   protected ReagentNameValueTable(Reagent reagent,
                                   ReagentViewer reagentViewer,
                                   GeneViewer geneViewer,
                                   CompoundViewer compoundViewer,
+                                  StructureImageProvider structureImageProvider,
                                   NameValueTable detailsNameValueTable)
   {
-    initialize(reagent, reagentViewer, geneViewer, compoundViewer, detailsNameValueTable);
+    initialize(reagent, reagentViewer, geneViewer, compoundViewer, structureImageProvider, detailsNameValueTable);
   }
 
   private void initialize(Reagent reagent,
                           ReagentViewer reagentViewer,
                           GeneViewer geneViewer,
                           CompoundViewer compoundViewer,
+                          StructureImageProvider structureImageProvider,
                           NameValueTable detailsNameValueTable)
   {
     List<NameValueTable> comboNameValueTables = new ArrayList<NameValueTable>();
@@ -67,7 +71,10 @@ public class ReagentNameValueTable extends ComboNameValueTable
           comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, reagentViewer));
         }
         for (Compound compound : well.getOrderedCompounds()) {
-          comboNameValueTables.add(new CompoundNameValueTable(compound, compoundViewer, reagentViewer));
+          comboNameValueTables.add(new CompoundNameValueTable(compound, 
+                                                              compoundViewer,
+                                                              structureImageProvider,
+                                                              reagentViewer));
         }
       }
     }

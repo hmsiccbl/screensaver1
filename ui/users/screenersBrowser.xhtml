@@ -8,11 +8,11 @@
 	xmlns:s="http://myfaces.apache.org/sandbox"
 	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
+
+
 <ui:composition template="/main/template.xhtml">
-
-	<ui:param name="pageTitle" value="Screeners Browser" />
+	<ui:param name="pageTitle" value="#{screenersBrowser.title}" />
 	<!-- ui:param name="pageHelpURL" value="screens/screenersBrowserHelp.jsf" /-->
-
 	<ui:define name="body">
 		<ui:include src="userSearchResultsBody.xhtml">
 			<ui:param name="userSearchResults" value="#{screenersBrowser}" />

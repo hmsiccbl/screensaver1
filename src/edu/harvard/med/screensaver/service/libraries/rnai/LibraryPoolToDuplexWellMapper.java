@@ -24,6 +24,8 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Sets;
+
 //TODO: the name of this class evolved away from it original intended use of
 //just performing the pool-to-duplex *well* mapping. It is simply more
 //convenient to create the LabCherryPicks for a set of ScreenerCherryPicks of
@@ -45,30 +47,35 @@ public class LibraryPoolToDuplexWellMapper
   }
 
   /**
-   * Maps cherry pick wells from a Dharmacon SMARTPool library to the respective
-   * wells in the related Dharmacon duplex library. The mapping is keyed on the
-   * SilencingReagents contained in the pool well, <i>not</i> the gene they are
-   * silencing.
+   * Creates LabCherryPicks in the specified CherryPickRequest by mapping
+   * ScreenerCherryPick source wells of Dharmacon SMARTPool libraries to the
+   * respective wells in the related Dharmacon duplex library, where the duplex
+   * wells contain the same silencing reagents as the pool well.
+   * <p>
+   * Pool-to-duplex mapping anomalies (i.e., when less than 4 duplexes are
+   * found, and, in particular, when 0 duplexes are found) can be determined by
+   * finding resultant ScreenerCherryPicks that do not have 4 LabCherryPicks.
    */
   public Set<LabCherryPick> createDuplexLabCherryPicksforPoolScreenerCherryPicks(RNAiCherryPickRequest cherryPickRequest)
   {
     // TODO: currently assumes that all RNAi cherry picks are from Dharmacon
     // libraries, which are split into pool and duplex libraries
 
-    // note: anomalies (i.e., when exactly 4 duplexes are not found, and,
-    // most importantly, when 0 duplexes are found) are implicitly recorded in
-    // our data model; a UI can handle notification of these cases as desired,
-    // simply by finding ScreenerCherryPicks that do not have a sufficient
-    // number of LabCherryPicks
-
-    Set<LabCherryPick> labCherryPicks = new HashSet<LabCherryPick>(cherryPickRequest.getScreenerCherryPicks().size() * 4);
+    Set<LabCherryPick> labCherryPicks = Sets.newHashSetWithExpectedSize(cherryPickRequest.getScreenerCherryPicks().size() * 4);
     Set<ScreenerCherryPick> screenerCherryPicks = cherryPickRequest.getScreenerCherryPicks();
+    Set<Well> allDuplexWells = Sets.newHashSet();
     for (ScreenerCherryPick screenerCherryPick : screenerCherryPicks) {
       Well poolWell = screenerCherryPick.getScreenedWell();
       Set<Well> duplexWells = mapPoolWellToDuplexWells(poolWell);
       for (Well duplexWell : duplexWells) {
+        if (allDuplexWells.contains(duplexWell)) {
+          throw new BusinessRuleViolationException("screener cherry pick for pool well " + 
+                                                   screenerCherryPick.getScreenedWell().getWellKey() + 
+                                                   " maps to duplexes that have already been added for another screener cherry pick");
+        }
         labCherryPicks.add(cherryPickRequest.createLabCherryPick(screenerCherryPick, duplexWell));
       }
+      allDuplexWells.addAll(duplexWells);
     }
     return labCherryPicks;
   }

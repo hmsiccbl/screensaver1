@@ -34,14 +34,15 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.joda.time.DateTime;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -79,6 +80,8 @@ public class ScreenResult extends TimeStampedAbstractEntity
   private boolean _isShareable;
   private Integer _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
+  private DateTime _dateLastImported;
+
   /**
    * @motivation optimization, to avoid loading inspecting all ResultValues when
    *             determining the set of plate numbers associated with this
@@ -89,6 +92,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
    */
   private SortedSet<Integer> _plateNumbers = new TreeSet<Integer>();
   private Integer _experimentalWellCount = 0; // can't be null
+  private String _comments;
 
 
   // public constructor
@@ -104,6 +108,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
     setScreen(screen);
     setShareable(isShareable);
     setReplicateCount(replicateCount);
+    _dateLastImported = new DateTime();
   }
 
 
@@ -155,13 +160,14 @@ public class ScreenResult extends TimeStampedAbstractEntity
   }
 
   /**
-   * Get the date this <code>ScreenResult</code> was last imported into Screensaver.
+   * Represents the last time that full or incremental data was imported for this ScreenResult.
    * @return the date this <code>ScreenResult</code> was last imported into Screensaver
    */
-  @Transient
+  @Column(nullable=false)
+  @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
   public DateTime getDateLastImported()
   {
-    return getDateCreated();
+    return _dateLastImported;
   }
 
   /**
@@ -215,7 +221,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
    */
   public ResultValueType createResultValueType(String name)
   {
-    return createResultValueType(name, null, false, false, false, null,null);
+    return createResultValueType(name, null, false, false, false, null, null);
   }
 
   /**
@@ -495,7 +501,18 @@ public class ScreenResult extends TimeStampedAbstractEntity
     }
     return rawNumericResultValueTypes;
   }
+  
+  @Column
+  public String getComments()
+  {
+    return _comments;
+  }
 
+
+  public void setComments(String comments)
+  {
+    _comments = comments;
+  }
 
   // package instance method
 
@@ -552,6 +569,14 @@ public class ScreenResult extends TimeStampedAbstractEntity
     _version = version;
   }
 
+  /**
+   * Set the date this <code>ScreenResult</code> was last imported into Screensaver.
+   */
+  public void setDateLastImported(DateTime date)
+  {
+    _dateLastImported = date;
+  }
+  
   /**
    * Set the screen.
    * @param screen the new screen

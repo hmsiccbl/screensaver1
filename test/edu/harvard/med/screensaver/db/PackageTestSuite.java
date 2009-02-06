@@ -32,6 +32,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(CherryPickRequestDAOTest.class);
     addTestSuite(GenericEntityDAOTest.class);
     addTestSuite(LibrariesDAOTest.class);
+    addTestSuite(ScreenDAOTest.class);
     addTestSuite(ScreenResultDAOTest.class);
     addTestSuite(UsersDAOTest.class);
     addTestSuite(WebDataAccessPolicyTest.class);

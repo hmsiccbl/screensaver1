@@ -25,6 +25,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -35,9 +38,6 @@ import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -474,7 +474,7 @@ public class LabCherryPick extends AbstractEntity
 
   /**
    * Return true iff the lab cherry pick is unfulfilled. A lab cherry pick is unfulfilled
-   * whenever if is neither allocated nor cancelled.
+   * when it is neither allocated nor cancelled.
    * @return true iff the lab cherry pick is unfulfilled
    */
   @Transient

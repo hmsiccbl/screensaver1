@@ -36,6 +36,7 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -65,7 +66,7 @@ import com.google.common.base.Join;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-abstract public class ScreensaverUser extends TimeStampedAbstractEntity implements Principal
+abstract public class ScreensaverUser extends TimeStampedAbstractEntity implements Principal, Comparable<ScreensaverUser>
 {
 
   // static fields
@@ -92,7 +93,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   private String _eCommonsId;
   private String _harvardId;
   private LocalDate _harvardIdExpirationDate;
-
+  private LocalDate _harvardIdRequestedExpirationDate;
 
   // public constructors
 
@@ -122,7 +123,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
     setComments(comments);
   }
 
-
+  
   // public instance methods
 
   @Override
@@ -527,6 +528,30 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   public void setHarvardIdExpirationDate(LocalDate harvardIdExpirationDate)
   {
     _harvardIdExpirationDate = harvardIdExpirationDate;
+  }
+  
+  /**
+   * Get the harvard id requested expiration date.
+   */
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  public LocalDate getHarvardIdRequestedExpirationDate()
+  {
+    return _harvardIdRequestedExpirationDate;
+  }
+
+  /**
+   * Set the harvard id requested expiration date.
+   */
+  public void setHarvardIdRequestedExpirationDate(LocalDate value)
+  {
+    _harvardIdRequestedExpirationDate = value;
+  }
+  
+  // Comparable interface
+  
+  public int compareTo(ScreensaverUser other)
+  {
+    return ScreensaverUserComparator.getInstance().compare(this, other);
   }
   
   

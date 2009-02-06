@@ -29,7 +29,8 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(AbstractEntityTest.class);
     addTestSuite(ModelTestCoverageTest.class);
     addTestSuite(PropertyPathTest.class);
-    addTestSuite(VolumeTest.class);
+    addTestSuite(VolumeTest.class); // TODO: remove once Volume extends Quantity
+    addTestSuite(QuantityTest.class);
 
     // ignored abstract classes
     // addTestSuite(ActivityTest.class);

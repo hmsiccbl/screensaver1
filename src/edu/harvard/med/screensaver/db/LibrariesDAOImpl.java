@@ -10,10 +10,19 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Query;
+import org.springframework.orm.hibernate3.HibernateCallback;
+
+import com.google.common.collect.Maps;
+
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -24,10 +33,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Query;
-import org.springframework.orm.hibernate3.HibernateCallback;
 
 public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 {
@@ -134,9 +139,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
    */
   public void deleteLibraryContents(Library library)
   {
-    library = _dao.reloadEntity(library, 
+    library = _dao.reloadEntity(library,
                                 false,
-                                "wells.compounds", 
+                                "wells.compounds",
                                 "wells.silencingReagents",
                                 "wells.reagent");
     for (Well well : library.getWells()) {
@@ -162,7 +167,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 
   /**
    * Efficiently loads all wells for the specified library into the current
-   * Hibernate session, avoiding database accesses when any of the library's
+   * Hibernate session, thus avoiding subsequent database accesses when any of the library's
    * wells are subsequently accessed. If the library has not had its wells
    * created yet, they will be created. Created wells will be in the Hibernate
    * session after invoking this method, but will not yet be flushed to the
@@ -171,11 +176,10 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
    * persisted (entity ID will be assigned, it will be managed by the Hibernate
    * session, but not flushed to the database). If the library is detached, it
    * will be reattached to the session.
-   * 
+   *
    * @throws IllegalArgumentException if the provided library instance is not
    *           the same as the one in the current Hibernate session.
    */
-  @SuppressWarnings("unchecked")
   public void loadOrCreateWellsForLibrary(Library library)
   {
     // Cases that must be handled:
@@ -188,7 +192,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       log.debug("library is transient");
     }
     else { // case 2, 3, or 4
-      // reload library, fetching all wells; 
+      // reload library, fetching all wells;
       // if library instance is detached (case 2), we load it from the database
       // if library instance is already in session (case 3 or 4), we obtain that instance
       Library reloadedLibrary = _dao.reloadEntity(library, false, "wells");
@@ -200,17 +204,27 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         log.debug("library is Hibernate-managed and persisted in database");
         // if library instance is not same instance as the one in the session, this method cannot be called
         if (reloadedLibrary != library) {
-          throw new IllegalArgumentException("provided Library instance is not the same as the one in the current Hibernate session; cannot load/create wells for that provided library");
-        }           
+          throw new IllegalArgumentException("provided Library instance is not the same as the one in the current Hibernate session; cannot load/create wells for that library");
+        }
       }
     }
-    
-    // create wells for library, if needed
-    if (library.getWells().size() == 0) {
+
+    // create wells for library, if needed;
+    // it is expected that either all wells will have been created, or none were created, but if 
+    int nominalWellCount = ((library.getEndPlate() - library.getStartPlate()) + 1) * (Well.PLATE_ROWS * Well.PLATE_COLUMNS);
+    int nWellsCreated = 0;
+    if (library.getWells().size() <= nominalWellCount) {
       for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
         for (int iRow = 0; iRow < library.getPlateRows(); ++iRow) {
           for (int iCol = 0; iCol < library.getPlateColumns(); ++iCol) {
-            library.createWell(new WellKey(iPlate, iRow, iCol), WellType.EMPTY);
+            WellKey wellKey = new WellKey(iPlate, iRow, iCol);
+            try {
+              library.createWell(wellKey, WellType.EMPTY);
+              ++nWellsCreated;
+            }
+            catch (DuplicateEntityException e) {
+              // ignore failed creation attempt for any well that has been created in the past
+            }
           }
         }
       }
@@ -219,6 +233,9 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       // subsequent code can find them in the Hibernate session
       _dao.persistEntity(library);
       log.info("created wells for library " + library.getLibraryName());
+      if (nWellsCreated < nominalWellCount) {
+        log.warn("needed to create only " + nWellsCreated + " of " + nominalWellCount + " wells for library " + library.getLibraryName());
+      }
     }
   }
 
@@ -238,23 +255,27 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     });
   }
 
-  public Volume findRemainingVolumeInWellCopy(Well well, Copy copy)
+  @SuppressWarnings("unchecked")
+  public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well)
   {
-    String hql;
-
-    hql = "select ci.wellVolume from CopyInfo ci where ci.copy=? and ci.plateNumber=? and ci.dateRetired is null";
-    List result = getHibernateTemplate().find(hql, new Object[] { copy, well.getPlateNumber() });
-    if (result == null || result.size() == 0) {
-      return Volume.ZERO;
+    String hql = "select c, ci.wellVolume, " +
+    		"(select sum(wva.volume) from WellVolumeAdjustment wva where wva.copy = c and wva.well.id=?) " +
+    		"from CopyInfo ci join ci.copy c " +
+    		"where ci.plateNumber=? and ci.dateRetired is null";
+    
+    
+    List<Object[]> copyVolumes = 
+      getHibernateTemplate().find(hql, 
+                                  new Object[] { well.getWellKey().toString(), well.getPlateNumber() });
+    Map<Copy,Volume> remainingVolumes = Maps.newHashMap();
+    for (Object[] row : copyVolumes) {
+      Volume remainingVolume = 
+        ((Volume) row[1]).add(row[2] == null 
+                                            ? VolumeUnit.ZERO 
+                                            : (Volume) row[2]);
+      remainingVolumes.put((Copy) row[0], remainingVolume);
     }
-    Volume initialVolume = (Volume) result.get(0);
-
-    hql = "select sum(wva.volume) from WellVolumeAdjustment wva where wva.copy=? and wva.well=?";
-    Volume deltaVolume = (Volume) getHibernateTemplate().find(hql, new Object[] { copy, well }).get(0);
-    if (deltaVolume == null) {
-      deltaVolume = Volume.ZERO;
-    }
-    return initialVolume.add(deltaVolume);
+    return remainingVolumes;
   }
 
   // private methods

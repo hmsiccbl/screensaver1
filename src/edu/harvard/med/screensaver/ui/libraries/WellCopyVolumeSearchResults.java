@@ -21,6 +21,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AggregateDataFetcher;
@@ -34,6 +38,7 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -43,6 +48,8 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
+import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.column.BooleanColumn;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
@@ -50,10 +57,6 @@ import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy,Pair<WellKey,String>>
 {
@@ -192,12 +195,15 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
     });
   }
 
-  public WellVolumeSearchResults getWellVolumeSearchResults()
-  {
-    return _wellVolumeSearchResults;
-  }
+//  public WellVolumeSearchResults getWellVolumeSearchResults()
+//  {
+//    return _wellVolumeSearchResults;
+//  }
 
-  @Override
+  /**
+   * TODO: this method is _required_ by the UI code, but this dependency is not defined explicitly.
+   *  Should be define explicitly via an interface.
+   */
   protected ScreensaverUserRole getEditableAdminRole()
   {
     return EDITING_ROLE;
@@ -254,6 +260,26 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
 //    @Override
 //    public Object cellAction(WellCopyVolume wellCopy) { return _libraryViewer.viewLibraryCopyVolumes(wellVolume.getWell(), WellCopyVolumeSearchResults.this); }
     });
+    
+    TableColumn<WellCopy,Boolean> col =
+      new BooleanColumn<WellCopy>("Is Retired", "Has this copy been retired?", TableColumn.UNGROUPED) 
+      {
+        @Override
+        public Boolean getCellValue(WellCopy wc) 
+        {
+          CopyInfo ci = wc.getCopy().getCopyInfo(wc.getWell().getPlateNumber());
+          if(ci != null && ci.isRetired())
+          {
+            return true;
+          }else {
+            return false;
+          }
+        }
+      };
+    col.clearCriteria();
+    col.addCriterion(new Criterion<Boolean>(Criterion.Operator.EQUAL, Boolean.FALSE));
+    columns.add(col);
+      
     columns.add(new VolumeColumn<WellCopy>(
       "Initial Volume", "The initial volume of this well copy", TableColumn.UNGROUPED) {
       @Override

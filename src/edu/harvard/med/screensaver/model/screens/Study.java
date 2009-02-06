@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.SortedSet;
 
 import javax.persistence.Transient;
@@ -24,9 +23,11 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 public abstract class Study extends TimeStampedAbstractEntity
 {
+  private static final long serialVersionUID = 1L;
+  
   public static final Integer MIN_STUDY_NUMBER = 100000;
 
-  abstract public Set<ScreeningRoomUser> getCollaborators();
+  abstract public SortedSet<ScreeningRoomUser> getCollaborators();
 
   abstract public LabHead getLabHead();
 
@@ -37,6 +38,8 @@ public abstract class Study extends TimeStampedAbstractEntity
   abstract public StudyType getStudyType();
 
   abstract public String getTitle();
+
+  abstract public String getSummary();
 
   abstract public SortedSet<AnnotationType> getAnnotationTypes();
 

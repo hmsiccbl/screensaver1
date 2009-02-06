@@ -5,7 +5,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition template="/main/template.xhtml">
 
@@ -15,9 +16,7 @@
 	<ui:define name="body">
 
 	<t:panelGrid rendered="#{! empty geneViewer.gene}" columns="1">
-		<t:aliasBean alias="#{nameValueTable}" value="#{geneViewer.geneNameValueTable}">
-			<ui:include src="/util/nameValueTable.xhtml" />
-		</t:aliasBean>
+    <ss:nameValueTable id="geneInfo" value="#{geneViewer.geneNameValueTable}"/>
 
     <t:div style="margin-top: 15px; margin-left: 20px;">
       <t:outputText

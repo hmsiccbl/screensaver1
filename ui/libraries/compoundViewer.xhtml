@@ -5,8 +5,9 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
-
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+  
 <ui:composition template="/main/template.xhtml">
 
 	<ui:param name="pageTitle" value="Compound Viewer" />
@@ -14,11 +15,7 @@
 
 	<ui:define name="body">
 	<t:panelGrid rendered="#{! empty compoundViewer.compound}" columns="1">
-		<t:aliasBean alias="#{nameValueTable}"
-			value="#{compoundViewer.compoundNameValueTable}">
-
-			<ui:include src="/util/nameValueTable.xhtml" />
-		</t:aliasBean>
+    <ss:nameValueTable id="compoundInfo" value="#{compoundViewer.compoundNameValueTable}"/>
 
     <t:div style="margin-top: 15px; margin-left: 20px;">
       <t:panelGrid columns="1">
@@ -30,8 +27,6 @@
 		  	</t:aliasBean>
 			</t:panelGrid>
 		</t:div>
-
-    <ui:include src="/libraries/structureImageNotice.xhtml" />
 
 	</t:panelGrid>
 

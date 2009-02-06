@@ -44,7 +44,7 @@ public class OpenBabelClient
   // private fields
   
   private String _output;
-  private String _error;
+  private String _stderrOutput;
   
   
   // public method
@@ -106,7 +106,7 @@ public class OpenBabelClient
             }
           }
           catch (IOException e) {
-            log.info("error reading Open Babel output", e);
+            log.error("error reading Open Babel output", e);
           }
         }
       };
@@ -117,17 +117,17 @@ public class OpenBabelClient
       Thread openBabelErrorThread = new Thread() {
         public void run()
         {
-          _error = "";
+          _stderrOutput = "";
           try {
             for (
               int ch = openBabelError.read();
               ch != -1;
               ch = openBabelError.read()) {
-              _error += (char) ch;
+              _stderrOutput += (char) ch;
             }
           }
           catch (IOException e) {
-            log.info("error reading Open Babel error stream", e);
+            log.error("error reading Open Babel error stream", e);
           }
         }
       };
@@ -137,8 +137,11 @@ public class OpenBabelClient
       openBabelOutputThread.join();
       openBabelErrorThread.join();
       
-      if (! _error.equals("")) {
-        log.debug("error reported from babel tool: " + _error);
+      if (_stderrOutput.contains("error")) {
+        log.error("error reported from babel tool:\n" + _stderrOutput);
+      }
+      else if (log.isDebugEnabled()) {
+        log.debug("stderr output from babel tool:\n" + _stderrOutput);
       }
     }
     catch (IOException e) {
@@ -146,14 +149,14 @@ public class OpenBabelClient
       return null;
     }
     catch (InterruptedException e) {
-      log.info("error waiting for Open Babel to complete: " + e.getMessage());
+      log.error("error waiting for Open Babel to complete: " + e.getMessage());
       return null;
     }
     
     // if there was an error in attempting to parse the molfile alias block, then strip
     // all the alias blocks and retry
-    if (_error.contains("  Error in alias block")) {
-      log.info("encountered an error in alias block: trimming alias block and retrying");
+    if (_stderrOutput.contains("  Error in alias block")) {
+      log.warn("encountered an error in alias block: trimming alias block and retrying");
       Matcher matcher = Pattern.compile(
         "(.*)(^A\\s+\\d+\\s*^.*?$\\s+^)+(.*)", Pattern.MULTILINE | Pattern.DOTALL).matcher(input);
       if (matcher.matches()) {

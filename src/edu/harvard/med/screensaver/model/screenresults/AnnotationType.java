@@ -165,15 +165,6 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
    * Get the set of annotation values for this annotation type
    * @return the set of annotation values for this annotation type
    */
-//  @OneToMany(
-//    mappedBy="annotationType",
-//    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-//    fetch=FetchType.LAZY
-//  )
-//  @org.hibernate.annotations.Cascade(value={
-//    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-//    org.hibernate.annotations.CascadeType.DELETE
-//  })
   @OneToMany(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
              mappedBy="annotationType")

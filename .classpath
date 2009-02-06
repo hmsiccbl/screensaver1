@@ -60,7 +60,6 @@
 	<classpathentry kind="lib" path="lib/util/poi-2.5.1/poi-contrib-2.5.1-final-20040804.jar"/>
 	<classpathentry kind="lib" path="lib/util/cglib-2.2_beta1.jar"/>
 	<classpathentry kind="lib" path="lib/util/dom4j-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/util/google-collect-snapshot-20080321.jar"/>
 	<classpathentry kind="lib" path="lib/util/joda-time-1.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/util/joda-time-hibernate-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/util/log4j-1.2.11.jar"/>
@@ -87,5 +86,6 @@
 	<classpathentry kind="lib" path="lib/REngine.jar"/>
 	<classpathentry kind="lib" path="lib/Rserve.jar"/>
 	<classpathentry kind="lib" path="lib/persistence/postgresql-8.3-603.jdbc3.jar"/>
+	<classpathentry kind="lib" path="lib/util/google-collect-snapshot-20080820.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>

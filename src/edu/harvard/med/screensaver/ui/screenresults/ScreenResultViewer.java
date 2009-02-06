@@ -19,10 +19,6 @@ import org.apache.log4j.Logger;
 import sg.edu.astar.bii.screensaver.ui.screenresults.cellhts2.CellHTS2Runner;
 import sg.edu.astar.bii.screensaver.util.DeleteDir;
 import edu.harvard.med.screensaver.ScreensaverProperties;
-import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
-import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
-import edu.harvard.med.screensaver.analysis.cellhts2.ScoreReplicatesMethod;
-import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -31,14 +27,12 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
+import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 
 /**
@@ -51,7 +45,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @SuppressWarnings("unchecked")
-public class ScreenResultViewer extends AbstractBackingBean implements EntityViewer
+public class ScreenResultViewer extends AbstractEditableBackingBean
 {
 
   // static data members
@@ -74,10 +68,10 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   private Map<String,Boolean> _isPanelCollapsedMap;
   private boolean _isWellSearchResultsInitialized;
 
-  // BII (Siew Cheng)
   private String _cellHTS2ReportFilePath;
   private CellHTS2Runner _cellHTS2Runner;
-  // BII ends
+  
+  private boolean _isEditMode;
   
   // constructors
 
@@ -100,6 +94,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
                             CellHTS2Runner cellHTS2Runner)
 
   {
+    super(ScreensaverUserRole.SCREEN_RESULTS_ADMIN);
     _dao = dao;
     _screenResultsDao = screenResultsDao;
     _screensBrowser = screensBrowser;
@@ -131,6 +126,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
+    _isEditMode=false;
 
     // lazy initialization of _wellSearchResults, for performance (avoid expense of determining columns, if not being viewed)
     _wellSearchResults.searchWellsForScreenResult(null);
@@ -145,7 +141,6 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
     }
     else {
       _resultValueTypesTable.initialize(screenResult.getResultValueTypesList());
-      // BII (Siew Cheng)
       _cellHTS2ReportFilePath = WEBAPP_ROOT + ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + screenResult.getScreenResultId();
     }
   }
@@ -189,7 +184,7 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
         }
       });
       
-      // BII (Siew Cheng): Delete directory and all files under it
+      // Delete directory and all files under it
       DeleteDir.deleteDirectory(new File(_cellHTS2ReportFilePath));
       log.info("Screen result file deleted");
       
@@ -225,15 +220,38 @@ public class ScreenResultViewer extends AbstractBackingBean implements EntityVie
   {
 	  return _cellHTS2Runner.viewCellHTS2Runner(_screenResult);
   }
-  //BII end
   
-  // result value data table filtering methods
-
-  // protected methods
-
-  protected ScreensaverUserRole getEditableAdminRole()
+  @UIControllerMethod
+  public String cancel()
   {
-    return ScreensaverUserRole.SCREEN_RESULTS_ADMIN;
+    _isEditMode = false;
+    if (_screenResult.getEntityId() == null) {
+      return VIEW_MAIN;
+    }
+    return _screenViewer.viewScreen(_screenResult.getScreen());
+  }
+
+  @UIControllerMethod
+  public String edit()
+  {
+    _isEditMode = true;
+    return VIEW_SCREEN_RESULT_EDITOR;
+  }
+
+  public boolean isEditMode()
+  {
+    return !super.isReadOnly() && _isEditMode;
+  }
+
+  @UIControllerMethod
+  public String save()
+  {
+    _isEditMode = false;
+
+    _dao.reattachEntity(_screenResult.getScreen());
+    _dao.flush();
+
+    return _screenViewer.viewScreen(_screenResult.getScreen());
   }
 
 }

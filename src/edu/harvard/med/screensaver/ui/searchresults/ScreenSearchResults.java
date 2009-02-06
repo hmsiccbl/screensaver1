@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -109,8 +110,6 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
         hql.where(getRootAlias(), "screenNumber", Operator.LESS_THAN, Study.MIN_STUDY_NUMBER);
       }
     });
-    // default to descending sort order on screen number
-    getColumnManager().setSortAscending(false);
   }
 
   public void searchScreens(Set<Screen> screens)
@@ -272,6 +271,22 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
         return new ArrayList<String>(
           org.apache.commons.collections.CollectionUtils.collect(screen.getFundingSupports(), new Transformer() {
             public Object transform(Object e) { return ((FundingSupport) e).getValue(); }
+          }));
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+
+    // TODO: should make this a vocab list, but need support for list-of-vocab column type
+    columns.add(new ListEntityColumn<Screen>(
+      new RelationshipPath(Screen.class, "screenResult.resultValueTypes"),
+      "Assay Readout Type", "The assay readout type for the screen",
+      TableColumn.ADMIN_COLUMN_GROUP) {
+      @Override
+      public List<String> getCellValue(Screen screen)
+      {
+        return new ArrayList<String>(
+          org.apache.commons.collections.CollectionUtils.collect(screen.getAssayReadoutTypes(), new Transformer() {
+            public Object transform(Object e) { return ((AssayReadoutType) e).getValue(); }
           }));
       }
     });

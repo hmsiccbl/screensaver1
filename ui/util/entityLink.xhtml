@@ -17,12 +17,12 @@
 
 <ui:composition>
 
-	<t:commandLink id="#{id}Link" action="#{bean[action]}">
-		<f:param name="entityId" value="#{entity.entityId}" />
-		<t:outputText id="#{id}LinkValue"
-			value="#{empty property ? entity.entityId : entity[property]}"
-			styleClass="dataText" />
-	</t:commandLink>
+  <t:commandLink id="#{id}Link" action="#{bean[action]}"
+    styleClass="entityLink #{styleClass}">
+    <f:param name="entityId" value="#{entity.entityId}" />
+    <t:outputText id="#{id}LinkValue"
+      value="#{empty property ? entity.entityId : entity[property]}" />
+  </t:commandLink>
 
 </ui:composition>
 

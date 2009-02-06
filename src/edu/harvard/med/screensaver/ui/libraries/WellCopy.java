@@ -12,15 +12,16 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
 
 public class WellCopy implements Comparable<WellCopy>
 {
@@ -50,7 +51,7 @@ public class WellCopy implements Comparable<WellCopy>
     _copy = copy;
     CopyInfo copyInfo = _copy.getCopyInfo(_well.getPlateNumber());
     if (copyInfo == null) {
-      _initialVolume = new Volume(0);
+      _initialVolume = VolumeUnit.ZERO;
     }
     else {
       _initialVolume = copyInfo.getWellVolume();

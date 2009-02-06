@@ -1,47 +1,45 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
 
-	<ui:include src="/util/nameValueTable.xhtml">
-		<ui:param name="nameValueTable" value="#{reagentViewer.nameValueTable}" />
-	</ui:include>
+  <ss:nameValueTable id="reagentInfo"
+    value="#{reagentViewer.nameValueTable}" />
 
-	<t:panelGrid style="margin-top: 10px;">
-		<t:panelGroup rendered="#{! empty reagentViewer.compounds}">
-			<h:form id="reagentContentsDownloadForm">
-				<h:commandButton value="Download SD File"
-					action="#{reagentViewer.downloadSDFile}" styleClass="command"
-					title="Download the contents of the reagent as an SD File" />
-			</h:form>
-		</t:panelGroup>
-    <t:panelGroup
-      rendered="#{! empty wellViewerSpecialMessage}"
-      style="color: fuchsia; font-size: small; margin-top: 10px;"
-    >
+	<ui:insert name="wellViewSection">
+	</ui:insert>
+
+  <t:panelGrid style="margin-top: 10px;">
+    <t:panelGroup rendered="#{reagentViewer.SDFileDownloadEnabled &amp;&amp; ! empty reagentViewer.compounds}">
+      <h:form id="reagentContentsDownloadForm">
+        <h:commandButton value="Download SD File"
+          action="#{reagentViewer.downloadSDFile}" styleClass="command"
+          title="Download the contents of the reagent as an SD File" />
+      </h:form>
+    </t:panelGroup>
+    <t:panelGroup rendered="#{! empty wellViewerSpecialMessage}"
+      style="color: fuchsia; font-size: small; margin-top: 10px;">
       <t:outputText value="#{wellViewerSpecialMessage}" />
     </t:panelGroup>
-	</t:panelGrid>
+  </t:panelGrid>
 
 	<t:panelGroup rendered="#{! empty reagentViewer.compounds}">
 		<ui:include src="/libraries/structureImageNotice.xhtml" />
 	</t:panelGroup>
-
-	<t:div style="margin-top: 15px; margin-left: 20px;"
-		rendered="#{reagentViewer.annotationNameValueTable.numRows > 0}">
-		<t:outputText styleClass="subsectionHeader" value="Annotations" />
-		<ui:include src="/util/nameValueTable.xhtml">
-			<ui:param name="nameValueTable"
-				value="#{reagentViewer.annotationNameValueTable}" />
-			<ui:param name="formId" value="annotationFormId" />
-		</ui:include>
-	</t:div>
+ 
+  <t:div style="margin-top: 15px; margin-left: 20px;" styleClass="annotationTable"
+    rendered="#{reagentViewer.annotationNameValueTable.numRows > 0}">
+    <t:outputText styleClass="subsectionHeader" value="Annotations" />
+    <ss:nameValueTable id="annotationInfo"
+      value="#{reagentViewer.annotationNameValueTable}" />
+  </t:div>
 
 </ui:composition>
 

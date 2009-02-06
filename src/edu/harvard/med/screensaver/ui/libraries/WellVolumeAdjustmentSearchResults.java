@@ -13,11 +13,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.PropertyPath;
 import edu.harvard.med.screensaver.model.RelationshipPath;
-import edu.harvard.med.screensaver.model.Volume.Units;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
@@ -30,8 +32,6 @@ import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
-
-import org.joda.time.LocalDate;
 
 public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellVolumeAdjustment,Integer>
 {
@@ -102,7 +102,7 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
       new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "volume"),
       "Volume", "The volume adjustment amount", TableColumn.UNGROUPED) {
       @Override
-      public BigDecimal getCellValue(WellVolumeAdjustment wva) { return wva.getVolume().getValue(Units.MICROLITERS); }
+      public BigDecimal getCellValue(WellVolumeAdjustment wva) { return wva.getVolume().getValue(VolumeUnit.MICROLITERS); }
     });
     columns.add(new IntegerEntityColumn<WellVolumeAdjustment>(
       new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "labCherryPick.cherryPickRequest", "cherryPickRequestNumber"),

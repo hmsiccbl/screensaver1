@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.namevaluetable;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.io.libraries.compound.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
@@ -31,12 +32,14 @@ public class WellNameValueTable extends ReagentNameValueTable
                             WellViewer wellViewer,
                             LibraryViewer libraryViewer,
                             GeneViewer geneViewer,
-                            CompoundViewer compoundViewer)
+                            CompoundViewer compoundViewer,
+                            StructureImageProvider structureImageProvider)
   {
     super(well.getReagent(),
           wellViewer,
           geneViewer,
           compoundViewer,
+          structureImageProvider,
           new WellDetailsNameValueTable(well, libraryViewer));
   }
 }

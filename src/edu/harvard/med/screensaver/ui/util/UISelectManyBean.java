@@ -32,13 +32,18 @@ public class UISelectManyBean<T> extends UISelectBean<T>
 
   public UISelectManyBean(Collection<T> objects)
   {
-    super(objects);
-    _selections = new ArrayList<T>();
+    this(objects, new ArrayList<T>());
   }
 
   public UISelectManyBean(Collection<T> objects, Collection<T> defaultSelections)
   {
-    this(objects);
+    this(objects, defaultSelections, false);
+  }
+  
+  public UISelectManyBean(Collection<T> objects, Collection<T> defaultSelections, boolean isEmptyValueAllowed)
+  {
+    super(objects, isEmptyValueAllowed);
+    _selections = new ArrayList<T>();
     setSelections(defaultSelections);
   }
   
@@ -63,21 +68,16 @@ public class UISelectManyBean<T> extends UISelectBean<T>
   {
     List<String> selectionKeys = new ArrayList<String>();
     for (T t : selections) {
-      selectionKeys.add(getKey(t));
+      selectionKeys.add(makeKey(t));
     }
     setValue(selectionKeys);
   }
   
-  /**
-   * called by controller 
-   */
   public List<T> getSelections()
   {
     return _selections;
   }
-  /**
-   * called by JSF UISelect component
-   */
+
   public List<String> getValue()
   {
     return _selectionKeys;

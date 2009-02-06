@@ -33,6 +33,11 @@ import java.util.regex.Pattern;
 import jxl.CellType;
 import jxl.Sheet;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.math.IntRange;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.CellValueParser;
@@ -56,10 +61,6 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericaln
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.math.IntRange;
-import org.apache.log4j.Logger;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -99,7 +100,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   // static data members
 
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
-  private static final Logger memoryDebugLog = Logger.getLogger(ScreenResultParser.class + "memoryDebug");
 
   private static final String NO_SCREEN_ID_FOUND_ERROR = "Screen ID not found";
   private static final String DATA_HEADER_SHEET_NOT_FOUND_ERROR = "\"Data Headers\" sheet not found";
@@ -107,8 +107,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String NO_DATA_SHEETS_FOUND_ERROR = "no data worksheets were found; no result data was imported";
   private static final String NO_SUCH_WELL = "library well does not exist";
   private static final String NO_SUCH_LIBRARY_WITH_PLATE = "no library with given plate number";
-
-  private static final int RELOAD_WORKBOOK_AFTER_SHEET_COUNT = 32;
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
   private static SortedMap<String,PositiveIndicatorDirection> indicatorDirectionMap = new TreeMap<String,PositiveIndicatorDirection>();
@@ -326,6 +324,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         parseData(workbook,
                   _screenResult,
                   plateNumberRange);
+        _screenResult.setDateLastImported(new DateTime());
       }
     }
     catch (UnrecoverableScreenResultParseException e) {

@@ -41,6 +41,7 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -54,6 +55,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 
 /**
@@ -145,20 +148,6 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   @Transient
   abstract public Volume getDefaultTransferVolume();
-
-  /**
-   * Get the cherry pick allowance.
-   * @return the chery pick allowance
-   */
-  @Transient
-  abstract public int getCherryPickAllowance();
-
-  /**
-   * Get the cherry pick allowance used.
-   * @return the chery pick allowance used
-   */
-  @Transient
-  abstract public int getCherryPickAllowanceUsed();
 
   /**
    * Get CherryPickRequest's number. If this entity was imported from a legacy
@@ -560,7 +549,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   public void setTransferVolumePerWellRequested(Volume transferVolumePerWell)
   {
-    if (transferVolumePerWell != null && transferVolumePerWell.compareTo(Volume.ZERO) <= 0) {
+    if (transferVolumePerWell != null && transferVolumePerWell.compareTo(VolumeUnit.ZERO) <= 0) {
       throw new BusinessRuleViolationException("cherry pick request approved volume must be undefined or > 0");
     }
     _transferVolumePerWellRequested = transferVolumePerWell;
@@ -583,7 +572,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   public void setTransferVolumePerWellApproved(Volume transferVolumePerWell)
   {
-    if (transferVolumePerWell != null && transferVolumePerWell.compareTo(Volume.ZERO) <= 0) {
+    if (transferVolumePerWell != null && transferVolumePerWell.compareTo(VolumeUnit.ZERO) <= 0) {
       throw new BusinessRuleViolationException("cherry pick request approved volume must be undefined or > 0");
     }
     _transferVolumePerWellApproved = transferVolumePerWell;
@@ -772,6 +761,23 @@ public abstract class CherryPickRequest extends AbstractEntity
     return platesRequiringReload;
   }
 
+  /**
+   * @return the set of ScreeningRoomUsers that may be used as an argument to
+   *         {@link #setRequestedBy(ScreeningRoomUser)}, which includes the
+   *         users associated with the CPR's parent screen (see
+   *         {@link Screen#getAssociatedScreeningRoomUsers()}), as well as the
+   *         currently set 'requestedBy' user (see {@link #getRequestedBy()),
+   *         even if he's no longer associated with the screen.
+   */
+  @Transient
+  public Set<ScreeningRoomUser> getRequestedByCandidates()
+  {
+    SortedSet<ScreeningRoomUser> requestedByCandidates = Sets.newTreeSet();
+    requestedByCandidates.addAll(getScreen().getAssociatedScreeningRoomUsers());
+    // add the current requestedBy user, even if it's no longer a valid candidate, to avoid inadvertently changing it   
+    requestedByCandidates.add(getRequestedBy());
+    return requestedByCandidates;
+  }
 
   // package methods
 

@@ -18,15 +18,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 /**
  * A hibernate entity representing an RNAi cherry pick request.
@@ -47,7 +47,6 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   private static Logger log = Logger.getLogger(RNAiCherryPickRequest.class);
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
   public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
-  private static final int CHERRY_PICK_SILENCING_AGENT_ALLOWANCE = 500 * 4;
   private static final Volume DEFAULT_TRANSFER_VOLUME = null;
 
 
@@ -124,24 +123,6 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   public boolean isScreened()
   {
     return _rnaiCherryPickScreenings.size() > 0;
-  }
-
-  @Override
-  @Transient
-  public int getCherryPickAllowance()
-  {
-    return CHERRY_PICK_SILENCING_AGENT_ALLOWANCE;
-  }
-
-  @Override
-  @Transient
-  public int getCherryPickAllowanceUsed()
-  {
-    int silencingAgentsUsed = 0;
-    for (ScreenerCherryPick screenerCherryPick : getScreenerCherryPicks()) {
-      silencingAgentsUsed += screenerCherryPick.getScreenedWell().getSilencingReagents().size();
-    }
-    return silencingAgentsUsed;
   }
 
   /**

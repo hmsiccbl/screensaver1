@@ -46,7 +46,9 @@ import org.hibernate.annotations.Immutable;
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "screenId", "filename" }) })
 @org.hibernate.annotations.Proxy
-@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class, 
+                                                               hasAlternateContainingEntityClass=true, 
+                                                               alternateContainingEntityClass=Publication.class)
 public class AttachedFile extends TimeStampedAbstractEntity
 {
 

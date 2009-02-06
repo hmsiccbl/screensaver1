@@ -26,10 +26,10 @@ public class FileUtils
    * extension.
    * 
    * @param file the File object to be modified
-   * @param newDirectory the output directory; if null the workbook's original
+   * @param newDirectory the output directory; if null the file original
    *          file directory is used.
-   * @param newExtension the extension to use when saving the workbook,
-   *          replacing the workbook's original filename extension; if null
+   * @param newExtension the extension to use when saving the file,
+   *          replacing the file's original filename extension; if null
    *          original filename extension is used. A leading period will be
    *          added if it does not exist.
    * @return the modified File object
@@ -61,10 +61,10 @@ public class FileUtils
    * extension.
    * 
    * @param file the File object to be modified
-   * @param newDirectory the output directory; if null the workbook's original
+   * @param newDirectory the output directory; if null the file's original
    *          file directory is used.
-   * @param newExtension the extension to use when saving the workbook,
-   *          replacing the workbook's original filename extension; if null
+   * @param newExtension the extension to use when saving the file,
+   *          replacing the file's original filename extension; if null
    *          original filename extension is used. A leading period will be
    *          added if it does not exist.
    * @return the modified File object

@@ -7,7 +7,7 @@
    $Id:$
 
    Copyright 2006 by the President and Fellows of Harvard College.
-   
+
    Screensaver is an open-source project developed by the ICCB-L and NSRB labs
    at Harvard Medical School. This software is distributed under the terms of
    the GNU General Public License.
@@ -23,8 +23,30 @@
    class="edu.harvard.med.screensaver.db.accesspolicy.UnrestrictedDataAccessPolicy">
   </bean>
 
+  <bean id="compoundCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.CompoundCherryPickRequestAllowancePolicy">
+    <constructor-arg ref="genericEntityDao"/>
+   </bean>
+
+  <bean id="rnaiCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy" >
+    <constructor-arg ref="genericEntityDao"/>
+   </bean>
+
+  <!-- needed for now, since we test SearchResults, which are currently (and unfortunately) backing beans, and in some cases depend upon the 'messages' property being initialized -->
+  <bean
+    id="messages"
+    class="edu.harvard.med.screensaver.ui.util.Messages">
+    <property name="messageSource">
+      <bean
+        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="basename" value="classpath:messages" />
+      </bean>
+    </property>
+  </bean>
+
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-logging.xml"/>
-  
+
 </beans>

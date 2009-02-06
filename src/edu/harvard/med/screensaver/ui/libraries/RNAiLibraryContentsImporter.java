@@ -9,17 +9,15 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.faces.context.FacesContext;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpSession;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
 import edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser;
@@ -162,26 +160,14 @@ public class RNAiLibraryContentsImporter extends AbstractBackingBean implements 
         showMessage("badUploadedFile", _uploadedFile.getName());
         return IMPORT_RNAI_LIBRARY_CONTENTS;
       }
-      _dao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          try {
-            Library library = _dao.reloadEntity(_library);
-            _rnaiLibraryContentsParser.setSilencingReagentType(_silencingReagentType);
-            _rnaiLibraryContentsParser.parseLibraryContents(library,
-                                                            new File(_uploadedFile.getName()),
-                                                            _uploadedFile.getInputStream(), 
-                                                            null, 
-                                                            null);
-            _dao.saveOrUpdateEntity(library);
-          }
-          catch (IOException e) {
-            throw new DAOTransactionRollbackException("could not access uploaded file", e);
-          }
-        }
-      });
-      showMessage("libraries.importedLibraryContents", "libraryViewer");
+      
+      // Spawn a new thread to run the upload
+      HttpSession http = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(false);
+      LibraryUploadThread t = new LibraryUploadThread(_dao,_rnaiLibraryContentsParser,_library,_silencingReagentType,_uploadedFile,
+                                                      _libraryViewer.getCurrentScreensaverUser().getScreensaverUser().getEmail());
+      t.start();
+      http.setAttribute("libraryUploadThread", t);
+      
       // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
       return _libraryViewer.viewLibrary(_library);
     }

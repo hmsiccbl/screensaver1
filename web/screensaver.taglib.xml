@@ -90,5 +90,10 @@
       <tag-name>entityLink</tag-name>
       <source>../util/entityLink.xhtml</source>
     </tag>
+    
+    <tag>
+      <tag-name>nameValueTable</tag-name>
+      <source>../util/nameValueTable.xhtml</source>
+    </tag>
 
 </facelet-taglib>

@@ -15,7 +15,7 @@ package edu.harvard.med.screensaver.util;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class DevelopmentException extends Exception
+public class DevelopmentException extends RuntimeException
 {
   /**
    * 

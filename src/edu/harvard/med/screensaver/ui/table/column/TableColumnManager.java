@@ -328,7 +328,7 @@ public class TableColumnManager<R> extends Observable implements Observer
     if (_sortColumnSelector == null) {
       _sortColumnSelector = new UISelectOneBean<TableColumn<R,?>>(getVisibleColumns()) {
         @Override
-        protected String getLabel(TableColumn<R,?> t)
+        protected String makeLabel(TableColumn<R,?> t)
         {
           return t.getName();
         }

@@ -9,15 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.namevaluetable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.faces.model.DataModel;
-import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.libraries.AnnotationNameValueTable;
 import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
@@ -37,14 +35,11 @@ abstract public class NameValueTable extends AbstractBackingBean
   // public static final data
 
   private static final Logger log = Logger.getLogger(NameValueTable.class);
-  private static final String NAME = "name";
-  private static final String VALUE = "value";
 
 
   // private instance data
 
   private DataModel _dataModel;
-  private DataModel _columnModel;
 
   /**
    * Workaround for JSF suckiness. Used by {@link #getLink()}.
@@ -75,10 +70,6 @@ abstract public class NameValueTable extends AbstractBackingBean
    */
   public NameValueTable()
   {
-    List<String> columns = new ArrayList<String>(2);
-    columns.add(NAME);
-    columns.add(VALUE);
-    _columnModel = new ListDataModel(columns);
   }
 
 
@@ -101,20 +92,38 @@ abstract public class NameValueTable extends AbstractBackingBean
   {
     _dataModel = dataModel;
   }
-
-  public DataModel getColumnModel()
+  
+  /**
+   * Return true if this NameValueTable has grouping, or summary info for sets of rows (see
+   * the AnnotationNameValue table).
+   * @return true if there is group info available
+   * @see #getGroupingValueTable()
+   */
+  public boolean getHasGroupingInfo()
   {
-    return _columnModel;
+    return false;
   }
-
-  public void setColumnModel(DataModel columnModel)
+  
+  /**
+   * If there is grouping information for this table and set of rows, return the DataModel for 
+   * this grouping information.  This DataModel is then used to create a subtable of summary
+   * information.
+   * @return the DataModel for the grouping/summary information
+   * @see AnnotationNameValueTable
+   */
+  public DataModel getGroupingValueTable()
   {
-    _columnModel = columnModel;
+    return null;
   }
-
-  public String getColumnStyle()
+  
+  public String getGroupingFooter()
   {
-    return isNameColumn() ? "keyColumn" : "textColumn";
+    return null;
+  }
+  
+  public Object getGroupId()
+  {
+    return null;
   }
 
   public String getNameDescription()
@@ -122,52 +131,49 @@ abstract public class NameValueTable extends AbstractBackingBean
     return getDescription(getRowIndex());
   }
 
-  public Object getCellValue()
+  public Object getLabel()
   {
-    if (isNameColumn()) {
-      return HtmlUtils.toNonBreakingSpaces(getName(getRowIndex()));
-    }
-    return getValue(getRowIndex());
+    return HtmlUtils.toNonBreakingSpaces(getName(getRowIndex()));
   }
 
-  public boolean getIsNameColumn()
+  public Object getValue()
   {
-    return isNameColumn();
+    return getValue(getRowIndex());
   }
 
   public boolean getIsTextValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.TEXT);
+    return getValueType(getRowIndex()).equals(ValueType.TEXT);
   }
 
   public boolean getIsUnescapedTextValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.UNESCAPED_TEXT);
+    return getValueType(getRowIndex()).equals(ValueType.UNESCAPED_TEXT);
   }
 
   public boolean getIsCommandValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.COMMAND);
+    return getValueType(getRowIndex()).equals(ValueType.COMMAND);
   }
 
   public boolean getIsLinkValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.LINK);
+    return getValueType(getRowIndex()).equals(ValueType.LINK);
   }
 
   public boolean getIsImageValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.IMAGE);
+    return getValueType(getRowIndex()).equals(ValueType.IMAGE);
   }
 
   public boolean getIsTextListValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.TEXT_LIST);
+    return getValueType(getRowIndex()).equals(ValueType.TEXT_LIST);
   }
 
   public boolean getIsLinkListValue()
   {
-    return ! isNameColumn() && getValueType(getRowIndex()).equals(ValueType.LINK_LIST);
+    return getValueType(getRowIndex()).equals(ValueType.LINK_LIST);
   }
 
   public Map<String,String> getLink()
@@ -252,13 +258,8 @@ abstract public class NameValueTable extends AbstractBackingBean
 
   // private instance methods
 
-  private int getRowIndex()
+  protected int getRowIndex()
   {
     return getDataModel().getRowIndex();
-  }
-
-  private boolean isNameColumn()
-  {
-    return getColumnModel().getRowData().equals(NAME);
   }
 }

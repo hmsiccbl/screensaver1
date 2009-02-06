@@ -24,7 +24,15 @@
       value="#{activityViewer.activity.dateOfActivity}" type="Date"
       required="true" editable="#{activityViewer.editMode}" />
 
-    <ss:propertyGroup label="Screen">
+		<ss:property id="concentration" label="Concentration"
+			value="#{activityViewer.concentrationValue}"
+			typeValue="#{activityViewer.concentrationType}"
+			type="typedValue"
+			description="concentration"
+			rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening' || activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}"
+			editable="#{activityViewer.editMode}" />
+
+		<ss:propertyGroup label="Screen">
       <ss:screenSummaryProperties
         screen="#{activityViewer.activity.screen}" />
     </ss:propertyGroup>
@@ -51,14 +59,16 @@
       value="#{activityViewer.activity.numberOfReplicates}"
       description="The number of replicates screened"
       editable="#{activityViewer.editMode}" editWidth="2"
-      rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}" />
+      rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening' || activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}" />
 
-    <ss:property id="reagentVolumeTransferred"
-      label="Volume Transferred"
-      value="#{activityViewer.activity.volumeTransferredPerWell}"
-      type="Volume" description="The volume transferred per well"
+    <ss:property id="volumeTransferredPerWell"
+      label="Volume Transferred per Replicate"
+			value="#{activityViewer.volumeTransferredPerWellValue}"
+			typeValue="#{activityViewer.volumeTransferredPerWellType}"
+			type="typedValue"
+			description="The volume transferred per replicate well"
       editable="#{activityViewer.editMode}" editWidth="6"
-      rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}" />
+      rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening' || activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}" />
 
     <ss:propertyGroup label="Assay Protocol" columns="1"
       rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening'}">
@@ -72,7 +82,8 @@
               value="#{value.value}"
               displayValueOnly="#{!activityViewer.editMode}"
               converter="#{assayProtocolTypeConverter}"
-              styleClass="inputText selectMenu">
+              styleClass="inputText selectMenu"
+              displayValueOnlyStyleClass="selectMenu">
               <f:selectItems value="#{value.selectItems}" />
             </t:selectOneMenu>
           </ui:define>
@@ -139,8 +150,15 @@
               <f:facet name="header">
                 <t:outputText value="Copy" />
               </f:facet>
-              <t:outputText id="copy" value="#{element.platesUsed.copy}"
+              <t:outputText id="copy" value="#{element.platesUsed.copyName}"
                 styleClass="dataText" />
+            </t:column>
+            <t:column rendered="#{activityViewer.editMode}">
+              <f:facet name="header">
+                <t:outputText value="Library Warning" />
+              </f:facet>
+              <t:outputText id="libraryWarning" value="#{element.adminLibraryWarning}"
+                styleClass="dataText errorMessage" />
             </t:column>
           </ui:define>
           <ui:define name="addProperties">
@@ -157,9 +175,9 @@
                 editable="true">
                 <ui:define name="editableData">
                   <t:selectOneMenu id="newPlatesScreenedCopy"
-                    value="#{activityViewer.newPlatesScreened.copy}">
+                    value="#{activityViewer.newPlatesScreened.copyName}">
                     <t:selectItems value="#{activityViewer.allCopies}"
-                      var="copy" itemLabel="#{copy}" itemValue="#{copy}" />
+                      var="copyName" itemLabel="#{copyName}" itemValue="#{copyName}" />
                   </t:selectOneMenu>
                 </ui:define>
               </ss:property>
@@ -188,11 +206,12 @@
       editable="#{activityViewer.editMode}" description="Comments"
       type="Textarea" editWidth="80" editHeight="5" />
 
+    <s:focus id="platesUsedFocuser"
+      for="#{empty activityViewer.activity.dateOfActivity ? 'activityViewerForm:dateOfActivityDateField' : 'activityViewerForm:newPlatesScreenedStartPlateField'}" />
+
   </ui:define>
 
-  <s:focus id="platesUsedFocuser"
-    for="activityViewerForm:newPlatesScreenedStartPlateField"
-    rendered="#{activityViewer.editMode}" />
+
 
 </ui:composition>
 

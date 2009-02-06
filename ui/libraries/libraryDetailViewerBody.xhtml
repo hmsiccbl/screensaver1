@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{libraryDetailViewer.library}" />
+  <ui:param name="viewer" value="#{libraryDetailViewer}" />
+  <ui:param name="hideId" value="#{true}" />
+  
+  <ui:define name="entityCommands">
+    <ui:remove> 
+      Disabled, due to performance
+      <h:commandButton value="Delete Library"
+        action="#{libraryViewer.deleteLibrary}"
+        onclick="javascript: return confirm('Are you sure you want to delete this library?');"
+        rendered="#{libraryViewer.editable &amp;&amp; libraryViewer.uploadStatus != 1 &amp;&amp; !libraryDetailViewer.editMode}"
+        styleClass="command" title="Delete this library" />
+    </ui:remove>
+  </ui:define>
+  
+
+  <ui:define name="propertiesContent">
+  	<ss:property id="libraryName" label="Library Name"
+			description="The full name of the library"
+			value="#{libraryDetailViewer.library.libraryName}" required="true"
+			editable="#{libraryDetailViewer.editMode}"
+			editWidth="60" />
+
+		<ss:property id="shortName" label="Short Name"
+			description="The abbreviated name for the library"
+			value="#{libraryDetailViewer.library.shortName}" required="true"
+			editable="#{libraryDetailViewer.editMode}"
+			editWidth="60" />
+
+		<t:outputText id="screenTypeLabel" value="Screen Type"
+				title="'Small Molecule' or 'RNAi'" escape="false" styleClass="label" />
+		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
+			<t:outputText id="screenTypeOutput"
+				value="#{libraryDetailViewer.library.screenType}" escape="false"
+				converter="#{screenTypeConverter}" styleClass="propertyValue" />
+		</t:panelGroup>
+		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
+			<t:selectOneMenu id="screenType" styleClass="inputText selectMenu"
+				required="true" value="#{libraryDetailViewer.library.screenType}"
+				converter="#{screenTypeConverter}">
+				<f:selectItems value="#{libraryDetailViewer.screenTypeSelectItems}" />
+			</t:selectOneMenu>
+		</t:panelGroup>
+
+		<t:outputText id="libraryTypeLabel" value="Library Type"
+				title="The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."
+				escape="false" styleClass="label" />
+		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
+			<t:outputText id="libraryTypeOutput" escape="false"
+				value="#{libraryDetailViewer.library.libraryType}"
+				converter="#{libraryTypeConverter}" styleClass="propertyValue" />
+		</t:panelGroup>
+		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
+			<t:selectOneMenu id="libraryType" styleClass="inputText selectMenu"
+				required="true" value="#{libraryDetailViewer.library.libraryType}"
+				converter="#{libraryTypeConverter}">
+				<f:selectItems value="#{libraryDetailViewer.libraryTypeSelectItems}" />
+			</t:selectOneMenu>
+		</t:panelGroup>
+
+    <ss:property id="screeningStatus" label="Screening Status"
+      description="Status of the library for screening."
+      value="#{libraryDetailViewer.library.screeningStatus}"
+      converter="#{libraryScreeningStatusConverter}"
+      editable="#{libraryDetailViewer.editMode}" adminOnly="true">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="libraryScreeningStatus"
+          value="#{libraryDetailViewer.library.screeningStatus}"
+          converter="#{libraryScreeningStatusConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{libraryDetailViewer.libraryScreeningStatusSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="startPlate" label="Start Plate"
+			description="The plate number for the first plate in the library"
+			value="#{libraryDetailViewer.library.startPlate}" required="true"
+			editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.library.libraryId}" />
+
+		<ss:property id="endPlate" label="End Plate"
+			description="The plate number for the last plate in the library"
+			value="#{libraryDetailViewer.library.endPlate}" required="true"
+			editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.library.libraryId}" />
+
+		<ss:property id="libraryVendor" label="Vendor"
+			description="The name of the library vendor"
+			value="#{libraryDetailViewer.library.vendor}"
+			editable="#{libraryDetailViewer.editMode}" />
+
+		<ss:property id="description" label="Description"
+			description="A description of the library"
+			value="#{libraryDetailViewer.library.description}"
+			editable="#{libraryDetailViewer.editMode}" type="Textarea"
+			editWidth="80" editHeight="3" />
+
+  </ui:define>
+
+</ui:composition>
+
+</html>
+

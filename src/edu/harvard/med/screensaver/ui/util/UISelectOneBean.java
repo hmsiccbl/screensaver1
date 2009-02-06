@@ -26,96 +26,137 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   // instance data members
 
   private T _selection;
-  private String _selectionKey;
+  /** never null */
+  private String _selectionKey = EMPTY_KEY;
   private int _selectionIndex;
   private T _defaultSelection;
 
 
   // public constructors and methods
 
+  public UISelectOneBean()
+  {
+    this(new ArrayList<T>());
+  }
+
   public UISelectOneBean(Collection<T> objects)
   {
-    super(objects);
+    this(objects, false);
+  }
+  
+  public UISelectOneBean(Collection<T> objects, boolean isEmptyValueAllowed)
+  {
+    this(objects, null, isEmptyValueAllowed);
+  }
+  
+  public UISelectOneBean(Collection<T> objects, T defaultSelection)
+  {
+    this(objects, defaultSelection, false);
+  }
+  
+  public UISelectOneBean(Collection<T> objects, T defaultSelection, boolean isEmptyValueAllowed)
+  {
+    super(objects, isEmptyValueAllowed);
+    if (defaultSelection == null) {
+      if (!_isEmptyValueAllowed && defaultSelection == null) {
+        if (objects.size() > 0) {
+          defaultSelection = objects.iterator().next(); 
+        }
+      }
+    }
+    _defaultSelection = defaultSelection;
+    setSelection(_defaultSelection);
   }
   
   @Override
   public void setDomain(Collection<T> objects)
   {
     super.setDomain(objects);
+    
+    // HACK: deal with fact that _selectionKey is not set until parent
+    // constructor returns, although this method is called before that!
+    if (_selectionKey == null) {
+      _selectionKey = EMPTY_KEY;
+    }
+    
     // set or restore selection
     if (objects.size() == 0) {
       _selection = null;
-      _selectionKey = null;
+      _selectionKey = EMPTY_KEY;
       _selectionIndex = 0;
     }
     else {
       _defaultSelection = objects.iterator().next();
-      if (_selectionKey == null || !_key2Obj.containsKey(_selectionKey)) {
+      if (!_key2Obj.containsKey(_selectionKey)) {
         setSelection(_defaultSelection);
       }
     }
   }
 
-  public UISelectOneBean(Collection<T> objects, T defaultSelection)
-  {
-    this(objects);
-    _defaultSelection = defaultSelection;
-    setSelection(_defaultSelection);
-  }
-
-  public UISelectOneBean()
-  {
-    this(new ArrayList<T>());
-  }
+  
 
   /**
-   * Set the selected item's key. Called by JSF UISelect component. Naming of
-   * this method corresponds to the JSF UISelect component's "value" attribute.
-   * @throws IllegalArgumentException if selectionKey is unknown
+   * Change the selection by specifying a new selection key.
    */
-  public void setValue(String newSelectionKey)
+  public void setKey(String newSelectionKey)
   {
-    if (newSelectionKey != null && !_key2Obj.containsKey(newSelectionKey))
-    {
+    if (newSelectionKey == null) {
+      newSelectionKey = EMPTY_KEY;
+    }
+
+    if (!_key2Obj.containsKey(newSelectionKey)) {
+      // unknown selection key! (client code error) recover...
       return;
-      //throw new IllegalArgumentException("unknown selection key " + newSelectionKey);
     }
-
-    if ((_selectionKey == null && newSelectionKey != null) || 
-      (_selectionKey != null && !_selectionKey.equals(newSelectionKey))) {
-      _selectionKey = newSelectionKey;
-      _selection = _key2Obj.get(newSelectionKey);
-      int i = 0;
-      for (SelectItem selectItem : getSelectItems()) {
-        if ((selectItem.getValue() == null && newSelectionKey == null) ||
-          selectItem.getValue().equals(newSelectionKey)) {
-          _selectionIndex = i;
-          break;
-        }
-        ++i;
+    if (_selectionKey.equals(newSelectionKey)) {
+      return;
+    }
+      
+    _selectionKey = newSelectionKey;
+    _selection = _key2Obj.get(newSelectionKey);
+    int i = 0;
+    for (SelectItem selectItem : getSelectItems()) {
+      if (selectItem.getValue().equals(newSelectionKey)) {
+        _selectionIndex = i;
+        break;
       }
-      setChanged();
-      notifyObservers(_selection);
+      ++i;
     }
+    setChanged();
+    notifyObservers(_selection);
   }
 
-  /**
-   * Returns selection key. Called by JSF UISelect component. Naming of this
-   * method corresponds to the JSF UISelect component's "value" attribute.
-   */
-  public String getValue()
+  public String getKey()
   {
     return _selectionKey;
   }
 
-  public void setSelection(T t)
+  /**
+   * Alias for setKey(), to match naming convention of JSF "selectItems" "value"
+   * attribute.
+   */
+  public void setValue(String newSelectionKey)
   {
-    setValue(getKey(t));
+    setKey(newSelectionKey);
   }
 
   /**
-   * called by controller
+   * Alias for getKey(), to match naming convention of JSF "selectItems" "value"
+   * attribute.
    */
+  public String getValue()
+  {
+    return getKey();
+  }
+
+  /**
+   * Change the selection by specifying a new selection object.
+   */
+  public void setSelection(T t)
+  {
+    setKey(_makeKey(t));
+  }
+
   public T getSelection()
   {
     return _selection;
@@ -126,6 +167,9 @@ public class UISelectOneBean<T> extends UISelectBean<T>
     return _defaultSelection;
   }
 
+  /**
+   * Change the selection by specifying a new selection index.
+   */
   public void setSelectionIndex(int index)
   {
     setSelection(_key2Obj.get(getSelectItems().get(index).getValue()));
@@ -137,4 +181,3 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   }
 
 }
-

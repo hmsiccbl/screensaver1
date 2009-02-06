@@ -110,7 +110,7 @@ TODO:
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
       editable="#{screenDetailViewer.editMode}"
       description="A summary of the screen" type="Textarea"
-      editWidth="80" editHeight="3" />
+      editWidth="80" editHeight="6" />
 
     <ss:propertyGroup label="Publishable Protocol" columns="1"
       columnClasses="column"
@@ -127,7 +127,7 @@ TODO:
           value="#{screenDetailViewer.screen.publishableProtocolComments}"
           editable="#{screenDetailViewer.editMode}" adminOnly="true"
           description="Comments associated with the publishable protocol"
-          type="Textarea" editWidth="80" editHeight="3" />
+          type="Textarea" editWidth="50" editHeight="3" />
         <ss:propertyGroup label="Entered" columns="4"
           columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
           adminOnly="true">
@@ -180,6 +180,15 @@ TODO:
               <t:outputText value="#{element.citation}"
                 styleClass="dataText" />
             </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="File" />
+              </f:facet>
+              <t:commandLink id="downloadPublicationAttachedFileCommandLink"
+                value="#{element.attachedFile.filename}"
+                action="#{screenDetailViewer.downloadPublicationAttachedFile}"
+                styleClass="dataText" />
+            </t:column>
           </ui:define>
         </ss:collectionTable>
       </ui:define>
@@ -221,6 +230,14 @@ TODO:
           <t:inputText id="publicationPages"
             value="#{screenDetailViewer.newPublication.pages}"
             styleClass="inputText" />
+          <ss:property id="uploadPublicationAttachedFile"
+            label="Upload File" adminOnly="true">
+            <ui:define name="editableData">
+              <t:inputFileUpload id="uploadPublicationAttachedFile"
+                value="#{screenDetailViewer.uploadedPublicationAttachedFileContents}"
+                maxlength="#{1024 * 1024}" styleClass="inputText" />
+            </ui:define>
+          </ss:property>
         </t:panelGrid>
       </ui:define>
     </ss:property>
@@ -453,9 +470,9 @@ TODO:
                     </t:column>
                     <t:column>
                       <f:facet name="header">
-                        <t:outputText value="Date Faxed" />
+                        <t:outputText value="Date Sent for Billing" />
                       </f:facet>
-                      <t:outputText value="#{element.dateFaxed}"
+                      <t:outputText value="#{element.dateSentForBilling}"
                         converter="#{dateConverter}"
                         styleClass="dataText" />
                     </t:column>
@@ -468,9 +485,9 @@ TODO:
                       <ss:property id="newBillingItemAmount"
                         label="Amount" type="Currency"
                         value="#{screenDetailViewer.newBillingItem.amount}" />
-                      <ss:property id="newBillingItemDateFaxed"
-                        label="Date Faxed" type="Date"
-                        value="#{screenDetailViewer.newBillingItem.dateFaxed}" />
+                      <ss:property id="newBillingItemDateSentForBilling"
+                        label="Date Sent for Billing" type="Date" required="false"
+                        value="#{screenDetailViewer.newBillingItem.dateSentForBilling}" />
                     </t:panelGrid>
                   </ui:define>
                 </ss:collectionTable>
@@ -510,7 +527,7 @@ TODO:
             </t:column>
           </ui:define>
           <ui:define name="addProperties">
-            <t:panelGrid columns="4">
+            <t:panelGrid columns="2">
               <ss:property id="newStatusItemValue" label="Status"
                 type="Text"
                 value="#{screenDetailViewer.newStatusItemValue}">

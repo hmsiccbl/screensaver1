@@ -10,14 +10,8 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;

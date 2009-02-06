@@ -11,15 +11,17 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -31,17 +33,15 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
-import org.apache.log4j.Logger;
-
-public class StudyDetailViewer extends AbstractBackingBean implements EntityViewer
+public class StudyDetailViewer extends AbstractEditableBackingBean
 {
   // static members
 
@@ -72,11 +72,43 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
   public StudyDetailViewer(GenericEntityDAO dao,
                            UsersDAO usersDao)
   {
+    this(dao, usersDao, null);
+  }
+
+  protected StudyDetailViewer(GenericEntityDAO dao,
+                              UsersDAO usersDao,
+                              ScreensaverUserRole editableAdminRole)
+  {
+    super(editableAdminRole);
     _dao = dao;
     _usersDao = usersDao;
   }
+  
+  @Override
+  public boolean isEditable()
+  {
+    if (_study.isStudyOnly()) {
+      return false;
+    }
+    return super.isEditable();
+  }
 
+  public String cancel()
+  {
+    throw new UnsupportedOperationException("editing not supported by this class (subclasses may support editing)");
+  }
 
+  public String edit()
+  {
+    throw new UnsupportedOperationException("editing not supported by this class (subclasses may support editing)");
+  }
+
+  public String save()
+  {
+    throw new UnsupportedOperationException("editing not supported by this class (subclasses may support editing)");
+  }
+
+  
   // public methods
 
   public AbstractEntity getEntity()
@@ -112,17 +144,22 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
 
   public List<SelectItem> getScreenTypeSelectItems()
   {
-    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()),
-                                        _study.getScreenType() == null);
+    List<ScreenType> items = Arrays.asList(ScreenType.values());
+    if (_study.getScreenType() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(items, "<select>");
+    }
+    else {
+      return JSFUtils.createUISelectItems(items);
+    }
   }
 
   public UISelectOneBean<LabHead> getLabName()
   {
     if (_labName == null) {
       SortedSet<LabHead> labHeads = _usersDao.findAllLabHeads();
-      labHeads.add(null);
-      _labName = new UISelectOneEntityBean<LabHead>(labHeads, _study.getLabHead(), _dao) {
-        protected String getLabel(LabHead t) { return t == null ? "" : t.getLab().getLabName(); }
+      _labName = new UISelectOneEntityBean<LabHead>(labHeads, _study.getLabHead(), true, _dao) {
+        @Override
+        protected String makeLabel(LabHead t) { return t.getLab().getLabName(); }
       };
     }
     return _labName;
@@ -131,22 +168,24 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
   public UISelectOneBean<ScreeningRoomUser> getNewCollaborator()
   {
     if (_newCollaborator == null) {
-      _newCollaborator = new UISelectOneBean<ScreeningRoomUser>(getCandidateCollaborators()) {
+      SortedSet<ScreeningRoomUser> collaborators = getCandidateCollaborators();
+      _newCollaborator = new UISelectOneBean<ScreeningRoomUser>(collaborators, null, true) {
         @Override
-        protected String getLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
+        protected String makeLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
+        @Override 
+        protected String getEmptyLabel() { return "<select>"; }
       };
     }
     return _newCollaborator;
   }
 
-  private Collection<ScreeningRoomUser> getCandidateCollaborators()
+  private SortedSet<ScreeningRoomUser> getCandidateCollaborators()
   {
-    List<ScreeningRoomUser> candidateCollaborators =
-      _dao.findAllEntitiesOfType(ScreeningRoomUser.class,
-                                 true,
-                                 // TODO: this is very inefficient!
-                                 "screensCollaborated");
-    Collections.sort(candidateCollaborators, ScreensaverUserComparator.getInstance());
+    SortedSet<ScreeningRoomUser> candidateCollaborators = new TreeSet<ScreeningRoomUser>(ScreensaverUserComparator.getInstance());
+    candidateCollaborators.addAll(_dao.findAllEntitiesOfType(ScreeningRoomUser.class,
+                                                             true,
+                                                             // TODO: this is very inefficient!
+                                                             "screensCollaborated"));
     Screen screen = (Screen) getStudy(); // HACK
     candidateCollaborators.removeAll(screen.getCollaborators());
     candidateCollaborators.remove(screen.getLeadScreener());
@@ -225,17 +264,15 @@ public class StudyDetailViewer extends AbstractBackingBean implements EntityView
       {
         ArrayList<ScreeningRoomUser> leadScreenerCandidates = new ArrayList<ScreeningRoomUser>();
         leadScreenerCandidates.addAll(_dao.findAllEntitiesOfType(ScreeningRoomUser.class));
-        if (_study == null || _study.getLeadScreener() == null) {
-          leadScreenerCandidates.add(null);
-        }
         Collections.sort(leadScreenerCandidates, ScreensaverUserComparator.getInstance());
         _leadScreener = new UISelectOneEntityBean<ScreeningRoomUser>(leadScreenerCandidates,
                                                                      _study.getLeadScreener(),
+                                                                     _study == null || _study.getLeadScreener() == null,                                                                     
                                                                      _dao) {
-          protected String getLabel(ScreeningRoomUser t)
-          {
-            return t == null ? "" : t.getFullNameLastFirst();
-          }
+          @Override
+          protected String makeLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
+          @Override
+          protected String getEmptyLabel() { return "<select>"; }
         };
       }
     });

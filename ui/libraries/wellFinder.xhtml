@@ -22,7 +22,7 @@
 						id="findWellsCommand" value="Find Wells" styleClass="command" />
 					<t:commandButton action="#{wellFinder.findWellVolumes}"
 						id="findWellVolumesCommand" value="Find Well Volumes"
-						rendered="#{wellCopyVolumesBrowser.editable || wellCopyVolumesBrowser.readAdmin}"
+						rendered="#{wellFinder.readAdmin}"
 						styleClass="command" />
 				</t:panelGroup>
 			</t:buffer>

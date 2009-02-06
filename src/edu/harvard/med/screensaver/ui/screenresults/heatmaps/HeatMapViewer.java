@@ -389,11 +389,11 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
 
     HeatMapConfiguration heatMapConfiguration = new HeatMapConfiguration();
     heatMapConfiguration.setDataHeaders(new UISelectOneBean<ResultValueType>(_screenResult.getNumericResultValueTypes()) {
-      protected String getLabel(ResultValueType t) { return t.getName(); }
+      protected String makeLabel(ResultValueType t) { return t.getName(); }
     });
     heatMapConfiguration.setScoringType(new UISelectOneBean<ScoringType>(Arrays.asList(ScoringType.values())));
     heatMapConfiguration.setNumericFormat(new UISelectOneBean<NumberFormat>(NUMBER_FORMATS) {
-      protected String getLabel(NumberFormat t) { return t.format(SAMPLE_NUMBER); }
+      protected String makeLabel(NumberFormat t) { return t.format(SAMPLE_NUMBER); }
     });
     heatMapConfiguration.setExcludedWellFilters(new UISelectManyBean<Filter<Pair<WellKey,ResultValue>>>(EXCLUDED_WELL_FILTERS));
     _heatMapConfigurations.add(heatMapConfiguration);

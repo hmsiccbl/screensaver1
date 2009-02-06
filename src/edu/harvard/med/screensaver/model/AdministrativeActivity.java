@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.model;
 
+import java.util.Set;
+import java.util.SortedSet;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,6 +20,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import edu.harvard.med.screensaver.model.screens.LabActivity;
+import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
@@ -24,6 +29,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 /**
  * Represents an activity involving administrative decisions or changes to data.
@@ -61,7 +68,7 @@ public class AdministrativeActivity extends Activity
   {
     return getType().getValue();
   }
-
+  
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {

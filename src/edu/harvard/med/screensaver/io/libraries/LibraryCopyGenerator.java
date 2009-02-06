@@ -26,19 +26,19 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.Volume.Units;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.util.StringUtils;
-
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.libraries.CopyInfo;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * Creates a set of new library copy plates for a given copy name, initializing
@@ -74,7 +74,7 @@ public class LibraryCopyGenerator
       if (!app.processOptions(true, true)) {
         System.exit(1);
       }
-      Volume volume = new Volume(app.getCommandLineOptionValue("v"), Units.MICROLITERS);
+      Volume volume = new Volume(app.getCommandLineOptionValue("v"),VolumeUnit.MICROLITERS);
       String copyName = app.getCommandLineOptionValue("c");
       DateTimeFormatter dateFormat = DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN);
       LocalDate datePlated = app.getCommandLineOptionValue("d", dateFormat).toLocalDate();

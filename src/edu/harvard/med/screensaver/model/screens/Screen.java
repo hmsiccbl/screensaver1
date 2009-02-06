@@ -42,13 +42,14 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -60,7 +61,6 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
@@ -94,7 +94,7 @@ public class Screen extends Study
   private String _title;
   private ScreeningRoomUser _leadScreener; // should rename
   private LabHead _labHead;
-  private Set<ScreeningRoomUser> _collaborators = new HashSet<ScreeningRoomUser>();
+  private SortedSet<ScreeningRoomUser> _collaborators = new TreeSet<ScreeningRoomUser>();
   private Set<Publication> _publications = new HashSet<Publication>();
   private String _url;
   private String _summary;
@@ -121,7 +121,7 @@ public class Screen extends Study
   private LocalDate _dataMeetingScheduled;
   private LocalDate _dataMeetingComplete;
   private BillingInformation _billingInformation = new BillingInformation(this, false);
-  private Set<BillingItem> _billingItems = new HashSet<BillingItem>();
+  private List<BillingItem> _billingItems = new ArrayList<BillingItem>();
   private Set<FundingSupport> _fundingSupports = new HashSet<FundingSupport>();
   private LocalDate _dateOfApplication;
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
@@ -381,7 +381,8 @@ public class Screen extends Study
   @org.hibernate.annotations.ForeignKey(name="fk_collaborator_link_to_screen")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
   @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="screensCollaborated")
-  public Set<ScreeningRoomUser> getCollaborators()
+  @Sort(type=SortType.NATURAL)
+  public SortedSet<ScreeningRoomUser> getCollaborators()
   {
     return _collaborators;
   }
@@ -409,7 +410,7 @@ public class Screen extends Study
   {
     StringBuilder collaborators = new StringBuilder();
     boolean first = true;
-    for (ScreeningRoomUser collaborator : getCollaboratorsList()) {
+    for (ScreeningRoomUser collaborator : getCollaborators()) {
       if (first) {
         first = false;
       }
@@ -828,7 +829,7 @@ public class Screen extends Study
     return publication;
   }
 
-  public void createPublication(Publication publicationDTO)
+  public Publication createPublication(Publication publicationDTO)
   {
     Publication publication = createPublication();
     publication.setTitle(publicationDTO.getTitle());
@@ -838,6 +839,7 @@ public class Screen extends Study
     publication.setJournal(publicationDTO.getJournal());
     publication.setVolume(publicationDTO.getVolume());
     publication.setPages(publicationDTO.getPages());
+    return publication;
   }
 
   /**
@@ -872,7 +874,10 @@ public class Screen extends Study
   }
 
   /**
-   * Create and return a new attached file for the screen.
+   * Create and return a new attached file for the screen. Use
+   * {@link Publication#createAttachedFile(String, InputStream)} to create an
+   * attached file that is associated with a Publication.
+   * 
    * @param filename the filename
    * @param fileType the file type
    * @param fileContents the file contents
@@ -889,8 +894,6 @@ public class Screen extends Study
    * Get the billing information.
    * @return the billing information
    */
-  @Column
-  @Immutable
   public BillingInformation getBillingInformation()
   {
     return _billingInformation;
@@ -903,7 +906,8 @@ public class Screen extends Study
   @org.hibernate.annotations.CollectionOfElements
   @JoinTable(name = "screen_billing_item",
              joinColumns = @JoinColumn(name = "screen_id"))
-  public Set<BillingItem> getBillingItems()
+  @org.hibernate.annotations.IndexColumn(name="ordinal")
+  public List<BillingItem> getBillingItems()
   {
     return _billingItems;
   }
@@ -913,7 +917,7 @@ public class Screen extends Study
    * @param billingItems the new set of billing items
    * @motivation for hibernate
    */
-  private void setBillingItems(Set<BillingItem> billingItems)
+  private void setBillingItems(List<BillingItem> billingItems)
   {
     _billingItems = billingItems;
   }
@@ -922,12 +926,22 @@ public class Screen extends Study
    * Create and return a new billing item for this billing information.
    * @param itemToBeCharged the item to be charged
    * @param amount the amount
-   * @param dateFaxed the date faxed
+   * @param dateSentForBilling the date sent for billing
    * @return the new billing item for this billing information
    */
-  public BillingItem createBillingItem(String itemToBeCharged, BigDecimal amount, LocalDate dateFaxed)
+  public BillingItem createBillingItem(String itemToBeCharged, BigDecimal amount, LocalDate dateSentForBilling)
   {
-    BillingItem billingItem = new BillingItem(itemToBeCharged, amount, dateFaxed);
+    if (itemToBeCharged == null) {
+      throw new RequiredPropertyException(this, "billing item name");
+    }
+    if (amount == null) {
+      throw new RequiredPropertyException(this, "billing item amount");
+    }
+    // allowed, as per [#1607]
+    //if (dateSentForBilling == null) {
+    //  throw new RequiredPropertyException(this, "billing item date faxed");
+    //}
+    BillingItem billingItem = new BillingItem(itemToBeCharged, amount, dateSentForBilling);
     _billingItems.add(billingItem);
     return billingItem;
   }
@@ -936,7 +950,7 @@ public class Screen extends Study
   {
     return createBillingItem(dtoBillingItem.getItemToBeCharged(),
                              dtoBillingItem.getAmount(),
-                             dtoBillingItem.getDateFaxed());
+                             dtoBillingItem.getDateSentForBilling());
   }
 
   /**
@@ -1568,7 +1582,7 @@ public class Screen extends Study
    * @param collaborators the new set of collaborators
    * @motivation for hibernate
    */
-  private void setCollaborators(Set<ScreeningRoomUser> collaborators)
+  private void setCollaborators(SortedSet<ScreeningRoomUser> collaborators)
   {
     _collaborators = collaborators;
   }
@@ -1688,5 +1702,15 @@ public class Screen extends Study
         throw new DuplicateEntityException(this, at);
       }
     }
+  }
+
+  /**
+   * Get the set of libraries that this screen has been authorized to screen,
+   * even if the library's screening status would otherwise not permit it.
+   */
+  @Transient
+  public Set<Library> getLibrariesPermitted()
+  {
+    return Collections.emptySet();
   }
 }

@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+<!-- xmlns:ft="http://facestrace.sourceforge.net"> -->
+
+
+<ui:composition>
+
+  <h:form id="screenResultDataPanelsForm" enctype="multipart/form-data">
+    <ss:collapsiblePanel id="dataHeadersPanel" label="Data Headers"
+      isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
+      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
+      <ui:define name="content">
+        <t:dataTable id="dataHeadersTable"
+          value="#{screenResultViewer.dataHeadersTable.dataModel}"
+          var="row" styleClass="standardTable" headerClass="tableHeader"
+          rowClasses="row1,row2">
+          <t:column styleClass="keyColumn">
+            <f:facet name="header">
+              <t:outputText value="Data Header Name" />
+            </f:facet>
+            <t:outputText value="#{row.rowLabel}" escape="false"
+              styleClass="dataText" title="#{row.rowDescription}" />
+          </t:column>
+          <t:columns
+            value="#{screenResultViewer.dataHeadersTable.columnModel}"
+            var="columnName" styleClass="column">
+            <f:facet name="header">
+              <t:outputText value="#{columnName}" />
+            </f:facet>
+            <t:outputText
+              value="#{screenResultViewer.dataHeadersTable.cellValue}"
+              styleClass="dataText" />
+          </t:columns>
+        </t:dataTable>
+      </ui:define>
+    </ss:collapsiblePanel>
+
+    <ss:collapsiblePanel id="dataTablePanel"
+      isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
+      title="Data"
+      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}" />
+  </h:form>
+
+
+	<!-- Warning: wellSearchResultsBody.xhtml must be included outside of h:form elements -->
+	<t:div
+		rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
+		<ui:include src="/libraries/wellSearchResultsBody.xhtml">
+			<ui:param name="wellsBrowser"
+				value="#{screenResultViewer.resultValueTable}" />
+		</ui:include>
+	</t:div>
+
+	<h:form id="heatMapsPanelForm">
+    <ss:collapsiblePanel id="heatMapsPanel"
+      isCollapsed="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
+      label="Heat Maps"
+      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
+      <ui:define name="content">
+        <ui:include src="heatMapViewer.xhtml" />
+      </ui:define>
+    </ss:collapsiblePanel>
+  </h:form>
+
+	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
+	<ss:roundedDiv rendered="#{empty screenResultViewer.screenResult}">
+		<t:outputText value="Screen result not available"
+			styleClass="transparentSectionHeader" />
+	</ss:roundedDiv>
+	<t:panelGroup
+		rendered="#{!screenResultViewer.readOnly &amp;&amp; empty screenResultViewer.screenResult}">
+		<ui:include src="admin/screenResultUploader.xhtml" />
+	</t:panelGroup>
+
+</ui:composition>
+
+</html>

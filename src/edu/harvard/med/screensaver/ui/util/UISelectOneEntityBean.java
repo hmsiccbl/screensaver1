@@ -37,12 +37,17 @@ public class UISelectOneEntityBean<E extends AbstractEntity> extends UISelectOne
 
   public UISelectOneEntityBean(Collection<E> entities, GenericEntityDAO dao)
   {
-    this(entities, null, dao);
+    this(entities, null, false, dao);
   }
 
   public UISelectOneEntityBean(Collection<E> entities, E defaultSelection, GenericEntityDAO dao)
   {
-    super(entities, defaultSelection);
+    this(entities, defaultSelection, false, dao);
+  }
+
+  public UISelectOneEntityBean(Collection<E> entities, E defaultSelection, boolean isEmptyValueAllowed, GenericEntityDAO dao)
+  {
+    super(entities, defaultSelection, isEmptyValueAllowed);
     _dao = dao;
   }
 
@@ -54,14 +59,13 @@ public class UISelectOneEntityBean<E extends AbstractEntity> extends UISelectOne
     if (entity == null) {
       return null;
     }
+    // reload entity, to ensure it is Hibernate-managed (if this method is
+    // invoked within a Hibernate session)
     return (E) _dao.findEntityById(entity.getEntityClass(), entity.getEntityId());
   }
 
-  protected String getKey(E e)
+  protected String makeKey(E e)
   {
-    if (e == null) {
-      return "";
-    }
     return e.getEntityId().toString();
   }
 }

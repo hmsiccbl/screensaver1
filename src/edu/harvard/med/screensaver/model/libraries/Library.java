@@ -24,12 +24,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
@@ -37,6 +31,11 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 /**
  * A library represents a set of reagents and their layout into wells across
@@ -75,7 +74,7 @@ import org.joda.time.LocalDate;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-public class Library extends AbstractEntity
+public class Library extends TimeStampedAbstractEntity
 {
 
   // private static data
@@ -99,7 +98,7 @@ public class Library extends AbstractEntity
   private Integer _startPlate;
   private Integer _endPlate;
   private String _alias;
-  private IsScreenable _isScreenable;
+  private LibraryScreeningStatus _screeningStatus;
   private Integer _compoundCount;
   private String _screeningCopy;
   private String _compoundConcentrationInScreeningCopy;
@@ -124,6 +123,15 @@ public class Library extends AbstractEntity
 
   // public constructor
 
+  /**
+   * Construct an uninitialized <code>Library</code>.
+   *
+   * @motivation for new Library creation via user interface, where even required
+   *             fields are allowed to be uninitialized, initially
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  public Library() {}
+  
   /**
    * Construct an initialized <code>Library</code> object.
    * 
@@ -151,6 +159,7 @@ public class Library extends AbstractEntity
     _endPlate = endPlate;
     this.plateRows = plateRows;
     this.plateColumns = plateColumns;
+    setScreeningStatus(LibraryScreeningStatus.ALLOWED);
   }
 
   public Library(String libraryName,
@@ -160,14 +169,7 @@ public class Library extends AbstractEntity
                  Integer startPlate,
                  Integer endPlate)
   {
-    _libraryName = libraryName;
-    _shortName = shortName;
-    _screenType = screenType;
-    _libraryType = libraryType;
-    _startPlate = startPlate;
-    _endPlate = endPlate;
-    this.plateRows = Well.PLATE_ROWS_DEFAULT;
-    this.plateColumns = Well.PLATE_COLUMNS_DEFAULT;
+    this(libraryName, shortName, screenType, libraryType, startPlate, endPlate, Well.PLATE_ROWS_DEFAULT, Well.PLATE_COLUMNS_DEFAULT);
   }
 
   // public instance methods
@@ -282,8 +284,7 @@ public class Library extends AbstractEntity
     return (Copy) CollectionUtils.find(_copies, new Predicate() {
       public boolean evaluate(Object e)
       {
-        return ((Copy) e).getName()
-                         .equals(copyName);
+        return ((Copy) e).getName().equals(copyName);
       };
     });
   }
@@ -509,24 +510,26 @@ public class Library extends AbstractEntity
   }
 
   /**
-   * Get the screenability.
+   * Get the screening status of this library, indicating whether this library
+   * is available for screening.
    * 
-   * @return the screenability
+   * @return the screening status
    */
-  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.libraries.IsScreenable$UserType")
-  public IsScreenable getIsScreenable()
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus$UserType")
+  @Column(nullable=false)
+  public LibraryScreeningStatus getScreeningStatus()
   {
-    return _isScreenable;
+    return _screeningStatus;
   }
 
   /**
-   * Set the screenability.
+   * Set the screening status
    * 
-   * @param isScreenable the new screenability
+   * @param screeningStatus the new screening status
    */
-  public void setIsScreenable(IsScreenable isScreenable)
+  public void setScreeningStatus(LibraryScreeningStatus screeningStatus)
   {
-    _isScreenable = isScreenable;
+    _screeningStatus = screeningStatus;
   }
 
   /**
@@ -910,17 +913,6 @@ public class Library extends AbstractEntity
   {
     _screeningSet = screeningSet;
   }
-
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>Library</code> object.
-   * 
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected Library()
-  {}
 
 
   // private instance methods

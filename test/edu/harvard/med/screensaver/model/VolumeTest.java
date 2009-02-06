@@ -13,8 +13,6 @@ import java.math.BigDecimal;
 
 import junit.framework.TestCase;
 
-import edu.harvard.med.screensaver.model.Volume.Units;
-
 import org.apache.log4j.Logger;
 
 public class VolumeTest extends TestCase
@@ -31,76 +29,76 @@ public class VolumeTest extends TestCase
   public void testDefaultUnits()
   {
     Volume volume = new Volume(1);
-    assertEquals(Units.MICROLITERS, volume.getUnits());
+    assertEquals(VolumeUnit.MICROLITERS, volume.getUnits());
     assertEquals(new BigDecimal("1.000"), volume.getValue()); 
   }
   
   public void testExplicitUnits()
   {
-    Volume volume = new Volume(1, Units.MICROLITERS);
-    assertEquals(Units.MICROLITERS, volume.getUnits());
+    Volume volume = new Volume(1, VolumeUnit.MICROLITERS);
+    assertEquals(VolumeUnit.MICROLITERS, volume.getUnits());
     assertEquals(new BigDecimal("1.000"), volume.getValue()); 
-    volume = new Volume(1, Units.NANOLITERS);
-    assertEquals(Units.NANOLITERS, volume.getUnits());
+    volume = new Volume(1, VolumeUnit.NANOLITERS);
+    assertEquals(VolumeUnit.NANOLITERS, volume.getUnits());
     assertEquals(new BigDecimal("1"), volume.getValue()); 
   }
   
   public void testConvertToLargerUnits()
   {
-    Volume volume = new Volume(1000, Units.NANOLITERS);
-    Volume newVolume = volume.convert(Units.MICROLITERS);
-    assertEquals(Units.MICROLITERS, newVolume.getUnits());
+    Volume volume = new Volume(1000, VolumeUnit.NANOLITERS);
+    Volume newVolume = volume.convert(VolumeUnit.MICROLITERS);
+    assertEquals(VolumeUnit.MICROLITERS, newVolume.getUnits());
     assertEquals(new BigDecimal("1.000"), newVolume.getValue());
   }
 
   public void testConvertToSmallerUnits()
   {
-    Volume volume = new Volume(1, Units.MICROLITERS);
-    Volume newVolume = volume.convert(Units.NANOLITERS);
-    assertEquals(Units.NANOLITERS, newVolume.getUnits());
+    Volume volume = new Volume(1, VolumeUnit.MICROLITERS);
+    Volume newVolume = volume.convert(VolumeUnit.NANOLITERS);
+    assertEquals(VolumeUnit.NANOLITERS, newVolume.getUnits());
     assertEquals(new BigDecimal("1000"), newVolume.getValue());
   }
 
   public void testConvertToReasonableUnits()
   {
-    Volume volume = new Volume("0.000001", Units.LITERS).convertToReasonableUnits();
-    assertEquals(Units.MICROLITERS, volume.getUnits());
+    Volume volume = new Volume("0.000001", VolumeUnit.LITERS).convertToReasonableUnits();
+    assertEquals(VolumeUnit.MICROLITERS, volume.getUnits());
     assertEquals(new BigDecimal("1.000"), volume.getValue());
 
-    volume = new Volume("0.0000012", Units.LITERS).convertToReasonableUnits();
-    assertEquals(Units.MICROLITERS, volume.getUnits());
+    volume = new Volume("0.0000012", VolumeUnit.LITERS).convertToReasonableUnits();
+    assertEquals(VolumeUnit.MICROLITERS, volume.getUnits());
     assertEquals(new BigDecimal("1.200"), volume.getValue());
 
-    volume = new Volume("0.0000001", Units.LITERS).convertToReasonableUnits();
-    assertEquals(Units.NANOLITERS, volume.getUnits());
+    volume = new Volume("0.0000001", VolumeUnit.LITERS).convertToReasonableUnits();
+    assertEquals(VolumeUnit.NANOLITERS, volume.getUnits());
     assertEquals(new BigDecimal("100"), volume.getValue());
 
-    volume = new Volume("0.000000999", Units.LITERS).convertToReasonableUnits();
-    assertEquals(Units.NANOLITERS, volume.getUnits());
+    volume = new Volume("0.000000999", VolumeUnit.LITERS).convertToReasonableUnits();
+    assertEquals(VolumeUnit.NANOLITERS, volume.getUnits());
     assertEquals(new BigDecimal("999"), volume.getValue());
 
-    volume = new Volume("1.000001", Units.LITERS).convertToReasonableUnits();
-    assertEquals(Units.LITERS, volume.getUnits());
+    volume = new Volume("1.000001", VolumeUnit.LITERS).convertToReasonableUnits();
+    assertEquals(VolumeUnit.LITERS, volume.getUnits());
     assertEquals(new BigDecimal("1.000001000"), volume.getValue());
     
-    volume = new Volume("0.1", Units.MICROLITERS).convertToReasonableUnits();
-    assertEquals(Units.NANOLITERS, volume.getUnits());
+    volume = new Volume("0.1", VolumeUnit.MICROLITERS).convertToReasonableUnits();
+    assertEquals(VolumeUnit.NANOLITERS, volume.getUnits());
     assertEquals(new BigDecimal("100"), volume.getValue());
 
-    volume = new Volume("0.001", Units.MICROLITERS).convertToReasonableUnits();
-    assertEquals(Units.NANOLITERS, volume.getUnits());
+    volume = new Volume("0.001", VolumeUnit.MICROLITERS).convertToReasonableUnits();
+    assertEquals(VolumeUnit.NANOLITERS, volume.getUnits());
     assertEquals(new BigDecimal("1"), volume.getValue());
 }
   
   public void testValueExceedsScale()
   {
     try {
-      Volume volume = new Volume("1000.1", Units.NANOLITERS);
+      Volume volume = new Volume("1000.1", VolumeUnit.NANOLITERS);
       fail("expected exception: " + volume);
     }
     catch (Exception e) {}
     try {
-      Volume volume = new Volume("1000000.1001", Units.MICROLITERS);
+      Volume volume = new Volume("1000000.1001", VolumeUnit.MICROLITERS);
       fail("expected exception: " + volume);
     }
     catch (Exception e) {}
@@ -108,31 +106,31 @@ public class VolumeTest extends TestCase
   
   public void testGetValueWithConversion()
   {
-    assertEquals(new BigDecimal("1.000"), new Volume(1, Units.MICROLITERS).getValue(Units.MICROLITERS));
-    assertEquals(new BigDecimal("0.000001000"), new Volume(1, Units.MICROLITERS).getValue(Units.LITERS));
-    assertEquals(new BigDecimal("1.000"), new Volume(1000, Units.NANOLITERS).getValue(Units.MICROLITERS));
-    assertEquals(new BigDecimal("0.999"), new Volume(999, Units.NANOLITERS).getValue(Units.MICROLITERS));
-    assertEquals(new BigDecimal("1.001"), new Volume(1001, Units.NANOLITERS).getValue(Units.MICROLITERS));
-    assertEquals(new BigDecimal("1000"), new Volume(1, Units.MICROLITERS).getValue(Units.NANOLITERS));
-    assertEquals(new BigDecimal("1001"), new Volume("1.001", Units.MICROLITERS).getValue(Units.NANOLITERS));
+    assertEquals(new BigDecimal("1.000"), new Volume(1, VolumeUnit.MICROLITERS).getValue(VolumeUnit.MICROLITERS));
+    assertEquals(new BigDecimal("0.000001000"), new Volume(1, VolumeUnit.MICROLITERS).getValue(VolumeUnit.LITERS));
+    assertEquals(new BigDecimal("1.000"), new Volume(1000, VolumeUnit.NANOLITERS).getValue(VolumeUnit.MICROLITERS));
+    assertEquals(new BigDecimal("0.999"), new Volume(999, VolumeUnit.NANOLITERS).getValue(VolumeUnit.MICROLITERS));
+    assertEquals(new BigDecimal("1.001"), new Volume(1001, VolumeUnit.NANOLITERS).getValue(VolumeUnit.MICROLITERS));
+    assertEquals(new BigDecimal("1000"), new Volume(1, VolumeUnit.MICROLITERS).getValue(VolumeUnit.NANOLITERS));
+    assertEquals(new BigDecimal("1001"), new Volume("1.001", VolumeUnit.MICROLITERS).getValue(VolumeUnit.NANOLITERS));
   }
   
   public void testAdd()
   {
     assertEquals(new Volume(3), new Volume(1).add(new Volume(2)));
-    assertEquals(new Volume(3, Units.MICROLITERS), new Volume(1, Units.MICROLITERS).add(new Volume(2, Units.MICROLITERS)));
-    assertEquals(new Volume(3, Units.NANOLITERS), new Volume(1, Units.NANOLITERS).add(new Volume(2, Units.NANOLITERS)));
-    assertEquals(new Volume(2001, Units.NANOLITERS), new Volume(1, Units.NANOLITERS).add(new Volume(2, Units.MICROLITERS)));
-    assertEquals(new Volume("2.001", Units.MICROLITERS), new Volume(2, Units.MICROLITERS).add(new Volume(1, Units.NANOLITERS)));
+    assertEquals(new Volume(3, VolumeUnit.MICROLITERS), new Volume(1, VolumeUnit.MICROLITERS).add(new Volume(2, VolumeUnit.MICROLITERS)));
+    assertEquals(new Volume(3, VolumeUnit.NANOLITERS), new Volume(1, VolumeUnit.NANOLITERS).add(new Volume(2, VolumeUnit.NANOLITERS)));
+    assertEquals(new Volume(2001, VolumeUnit.NANOLITERS), new Volume(1, VolumeUnit.NANOLITERS).add(new Volume(2, VolumeUnit.MICROLITERS)));
+    assertEquals(new Volume("2.001", VolumeUnit.MICROLITERS), new Volume(2, VolumeUnit.MICROLITERS).add(new Volume(1, VolumeUnit.NANOLITERS)));
   }
   
   public void testSubtract()
   {
     assertEquals(new Volume(-1), new Volume(1).subtract(new Volume(2)));
-    assertEquals(new Volume(-1, Units.MICROLITERS), new Volume(1, Units.MICROLITERS).subtract(new Volume(2, Units.MICROLITERS)));
-    assertEquals(new Volume(-1, Units.NANOLITERS), new Volume(1, Units.NANOLITERS).subtract(new Volume(2, Units.NANOLITERS)));
-    assertEquals(new Volume(-1999, Units.NANOLITERS), new Volume(1, Units.NANOLITERS).subtract(new Volume(2, Units.MICROLITERS)));
-    assertEquals(new Volume("1.999", Units.MICROLITERS), new Volume(2, Units.MICROLITERS).subtract(new Volume(1, Units.NANOLITERS)));
+    assertEquals(new Volume(-1, VolumeUnit.MICROLITERS), new Volume(1, VolumeUnit.MICROLITERS).subtract(new Volume(2, VolumeUnit.MICROLITERS)));
+    assertEquals(new Volume(-1, VolumeUnit.NANOLITERS), new Volume(1, VolumeUnit.NANOLITERS).subtract(new Volume(2, VolumeUnit.NANOLITERS)));
+    assertEquals(new Volume(-1999, VolumeUnit.NANOLITERS), new Volume(1, VolumeUnit.NANOLITERS).subtract(new Volume(2, VolumeUnit.MICROLITERS)));
+    assertEquals(new Volume("1.999", VolumeUnit.MICROLITERS), new Volume(2, VolumeUnit.MICROLITERS).subtract(new Volume(1, VolumeUnit.NANOLITERS)));
   }
   
   public void testNegate()
@@ -144,44 +142,44 @@ public class VolumeTest extends TestCase
   
   public void testEquals()
   {
-    assertEquals(new Volume(0, Units.MICROLITERS), new Volume(0, Units.NANOLITERS));
-    assertEquals(new Volume(1, Units.MICROLITERS), new Volume(1000, Units.NANOLITERS));
-    assertEquals(new Volume("0.1", Units.MICROLITERS), new Volume(100, Units.NANOLITERS));
-    assertEquals(new Volume("0.001", Units.MICROLITERS), new Volume(1, Units.NANOLITERS));
-    assertEquals(new Volume(1000, Units.NANOLITERS), new Volume(1, Units.MICROLITERS));
-    assertFalse(new Volume(1, Units.NANOLITERS).equals(new Volume(1, Units.MICROLITERS)));
-    assertFalse(new Volume(1, Units.MICROLITERS).equals(new Volume(1, Units.NANOLITERS)));
+    assertEquals(new Volume(0, VolumeUnit.MICROLITERS), new Volume(0, VolumeUnit.NANOLITERS));
+    assertEquals(new Volume(1, VolumeUnit.MICROLITERS), new Volume(1000, VolumeUnit.NANOLITERS));
+    assertEquals(new Volume("0.1", VolumeUnit.MICROLITERS), new Volume(100, VolumeUnit.NANOLITERS));
+    assertEquals(new Volume("0.001", VolumeUnit.MICROLITERS), new Volume(1, VolumeUnit.NANOLITERS));
+    assertEquals(new Volume(1000, VolumeUnit.NANOLITERS), new Volume(1, VolumeUnit.MICROLITERS));
+    assertFalse(new Volume(1, VolumeUnit.NANOLITERS).equals(new Volume(1, VolumeUnit.MICROLITERS)));
+    assertFalse(new Volume(1, VolumeUnit.MICROLITERS).equals(new Volume(1, VolumeUnit.NANOLITERS)));
   }
   
   public void testCompareEquals()
   {
-    assertEquals(0, new Volume(0, Units.MICROLITERS).compareTo(new Volume(0, Units.MICROLITERS)));
-    assertEquals(0, new Volume(0, Units.MICROLITERS).compareTo(new Volume(0, Units.NANOLITERS)));
-    assertEquals(0, new Volume(0, Units.NANOLITERS).compareTo(new Volume(0, Units.MICROLITERS)));
-    assertEquals(-1, new Volume(1, Units.NANOLITERS).compareTo(new Volume(1, Units.MICROLITERS)));
-    assertEquals(1, new Volume(1, Units.MICROLITERS).compareTo(new Volume(1, Units.NANOLITERS)));
-    assertEquals(0, new Volume(1, Units.MICROLITERS).compareTo(new Volume(1000, Units.NANOLITERS)));
-    assertEquals(0, new Volume("0.001", Units.MICROLITERS).compareTo(new Volume(1, Units.NANOLITERS)));
-    assertEquals(0, new Volume(1, Units.NANOLITERS).compareTo(new Volume("0.001", Units.MICROLITERS)));
+    assertEquals(0, new Volume(0, VolumeUnit.MICROLITERS).compareTo(new Volume(0, VolumeUnit.MICROLITERS)));
+    assertEquals(0, new Volume(0, VolumeUnit.MICROLITERS).compareTo(new Volume(0, VolumeUnit.NANOLITERS)));
+    assertEquals(0, new Volume(0, VolumeUnit.NANOLITERS).compareTo(new Volume(0, VolumeUnit.MICROLITERS)));
+    assertEquals(-1, new Volume(1, VolumeUnit.NANOLITERS).compareTo(new Volume(1, VolumeUnit.MICROLITERS)));
+    assertEquals(1, new Volume(1, VolumeUnit.MICROLITERS).compareTo(new Volume(1, VolumeUnit.NANOLITERS)));
+    assertEquals(0, new Volume(1, VolumeUnit.MICROLITERS).compareTo(new Volume(1000, VolumeUnit.NANOLITERS)));
+    assertEquals(0, new Volume("0.001", VolumeUnit.MICROLITERS).compareTo(new Volume(1, VolumeUnit.NANOLITERS)));
+    assertEquals(0, new Volume(1, VolumeUnit.NANOLITERS).compareTo(new Volume("0.001", VolumeUnit.MICROLITERS)));
   }    
   
   public void testToString()
   {
-    assertEquals("0 L", new Volume("0", Units.LITERS).toString());
-    assertEquals("0 L", new Volume("0.0", Units.LITERS).toString());
-    assertEquals("0.1 L", new Volume("0.1", Units.LITERS).toString());
-    assertEquals("0.1 L", new Volume("0.100", Units.LITERS).toString());
-    assertEquals("0.1001 L", new Volume("0.1001", Units.LITERS).toString());
-    assertEquals("10 L", new Volume("10", Units.LITERS).toString());
-    assertEquals("10 L", new Volume("10.0", Units.LITERS).toString());
-    assertEquals("10 L", new Volume("10.0000", Units.LITERS).toString());
-    assertEquals("10 L", new Volume("10.0", Units.LITERS).toString());
-    assertEquals("10.01 L", new Volume("10.01", Units.LITERS).toString());
-    assertEquals("1 uL", new Volume("1", Units.MICROLITERS).toString());
-    assertEquals("1.001 uL", new Volume("1.001", Units.MICROLITERS).toString());
-    assertEquals("1.001 uL", new Volume("1.0010", Units.MICROLITERS).toString());
-    assertEquals("1.001 mL", new Volume("1.00100", Units.MILLILITERS).toString());
-    assertEquals("1.00101 mL", new Volume("1.00101", Units.MILLILITERS).toString());
+    assertEquals("0 L", new Volume("0", VolumeUnit.LITERS).toString());
+    assertEquals("0 L", new Volume("0.0", VolumeUnit.LITERS).toString());
+    assertEquals("0.1 L", new Volume("0.1", VolumeUnit.LITERS).toString());
+    assertEquals("0.1 L", new Volume("0.100", VolumeUnit.LITERS).toString());
+    assertEquals("0.1001 L", new Volume("0.1001", VolumeUnit.LITERS).toString());
+    assertEquals("10 L", new Volume("10", VolumeUnit.LITERS).toString());
+    assertEquals("10 L", new Volume("10.0", VolumeUnit.LITERS).toString());
+    assertEquals("10 L", new Volume("10.0000", VolumeUnit.LITERS).toString());
+    assertEquals("10 L", new Volume("10.0", VolumeUnit.LITERS).toString());
+    assertEquals("10.01 L", new Volume("10.01", VolumeUnit.LITERS).toString());
+    assertEquals("1 uL", new Volume("1", VolumeUnit.MICROLITERS).toString());
+    assertEquals("1.001 uL", new Volume("1.001", VolumeUnit.MICROLITERS).toString());
+    assertEquals("1.001 uL", new Volume("1.0010", VolumeUnit.MICROLITERS).toString());
+    assertEquals("1.001 mL", new Volume("1.00100", VolumeUnit.MILLILITERS).toString());
+    assertEquals("1.00101 mL", new Volume("1.00101", VolumeUnit.MILLILITERS).toString());
   }
   
 

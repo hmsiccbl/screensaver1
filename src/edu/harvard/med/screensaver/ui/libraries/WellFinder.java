@@ -118,7 +118,14 @@ public class WellFinder extends AbstractBackingBean
   @UIControllerMethod
   public String findWell()
   {
-    return _wellViewer.viewWell(_plateWellListParser.lookupWell(_plateNumber, _wellName));
+    Well well = _plateWellListParser.lookupWell(_plateNumber, _wellName);
+    if(well != null) {
+      resetSearchFields();
+      return _wellViewer.viewWell(well);
+    }else {
+      showMessage("wells.plateWellNotFound", _plateNumber, _wellName);
+    }
+    return null;
   }
 
   /**
@@ -197,4 +204,12 @@ public class WellFinder extends AbstractBackingBean
     });
     return result[0];
   }
+  
+  private void resetSearchFields()
+  {
+    _plateNumber = null;
+    _wellName = null;
+    _plateWellList = null;
+  }
+
 }

@@ -87,8 +87,11 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
    */
   public void initialize(DataFetcher<R,K,P> dataFetcher)
   {
+    initialize(dataFetcher, buildColumns());
+  }
+  public void initialize(DataFetcher<R,K,P> dataFetcher, List<? extends TableColumn<R,?>> columns)
+  {
     _dataFetcher = dataFetcher;
-    List<? extends TableColumn<R,?>> columns = buildColumns();
     initialize(buildDataTableModel(dataFetcher, columns),
                columns,
                buildRowsPerPageSelector());               

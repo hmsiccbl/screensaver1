@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
@@ -90,14 +91,15 @@ abstract public class AbstractPropertyTester<E extends AbstractEntity>
     return getBeanClass() + "." + getWriteMethod().getName();
   }
 
-  protected boolean setterOrAdderMethodNotExpected()
+  protected boolean setterMethodNotExpected()
   {
     if (
       isTransientProperty() ||
       isPropertyWithNonconventionalSetterMethod() ||
       isImmutableProperty() ||
       isContainedEntityProperty() ||
-      isEntityIdProperty()) {
+      isEntityIdProperty() ||
+      isEmbeddableProperty()) {
       log.debug("setter method not expected for property: " + getPropertyFullname());
       return true;
     }
@@ -134,6 +136,17 @@ abstract public class AbstractPropertyTester<E extends AbstractEntity>
       return
         containedEntity != null &&
         getBeanClass().isAssignableFrom(containedEntity.containingEntityClass());
+    }
+    return false;
+  }
+
+  protected boolean isEmbeddableProperty()
+  {
+    if (!AbstractEntity.class.isAssignableFrom(getPropertyType())) {
+      Class propertyType = (Class) getPropertyType();
+      Embeddable embeddable =
+        propertyType.<Embeddable>getAnnotation(Embeddable.class);
+      return embeddable!= null;
     }
     return false;
   }

@@ -20,14 +20,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 /**
  * Tracks the activity of correcting the "known" volume of a set of wells on a

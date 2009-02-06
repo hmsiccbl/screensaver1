@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -54,6 +55,7 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 
 /**
@@ -376,11 +378,19 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParseScreenResult() throws Exception
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
+    Date now = new Date();
+    
     ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115),
                                                              workbookFile);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
     doTestScreenResult115ParseResult(screenResult);
+    
+    // also test that the parse time is correct
+    assertTrue("Screen parse time is incorrect: " + screenResult.getDateLastImported() +
+               ", should be after: " + now,
+               screenResult.getDateLastImported().getMillis() > now.getTime() );
+    
   }
   
   
@@ -389,16 +399,24 @@ public class ScreenResultParserTest extends AbstractSpringTest
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    mockScreenResultParser.parse(screen,
+    ScreenResult screenResult = mockScreenResultParser.parse(screen,
                                  workbookFile,
                                  new IntRange(1, 2));
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
-    mockScreenResultParser.parse(screen,
+    DateTime firstParseTime = screenResult.getDateLastImported();
+
+    screenResult = mockScreenResultParser.parse(screen,
                                  workbookFile,
                                  new IntRange(3, 3));
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
     
     doTestScreenResult115ParseResult(screen.getScreenResult());
+    
+    // also test that the parse time has been updated
+    assertTrue("Screen parse time is incorrect: " + screenResult.getDateLastImported() +
+               ", should be after: " + firstParseTime,
+               screenResult.getDateLastImported().getMillis() > firstParseTime.getMillis() );
+    
   }
 
   public void testHitCounts() throws Exception

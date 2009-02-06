@@ -21,6 +21,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -108,7 +109,7 @@ public class LibraryScreening extends Screening
    * @param copy the copy
    * @return a new plates used for the library screening
    */
-  public PlatesUsed createPlatesUsed(Integer startPlate, Integer endPlate, String copy)
+  public PlatesUsed createPlatesUsed(Integer startPlate, Integer endPlate, Copy copy)
   {
     PlatesUsed platesUsed = new PlatesUsed(this, startPlate, endPlate, copy);
     _platesUsed.add(platesUsed);
@@ -139,6 +140,7 @@ public class LibraryScreening extends Screening
    * @return the is special boolean flag
    */
   @Column(name="isSpecial", nullable=false)
+  // TODO: rename property to isScreenerProvidedPlates
   public boolean isSpecial()
   {
     return _isSpecial;

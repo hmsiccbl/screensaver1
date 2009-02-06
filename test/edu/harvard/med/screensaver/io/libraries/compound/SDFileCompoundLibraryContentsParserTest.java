@@ -210,10 +210,7 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
     Compound compound = compounds.iterator().next();
     assertEquals("compound has smiles", "O=C1CC(C)(C)CC(=O)C1C(c1ccccc1)C1=C(O)CC(C)(C)CC1=O", compound.getSmiles());
     assertEquals("compound has inchi", "InChI=1/C23H28O4/c1-22(2)10-15(24)20(16(25)11-22)19(14-8-6-5-7-9-14)21-17(26)12-23(3,4)13-18(21)27/h5-9,19-20,26H,10-13H2,1-4H3", compound.getInchi());
-    Set<String> pubchemCids = compound.getPubchemCids();
-    assertEquals("compound has 1 pubchem cid", 1, pubchemCids.size());
-    String pubchemCid = pubchemCids.iterator().next();
-    assertEquals("compound has pubchem cid", "558309", pubchemCid);
+    assertTrue("compound has expected pubchem cid", compound.getPubchemCids().contains("558309"));
   }
   
   public void doTestTwoCompoundsInWell()
@@ -235,16 +232,10 @@ public class SDFileCompoundLibraryContentsParserTest extends AbstractSpringTest
 
     assertEquals("primary compound has smiles", "CC(=C)C[N+](C)(C)Cc1c(C)ccc2ccccc12", primaryCompound.getSmiles());
     assertEquals("primary compound has inchi", "InChI=1/C18H24N/c1-14(2)12-19(4,5)13-18-15(3)10-11-16-8-6-7-9-17(16)18/h6-11H,1,12-13H2,2-5H3/q+1", primaryCompound.getInchi());
-    Set<String> pubchemCids = primaryCompound.getPubchemCids();
-    assertEquals("primary compound has 1 pubchem cid", 1, pubchemCids.size());
-    String pubchemCid = pubchemCids.iterator().next();
-    assertEquals("compound has pubchem cid", "4560856", pubchemCid);
+    assertTrue("primary compound has expected pubchem cid", primaryCompound.getPubchemCids().contains("4560856"));
 
     assertEquals("non primary compound has smiles", "[Br-]", nonPrimaryCompound.getSmiles());
-    assertEquals("non primary compound has inchi", "InChI=1/BrH/h1H/p-1", nonPrimaryCompound.getInchi());
-    pubchemCids = primaryCompound.getPubchemCids();
-    assertEquals("non primary compound has 1 pubchem cid", 1, pubchemCids.size());
-    pubchemCid = pubchemCids.iterator().next();
-    assertEquals("ncompound has pubchem cid", "4560856", pubchemCid);
+    assertEquals("non primary compound has inchi", "InChI=1/BrH/h1H/p-1/fBr/h1h/q-1", nonPrimaryCompound.getInchi());
+    assertTrue("non primary compound has expected pubchem cid", nonPrimaryCompound.getPubchemCids().contains("259"));
   }
 }

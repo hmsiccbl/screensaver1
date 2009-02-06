@@ -104,6 +104,16 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
   }
 
+  public void initialize(DataFetcher<E,K,PropertyPath<E>> dataFetcher, List<? extends TableColumn<E,?>> columns)
+  {
+    super.initialize(dataFetcher, columns);
+    
+    // reset to default rows-per-page, if in "entity view" mode
+    if (isEntityView()) {
+      getRowsPerPageSelector().setSelection(getRowsPerPageSelector().getDefaultSelection());
+    }
+  }
+  
   /**
    * View the entity currently selected in the DataTableModel in entity view
    * mode.
@@ -136,13 +146,13 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
                                                                                     100),
                                                                       20) {
       @Override
-      public String getLabel(Integer value)
+      public String makeLabel(Integer value)
       {
         if (value.equals(1)) {
           return "Single";
         }
         else {
-          return super.getLabel(value);
+          return super.makeLabel(value);
         }
       }
     };
@@ -321,7 +331,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     if (_dataExporterSelector == null) {
       _dataExporterSelector = new UISelectOneBean<DataExporter<?>>(getDataExporters()) {
         @Override
-        protected String getLabel(DataExporter<?> dataExporter)
+        protected String makeLabel(DataExporter<?> dataExporter)
         {
           return dataExporter.getFormatName();
         }

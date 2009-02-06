@@ -28,8 +28,9 @@
 
       <ui:insert name="custom0" />
 
+      <!-- note: immediate="false" is necessary to support user-edited field values between page scrolls; e.g. see [#1361] -->
       <t:dataScroller id="dataTableScroller"
-        for=":#{dataTable.clientId}" immediate="true"
+        for=":#{dataTable.clientId}" immediate="false"
         actionListener="#{dataTable.dataScrollerListener}"
         firstRowIndexVar="fromRow" lastRowIndexVar="toRow"
         rowsCountVar="rowCount" fastStep="10"

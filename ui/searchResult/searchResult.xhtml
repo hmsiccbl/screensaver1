@@ -55,7 +55,7 @@
 				</t:collapsiblePanel>
 			</h:form>
 
-			<h:form>
+			<h:form id="searchForm">
 				<t:collapsiblePanel var="isCollapsed">
 					<f:facet name="header">
 						<t:headerLink immediate="true">
@@ -67,7 +67,7 @@
 
 					<!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
 					<t:commandButton id="defaultSearchButton" forceId="true"
-						styleClass="hiddenCommand" />
+						styleClass="hiddenCommand"  actionListener="#{searchResults.searchCommandListener}"/>
 
 					<t:panelGrid styleClass="groupingPanel" style="margin-top: 2px">
 						<t:dataTable id="queryTable" var="column"
@@ -86,18 +86,18 @@
 							</t:column>
 							<t:column>
 								<t:commandButton value="Reset" immediate="true"
-									action="#{column.criterion.reset}" styleClass="command" />
+									action="#{searchResults.resetColumnFilter}" styleClass="command" />
 							</t:column>
 						</t:dataTable>
 						<t:panelGroup id="searchCommandPanel">
 							<!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
 							<t:commandButton id="searchButton" value="Search"
-								styleClass="command" />
+								styleClass="command" actionListener="#{searchResults.searchCommandListener}"/>
 							<t:commandButton value="Reset All" immediate="true"
 								action="#{searchResults.resetFilter}" styleClass="command" />
 							<t:selectBooleanCheckbox id="showFiltersInTableOption"
 								value="#{searchResults.tableFilterMode}"
-								onchange="javascript:document.getElementById('defaultSearchButton').click()" />
+								onchange="javascript:submit()" />
 							<t:outputLabel for="showFiltersInTableOption"
 								value="Show search fields above table columns" styleClass="label" />
 						</t:panelGroup>
@@ -158,11 +158,12 @@
 									<t:panelGrid columns="2">
 										<t:commandButton id="search" forceId="true" value="Search"
 											styleClass="command"
-											rendered="#{searchResults.tableFilterMode}" />
-										<t:commandButton value="Reset" immediate="true"
-											action="#{column.criterion.reset}" styleClass="command"
-											rendered="#{searchResults.tableFilterMode}" />
-									</t:panelGrid>
+											rendered="#{searchResults.tableFilterMode}"  actionListener="#{searchResults.searchCommandListener}"/>
+                    <t:commandButton value="Reset" immediate="true"
+                      action="#{searchResults.resetColumnFilter}"
+                      styleClass="command"
+                      rendered="#{searchResults.tableFilterMode}" />
+                  </t:panelGrid>
 								</t:panelGrid>
 							</t:panelGrid>
 						</f:facet>

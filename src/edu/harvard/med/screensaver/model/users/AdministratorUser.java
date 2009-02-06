@@ -131,7 +131,7 @@ public class AdministratorUser extends ScreensaverUser
   @Override
   protected boolean validateRole(ScreensaverUserRole role)
   {
-    return role.isAdministrative();
+    return role.isAdministrative() || role == ScreensaverUserRole.SCREENSAVER_USER;
   }
 
 

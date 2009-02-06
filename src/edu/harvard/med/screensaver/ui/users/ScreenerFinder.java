@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.users;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
@@ -104,6 +105,9 @@ public class ScreenerFinder extends AbstractBackingBean
     if (!StringUtils.isEmpty(pattern)) {
       _screenerSearchResults.searchUsers(); // potentially poor performance, but "correct", as it always searches lastest additions and changes to users
       TableColumn<ScreeningRoomUser,String> column = (TableColumn<ScreeningRoomUser,String>) _screenerSearchResults.getColumnManager().getColumn("Name");
+      //Note: the assumption is that alphabetic sort when searching on name is desired
+      _screenerSearchResults.getColumnManager().setSortColumn(column);
+      _screenerSearchResults.getColumnManager().setSortDirection(SortDirection.ASCENDING);
       column.resetCriteria().setOperatorAndValue(Operator.TEXT_LIKE, pattern);
       if (_screenerSearchResults.getRowCount() == 0) {
         showMessage("users.noUserWithMatchingName", pattern);

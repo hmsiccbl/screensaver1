@@ -90,6 +90,9 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public static final int VOLUME_PRECISION = 10;
   public static final int VOLUME_SCALE = 9;
 
+  public static final int CONCENTRATION_PRECISION = 12;
+  public static final int CONCENTRATION_SCALE = 9;
+
   public static final Collection<Integer> PLATE_COLUMNS_LIST;
 
   static {

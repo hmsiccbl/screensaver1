@@ -303,7 +303,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     BillingItem expectedBillingItem = new BillingItem();
     expectedBillingItem.setItemToBeCharged("Plates");
     expectedBillingItem.setAmount(new BigDecimal("19.99"));
-    expectedBillingItem.setDateFaxed(new LocalDate(2008, 2, 18));
+    expectedBillingItem.setDateSentForBilling(new LocalDate(2008, 2, 18));
 //    assertTrue("billing item added (value)",
 //                 expectedBillingItem.isEquivalent(((Set<BillingItem>) getBeanValue("screenDetailViewer.screen.billingInformation.billingItems")).iterator().next()));
 

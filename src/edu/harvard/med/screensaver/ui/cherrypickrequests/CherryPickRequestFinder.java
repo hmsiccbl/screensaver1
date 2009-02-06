@@ -72,6 +72,7 @@ public class CherryPickRequestFinder extends AbstractBackingBean
     if (_cherryPickRequestNumber != null) {
       CherryPickRequest cherryPickRequest = _cherryPickRequestDao.findCherryPickRequestByNumber(_cherryPickRequestNumber);
       if (cherryPickRequest != null) {
+        resetSearchFields();
         return _cherryPickRequestViewer.viewCherryPickRequest(cherryPickRequest);
       }
       else {
@@ -85,4 +86,10 @@ public class CherryPickRequestFinder extends AbstractBackingBean
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+  
+  private void resetSearchFields()
+  {
+    _cherryPickRequestNumber = null;
+  }
+  
 }

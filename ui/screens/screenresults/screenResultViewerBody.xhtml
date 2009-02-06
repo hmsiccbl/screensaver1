@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:s="http://myfaces.apache.org/sandbox"
+	xmlns:ss="http://screensaver.med.harvard.edu/ui">
+<!-- xmlns:ft="http://facestrace.sourceforge.net"> -->
+
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{screenResultViewer.screenResult}" />
+  <ui:param name="viewer" value="#{screenResultViewer}" />
+  <ui:param name="hideId" value="#{true}" />
+
+	<ui:define name="entityCommands">
+		<t:commandButton action="#{screenResultViewer.delete}" value="Delete"
+			onclick="javascript: return confirm('Delete this screen result permanently?');"
+			styleClass="command" rendered="#{screenResultViewer.editable}"
+			title="Delete the screen results for this screen" />
+	</ui:define>
+
+	<ui:define name="propertiesContent">
+		<ss:property id="screenResultLastImported" label="Last Imported"
+						type="Date"
+						description="The date the current screen results were loaded into the database"
+						value="#{screenResultViewer.screenResult.dateLastImported}" />
+
+					<ss:property id="screenResultIsShareable" label="Shareable"
+						type="Boolean"
+						description="True when the results are shareable with scientists outside the lab"
+						editable="#{screenResultViewer.editMode}"
+						value="#{screenResultViewer.screenResult.shareable}" />
+
+					<ss:property id="screenResultPlateCount" label="Plates"
+						description="The number of plates for which we have results"
+						value="#{screenResultViewer.screenResult.plateNumberCount}" />
+
+					<ss:property id="screenResultReplicateCount" label="Replicates"
+						description="The number of replicates screened"
+						value="#{screenResultViewer.screenResult.replicateCount}" />
+
+					<ss:property id="screenResultExperimentalWellCount"
+						label="Experimental Wells"
+						description="The number of experimental wells for which we have results"
+						value="#{screenResultViewer.screenResult.experimentalWellCount}" />
+						
+					<ss:property id="comments" label="Comments"
+						value="#{screenResultViewer.screenResult.comments}"
+						rendered="#{screenResultViewer.readAdmin}"
+						adminOnly="true" editable="#{screenResultViewer.editMode}"
+						description="Administrative comments" type="Textarea"
+						editWidth="80" editHeight="3" />
+	
+</ui:define>
+</ui:composition>
+
+</html>

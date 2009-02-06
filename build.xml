@@ -337,7 +337,8 @@
           description="Stops the web application (running locally on a Tomcat server)"
   >
     <exec executable="${appserver.stop.cmd}">
-      <!--arg line="-force" /-->
+      <!-- requires CATALINA_PID env variable that points to a file that will store the PID -->
+      <arg line="-force" />
     </exec>
   </target>
 

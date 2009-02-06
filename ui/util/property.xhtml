@@ -11,9 +11,10 @@
 	   facelets parameters:
 	     - id
 	     - label
-	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'Volume', 'Currency'
+	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'Volume', 'Currency', 'Concentration', 'typedValue'
 	     - description
 	     - value
+	     - typeValue: required if type==typedValue, must be instance of edu.harvard.med.screensaver.ui.util.UiSelectOneBean
 	     - editable: boolean, (optional, defaults to false)
 	     - rendered: boolean, (optional, defaults to true)
        - adminOnly: boolean (optional, defaults to false)
@@ -41,25 +42,30 @@
 	</t:div>
 	<t:div rendered="#{(empty rendered ? true : rendered) &amp;&amp; (adminOnly ? appInfo.screensaverUser.isUserInRoleOfNameMap['readEverythingAdmin'] : true)}">
 		<ui:insert name="valueHeader" />
-		<t:div rendered="#{!editable}">
-			<ui:insert name="data">
+    <t:div rendered="#{!editable}"
+      styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}">
+      <ui:insert name="data">
         <t:outputText id="#{id}#{type}Value" value="#{value}"
-          rendered="#{type != 'Textarea'}"
-          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Currency' ? currencyConverter : stringConverter}"
-          styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}" />
+          rendered="#{!(type == 'Textarea' || type == 'typedValue')}"
+          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Concentration' ? concentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
+        <!-- TODO: not sure why we need to repeat styleClass attribute here to make it take effect... -->
         <t:inputTextarea id="#{id}#{type}Value1"
           rendered="#{type == 'Textarea'}" value="#{value}"
           readonly="true" cols="#{editWidth}" rows="#{editHeight}"
           styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}" />
+				<t:outputText id="#{id}#{type}Value2"
+					rendered="#{type == 'typedValue' &amp;&amp; !empty value }"
+					value="#{value} #{typeValue.selection}" />
       </ui:insert>
-		</t:div>
-		<t:div rendered="#{editable}">
+    </t:div>
+
+    <t:div rendered="#{editable}">
 			<ui:insert name="editableData">
 				<t:inputText id="#{id}#{type}Field"
-					rendered="#{!(type == 'Textarea' || type == 'Boolean')}"
+					rendered="#{!(type == 'Textarea' || type == 'Boolean' || type == 'typedValue' )}"
 					required="#{required}" value="#{value}" size="#{editWidth}"
 					styleClass="inputText"
-					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
+					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Concentration' ? concentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
 				<t:inputTextarea id="#{id}#{type}Field1"
 					rendered="#{type == 'Textarea'}" required="#{required}"
 					value="#{value}" cols="#{editWidth}" rows="#{editHeight}"
@@ -68,6 +74,21 @@
 					rendered="#{type == 'Boolean'}" required="#{required}"
 					onclick="#{submitOnChange ? 'javascript:submit()' : ''}"
 					immediate="#{submitOnChange}" />
+				<t:div rendered="#{type == 'typedValue'}">
+					<t:inputText id="#{id}#{type}typedValue" rendered="#{type == 'typedValue'}"
+						value="#{value}" size="4" styleClass="inputText">
+						<ui:insert name="editValidator"/>
+					</t:inputText>
+					<t:selectOneMenu id="#{id}#{type}SelectMenu"
+						rendered="#{type == 'typedValue'}"
+						value="#{typeValue.value}" styleClass="inputText selectMenu"
+						displayValueOnlyStyleClass="selectMenu">
+						<f:selectItems value="#{typeValue.selectItems}" />
+					</t:selectOneMenu>
+					<t:message showDetail="true" showSummary="true"
+						styleClass="errorMessage" id="#{id}#{type}ValueFieldError"
+						for="#{id}#{type}typedValue" />
+				</t:div>
 			</ui:insert>
 		</t:div>
 		<ui:insert name="valueFooter" />

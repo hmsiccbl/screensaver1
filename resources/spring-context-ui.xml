@@ -67,6 +67,14 @@
   </aop:config>
 
   <bean
+    id="applicationProperties"
+    class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property
+      name="location"
+      value="classpath:screensaver.properties" />
+  </bean>
+
+  <bean
     id="messages"
     class="edu.harvard.med.screensaver.ui.util.Messages">
     <property name="messageSource">
@@ -104,6 +112,9 @@
     <description>
       Abstract bean definition for user interface beans.
     </description>
+    <property
+      name="applicationProperties"
+      ref="applicationProperties" />
     <property
       name="messages"
       ref="messages" />
@@ -158,6 +169,8 @@
     <constructor-arg ref="labActivitiesBrowser" />
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="userViewer" />
+    <constructor-arg ref="libraryDetailViewer" />
+    <constructor-arg ref="wellsBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -222,6 +235,8 @@
     <constructor-arg ref="compoundLibraryContentsImporter" />
     <constructor-arg ref="rnaiLibraryContentsImporter" />
     <constructor-arg ref="naturalProductsLibraryContentsImporter" />
+    <constructor-arg ref="libraryDetailViewer" />
+    <constructor-arg ref="librariesBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -306,6 +321,8 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="geneViewer" />
     <constructor-arg ref="compoundViewer" />
+    <constructor-arg ref="structureImageProvider" />
+    <constructor-arg ref="studyViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -318,6 +335,8 @@
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="geneViewer" />
     <constructor-arg ref="compoundViewer" />
+    <constructor-arg ref="structureImageProvider" />
+    <constructor-arg ref="studyViewer" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -336,6 +355,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.CompoundViewer">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="structureImageProvider" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -522,8 +542,11 @@
     <constructor-arg ref="cherryPickRequestAllocator" />
     <constructor-arg ref="cherryPickRequestPlateMapper" />
     <constructor-arg ref="cherryPickRequestPlateMapFilesBuilder" />
+    <constructor-arg ref="cherryPickRequestPlateStatusUpdater" />
     <constructor-arg ref="libraryPoolToDuplexWellMapper" />
     <constructor-arg ref="cherryPickRequestExporter" />
+    <constructor-arg ref="compoundCherryPickRequestAllowancePolicy" />
+    <constructor-arg ref="rnaiCherryPickRequestAllowancePolicy" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -642,6 +665,17 @@
     <aop:scoped-proxy />
   </bean>
 
+  <bean
+    id="libraryDetailViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.LibraryDetailViewer">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryCreator" />
+    <constructor-arg ref="libraryViewer" />
+    <aop:scoped-proxy/>
+  </bean>
+  
 
   <!-- converters -->
 
@@ -650,6 +684,8 @@
   <bean id="screenTypeConverter" class="edu.harvard.med.screensaver.ui.util.ScreenTypeConverter" />
 
   <bean id="stringConverter" class="edu.harvard.med.screensaver.ui.util.NoOpStringConverter" />
+
+  <bean id="toLowerCaseConverter" class="edu.harvard.med.screensaver.ui.util.ToLowerCaseConverter" />
 
   <bean id="dateConverter" class="edu.harvard.med.screensaver.ui.table.column.LocalDateConverter" />
 
@@ -661,6 +697,8 @@
 
   <bean id="volumeConverter" class="edu.harvard.med.screensaver.ui.util.VolumeConverter" />
 
+  <bean id="concentrationConverter" class="edu.harvard.med.screensaver.ui.util.ConcentrationConverter" />
+
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.util.SilencingReagentTypeConverter" />
 
   <bean id="statusValueConverter" class="edu.harvard.med.screensaver.ui.util.StatusValueConverter" />
@@ -671,13 +709,15 @@
 
   <bean id="affiliationCategoryConverter" class="edu.harvard.med.screensaver.ui.util.AffiliationCategoryConverter" />
   
-  <!-- BII Start -->  
   <bean id="normalizePlatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.NormalizePlatesMethodConverter" />
 
   <bean id="scoreReplicatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.ScoreReplicatesMethodConverter" />
   
   <bean id="summarizeReplicatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.SummarizeReplicatesMethodConverter" />
-  <!-- BII End -->
+
+  <bean id="libraryScreeningStatusConverter" class="edu.harvard.med.screensaver.ui.util.LibraryScreeningStatusConverter" />
+
+  <bean id="libraryTypeConverter" class="edu.harvard.med.screensaver.ui.util.LibraryTypeConverter" />
 
   <!-- Development/Debug related beans -->
 

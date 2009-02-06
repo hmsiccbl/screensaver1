@@ -34,8 +34,20 @@ import com.meterware.httpunit.HTMLElement;
 import com.meterware.httpunit.WebConversation;
 
 /**
- * Base class for user interface unit tests.
- *
+ * Base class for user interface unit tests (EXPERIMENTAL).
+ * <p>
+ * Instructions:
+ * <ul>
+ * <li>Run the Ant build.xml deploy target with property
+ * <code>ui-test=true</code>. Also ensure that the database to be used is a test
+ * database whose tables can be truncated (they will be).</li>
+ * <li>Restart the Tomcat web server.</li>
+ * <li>From a browser, visit this <a href="http://localhost:8080/screensaver/ServletTestRunner?suite=edu.harvard.med.screensaver.ui.ScreensaverJsfUnitTest&xsl=/screensaver/dev/jsfunit-test.xsl">link</a>.
+ * You may substitute a different test class value for the suite
+ * parameter, if you want to run a subset of the user interface tests.</li>
+ * <li>Test results will be displayed in the browser.</li>
+ * </ul>
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
@@ -115,6 +127,7 @@ public class AbstractJsfUnitTest extends org.apache.cactus.ServletTestCase
                             "for jsfunit testing",
                             (first + last).toLowerCase(),
                             (first + last).toLowerCase());
+    user.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
     user.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
     user.addScreensaverUserRole(ScreensaverUserRole.DEVELOPER);
     user.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);

@@ -20,14 +20,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
-
-import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import javax.persistence.Transient;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+
+import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 
 /**
@@ -54,6 +57,8 @@ public abstract class LabActivity extends Activity
   private Screen _screen;
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
   private Volume _volumeTransferredPerWell;
+
+  private Concentration _concentration;
 
 
   // public instance methods
@@ -83,6 +88,13 @@ public abstract class LabActivity extends Activity
   {
     return _volumeTransferredPerWell;
   }
+  
+  @Transient
+  public String getVolumeTransferredPerWellValue()
+  {
+    return _volumeTransferredPerWell == null ? null : _volumeTransferredPerWell.getDisplayValue().toString();
+  }
+  
 
   /**
    * Set the volume transferred per well
@@ -91,6 +103,38 @@ public abstract class LabActivity extends Activity
   public void setVolumeTransferredPerWell(Volume volumeTransferredPerWell)
   {
     _volumeTransferredPerWell = volumeTransferredPerWell;
+  }
+
+  @Transient
+  public String getConcentrationValue()
+  {
+    return _concentration == null ? null : _concentration.getDisplayValue().toString();
+  }  
+
+  /**
+   * Get the concentration
+   * @return the concentration
+   */
+  @Column(precision=Well.CONCENTRATION_PRECISION, scale=Well.CONCENTRATION_SCALE)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.ConcentrationType") 
+  public Concentration getConcentration()
+  {
+    return _concentration;
+  }
+
+  /**
+   * Set Concentration
+   * @param value
+   */
+  public void setConcentration(Concentration value)
+  {
+    _concentration = value;
+  }
+  
+  @Transient
+  public ConcentrationUnit getConcentrationUnits()
+  {
+    return _concentration == null ? ConcentrationUnit.DEFAULT : _concentration.getUnits();
   }
 
   /**

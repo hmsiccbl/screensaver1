@@ -100,19 +100,28 @@ public class JSFUtils
    */
   public static List<SelectItem> createUISelectItems(Collection items)
   {
-    return createUISelectItems(items, false);
+    return createUISelectItems(items, false, null);
   }
 
   /**
    * Creates a UISelectItems object that can be assigned to the "value"
-   * attribute of a UISelectItems JSF component.
+   * attribute of a UISelectItems JSF component. Adds an additional
+   * "empty selection" item, whose value is an empty string and label is as
+   * specified (empty string if null).
    */
-  public static List<SelectItem> createUISelectItems(Collection items,
-                                                     boolean addEmptyItem)
+  public static List<SelectItem> createUISelectItemsWithEmptySelection(Collection items,
+                                                                       String emptySelectionLabel)
+  {
+    return createUISelectItems(items, true, emptySelectionLabel);
+  }
+  
+  private static List<SelectItem> createUISelectItems(Collection items,
+                                                      boolean addEmptyItem,
+                                                      String emptyItemLabel)
   {
     List<SelectItem> result = new ArrayList<SelectItem>();
     if (addEmptyItem) {
-      result.add(new SelectItem("", ""));
+      result.add(new SelectItem("", emptyItemLabel == null ? "" : emptyItemLabel));
     }
     for (Object item : items) {
       result.add(new SelectItem(item,

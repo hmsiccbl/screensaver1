@@ -241,21 +241,22 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
     Well wellC03 = genericEntityDao.findEntityById(Well.class, "00001:C03");
 
-    assertEquals("C:A01", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellA01, copyC));
-    assertEquals("C:B02", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellB02, copyC));
-    assertEquals("C:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyC));
-    assertEquals("D:A01", new Volume(9),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyD));
-    assertEquals("D:B02", new Volume(9),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyD));
-    assertEquals("D:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyD));
-    assertEquals("E:A01", new Volume(8),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyE));
-    assertEquals("E:B02", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellB02, copyE));
-    assertEquals("E:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyE));
-    assertEquals("F:A01", new Volume(9),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyF));
-    assertEquals("F:B02", new Volume(7),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyF));
-    assertEquals("F:C03", new Volume(10), librariesDao.findRemainingVolumeInWellCopy(wellC03, copyF));
-    assertEquals("G:A01", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellA01, copyG));
-    assertEquals("G:B02", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellB02, copyG));
-    assertEquals("G:C03", new Volume(0),  librariesDao.findRemainingVolumeInWellCopy(wellC03, copyG));
+    assertEquals("C:A01", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellA01).get(copyC));
+    assertEquals("C:B02", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellB02).get(copyC));
+    assertEquals("C:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03).get(copyC));
+    assertEquals("D:A01", new Volume(9),  librariesDao.findRemainingVolumesInWellCopies(wellA01).get(copyD));
+    assertEquals("D:B02", new Volume(9),  librariesDao.findRemainingVolumesInWellCopies(wellB02).get(copyD));
+    assertEquals("D:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03).get(copyD));
+    assertEquals("E:A01", new Volume(8),  librariesDao.findRemainingVolumesInWellCopies(wellA01).get(copyE));
+    assertEquals("E:B02", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellB02).get(copyE));
+    assertEquals("E:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03).get(copyE));
+    assertEquals("F:A01", new Volume(9),  librariesDao.findRemainingVolumesInWellCopies(wellA01).get(copyF));
+    assertEquals("F:B02", new Volume(7),  librariesDao.findRemainingVolumesInWellCopies(wellB02).get(copyF));
+    assertEquals("F:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03).get(copyF));
+    // note: copy G is retired
+    assertEquals("G:A01", null,  librariesDao.findRemainingVolumesInWellCopies(wellA01).get(copyG));
+    assertEquals("G:B02", null,  librariesDao.findRemainingVolumesInWellCopies(wellB02).get(copyG));
+    assertEquals("G:C03", null,  librariesDao.findRemainingVolumesInWellCopies(wellC03).get(copyG));
   }
   
   public void testDeleteSmallMoleculeLibraryContents()

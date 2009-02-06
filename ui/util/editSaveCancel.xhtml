@@ -16,16 +16,14 @@
 
 	<h:commandButton id="editCommand" value="Edit"
 		rendered="#{viewer.editable &amp;&amp; !viewer.editMode}"
-		action="#{viewer.edit}" styleClass="command"
-		title="Enter edit mode" />
-	<t:commandButton id="saveCommand" value="Save"
-		action="#{viewer.save}" styleClass="command"
-		rendered="#{viewer.editMode}"
+		action="#{viewer.edit}" styleClass="command" title="Enter edit mode" />
+	<h:commandButton id="saveCommand" value="Save" action="#{viewer.save}"
+		styleClass="command" rendered="#{viewer.editMode}"
 		title="Save your changes and leave edit mode" />
 	<h:commandButton id="cancelEditCommand" value="Cancel"
-		rendered="#{viewer.editMode}"
-		action="#{viewer.cancel}" immediate="true"
-		styleClass="command" title="Discard your changes and leave edit mode" />
+		rendered="#{viewer.editMode}" action="#{viewer.cancel}"
+		immediate="true" styleClass="command"
+		title="Discard your changes and leave edit mode" />
 
 </ui:composition>
 

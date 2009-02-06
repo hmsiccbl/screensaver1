@@ -9,13 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.namevaluetable;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.io.libraries.compound.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
 import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
@@ -34,8 +33,6 @@ public class CompoundNameValueTable extends NameValueTable
   // private static final fields
 
   private static final Logger log = Logger.getLogger(CompoundNameValueTable.class);
-  private static final String SCREENSAVER0_IMAGE_RENDERER_URL_PREFIX =
-    "http://screensaver.med.harvard.edu/render_molecule.png?smiles=";
   private static final String PUBCHEM_CID_LOOKUP_URL_PREFIX =
     "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=";
   private static final String CHEMBANK_ID_LOOKUP_URL_PREFIX =
@@ -59,6 +56,7 @@ public class CompoundNameValueTable extends NameValueTable
 
   private CompoundViewer _compoundViewer;
   private Compound _compound;
+  private StructureImageProvider _imageProvider;
   private ReagentViewer _parentViewer;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
@@ -69,18 +67,21 @@ public class CompoundNameValueTable extends NameValueTable
   // public constructor and implementations of NameValueTable abstract methods
 
   public CompoundNameValueTable(Compound compound,
-                                CompoundViewer compoundViewer)
+                                CompoundViewer compoundViewer,
+                                StructureImageProvider imageProvider)
   {
-    this(compound, compoundViewer, null);
+    this(compound, compoundViewer, imageProvider, null);
   }
 
   public CompoundNameValueTable(
     Compound compound,
     CompoundViewer compoundViewer,
+    StructureImageProvider imageProvider,
     ReagentViewer parentViewer)
   {
     _compoundViewer = compoundViewer;
     _compound = compound;
+    _imageProvider = imageProvider;
     _parentViewer = parentViewer;
     initializeLists(compound);
     setDataModel(new ListDataModel(_values));
@@ -141,15 +142,6 @@ public class CompoundNameValueTable extends NameValueTable
     if (name.equals(CHEMBANK_IDS)) {
       return CHEMBANK_ID_LOOKUP_URL_PREFIX + value;
     }
-    if (name.equals(STRUCTURE)) {
-      try {
-        value = URLEncoder.encode(value, "UTF-8");
-      }
-      catch (UnsupportedEncodingException ex){
-        throw new RuntimeException("UTF-8 not supported", ex);
-      }
-      return SCREENSAVER0_IMAGE_RENDERER_URL_PREFIX + value;
-    }
     // other fields do not have links
     return null;
   }
@@ -168,7 +160,9 @@ public class CompoundNameValueTable extends NameValueTable
    * @param compound
    */
   private void initializeLists(Compound compound) {
-    addItem(STRUCTURE, compound.getSmiles(), ValueType.IMAGE, "A 2D structure image of the compound");
+    if (compound.getPubchemCids().size() > 0) {
+      addItem(STRUCTURE, _imageProvider.getImageUrl(compound), ValueType.IMAGE, "A 2D structure image of the compound");
+    }
     addItem(SMILES, compound.getSmiles(), isEmbedded() ? ValueType.COMMAND : ValueType.TEXT, "The SMILES string for the compound");
     addItem(INCHI, compound.getInchi(), ValueType.TEXT, "The InChI string for the compound");
     if (compound.getNumCompoundNames() > 0) {

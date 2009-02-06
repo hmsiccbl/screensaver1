@@ -227,8 +227,22 @@ public class Messages extends AbstractBackingBean implements PhaseListener
     String message = _messageSource.getMessage(messageKey, args, DEFAULT_MESSAGE, _locale);
     if (message.equals(DEFAULT_MESSAGE)) {
       log.error("message not found for key '" + messageKey + "'");
+      message = "???"+ messageKey +"???";
     }
     // if detail is null, FacesMessage repeats summary when asked for detail! :(
     return new FacesMessage(severity, message, "");
+  }
+  
+  /**
+   * Create and return a formatted message based on the <code>message.properties</code>
+   * resource.
+   *
+   * @param messageKey the message key
+   * @param args arguments to the message
+   */
+  public String getMessage(String messageKey, Object... args)
+  {
+    return _messageSource.getMessage(messageKey, args, "???" + messageKey +
+                                                       "???", _locale);
   }
 }

@@ -13,6 +13,7 @@ import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.CompoundCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -39,6 +40,7 @@ public class CompoundCherryPickRequestTest extends CherryPickRequestTest<Compoun
   // private instance datum
 
   protected LibrariesDAO librariesDao;
+  protected CompoundCherryPickRequestAllowancePolicy compoundCherryPickRequestAllowancePolicy;
 
   
   // public instance methods
@@ -83,9 +85,11 @@ public class CompoundCherryPickRequestTest extends CherryPickRequestTest<Compoun
         for (int i = 0; i < 200; ++i) {
           cherryPickRequest.createScreenerCherryPick(wells.get(i));
         }
+        genericEntityDao.persistEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
 
-        assertEquals((int) ((10 * 384) / 2 * 0.003), cherryPickRequest.getCherryPickAllowance());
-        assertEquals(200, cherryPickRequest.getCherryPickAllowanceUsed());
+        assertEquals((int) ((10 * 384) / 2 * 0.003), compoundCherryPickRequestAllowancePolicy.getCherryPickAllowance(cherryPickRequest));
+        assertEquals(200, compoundCherryPickRequestAllowancePolicy.getCherryPickAllowanceUsed(cherryPickRequest));
 
         genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(screen.getLabHead());

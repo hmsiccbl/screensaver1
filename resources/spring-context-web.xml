@@ -19,10 +19,35 @@
 
 <beans>
 
+  <!--  Policy & Service configuration section for web application-->
+
   <bean id="dataAccessPolicy"
    class="edu.harvard.med.screensaver.ui.WebDataAccessPolicy">
    <constructor-arg ref="currentScreensaverUser" />
   </bean>
+  
+  <bean id="compoundCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.CompoundCherryPickRequestAllowancePolicy" >
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean id="rnaiCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy" >
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+ 
+  <bean id="structureImageProvider"
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.compound.DaylightOrchestraStructureImageProvider" />
+  <!--
+  <<bean id="structureImageProvider" class="edu.harvard.med.screensaver.io.libraries.compound.PubChemStructureImageProvider" />
+  <bean id="structureImageProvider"
+   class="edu.harvard.med.iccbl.screensaver.io.libraries.compound.StaticHashedSmilesStructureImageProvider">
+     <constructor-arg value="http://localhost:8080/screensaver/images/sm/" />
+   </bean>
+  -->
+
+
+  <!--  Top-level web application construction -->
 
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>

@@ -50,7 +50,7 @@ import org.apache.log4j.Logger;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "libraryId", "name" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Library.class)
-public class Copy extends SemanticIDAbstractEntity
+public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
 {
 
   // static fields
@@ -77,6 +77,11 @@ public class Copy extends SemanticIDAbstractEntity
     return visitor.visit(this);
   }
 
+  public int compareTo(Copy other) 
+  { 
+    return this.getCopyId().compareTo(other.getCopyId()); 
+  }
+  
   @Override
   @Transient
   public String getEntityId()
@@ -198,7 +203,7 @@ public class Copy extends SemanticIDAbstractEntity
    * @param name the name
    * @motivation intended for use by {@link Library#createCopy} only.
    */
-  Copy(Library library, CopyUsageType usageType, String name)
+  public Copy(Library library, CopyUsageType usageType, String name)
   {
     _copyId = library.getShortName() + ":" + name;
     _library = library;

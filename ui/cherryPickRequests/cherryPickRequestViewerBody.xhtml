@@ -44,6 +44,11 @@
 								styleClass="command"
 								title="Discard your changes and leave edit mode" />
 						</t:panelGroup>
+            <t:commandButton id="showAdminWarnings" value="Show Cherry Pick Warnings"
+              action="#{cherryPickRequestViewer.showAdminWarnings}"
+              rendered="#{cherryPickRequestViewer.readAdmin &amp;&amp; !empty cherryPickRequestViewer.cherryPickRequest.screenerCherryPicks}"
+              styleClass="command"
+              description="Show administrative warnings for screener cherry picks" />
 						<t:commandButton id="downloadCherryPickRequestCommand"
 							value="Download"
 							action="#{cherryPickRequestViewer.downloadCherryPickRequest}"
@@ -86,19 +91,23 @@
 						</ss:property>
 
 						<ss:propertyGroup label="Volumes">
-							<ss:property id="requestedVolume"
-								label="Requested Volume"
+					    <ss:property id="requestedVolume"
+					      label="Requested Volume"
+								value="#{cherryPickRequestViewer.transferVolumePerWellRequestedValue}"
+								typeValue="#{cherryPickRequestViewer.transferVolumePerWellRequestedType}"
+								type="typedValue"
 								description="The volume per well that the screener requested"
-								value="#{cherryPickRequestViewer.cherryPickRequest.transferVolumePerWellRequested}" type="Volume"
-								editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
-								editWidth="5" />
+					      editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
+					      editWidth="5" />
 
-							<ss:property id="approvedVolume"
-								label="Approved Volume"
-								ion="The volume per well approved by the screening room"
-								value="#{cherryPickRequestViewer.cherryPickRequest.transferVolumePerWellApproved}" type="Volume"
-								editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
-								editWidth="5" />
+					    <ss:property id="approvedVolume"
+					      label="Approved Volume"
+								value="#{cherryPickRequestViewer.transferVolumePerWellApprovedValue}"
+								typeValue="#{cherryPickRequestViewer.transferVolumePerWellApprovedType}"
+								type="typedValue"
+								description="The volume per well approved by the screening room"
+					      editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
+					      editWidth="5" />
 
 							<ss:property id="approvedBy" label="Approved By"
 								description="The screening room staff member that approved this volume"
@@ -227,11 +236,6 @@
 
 				<t:panelGrid id="viewScreenerCherryPicks" columns="1"
 					rendered="#{cherryPickRequestViewer.screenerCherryPickCount > 0}">
-
-					<!-- t:outputText
-					value="WARNING: Cherry pick allowance has been exceeded! (#{cherryPickRequestViewer.cherryPickRequest.cherryPickAllowanceUsed} > #{cherryPickRequestViewer.cherryPickRequest.cherryPickAllowance})"
-					rendered="#{!cherryPickRequestViewer.cherryPickRequest.mapped &amp;&amp; cherryPickRequestViewer.cherryPickRequest.cherryPickAllowanceUsed > cherryPickRequestViewer.cherryPickRequest.cherryPickAllowance}"
-					styleClass="errorMessage" /-->
 
 					<t:panelGroup id="screenerCherryPicksCommandPanel"
 						styleClass="commandPanel"
@@ -451,13 +455,13 @@
 						<t:panelGroup>
 							<t:commandButton id="recordLiquidTransfer"
 								value="Record Selected Plates as 'Plated'"
-								action="#{cherryPickRequestViewer.recordLiquidTransferForSelectedAssayPlates}"
+								action="#{cherryPickRequestViewer.recordSuccessfulCreationOfAssayPlates}"
 								disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
 								styleClass="command" title="Record successful reagent transfer" />
 							<t:commandButton id="recordFailureOfAssayPlates"
 								value="Record Selected Plates as 'Failed'"
 								disabled="#{!cherryPickRequestViewer.cherryPickRequest.mapped}"
-								action="#{cherryPickRequestViewer.recordFailureOfAssayPlates}"
+								action="#{cherryPickRequestViewer.recordFailedCreationOfAssayPlates}"
 								styleClass="command"
 								title="Record unsuccessful reagent transfer" />
 							<t:commandButton id="cancelAssayPlates"

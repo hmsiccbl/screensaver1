@@ -72,10 +72,10 @@ public class LibraryCreator
     // verify uniqueness constraints will not be violated.
     // this would happen at flush time, but we can throw a more explicit exception by checking manually
     if (_dao.findEntityByProperty(Library.class, "libraryName", library.getLibraryName()) != null) {
-      throw new DuplicateEntityException(library);
+      throw new DuplicateEntityException(library, "Library Name", library.getLibraryName() );
     }
     if (_dao.findEntityByProperty(Library.class, "shortName", library.getShortName()) != null) {
-      throw new DuplicateEntityException(library);
+      throw new DuplicateEntityException(library,"Short Name", library.getShortName());
     }
     if (!_librariesDao.isPlateRangeAvailable(library.getStartPlate(), library.getEndPlate())) {
       throw new DataModelViolationException("plate range [" + library.getStartPlate() + "," + library.getEndPlate() + "] is not available");

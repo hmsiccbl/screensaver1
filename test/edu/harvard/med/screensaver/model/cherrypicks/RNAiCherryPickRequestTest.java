@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -32,6 +33,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
   private static Logger log = Logger.getLogger(RNAiCherryPickRequestTest.class);
 
   protected LibrariesDAO librariesDao;
+  protected RNAiCherryPickRequestAllowancePolicy rnaiCherryPickRequestAllowancePolicy;
 
   public RNAiCherryPickRequestTest() throws IntrospectionException
   {
@@ -95,8 +97,9 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
         genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
+        genericEntityDao.flush();
 
-        assertEquals("cherry pick allowance used", 384 * 6, cherryPickRequest.getCherryPickAllowanceUsed());
+        assertEquals("cherry pick allowance used", 384 * 6, rnaiCherryPickRequestAllowancePolicy.getCherryPickAllowanceUsed(cherryPickRequest));
       }
     });
   }

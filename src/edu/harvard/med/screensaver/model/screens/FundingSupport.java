@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -14,7 +14,7 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
  * The funding support vocabulary.
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -22,7 +22,7 @@ public enum FundingSupport implements VocabularyTerm
 {
 
   // the vocabulary
-  
+
   CLARDY_GRANTS("Clardy Grants"),
   D_ANDREA_CMCR("D'Andrea CMCR"),
   ICCBL_HMS_AFFILIATE("ICCB-L HMS Affiliate"),
@@ -30,15 +30,19 @@ public enum FundingSupport implements VocabularyTerm
   ICCBL_EXTERNAL("ICCB-L External"),
   MITCHISON_P01("Mitchison P01"),
   ICG("ICG"),
+  MARCUS_LIBRARY_SCREEN("Marcus Library Screen"),
   NERCE_NSRB("NERCE/NSRB"),
   NOVARTIS("Novartis"),
+  NSRB_RNAI_QUAD_INTERNAL("NSRB-RNAi Quad (internal)"),
+  NSRB_RNAI_HMS_AFFILIATE("NSRB-RNAi HMS Affiliate"),
+  NSRB_RNAI_EXTERNAL("NSRB-RNAi External"),
   SANOFI_AVENTIS("Sanofi-Aventis"),
   YUAN_NIH_06_07("Yuan NIH 06-07"),
   OTHER("Other"),
   UNSPECIFIED("Unspecified")
   ;
 
- 
+
   // static inner class
 
   /**

@@ -26,6 +26,9 @@ public abstract class BooleanColumn<R> extends TableColumn<R,Boolean>
           group);
   }
 
+  /**
+   * For <t:selectOneMenu> <f:selectItems> JSF element.
+   */
   public List<SelectItem> getBooleanSelections()
   {
     if (_selectItems == null) {

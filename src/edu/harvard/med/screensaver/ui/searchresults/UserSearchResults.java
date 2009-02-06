@@ -49,6 +49,8 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
   private Class<E> _type;
   private UserViewer _userViewer;
 
+  private String _title;
+
 
   // public constructor
 
@@ -70,6 +72,7 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
 
   public void searchUsers()
   {
+    setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchAll"));
     initialize(new AllEntitiesOfTypeDataFetcher<E,Integer>(_type, _dao));
     // default to descending sort order on user ID, to show last created first
     getColumnManager().setSortAscending(false);
@@ -85,10 +88,10 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
     getColumnManager().setSortAscending(true);
   }
 
-
   // implementations of the SearchResults abstract methods
 
    @Override
+
   protected List<? extends TableColumn<E,?>> buildColumns()
   {
     ArrayList<EntityColumn<E,?>> columns = new ArrayList<EntityColumn<E,?>>();
@@ -169,5 +172,15 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
   protected void setEntityToView(ScreensaverUser user)
   {
     _userViewer.setUser(user);
+  }
+
+  public String getTitle()
+  {
+    return _title;
+  }
+
+  public void setTitle( String value )
+  {
+    _title = value;
   }
 }

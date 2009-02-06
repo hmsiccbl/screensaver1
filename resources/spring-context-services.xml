@@ -40,6 +40,13 @@
   </bean>
 
   <bean
+    id="studyAnnotationParser"
+    class="edu.harvard.med.screensaver.io.screens.StudyAnnotationParser"
+    scope="prototype">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
     id="compoundLibraryContentsParser"
     class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
     scope="singleton"
@@ -167,6 +174,13 @@
   <bean
     id="cherryPickRequestPlateMapFilesBuilder"
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
+    id="cherryPickRequestPlateStatusUpdater"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateStatusUpdater"
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
   </bean>

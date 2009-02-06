@@ -16,11 +16,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -34,6 +33,8 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+
+import org.apache.log4j.Logger;
 
 public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistenceTest
 {
@@ -49,7 +50,7 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
 
   // public constructors and methods
 
-  // TODO: consider testing same gene in 2 libs, but with different silencing reagents (shared gene, above, also sahres same silencing reagents between the 2 libraries)
+  // TODO: consider testing same gene in 2 libs, but with different silencing reagents
   public void testMap()
   {
     genericEntityDao.doInTransaction(new DAOTransaction()
@@ -258,6 +259,78 @@ public class LibraryPoolToDuplexWellMapperTest extends AbstractSpringPersistence
         }
       }
 
+    });
+  }
+  
+  public void testScpsMappingToRedundantLcpsIsNotAllowed() 
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Library poolLibrary = new Library("Pools Library", "pools lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 1, 1);
+        Library duplexLibrary = new Library("Duplexes Library", "duplexes lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 2, 2);
+
+        Gene gene1 = new Gene("ANT1", 1, "ant1", "Human");
+
+        SilencingReagent silencingReagent1_1 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, "GATTACA");
+        SilencingReagent silencingReagent1_2 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, "GATTACC");
+        SilencingReagent silencingReagent1_3 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, "GATTACT");
+        SilencingReagent silencingReagent1_4 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, "GATTACG");
+
+        Well poolWell1_1 = poolLibrary.createWell(new WellKey(1,  "A01"),  WellType.EXPERIMENTAL);
+        poolWell1_1.addSilencingReagent(silencingReagent1_1);
+        poolWell1_1.addSilencingReagent(silencingReagent1_2);
+        poolWell1_1.addSilencingReagent(silencingReagent1_3);
+        poolWell1_1.addSilencingReagent(silencingReagent1_4);
+
+        Well duplexWell1_1 = duplexLibrary.createWell(new WellKey(2,  "A01"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_2 = duplexLibrary.createWell(new WellKey(2,  "A02"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_3 = duplexLibrary.createWell(new WellKey(2,  "A03"),  WellType.EXPERIMENTAL);
+        Well duplexWell1_4 = duplexLibrary.createWell(new WellKey(2,  "A04"),  WellType.EXPERIMENTAL);
+        duplexWell1_1.addSilencingReagent(silencingReagent1_1);
+        duplexWell1_2.addSilencingReagent(silencingReagent1_2);
+        duplexWell1_3.addSilencingReagent(silencingReagent1_3);
+        duplexWell1_4.addSilencingReagent(silencingReagent1_4);
+
+        Well poolWell2_1 = poolLibrary.createWell(new WellKey(1,  "A02"),  WellType.EXPERIMENTAL);
+        poolWell2_1.addSilencingReagent(silencingReagent1_1);
+        poolWell2_1.addSilencingReagent(silencingReagent1_2);
+        poolWell2_1.addSilencingReagent(silencingReagent1_3);
+        poolWell2_1.addSilencingReagent(silencingReagent1_4);
+
+        Well duplexWell2_1 = duplexLibrary.createWell(new WellKey(2,  "B01"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_2 = duplexLibrary.createWell(new WellKey(2,  "B02"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_3 = duplexLibrary.createWell(new WellKey(2,  "B03"),  WellType.EXPERIMENTAL);
+        Well duplexWell2_4 = duplexLibrary.createWell(new WellKey(2,  "B04"),  WellType.EXPERIMENTAL);
+        duplexWell2_1.addSilencingReagent(silencingReagent1_1);
+        duplexWell2_2.addSilencingReagent(silencingReagent1_2);
+        duplexWell2_3.addSilencingReagent(silencingReagent1_3);
+        duplexWell2_4.addSilencingReagent(silencingReagent1_4);
+        
+        genericEntityDao.saveOrUpdateEntity(poolLibrary);
+        genericEntityDao.saveOrUpdateEntity(duplexLibrary);
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
+        RNAiCherryPickRequest rnaiCherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
+        genericEntityDao.saveOrUpdateEntity(screen);
+        genericEntityDao.saveOrUpdateEntity(rnaiCherryPickRequest);
+
+        try {
+          /*Set<WellKey> actualDuplexCherryPickWellKeys = */
+          createLabCherryPicksForPoolWells(rnaiCherryPickRequest,
+                                           new WellKey(1, "A01"),
+                                           new WellKey(1, "A02"));
+          fail("expected business rule violation exception");
+        }
+        catch (BusinessRuleViolationException e) {}
+      }
     });
   }
 

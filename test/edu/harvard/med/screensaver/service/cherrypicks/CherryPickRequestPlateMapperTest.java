@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -36,8 +38,6 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-
-import org.apache.log4j.Logger;
 
 public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceTest
 {
@@ -68,22 +68,29 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
 
         // create and allocate a cherry pick request, to force next cherry pick
         // request to allocate some cherry picks from alternate plate copies;
-        // we need to allocate from multiple copies to test sets of picks from
+        // we need to allocate from multiple copies to test that sets of picks from
         // different copies are kept together on same cherry pick plate
         {
           CherryPickRequest earlierCherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(10));
           ScreenerCherryPick dummyScreenerCherryPick = earlierCherryPickRequest.createScreenerCherryPick(
             librariesDao.findWell(new WellKey(1, "A01")));
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A01")));
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A02")));
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A03")));
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A01")));
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A02")));
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A03")));
-          genericEntityDao.saveOrUpdateEntity(earlierCherryPickRequest.getScreen().getLeadScreener());
-          genericEntityDao.saveOrUpdateEntity(earlierCherryPickRequest.getScreen().getLabHead());
+          // these cherry picks will force subsequent picks from the same well to be allocated from copy D
+          Copy copyC = duplexLibrary.getCopy("C");
+          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A01"))).setAllocated(copyC);
+          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A02"))).setAllocated(copyC);
+          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A03"))).setAllocated(copyC);
+          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A01"))).setAllocated(copyC);
+          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A02"))).setAllocated(copyC);
+          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A03"))).setAllocated(copyC);
+          // due to the "minimal copy usage" allocation feature, we need force
+          // at least one D copy well on library plate 5 to be depleted, so that all cherry picks
+          // (in the next cpr) are not allocated exclusively from copy D; the
+          // effect will be that future picks from the above wells will be
+          // allocated from copy D, and all others from copy C.
+          Copy copyD = duplexLibrary.getCopy("D");
+          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A24"))).setAllocated(copyD);
+
           genericEntityDao.saveOrUpdateEntity(earlierCherryPickRequest.getScreen());
-          cherryPickRequestAllocator.allocate(earlierCherryPickRequest);
           genericEntityDao.flush(); // needed to make sure above allocations are in the database; allocate(), below, will query db (not just session) for existing well volume reservations
         }
 
@@ -109,6 +116,8 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+        
         cherryPickRequestAllocator.allocate(cherryPickRequest);
         cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequest);
 
@@ -161,6 +170,8 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+
         cherryPickRequestAllocator.allocate(cherryPickRequest);
         cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequest);
 
@@ -197,6 +208,8 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+
         cherryPickRequestAllocator.allocate(cherryPickRequest);
         cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequest);
 
@@ -247,6 +260,8 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+
         cherryPickRequestAllocator.allocate(cherryPickRequest);
         cherryPickRequestPlateMapper.generatePlateMapping(cherryPickRequest);
 
@@ -308,6 +323,8 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+
         cherryPickRequestAllocator.allocate(cherryPickRequest);
         cherryPickRequestOut[0] = cherryPickRequest;
       }

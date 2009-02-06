@@ -24,12 +24,13 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 
 /**
  * Annotation value on a particular library member (e.g. a compound or silencing
@@ -178,6 +179,9 @@ public class AnnotationValue extends AbstractEntity
     String value,
     Double numericValue)
   {
+    if (reagent == null) {
+      throw new RequiredPropertyException(this, "reagent"); 
+    }
     if (annotationType.isNumeric() && value != null && numericValue == null) {
       throw new IllegalArgumentException("'numericValue' must be specified (in addition to 'value') for numeric annotation types");
     }

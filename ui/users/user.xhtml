@@ -5,7 +5,8 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
-	xmlns:s="http://myfaces.apache.org/sandbox">
+	xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <!-- facelet params:
 	       - id
@@ -14,16 +15,9 @@
 	 -->
 
 <ui:component>
-	<span class="propertyValue">
-	 <t:commandLink id="#{id}User" value="#{user.fullNameLastFirst}"
-		action="#{userViewer.viewUser}"
-		rendered="#{!empty user.fullNameLastFirst}" styleClass="entityLink"
-		style="margin-right: 4px">
-		<f:param name="entityId" value="#{user.entityId}" />
-	</t:commandLink> 
-	<t:outputText rendered="#{(empty showEmail || showEmail) &amp;&amp; !empty user.email}"
-		value="&lt;#{user.email}&gt;" /> 
-  </span>
+  <ss:entityLink entity="#{user}" property="fullNameLastFirst" bean="#{userViewer}" action="viewUser" />
+  <t:outputText rendered="#{(empty showEmail || showEmail) &amp;&amp; !empty user.email}"
+		value="&#160;&lt;#{user.email}&gt;" />
 </ui:component>
 
 </html>

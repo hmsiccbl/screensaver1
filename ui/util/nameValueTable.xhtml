@@ -5,57 +5,98 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox">
+  
+  <!-- 
+    facelets params:
+    - id
+    - nameValueTable: NameValueTable 
+   -->
 
 <ui:composition>
 
-	<h:form id="#{empty formId ? &quot;nameValueTableForm&quot; : formId}">
-		<t:dataTable id="nameValueTable" value="#{nameValueTable.dataModel}"
-			var="row" rows="#{nameValueTable.numRows}" rendered="true"
-			styleClass="standardTable" rowClasses="row1,row2" width="100%">
-			<t:columns value="#{nameValueTable.columnModel}" var="columnName"
-				styleClass="#{nameValueTable.columnStyle}">
-				<h:outputText value="#{nameValueTable.cellValue}"
-					title="#{nameValueTable.nameDescription}"
-					rendered="#{nameValueTable.isNameColumn}" escape="false" />
-				<h:outputText value="#{nameValueTable.cellValue}"
-					rendered="#{nameValueTable.isTextValue}" />
-				<h:outputText value="#{nameValueTable.cellValue}"
-					rendered="#{nameValueTable.isUnescapedTextValue}" escape="false" />
-				<h:commandLink action="#{nameValueTable.action}"
-					value="#{nameValueTable.cellValue}"
-					rendered="#{nameValueTable.isCommandValue}">
-					<f:param name="actionValue" value="#{nameValueTable.cellValue}" />
-				</h:commandLink>
-				<h:outputLink
-					value="#{nameValueTable.link[nameValueTable.cellValue]}"
-					rendered="#{nameValueTable.isLinkValue}" target="_blank">
-					<h:outputText value="#{nameValueTable.cellValue}" />
-				</h:outputLink>
-				<t:graphicImage
-					url="#{nameValueTable.link[nameValueTable.cellValue]}"
-					rendered="#{nameValueTable.isImageValue}" style="float: left;">
-				</t:graphicImage>
-				<t:dataList id="textList" var="eltValue"
-					value="#{nameValueTable.cellValue}" layout="simple"
-					rendered="#{nameValueTable.isTextListValue}" rowIndexVar="eltIndex"
-					rowCountVar="eltCount">
-					<t:outputText value="#{eltValue}" />
-					<h:outputText value=";" rendered="#{eltIndex &lt; eltCount - 1}" />
-				</t:dataList>
-        <t:dataList id="linkList" var="eltValue"
-					value="#{nameValueTable.cellValue}" layout="simple"
-					rendered="#{nameValueTable.isLinkListValue}" rowIndexVar="eltIndex"
-					rowCountVar="eltCount">
-					<h:outputLink value="#{nameValueTable.link[eltValue]}"
-						target="_blank">
-						<h:outputText value="#{eltValue}" />
-					</h:outputLink>
-					<h:outputText value=";" rendered="#{eltIndex &lt; eltCount - 1}" />
-				</t:dataList>
-			</t:columns>
-		</t:dataTable>
-		
-	</h:form>
+	<h:form id="#{id}NameValueTableForm">
+    <t:dataTable id="#{id}NameValueTable"
+      value="#{value.dataModel}" var="rowValue"
+      rows="#{value.numRows}" rendered="true"
+      styleClass="standardTable"
+      columnClasses="propertyLabelColumn, greedyColumn" width="100%">
+      <t:column styleClass=".hiddenColumn" groupBy="true" rendered="#{value.hasGroupingInfo}" >
+        <h:outputText value="#{value.groupId}"
+          styleClass="propertyLabel" escape="false" />
+		    <t:dataTable id="#{id}NameValueTableHeader"
+		      value="#{value.groupingValueTable}" var="summaryRowValue"
+		      styleClass="standardTable, greedyTable"
+		      columnClasses="propertyLabelColumn, greedyColumn">
+		      <t:column >
+		        <h:outputText value="#{summaryRowValue.title}"  
+		          title="#{summaryRowValue.title}"
+		          styleClass="propertyLabel" escape="false" />
+		      </t:column>
+		      <t:column>
+						<t:commandLink disabled="#{! summaryRowValue.commandLink}" 
+							action="#{summaryRowValue.cellAction}">
+						  <t:outputText id="text" value="#{summaryRowValue.value}" 
+						    styleClass="dataText" />
+						</t:commandLink>  
+		      </t:column>
+		       <f:facet name="footer"><!-- Note, this footer is a proposed way of showing the summary info (left out for now) -->
+               <t:outputText value="#{value.groupingFooter}"/>
+          </f:facet>
+		    </t:dataTable>
+      </t:column>
+      <!-- note, inserting a hidden, empty column so that the column shading scheme is not altered
+           by the grouping info column  (even: shaded, odd: no shading) -->
+      <t:column width="0" styleClass="hiddenColumn" rendered="#{value.hasGroupingInfo}" ></t:column>
+      <t:column >
+        <h:outputText value="#{value.label}"
+          title="#{value.nameDescription}"
+          styleClass="propertyLabel" escape="false" />
+      </t:column>
+      <t:column >
+        <h:outputText value="#{rowValue}"
+          rendered="#{value.isTextValue}"
+          styleClass="propertyValue dataText" />
+        <h:outputText value="#{rowValue}"
+          rendered="#{value.isUnescapedTextValue}"
+          escape="false" styleClass="propertyValue dataText" />
+        <h:commandLink action="#{value.action}"
+          value="#{rowValue}" rendered="#{value.isCommandValue}"
+          styleClass="propertyValue dataText">
+          <f:param name="actionValue" value="#{rowValue}" />
+        </h:commandLink>
+        <h:outputLink value="#{value.link[rowValue]}"
+          rendered="#{value.isLinkValue}" target="_blank"
+          styleClass="propertyValue dataText">
+          <h:outputText value="#{rowValue}" />
+        </h:outputLink>
+        <t:graphicImage url="#{rowValue}"
+          rendered="#{value.isImageValue}" style="float: left;">
+        </t:graphicImage>
+        <t:dataList id="textList" var="eltValue" value="#{rowValue}"
+          layout="simple" rendered="#{value.isTextListValue}"
+          rowIndexVar="eltIndex" rowCountVar="eltCount">
+          <t:outputText value="#{eltValue}"
+            styleClass="propertyValue dataText" />
+          <h:outputText value=";"
+            rendered="#{eltIndex &lt; eltCount - 1}"
+            styleClass="propertyValue dataText" />
+        </t:dataList>
+        <t:dataList id="linkList" var="eltValue" value="#{rowValue}"
+          layout="simple" rendered="#{value.isLinkListValue}"
+          rowIndexVar="eltIndex" rowCountVar="eltCount">
+          <h:outputLink value="#{value.link[eltValue]}"
+            target="_blank">
+            <h:outputText value="#{eltValue}"
+              styleClass="propertyValue dataText" />
+          </h:outputLink>
+          <h:outputText value=";"
+            rendered="#{eltIndex &lt; eltCount - 1}"
+            styleClass="propertyValue dataText" />
+        </t:dataList>
+      </t:column>
+    </t:dataTable>
+
+  </h:form>
 
 </ui:composition>
 

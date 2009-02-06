@@ -77,6 +77,7 @@ public class ScreenFinder extends AbstractBackingBean
                                                 "screenNumber",
                                                 _screenNumber);
       if (screen != null) {
+        resetSearchFields();
         return _screenViewer.viewScreen(screen);
       }
       else {
@@ -106,6 +107,11 @@ public class ScreenFinder extends AbstractBackingBean
       return _screenDetailViewer.addCherryPickRequest();
     }
     return result;
+  }
+  
+  private void resetSearchFields()
+  {
+    _screenNumber = null;
   }
 
 }

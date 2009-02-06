@@ -22,7 +22,7 @@
           styleClass="menuItem"
           title="The current version of Screensaver" />
         <t:outputText id="buildNumber"
-          value="(#{menu.applicationBuildNumber})"
+          value="&#160;(#{menu.applicationBuildNumber})"
           styleClass="menuItem" visibleOnUserRole="developer"
           title="The build number" />
       </h:form>
@@ -58,6 +58,10 @@
           <t:commandNavigation2 action="#{menu.findReagents}"
             styleClass="menuItem" value="Find Reagents" accesskey="R"
             title="Look up one or more reagents by vendor reagent ID" />
+          <t:commandNavigation2 action="#{menu.browseWells}"
+            value="Browse Wells" styleClass="menuItem" 
+            title="Look up one or more library wells by plate number and well name"
+            rendered="#{menu.screener || menu.readAdmin}" />
           <t:commandNavigation2 action="#{menu.browseLibraries}"
             styleClass="menuItem" value="Browse Libraries" accesskey="L"
             title="Browse the currently available libraries" />
@@ -108,6 +112,10 @@
             action="#{menu.browseLabActivities}"
             value="Browse Lab Activities" accesskey="A"
             title="Browse the lab activities currently available and accessible to you" />
+          <t:commandNavigation2 action="#{menu.browseUsers}"
+            styleClass="menuItem" rendered="#{menu.readAdmin}"
+            value="Browse Users" title="Browse the users"
+            accesskey="U" />
           <t:commandNavigation2 action="#{menu.browseScreeners}"
             styleClass="menuItem" rendered="#{menu.readAdmin}"
             value="Browse Screeners" title="Browse the screeners"
@@ -123,9 +131,6 @@
             value="Browse Staff"
             title="Browse the staff members of the lab" />
           <t:commandNavigation2 />
-          <t:commandNavigation2 action="#{menu.viewNews}"
-            value="Latest News" styleClass="menuItem" accesskey="N"
-            title="The latest Screensaver news" />
           <t:commandNavigation2 action="#{menu.viewDownloads}"
             styleClass="menuItem" value="Data Downloads" accesskey="D"
             title="Download SD Files for small molecule libraries" />
@@ -235,6 +240,10 @@
       <h:form id="entityCreationForm" title="Entity creation commands">
         <t:panelGrid columns="1"
           rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}">
+          <t:commandButton action="#{menu.addLibrary}"
+            id="addLibraryCommand" value="Add Library"
+            rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
+            styleClass="command" />
           <t:commandButton action="#{menu.addScreen}"
             id="addScreenCommand" value="Add Screen"
             rendered="#{menu.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"

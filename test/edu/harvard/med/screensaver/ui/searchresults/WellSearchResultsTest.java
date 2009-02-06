@@ -134,7 +134,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       });
     }
 
-    _wellViewer = new WellViewer(genericEntityDao, null, null, null);
+    _wellViewer = new WellViewer(genericEntityDao, null, null, null, null, null);
     _wellSearchResults = new WellSearchResults(genericEntityDao,
                                                null,
                                                _wellViewer,
@@ -151,6 +151,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                          columnManager.getColumn("Well"));
     columnManager.setSortColumnName("Plate");
   }
+  
+  public void testSearchAllWellsIsInitiallyEmpty()
+  {
+    _wellSearchResults.searchAllWells();
+    assertEquals("search result is initially empty", 0, _wellSearchResults.getRowCount());
+    ((Criterion<String>) _wellSearchResults.getColumnManager().getColumn("Well").getCriterion()).setOperatorAndValue(Operator.TEXT_STARTS_WITH, "B");
+    _wellSearchResults.searchCommandListener(null);
+    assertTrue("search result is non-empty after explicit search command listener is invoked", 0 != _wellSearchResults.getRowCount());
+  }
 
   /**
    * Tests WellSearchResult of all wells from all libraries.
@@ -159,6 +168,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   public void testAllEntitiesOfType()
   {
     _wellSearchResults.searchAllWells();
+    _wellSearchResults.searchCommandListener(null); // invoke search now (necessary when using searchAllWells(), above
     setOrderBy();
     _wellSearchResults.clearFilter();
     DataTableModel model = _wellSearchResults.getDataTableModel();

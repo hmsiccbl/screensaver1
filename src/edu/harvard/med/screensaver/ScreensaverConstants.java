@@ -15,10 +15,9 @@ public interface ScreensaverConstants
 {
   // static data members
 
-  public static final String APPLICATION_NAME = "Screensaver";
-  public static final String APPLICATION_VERSION = "1.7.0";
-  public static final String APPLICATION_TITLE = APPLICATION_NAME + " " + APPLICATION_VERSION;
-  public static final String FEEDBACK_URL = "mailto:screensaver-feedback@hms.harvard.edu";
+  public static final String APPLICATION_NAME_PROPERTY = "screensaver.ui.application_name";
+  public static final String APPLICATION_VERSION_PROPERTY = "screensaver.ui.version";
+  public static final String FEEDBACK_URL_PROPERTY = "screensaver.ui.feedback_url";
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
   public static Color SCREENSAVER_THEME_COLOR = new Color(0x33, 0x66, 0x99);
   public static Color HEADER_COLOR = new Color(0x0, 0x94, 0xC4);
@@ -28,9 +27,6 @@ public interface ScreensaverConstants
   // define navigation rules in faces-config.xml
 
   public static final String REDISPLAY_PAGE_ACTION_RESULT = null;
-  public static final String SUCCESS_ACTION_RESULT = "success";
-  public static final String ERROR_ACTION_RESULT = "error";
-  public static final String DONE_ACTION_RESULT = "done";
   public static final String VIEW_MAIN ="viewMain";
   public static final String VIEW_GOODBYE = "goodbye";
   public static final String VIEW_HELP ="viewHelp";
@@ -60,6 +56,7 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENS = "browseScreens";
   public static final String BROWSE_MY_SCREENS = "browseScreens";
   public static final String VIEW_SCREEN = "viewScreen";
+  public static final String VIEW_SCREEN_RESULT_EDITOR = "viewScreenResultEditor";
   public static final String VIEW_SCREEN_DETAIL = "viewScreenDetail";
   public static final String BROWSE_CHERRY_PICK_REQUESTS = "browseCherryPickRequests";
   public static final String VIEW_CHERRY_PICK_REQUEST_ACTION_RESULT = "viewCherryPickRequest";
@@ -71,10 +68,12 @@ public interface ScreensaverConstants
   public static final String BROWSE_SCREENERS = "browseScreeners";
   public static final String BROWSE_STAFF = "browseStaff";
   public static final String VIEW_USER = "viewUser";
-  
-  // BII static data members
-  public static final String WEBAPP_ROOT = System.getProperty("webapp.root");
-  
-  // BII JSF Action Results
+  public static final String VIEW_LIBRARY_DETAIL = "viewLibraryDetail";
   public static final String RUN_CELLHTS2 = "runCellHTS2";
+  public static final String WEBAPP_ROOT = System.getProperty("webapp.root");
+  public static final int LIBRARY_UPLOAD_SUCCESSFULL = 2;
+  public static final int LIBRARY_UPLOAD_RUNNING = 1;
+  public static final int LIBRARY_UPLOAD_FAILED = 3;
+  public static final int LIBRARY_UPLOAD_IDLE = -1;
+  
 }

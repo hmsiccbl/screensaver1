@@ -73,14 +73,6 @@ abstract public class ComboNameValueTable extends NameValueTable
         dataModelContents.add(childTable.getValue(childTableRowIndex));
       }
 
-      // blank row between child tables
-      if (childTableIndex + 1 < _childTables.length) {
-        _rowIndexToChildTableIndex[parentRowIndex] = -1;
-        _rowIndexToChildTableRowIndex[parentRowIndex] = -1;
-        parentRowIndex ++;
-
-        dataModelContents.add("spacer");
-      }
     }
 
     setDataModel(new ListDataModel(dataModelContents));

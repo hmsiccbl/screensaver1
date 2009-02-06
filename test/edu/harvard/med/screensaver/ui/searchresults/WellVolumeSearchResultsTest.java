@@ -2,7 +2,7 @@
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -54,7 +54,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 
 
   // instance data members
-  
+
   protected LibrariesDAO librariesDao;
   private WellVolumeSearchResults _wellVolumeSearchResults;
   private WellCopyVolumeSearchResults _wellCopyVolumeSearchResults;
@@ -65,17 +65,17 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 
 
   // public constructors and methods
-  
+
   @Override
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
-    
+
     initializeWellCopyVolumes();
     _wellVolumeSearchResults = new WellVolumeSearchResults(genericEntityDao, null, null, null, null);
     _wellCopyVolumeSearchResults = new WellCopyVolumeSearchResults(genericEntityDao, null, null, _wellVolumeSearchResults, null);
   }
-  
+
   public void testWellVolumeSearchResults()
   {
     _wellCopyVolumeSearchResults.searchWellsForLibrary(_library);
@@ -86,7 +86,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     _wellCopyVolumeSearchResults.searchWells(makeWellKeys(wells));
     doTestWellCopyVolumeSearchResult(makeWellCopyKeys(wells));
     doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopyKeys(wells)));
-    
+
     _wellCopyVolumeSearchResults.searchWellsForCherryPickRequest(_cherryPickRequest, false);
     doTestWellCopyVolumeSearchResult(makeWellCopyKeys(_cherryPickRequest));
     doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopyKeys(_cherryPickRequest)));
@@ -205,7 +205,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
       assertEquals("tested all columns for row " + j, 6, columnsTested);
     }
   }
-  
+
   /**
    * 00001:A01:C: 1 lcp
    * 00001:A01:D: 1 lcp
@@ -214,7 +214,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
    * 00001:B01:C: 2 wvas
    * 00001:B01:D: -
    * 00001:B02:C: 1 wva
-   * 00001:B02:D: 1 wva 
+   * 00001:B02:D: 1 wva
    * 00002:A01:C: 1 lcp
    * 00002:A01:D: -
    * 00002:B01:C: -
@@ -241,7 +241,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 
         _cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(3));
         ScreenerCherryPick dummyScreenerCherryPick = _cherryPickRequest.createScreenerCherryPick(plate1WellA01);
-        // note: you cannot normally have 2 LCP for the same well in a CPR, 
+        // note: you cannot normally have 2 LCP for the same well in a CPR,
         // but we do that here anyway to test aggregation of 2 LCPs in the same well;
         // to do this correctly, we should create 2 CPRs
         _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate1WellA01).setAllocated(copyC);
@@ -251,13 +251,13 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen());
-        
+
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new Volume(-1), null));
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new Volume(-1), null));
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB02, new Volume(-1), null));
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate1WellB02, new Volume(-1), null));
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate2WellB01, new Volume(-1), null));
-        
+
         _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "C"), new Volume(7));
         _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "D"), new Volume(17));
         _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB01.getWellKey(), "C"), new Volume(8));
@@ -265,7 +265,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB02.getWellKey(), "D"), new Volume(19));
         _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellA01.getWellKey(), "C"), new Volume(7));
         _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellB01.getWellKey(), "D"), new Volume(16));
-        
+
         for (Well well : _library.getWells()) {
           Volume expectedRemainingWellVolume = new Volume(0);
           for (Copy copy : _library.getCopies()) {
@@ -304,7 +304,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     }
     return expectedKeys;
   }
-  
+
   private static SortedSet<Pair<WellKey,String>> makeWellCopyKeys(List<Well> wells)
   {
     SortedSet<Pair<WellKey,String>> wellCopyKeys = new TreeSet<Pair<WellKey,String>>(new Pair.PairComparator<WellKey,String>());
@@ -315,7 +315,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     }
     return wellCopyKeys;
   }
-  
+
   private static SortedSet<Pair<WellKey,String>> makeWellCopyKeys(RNAiCherryPickRequest cherryPickRequest)
   {
     SortedSet<Pair<WellKey,String>> expectedKeys = new TreeSet<Pair<WellKey,String>>(new PairComparator<WellKey,String>());
@@ -329,13 +329,13 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     }
     return expectedKeys;
   }
-  
+
   private SortedSet<WellKey> makeWellVolumeKeys(SortedSet<Pair<WellKey,String>> wellCopyKeys)
   {
     SortedSet<WellKey> wellKeys = new TreeSet<WellKey>();
     for (Pair<WellKey,String> wellCopyKey : wellCopyKeys) {
       wellKeys.add(wellCopyKey.getFirst());
-    } 
+    }
     return wellKeys;
   }
 }

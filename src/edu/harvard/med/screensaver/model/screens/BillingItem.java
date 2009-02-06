@@ -39,7 +39,7 @@ public class BillingItem
 
   private String _itemToBeCharged;
   private BigDecimal _amount;
-  private LocalDate _dateFaxed;
+  private LocalDate _dateSentForBilling;
 
 
   // public constructor
@@ -84,23 +84,23 @@ public class BillingItem
   }
 
   /**
-   * Get the date faxed.
-   * @return the date faxed
+   * Get the date sent for billing.
+   * @return the date sent for billing
    */
-  @Column(nullable=false)
+  @Column(nullable=true)
   @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
-  public LocalDate getDateFaxed()
+  public LocalDate getDateSentForBilling()
   {
-    return _dateFaxed;
+    return _dateSentForBilling;
   }
 
   /**
-   * Set the date faxed.
-   * @param dateFaxed the new date faxed
+   * Set the date sent for billing.
+   * @param value the new date sent for billing
    */
-  public void setDateFaxed(LocalDate dateFaxed)
+  public void setDateSentForBilling(LocalDate value)
   {
-    _dateFaxed = dateFaxed;
+    _dateSentForBilling = value;
   }
 
 
@@ -111,16 +111,16 @@ public class BillingItem
    * BillingInformation#createBillingItem} only.
    * @param itemToBeCharged the item to be charged
    * @param amount the amount
-   * @param dateFaxed the date faxed
+   * @param dateSentForBilling the date sent for billing
    */
   BillingItem(
     String itemToBeCharged,
     BigDecimal amount,
-    LocalDate dateFaxed)
+    LocalDate dateSentForBilling)
   {
     _itemToBeCharged = itemToBeCharged;
     _amount = amount;
-    _dateFaxed = dateFaxed;
+    _dateSentForBilling = dateSentForBilling;
   }
 
   /**

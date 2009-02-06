@@ -22,6 +22,10 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.RequiredPropertyException;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.Library;
 
 import org.apache.log4j.Logger;
 
@@ -50,7 +54,8 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
   private LibraryScreening _libraryScreening;
   private Integer _startPlate;
   private Integer _endPlate;
-  private String _copy;
+  private String _copyName;
+  private Copy _copy;
 
 
   // public instance methods
@@ -68,7 +73,7 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
     }
     int result = getStartPlate().compareTo(that.getStartPlate());
     if (result == 0) {
-      result = getCopy().compareTo(that.getCopy());
+      result = getCopyName().compareTo(that.getCopyName());
     }
     if (result == 0) {
       result = hashCode() < that.hashCode() ? -1 : 1;
@@ -114,65 +119,56 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
     return _libraryScreening;
   }
 
-  /**
-   * Get the start plate.
-   * @return the start plate
-   */
   @Column(nullable=false)
   public Integer getStartPlate()
   {
     return _startPlate;
   }
 
-  /**
-   * Set the start plate.
-   * @param startPlate the new start plate
-   */
   public void setStartPlate(Integer startPlate)
   {
     _startPlate = startPlate;
   }
 
-  /**
-   * Get the end plate.
-   * @return the end plate
-   */
   @Column(nullable=false)
   public Integer getEndPlate()
   {
     return _endPlate;
   }
 
-  /**
-   * Set the end plate.
-   * @param endPlate the new end plate
-   */
   public void setEndPlate(Integer endPlate)
   {
     _endPlate = endPlate;
   }
 
-  /**
-   * Get the copy.
-   * @return the copy
-   */
   @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
-  public String getCopy()
+  // TODO: eliminate this method, once the copy property is made persistent
+  public String getCopyName()
+  {
+    return _copyName;
+  }
+
+  // TODO: eliminate this method, once the copy property is made persistent
+  public void setCopyName(String copyName)
+  {
+    _copyName = copyName;
+  }
+
+  @Transient
+  public Copy getCopy()
   {
     return _copy;
   }
 
-  /**
-   * Set the copy.
-   * @param copy the new copy
-   */
-  public void setCopy(String copy)
+  public void setCopy(Copy copy)
   {
+    // TODO: eliminate this class, once the copy property is made persistent
+    setCopyName(copy.getName());
     _copy = copy;
   }
 
-
+  
   // package constructor
 
   /**
@@ -186,15 +182,25 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
     LibraryScreening libraryScreening,
     Integer startPlate,
     Integer endPlate,
-    String copy)
+    Copy copy)
   {
     if (libraryScreening == null) {
-      throw new NullPointerException();
+      throw new RequiredPropertyException(this, LibraryScreening.class);
+    }
+    if (copy == null) {
+      throw new RequiredPropertyException(this, LibraryScreening.class);
+    }
+    Library library = copy.getLibrary();
+    if (startPlate < library.getStartPlate()) {
+      throw new DataModelViolationException("start plate " + startPlate + " is not within library plate range [" + library.getStartPlate() + "," + library.getEndPlate() + "]");
+    }
+    if (endPlate > library.getEndPlate()) {
+      throw new DataModelViolationException("end plate " + endPlate + " is not within library plate range [" + library.getStartPlate() + "," + library.getEndPlate() + "]");
     }
     _libraryScreening = libraryScreening;
     _startPlate = startPlate;
     _endPlate = endPlate;
-    _copy = copy;
+    setCopy(copy);
   }
 
 

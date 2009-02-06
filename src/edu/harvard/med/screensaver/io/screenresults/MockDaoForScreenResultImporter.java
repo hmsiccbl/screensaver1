@@ -47,6 +47,8 @@ import edu.harvard.med.screensaver.ui.libraries.WellCopy;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Maps;
+
 /**
  * A DAO implementation that can be used in a database-free environment.
  *
@@ -275,9 +277,9 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public Volume findRemainingVolumeInWellCopy(Well well, Copy copy)
+  public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well)
   {
-    return Volume.ZERO;
+    return Maps.newHashMap();
   }
 
   public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)

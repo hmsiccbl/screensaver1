@@ -26,7 +26,8 @@ public enum AttachedFileType implements VocabularyTerm
   PRIMARY_SCREEN_REPORT("Primary Screen Report"), // a document containing both original and publishable protocol, from which the publishable protocol field will ultimately be popuplated (manually)
   LETTER_OF_SUPPORT("Letter of Support"),
   SCREENER_CORRESPONDENCE("Screener Correspondence"),
-  MIARE_DOCUMENT("MIARE Document")
+  MIARE_DOCUMENT("MIARE Document"),
+  PUBLICATION("Publication")
   ;
 
 

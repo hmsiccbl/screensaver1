@@ -15,6 +15,7 @@ import java.io.InputStream;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.libraries.WellSdfDataExporter;
+import edu.harvard.med.screensaver.io.libraries.compound.StructureImageProvider;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -23,6 +24,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
+import edu.harvard.med.screensaver.ui.screens.StudyViewer;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
@@ -55,9 +57,11 @@ public class WellViewer extends ReagentViewer
   public WellViewer(GenericEntityDAO dao,
                     LibraryViewer libraryViewer,
                     GeneViewer geneViewer,
-                    CompoundViewer compoundViewer)
+                    CompoundViewer compoundViewer,
+                    StructureImageProvider structureImageProvider,
+                    StudyViewer _studyViewer)
   {
-    super(dao, geneViewer, compoundViewer);
+    super(dao, geneViewer, compoundViewer, structureImageProvider, _studyViewer);
     _libraryViewer = libraryViewer;
   }
 
@@ -149,7 +153,8 @@ public class WellViewer extends ReagentViewer
                                                    WellViewer.this,
                                                    _libraryViewer,
                                                    _geneViewer,
-                                                   _compoundViewer));
+                                                   _compoundViewer,
+                                                   _structureImageProvider));
         }
       });
     }
@@ -181,4 +186,7 @@ public class WellViewer extends ReagentViewer
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+
+  public boolean isSDFileDownloadEnabled() { return true; }
+
 }

@@ -25,7 +25,6 @@
 	</ui:define>
 
 	<ui:define name="propertiesContent">
-
 		<ss:property id="fullName" label="Name"
 			description="The name and email of the user"
 			value="#{userViewer.user.fullNameFirstLast}" required="true"
@@ -105,23 +104,32 @@
 			value="#{userViewer.user.email}" editable="#{userViewer.editMode}"
 			editWidth="60" />
 
-		<ss:property id="ecommonsId" label="eCommons ID"
-			description="The user's eCommons ID "
-			value="#{userViewer.user.ECommonsId}"
-			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}" />
+    <ss:property id="ecommonsId" label="eCommons ID"
+      description="The user's eCommons ID "
+      value="#{userViewer.user.ECommonsId}"
+      rendered="#{userViewer.readAdmin || userViewer.me}"
+      editable="#{userViewer.editMode}"
+      converter="#{toLowerCaseConverter}" />
 
-		<ss:property id="harvardId" label="Harvard ID" description="The user "
+    <ss:property id="harvardId" label="Harvard ID" description="The user "
 			value="#{userViewer.user.harvardId}"
 			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}" />
 
 		<ss:property id="harvardIdExpiration" type="Date"
-			label="Harvard ID Initial Expiration Date"
+			label="Harvard ID Actual Expiration Date"
 			description="The date when the user's Harvard ID will expire"
 			value="#{userViewer.user.harvardIdExpirationDate}"
 			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}">
 			<!-- TODO: ui:define name="valueFooter">
 					  <t:outputText id="harvardIdExpirationWarning" value="#{userViewer.harvardIdExpired ? 'Expired!' : userViewer.harvardIdDaysUntilExpiration}"/>
 					</ui:define -->
+		</ss:property>
+
+		<ss:property id="harvardIdRequestedExpiration" type="Date"
+			label="Harvard ID Requested Expiration Date"
+			description="The requested date when the user's Harvard ID will expire"
+			value="#{userViewer.user.harvardIdRequestedExpirationDate}"
+			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}">
 		</ss:property>
 
 		<ss:property id="phone" label="Phone"
@@ -260,8 +268,8 @@
                       popupText="The checklist item status" />
                   </f:facet>
                   <t:outputText
-                    value="#{empty element.value ? 'Not Completed' : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')}"
-                    styleClass="dataText #{empty element.value || element.value.expiration ? 'subdued' : 'eyeCatcher'}" />
+                    value="#{empty element.value ? 'Not Completed' : (element.value.notApplicable ? 'N/A' : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')) }"
+                    styleClass="dataText #{empty element.value || element.value.expiration || element.value.notApplicable  ? 'subdued' : 'eyeCatcher'}" />
                 </t:column>
                 <ss:textColumn columnName="Date"
                   description="The date the checklist item event was performed"
@@ -278,19 +286,19 @@
                 <t:column columnName="Action"
                   description="Actions to update the checklist item"
                   rendered="#{userViewer.editMode}">
-                  <t:panelGrid columns="2">
+                  <t:panelGrid columns="3">
                     <t:inputText id="newChecklistItemDatePerformedField"
-                      value="#{userViewer.newChecklistItemDatePerformed[rowIndex]}"
-                      rendered="#{element.key.expirable || empty element.value}"
+                      value="#{userViewer.newChecklistItemDatePerformed[element.key]}"
+                      rendered="#{empty element.value || (element.key.expirable &amp;&amp; !element.value.notApplicable)}"
                       size="8" styleClass="inputText"
                       converter="#{dateConverter}" />
                     <t:commandButton id="activateChecklistItemCommand"
-                      rendered="#{element.key.expirable &amp;&amp; (empty element.value || element.value.expiration)}"
+                      rendered="#{element.key.expirable &amp;&amp; (empty element.value || (element.value.expiration &amp;&amp; !element.value.notApplicable))}"
                       value="Activate"
                       action="#{userViewer.checklistItemActivated}"
                       styleClass="command" />
                     <t:commandButton id="deactivateChecklistItemCommand"
-                      rendered="#{element.key.expirable  &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration)}"
+                      rendered="#{element.key.expirable &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration &amp;&amp; !element.value.notApplicable)}"
                       value="Deactivate"
                       action="#{userViewer.checklistItemDeactivated}"
                       styleClass="command" />
@@ -299,7 +307,13 @@
                       value="Completed"
                       action="#{userViewer.checklistItemCompleted}"
                       styleClass="command" />
-                  </t:panelGrid>
+                    <t:commandButton id="notApplicableChecklistItemCommand"
+                      rendered="#{empty element.value}"
+                      value="N/A"
+                      action="#{userViewer.checklistItemNotApplicable}"
+                      styleClass="command" />
+
+									</t:panelGrid>
                 </t:column>
               </ui:define>
             </ss:collectionTable>
@@ -377,7 +391,7 @@
               <t:commandButton id="addRnaiScreenCommand"
                 value="Add RNAi Screen"
                 action="#{userViewer.addRnaiScreen}"
-                rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}" 
+                rendered="#{userViewer.screensaverUser.isUserInRoleOfNameMap['screensAdmin']}"
                 styleClass="command" />
             </ui:define>
           </ss:property>

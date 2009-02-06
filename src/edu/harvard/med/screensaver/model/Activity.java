@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model;
 
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,12 +25,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 
 /**
@@ -103,6 +109,18 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
 
   @Transient
   abstract public String getActivityTypeName();
+  
+  /**
+   * @return the set of ScreensaverUsers that may be used as an argument to
+   *         {@link #setPerformedBy(ScreensaverUser)}; null if all users are
+   *         candidates
+   */
+  @Transient
+  public Set<ScreensaverUser> getPerformedByCandidates()
+  {
+    return null;
+  }
+  
 
   /**
    * Get the user that performed the activity.

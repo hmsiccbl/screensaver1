@@ -10,9 +10,11 @@
 package edu.harvard.med.screensaver.ui;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
@@ -64,6 +66,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   // private data members
 
+  private Properties _applicationProperties;
   private Messages _messages;
   private CurrentScreensaverUser _currentScreensaverUser;
 
@@ -74,7 +77,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   public String getApplicationName()
   {
-    return APPLICATION_NAME;
+    return _applicationProperties.getProperty(APPLICATION_NAME_PROPERTY);
   }
 
   /**
@@ -82,7 +85,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   public String getApplicationVersion()
   {
-    return APPLICATION_VERSION;
+      return _applicationProperties.getProperty(APPLICATION_VERSION_PROPERTY);
   }
 
   /**
@@ -98,7 +101,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   public String getApplicationTitle()
   {
-    return APPLICATION_TITLE;
+    return getApplicationName() + " " + getApplicationVersion();
   }
 
   /**
@@ -106,19 +109,31 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    */
   public String getFeedbackUrl()
   {
-    return FEEDBACK_URL;
+    return _applicationProperties.getProperty(FEEDBACK_URL_PROPERTY);
   }
 
   public Color getScreensaverThemeColor() 
   { 
     return SCREENSAVER_THEME_COLOR;
+    //return _applicationProperties.getProperty(SCREENSAVER_THEME_COLOR_PROPERTY);
   } 
 
   public Color getScreensaverThemeHeaderColor() 
   { 
-    return HEADER_COLOR; 
+    return HEADER_COLOR;
+    //return _applicationProperties.getProperty(HEADER_COLOR_PROPERTY); 
   } 
   
+  public Properties getApplicationProperties()
+  {
+    return _applicationProperties;
+  }
+
+  public void setApplicationProperties(Properties applicationProperties)
+  {
+    _applicationProperties = applicationProperties;
+  }
+
   /**
    * Get the group of messages that was injected into this backing bean.
    *
@@ -158,19 +173,29 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    *         method.
    * @see #isUserInRole(ScreensaverUserRole)
    */
-  public boolean isReadOnly()
-  {
-    ScreensaverUserRole editableAdminRole = getEditableAdminRole();
-    if (editableAdminRole == null) {
-      return true;
-    }
-    return !isUserInRole(editableAdminRole);
-  }
-
-  public boolean isEditable()
-  {
-    return !isReadOnly();
-  }
+//  public boolean isReadOnly()
+//  {
+//    ScreensaverUserRole editableAdminRole = getEditableAdminRole();
+//    if (editableAdminRole == null) {
+//      return true;
+//    }
+//    return !isUserInRole(editableAdminRole);
+//  }
+//
+//  public boolean isEditable()
+//  {
+//    return !isReadOnly();
+//  }
+//
+//  /**
+//   * Controller subclasses for viewers should override this method and return
+//   * the ScreensaverUserRole that is allowed to edit the data contents of the
+//   * viewer.
+//   */
+//  protected ScreensaverUserRole getEditableAdminRole()
+//  {
+//    return null;
+//  }
 
   /**
    * Get whether user can view any data in the current view.
@@ -270,15 +295,6 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   // protected methods
 
-  /**
-   * Controller subclasses for viewers should override this method and return
-   * the ScreensaverUserRole that is allowed to edit the data contents of the
-   * viewer.
-   */
-  protected ScreensaverUserRole getEditableAdminRole()
-  {
-    return null;
-  }
 
   protected FacesContext getFacesContext()
   {
@@ -381,28 +397,59 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 //    return text;
 //  }
 
+  public String getMessage(String messageKey, Object... messageArgs)
+  {
+    return _messages.getMessage(messageKey, messageArgs);
+  }
+
 
   /**
-   * Adds the message of the specified key to the specified component. Any
-   * request parameters that have a name of the form "<componentId>MessageParam*"
-   * will be used to parameterize the message.
-   *
-   * @param messageKey the key of the message to be shown
-   * @param componentId the "simple" component ID, as specified in the "id"
+   * Adds the message of the specified key to the component specified by the
+   * localId. (requires a <pre> &lt;h:message for=&quot;localId&quot;/&gt;</pre> 
+   * JSF element in the view)
+   * 
+   * @param facesContext
+   * @param localId the "simple" component ID, as specified in the "id"
    *          attribute of its defining JSF tag (not the fully-qualified client
    *          ID expression required by UIComponent.findComponent(), such as
-   *          ":formId:subviewId:fieldId").
-   * @return the FacesMessage that was set
+   *          ":formId:subviewId:fieldId"). If the specified component cannot be
+   *          found then the messages will be sent to the generalized message
+   *          list, see {@link #showMessage(String, Object...)}
+   * @param messageKey the key to the message resource in the
+   *          <code>messages</code> bean.
+   * @param msgArgs arguments for the message resource
+   * @return null if the component can not be found
+   * @see Messages
    */
-  protected FacesMessage showMessageForComponent(String messageKey, String componentId)
+  protected FacesMessage showMessageForLocalComponentId(FacesContext facesContext,
+                                                        String localId,
+                                                        String msgKey,
+                                                        Object... msgArgs)
   {
-    return showMessage(messageKey, componentId, new Object[] {});
+    // UIComponent c = getFacesContext().getViewRoot().findComponent(localID); this didn't work
+    UIComponent component = null;
+    UIViewRoot viewRoot = facesContext.getViewRoot();
+    component = org.apache.myfaces.custom.util.ComponentUtils.findComponentById(getFacesContext(),
+                                                                                viewRoot,
+                                                                                localId);
+    if (component != null) {
+      String clientId = component.getClientId(getFacesContext());
+      return showMessageForComponent(msgKey, clientId, msgArgs);
+    }
+    else {
+      log.warn("Error creating messages: " + msgKey + ": " +
+               Arrays.asList(msgArgs) + ", could not find the component: " +
+               localId);
+      showMessage(msgKey, msgArgs);
+      return null;
+    }
   }
+
 
   /**
    * Adds the message of the specified key to the view (requires an h:messages
    * JSF element in the view).
-   *
+   * 
    * @param messageKey the key of the message to be shown
    * @return the FacesMessage that was set
    */
@@ -414,54 +461,41 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   /**
    * Adds the message of the specified key to the view (requires an h:messages
    * JSF element in the view).
-   *
+   * 
    * @param messageKey the key of the message to be shown
    * @param messageArgs the args that will be used to parameterize this message
    *          (replacing the "{0}", ..., "{n}" placeholders in the message
    *          string)
    * @return the FacesMessage that was set
    */
-  protected FacesMessage showMessage(String messageKey,
-                                     Object... messageArgs)
+  protected FacesMessage showMessage(String messageKey, Object... messageArgs)
   {
-    FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, null, messageArgs);
-    if (msg == null) {
-      log.error("no message exists for key '" + messageKey + "'");
-    }
-    else {
-      log.debug(msg.getDetail());
-    }
-    return msg;
+    return _messages.setFacesMessageForComponent(messageKey, null, messageArgs);
   }
 
   /**
    * Adds the message of the specified key to the specified component. Any
-   * request parameters that have a name of the form "<componentId>MessageParam*"
-   * will be used to parameterize the messsage.
-   *
+   * request parameters that have a name of the form
+   * "<componentId>MessageParam*" will be used to parameterize the messsage.
+   * 
    * @param messageKey the key of the message to be shown
    * @param messageArgs the args that will be used to parameterize this message
-   *          (replacing the "{0}", ..., "{n}" placeholders in the message string)
-   * @param componentId the "simple" component ID, as specified in the "id"
-   *          attribute of its defining JSF tag (not the fully-qualified client
-   *          ID expression required by UIComponent.findComponent(), such as
-   *          ":formId:subviewId:fieldId").
+   *          (replacing the "{0}", ..., "{n}" placeholders in the message
+   *          string)
+   * @param componentId the fully-qualified client ID expression required by
+   *          UIComponent.findComponent(), such as ":formId:subviewId:fieldId".
+   *          To give only the local name, i.e."fieldId", see
+   *          {@link #showMessageForLocalComponentId(FacesContext, String, String, Object...)}
    * @return the FacesMessage that was set
    */
   protected FacesMessage showMessageForComponent(String messageKey,
                                                  String componentId,
                                                  Object... messageArgs)
   {
-    FacesMessage msg = _messages.setFacesMessageForComponent(messageKey, componentId, messageArgs);
-    if (msg == null) {
-      log.error("no message exists for key '" + messageKey + "'");
-    }
-    else {
-      log.debug(msg.getDetail());
-    }
-    return msg;
+    return _messages.setFacesMessageForComponent(messageKey,
+                                                 componentId,
+                                                 messageArgs);
   }
-
 
   /**
    * Returns the fully-qualified "client" ID of the component, which can be used to

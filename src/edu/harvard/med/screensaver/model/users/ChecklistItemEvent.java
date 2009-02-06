@@ -65,6 +65,7 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   private ChecklistItem _checklistItem;
   private ScreeningRoomUser _screeningRoomUser;
   private boolean _isExpiration;
+  private boolean _isNotApplicable;
   private LocalDate _datePerformed;
   private AdministrativeActivity _entryActivity;
 
@@ -124,6 +125,16 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   public boolean isExpiration()
   {
     return _isExpiration;
+  }
+
+  /**
+   * If set, indicates that this checklist item is "not applicable"
+   */
+  @Column(nullable = false, name = "isNotApplicable")
+  @org.hibernate.annotations.Immutable
+  public boolean isNotApplicable()
+  {
+    return _isNotApplicable;
   }
 
   /**
@@ -204,8 +215,28 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
     _checklistItem = checklistItem;
     _screeningRoomUser = screeningRoomUser;
     _isExpiration = false;
+    _isNotApplicable = false;
     _datePerformed = datePerformed;
     _entryActivity = entryActivity;
+  }
+  
+  /**
+   * Construct an initialized "not applicable" <code>ChecklistItemEvent</code> 
+   * <p>
+   * Intended only for use by {@link ScreeningRoomUser}.
+   * 
+   * @param isNotApplicable 
+   *
+   * @see #ChecklistItemEvent(ChecklistItem, ScreeningRoomUser, LocalDate, AdministrativeActivity)
+   **/
+  ChecklistItemEvent(ChecklistItem checklistItem,
+                     ScreeningRoomUser screeningRoomUser,
+                     LocalDate datePerformed,
+                     AdministrativeActivity entryActivity,
+                     boolean isNotApplicable )
+  {
+    this(checklistItem, screeningRoomUser, datePerformed, entryActivity);
+    _isNotApplicable = isNotApplicable;
   }
 
   public ChecklistItemEvent createChecklistItemExpirationEvent(LocalDate datePerformed,
@@ -225,6 +256,9 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
     if (previousEvent.isExpiration()) {
       throw new DataModelViolationException("can only expire a previously active checklist item");
     }
+    if (previousEvent.isNotApplicable()) {
+      throw new DataModelViolationException("can not expire a checklist item that has been marked \"not applicable\"");
+    }
     if (datePerformed.compareTo(previousEvent.getDatePerformed()) < 0) {
       throw new DataModelViolationException("checklist item expiration date must be on or after the previous activation date");
     }
@@ -236,7 +270,6 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
     this.getScreeningRoomUser().getChecklistItemEvents().add(checklistItemExpiration);
     return checklistItemExpiration;
   }
-
 
   /**
    * Construct an uninitialized <code>ChecklistItem</code> object.
@@ -308,6 +341,12 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   {
     _isExpiration = isExpiration;
   }
+
+  private void setNotApplicable(boolean value)
+  {
+    _isNotApplicable = value;
+  }
+
 
   private static ChecklistItemEventComparator _checklistItemEventComparator = new ChecklistItemEventComparator();
 

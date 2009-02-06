@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
  * <ul>
  * <li>all properties have a getter method
  * <li>{@link AbstractPropertyTester#isCollectionProperty() collection properties} do not have a setter method
- * <li>{@link AbstractPropertyTester#setterOrAdderMethodNotExpected() properties that are not expected to have a testable
+ * <li>{@link AbstractPropertyTester#setterMethodNotExpected() properties that are not expected to have a testable
  * setter or adder method} do not have a setter method
  * </ul>
  */
@@ -66,7 +66,7 @@ extends AbstractPropertiesTester<E>
     {
       assertNotNull("property has public getter: " + getPropertyFullname(), getReadMethod());
       
-      if (setterOrAdderMethodNotExpected()) {
+      if (setterMethodNotExpected()) {
         assertNull("property does not have public setter: " + getPropertyFullname(), getWriteMethod());
       }
       else if (!isCollectionProperty()) { // a collection property *may* have a setter, optionally

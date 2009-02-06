@@ -11,10 +11,12 @@ package edu.harvard.med.screensaver.ui.activities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.faces.context.FacesContext;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
@@ -22,7 +24,12 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
@@ -33,22 +40,23 @@ import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
-import edu.harvard.med.screensaver.ui.util.EditableViewer;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-public class ActivityViewer extends AbstractBackingBean implements EditableViewer
+import com.google.common.collect.Sets;
+
+public class ActivityViewer extends AbstractEditableBackingBean
 {
   // static members
 
   private static Logger log = Logger.getLogger(ActivityViewer.class);
-  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.SCREENS_ADMIN;
-
 
   // instance data members
 
@@ -60,6 +68,10 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   private boolean _isEditMode;
   private UISelectOneEntityBean<ScreensaverUser> _performedBy;
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
+  private UISelectOneBean<ConcentrationUnit> _concentrationType;
+  private UISelectOneBean<VolumeUnit> _volumeType;
+  private String _concentrationValue;
+  private String _volumeValue;
   private DataModel _libraryAndPlatesScreenedDataModel;
   private PlatesUsed _newPlatesScreened;
   private AbstractBackingBean _returnToViewAfterEdit;
@@ -80,6 +92,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
                         LibrariesDAO librariesDao,
                         LabActivitySearchResults labActivitiesBrowser)
   {
+    super(ScreensaverUserRole.SCREENS_ADMIN);
     _thisProxy = _activityViewerProxy;
     _returnToViewAfterEdit = _thisProxy;
     _dao = dao;
@@ -124,42 +137,135 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
       }
     }
     _activity = activity;
+
+    setConcentrationType( _activity instanceof LabActivity ? ((LabActivity) _activity).getConcentrationUnits() : null);
+    setConcentrationValue( _activity instanceof LabActivity ? ((LabActivity) _activity).getConcentrationValue() : null );
     resetView();
   }
 
   public UISelectOneBean<ScreensaverUser> getPerformedBy()
   {
     if (_performedBy == null) {
-      Set<ScreensaverUser> performedByCandidates = null;
-      if (_activity instanceof Screening) {
-         performedByCandidates = new HashSet<ScreensaverUser>(((LabActivity) _activity).getScreen().getAssociatedScreeningRoomUsers());
-         // existing performedBy user of a Screening should be associated with Screen, but if not, load all ScreensaverUsers
-         if (_activity.getPerformedBy() != null && 
-           !performedByCandidates.contains(_activity.getPerformedBy())) {
-           performedByCandidates = null;
-         }
-      }
+      Set<ScreensaverUser> performedByCandidates = _activity.getPerformedByCandidates();
       if (performedByCandidates == null) {
-        performedByCandidates = new HashSet<ScreensaverUser>(_dao.findAllEntitiesOfType(ScreensaverUser.class));
+        performedByCandidates = Sets.newTreeSet();
+        performedByCandidates.addAll(_dao.findAllEntitiesOfType(ScreensaverUser.class));
       }
-      assert _activity.getPerformedBy() == null || performedByCandidates.contains(_activity.getPerformedBy());
       _performedBy = new UISelectOneEntityBean<ScreensaverUser>(
         performedByCandidates,
         _activity.getPerformedBy(),
         _dao) {
-        protected String getLabel(ScreensaverUser t) { return t.getFullNameLastFirst(); }
+        @Override
+        protected String makeLabel(ScreensaverUser t) { return t.getFullNameLastFirst(); }
       };
     }
     return _performedBy;
   }
 
+  public UISelectOneBean<VolumeUnit> getVolumeTransferredPerWellType()
+  {
+    try {
+      if (_volumeType == null) {
+        Volume v = (_activity instanceof LabActivity ?
+                                    ((LabActivity) _activity).getVolumeTransferredPerWell() :
+                                    null );
+        VolumeUnit unit = ( v == null ? null: v.getUnits());
+
+        _volumeType = new UISelectOneBean<VolumeUnit>( Arrays.asList(VolumeUnit.DISPLAY_VALUES), unit )
+          {
+            @Override
+            protected String makeLabel(VolumeUnit t)
+            {
+              return t.getValue();
+            }
+          };
+      }
+      return _volumeType;
+    } catch (Exception e) {
+      log.error("err: " + e);
+      return null;
+    }
+  }
+
+  /**
+   * This method exists to grab the value portion of the Quantity stored
+  */
+  public String getVolumeTransferredPerWellValue()
+  {
+    if( _volumeValue == null )
+    {
+      _volumeValue =
+        _activity instanceof LabActivity ? ((LabActivity) _activity).getVolumeTransferredPerWellValue(): null;
+    }
+    return _volumeValue;
+  }
+  /**
+   * This method exists to set the value portion of the Quantity stored
+   * @see #save()
+  */
+  public void setVolumeTransferredPerWellValue( String value )
+  {
+    _volumeValue = value;
+  }
+
+  public Concentration getConcentration()
+  {
+    return _activity instanceof LabActivity ? ((LabActivity) _activity).getConcentration(): null;
+  }
+
+
+  public UISelectOneBean<ConcentrationUnit> getConcentrationType()
+  {
+    try {
+      if (_concentrationType == null) {
+        setConcentrationType( _activity instanceof LabActivity ? ((LabActivity) _activity).getConcentrationUnits() : null);
+      }
+      return _concentrationType;
+    } catch (Exception e) {
+      log.error("err: " + e);
+      return null;
+    }
+  }
+
+  private void setConcentrationType( ConcentrationUnit unit )
+  {
+    _concentrationType =
+      new UISelectOneBean<ConcentrationUnit>(Arrays.asList(ConcentrationUnit.DISPLAY_VALUES),unit)
+      {
+        @Override
+        protected String makeLabel(ConcentrationUnit t) { return t.getValue(); }
+      };
+  }
+
+  /**
+   * This method exists to grab the value portion of the Quantity stored
+  */
+  public String getConcentrationValue()
+  {
+    if( _concentrationValue == null )
+    {
+      _concentrationValue =
+        _activity instanceof LabActivity ? ((LabActivity) _activity).getConcentrationValue(): null;
+    }
+    return _concentrationValue;
+  }
+
+  /**
+   * This method exists to set the value portion of the Quantity stored
+   * @see #save()
+  */
+  public void setConcentrationValue( String value )
+  {
+    _concentrationValue = value;
+  }
+
   public UISelectOneBean<AssayProtocolType> getAssayProtocolType()
   {
     if (_assayProtocolType == null) {
-      _assayProtocolType = new UISelectOneBean<AssayProtocolType>(
-        Arrays.asList(AssayProtocolType.values()),
+      _assayProtocolType = new UISelectOneBean<AssayProtocolType>(Arrays.asList(AssayProtocolType.values()),
         _activity instanceof Screening ? ((Screening) _activity).getAssayProtocolType() : null) {
-        protected String getLabel(AssayProtocolType t) { return t.getValue(); }
+        @Override
+        protected String makeLabel(AssayProtocolType t) { return t.getValue(); }
       };
     }
     return _assayProtocolType;
@@ -181,12 +287,6 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return _thisProxy.viewActivity(_activity);
-  }
-
-  @Override
-  protected ScreensaverUserRole getEditableAdminRole()
-  {
-    return EDITING_ROLE;
   }
 
   public boolean isEditMode()
@@ -213,12 +313,86 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
   @Transactional
   public String save()
   {
+    boolean valid = true;
+    if( !saveConcentration() ) valid = false;
+    if( !saveVolumeTransferredPerWell()) valid = false;
+    if(! valid )
+    {
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     _isEditMode = false;
+
     _dao.saveOrUpdateEntity(getActivity());
     _dao.flush();
     getActivity().setPerformedBy(getPerformedBy().getSelection());
     // TODO _labActivitiesBrowser.refetch();
     return _returnToViewAfterEdit.reload();
+  }
+
+  private boolean saveConcentration()
+  {
+    try {
+      Concentration c = null;
+      if (!StringUtils.isEmpty(_concentrationValue)) {
+        ConcentrationUnit units = _concentrationType.getSelection();
+        c = new Concentration(_concentrationValue, units).convertToReasonableUnits();
+      }
+      ((LabActivity) _activity).setConcentration(c);
+      _concentrationType = null;
+      _concentrationValue = null;
+    }
+    catch (Exception e) {
+      // herein lies the weakness of the application level validation:
+      // you have to know the field name here.
+      // alternative would be to write a validator/UIComponent that could take
+      // both values at once.
+      String fieldName = "concentrationtypedValuetypedValue";
+      String msgKey = "invalidUserInput";
+
+      String msg = "Concentration value is incorrect";
+      if (e.getLocalizedMessage() != null)
+        msg += ": " + e.getLocalizedMessage();
+
+      FacesContext facesContext = getFacesContext();
+      log.warn("validation on concentration field: " + _concentrationValue, e);
+
+      showMessageForLocalComponentId(facesContext, fieldName, msgKey, msg);
+      return false;
+    }
+    return true;
+  }
+
+  private boolean saveVolumeTransferredPerWell()
+  {
+    try {
+      Volume v = null;
+      if (!StringUtils.isEmpty(_volumeValue)) {
+        VolumeUnit units = _volumeType.getSelection();
+        v = new Volume(_volumeValue, units).convertToReasonableUnits();
+      }
+      ((LabActivity) _activity).setVolumeTransferredPerWell(v);
+      _volumeType = null;
+      _volumeValue = null;
+    }
+    catch (Exception e) {
+      // herein lies the weakness of the application level validation:
+      // you have to know the field name here.
+      // alternative would be to write a validator/UIComponent that could take
+      // both values at once.
+      String fieldName = "volumeTransferredPerWelltypedValuetypedValue";
+      String msgKey = "invalidUserInput";
+
+      String msg = "Volume value is incorrect";
+      if (e.getLocalizedMessage() != null)
+        msg += ": " + e.getLocalizedMessage();
+
+      FacesContext facesContext = getFacesContext();
+      log.warn("validation on: " + fieldName + ": " + _volumeValue, e);
+
+      showMessageForLocalComponentId(facesContext, fieldName, msgKey, msg);
+      return false;
+    }
+    return true;
   }
 
   public DataModel getLibraryAndPlatesScreenedDataModel()
@@ -264,7 +438,7 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     }
 
     setActivity(activity);
-        
+
     // calling viewActivity() is a request to view the most up-to-date, persistent
     // version of the activity, which means the labActivitesBrowser must also be
     // updated to reflect the persistent version of the user
@@ -299,8 +473,8 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     if (_activity instanceof LibraryScreening) {
       LibraryScreening libraryScreening = (LibraryScreening) _activity;
       if (getNewPlatesScreened().getStartPlate() != null &&
-        getNewPlatesScreened().getCopy() != null &&
-        getNewPlatesScreened().getCopy().length() != 0) {
+        getNewPlatesScreened().getCopyName() != null &&
+        getNewPlatesScreened().getCopyName().length() != 0) {
         if (getNewPlatesScreened().getEndPlate() == null) {
           getNewPlatesScreened().setEndPlate(getNewPlatesScreened().getStartPlate());
         }
@@ -309,10 +483,10 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
                                             platesUsed.getEndPlate(),
                                             platesUsed.getCopy());
         }
+      }
         _libraryAndPlatesScreenedDataModel = null;
         _newPlatesScreened = null;
       }
-    }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -322,18 +496,22 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     int endPlate = platesUsed.getEndPlate();
     Library libraryWithEndPlate = _librariesDao.findLibraryWithPlate(endPlate);
     if (libraryWithEndPlate == null) {
-      throw new DataModelViolationException("end plate " + endPlate + " is not contained in any library");
+      reportApplicationError("plate " + endPlate + " is not contained in any library");
+      return Collections.emptySet();
     }
     Set<PlatesUsed> result = new HashSet<PlatesUsed>();
     do {
       Library libraryWithStartPlate = _librariesDao.findLibraryWithPlate(startPlate);
       if (libraryWithStartPlate == null) {
-        throw new DataModelViolationException("plate " + startPlate + " is not contained in any library");
+        reportApplicationError("plate " + endPlate + " is not contained in any library");
+        return Collections.emptySet();
       }
       PlatesUsed platesUsed2 = new PlatesUsed();
       platesUsed2.setStartPlate(startPlate);
       platesUsed2.setEndPlate(Math.min(libraryWithStartPlate.getEndPlate(), endPlate));
-      platesUsed2.setCopy(platesUsed.getCopy());
+      platesUsed2.setCopy(new Copy(libraryWithStartPlate,
+                                   CopyUsageType.FOR_LIBRARY_SCREENING,
+                                   platesUsed.getCopyName()));
       result.add(platesUsed2);
       startPlate = libraryWithStartPlate.getEndPlate() + 1;
     } while (startPlate <= endPlate);
@@ -367,6 +545,10 @@ public class ActivityViewer extends AbstractBackingBean implements EditableViewe
     _performedBy = null;
     _libraryAndPlatesScreenedDataModel = null;
     _newPlatesScreened = null;
+    _concentrationType = null;
+    _concentrationValue = null;
+    _volumeType = null;
+    _volumeValue = null;
   }
 }
 

@@ -8,135 +8,23 @@
 	xmlns:s="http://myfaces.apache.org/sandbox"
 	xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
-
 <ui:composition>
-
-	<h:form id="screenResultPanelForm">
+<!-- 
+			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['screenResultSummary']}"
+ -->
+	<h:form id="screenResultViewerForm" enctype="multipart/form-data">
 		<ss:collapsiblePanel id="screenResultPanel"
 			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['screenResultSummary']}"
 			label="Screen Result Summary"
 			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
 			<ui:define name="content">
-				<t:panelGroup rendered="#{screenResultViewer.editable}">
-					<t:commandButton action="#{screenResultViewer.delete}"
-						value="Delete"
-						onclick="javascript: return confirm('Delete this screen result permanently?');"
-						styleClass="command" rendered="#{screenResultViewer.editable}"
-						title="Delete the screen results for this screen" />
-				</t:panelGroup>
-				<!-- BII Start: Buttons to run cellHTS2 and link to report -->
-				<t:commandButton action="#{screenResultViewer.viewCellHTS2Runner}"
-					value="Click here to enter CellHTS2 parameters" styleClass="command" 
-					rendered="#{screenResultViewer.editable &amp;&amp; !screenResultViewer.cellHTS2ReportFileExists}"
-					title="Run CellHTS2 on the screen result for this screen" />
-				<t:panelGroup id="screenResultReportLink" rendered="#{screenResultViewer.cellHTS2ReportFileExists}">
-					<t:commandButton action="#{screenResultViewer.viewCellHTS2Runner}"
-						value="Click here to reenter CellHTS2 parameters" styleClass="command" 
-						rendered="#{screenResultViewer.editable}"
-						title="Rerun CellHTS2 analysis on the screen result for this screen" /> 
-					<h:outputLink value="#{screenResultViewer.reportURL}" 
-						title="Click here for CellHTS2 report"> 
-						<h:outputText value="CellHTS2 Report" styleClass="dataText"/> 
-					</h:outputLink>
-				</t:panelGroup>
-				<!-- BII End -->
-
-				<t:panelGrid id="screenResultProperties" columns="2"
-					columnClasses="propertyLabelColumn,fixedColumn300"
-					styleClass="layoutPanel">
-
-					<ss:property id="screenResultLastImported" label="Last Imported"
-						type="Date"
-						description="The date the current screen results were loaded into the database"
-						value="#{screenResultViewer.screenResult.dateLastImported}" />
-
-					<ss:property id="screenResultIsShareable" label="Shareable"
-						type="Boolean"
-						description="True when the results are shareable with scientists outside the lab"
-						submitOnChange="true"
-						value="#{screenResultViewer.screenResult.shareable}" />
-
-					<ss:property id="screenResultPlateCount" label="Plates"
-						description="The number of plates for which we have results"
-						value="#{screenResultViewer.screenResult.plateNumberCount}" />
-
-					<ss:property id="screenResultReplicateCount" label="Replicates"
-						description="The number of replicates screened"
-						value="#{screenResultViewer.screenResult.replicateCount}" />
-
-					<ss:property id="screenResultExperimentalWellCount"
-						label="Experimental Wells"
-						description="The number of experimental wells for which we have results"
-						value="#{screenResultViewer.screenResult.experimentalWellCount}" />
-				</t:panelGrid>
+				<ui:include src="screenResultViewerBody.xhtml" />
 			</ui:define>
 		</ss:collapsiblePanel>
-
-		<ss:collapsiblePanel id="dataHeadersPanel" label="Data Headers"
-			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
-			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
-			<ui:define name="content">
-				<t:dataTable id="dataHeadersTable"
-					value="#{screenResultViewer.dataHeadersTable.dataModel}" var="row"
-					styleClass="standardTable" headerClass="tableHeader"
-					rowClasses="row1,row2">
-					<t:column styleClass="keyColumn">
-						<f:facet name="header">
-							<t:outputText value="Data Header Name" />
-						</f:facet>
-						<t:outputText value="#{row.rowLabel}" escape="false"
-							styleClass="dataText" title="#{row.rowDescription}" />
-					</t:column>
-					<t:columns
-						value="#{screenResultViewer.dataHeadersTable.columnModel}"
-						var="columnName" styleClass="column">
-						<f:facet name="header">
-							<t:outputText value="#{columnName}" />
-						</f:facet>
-						<t:outputText
-							value="#{screenResultViewer.dataHeadersTable.cellValue}"
-							styleClass="dataText" />
-					</t:columns>
-				</t:dataTable>
-			</ui:define>
-		</ss:collapsiblePanel>
-
-		<ss:collapsiblePanel id="dataTablePanel"
-			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
-			title="Data"
-			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}" />
 	</h:form>
-
-	<!-- Warning: wellSearchResultsBody.xhtml must be included outside of h:form elements -->
-	<t:div
-		rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
-		<ui:include src="/libraries/wellSearchResultsBody.xhtml">
-			<ui:param name="wellsBrowser"
-				value="#{screenResultViewer.resultValueTable}" />
-		</ui:include>
-	</t:div>
-
-	<h:form id="heatMapsPanelForm">
-    <ss:collapsiblePanel id="heatMapsPanel"
-      isCollapsed="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
-      label="Heat Maps"
-      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
-      <ui:define name="content">
-        <ui:include src="heatMapViewer.xhtml" />
-      </ui:define>
-    </ss:collapsiblePanel>
-  </h:form>
-
-	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
-	<ss:roundedDiv rendered="#{empty screenResultViewer.screenResult}">
-		<t:outputText value="Screen result not available"
-			styleClass="transparentSectionHeader" />
-	</ss:roundedDiv>
-	<t:panelGroup
-		rendered="#{!screenResultViewer.readOnly &amp;&amp; empty screenResultViewer.screenResult}">
-		<ui:include src="admin/screenResultUploader.xhtml" />
-	</t:panelGroup>
+  <ui:include src="screenExtrasBody.xhtml" />
 
 </ui:composition>
 
 </html>
+

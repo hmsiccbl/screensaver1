@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSortedSet;
 
 
 /**
@@ -65,10 +65,10 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
       public void runTransaction()
       {
         ScreensaverUser user1 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail1);
-        assertEquals(Sets.immutableSortedSet(ScreensaverUserRole.SCREENSAVER_USER), user1.getScreensaverUserRoles());
+        assertEquals(ImmutableSortedSet.of(ScreensaverUserRole.SCREENSAVER_USER), user1.getScreensaverUserRoles());
         
         ScreensaverUser user2 = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "email", userEmail2);
-        assertEquals(Sets.immutableSortedSet(ScreensaverUserRole.SCREENSAVER_USER), user2.getScreensaverUserRoles());
+        assertEquals(ImmutableSortedSet.of(ScreensaverUserRole.SCREENSAVER_USER), user2.getScreensaverUserRoles());
         assertEquals(user1.getScreensaverUserRoles(), user2.getScreensaverUserRoles());
       }
     });

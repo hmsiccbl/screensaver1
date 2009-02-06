@@ -38,7 +38,7 @@ public enum StatusValue implements VocabularyTerm
   PENDING_LEGACY("Pending - Legacy", 0), // for ScreenDB pending statuses, to differentiate from the two new pending statuses
   PENDING_ICCB("Pending - ICCB-L", 0),
   PENDING_NSRB("Pending - NSRB", 0),
-  PILOTED("Piloted", 1),
+  PILOTED("Piloting", 1),
   ACCEPTED("Accepted", 2),
   ONGOING("Ongoing", 3),
   COMPLETED("Completed", 4),

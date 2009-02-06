@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
+// TODO: replace implementation with AbstractEntitableBackingBean
 public abstract class EditableDataTable<R> extends DataTable<R>
 {
 

@@ -12,6 +12,10 @@ log4j.properties.file=cfg/log4j.properties.debug
 
 ### run-time properties
 
+screensaver.ui.application_name=Screensaver
+screensaver.ui.version=Test
+screensaver.ui.feedback_url=mailto:screensaver-feedback@hms.harvard.edu
+
 babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
