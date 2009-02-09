@@ -42,6 +42,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -603,6 +604,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private void buildResultValueTypeColumns(List<EntityColumn<Well,?>> columns)
   {
     List<EntityColumn<Well,?>> otherColumns = new ArrayList<EntityColumn<Well,?>>();
+    boolean isAssayWellTypeColumnCreated = false; 
     for (Triple<ResultValueType,Integer,String> rvtAndScreenNumberAndTitle : findValidResultValueTypes()) {
       final ResultValueType rvt = rvtAndScreenNumberAndTitle.getFirst();
       Integer screenNumber = rvtAndScreenNumberAndTitle.getSecond();
@@ -703,6 +705,24 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
       // request eager fetching of resultValueType, since Hibernate will otherwise fetch these with individual SELECTs
       column.addRelationshipPath(new RelationshipPath<Well>(Well.class, "resultValues.resultValueType"));
+
+      // BII start: (Siew Cheng) Add assay well type column 
+      if (!isAssayWellTypeColumnCreated && column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
+        columns.add(new EnumEntityColumn<Well,AssayWellType>(new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "assayWellType", rvt),
+          "Assay Well Type",
+          "The type of assay well, e.g., 'Experimental', 'Empty', 'Library Control', " +
+          "'Assay Positive Control', 'Assay Control', 'Buffer', etc.",
+          column.getGroup(),
+          AssayWellType.values()) {
+          @Override
+          public AssayWellType getCellValue(Well well)
+          {
+            return well.getResultValues().get(rvt) == null ? null : well.getResultValues().get(rvt).getAssayWellType();
+          }
+        });
+        isAssayWellTypeColumnCreated = true;
+      }
+      // BII end
 
       if (column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
         columns.add(column);
