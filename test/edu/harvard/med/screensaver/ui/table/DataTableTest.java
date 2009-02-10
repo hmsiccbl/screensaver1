@@ -138,7 +138,8 @@ public class DataTableTest extends TestCase
       }
     },
     _columns,
-    new RowsPerPageSelector(Arrays.asList(1, 2, 4), 2));                          
+    new RowsPerPageSelector(Arrays.asList(1, 2, 4), 2),
+    false);                          
   }
   
   public void testRefetchOnColumnVisibilityChange()

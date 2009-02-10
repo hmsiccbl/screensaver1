@@ -23,35 +23,8 @@
 								escape="true" styleClass="label" />
 						</t:headerLink>
 					</f:facet>
-					<t:panelGrid id="columnsSelectionPanelInternal" columns="1">
-						<t:commandButton id="updateColumnsButton" forceId="true"
-							action="#{searchResults.columnManager.updateColumnSelections}"
-							value="Update" styleClass="command"
-							title="Update the columns selection" />
-						<t:tree2 id="columnsSelectorTree"
-							value="#{searchResults.columnManager.columnsTreeModel}"
-							var="node" varNodeToggler="t" clientSideToggle="true"
-							showRootNode="false">
-							<f:facet name="root">
-								<h:panelGroup>
-									<h:outputText value="Columns" styleClass="label" />
-								</h:panelGroup>
-							</f:facet>
-							<f:facet name="group">
-								<h:panelGroup>
-									<h:outputText value="#{node.description}" styleClass="label" />
-								</h:panelGroup>
-							</f:facet>
-							<f:facet name="column">
-								<h:panelGroup>
-									<t:selectBooleanCheckbox id="columnSelector"
-										value="#{node.checked}" styleClass="command" />
-									<t:outputLabel for="columnSelector" value="#{node.description}"
-										styleClass="label" />
-								</h:panelGroup>
-							</f:facet>
-						</t:tree2>
-					</t:panelGrid>
+					<ss:columnSelectorTree rendered="#{searchResults.columnManager.useTreeWidget}"/>
+					<ss:columnSelectorReorderList rendered="#{searchResults.columnManager.useReorderListWidget}"/>
 				</t:collapsiblePanel>
 			</h:form>
 

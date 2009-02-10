@@ -77,7 +77,7 @@ public class TableColumnManagerTest extends TestCase
     assertEquals("Value", _valueCol.getName());
     _urlCol = (TextColumn<RowItem>) _columns.get(4);
     assertEquals("URL", _urlCol.getName());
-    _columnManager = new TableColumnManager<RowItem>(_columns, null);
+    _columnManager = new TableColumnManager<RowItem>(_columns, null, false);
     _columnManager.addObserver(new Observer() {
       @SuppressWarnings("unchecked")
       public void update(Observable o, Object obj)

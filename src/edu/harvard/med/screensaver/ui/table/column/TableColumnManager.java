@@ -23,6 +23,14 @@ import java.util.Observer;
 import java.util.Set;
 
 import javax.faces.model.ListDataModel;
+import javax.faces.model.SelectItem;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.tree2.TreeModel;
+import org.apache.myfaces.custom.tree2.TreeModelBase;
+import org.apache.myfaces.custom.tree2.TreeNode;
+import org.apache.myfaces.custom.tree2.TreeNodeBase;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.SortDirection;
@@ -34,13 +42,6 @@ import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
 import edu.harvard.med.screensaver.ui.table.SortDirectionSelector;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.tree2.TreeModel;
-import org.apache.myfaces.custom.tree2.TreeModelBase;
-import org.apache.myfaces.custom.tree2.TreeNode;
-import org.apache.myfaces.custom.tree2.TreeNodeBase;
 
 /**
  * Notifies observers when set of available columns are changed, either from
@@ -71,12 +72,50 @@ public class TableColumnManager<R> extends Observable implements Observer
   private Map<String,TableColumn<R,?>> _name2Column = new HashMap<String,TableColumn<R,?>>();
 
 
+  // For ReorderListWidget: List and arrays for the pick list
+  private List<SelectItem> allItemsLeft;
+  private List<SelectItem> allItemsRight;
+  private List<SelectItem> defaultItemsRight; // the default columns displayed at the start
+  private List<SelectItem> defaultItemsLeft; // the default columns not displayed at the start
+  private String[] selectedItemsLeft = {};
+  private String[] selectedItemsRight = {};
+  private boolean _useReorderListWidget = false;
+  // ReorderListWidget: End
 
-  // public constructors and methods
-
+  /**
+   * @param columns
+   * @param currentScreensaverUser
+   * @param useReorderListWidget if true use the dual list based column selector with the ability to re-orde
+   *        (do NOT use the tree based column selector)
+   */
   public TableColumnManager(List<? extends TableColumn<R,?>> columns,
-                            CurrentScreensaverUser currentScreensaverUser)
+                            CurrentScreensaverUser currentScreensaverUser,
+                            boolean useReorderListWidget)
   {
+
+  	// For ReorderListWidget: Initialize the lists
+    _useReorderListWidget = useReorderListWidget;
+    if(isUseReorderListWidget())
+    {
+    	allItemsLeft = new ArrayList<SelectItem>();
+    	allItemsRight = new ArrayList<SelectItem>();
+    	defaultItemsRight = new ArrayList<SelectItem>();
+    	defaultItemsLeft = new ArrayList<SelectItem>();
+    	
+    	for (int i=0; i<columns.size(); i++) {
+    		if (columns.get(i).isVisible()) {
+    			allItemsRight.add(new SelectItem(columns.get(i).getName(), columns.get(i).getName()));
+    			defaultItemsRight.add(new SelectItem(columns.get(i).getName(), columns.get(i).getName()));
+    		}
+    		else {
+    			allItemsLeft.add(new SelectItem(columns.get(i).getName(), columns.get(i).getName()));
+    			defaultItemsLeft.add(new SelectItem(columns.get(i).getName(), columns.get(i).getName()));
+    		}
+    			
+    	}
+    }  	
+    // For ReorderListWidget: End
+  	
     _currentScreensaverUser = currentScreensaverUser;
     setColumns(columns);
   }
@@ -354,6 +393,43 @@ public class TableColumnManager<R> extends Observable implements Observer
   public String updateColumnSelections()
   {
     getColumnsTreeModel().getTreeState().collapsePath(new String[] { "0" });
+    
+    if(isUseReorderListWidget())
+    {
+      // For ReorderListWidget: To arrange the columns according to the order specified by user
+      List<TableColumn<R,?>> columns = getAllColumns();
+      List<TableColumn<R,?>> tempColumns = new ArrayList<TableColumn<R,?>>();
+      
+  		// Reset all columns to hidden
+      for (int j=0; j<columns.size(); j++) {
+      	columns.get(j).setVisible(false);
+      }
+      for (int i = 0; i < allItemsRight.size(); i++) {
+  			
+      	for (int j=0; j<columns.size(); j++) {
+  				
+  				// Add visible columns to the front of list. Will be used in updateVisibleColumns
+  				// to obtain all visible columns
+      		if (allItemsRight.get(i).getValue().equals(columns.get(j).getName())) {
+  					columns.get(j).setVisible(true);
+  					tempColumns.add(columns.get(j));
+  					
+  					break;
+  				}
+  			}
+  		}
+      
+      // add remaining (hidden) columns to the back
+      for (int j=0; j<columns.size(); j++) {
+      	if (!columns.get(j).isVisible()) {
+      		tempColumns.add(columns.get(j));
+      	}
+      }
+      _columns = tempColumns;
+      
+      updateVisibleColumns(new ColumnVisibilityChangedEvent());
+    }
+    
     return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
   }
 
@@ -401,8 +477,12 @@ public class TableColumnManager<R> extends Observable implements Observer
   // private methods
 
   private void updateVisibleColumns(ColumnVisibilityChangedEvent event)
-  {
-    if (event.getColumnsAdded().size() > 0 || event.getColumnsRemoved().size() > 0) {
+  { 
+    // for reorder mode, update should be done even if columnsAdded 
+    // and columnsRemoved are unchanged
+    if (event.getColumnsAdded().size() > 0 
+        || event.getColumnsRemoved().size() > 0 
+        || isUseReorderListWidget() ) {
       if (log.isDebugEnabled()) {
         log.debug("column selections changed: " + event);
       }
@@ -460,4 +540,136 @@ public class TableColumnManager<R> extends Observable implements Observer
     }
     return groupNode;
   }
+  
+  // For ReorderListWidget: Getters and setters
+  
+  public boolean isUseReorderListWidget() { return _useReorderListWidget; }
+  public boolean isUseTreeWidget() { return !_useReorderListWidget; }
+  
+	public List<SelectItem> getAllItemsLeft() {
+		return allItemsLeft;
+	}
+
+	public void setAllItemsLeft(List<SelectItem> allItemsLeft) {
+		this.allItemsLeft = allItemsLeft;
+	}
+
+	public List<SelectItem> getAllItemsRight() {
+		return allItemsRight;
+	}
+
+	public void setAllItemsRight(List<SelectItem> allItemsRight) {
+		this.allItemsRight = allItemsRight;
+	}
+
+	public String[] getSelectedItemsLeft() {
+		return selectedItemsLeft;
+	}
+
+	public void setSelectedItemsLeft(String[] selectedItemsLeft) {
+		this.selectedItemsLeft = selectedItemsLeft;
+	}
+
+	public String[] getSelectedItemsRight() {
+		return selectedItemsRight;
+	}
+
+	public void setSelectedItemsRight(String[] selectedItemsRight) {
+		this.selectedItemsRight = selectedItemsRight;
+	}
+	
+	public String leftToRight() {
+		for (int i = 0; i < selectedItemsLeft.length; i++) {
+			for (int j=0; j<allItemsLeft.size(); j++) {
+				if (selectedItemsLeft[i].equals(allItemsLeft.get(j).getValue())) {
+					allItemsRight.add(allItemsLeft.get(j));
+					allItemsLeft.remove(j);
+				}
+			}
+		}
+		
+		return null;
+	}
+
+	public String allLeftToRight() {
+		allItemsRight.addAll(allItemsLeft);
+		allItemsLeft.clear();
+		return null;
+	}
+
+	public String rightToLeft() {
+		for (int i = 0; i < selectedItemsRight.length; i++) {
+			for (int j=0; j<allItemsRight.size(); j++) {
+				if (selectedItemsRight[i].equals(allItemsRight.get(j).getValue())) {
+					allItemsLeft.add(allItemsRight.get(j));
+					allItemsRight.remove(j);
+				}
+			}
+		}
+		
+		return null;
+	}
+
+	public String allRightToLeft() {
+		allItemsLeft.addAll(allItemsRight);
+		allItemsRight.clear();
+		return null;
+	}
+  
+  public String moveUp() {
+
+    int j = 0;
+    for (int i=0; i<allItemsRight.size(); i++) {
+      if (selectedItemsRight.length <= j) break;
+      
+      if (selectedItemsRight[j].equals(allItemsRight.get(i).getValue())) {
+        j++;
+        if (i != 0)
+          allItemsRight.add(i-1, allItemsRight.remove(i));
+      }
+    }
+    
+    return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
+  }
+  
+  public String moveDown() {
+    
+    int j = selectedItemsRight.length-1;
+    for (int i=allItemsRight.size()-1; i>=0; i--) {
+      if (j < 0) break;
+      
+      if (selectedItemsRight[j].equals(allItemsRight.get(i).getValue())) {
+        j--;
+        if (i != allItemsRight.size()-1)
+          allItemsRight.add(i, allItemsRight.remove(i+1));
+      }
+    }
+
+    return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
+  }
+	
+	// JSF UI method to restore columns to the default settings
+  public String updateDefaultColumns() {
+	  if (log.isDebugEnabled()) {
+		  log.debug("BII: column selections changed back to default");
+	  }
+	  
+	  // clear the current selection lists
+	  allItemsRight.clear();
+	  allItemsLeft.clear();
+	  
+	  // Set both selection list to default settings
+	  for (int i = 0; i < defaultItemsRight.size(); i++) {
+	  	allItemsRight.add(new SelectItem(defaultItemsRight.get(i).getValue(),defaultItemsRight.get(i).getLabel()));
+		}
+	  for (int i = 0; i < defaultItemsLeft.size(); i++) {
+	  	allItemsLeft.add(new SelectItem(defaultItemsLeft.get(i).getValue(),defaultItemsLeft.get(i).getLabel()));
+		}
+	  
+	  updateColumnSelections();
+	  
+	  return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
+  }
+	// For ReorderListWidget: End
+  
 }

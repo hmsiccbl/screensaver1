@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
 import edu.harvard.med.screensaver.ui.table.EditableDataTable;
@@ -76,7 +77,8 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     // initialize to do nothing
     initialize(new InMemoryDataModel<R>(new NoOpDataFetcher<R,K,P>()),
                new ArrayList<TableColumn<R,?>>(),
-               new RowsPerPageSelector(Arrays.asList(0)));
+               new RowsPerPageSelector(Arrays.asList(0)),
+               ScreensaverProperties.useReorderListInSearchTable());
   }
 
   /**
@@ -94,7 +96,8 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     _dataFetcher = dataFetcher;
     initialize(buildDataTableModel(dataFetcher, columns),
                columns,
-               buildRowsPerPageSelector());               
+               buildRowsPerPageSelector(),
+               ScreensaverProperties.useReorderListInSearchTable());               
   }
 
   // abstract methods

@@ -17,6 +17,15 @@
     </tag>
 
     <tag>
+        <tag-name>columnSelectorTree</tag-name>
+        <source>../searchResult/columnSelectorTree.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>columnSelectorReorderList</tag-name>
+        <source>../searchResult/columnSelectorReorderList.xhtml</source>
+    </tag>
+
+    <tag>
         <tag-name>operator</tag-name>
         <source>../searchResult/operator.xhtml</source>
     </tag>

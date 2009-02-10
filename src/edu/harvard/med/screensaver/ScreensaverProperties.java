@@ -41,5 +41,20 @@ public class ScreensaverProperties
   {
     return _screensaverProperties.getProperty(name);
   }
+  
+  /** 
+   * @param name
+   * @return false if the property is nonexistent or not equal (case-insensitive) "t" or "true"
+   */
+  public static boolean getBooleanProperty(String name)
+  {
+    String temp = _screensaverProperties.getProperty(name, "false").toLowerCase();
+    return temp.equals("true") || temp.equals("t");
+  }
+  
+  public static boolean useReorderListInSearchTable()
+  {
+    return getBooleanProperty("searchtable.use_reorder_list_widget");
+  }
 }
 
