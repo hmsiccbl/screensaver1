@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
  * ScreensaverUser instance directly, since a user hasn't necessarily
  * authenticated themselves when Spring session-scoped beans are instantiated.
  *
- * @see WebDataAccessPolicy
+ * @see DataAccessPolicy
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>

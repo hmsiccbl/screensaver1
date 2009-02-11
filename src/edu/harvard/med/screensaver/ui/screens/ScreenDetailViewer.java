@@ -25,18 +25,10 @@ import java.util.TreeSet;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -59,7 +51,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
@@ -68,6 +59,15 @@ import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
+
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 
 public class ScreenDetailViewer extends StudyDetailViewer
 {
@@ -81,7 +81,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   private ScreenDetailViewer _thisProxy;
   private GenericEntityDAO _dao;
   private ScreenDAO _screenDao;
-  private WebDataAccessPolicy _dataAccessPolicy;
+  private DataAccessPolicy _dataAccessPolicy;
   private ScreenViewer _screenViewer;
   private ScreenSearchResults _screensBrowser;
   private ActivityViewer _activityViewer;
@@ -123,7 +123,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
                             GenericEntityDAO dao,
                             ScreenDAO screenDao,
                             UsersDAO usersDao,
-                            WebDataAccessPolicy dataAccessPolicy,
+                            DataAccessPolicy dataAccessPolicy,
                             ScreenViewer screenViewer,
                             ScreenSearchResults screensBrowser,
                             ActivityViewer activityViewer,
@@ -204,10 +204,6 @@ public class ScreenDetailViewer extends StudyDetailViewer
   /**
    * Determine if the current user can view the restricted screen fields.
    */
-  // TODO: when the Study/Screen/IccbScreen hierarchy is ready, we might be able
-  // to use the DataAccessPolicy to restrict access to particular fields, by
-  // virtue of which subclass the field is from. We might need a fourth subclass
-  // IccbAdminScreen to contain admin-only fields
   public boolean isAllowedAccessToScreenDetails()
   {
     return isReadAdmin() ||

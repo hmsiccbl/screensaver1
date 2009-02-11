@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.ui;
+package edu.harvard.med.iccbl.screensaver.policy;
 
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -58,6 +58,8 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser;
 
 import org.apache.log4j.Logger;
 
@@ -381,7 +383,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
-  private boolean isScreenerAssociatedWithScreen(Screen screen)
+  public boolean isScreenerAssociatedWithScreen(Screen screen)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
     if (user instanceof ScreeningRoomUser) {

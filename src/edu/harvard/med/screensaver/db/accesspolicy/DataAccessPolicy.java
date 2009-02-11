@@ -10,7 +10,16 @@
 package edu.harvard.med.screensaver.db.accesspolicy;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 public interface DataAccessPolicy extends AbstractEntityVisitor
 {
+  /**
+   * @deprecated This is a hack. Should separate out Screen properties that need
+   *             additional protection into a related entity, in order to use
+   *             the AbstractEntityVisitor to control access to these properties
+   *             in a manner consistent with the rest of our DataAccessPolicy.
+   */
+  @Deprecated()
+  public boolean isScreenerAllowedAccessToScreenDetails(Screen screen);
 }

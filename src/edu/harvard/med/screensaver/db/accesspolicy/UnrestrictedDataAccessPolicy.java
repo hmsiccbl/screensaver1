@@ -281,5 +281,10 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   {
     return false;
   }
+
+  public boolean isScreenerAllowedAccessToScreenDetails(Screen screen)
+  {
+    return false;
+  }
 }
 
