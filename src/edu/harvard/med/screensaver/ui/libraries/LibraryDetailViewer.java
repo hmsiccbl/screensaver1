@@ -154,22 +154,7 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
 
   public List<SelectItem> getScreenTypeSelectItems()
   {
-    List<ScreenType> screenTypelist = new ArrayList<ScreenType>();
-    // BII (Siew Cheng) start: Hide compound
-    // TODO: merge compound hide functionality from the imcb trunk
-    if (Boolean.valueOf(
-          ScreensaverProperties.getProperty("isCompoundHidden")) == true) {
-      for(ScreenType screenType:Arrays.asList(ScreenType.values())){
-        if (screenType != ScreenType.SMALL_MOLECULE) {
-          screenTypelist.add(screenType);
-        }
-      }
-      return JSFUtils.createUISelectItems(screenTypelist);
-    }
-    else {
-      return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
-    }
-  // BII end
+    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
   }
   
   public List<SelectItem> getLibraryTypeSelectItems()
