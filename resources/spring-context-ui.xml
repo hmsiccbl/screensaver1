@@ -597,7 +597,7 @@
   	id="cellHTS2Runner"
    	parent="uiBean"
     scope="session"
-    class="sg.edu.astar.bii.screensaver.ui.screenresults.cellhts2.CellHTS2Runner">
+    class="edu.harvard.med.screensaver.ui.screenresults.cellhts2.CellHTS2Runner">
     <constructor-arg ref="cellHts2Annotator" />
     <aop:scoped-proxy/>
   </bean>
@@ -709,11 +709,11 @@
 
   <bean id="affiliationCategoryConverter" class="edu.harvard.med.screensaver.ui.util.AffiliationCategoryConverter" />
   
-  <bean id="normalizePlatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.NormalizePlatesMethodConverter" />
+  <bean id="normalizePlatesMethodConverter" class="edu.harvard.med.screensaver.ui.util.NormalizePlatesMethodConverter" />
 
-  <bean id="scoreReplicatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.ScoreReplicatesMethodConverter" />
+  <bean id="scoreReplicatesMethodConverter" class="edu.harvard.med.screensaver.ui.util.ScoreReplicatesMethodConverter" />
   
-  <bean id="summarizeReplicatesMethodConverter" class="sg.edu.astar.bii.screensaver.util.SummarizeReplicatesMethodConverter" />
+  <bean id="summarizeReplicatesMethodConverter" class="edu.harvard.med.screensaver.ui.util.SummarizeReplicatesMethodConverter" />
 
   <bean id="libraryScreeningStatusConverter" class="edu.harvard.med.screensaver.ui.util.LibraryScreeningStatusConverter" />
 
