@@ -14,9 +14,14 @@ log4j.properties.file=cfg/log4j.properties.debug
 
 screensaver.ui.application_name=Screensaver
 screensaver.ui.version=Test
-screensaver.ui.feedback_url=mailto:screensaver-feedback@hms.harvard.edu
+screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
 
 babel.executable.path=/usr/local/openbabel/bin/babel
+
+# cellHTS2 report properties
+# The cellHTS2 report directory
+# is <appserver.dir>/webapps/screensaver/<cellHTS2report.filepath.prefix><screen result Id>
+cellHTS2report.filepath.prefix=cellHTS2/output/cellHts2_output_screenResultId_
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
