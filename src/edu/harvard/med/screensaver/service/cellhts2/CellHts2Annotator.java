@@ -13,11 +13,6 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
-
-import sg.edu.astar.bii.screensaver.util.DeleteDir;
-
 import edu.harvard.med.screensaver.analysis.cellhts2.CellHTS2;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
@@ -26,6 +21,10 @@ import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.util.DeleteDir;
+
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 public class CellHts2Annotator
 {

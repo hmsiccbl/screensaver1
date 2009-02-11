@@ -1,7 +1,11 @@
-package sg.edu.astar.bii.screensaver.util;
+package edu.harvard.med.screensaver.util;
 
 import java.io.File;
 
+
+/**
+ * @author Kian Loon Voon
+ */
 public class DeleteDir {
   public static void main(String args[]) {
     deleteDirectory(new File(args[0]));

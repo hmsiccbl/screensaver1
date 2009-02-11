@@ -1,4 +1,4 @@
-package sg.edu.astar.bii.screensaver.ui.screenresults.cellhts2;
+package edu.harvard.med.screensaver.ui.screenresults.cellhts2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,9 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 import org.apache.log4j.Logger;
 
+/**
+ * @author Siew Cheng Aw
+ */
 public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 {
 

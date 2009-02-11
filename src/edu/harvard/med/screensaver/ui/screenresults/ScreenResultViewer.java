@@ -14,10 +14,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
-import sg.edu.astar.bii.screensaver.ui.screenresults.cellhts2.CellHTS2Runner;
-import sg.edu.astar.bii.screensaver.util.DeleteDir;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -29,10 +25,14 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
 import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.screenresults.cellhts2.CellHTS2Runner;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
+import edu.harvard.med.screensaver.util.DeleteDir;
+
+import org.apache.log4j.Logger;
 
 
 /**
