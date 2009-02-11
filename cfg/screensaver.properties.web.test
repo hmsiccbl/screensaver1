@@ -16,6 +16,8 @@ screensaver.ui.application_name=Screensaver
 screensaver.ui.version=Test
 screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
 
+datatable.use_column_reorder_list_widget=false
+
 babel.executable.path=/usr/local/openbabel/bin/babel
 
 # cellHTS2 report properties

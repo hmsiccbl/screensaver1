@@ -78,7 +78,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     initialize(new InMemoryDataModel<R>(new NoOpDataFetcher<R,K,P>()),
                new ArrayList<TableColumn<R,?>>(),
                new RowsPerPageSelector(Arrays.asList(0)),
-               ScreensaverProperties.useReorderListInSearchTable());
+               ScreensaverProperties.useColumnReorderListWidgetInDataTable());
   }
 
   /**
@@ -97,7 +97,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     initialize(buildDataTableModel(dataFetcher, columns),
                columns,
                buildRowsPerPageSelector(),
-               ScreensaverProperties.useReorderListInSearchTable());               
+               ScreensaverProperties.useColumnReorderListWidgetInDataTable());               
   }
 
   // abstract methods

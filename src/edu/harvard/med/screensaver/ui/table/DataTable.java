@@ -81,12 +81,12 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   {}
 
   /**
-   * 
    * @param dataTableModel
    * @param columns
    * @param rowsPerPageSelector
-   * @param useReorderListWidget if true use the dual list based column selector with the ability to re-orde
-   *        (do NOT use the tree based column selector)
+   * @param useReorderListWidget if true use the dual list-based column selector
+   *          with the ability to re-order columns; if false, tree-based column
+   *          selector
    */
   public void initialize(DataTableModel<R> dataTableModel,
                          List<? extends TableColumn<R,?>> columns,
