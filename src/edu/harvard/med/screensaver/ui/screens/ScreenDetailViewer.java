@@ -25,6 +25,17 @@ import java.util.TreeSet;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+
+import edu.harvard.med.screensaver.ScreensaverProperties;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
@@ -903,4 +914,26 @@ public class ScreenDetailViewer extends StudyDetailViewer
     currentScreening.setVolumeTransferredPerWell(previousScreening.getVolumeTransferredPerWell());
     currentScreening.setConcentration(previousScreening.getConcentration());
   }
+  
+  @Override
+  public boolean isDeleteSupported()
+  {
+    return ScreensaverProperties.allowScreenDeletion();
+  }
+  
+  @UIControllerMethod
+  @Transactional
+  public String delete()
+  {
+    if( _screen.isDataLoaded() ) 
+    {
+      showMessage("screens.screenDeletionFailed.containsData", _screen.getScreenNumber());
+    }else {
+      _screenDao.deleteStudy(_screen);
+      showMessage("screens.deletedScreen", "screenDetailViewer");
+    }
+    _screensBrowser.searchAllScreens();
+    return BROWSE_SCREENS;
+  }
+  
 }

@@ -1,0 +1,171 @@
+# Log4J configuration, to be used during debugging
+
+# By default, Screensaver log level is 'debug', while other
+# technology-specific log levels are set to 'info', by default,
+# with the intention that the developer will edit their local
+# copy of this file when they want more detail
+
+### direct log messages to stdout ###
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %c:%L - %m%n
+
+### direct messages to file ###
+log4j.appender.file=org.apache.log4j.FileAppender
+log4j.appender.file.File=screensaver.log
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{ABSOLUTE} %5p %c{3}:%L - %m%n
+log4j.appender.file.append=true
+
+### Root logger
+
+log4j.rootLogger=info, stdout, file
+
+### User Activity logger
+
+log4j.logger.userActivity=info
+
+### Screensaver application
+
+log4j.logger.edu.harvard.med.screensaver=info
+#log4j.logger.edu.harvard.med.screensaver.db=debug
+log4j.logger.edu.harvard.med.screensaver.db.datafetcher=debug
+#log4j.logger.edu.harvard.med.screensaver.ui=debug
+#log4j.logger.edu.harvard.med.screensaver.io=debug
+#log4j.logger.edu.harvard.med.screensaver.ui.table=debug
+#log4j.logger.edu.harvard.med.screensaver.ui.searchresults=debug
+#log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=debug
+#log4j.logger.edu.harvard.med.screensaver.model=debug
+#log4j.logger.edu.harvard.med.screensaver.util.eutils=debug
+log4j.logger.edu.harvard.med.screensaver.ui.authentication=debug
+
+#log4j.logger.org.apache.commons.dbcp=debug
+#log4j.logger.springframework.jdbc=debug
+
+
+
+log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
+
+# filter out debug output that is especially verbose and common
+log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor=warn
+log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor=warn
+log4j.logger.edu.harvard.med.screensaver.db.SchemaUtil=debug
+log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl.EntityInflator=warn
+log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
+log4j.logger.edu.harvard.med.screensaver.io.libraries.compound.OpenBabelClient=info
+
+# avoid writing database passwords to the log!
+log4j.logger.edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer=info
+
+
+### Tomcat
+
+log4j.logger.org.apache.catalina.core=warn
+log4j.logger.org.apache.catalina.session=warn
+log4j.logger.org.apache.catalina.users=warn
+log4j.logger.org.apache.catalina.realm=warn
+log4j.logger.org.apache.coyote.tomcat=warn
+log4j.logger.org.apache.jasper.compiler=warn
+
+log4j.logger.javax.servlet=warn
+
+
+### Spring framework
+
+log4j.logger.org.springframework=error
+log4j.logger.org.springframework.orm.hibernate3=error
+#log4j.logger.org.springframework.aop=debug
+#log4j.logger.org.springframework.beans=debug
+
+### JavaServer Faces
+
+log4j.logger.org.apache.myfaces=error
+log4j.logger.org.apache.myfaces.application=error
+
+# hide silly warnings about obsolete JSP comment styles, in Tomahawk components
+log4j.logger.org.apache.myfaces.shared_tomahawk.taglib=error
+
+# following are suggestions from http://wiki.apache.org/myfaces/LoggingSettings
+
+# Show lifecycle phases as they occur
+log4j.logger.org.apache.myfaces.lifecycle.LifecycleImpl=warn
+
+# Show servlet invocation
+#log4j.logger.org.apache.myfaces.webapp.MyFacesServlet=warn
+#log4j.logger.javax.faces.webapp.FacesServlet=trace
+#log4j.logger.org.apache.myfaces.share_tomahawk.taglib=error
+
+# Facelets
+
+# For outputting debug information about the compilation process. This would include namespace resolution for TagLibraries and XML events. Most of the output will be FINE.
+#log4j.facelets.compiler=debug
+# Information about the inner workings of the FaceletFactory.
+#log4j.facelets.factory=info
+# Debug information that helps with component lifecycles in relation to Facelets.
+#log4j.facelets.tag.component=info
+# Output view-id mapping/resolution and the states of your views.
+log4j.facelets.viewhandler=info
+
+# Show navigation processing
+#log4j.logger.org.apache.myfaces.application.NavigationHandlerImpl=debug
+
+# Show modifications to Application
+#log4j.logger.org.apache.myfaces.application.ApplicationImpl=debug
+
+# Show unresolved variables (note: an error will be shown when the bean is Spring-managed but available via Spring)
+log4j.logger.org.apache.myfaces.el.VariableResolverImpl=error
+
+# Controls DebugUtils.traceView() output
+# controls the verbose output of the rendered JSF component tree
+#log4j.logger.org.apache.myfaces.util.DebugUtils=trace
+
+# To view the saving/restoring of a JSF view's component tree, and serlialization/deserialization of components' state
+#log4j.logger.org.apache.myfaces.application.jsp.JspStateManagerImpl=debug
+
+# HTML rendering related issues (e.g, no content type). Good setting during development
+log4j.logger.org.apache.myfaces.renderkit.html.HtmlResponseWriterImpl=warn
+
+
+### Hibernate
+
+log4j.logger.org.hibernate=warn
+log4j.logger.org.hibernate.impl.SessionImpl=warn
+# view load, save, etc. events on a per-entity basis
+#log4j.logger.org.hibernate.event=debug
+# low-level loading of entities, collections
+#log4j.logger.org.hibernate.loader=warn
+
+
+# log just the SQL - set this to "debug" to get all the SQL stmts
+#log4j.logger.org.hibernate.SQL=debug
+
+# log transaction activity (should set these all at once to same log level)
+#log4j.logger.org.hibernate.transaction=debug
+#log4j.logger.org.springframework.orm.hibernate3.HibernateTransactionManager=debug
+#log4j.logger.org.springframework.transaction=debug
+#log4j.logger.org.springframework.transaction.interceptor.TransactionInterceptor=info
+#log4j.logger.org.springframework.transaction.support.TransactionSynchronizationManager=debug
+
+
+### log JDBC bind parameters ###
+#log4j.logger.org.hibernate.type=trace
+
+### log schema export/update ###
+#log4j.logger.org.hibernate.tool.hbm2ddl=debug
+
+# log HQL parse trees
+#log4j.logger.org.hibernate.hql=debug
+
+# log HQL query parser activity
+#log4j.logger.org.hibernate.hql.ast.AST=debug
+
+# log cache activity
+#log4j.logger.org.hibernate.cache=debug
+
+# log JDBC resource acquisition
+#log4j.logger.org.hibernate.jdbc=debug
+
+# enable the following line if you want to track down connection
+# leakages when using DriverManagerConnectionProvider
+#log4j.logger.org.hibernate.connection.DriverManagerConnectionProvider=trace

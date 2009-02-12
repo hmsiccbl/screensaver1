@@ -591,6 +591,15 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     showMessage("applicationError", errorMessage);
   }
 
+  protected void reportApplicationError(String errorMessage, Throwable t)
+  {
+    log.error(errorMessage, t);
+    showMessage("applicationError", errorMessage);
+  }
+
+  /**
+   * @deprecated prefer the method {@link AbstractBackingBean#reportApplicationError(String, Throwable)}
+   */
   protected void reportApplicationError(Throwable throwable)
   {
     throwable.printStackTrace();

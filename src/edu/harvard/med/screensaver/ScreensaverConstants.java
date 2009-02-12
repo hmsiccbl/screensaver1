@@ -17,6 +17,7 @@ public interface ScreensaverConstants
   public static final String APPLICATION_VERSION_PROPERTY = "screensaver.ui.version";
   public static final String FEEDBACK_URL_PROPERTY = "screensaver.ui.feedback_url";
   public static final String DATATABLE_USE_COLUMN_REORDER_LIST_WIDGET = "datatable.use_column_reorder_list_widget";
+  public static final String SCREENS_ALLOW_DELETE = "screens.allow_delete";
   
   public static final String BUILD_NUMBER_FILE = "/build-number.txt";
   public static Color SCREENSAVER_THEME_COLOR = new Color(0x33, 0x66, 0x99);

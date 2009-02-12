@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.util.EditableViewer;
@@ -56,5 +57,20 @@ public abstract class AbstractEditableBackingBean
   public boolean isEditable()
   {
     return !isReadOnly();
+  }
+  
+  public boolean isDeleteSupported()
+  {
+    return false;
+  }
+  
+  @UIControllerMethod
+  @Transactional
+  /**
+   * @motivation provide a convenient default implementation as delete support is off by default
+   */
+  public String delete()
+  {
+    return null;
   }
 }

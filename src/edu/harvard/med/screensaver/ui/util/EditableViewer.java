@@ -35,6 +35,10 @@ public interface EditableViewer extends edu.harvard.med.screensaver.ui.EntityVie
   @Transactional
   public String save();
 
+  @UIControllerMethod
+  @Transactional
+  public String delete();
+
   /**
    * Return the ScreensaverUserRole that is allowed to edit the data contents of
    * the viewer.

@@ -16,6 +16,7 @@ screensaver.ui.version=Debug
 screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
 
 datatable.use_column_reorder_list_widget=false
+screens.allow_delete=false
 
 babel.executable.path=/usr/local/openbabel/bin/babel
 

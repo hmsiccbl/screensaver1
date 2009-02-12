@@ -301,8 +301,7 @@ public class Screen extends Study
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lead_screener")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE
   })
   @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensLed")
   public ScreeningRoomUser getLeadScreener()

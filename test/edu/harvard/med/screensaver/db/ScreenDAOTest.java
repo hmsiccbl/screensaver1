@@ -58,4 +58,22 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
     nextScreenNumber = screenDao.findNextScreenNumber();
     assertEquals(new Integer(2), nextScreenNumber);
   }
+  
+  public void testDelete()
+  {
+    Integer nextScreenNumber = screenDao.findNextScreenNumber();
+    assertEquals(new Integer(1), nextScreenNumber);
+    Screen screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
+    genericEntityDao.persistEntity(screen.getLabHead());
+    genericEntityDao.persistEntity(screen.getLeadScreener());
+    genericEntityDao.persistEntity(screen);
+
+    screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber));
+
+    Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber);
+    
+    assertNull("screen not deleted", screen1);
+    
+  }
+  
 }
