@@ -25,7 +25,7 @@
   </bean>
   
   <bean id="dataAccessPolicy"
-   class="edu.harvard.med.screensaver.ui.WebDataAccessPolicy">
+   class="edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy">
    <constructor-arg ref="currentScreensaverUser" />
   </bean>
   
