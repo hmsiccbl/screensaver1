@@ -14,7 +14,8 @@ testWriteReport1 <- function(debug=FALSE) {
 		debug(writeReport)
 	
 	##2. RUN METHOD WRITEREPORT #, TODO Add "scored"=rcanss
-	out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan), plotPlateArgs = FALSE,imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/")
+	out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan), plotPlateArgs = FALSE,imageScreenArgs = list(zrange=c( -4, 8), ar=1), 
+			map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/",progressReport=FALSE)
 	
 	## 3. CHECK
 	## TODO check for all the expected files, starting with index.html 
@@ -47,7 +48,8 @@ testWriteReportInclScored <- function(debug=FALSE) {
    ##2. RUN METHOD WRITEREPORT #, TODO Add "scored"=rcanss
    ## debug(imageScreen)
    ##,
-   out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan,"scored"=rcanss ), plotPlateArgs = FALSE, imageScreenArgs = list(ar=1), map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output2/")
+   out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan,"scored"=rcanss ), plotPlateArgs = FALSE, imageScreenArgs = list(ar=1), map=TRUE,
+		   force = TRUE, outdir = "/tmp/screensaver/output2/",progressReport=FALSE)
 
    ## 3. CHECK
    ## TODO check for all the expected files, starting with index.html 

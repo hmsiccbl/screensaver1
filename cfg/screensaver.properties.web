@@ -26,6 +26,8 @@ babel.executable.path=/usr/local/openbabel/bin/babel
 # The cellHTS2 report directory
 # is <appserver.dir>/webapps/screensaver/<cellHTS2report.filepath.prefix><screen result Id>
 cellHTS2report.filepath.prefix=cellHTS2/output/cellHts2_output_screenResultId_
+#parameter setting cellHTS2 function writeReport for showing progress window. 
+cellHTS2report.writeReport.progressReport=FALSE
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost

@@ -20,12 +20,11 @@ import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
-import org.rosuda.REngine.REXPNull;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -763,9 +762,22 @@ public class CellHTS2 {
 
     // 2. RUN R METHOD WRITEREPORT AND RETRIEVE
     // TODO ADD "scored"=rcanss
+    String progressReport = ScreensaverProperties.getProperty("cellHTS2report.writeReport.progressReport");
+    if (progressReport == null) {
+      progressReport = "TRUE";
+    }else {
+       if (progressReport.equals("FALSE") || progressReport.equals("TRUE") ) {
+         ;
+       }else {
+         log.warn("In screensaver.properties the value for cellHTS2report.writeReport.progressReport is not valid. Only FALSE or TRUE are valid. " +
+            "Given value is: " + progressReport + ". Value set to TRUE in this run.");
+         progressReport = "TRUE";
+       }
+    }
+    
     String rExpr = "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan), plotPlateArgs = FALSE,"
         + "imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = \""
-        + this.reportOutputPath + "\")";
+        + this.reportOutputPath + "\",progressReport="+ progressReport + ")";
 
     RserveExtensions rserveExtensions = new RserveExtensions();
     String indexUrl = rserveExtensions.tryEval(rConnection, rExpr).asString();
