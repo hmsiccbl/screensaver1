@@ -165,6 +165,18 @@
   <listener>
     <listener-class>org.apache.myfaces.webapp.StartupServletContextListener</listener-class>
   </listener>
+  
+  <!-- servlet to present cellHTS2 output documents from an file location outside the webapps subdirectory -->
+   <servlet>
+     <servlet-name>dataservlet</servlet-name>
+   	 <servlet-class>edu.harvard.med.screensaver.analysis.cellhts2.DataServlet</servlet-class>
+   </servlet>
+   
+   <servlet-mapping>
+     <servlet-name>dataservlet</servlet-name>
+     <url-pattern>/cellHTS2/output/*</url-pattern>
+   </servlet-mapping>
+  
 
   <context-param>
     <description>

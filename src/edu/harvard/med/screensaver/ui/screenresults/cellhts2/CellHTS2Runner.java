@@ -61,7 +61,8 @@ public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 	public void setScreenResult(ScreenResult screenResult)
 	{
 		_screenResult = screenResult;
-		_screenResultFilePath = WEBAPP_ROOT + ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + screenResult.getScreenResultId();
+		_screenResultFilePath = ScreensaverProperties.getProperty("cellHTS2report.filepath.base")
+		  + ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + screenResult.getScreenResultId();
 	}
 
 	public ScreenResult getScreenResult()

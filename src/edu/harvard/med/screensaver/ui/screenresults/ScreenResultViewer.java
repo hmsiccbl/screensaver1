@@ -141,7 +141,9 @@ public class ScreenResultViewer extends AbstractEditableBackingBean
     }
     else {
       _resultValueTypesTable.initialize(screenResult.getResultValueTypesList());
-      _cellHTS2ReportFilePath = WEBAPP_ROOT + ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + screenResult.getScreenResultId();
+      _cellHTS2ReportFilePath = ScreensaverProperties.getProperty("cellHTS2report.filepath.base") + 
+         ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + 
+         screenResult.getScreenResultId();
     }
   }
 
