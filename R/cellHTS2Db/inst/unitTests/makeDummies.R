@@ -211,6 +211,9 @@ makeTestSet2 <- function() {
 	
 }
 
+
+
+	
 makeIntensityFiles2 <- function() {
 	nrPlates = 2
 	nrReps=2
@@ -241,6 +244,74 @@ makeIntensityFiles2 <- function() {
 	return(intensityFilesTarget)
 	
 }
+
+
+#Test set especially created for writeReport. In the report the "Screen-wide image plot of the scored values"
+# must have a minimal width, because otherwise there will be an error due to the plotting of the colorbar below the image
+# An image of one plate with 384 wells will do. I took from the KcViab example of cellHTS2 the file FT01-GO1.txt
+
+makeTestSet3 <- function() {
+	#1. PARAMETERS FOR THE READPLATELIST
+	## A. GENERAL
+	nrWells = 384
+	nrPlates = 1
+	nrReps = 1
+	nrChannels = 1
+	
+	xraw <- array(as.numeric(NA), dim=c(nrWells,nrPlates,nrReps,nrChannels))
+	
+	d <- read.table(file="../inst/unitTests/FT01-G01.txt", sep="\t", header=TRUE, stringsAsFactors=FALSE, na.string="", quote="\"", fill=FALSE)
+	
+	#plate 1, replicate 1
+	xraw[,1,1,] <- d$value
+	
+	## 1.1 READPLATELISTCOMMON
+	## dimPlate
+	dimPlate <-  c(nrow=as.integer(16), ncol=as.integer(24))
+	
+	## pd
+	vFileNames <- "FT01-G01.txt"
+	vPlates <- c(1)
+	vRep <- c(1)
+	vChannel <- c(1)
+	
+	pd <- data.frame(Filename=vFileNames, Plate=as.integer(vPlates) , Replicate=as.integer(vRep) ,Channel=as.integer(vChannel),stringsAsFactors=FALSE)
+	
+	## status		
+	status =  rep("OK",nrow(pd))
+	intensityFiles = vector(mode="list", length=nrPlates * nrReps * nrChannels)
+	names(intensityFiles) <- "FT01-G01.txt"
+	intensityFiles[[1]] <- I(paste(d$filename,d$well,d$value,sep="\t"))
+	
+	#2. CONF PARAMETER FOR THE CONFIGURATION
+	## Wells: 384
+	## Plates: 57
+	## Plate	Well	Content
+	## *	*	sample
+	## *	A0[1-2]	other
+	## *	B01	neg
+	## *	B02	pos
+	conf <- data.frame(Plate=c("*","*","*","*"), Well=c("*","A0[1-2]","B01","B02"), Content=c("sample","other","neg","pos"),stringsAsFactors=FALSE)
+	
+	
+	#3. ANNOTATION
+	##  geneIDs : Same content als de geneID file  f.e.
+	##		Plate	Well	HFAID		GeneID
+	##		1		A01					MOCK
+	##		1		A02		NM_018243	SEPT11
+	##	but now in a 'data.frame', with NA for empty values:
+	##$ Plate : int  1 1 1 ...
+	##$ Well  : chr  "A01" "A02" "B01" "B02" (one character and two digits)
+	##$ HFAID : chr  NA "NM_018243"	NA NM_001777"	
+	##$ GeneID: chr  "MOCK" "SEPT11" "MOCK ""CD47"
+	##----------------------------------------	
+	geneIDs <- read.table(file="../inst/unitTests/KcViab_geneIds.txt", sep="\t", header=TRUE, stringsAsFactors=FALSE, na.string="", quote="\"", fill=FALSE)
+	
+	testSet <- list(xraw=xraw, dimPlate=dimPlate, pd=pd, status=status, intensityFiles=intensityFiles,
+			nrRowsPlate=16, nrColsPlate=24, name="Dummy_experiment 3", conf=conf, geneIDs=geneIDs)
+	
+}
+
 
 makeReadPlateListTarget <- function() {
 	

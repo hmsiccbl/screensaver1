@@ -775,7 +775,7 @@ public class CellHTS2 {
        }
     }
     
-    String rExpr = "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan), plotPlateArgs = FALSE,"
+    String rExpr = "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan,\"scored\"=rcanss), plotPlateArgs = TRUE,"
         + "imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = \""
         + this.reportOutputPath + "\",progressReport="+ progressReport + ")";
 

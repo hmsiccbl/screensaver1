@@ -531,7 +531,7 @@ public class CellHTS2Test extends AbstractSpringTest
     REXPMismatchException
   {
     // 1. PREPARE INPUT
-    ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult();
+    ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult(false,false,3);
     String title = "Dummy_Experiment";
     String indexUrl = null;
     CellHTS2 cellHts2 = null;

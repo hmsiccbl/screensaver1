@@ -5,7 +5,7 @@ testWriteReport1 <- function(debug=FALSE) {
 	
 	##1. PREPARE INPUT
 	source("../inst/unitTests/createRca.R")
-	rca <- createRca()
+	rca <- createRca(3)
 	rcan <- normalizePlates(rca,method="median");
 	rcans <- scoreReplicates(rcan, method="zscore")
 	rcanss <- summarizeReplicates(rcans,summary="mean");
@@ -13,9 +13,12 @@ testWriteReport1 <- function(debug=FALSE) {
 	if (debug) 
 		debug(writeReport)
 	
-	##2. RUN METHOD WRITEREPORT #, TODO Add "scored"=rcanss
-	out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan), plotPlateArgs = FALSE,imageScreenArgs = list(zrange=c( -4, 8), ar=1), 
-			map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/",progressReport=FALSE)
+	##2. RUN METHOD WRITEREPORT #, TODO Add "scored"=rcanss. Currently not possible. The location for some text is
+	## calculated and failed in case to few samples.
+	## .. 
+
+	out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan,"scored"=rcanss), plotPlateArgs = TRUE, 
+			 imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/",progressReport=FALSE)
 	
 	## 3. CHECK
 	## TODO check for all the expected files, starting with index.html 

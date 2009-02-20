@@ -4,9 +4,12 @@ createRca <- function(testSet=1,withSlog =FALSE) {
 	source("../inst/unitTests/makeDummies.R")
 	if (testSet==1){
 		testSet <- makeTestSet(withSlog)
-	} else {
+	}else if (testSet==2){
 		testSet <- makeTestSet2()
+	}else if (testSet==3) {
+		testSet <- makeTestSet3()		
 	}
+		
 	xrawd <- dim(testSet$xraw)
 	r <- readPlateListDb(testSet$xraw, testSet$name, testSet$nrRowsPlate, testSet$nrColsPlate)
 	
