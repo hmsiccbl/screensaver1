@@ -78,6 +78,11 @@ public interface ScreensaverConstants
   public static final int LIBRARY_UPLOAD_RUNNING = 1;
   public static final int LIBRARY_UPLOAD_FAILED = 3;
   public static final int LIBRARY_UPLOAD_IDLE = -1;
+  /**
+   * Note: If you configure a larger default PlateSize, be sure to update
+   * @Column(length=3) on WellName.getName() so that length is large enough to
+   * accommodate multi-letter row labels.
+   */
   public static final PlateSize DEFAULT_PLATE_SIZE = PlateSize.WELLS_384;
   public static final int PLATE_NUMBER_LEN = 5;
   public static final int VOLUME_PRECISION = 10;
