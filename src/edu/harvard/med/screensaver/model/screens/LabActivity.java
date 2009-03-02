@@ -25,11 +25,11 @@ import javax.persistence.Transient;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.Concentration;
 import edu.harvard.med.screensaver.model.ConcentrationUnit;
 import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 
@@ -82,7 +82,7 @@ public abstract class LabActivity extends Activity
    * Get the volume transferred per well
    * @return the volume transferred per well
    */
-  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
+  @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
   public Volume getVolumeTransferredPerWell()
   {
@@ -115,7 +115,7 @@ public abstract class LabActivity extends Activity
    * Get the concentration
    * @return the concentration
    */
-  @Column(precision=Well.CONCENTRATION_PRECISION, scale=Well.CONCENTRATION_SCALE)
+  @Column(precision=ScreensaverConstants.CONCENTRATION_PRECISION, scale=ScreensaverConstants.CONCENTRATION_SCALE)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.ConcentrationType") 
   public Concentration getConcentration()
   {

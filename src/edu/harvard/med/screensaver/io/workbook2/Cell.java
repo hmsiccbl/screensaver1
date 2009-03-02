@@ -13,6 +13,8 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import edu.harvard.med.screensaver.util.AlphabeticCounter;
+
 import jxl.BooleanCell;
 import jxl.CellType;
 import jxl.DateCell;
@@ -178,37 +180,6 @@ public class Cell
   }
   
 
-  // static methods
-
-  public static String columnIndexToLabel(int columnIndex)
-  {
-    String columnLabel = "";
-    if (columnIndex >= 26) {
-      columnLabel += (char) ('A' + (columnIndex / 26) - 1);
-    }
-    columnLabel += (char) ('A' + (columnIndex % 26));
-    return columnLabel;
-  }
-
-  public static int columnLabelToIndex(String columnLabel)
-    throws IllegalArgumentException
-  {
-    if (!columnLabel.matches("^[A-Za-z][A-Za-z]?$")) {
-      throw new IllegalArgumentException("malformed column label string:" + columnLabel);
-    }
-    
-    columnLabel = columnLabel.toUpperCase();
-    int columnIndex= 1;
-    if (columnLabel.length() == 2) {
-      columnIndex = 26 * (columnLabel.charAt(0) - 'A' + 1) + (columnLabel.charAt(1) - 'A');
-    }
-    else if (columnLabel.length() == 1) {
-      columnIndex = columnLabel.charAt(0) - 'A';
-    }
-    return columnIndex;
-  }
-
-  
   // public methods
   
   /**
@@ -246,10 +217,9 @@ public class Cell
   
   public String getFormattedRowAndColumn()
   {
-
     _formattedRowAndColumnBuilder.setLength(0);
     _formattedRowAndColumnBuilder.append('(');
-    _formattedRowAndColumnBuilder.append(columnIndexToLabel(_column));
+    _formattedRowAndColumnBuilder.append(AlphabeticCounter.toLabel(_column));
     _formattedRowAndColumnBuilder.append(',');
     _formattedRowAndColumnBuilder.append(Integer.toString(_row + 1));
     _formattedRowAndColumnBuilder.append(')');

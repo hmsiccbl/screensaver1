@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -185,5 +186,23 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
     });
   }
   
+  public void testWellEdge()
+  {
+    Library library = new Library("dummy",
+                                  "shortDummy",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  1,
+                                  ScreensaverConstants.DEFAULT_PLATE_SIZE);
+    for (int row = 0; row <= library.getPlateSize().getRows(); ++row) {
+      for (int col = 0; col < library.getPlateSize().getColumns(); ++col) {
+        WellName wellName = new WellName(row, col);
+        assertEquals("is edge @ " + wellName,
+                     row == 0 || row == ScreensaverConstants.DEFAULT_PLATE_SIZE.getRows() - 1 || 
+                     col == 0 || col == ScreensaverConstants.DEFAULT_PLATE_SIZE.getColumns() - 1);
+      }
+    }
+  }
 }
 

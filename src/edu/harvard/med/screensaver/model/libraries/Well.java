@@ -12,7 +12,6 @@
 package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,44 +71,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public static final Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
 
   public static final Well NULL_WELL = new Well();
-
-  // constants for well names
-  // note that these can be hardcoded for now, since we only support 384 well plates
-  public static final int MIN_WELL_COLUMN = 1;
-  public static final int MAX_WELL_COLUMN = 24;
-  public static final char MIN_WELL_ROW = 'A';
-  public static final char MAX_WELL_ROW = 'P';
-  public static final int PLATE_ROWS = (MAX_WELL_ROW - MIN_WELL_ROW) + 1;
-  public static final int PLATE_COLUMNS = (MAX_WELL_COLUMN - MIN_WELL_COLUMN) + 1;
-  public static final int PLATE_NUMBER_LEN = 5;
-  public static final int PLATE_ROWS_DEFAULT = 16;
-  public static final int PLATE_COLUMNS_DEFAULT = 24;
-  /**
-   * The number of decimal places used when recording volume values.
-   */
-  public static final int VOLUME_PRECISION = 10;
-  public static final int VOLUME_SCALE = 9;
-
-  public static final int CONCENTRATION_PRECISION = 12;
-  public static final int CONCENTRATION_SCALE = 9;
-
-  public static final Collection<Integer> PLATE_COLUMNS_LIST;
-
-  static {
-    ArrayList<Integer> plateColumnsList = new ArrayList<Integer>();
-    for (int i = Well.MIN_WELL_COLUMN; i <= Well.MAX_WELL_COLUMN; i++) {
-      plateColumnsList.add(i);
-    }
-    PLATE_COLUMNS_LIST = Collections.unmodifiableList(plateColumnsList);
-  }
-  public static final Collection<Character> PLATE_ROWS_LIST;
-  static {
-    ArrayList<Character> plateRowsList = new ArrayList<Character>();
-    for (char i = Well.MIN_WELL_ROW; i <= Well.MAX_WELL_ROW; i++) {
-      plateRowsList.add(i);
-    }
-    PLATE_ROWS_LIST = Collections.unmodifiableList(plateRowsList);
-  }
 
   public static boolean isValidWellName(String wellName)
   {
@@ -479,7 +440,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   {
     return _deprecationActivity != null;
   }
-  
+
   public void setDeprecated(boolean isDeprecated) {
   }
 
@@ -612,16 +573,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   }
 
   /**
-   * Get the row letter of this well.
-   * @return the row letter of this well
-   */
-  @Transient
-  public char getRowLetter()
-  {
-    return (char) (_wellKey.getRow() + MIN_WELL_ROW);
-  }
-
-  /**
    * Get the <i>zero-based</i> column index of this well.
    * @return the <i>zero-based</i> column index of this well
    */
@@ -638,9 +589,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   @Transient
   public boolean isEdgeWell()
   {
-    // TODO: use plate size/layout to determine this dynamically
-    return _wellKey.getRow() == 0 || _wellKey.getRow() == PLATE_ROWS - 1 ||
-    _wellKey.getColumn() == 0 || _wellKey.getColumn() == PLATE_COLUMNS - 1;
+    return _wellKey.getRow() == 0 || _wellKey.getRow() == _library.getPlateSize().getRows() - 1 ||
+    _wellKey.getColumn() == 0 || _wellKey.getColumn() == _library.getPlateSize().getColumns() - 1;
   }
 
 

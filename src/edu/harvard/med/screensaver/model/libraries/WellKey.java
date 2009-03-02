@@ -16,6 +16,8 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -37,7 +39,8 @@ public class WellKey implements Comparable/*, Serializable*/
   private static Logger log = Logger.getLogger(WellKey.class);
 
   private static final Pattern keyPattern = Pattern.compile("(\\d+):(.*)");
-  private static final String wellKeyFormat = "%0" + Well.PLATE_NUMBER_LEN + "d:%s";
+  private static final String plateNumberLabelFormat = "%0" + ScreensaverConstants.PLATE_NUMBER_LEN + "d";
+  private static final String wellKeyFormat = plateNumberLabelFormat + ":%s";
 
 
   // instance data members
@@ -95,6 +98,17 @@ public class WellKey implements Comparable/*, Serializable*/
     return _plateNumber;
   }
 
+  @Transient
+  public String getPlateNumberLabel()
+  {
+    return getPlateNumberLabel(_plateNumber);
+  }
+
+  public static String getPlateNumberLabel(int plateNumber)
+  {
+    return String.format(plateNumberLabelFormat, plateNumber);
+  }
+
   public void setPlateNumber(int plateNumber)
   {
     _plateNumber = plateNumber;
@@ -125,8 +139,8 @@ public class WellKey implements Comparable/*, Serializable*/
   public int hashCode()
   {
     if (_hashCode == -1) {
-      _hashCode = _plateNumber * (Well.PLATE_ROWS * Well.PLATE_COLUMNS) +
-      _wellName.getRowIndex() * Well.PLATE_COLUMNS +
+      _hashCode = _plateNumber * PlateSize.MAX_PLATE_SIZE.getWellCount() +
+      _wellName.getRowIndex() * PlateSize.MAX_PLATE_SIZE.getColumns() + 
       _wellName.getColumnIndex();
     }
     return _hashCode;
@@ -160,6 +174,7 @@ public class WellKey implements Comparable/*, Serializable*/
     return _wellName.toString();
   }
 
+  
   // private methods
 
   /**
@@ -177,6 +192,5 @@ public class WellKey implements Comparable/*, Serializable*/
     }
     resetDerivedValues();
   }
-
 }
 

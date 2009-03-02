@@ -186,18 +186,18 @@ public class MakeDummyEntities
     if (nPlates > 1000) {
       throw new IllegalArgumentException("too many plates requested");
     }
-    int nWells = nPlates * (Well.PLATE_COLUMNS * Well.PLATE_ROWS);
     Library library = new Library("library " + id,
                                   "l" + id,
                                   screenType,
                                   LibraryType.COMMERCIAL,
                                   startPlate,
                                   endPlate);
+    int nWells = nPlates * library.getPlateSize().getWellCount();
     List<Well> wells = new ArrayList<Well>(nWells);
     for (int i = 0; i < nWells; ++i) {
-      int plate = startPlate + (i / (Well.PLATE_COLUMNS * Well.PLATE_ROWS));
-      int row = (i % (Well.PLATE_COLUMNS * Well.PLATE_ROWS)) / Well.PLATE_COLUMNS;
-      int col = (i % (Well.PLATE_COLUMNS * Well.PLATE_ROWS)) % Well.PLATE_COLUMNS;
+      int plate = startPlate + (i / library.getPlateSize().getWellCount());
+      int row = (i % library.getPlateSize().getWellCount()) / library.getPlateSize().getColumns();
+      int col = (i % library.getPlateSize().getWellCount()) % library.getPlateSize().getColumns();
       WellKey wellKey = new WellKey(plate, row, col);
       Well well = library.createWell(wellKey, WellType.EXPERIMENTAL);
       if (library.getScreenType() == ScreenType.RNAI) {

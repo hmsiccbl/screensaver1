@@ -61,6 +61,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericaln
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.util.AlphabeticCounter;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -218,7 +219,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * via {@link #getErrors}. The returned <code>ScreenResult</code> may only
    * be partially populated if errors are encountered, so always call
    * getErrors() to determine parsing success.
-   * 
+   *
    * @param screen the parent Screen of the Screen Result being parsed
    * @param workbookFile the workbook file to be parsed
    * @param plateNumberRange the range of plate numbers to be parsed, allowing for only a subset
@@ -271,8 +272,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @motivation For use by the web application UI; the InputStream allows us to
    *             avoid making (another) temporary copy of the file.
    */
-  public ScreenResult parse(Screen screen, 
-                            String inputSourceName, 
+  public ScreenResult parse(Screen screen,
+                            String inputSourceName,
                             InputStream inputStream)
   {
     return doParse(screen,
@@ -573,7 +574,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       try {
         if (forColumnInRawDataWorksheet != null) {
           _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
-                                                (short) Cell.columnLabelToIndex(forColumnInRawDataWorksheet));
+                                                (short) AlphabeticCounter.toIndex(forColumnInRawDataWorksheet));
           ResultValueType rvt = screenResult.getResultValueTypesList().get(iDataHeader);
           _dataTableColumnLabel2RvtMap.put(forColumnInRawDataWorksheet, rvt);
         }
@@ -620,7 +621,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       while (rowIter.hasNext()) {
         Integer iRow = rowIter.next();
         WellKey wellKey = rowIter.getWellKey();
-        if (plateNumberRange == null || plateNumberRange.containsInteger(wellKey.getPlateNumber())) { 
+        if (plateNumberRange == null || plateNumberRange.containsInteger(wellKey.getPlateNumber())) {
           Well well = rowIter.getWell();
           AssayWellType assayWellType = _assayWellTypeParser.parse(dataCell(iRow, DataColumn.ASSAY_WELL_TYPE));
           List<ResultValueType> wellExcludes = _excludeParser.parseList(dataCell(iRow, DataColumn.EXCLUDE));
@@ -822,7 +823,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return _iRow;
     }
 
-    private WellKey parseWellKey(int iRow) 
+    private WellKey parseWellKey(int iRow)
     {
       // TODO: dataCell() call assumes initializeDataSheet() has been called before this iterator object is used! (bad!)
       Integer plateNumber = _plateNumberParser.parse(dataCell(iRow,
@@ -1004,11 +1005,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return _columnLabel2RvtMap.get(columnLabel);
     }
   }
-  
+
   private class DerivedFromParser extends ColumnLabelsParser
   {
-    
-    public DerivedFromParser(Map<String,ResultValueType> columnLabel2RvtMap, 
+
+    public DerivedFromParser(Map<String,ResultValueType> columnLabel2RvtMap,
                              ParseErrorManager errors)
     {
       super(columnLabel2RvtMap, errors);

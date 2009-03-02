@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.util.List;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -50,13 +51,11 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     List<ResultValue> result = runQuery(new edu.harvard.med.screensaver.db.Query() {
       public List<?> execute(Session session)
       {
-        String hql = "select r from ResultValue r where r.resultValueType.id = :rvtId and r.well.id >= :firstWell and r.well.id <= :lastWell";
+        String hql = "select r from ResultValue r where r.resultValueType.id = :rvtId and r.well.id >= :firstWellInclusive and r.well.id < :lastWellExclusive";
         Query query = session.createQuery(hql);
         query.setParameter("rvtId", rvt.getEntityId());
-        query.setParameter("firstWell", new WellKey(plateNumber, 0, 0).toString());
-        query.setParameter("lastWell", new WellKey(plateNumber, 
-                                                      Well.MAX_WELL_ROW - Well.MIN_WELL_ROW, 
-                                                      Well.MAX_WELL_COLUMN - Well.MIN_WELL_COLUMN).toString());
+        query.setParameter("firstWellInclusive", new WellKey(plateNumber, 0, 0).toString());
+        query.setParameter("lastWellExclusive", new WellKey(plateNumber + 1, 0, 0).toString());
         return query.list();
       }
     });

@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.analysis.AggregateFunction;
 import edu.harvard.med.screensaver.analysis.Filter;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -51,12 +53,13 @@ public class HeatMap
   
   private Map<WellKey,ResultValue> _resultValues;
   private int _plateNumber;
+  private PlateSize _plateSize;
   private ScalableColorFunction _scalableColorFunction;
   private AggregateFunction<Double> _scoringFunc;
   private DescriptiveStatisticsImpl _statistics;
   private double _median;
 
-
+  
   // public constructors and methods
   
   /**
@@ -67,6 +70,7 @@ public class HeatMap
    * @param colorFunction maps a range of continuous values to colors
    */
   public HeatMap(int plateNumber,
+                 PlateSize plateSize,
                  Map<WellKey,ResultValue> resultValues,
                  Filter<Pair<WellKey,ResultValue>> scoringFilter,
                  AggregateFunction<Double> scoringFunc,
@@ -74,6 +78,7 @@ public class HeatMap
   {
     _resultValues = resultValues;
     _plateNumber = plateNumber;
+    _plateSize = plateSize;
     _scalableColorFunction = new ScalableColorFunction(colorFunction);
     _scoringFunc = scoringFunc;
     initialize(scoringFilter, scoringFunc);
@@ -160,16 +165,11 @@ public class HeatMap
     return _statistics.getSkewness();
   }
 
-  public int getRowCount()
+  public PlateSize getPlateSize()
   {
-    return (Well.MAX_WELL_ROW - Well.MIN_WELL_ROW) + 1;
+    return _plateSize;
   }
 
-  public int getColumnCount()
-  {
-    return Well.MAX_WELL_COLUMN;
-  }
- 
   
   // private methods
 

@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -74,7 +75,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         // each assertion (below), since we can set the starting volume of each
         // plate independently
 
-        Library library = makeRNAiDuplexLibrary("library1", 1, 6, 1);
+        Library library = makeRNAiDuplexLibrary("library1", 1, 6, PlateSize.WELLS_96);
         genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
@@ -147,7 +148,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
@@ -210,7 +211,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     final Volume requestVolume = new Volume(12);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         Copy copy1 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         copy1.createCopyInfo(1, "loc1", PlateType.EPPENDORF, requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         Copy copy2 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
@@ -258,7 +259,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
@@ -354,7 +355,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     final Volume requestVolume = new Volume(10);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         Copy copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         copy.createCopyInfo(1, "loc1", PlateType.EPPENDORF, requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         genericEntityDao.saveOrUpdateEntity(library);
@@ -406,7 +407,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     final Volume requestVolume = new Volume(10);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = makeRNAiDuplexLibrary("library", 1, 1, 384);
+        Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         Copy copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         copy.createCopyInfo(1, "loc1", PlateType.EPPENDORF, requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
         genericEntityDao.saveOrUpdateEntity(library);
@@ -471,14 +472,14 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   
   // utility methods
 
-  public static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, int wellsPerPlate)
+  public static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, PlateSize plateSize)
   {
     Library library = new Library(name, name, ScreenType.RNAI, LibraryType.COMMERCIAL, startPlate, endPlate);
     NEXT_PLATE:
     for (int plateNumber = startPlate; plateNumber <= endPlate; plateNumber++) {
-      int wellsToCreateOnPlate = wellsPerPlate;
-      for (int iRow = 0; iRow < Well.PLATE_ROWS; iRow++) {
-        for (int iCol = 0; iCol < Well.PLATE_COLUMNS; iCol++) {
+      int wellsToCreateOnPlate = plateSize.getWellCount();
+      for (int iRow = 0; iRow < plateSize.getRows(); iRow++) {
+        for (int iCol = 0; iCol < plateSize.getColumns(); iCol++) {
           makeRNAiWell(library, plateNumber, new WellName(iRow, iCol));
           if (--wellsToCreateOnPlate <= 0) {
             continue NEXT_PLATE;

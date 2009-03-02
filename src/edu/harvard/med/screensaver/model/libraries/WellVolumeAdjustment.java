@@ -25,6 +25,7 @@ import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Activity;
@@ -169,7 +170,7 @@ public class WellVolumeAdjustment extends AbstractEntity
    * Get the volume
    * @return the volume
    */
-  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE, nullable=false, updatable=false)
+  @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE, nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
   public Volume getVolume()

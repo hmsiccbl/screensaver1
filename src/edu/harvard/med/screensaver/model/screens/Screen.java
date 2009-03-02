@@ -1306,6 +1306,7 @@ public class Screen extends Study
    * @return the assay readout types
    */
   @Transient
+  // TODO: this is really a property of the ScreenResult; should move into ScreenResult
   public Set<AssayReadoutType> getAssayReadoutTypes()
   {
     Set<AssayReadoutType> assayReadoutTypes = new HashSet<AssayReadoutType>();

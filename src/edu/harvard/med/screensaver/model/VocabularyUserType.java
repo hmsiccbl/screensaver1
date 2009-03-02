@@ -2,7 +2,7 @@
 // $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-// 
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -26,14 +26,14 @@ import org.hibernate.usertype.UserType;
  * VocabularyTerms}. This abstract superclass provides all the functionality
  * to make the <code>VocabularyTerms</code> work as Hibernate types. All it
  * needs to know are the <code>Enum.values()</code> array of vocabulary terms.
- * 
+ *
  * <p>
  *
  * Let's say the name of the <code>VocabularyTerm</code> subclass is
  * <code>term.VTS</code>. In order to make <code>term.VTS</code> function
  * properly, two things need to be done. First, declare a static nested class
  * like so:
- * 
+ *
  * <pre>
  *   public static class UserType extends VocabularyUserType<VTS> {
  *     public UserType() {
@@ -44,7 +44,7 @@ import org.hibernate.usertype.UserType;
  *
  * Second, every entity property that has type <code>term.VTS</code> must be
  * Hibernate-annotated with the <code>UserType</code>. For example:
- * 
+ *
  * <pre>
  *   @org.hibernate.annotations.Type(
  *     type="term.VTS$UserType"
@@ -59,45 +59,45 @@ implements UserType
 {
 
   // private static fields
-  
+
   private static final int[] SQL_TYPES = {Types.CLOB};
-  
-  
+
+
   // private instance fields
-  
+
   private Map<String,VT> _valueToTerm = new HashMap<String,VT>();
-  
-  
+
+
   // protected constructor
-  
+
   protected VocabularyUserType(VT [] vocabularyTerms)
   {
     for (VT vocabularyTerm : vocabularyTerms) {
       _valueToTerm.put(vocabularyTerm.getValue(), vocabularyTerm);
     }
   }
-  
-  
+
+
   // public method for general use
-  
+
   public VT getTermForValue(String value)
   {
     return _valueToTerm.get(value);
   }
-  
-  
-  // public instance methods that implement UserType  
+
+
+  // public instance methods that implement UserType
 
   /* (non-Javadoc)
    * @see org.hibernate.usertype.UserType#sqlTypes()
    */
   public int[] sqlTypes() { return SQL_TYPES; }
-  
+
   /* (non-Javadoc)
    * @see org.hibernate.usertype.UserType#returnedClass()
    */
   public Class returnedClass() { return VocabularyTerm.class; }
-  
+
   /* (non-Javadoc)
    * @see org.hibernate.usertype.UserType#equals(java.lang.Object, java.lang.Object)
    */
@@ -105,8 +105,8 @@ implements UserType
     if (x == y) {
       return true;
     }
-    if (null == x || null == y) { 
-      return false; 
+    if (null == x || null == y) {
+      return false;
     }
     return x.equals(y);
   }
@@ -136,6 +136,7 @@ implements UserType
       statement.setNull(index, Types.CLOB);
     }
     else {
+      // TODO: value.toString() should be value.getValue(), otherwise concrete class must implement toString() as delegate to getValue(), which is not a documented requirement of this class
       statement.setString(index, value.toString());
     }
   }
@@ -144,7 +145,7 @@ implements UserType
    * @see org.hibernate.usertype.UserType#deepCopy(java.lang.Object)
    */
   public Object deepCopy(Object value) { return value; }
-  
+
   /* (non-Javadoc)
    * @see org.hibernate.usertype.UserType#isMutable()
    */
@@ -164,7 +165,7 @@ implements UserType
     throws HibernateException {
     return cached;
   }
-  
+
   /* (non-Javadoc)
    * @see org.hibernate.usertype.UserType#replace(java.lang.Object, java.lang.Object, java.lang.Object)
    */

@@ -36,12 +36,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -83,20 +85,6 @@ public abstract class CherryPickRequest extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(CherryPickRequest.class);
   private static final long serialVersionUID = 0L;
-
-  private static final Set<WellName> DEFAULT_EMPTY_WELL_NAMES = new HashSet<WellName>();
-  static {
-    for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; ++row) {
-      for (int col = Well.MIN_WELL_COLUMN; col <= Well.MAX_WELL_COLUMN; ++col) {
-        if (row == Well.MIN_WELL_ROW || row == (char) (Well.MIN_WELL_ROW + 1) ||
-          row == Well.MAX_WELL_ROW || row == (char) (Well.MAX_WELL_ROW - 1) ||
-          col == Well.MIN_WELL_COLUMN || col == Well.MIN_WELL_COLUMN + 1 ||
-          col == Well.MAX_WELL_COLUMN || col == Well.MAX_WELL_COLUMN - 1) {
-          DEFAULT_EMPTY_WELL_NAMES.add(new WellName(row, col));
-        }
-      }
-    }
-  }
 
 
   // private instance data
@@ -536,7 +524,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Get the requested transferVolumePerWell.
    * @return the transferVolumePerWell
    */
-  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
+  @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
   public Volume getTransferVolumePerWellRequested()
   {
@@ -559,7 +547,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * Get the approved transferVolumePerWell.
    * @return the transferVolumePerWell
    */
-  @Column(precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
+  @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
   public Volume getTransferVolumePerWellApproved()
   {
@@ -820,7 +808,21 @@ public abstract class CherryPickRequest extends AbstractEntity
     if (getDefaultAssayPlateType() != null) {
       setAssayPlateType(getDefaultAssayPlateType());
     }
-    addEmptyWellsOnAssayPlate(DEFAULT_EMPTY_WELL_NAMES);
+    addEmptyWellsOnAssayPlate(makeDefaultEmptyWells(getAssayPlateType().getPlateSize()));
+  }
+
+  private Set<WellName> makeDefaultEmptyWells(PlateSize plateSize) 
+  {
+    Set<WellName> emptyWells = Sets.newTreeSet();
+    for (int row = 0; row < plateSize.getRows(); ++row) {
+      for (int col = 0; col < plateSize.getColumns(); ++col) {
+        if (row <= 1 || row >= plateSize.getRows() - 2 ||
+            col <= 1 || col >= plateSize.getColumns() - 2) {
+          emptyWells.add(new WellName(row, col));
+        }
+      }
+    }
+    return emptyWells;
   }
 
   /**

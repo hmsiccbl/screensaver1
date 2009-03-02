@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.analysis.ChainedFilter;
 import edu.harvard.med.screensaver.analysis.IdentityFunction;
 import edu.harvard.med.screensaver.analysis.ZScoreFunction;
@@ -64,6 +65,7 @@ public class HeatMapTest extends AbstractSpringTest
   {
     assertFalse(_parser.getHasErrors());
     HeatMap heatMap = new HeatMap(1,
+                                  ScreensaverConstants.DEFAULT_PLATE_SIZE,
                                   _wellKeyToResultValueMap,
                                   new NoOpFilter(),
                                   new IdentityFunction(),
@@ -86,6 +88,7 @@ public class HeatMapTest extends AbstractSpringTest
   public void testZScoreHeatMap()
   {
     HeatMap heatMap = new HeatMap(1,
+                                  ScreensaverConstants.DEFAULT_PLATE_SIZE,
                                   _wellKeyToResultValueMap,
                                   new NoOpFilter(),
                                   new ZScoreFunction(),
@@ -106,6 +109,7 @@ public class HeatMapTest extends AbstractSpringTest
   public void testFilters()
   {
     HeatMap heatMap = new HeatMap(1,
+                                  ScreensaverConstants.DEFAULT_PLATE_SIZE,
                                   _wellKeyToResultValueMap,
                                   new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(),
                                     new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),
@@ -120,6 +124,7 @@ public class HeatMapTest extends AbstractSpringTest
   public void testMakeHtmlHeatMap() throws IOException
   {
     HeatMap heatMap = new HeatMap(1,
+                                  ScreensaverConstants.DEFAULT_PLATE_SIZE,
                                   _wellKeyToResultValueMap,
                                   new ChainedFilter<Pair<WellKey,ResultValue>>(new ExcludedWellsFilter(),
                                                                  new ChainedFilter<Pair<WellKey,ResultValue>>(new ControlWellsFilter())),

@@ -9,7 +9,10 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -24,18 +27,23 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
+import com.google.common.collect.ImmutableList;
 
 /**
  * A library represents a set of reagents and their layout into wells across
@@ -68,7 +76,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
  * aware that a given member Well may not be defined. See
  * {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}.
  * </ul>
- * 
+ *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
@@ -77,10 +85,11 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 public class Library extends TimeStampedAbstractEntity
 {
 
-  // private static data
+  // static data
 
   private static final Logger log = Logger.getLogger(Library.class);
   private static final long serialVersionUID = 0L;
+
 
 
   // private instance data
@@ -117,8 +126,7 @@ public class Library extends TimeStampedAbstractEntity
   private String _chemistDOS;
   private String _chemistryComments;
   private String _screeningSet;
-  private Integer plateRows;
-  private Integer plateColumns;
+  private PlateSize _plateSize;
 
 
   // public constructor
@@ -131,10 +139,10 @@ public class Library extends TimeStampedAbstractEntity
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   public Library() {}
-  
+
   /**
    * Construct an initialized <code>Library</code> object.
-   * 
+   *
    * @param libraryName the library name
    * @param shortName the short name
    * @param screenType the screen type (RNAi or Small Molecule)
@@ -148,8 +156,7 @@ public class Library extends TimeStampedAbstractEntity
                  LibraryType libraryType,
                  Integer startPlate,
                  Integer endPlate,
-                 Integer plateRows,
-                 Integer plateColumns )
+                 PlateSize plateSize)
   {
     _libraryName = libraryName;
     _shortName = shortName;
@@ -157,8 +164,7 @@ public class Library extends TimeStampedAbstractEntity
     _libraryType = libraryType;
     _startPlate = startPlate;
     _endPlate = endPlate;
-    this.plateRows = plateRows;
-    this.plateColumns = plateColumns;
+    _plateSize = plateSize;
     setScreeningStatus(LibraryScreeningStatus.ALLOWED);
   }
 
@@ -169,7 +175,7 @@ public class Library extends TimeStampedAbstractEntity
                  Integer startPlate,
                  Integer endPlate)
   {
-    this(libraryName, shortName, screenType, libraryType, startPlate, endPlate, Well.PLATE_ROWS_DEFAULT, Well.PLATE_COLUMNS_DEFAULT);
+    this(libraryName, shortName, screenType, libraryType, startPlate, endPlate, ScreensaverConstants.DEFAULT_PLATE_SIZE);
   }
 
   // public instance methods
@@ -189,7 +195,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the id for the screening library.
-   * 
+   *
    * @return the id for the screening library
    */
   @Id
@@ -202,7 +208,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the set of wells.
-   * 
+   *
    * @return the wells
    */
   @OneToMany(targetEntity = Well.class, mappedBy = "library", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
@@ -215,7 +221,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the number of wells.
-   * 
+   *
    * @return the number of wells
    * @motivation {@link #getWells} forces loading of all wells, just to get the
    *             size; Hibernate can optimize a collection size request, if we
@@ -230,7 +236,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Create and return a new well for the library.
-   * 
+   *
    * @param wellKey the well key for the new well
    * @param wellType the well type for the new well
    * @return the new well
@@ -246,7 +252,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the copies.
-   * 
+   *
    * @return the copies
    */
   @OneToMany(mappedBy = "library", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
@@ -259,7 +265,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the number of copies.
-   * 
+   *
    * @return the number of copies
    * @motivation {@link #getCopies()} forces loading of all copies, just to get
    *             the size; Hibernate can optimize a collection size request, if
@@ -274,7 +280,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the copy with the given copy name
-   * 
+   *
    * @param copyName the copy name of the copy to get
    * @return the copy with the given copy name
    */
@@ -291,7 +297,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Create a new copy for the library.
-   * 
+   *
    * @param usageType the copy usage type
    * @param name the copy name
    */
@@ -306,7 +312,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the library name.
-   * 
+   *
    * @return the library name
    */
   @Column(unique = true, nullable = false)
@@ -318,7 +324,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the library name.
-   * 
+   *
    * @param libraryName the new library name
    */
   public void setLibraryName(String libraryName)
@@ -328,7 +334,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the short name.
-   * 
+   *
    * @return the short name
    */
   @Column(unique = true, nullable = false)
@@ -340,7 +346,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the short name.
-   * 
+   *
    * @param shortName the new short name
    */
   public void setShortName(String shortName)
@@ -350,7 +356,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the description.
-   * 
+   *
    * @return the description
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -361,7 +367,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the description.
-   * 
+   *
    * @param description the new description
    */
   public void setDescription(String description)
@@ -371,7 +377,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the vendor.
-   * 
+   *
    * @return the vendor
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -382,7 +388,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the vendor.
-   * 
+   *
    * @param vendor the new vendor
    */
   public void setVendor(String vendor)
@@ -392,7 +398,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the screen type.
-   * 
+   *
    * @return the screen type
    */
   @Column(nullable = false)
@@ -404,7 +410,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the screen type.
-   * 
+   *
    * @param screenType the new screen type
    */
   public void setScreenType(ScreenType screenType)
@@ -414,7 +420,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the library type.
-   * 
+   *
    * @return the library type
    */
   @Column(nullable = false)
@@ -426,7 +432,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the library type.
-   * 
+   *
    * @param libraryType the new library type
    */
   public void setLibraryType(LibraryType libraryType)
@@ -436,7 +442,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the start plate.
-   * 
+   *
    * @return the start plate
    */
   @Column(unique = true, nullable = false)
@@ -447,7 +453,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the start plate.
-   * 
+   *
    * @param startPlate the new start plate
    */
   public void setStartPlate(Integer startPlate)
@@ -457,7 +463,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the end plate.
-   * 
+   *
    * @return the end plate
    */
   @Column(unique = true, nullable = false)
@@ -468,7 +474,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the end plate.
-   * 
+   *
    * @param endPlate the new end plate
    */
   public void setEndPlate(Integer endPlate)
@@ -478,7 +484,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Return true iff this library contains the specified plate.
-   * 
+   *
    * @param plateNumber
    * @return true iff this library contains the specified plate
    */
@@ -490,7 +496,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the alias.
-   * 
+   *
    * @return the alias
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -501,7 +507,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the alias.
-   * 
+   *
    * @param alias the new alias
    */
   public void setAlias(String alias)
@@ -512,7 +518,7 @@ public class Library extends TimeStampedAbstractEntity
   /**
    * Get the screening status of this library, indicating whether this library
    * is available for screening.
-   * 
+   *
    * @return the screening status
    */
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus$UserType")
@@ -524,7 +530,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the screening status
-   * 
+   *
    * @param screeningStatus the new screening status
    */
   public void setScreeningStatus(LibraryScreeningStatus screeningStatus)
@@ -534,7 +540,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the compound count.
-   * 
+   *
    * @return the compound count
    * @motivation from the libraries Filemaker database. we dont need to store
    *             this forever, since we can always compute it, but we need to
@@ -548,7 +554,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the compound count.
-   * 
+   *
    * @param compoundCount the new compound count
    */
   public void setCompoundCount(Integer compoundCount)
@@ -558,7 +564,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the screening copy.
-   * 
+   *
    * @return the screening copy
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -569,7 +575,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the screening copy.
-   * 
+   *
    * @param screeningCopy the new screening copy
    */
   public void setScreeningCopy(String screeningCopy)
@@ -579,7 +585,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the compound concentration in the screening copy.
-   * 
+   *
    * @return the compound concentration in the screening copy
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -590,7 +596,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the compound concentration in the screening copy.
-   * 
+   *
    * @param compoundConcentrationInScreeningCopy the new compound concentration
    *          in the screening copy
    */
@@ -601,7 +607,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the cherry pick copy.
-   * 
+   *
    * @return the cherry pick copy
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -612,7 +618,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the cherry pick copy.
-   * 
+   *
    * @param cherryPickCopy the new cherry pick copy
    */
   public void setCherryPickCopy(String cherryPickCopy)
@@ -622,7 +628,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the date received.
-   * 
+   *
    * @return the date received
    */
   @Type(type = "edu.harvard.med.screensaver.db.hibernate.LocalDateType")
@@ -633,7 +639,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the date received.
-   * 
+   *
    * @param dateReceived the new date received
    */
   public void setDateReceived(LocalDate dateReceived)
@@ -643,7 +649,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the date screenable.
-   * 
+   *
    * @return the date screenable
    */
   @Type(type = "edu.harvard.med.screensaver.db.hibernate.LocalDateType")
@@ -654,7 +660,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the date screenable.
-   * 
+   *
    * @param dateScreenable the new date screenable
    */
   public void setDateScreenable(LocalDate dateScreenable)
@@ -664,7 +670,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the non-compound wells.
-   * 
+   *
    * @return the non-compound wells
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -675,7 +681,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the non-compound wells.
-   * 
+   *
    * @param nonCompoundWells the new non-compound wells
    */
   public void setNonCompoundWells(String nonCompoundWells)
@@ -685,7 +691,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the screening room comments.
-   * 
+   *
    * @return the screening room comments
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -696,7 +702,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the screening room comments.
-   * 
+   *
    * @param screeningRoomComments the new screening room comments
    */
   public void setScreeningRoomComments(String screeningRoomComments)
@@ -706,7 +712,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the diversity set plates.
-   * 
+   *
    * @return the diversity set plates
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -717,7 +723,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the diversity set plates.
-   * 
+   *
    * @param diversitySetPlates the new diversity set plates
    */
   public void setDiversitySetPlates(String diversitySetPlates)
@@ -727,7 +733,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the mapped-from copy.
-   * 
+   *
    * @return the mapped-from copy
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -738,7 +744,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the mapped-from copy.
-   * 
+   *
    * @param mappedFromCopy the new mapped-from copy
    */
   public void setMappedFromCopy(String mappedFromCopy)
@@ -748,7 +754,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the mapped-from plate.
-   * 
+   *
    * @return the mapped-from plate
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -759,7 +765,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the mapped-from plate.
-   * 
+   *
    * @param mappedFromPlate the new mapped-from plate
    */
   public void setMappedFromPlate(String mappedFromPlate)
@@ -769,7 +775,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the purchased using funds from.
-   * 
+   *
    * @return the purchased using funds from
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -780,7 +786,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the purchased using funds from.
-   * 
+   *
    * @param purchasedUsingFundsFrom the new purchased using funds from
    */
   public void setPurchasedUsingFundsFrom(String purchasedUsingFundsFrom)
@@ -790,7 +796,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the plating funds supplied by.
-   * 
+   *
    * @return the plating funds supplied by
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -801,7 +807,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the plating funds supplied by.
-   * 
+   *
    * @param platingFundsSuppliedBy the new plating funds supplied by
    */
   public void setPlatingFundsSuppliedBy(String platingFundsSuppliedBy)
@@ -811,7 +817,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the informatics comments.
-   * 
+   *
    * @return the informatics comments
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -822,7 +828,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the informatics comments.
-   * 
+   *
    * @param informaticsComments the new informatics comments
    */
   public void setInformaticsComments(String informaticsComments)
@@ -832,7 +838,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the data file location.
-   * 
+   *
    * @return the data file location
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -843,7 +849,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the data file location.
-   * 
+   *
    * @param dataFileLocation the new data file location
    */
   public void setDataFileLocation(String dataFileLocation)
@@ -853,7 +859,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the chemist DOS.
-   * 
+   *
    * @return the chemist DOS
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -864,7 +870,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the chemist DOS.
-   * 
+   *
    * @param chemistDOS the new chemist DOS
    */
   public void setChemistDOS(String chemistDOS)
@@ -874,7 +880,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the chemistry comments.
-   * 
+   *
    * @return the chemistry comments
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -885,7 +891,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the chemistry comments.
-   * 
+   *
    * @param chemistryComments the new chemistry comments
    */
   public void setChemistryComments(String chemistryComments)
@@ -895,7 +901,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the screening set.
-   * 
+   *
    * @return the screening set
    */
   @org.hibernate.annotations.Type(type = "text")
@@ -906,7 +912,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the screening set.
-   * 
+   *
    * @param screeningSet the new screening set
    */
   public void setScreeningSet(String screeningSet)
@@ -919,7 +925,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the id for the screening library.
-   * 
+   *
    * @param libraryId the new id for the screening library
    * @motivation for hibernate
    */
@@ -930,7 +936,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Get the version for the screening library.
-   * 
+   *
    * @return the version for the screening library
    * @motivation for hibernate
    */
@@ -943,7 +949,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the version for the screening library.
-   * 
+   *
    * @param version the new version for the screening library
    * @motivation for hibernate
    */
@@ -954,7 +960,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the set of wells.
-   * 
+   *
    * @param wells the new set of wells
    * @motivation for hibernate
    */
@@ -965,7 +971,7 @@ public class Library extends TimeStampedAbstractEntity
 
   /**
    * Set the set of copies.
-   * 
+   *
    * @param copies the new set of copies
    * @motivation for hibernate
    */
@@ -974,27 +980,19 @@ public class Library extends TimeStampedAbstractEntity
     _copies = copies;
   }
 
-
-  public Integer getPlateRows()
+  @Column(nullable=false, updatable=false)
+  @org.hibernate.annotations.Immutable
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.libraries.PlateSize$UserType")
+  public PlateSize getPlateSize()
   {
-    return plateRows;
+    return _plateSize;
   }
 
-
-  public void setPlateRows(Integer plateRows)
+  public void setPlateSize(PlateSize plateSize)
   {
-    this.plateRows = plateRows;
-  }
-
-
-  public Integer getPlateColumns()
-  {
-    return plateColumns;
-  }
-
-
-  public void setPlateColumns(Integer plateColumns)
-  {
-    this.plateColumns = plateColumns;
+    if (!isHibernateCaller() && getEntityId() != null && plateSize != _plateSize) {
+      throw new DataModelViolationException("cannot change plate size after library is created");
+    }
+    _plateSize = plateSize;
   }
 }

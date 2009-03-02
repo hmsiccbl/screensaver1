@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -224,7 +225,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        _library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
+        _library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
         Copy copyC = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         Copy copyD = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
         copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));

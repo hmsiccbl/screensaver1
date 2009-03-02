@@ -31,6 +31,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(CryptoUtilsTest.class);
     addTestSuite(FileUtilsTest.class);
     addTestSuite(PowerSetTest.class);
+    addTestSuite(AlphabeticCounterTest.class);
     addTest(edu.harvard.med.screensaver.util.eutils.PackageTestSuite.suite());
   }
 }

@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -87,9 +88,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           Well[] wells = new Well[3];
           for (int iWell = 0; iWell < wells.length; ++iWell) {
             WellKey wellKey = new WellKey(( iWell / 2 ) + 1,
-                                          String.format("%c%02d",
-                                                        Well.MIN_WELL_ROW + ((iWell / Well.PLATE_ROWS) + 1),
-                                                        (iWell % Well.PLATE_COLUMNS) + 1));
+                                          (iWell / library.getPlateSize().getRows()),
+                                          (iWell % library.getPlateSize().getColumns()));
 
             wells[iWell] = library.createWell(wellKey, WellType.EXPERIMENTAL);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {

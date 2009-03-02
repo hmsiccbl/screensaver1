@@ -39,12 +39,12 @@ public enum PlateType implements VocabularyTerm
    * ABgene 384 CB PP is the name we use in the software for our current
    * V-bottomed plates."
    */
-  ABGENE("ABgene", 384, "CB", "PP"), 
-  COSTAR("Costar", 96, "RB", "PS"),
-  EPPENDORF("Eppendorf", 384, "CB", "PP"),
-  GENETIX("Genetix", 384, "CB", "PP"),
-  MARSH("Marsh", 384, "VB", "PP"),
-  NUNC("Nunc", 96, "VB", "PS"),
+  ABGENE("ABgene", PlateSize.WELLS_384, "CB", "PP"), 
+  COSTAR("Costar", PlateSize.WELLS_96, "RB", "PS"),
+  EPPENDORF("Eppendorf", PlateSize.WELLS_384, "CB", "PP"),
+  GENETIX("Genetix", PlateSize.WELLS_384, "CB", "PP"),
+  MARSH("Marsh", PlateSize.WELLS_384, "VB", "PP"),
+  NUNC("Nunc", PlateSize.WELLS_96, "VB", "PS"),
   ;
   
   // TODO: consider enums for auxiliary attributes
@@ -67,7 +67,7 @@ public enum PlateType implements VocabularyTerm
   // private instance field and constructor
 
   private String _value;
-  private int _plateSize;
+  private PlateSize _plateSize;
   private String _wellBottomShape;
   private String _material;
 
@@ -75,7 +75,7 @@ public enum PlateType implements VocabularyTerm
    * Constructs a <code>PlateType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private PlateType(String value, int plateSize, String wellBottomShape, String material)
+  private PlateType(String value, PlateSize plateSize, String wellBottomShape, String material)
   {
     _value = value;
     _plateSize = plateSize;
@@ -100,12 +100,10 @@ public enum PlateType implements VocabularyTerm
     return _material;
   }
 
-
-  public int getPlateSize()
+  public PlateSize getPlateSize()
   {
     return _plateSize;
   }
-
 
   public String getWellBottomShape()
   {
@@ -128,7 +126,7 @@ public enum PlateType implements VocabularyTerm
   {
     return new StringBuilder().append(_value)
     .append(' ')
-    .append(_plateSize)
+    .append(getPlateSize().getWellCount())
     .append(' ')
     .append(_wellBottomShape)
     .append(' ')

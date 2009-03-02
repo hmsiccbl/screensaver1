@@ -28,6 +28,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Volume;
@@ -209,7 +210,7 @@ public class CopyInfo extends AbstractEntity
    * Get the default volume for wells on this copy plate.
    * @return the volume
    */
-  @Column(nullable=false, precision=Well.VOLUME_PRECISION, scale=Well.VOLUME_SCALE)
+  @Column(nullable=false, precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
   public Volume getWellVolume()

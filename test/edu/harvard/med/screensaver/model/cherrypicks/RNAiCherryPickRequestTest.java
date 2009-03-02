@@ -19,6 +19,8 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
@@ -65,7 +67,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
       public void runTransaction()
       {
         Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-        assertTrue(screen2.getCherryPickRequests().iterator().next().getEmptyWellsOnAssayPlate().size() == 144 + (3 - 1 /* -1 to account for overlap w/edge wells */)); 
+        assertTrue(screen2.getCherryPickRequests().iterator().next().getEmptyWellsOnAssayPlate().size() == 144 + (3 - 1 /* -1 to account for overlap w/edge wells */));
         assertTrue(screen2.getCherryPickRequests().iterator().next().getEmptyWellsOnAssayPlate().containsAll(requestedEmptyWells));
       }
     });
@@ -83,11 +85,12 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-        genericEntityDao.saveOrUpdateEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
+        Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
+        genericEntityDao.saveOrUpdateEntity(duplexLibrary);
 
         for (int plateOrdinal = 0; plateOrdinal < 6; ++plateOrdinal) {
-          for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
-            for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
+          for (int iRow = 0; iRow < duplexLibrary.getPlateSize().getRows(); ++iRow) {
+            for (int iCol = 0; iCol < duplexLibrary.getPlateSize().getColumns(); ++iCol) {
               WellKey wellKey = new WellKey(plateOrdinal + 50001, iRow, iCol);
               Well well = librariesDao.findWell(wellKey);
               cherryPickRequest.createScreenerCherryPick(well);
@@ -119,7 +122,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
         {
           Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
           RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-          genericEntityDao.saveOrUpdateEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, 384));
+          genericEntityDao.saveOrUpdateEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384));
           WellKey wellKey = new WellKey(50001, 0, 0);
           Well well = librariesDao.findWell(wellKey);
           cherryPickRequest.createScreenerCherryPick(well);

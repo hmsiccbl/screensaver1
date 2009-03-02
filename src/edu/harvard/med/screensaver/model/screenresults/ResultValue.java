@@ -428,6 +428,12 @@ public class ResultValue extends AbstractEntity
     return getAssayWellType().isControl();
   }
 
+  @Transient
+  public boolean isEdgeWell()
+  {
+    return getWell().isEdgeWell();
+  }
+
   /**
    * Return true iff the assay well type is data producing.
    *

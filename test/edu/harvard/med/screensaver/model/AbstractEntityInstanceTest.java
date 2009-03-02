@@ -40,6 +40,7 @@ import org.joda.time.LocalDate;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -1187,7 +1188,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     }
     if (type.equals(Character.class)) {
       _characterTestValue++;
-      _characterTestValue %= Well.PLATE_ROWS; // HACK: prevent well row from exploding (TODO: create WellRow class)
+      _characterTestValue %= ScreensaverConstants.DEFAULT_PLATE_SIZE.getRows(); // HACK: prevent well row from exploding (TODO: create WellRow class)
       return _characterTestValue;
     }
     if (type.equals(LocalDate.class)) {
@@ -1254,11 +1255,11 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     int col = _wellKeyTestValue.getColumn() + 1;
     int row = _wellKeyTestValue.getRow();
     int plateNumber = _wellKeyTestValue.getPlateNumber();
-    if (col >= Well.PLATE_COLUMNS) {
+    if (col >= ScreensaverConstants.DEFAULT_PLATE_SIZE.getColumns()) {
       col = 0;
       ++row;
     }
-    if (row >= Well.PLATE_ROWS) {
+    if (row >= ScreensaverConstants.DEFAULT_PLATE_SIZE.getRows()) {
       row = 0;
       ++plateNumber;
     }

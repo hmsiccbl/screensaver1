@@ -24,6 +24,7 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -189,7 +190,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
   {
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, 384);
+        Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
         Copy copyC = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
         copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored

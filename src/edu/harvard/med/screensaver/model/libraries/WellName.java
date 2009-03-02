@@ -9,20 +9,25 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
+
+import edu.harvard.med.screensaver.util.AlphabeticCounter;
 
 @Embeddable
 public class WellName implements Comparable<WellName>
 {
   // static members
 
+  Pattern WELL_NAME_PATTERN = Pattern.compile("([A-Z]+)([0-9]+)");
+
   public static String toString(int rowIndex, int columnIndex)
   {
-    return String.format("%c%02d",
-                         Well.MIN_WELL_ROW + rowIndex,
-                         columnIndex + Well.MIN_WELL_COLUMN);
+    return getRowLabel(rowIndex) + getColumnLabel(columnIndex);
   }
 
 
@@ -45,20 +50,12 @@ public class WellName implements Comparable<WellName>
   public WellName(int rowIndex,
                   int columnIndex)
   {
-    if (columnIndex >= Well.PLATE_COLUMNS || columnIndex < 0 ||
-      rowIndex >= Well.PLATE_ROWS|| rowIndex < 0) {
+    if (columnIndex < 0 || rowIndex < 0) {
       throw new IllegalArgumentException("row or column out of range");
     }
     _rowIndex = rowIndex;
     _columnIndex = columnIndex;
     _wellName = toString(_rowIndex, _columnIndex);
-  }
-
-  public WellName(char row,
-                  int column)
-  {
-    this(row - Well.MIN_WELL_ROW,
-         column - Well.MIN_WELL_COLUMN);
   }
 
   public WellName(String wellName)
@@ -75,10 +72,10 @@ public class WellName implements Comparable<WellName>
     return _columnIndex;
   }
 
-  public void setColumnIndex(int columnIndex)
+  private void setColumnIndex(int columnIndex)
   {
-    if (columnIndex >= Well.PLATE_COLUMNS) {
-      throw new IllegalArgumentException("column index" + columnIndex + " is not < " + Well.PLATE_COLUMNS);
+    if (columnIndex < 0) {
+      throw new IllegalArgumentException("column index" + columnIndex + " is negative");
     }
     _columnIndex = columnIndex;
   }
@@ -92,39 +89,60 @@ public class WellName implements Comparable<WellName>
     return _rowIndex;
   }
 
-  public void setRowIndex(int rowIndex)
+  private void setRowIndex(int rowIndex)
   {
-    if (rowIndex >= Well.PLATE_ROWS) {
-      throw new IllegalArgumentException("row index " + rowIndex + " is not < " + Well.PLATE_ROWS);
+    if (rowIndex < 0) {
+      throw new IllegalArgumentException("row index" + rowIndex + " is negative");
     }
     _rowIndex = rowIndex;
   }
 
-  /**
-   * Return the letter "name" of the row ('A' through 'P')
-   */
   @Transient
-  public Character getRowName()
+  public String getRowLabel()
   {
-    return Character.valueOf((char) (Well.MIN_WELL_ROW + _rowIndex));
+    return getRowLabel(_rowIndex);
   }
 
-  /**
-   * Return the numeric "name" of the column ('1' through '24').
-   */
   @Transient
-  public Integer getColumnName()
+  public String getColumnLabel()
   {
-    return _columnIndex + Well.MIN_WELL_COLUMN;
+    return getColumnLabel(_columnIndex);
   }
 
-  public void setName(String wellName)
+  public static String getRowLabel(int rowIndex)
   {
-    setRowIndex(wellName.toUpperCase().charAt(0) - Well.MIN_WELL_ROW);
-    setColumnIndex(Integer.parseInt(wellName.substring(1)) - 1);
+    return AlphabeticCounter.toLabel(rowIndex);
+  }
+
+  public static String getColumnLabel(int columnIndex)
+  {
+    return String.format("%02d", columnIndex + 1);
+  }
+
+  private void setName(String wellName)
+  {
+    Matcher matcher = WELL_NAME_PATTERN.matcher(wellName);
+    if (matcher.matches()) {
+      setRowIndex(parseRowLabel(matcher.group(1)));
+      setColumnIndex(parseColumnLabel(matcher.group(2)));
+    }
+    else {
+      throw new IllegalArgumentException("illegal well name '" + wellName + "'");
+    }
     _wellName = toString(_rowIndex, _columnIndex);
   }
 
+  public static int parseColumnLabel(String columnLabel)
+  {
+    return Integer.parseInt(columnLabel) - 1;
+  }
+
+  public static int parseRowLabel(String rowLabel)
+  {
+    return AlphabeticCounter.toIndex(rowLabel);
+  }
+
+  // TODO: length only works up to 384 well plates; increase length to accommodate labels for max plate size
   @Column(name="wellName", length=3)
   public String getName()
   {
@@ -154,10 +172,7 @@ public class WellName implements Comparable<WellName>
 
   public int compareTo(WellName other)
   {
-    return _wellName.compareTo(other._wellName);
+    return _rowIndex < other._rowIndex ? -1 : _rowIndex > other._rowIndex ? 1 : _columnIndex < other._columnIndex ? -1 : _columnIndex > other._columnIndex ? 1 : 0;
   }
-
-  // private methods
-
 }
 

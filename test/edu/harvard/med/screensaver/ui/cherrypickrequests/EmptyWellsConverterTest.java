@@ -32,7 +32,7 @@ public class EmptyWellsConverterTest extends TestCase
 
   public void testMakeFullColumn()
   {
-    List<WellName> fullColumn = EmptyWellsConverter.makeFullColumn(9);
+    List<WellName> fullColumn = EmptyWellsConverter.makeFullColumn(8);
     assertEquals(Arrays.asList(new WellName("A09"),
                                new WellName("B09"),
                                new WellName("C09"),
@@ -50,7 +50,7 @@ public class EmptyWellsConverterTest extends TestCase
                                new WellName("O09"),
                                new WellName("P09")),
                    fullColumn);
-    fullColumn = EmptyWellsConverter.makeFullColumn(10);
+    fullColumn = EmptyWellsConverter.makeFullColumn(9);
     assertEquals(Arrays.asList(new WellName("A10"),
                                new WellName("B10"),
                                new WellName("C10"),
@@ -73,7 +73,7 @@ public class EmptyWellsConverterTest extends TestCase
 
   public void testMakeFullRow()
   {
-    List<WellName> fullRow = EmptyWellsConverter.makeFullRow('H');
+    List<WellName> fullRow = EmptyWellsConverter.makeFullRow('H' - 'A');
     assertEquals(Arrays.asList(new WellName("H01"),
                                new WellName("H02"),
                                new WellName("H03"),
@@ -108,16 +108,16 @@ public class EmptyWellsConverterTest extends TestCase
                                              new WellName("P24"));
     doTest("single well", "A01", wellNames.subList(0, 1));
     doTest("multiple wells", "A01, F10, P24", wellNames);
-    List<WellName> rowB = EmptyWellsConverter.makeFullRow('B');
-    List<WellName> rowH = EmptyWellsConverter.makeFullRow('H');
+    List<WellName> rowB = EmptyWellsConverter.makeFullRow('B' - 'A');
+    List<WellName> rowH = EmptyWellsConverter.makeFullRow('H' - 'A');
     List<WellName> rows = new ArrayList<WellName>();
     rows.addAll(rowB);
     rows.addAll(rowH);
     doTest("full row", "Row:B", rowB);
     doTest("full rows", "Row:B, Row:H", rows);
 
-    List<WellName> col2 = EmptyWellsConverter.makeFullColumn(2);
-    List<WellName> col11 = EmptyWellsConverter.makeFullColumn(11);
+    List<WellName> col2 = EmptyWellsConverter.makeFullColumn(1);
+    List<WellName> col11 = EmptyWellsConverter.makeFullColumn(10);
     List<WellName> cols = new ArrayList<WellName>();
     cols.addAll(col2);
     cols.addAll(col11);

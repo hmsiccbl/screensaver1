@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.util.Iterator;
+import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.io.workbook.Cell;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -32,7 +33,7 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
 
   public HSSFSheet build(HSSFWorkbook workbook, ScreenResult screenResult, Integer plateNumber)
   {
-    HSSFSheet sheet = workbook.createSheet(makePlateNumberString(plateNumber));
+    HSSFSheet sheet = workbook.createSheet(WellKey.getPlateNumberLabel(plateNumber));
     writeDataColumnNames(sheet,
                          screenResult);
     writeData(workbook,
@@ -62,43 +63,38 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
     Integer plateNumber)
   {
     int rowIndex = RAWDATA_FIRST_DATA_ROW_INDEX;
-    for (int iRow = 0; iRow < Well.PLATE_ROWS; ++iRow) {
-      for (int iCol = 0; iCol < Well.PLATE_COLUMNS; ++iCol) {
-        WellKey wellKey = new WellKey(plateNumber, iRow, iCol);
 
-        // TODO: assayWellType should default to Well's assayWellType
-        AssayWellType assayWellType = AssayWellType.EXPERIMENTAL;
-        StringBuilder excludeBuf = new StringBuilder();
-        HSSFRow row = HSSFCellUtil.getRow(rowIndex, sheet);
-        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          ResultValue rv = rvt.getWellKeyToResultValueMap().get(wellKey);
-          if (rv != null) {
-            assayWellType = rv.getAssayWellType(); // overwrites, but should be same for all resultValues of a well
-            addExclude(excludeBuf, row, rvt, rv);
-            HSSFCell cell =
-              HSSFCellUtil.getCell(row,
-                                   rvt.getOrdinal() +
-                                   RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX);
-            Object typedValue = ResultValue.getTypedValue(rv, rvt);
-            Cell.setTypedCellValue(workbook, cell, typedValue);
-            // TODO: set numeric format
+    SortedSet<Well> wells = screenResult.getWells();
+    for (Well well : wells) {
+      AssayWellType assayWellType = AssayWellType.EXPERIMENTAL;
+      StringBuilder excludeBuf = new StringBuilder();
+      HSSFRow row = HSSFCellUtil.getRow(rowIndex, sheet);
+      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+        ResultValue rv = rvt.getWellKeyToResultValueMap().get(well.getWellKey());
+        if (rv != null) {
+          assayWellType = rv.getAssayWellType(); // overwrites, but should be same for all resultValues of a well
+          addExclude(excludeBuf, row, rvt, rv);
+          HSSFCell cell =
+            HSSFCellUtil.getCell(row,
+                                 rvt.getOrdinal() +
+                                 RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX);
+          Object typedValue = ResultValue.getTypedValue(rv, rvt);
+          Cell.setTypedCellValue(workbook, cell, typedValue);
+          // TODO: set numeric format
 //            if (rvt.isNumeric()) {
 //              HSSFDataFormat dataFormat = workbook.createDataFormat();
 //              short format = dataFormat.getFormat("#.##");
 //              HSSFCellStyle cellStyle = workbook.createCellStyle();
 //              cellStyle.setDataFormat(format);
 //            }
-          }
         }
-        writeWell(row,
-                  wellKey,
-                  assayWellType);
-        if (excludeBuf.length() > 0) {
-          HSSFCell excludeCell = HSSFCellUtil.getCell(row, 3);
-          excludeCell.setCellValue(excludeBuf.toString());
-        }
-        ++rowIndex;
       }
+      writeWell(row, well.getWellKey(), assayWellType);
+      if (excludeBuf.length() > 0) {
+        HSSFCell excludeCell = HSSFCellUtil.getCell(row, 3);
+        excludeCell.setCellValue(excludeBuf.toString());
+      }
+      ++rowIndex;
     }
   }
 
@@ -116,16 +112,10 @@ public class DataWorksheet implements ScreenResultWorkbookSpecification
 
   private void writeWell(HSSFRow row, WellKey wellKey, AssayWellType assayWellType)
   {
-    HSSFCellUtil.getCell(row, 0).setCellValue(makePlateNumberString(wellKey.getPlateNumber()));
+    HSSFCellUtil.getCell(row, 0).setCellValue(wellKey.getPlateNumberLabel());
     HSSFCellUtil.getCell(row, 1).setCellValue(wellKey.getWellName());
     if (assayWellType != null) {
       HSSFCellUtil.getCell(row, 2).setCellValue(assayWellType.getAbbreviation());
     }
   }
-
-  private String makePlateNumberString(Integer plateNumber)
-  {
-    return String.format(ScreenResultWorkbookSpecification.PLATE_NUMBER_FORMAT, plateNumber);
-  }
-
 }

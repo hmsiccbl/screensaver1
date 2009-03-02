@@ -572,7 +572,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     PropertyPath<Well> propertyPath = new PropertyPath<Well>(Well.class, "gene.genbankAccessionNumbers", "");
     _wellSetFetcher.setRelationshipsToFetch(Arrays.asList(propertyPath.getRelationshipPath()));
     Map<PropertyPath<Well>,List<? extends Criterion<?>>> filteringCriteria = new HashMap<PropertyPath<Well>,List<? extends Criterion<?>>>();
-    filteringCriteria.put(propertyPath, Arrays.asList(new Criterion<String>(Operator.EQUAL, "GB768767")));
+    filteringCriteria.put(propertyPath, Arrays.asList(new Criterion<String>(Operator.EQUAL, "GB3074279")));
     _wellSetFetcher.setFilteringCriteria(filteringCriteria);
     List<String> keys = _wellSetFetcher.findAllKeys();
     assertEquals("result size", 1, keys.size());

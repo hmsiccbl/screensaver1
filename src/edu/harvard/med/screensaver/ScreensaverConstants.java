@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver;
 
 import java.awt.Color;
 
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
+
 public interface ScreensaverConstants
 {
   public static final String APPLICATION_NAME_PROPERTY = "screensaver.ui.application_name";
@@ -76,5 +78,11 @@ public interface ScreensaverConstants
   public static final int LIBRARY_UPLOAD_RUNNING = 1;
   public static final int LIBRARY_UPLOAD_FAILED = 3;
   public static final int LIBRARY_UPLOAD_IDLE = -1;
+  public static final PlateSize DEFAULT_PLATE_SIZE = PlateSize.WELLS_384;
+  public static final int PLATE_NUMBER_LEN = 5;
+  public static final int VOLUME_PRECISION = 10;
+  public static final int VOLUME_SCALE = 9;
+  public static final int CONCENTRATION_PRECISION = 12;
+  public static final int CONCENTRATION_SCALE = 9;
   
 }

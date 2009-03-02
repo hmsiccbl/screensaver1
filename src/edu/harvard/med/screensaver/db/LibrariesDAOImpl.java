@@ -211,12 +211,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 
     // create wells for library, if needed;
     // it is expected that either all wells will have been created, or none were created, but if 
-    int nominalWellCount = ((library.getEndPlate() - library.getStartPlate()) + 1) * (Well.PLATE_ROWS * Well.PLATE_COLUMNS);
+    int nominalWellCount = ((library.getEndPlate() - library.getStartPlate()) + 1) * library.getPlateSize().getWellCount();
     int nWellsCreated = 0;
     if (library.getWells().size() <= nominalWellCount) {
       for (int iPlate = library.getStartPlate(); iPlate <= library.getEndPlate(); ++iPlate) {
-        for (int iRow = 0; iRow < library.getPlateRows(); ++iRow) {
-          for (int iCol = 0; iCol < library.getPlateColumns(); ++iCol) {
+        for (int iRow = 0; iRow < library.getPlateSize().getRows(); ++iRow) {
+          for (int iCol = 0; iCol < library.getPlateSize().getColumns(); ++iCol) {
             WellKey wellKey = new WellKey(iPlate, iRow, iCol);
             try {
               library.createWell(wellKey, WellType.EMPTY);

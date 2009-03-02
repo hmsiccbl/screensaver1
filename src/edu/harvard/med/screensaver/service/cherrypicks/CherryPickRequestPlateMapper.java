@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -180,8 +180,8 @@ public class CherryPickRequestPlateMapper
   private List<WellName> findAvailableWellNames(CherryPickRequest cherryPickRequest)
   {
     List<WellName> availableWellNames = new ArrayList<WellName>();
-    for (int column = Well.MIN_WELL_COLUMN; column <= Well.MAX_WELL_COLUMN; column++) {
-      for (char row = Well.MIN_WELL_ROW; row <= Well.MAX_WELL_ROW; row++) {
+    for (int column = 0; column < cherryPickRequest.getAssayPlateType().getPlateSize().getColumns(); column++) {
+      for (char row = 0; row < cherryPickRequest.getAssayPlateType().getPlateSize().getRows(); row++) {
         if (!cherryPickRequest.getEmptyWellsOnAssayPlate().contains(new WellName(row, column))) {
           availableWellNames.add(new WellName(row, column));
         }

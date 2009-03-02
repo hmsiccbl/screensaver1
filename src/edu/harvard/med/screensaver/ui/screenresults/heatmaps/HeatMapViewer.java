@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -72,13 +73,6 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
   static {
     EXCLUDED_WELL_FILTERS.add(new ControlWellsFilter());
     EXCLUDED_WELL_FILTERS.add(new EdgeWellsFilter());
-  }
-  private static final int PLATE_ROWS = 26;
-  private static final String[] HEAT_MAP_ROW_LABELS = new String[PLATE_ROWS];
-  static {
-    for (int i = 0; i < HEAT_MAP_ROW_LABELS.length; i++) {
-      HEAT_MAP_ROW_LABELS[i] = Character.toString((char) ('A' + i));
-    }
   }
   private static final Filter<Pair<WellKey,ResultValue>> IMPLICIT_FILTER = new ExcludedOrNonDataProducingWellFilter();
   private static final Double SAMPLE_NUMBER = new Double(-1234.567);
@@ -189,7 +183,7 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
 
   public String[] getHeatMapRowLabels()
   {
-    return HEAT_MAP_ROW_LABELS;
+    return getHeatMaps().get(_plateNumber.getSelectionIndex()).getPlateSize().getRowsLabels().toArray(new String[] {});
   }
 
   public DataModel getCellTypeLegendDataModel()
@@ -310,6 +304,7 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
       _heatMapColumnDataModels = new ArrayList<DataModel>();
       _heatMaps = new ArrayList<HeatMap>();
       _heatMapStatistics = new ArrayList<DataModel>();
+      PlateSize plateSize = _librariesDao.findLibraryWithPlate(_plateNumber.getSelection()).getPlateSize();
       for (HeatMapConfiguration heatMapConfig : _heatMapConfigurations) {
         if (heatMapConfig.getDataHeaders().getSelection() != null &&
           _plateNumber.getSelection() != null) {
@@ -317,6 +312,7 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
             _screenResultsDao.findResultValuesByPlate(_plateNumber.getSelection(),
                                                       heatMapConfig.getDataHeaders().getSelection());
           HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
+                                        plateSize,
                                         resultValues,
                                         new ChainedFilter<Pair<WellKey,ResultValue>>(
                                           IMPLICIT_FILTER,
@@ -326,9 +322,9 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
 
           NumberFormat format = heatMapConfig.getNumericFormat().getSelection();
           List<List<HeatMapCell>> rows = new ArrayList<List<HeatMapCell>>();
-          for (int row = 0; row < heatMap.getRowCount(); row++) {
+          for (int row = 0; row < plateSize.getRows(); row++) {
             List<HeatMapCell> rowData = new ArrayList<HeatMapCell>();
-            for (int column = 0; column < heatMap.getColumnCount(); column++) {
+            for (int column = 0; column < plateSize.getColumns(); column++) {
               rowData.add(new HeatMapCell(heatMap.getResultValue(row, column),
                                           heatMap.getWellKey(row, column),
                                           heatMap.getScoredValue(row, column),
@@ -341,7 +337,7 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
           _heatMapDataModels.add(new ListDataModel(rows));
 
           List<Integer> columnIndexes = new ArrayList<Integer>();
-          for (int column = 0; column < heatMap.getColumnCount(); column++) {
+          for (int column = 0; column < plateSize.getColumns(); column++) {
             columnIndexes.add(column);
           }
           _heatMapColumnDataModels.add(new ListDataModel(columnIndexes));

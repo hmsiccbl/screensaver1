@@ -40,7 +40,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(WellVolumeCorrectionActivityTest.class);
 
     // test non-entity model classes
-    addTestSuite(WellNameAndEdgeMethodsTest.class);
+    addTestSuite(WellNameTest.class);
     addTestSuite(WellKeyTest.class);
   }
 }

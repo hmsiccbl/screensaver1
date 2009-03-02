@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -114,6 +115,7 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
 
     _library = new Library();
     _library.setScreeningStatus(LibraryScreeningStatus.ALLOWED);
+    _library.setPlateSize(ScreensaverConstants.DEFAULT_PLATE_SIZE);
     
     _isEditMode = true;
     return VIEW_LIBRARY_DETAIL;
@@ -154,7 +156,22 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
 
   public List<SelectItem> getScreenTypeSelectItems()
   {
-    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
+    List<ScreenType> screenTypelist = new ArrayList<ScreenType>();
+    // BII (Siew Cheng) start: Hide compound
+    // TODO: merge compound hide functionality from the imcb trunk
+    if (Boolean.valueOf(
+          ScreensaverProperties.getProperty("isCompoundHidden")) == true) {
+      for(ScreenType screenType:Arrays.asList(ScreenType.values())){
+        if (screenType != ScreenType.SMALL_MOLECULE) {
+          screenTypelist.add(screenType);
+        }
+      }
+      return JSFUtils.createUISelectItems(screenTypelist);
+    }
+    else {
+      return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
+    }
+  // BII end
   }
   
   public List<SelectItem> getLibraryTypeSelectItems()

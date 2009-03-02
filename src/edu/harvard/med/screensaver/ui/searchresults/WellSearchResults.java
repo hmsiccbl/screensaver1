@@ -238,8 +238,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
                                                   List<? extends TableColumn<Well,?>> columns)
   {
     if (_library != null &&
-      ((_library.getEndPlate() - _library.getStartPlate()) + 1) * (Well.PLATE_ROWS * Well.PLATE_COLUMNS) <=
-      EntitySearchResults.ALL_IN_MEMORY_THRESHOLD) {
+      ((_library.getEndPlate() - _library.getStartPlate()) + 1) * _library.getPlateSize().getWellCount() <= EntitySearchResults.ALL_IN_MEMORY_THRESHOLD) {
       log.debug("using InMemoryDataModel due to domain size");
       return new InMemoryEntityDataModel<Well>(dataFetcher);
     }
