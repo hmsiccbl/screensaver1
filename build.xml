@@ -86,6 +86,8 @@
   <property name="javadoc.dir" location="${build.dir}/api" />
   <property name="install.dir" location="${build.dir}/${app.name}" />
   <property name="ddl.build.dir" location="${build.dir}/ddl" />
+  <property name="jar" value="${build.dir}/${app.name}.jar" />
+  <property name="jar.build.dir" location="${build.dir}/jar" />
   <property name="war.build.dir" location="${build.dir}/war" />
   <property name="war" value="${build.dir}/${app.name}.war" />
   <property name="distro.file" location="${build.dir}/${app.name}.tgz" />
@@ -205,6 +207,18 @@
 
   </target>
 
+
+  <target name="jar">
+    <description>
+      Build Screensaver into a JAR
+    </description>
+    <delete dir="${jar.build.dir}" />
+    <delete file="${jar}" />
+    <antcall target="build">
+      <param name="build.dir" location="${jar.build.dir}" />
+    </antcall>
+    <jar destfile="${jar}" basedir="${jar.build.dir}/classes" />
+  </target>
 
   <target name="war">
     <description>
