@@ -581,11 +581,18 @@ public class CellHTS2 {
     String cellHtsObjectName = null;
     if (rMethod.equals(RMethod.NORMALIZE_PLATES)) {
       cellHtsObjectName = "rcan";
-      runMethod = cellHtsObjectName + " <- normalizePlates(rca,method=\""
-          + this.normalizePlatesMethod.getValue() + "\");";
+      runMethod = cellHtsObjectName +
+      // [atolopko, 2008-03-12] this commented out line includes the version I used to produce matching analysis results for the example data supplied by Boutros cellHTS2 tutorial
+      //" <- normalizePlates(rca,scale=\"multiplicative\", log=FALSE, varianceAdjust=\"none\", method=\""
+      " <- normalizePlates(rca, method=\""
+      + this.normalizePlatesMethod.getValue() + "\");";
     } else if (rMethod.equals(RMethod.SCORE_REPLICATES)) {
       cellHtsObjectName = "rcans";
-      runMethod = cellHtsObjectName + " <- scoreReplicates(rcan,method=\""
+      // [atolopko, 2008-03-12] this commented out line includes the version I used to produce matching analysis results for the example data supplied by Boutros cellHTS2 tutorial
+      runMethod = cellHtsObjectName + 
+      // [atolopko, 2008-03-12] this commented out line includes the version I used to produce matching analysis results for the example data supplied by Boutros cellHTS2 tutorial
+      //" <- scoreReplicates(rcan, sign=\"-\", method=\""
+      " <- scoreReplicates(rcan, method=\""
           + this.scoreReplicatesMethod.getValue() + "\");";
     } else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
       cellHtsObjectName = "rcanss";
