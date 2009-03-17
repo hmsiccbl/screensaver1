@@ -77,6 +77,23 @@ public class CellHTS2Test extends AbstractSpringTest
   }
 
   public void tReadPlateListDb(boolean withNull)
+  throws RserveException,
+  REngineException,
+  REXPMismatchException {
+    tReadPlateListDb(true,false);
+  }
+
+  public void testReadPlateListDbWithoutA01ResultValue()
+    throws RserveException,
+    REngineException,
+    REXPMismatchException
+  {
+    tReadPlateListDb(false,true);
+  }
+  
+  
+  
+  public void tReadPlateListDb(boolean withNull,boolean withoutA01ResultValue)
     throws RserveException,
     REngineException,
     REXPMismatchException
@@ -85,7 +102,8 @@ public class CellHTS2Test extends AbstractSpringTest
     // 1. PREPARE INPUT
     ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult(false,
                                                                                       withNull,
-                                                                                      2);
+                                                                                      2,
+                                                                                      withoutA01ResultValue);
     String title = "Dummy_Experiment";
 
     CellHTS2 cellHts2 = null;
@@ -117,6 +135,13 @@ public class CellHTS2Test extends AbstractSpringTest
       if (withNull) {
         Rep1Values[2] = CellHTS2.NA;
         Rep2Values[2] = CellHTS2.NA;
+      }
+      
+      if (withoutA01ResultValue) {
+        Rep1Values[0] = CellHTS2.NA;
+        Rep1Values[4] = CellHTS2.NA;
+        Rep2Values[0] = CellHTS2.NA;
+        Rep2Values[4] = CellHTS2.NA;
       }
 
       expected[0] = Rep1Values;

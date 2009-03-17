@@ -261,6 +261,15 @@ public class CellHTS2 {
       // create a double[][]
       // .. variable in Java representing the values per plate en per well.
       double[][] values = new double[nrPlates][nrWells];
+      
+     /* ScreenResult is allowed to have wells in the upper-left part of a plate that do
+      not have ResultValues. */
+      for (int p = 0; p < nrPlates; p++) {
+        for (int w = 0; w < nrWells; w++) {
+            values[p][w] = CellHTS2.NA;
+        }
+      }
+      
       WellKey wellKey;
       for (ResultValue rv : resultValues) {
         wellKey = rv.getWell().getWellKey();

@@ -84,7 +84,13 @@ public class MakeDummyEntitiesCellHTS2 {
     return(makeSimpleDummyScreenResult(false,false,2));
     
   }
-  public static ScreenResult makeSimpleDummyScreenResult(boolean withExcl, boolean withNull,int nrPlateColumns) {
+  
+  public static ScreenResult makeSimpleDummyScreenResult(boolean withExcl, boolean withNull,int nrPlateColumns){
+    return (makeSimpleDummyScreenResult( withExcl,  withNull, nrPlateColumns,false));
+    
+  }
+  
+  public static ScreenResult makeSimpleDummyScreenResult(boolean withExcl, boolean withNull,int nrPlateColumns,boolean withoutA01ResultValue) {
 
     Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI); //That is without the results
 
@@ -165,8 +171,13 @@ public class MakeDummyEntitiesCellHTS2 {
         rep2Values.set(2, null);
       }
       
-      normRep1.createResultValue(well, assayWellType, rep1Values.get(i), 3, exclude);
-      normRep2.createResultValue(well, assayWellType, rep2Values.get(i), 3, exclude);
+      if (withoutA01ResultValue && wellName.equals("A01")) { } 
+      else {
+        normRep1.createResultValue(well, assayWellType, rep1Values.get(i), 3, exclude);
+        normRep2.createResultValue(well, assayWellType, rep2Values.get(i), 3, exclude);
+      }
+      
+
       // rvt.getResultValues();
     }
 
