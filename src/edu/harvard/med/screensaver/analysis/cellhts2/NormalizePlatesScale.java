@@ -11,22 +11,15 @@ package edu.harvard.med.screensaver.analysis.cellhts2;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 
-// BII (Siew Cheng): Implement VocabularyTerm
-public enum NormalizePlatesMethod implements VocabularyTerm
+public enum NormalizePlatesScale implements VocabularyTerm
 {
-  // the vocabulary
-	
-  /* POC("POC"), */
-  NEGATIVES("negatives"),
-   NPI("NPI"),
-  MEAN("mean"), 
-  MEDIAN("median"),
+  ADDITIVE("additive"),
+  MULTIPLICATIVE("multiplicative"); 
  /* SHORTH("shorth"),
   BSCORE("Bscore"),
-  LOCFIT("locfit"), */
-  LOESS("loess"); 
+  LOCFIT("locfit"),
+  LOESS("loess"); */
   
   // BII (Siew Cheng) start: implement VocabularyTerm
   // static inner class
@@ -34,11 +27,11 @@ public enum NormalizePlatesMethod implements VocabularyTerm
   /**
    * A Hibernate <code>UserType</code> to map the {@link NormalizePlatesMethod} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<NormalizePlatesMethod>
+  public static class UserType extends VocabularyUserType<NormalizePlatesScale>
   {
     public UserType()
     {
-      super(NormalizePlatesMethod.values());
+      super(NormalizePlatesScale.values());
     }
   }
 
@@ -50,9 +43,9 @@ public enum NormalizePlatesMethod implements VocabularyTerm
    * Constructs a <code>NormalizePlatesMethod</code> vocabulary term.
    * @param value The value of the term.
    */
-  private NormalizePlatesMethod(String value)
+  private NormalizePlatesScale(String value)
   {
-	  _value = value;
+    _value = value;
   }
 
   // public instance methods
@@ -74,5 +67,5 @@ public enum NormalizePlatesMethod implements VocabularyTerm
   {
     return getValue();
   }
-  // BII end
+
 }

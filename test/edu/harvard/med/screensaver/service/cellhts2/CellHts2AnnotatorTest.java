@@ -9,9 +9,13 @@
 
 package edu.harvard.med.screensaver.service.cellhts2;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.analysis.cellhts2.CellHTS2;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
+import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesNegControls;
+import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesScale;
 import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -19,8 +23,6 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
 
 public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
 {
@@ -61,6 +63,8 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
         screenResult,
        "testAnalysis",
        NormalizePlatesMethod.MEDIAN,
+       NormalizePlatesNegControls.NEG,
+       NormalizePlatesScale.ADDITIVE,
        null,
        null,
        true,

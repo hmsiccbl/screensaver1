@@ -1,4 +1,6 @@
-// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+// $HeadURL:
+// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml
+// $
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -42,10 +44,10 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
  * <p>
  * It is the responsibility of calling code to ensure that all required entity
  * relationships are accessible. This implies that methods in this class should
- * either be called within an active Hibernate session (e.g. by a @Transactional
- * method), or the ScreenResult has already had the necessary relationships
- * eagerly fetched.
+ * either be called within an active Hibernate session (e.g. by a
  * 
+ * @Transactional method), or the ScreenResult has already had the necessary
+ *                relationships eagerly fetched.
  * @author Cor Lieftink
  */
 
@@ -63,6 +65,8 @@ public class CellHTS2 {
   private RMethod lastRMethodToRun = RMethod.START;
   private String title;
   private NormalizePlatesMethod normalizePlatesMethod;
+  private NormalizePlatesScale normalizePlatesScale;
+  private NormalizePlatesNegControls normalizePlatesNegControls;
   private ScoreReplicatesMethod scoreReplicatesMethod;
   private SummarizeReplicatesMethod summarizeReplicatesMethod;
   private String reportOutputPath;
@@ -78,9 +82,9 @@ public class CellHTS2 {
   }
 
   /**
-   * Can be called repeatedly, assuming later rMethods are being initialized since
-   * the last call (otherwise nothing new will happen).
-   *
+   * Can be called repeatedly, assuming later rMethods are being initialized
+   * since the last call (otherwise nothing new will happen).
+   * 
    * @return the update screen result
    * @throws CellHtsException
    */
@@ -172,7 +176,7 @@ public class CellHTS2 {
    * <li>replicates
    * <li>channels
    * </ul>
-   *
+   * 
    * @param screenResult
    * @return ArrayDimensions type, containing all the above values
    */
@@ -314,8 +318,10 @@ public class CellHTS2 {
     String rExpr = "library(cellHTS2Db);"
         + runReadPlateListDb + ";\"OK\""; // Added OK, Otherwise returns the
                                           // variable r (==cellHTS2 object)
-    // and there is apparantly a bug, as the result REXP does contain elements count 16 and names count 31
-    // .. based on the name it will retrieve an element and then arrayIndexOutOfBoundError
+    // and there is apparantly a bug, as the result REXP does contain elements
+    // count 16 and names count 31
+    // .. based on the name it will retrieve an element and then
+    // arrayIndexOutOfBoundError
     rserveExtensions.tryEval(rConnection, rExpr);
   }
   
@@ -363,10 +369,10 @@ public class CellHTS2 {
   
 
   /**
-   * Makes a call to the R function configureDb 
+   * Makes a call to the R function configureDb
    */
 
-  private void configureDb() throws RserveException, REngineException, REXPMismatchException {
+  private String[] configureDb() throws RserveException, REngineException, REXPMismatchException {
 
     // 1. PREPARE INPUT OBJECTS IN R FOR R METHOD CONFIGURE
     // String[] plate : "1","1","1"
@@ -379,8 +385,9 @@ public class CellHTS2 {
     String[] contents = new String[l];
     
     // Each replicate will be similar in content. Information is taken from the
-    // first one. need to loop over resultvalues in stead over wells, because we need
-    // information about assayWellType. 
+    // first one. need to loop over resultvalues in stead over wells, because we
+    // need
+    // information about assayWellType.
     int i = -1;
     ResultValueType rvt = screenResult.getResultValueTypes().first();
     for (ResultValue rv : rvt.getResultValues()) {
@@ -395,8 +402,10 @@ public class CellHTS2 {
       // O
       if (rv.getAssayWellType().getAbbreviation().equals("P")) {
         contents[i] = "pos";
-      } else if (rv.getAssayWellType().getAbbreviation().equals("N")) {
-        contents[i] = "neg";
+      } else if (rv.getAssayWellType().getAbbreviation().equals("N") ) {
+        contents[i] = "N";
+      } else if (rv.getAssayWellType().getAbbreviation().equals("NS") ) {
+        contents[i] = "NS";
       } else if (rv.getAssayWellType().getAbbreviation().equals("X")) {
         contents[i] = "sample";
       }
@@ -415,8 +424,8 @@ public class CellHTS2 {
     rExpr.append("library(cellHTS2Db);");
     rExpr.append("conf <- data.frame(Plate=plate, Well=well, Content=content,stringsAsFactors=FALSE);");
     
-    //CREATE SLOG
-    //CellHTS2 requires the Plate, Sample, Channel as numeric fields
+    // CREATE SLOG
+    // CellHTS2 requires the Plate, Sample, Channel as numeric fields
     ArrayList<Integer> slogP = new ArrayList<Integer>();
     ArrayList<String> slogW = new ArrayList<String>();
     ArrayList<Integer> slogS = new ArrayList<Integer>();
@@ -431,10 +440,10 @@ public class CellHTS2 {
       }
     }
 
-    //In case of at least one screenlog entry
+    // In case of at least one screenlog entry
     if (slogP.size() > 0) {
-      //Create slog data object
-      //Convert the ArrayLists to String[]
+      // Create slog data object
+      // Convert the ArrayLists to String[]
       double [] slogPd  = new double [slogP.size()];
       String [] slogWd  = new String [slogW.size()];
       double [] slogSd  = new double [slogS.size()];
@@ -455,10 +464,10 @@ public class CellHTS2 {
           slogC[i]=1;
           slogF[i]="NA";
       }
-      //rConnection.assign("slogC" ,slogC);
+      // rConnection.assign("slogC" ,slogC);
       rConnection.assign("slogF" ,slogF);
       
-      //Add slog statement to R expression
+      // Add slog statement to R expression
       rExpr.append("slog <- data.frame(Plate=slogP,Well=slogW,Sample=slogS, Flag=slogF,stringsAsFactors=FALSE);");
       rExpr.append("rc <- configureDb(r,conf,slog);");
     } else {
@@ -468,7 +477,7 @@ public class CellHTS2 {
     rExpr.append("\"OK\""); // OK, otherwise rc is retrieved in Rserve client
     rserveExtensions.tryEval(rConnection, rExpr.toString());
 
-
+    return (contents);
   }
   // 3. RETRIEVE DATA FROM R (ONLY RELEVANT FOR RUNIT TEST)
   public String[] getConfigureDbResultConf() throws RserveException, REngineException, REXPMismatchException {
@@ -510,7 +519,6 @@ public class CellHTS2 {
    * Creates the geneIDs data.frame in the cellHTS2 object: ..
    * data.frame(Plate=plate, Well=well, HFAID=hfaid,
    * GeneID=geneid,stringsAsFactors=FALSE)
-   *
    */
 
   private void annotateDb() throws REngineException, RserveException, REXPMismatchException {
@@ -593,8 +601,8 @@ public class CellHTS2 {
       runMethod = cellHtsObjectName +
       // [atolopko, 2008-03-12] this commented out line includes the version I used to produce matching analysis results for the example data supplied by Boutros cellHTS2 tutorial
       //" <- normalizePlates(rca,scale=\"multiplicative\", log=FALSE, varianceAdjust=\"none\", method=\""
-      " <- normalizePlates(rca, method=\""
-      + this.normalizePlatesMethod.getValue() + "\");";
+	     " <- normalizePlates(rca," +"scale=\"" + this.normalizePlatesScale.getValue() + "\"," +
+      		"method=\""+ this.normalizePlatesMethod.getValue() + "\"," + "negControls=\"" + this.normalizePlatesNegControls.getValue()  + "\");";
     } else if (rMethod.equals(RMethod.SCORE_REPLICATES)) {
       cellHtsObjectName = "rcans";
       // [atolopko, 2008-03-12] this commented out line includes the version I used to produce matching analysis results for the example data supplied by Boutros cellHTS2 tutorial
@@ -669,7 +677,7 @@ public class CellHTS2 {
         // the position in the result matrix is based on the replicateOrdinal
         // value of the rvt: see readPlateListDb
         int r = rvt.getReplicateOrdinal();
-        //rvt.getName();
+        // rvt.getName();
 
         ResultValueType rvtNew = screenResult.createResultValueType(rvtPrefix
             + rvt.getName(), r, true, false, false, "phenotype",rvt.getChannel());
@@ -704,9 +712,17 @@ public class CellHTS2 {
     setLastRMethodToRun(RMethod.ANNOTATE);
   }
 
-  public void normalizePlatesInit(NormalizePlatesMethod normalizePlatesMethod)
+  public void normalizePlatesInit(NormalizePlatesMethod normalizePlatesMethod, NormalizePlatesScale normalizePlatesScale){
+    normalizePlatesInit(normalizePlatesMethod,  normalizePlatesScale,NormalizePlatesNegControls.NEG);
+    
+  }
+  
+  public void normalizePlatesInit(NormalizePlatesMethod normalizePlatesMethod, NormalizePlatesScale normalizePlatesScale,
+          NormalizePlatesNegControls normalizePlatesNegControls)
   {
     this.normalizePlatesMethod = normalizePlatesMethod;
+    this.normalizePlatesScale = normalizePlatesScale;
+    this.normalizePlatesNegControls = normalizePlatesNegControls;
     setLastRMethodToRun(RMethod.NORMALIZE_PLATES);
   }
 
@@ -728,10 +744,10 @@ public class CellHTS2 {
    * @throws REXPMismatchException
    */
 
-/*  private void scoreReplicates() throws RserveException, REXPMismatchException {
-     runRMethod(RMethod.SCORE_REPLICATES);
-  }
-*/ 
+/*
+ * private void scoreReplicates() throws RserveException, REXPMismatchException {
+ * runRMethod(RMethod.SCORE_REPLICATES); }
+ */ 
   public void scoreReplicatesAddResult() throws RserveException,	REXPMismatchException {
 	 addRMethodResult(RMethod.SCORE_REPLICATES);
   }
@@ -744,6 +760,7 @@ public class CellHTS2 {
 
   /**
    * screenResult: takes a screenResult which included resultTypes of 'scored'
+   * 
    * @return
    */
 
@@ -764,11 +781,9 @@ public class CellHTS2 {
    * rank correlation 2) boxplots both for raw and normalized data 3) for both
    * pos and neg controls a. normalized intensities b. distribution obtained
    * from kernel density estimates
-   *
-   * @param outputPath:
-   *          path to the directory where to store the report files, f.e.
-   *          '/tmp/output'
-   *
+   * 
+   * @param outputPath: path to the directory where to store the report files,
+   *          f.e. '/tmp/output'
    */
 
   private String writeReport() throws RserveException,  REXPMismatchException {
@@ -790,10 +805,14 @@ public class CellHTS2 {
          progressReport = "TRUE";
        }
     }
+   
+    // In R 2.7.0 png needs cairo >= 1.2, in order to support lower versions like 1.0.2 
+    // use value cairo1 for type
+    String rCairo = "temp <- png; png <- function(...) { temp (type=\"cairo1\", ...) };";
     
-    String rExpr = "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan,\"scored\"=rcanss), plotPlateArgs = TRUE,"
+    String rExpr = rCairo + "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan,\"scored\"=rcanss), plotPlateArgs = TRUE,"
         + "imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = \""
-        + this.reportOutputPath + "\",progressReport="+ progressReport + ")";
+        + this.reportOutputPath + "\")";
 
     RserveExtensions rserveExtensions = new RserveExtensions();
     String indexUrl = rserveExtensions.tryEval(rConnection, rExpr).asString();

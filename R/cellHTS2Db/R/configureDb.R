@@ -118,7 +118,7 @@ setMethod("configureDb", signature("cellHTS"),
 #			## Process the configuration file into wellAnno slot
 #			## and set all 'empty' wells to NA in object
 			## all plates are below each other
-			pcontent = tolower(conf$Content)  ## ignore case!
+			pcontent = conf$Content 
 			wAnno = factor(rep(NA, nrWpP*nrPlate), levels=unique(pcontent))
 #			
 #			

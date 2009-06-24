@@ -483,6 +483,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   public void testParseScreenResultWithChannels() throws Exception
   {
+    /* including test for use "NS" */
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_117_TEST_WORKBOOK_FILE);
     ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(117),
                                                              workbookFile);
@@ -490,7 +491,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     doTestScreenResult117ParseResult(screenResult);
   }
-
+  
   private void setDefaultValues(ResultValueType rvt)
   {
     if (rvt.getAssayPhenotype() == null) {
@@ -749,7 +750,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       AssayWellType.ASSAY_POSITIVE_CONTROL,
       AssayWellType.EXPERIMENTAL,
       AssayWellType.EXPERIMENTAL,
-      AssayWellType.ASSAY_POSITIVE_CONTROL,
+      AssayWellType.ASSAY_CONTROL_SHARED,
       AssayWellType.EXPERIMENTAL,
       AssayWellType.EXPERIMENTAL};
 

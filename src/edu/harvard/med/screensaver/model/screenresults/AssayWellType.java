@@ -29,6 +29,7 @@ public enum AssayWellType implements VocabularyTerm
   LIBRARY_CONTROL("library control", "C"),
   ASSAY_POSITIVE_CONTROL("assay positive control", "P"),
   ASSAY_CONTROL("assay control", "N"), // aka "assay negative control", but stakeholders prefer simply "assay control"
+  ASSAY_CONTROL_SHARED("assay control shared", "NS"), //shared between screens
   BUFFER("buffer", "B"), // RNAi only
   DMSO("DMSO", "D"), // small compound only
                      // note: as of 2007-01-31, screen result files don't use this; they use EMPTY for what should be DMSO wells
@@ -100,6 +101,7 @@ public enum AssayWellType implements VocabularyTerm
   public boolean isControl()
   {
     return this.equals(AssayWellType.ASSAY_CONTROL) ||
+    this.equals(AssayWellType.ASSAY_CONTROL_SHARED) ||
     this.equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
     this.equals(AssayWellType.LIBRARY_CONTROL);
   }

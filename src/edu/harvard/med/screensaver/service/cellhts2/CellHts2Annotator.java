@@ -15,6 +15,8 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.analysis.cellhts2.CellHTS2;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
+import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesNegControls;
+import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesScale;
 import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.ScoreReplicatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
@@ -54,6 +56,8 @@ public class CellHts2Annotator
                       					ScreenResult screenResult,
                                         String analysisName,
                                         NormalizePlatesMethod normalizationMethod,
+                                        NormalizePlatesNegControls normalizePlatesNegControls, 
+                                        NormalizePlatesScale normalizationScale,
                                         ScoreReplicatesMethod scoreReplicatesMethod,
                                         SummarizeReplicatesMethod summarizeReplicatesMethod,
                                         boolean addNewCellHtsResultValueTypes,
@@ -79,7 +83,7 @@ public class CellHts2Annotator
         
         //Initiate the parameters for all the methods to be run
         if (untilInclRmethod.getIndex() >= RMethod.NORMALIZE_PLATES.getIndex()){ 
-          _cellHts.normalizePlatesInit(normalizationMethod);
+          _cellHts.normalizePlatesInit(normalizationMethod,normalizationScale);
         }
         if (untilInclRmethod.getIndex() >= RMethod.SCORE_REPLICATES.getIndex()){ 
           _cellHts.scoreReplicatesInit(scoreReplicatesMethod);

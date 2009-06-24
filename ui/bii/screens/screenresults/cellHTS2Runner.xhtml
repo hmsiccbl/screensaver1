@@ -46,6 +46,34 @@
               </t:selectOneMenu>
             </ui:define>
           </ss:property>
+
+         <ss:property id="normalizePlatesScale" 
+           label="Normalize Plates Scale"
+           description="The scale used for normalizing plates"
+           value="#{cellHTS2Runner}">
+           <ui:define name="data">
+             <t:selectOneMenu value="#{value.normalizePlatesScale}" 
+             converter="#{normalizePlatesScaleConverter}" 
+             styleClass="inputText selectMenu">
+             <f:selectItems 
+               value="#{value.normalizePlatesScaleSelections}" />
+             </t:selectOneMenu>
+           </ui:define>
+         </ss:property>
+         <ss:property id="normalizePlatesNegControls" 
+             label="Normalize Plates NegControls"
+           description="Type of neg control used when using 'negatives' as method for normalization. "
+           value="#{cellHTS2Runner}">
+           <ui:define name="data">
+             <t:selectOneMenu value="#{value.normalizePlatesNegControls}" 
+             converter="#{normalizePlatesNegControlsConverter}" 
+             styleClass="inputText selectMenu">
+             <f:selectItems value="#{value.normalizePlatesNegControlsSelections}" />
+             </t:selectOneMenu>
+           </ui:define>
+         </ss:property>          
+          
+          
           <ss:property id="scoreReplicatesMethod"
             label="Score Replicates Method"
             description="The method used for scoring replicates"

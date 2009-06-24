@@ -172,7 +172,8 @@ makeTestSet2 <- function() {
 	#		$ Plate  : chr  "*" "*" "*"  
 	#		$ Well   : chr  "*" "A01" "B01"
 	#		$ Content: chr  "sample" "pos" "neg"	
-	conf <- data.frame(Plate=c("*","*","*"), Well=c("*","A01","B01"), Content=c("sample","pos","neg"),stringsAsFactors=FALSE)
+	negAnno <- "N"
+	conf <- data.frame(Plate=c("*","*","*"), Well=c("*","A01","B01"), Content=c("sample","pos",negAnno),stringsAsFactors=FALSE)
 	
 	
 	#3. ANNOTATION
@@ -479,3 +480,50 @@ makeNormNegativesTarget <- function () {
 	
 }
 
+
+makeNormNpiTarget <- function () {
+	
+	nrWells = 4
+	nrPlates = 2
+	nrReps = 2
+	nrChannels = 1
+	
+	dimNames <- list(Features=c(1:8),Sample=c(1:2),Channels="ch1")
+	dataNormTarget <- array(as.numeric(NA), dim=c(nrWells * nrPlates,nrReps,nrChannels), dimnames=dimNames)
+	## Fun in cellHTS2 code
+	## (mean(a[pos], na.rm = TRUE) - a)/(mean(a[pos], na.rm = TRUE) - 
+	##             mean(a[neg], na.rm = TRUE))
+	
+	##     		(mean(P) -x)  / (mean(P) - mean(N)
+	## P1R1
+	## A01 P 1  (1-1)/ (1-3) = 0.0   
+	## A02 X 2  (1-2)/ (1-3) = 0.5
+	## B01 N 3 	(1-3)/ (1-3) = 1.0
+	## B02 X 4  (1-4)/ (1-3) = 1.5 
+	
+	## P2R1
+	## A01 P 5  (5-5)/ (5-7) = 0.0   
+	## A02 X 6  (5-6)/ (5-7) = 0.5
+	## B01 N 7 	(5-7)/ (5-7) = 1.0
+	## B02 X 9  (5-9)/ (5-7) = 2.0  
+
+	##P1R2 
+	## A01 P 9  (9-9)/ (9-11)= 0.0
+	## A02 X 10 (9-10)/ (9-11)= 0.5
+	## B01 N 11 (9-11)/ (9-11)= 1
+	## B02 X 14 (9-14)/ (9-11)= 2.5
+	
+	##P2R2 
+	## A01 P 13 (13-13)/ (13-15)= 0.0
+	## A02 X 14 (13-14)/ (13-15)= 0.5
+	## B01 N 15 (13-15)/ (13-15)= 1.0
+	## B02 X 19 (13-19)/ (13-15)= 3.0
+	
+	#values replicate 1 (plate 1 + 2) 
+	dataNormTarget[,1,1] <- c(0.0, 0.5, 1.0,1.5,0.0, 0.5, 1.0, 2.0)
+	
+	#values replicate 2 (plate 1 + 2) 	
+	dataNormTarget[,2,1] <- c(0.0, 0.5, 1, 2.5, 0.0, 0.5, 1.0, 3.0)
+	return(dataNormTarget)
+	
+}

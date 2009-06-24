@@ -5,8 +5,12 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
+import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesNegControls;
+import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesScale;
 import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.ScoreReplicatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
@@ -18,11 +22,10 @@ import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
-import org.apache.log4j.Logger;
-
 /**
  * @author Siew Cheng Aw
  */
+ 
 public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 {
 
@@ -32,6 +35,8 @@ public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 
 	private ScreenResult _screenResult;
 	private NormalizePlatesMethod _normalizePlatesMethod = NormalizePlatesMethod.MEDIAN;
+  private NormalizePlatesScale _normalizePlatesScale = NormalizePlatesScale.ADDITIVE;
+  private NormalizePlatesNegControls _normalizePlatesNegControls = NormalizePlatesNegControls.NEG;
 	private ScoreReplicatesMethod _scoreReplicatesMethod = ScoreReplicatesMethod.ZSCORE;
 	private SummarizeReplicatesMethod _summarizeReplicatesMethod = SummarizeReplicatesMethod.MEAN;
 	private String _screenResultFilePath;
@@ -78,6 +83,22 @@ public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 		_normalizePlatesMethod = normalizePlatesMethod;
 	}
 
+	 public NormalizePlatesNegControls getNormalizePlatesNegControls() {
+	    return _normalizePlatesNegControls;
+	  }
+
+	  public void setNormalizePlatesNegControls(NormalizePlatesNegControls normalizePlatesNegControls) {
+	    _normalizePlatesNegControls = normalizePlatesNegControls;
+	  }
+	
+ public NormalizePlatesScale getNormalizePlatesScale() {
+    return _normalizePlatesScale;
+  }
+
+  public void setNormalizePlatesScale(NormalizePlatesScale normalizePlatesScale) {
+    _normalizePlatesScale = normalizePlatesScale;
+  }
+	
 	public ScoreReplicatesMethod getScoreReplicatesMethod() {
 		return _scoreReplicatesMethod;
 	}
@@ -112,6 +133,8 @@ public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 										_screenResult,
 										_screenResult.getScreen().getTitle(),
 										_normalizePlatesMethod,
+                    _normalizePlatesNegControls,
+										_normalizePlatesScale,
 										_scoreReplicatesMethod,
 										_summarizeReplicatesMethod,
 										_addNewCellHtsResultValueTypes,
@@ -134,8 +157,26 @@ public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 		}
 		return JSFUtils.createUISelectItems(selections);
 	}
+
+	 public List<SelectItem> getNormalizePlatesScaleSelections()
+	  {
+	    List<NormalizePlatesScale> selections = new ArrayList<NormalizePlatesScale>();
+	    for (NormalizePlatesScale normalizePlatesScale : NormalizePlatesScale.values()) {
+	      selections.add(normalizePlatesScale);
+	    }
+	    return JSFUtils.createUISelectItems(selections);
+	  }
 	
-	public List<SelectItem> getScoreReplicatesMethodSelections()
+   public List<SelectItem> getNormalizePlatesNegControlsSelections()
+   {
+     List<NormalizePlatesNegControls> selections = new ArrayList<NormalizePlatesNegControls>();
+     for (NormalizePlatesNegControls normalizePlatesNegControls : NormalizePlatesNegControls.values()) {
+       selections.add(normalizePlatesNegControls);
+     }
+     return JSFUtils.createUISelectItems(selections);
+   }
+	 
+	 public List<SelectItem> getScoreReplicatesMethodSelections()
 	{
 		List<ScoreReplicatesMethod> selections = new ArrayList<ScoreReplicatesMethod>();
 		for (ScoreReplicatesMethod scoreReplicatesMethod : ScoreReplicatesMethod.values()) {

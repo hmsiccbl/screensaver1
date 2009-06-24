@@ -13,7 +13,7 @@ package edu.harvard.med.screensaver.analysis.cellhts2;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -188,7 +188,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
       // 3. CHECKEQUALS
       // Check for the content field in the result
-      String[] expectedResultConf = { "pos", "sample", "neg", "sample", "pos", "sample", "neg", "sample" };
+      String[] expectedResultConf = { "pos", "sample", "N", "sample", "pos", "sample", "N", "sample" };
 
       // assertEquals cannot compare String[] straight away. It will compare the
       // memory address
@@ -198,7 +198,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
       // Check for result screenlog
       String[] expectedResultSlog = { "1.0", "1.0" }; // values in column Plate
-                                                      // .
+      // .
       // TODO other check for the entries in the other columns ic.
       // Well,Sample,Channel,Flag.
       String[] actualResultSlog = cellHts2.getConfigureDbResultSlog();
@@ -277,7 +277,9 @@ public class CellHTS2Test extends AbstractSpringTest
     REngineException,
     REXPMismatchException
   {
-    this.normalizePlatesAssert(NormalizePlatesMethod.MEAN, 2);
+    this.normalizePlatesAssert(NormalizePlatesMethod.MEAN,
+                               NormalizePlatesScale.ADDITIVE,
+                               2);
   }
 
   public void testNormalizePlatesMedian()
@@ -285,26 +287,115 @@ public class CellHTS2Test extends AbstractSpringTest
     REngineException,
     REXPMismatchException
   {
-    this.normalizePlatesAssert(NormalizePlatesMethod.MEDIAN, 3);
+    this.normalizePlatesAssert(NormalizePlatesMethod.MEDIAN,
+                               NormalizePlatesScale.ADDITIVE,
+                               3);
+  }
+
+  public void testNormalizePlatesMedianMultiplicative()
+    throws RserveException,
+    REngineException,
+    REXPMismatchException
+  {
+    this.normalizePlatesAssert(NormalizePlatesMethod.MEDIAN,
+                               NormalizePlatesScale.MULTIPLICATIVE,
+                               3);
+  }
+
+  public void testNormalizePlatesLoess()
+    throws RserveException,
+    REngineException,
+    REXPMismatchException
+  {
+    this.normalizePlatesAssert(NormalizePlatesMethod.LOESS,
+                               NormalizePlatesScale.ADDITIVE,
+                               3);
   }
 
 
+  public void testNormalizePlatesNegativesAdditive()
+    throws RserveException,
+    REngineException,
+    REXPMismatchException
+  {
+    this.normalizePlatesAssert(NormalizePlatesMethod.NEGATIVES,
+                               NormalizePlatesScale.ADDITIVE,
+                               2);
+  }
+
+  public void testNormalizePlatesNegativesMultiplicative()
+    throws RserveException,
+    REngineException,
+    REXPMismatchException
+  {
+    this.normalizePlatesAssert(NormalizePlatesMethod.NEGATIVES,
+                               NormalizePlatesScale.MULTIPLICATIVE,
+                               2);
+  }
+
+  public void testNormalizePlatesNegativesNegSharedMultiplicative()
+    throws RserveException,
+    REngineException,
+    REXPMismatchException
+  {
+    this.normalizePlatesAssert(NormalizePlatesMethod.NEGATIVES,
+                               NormalizePlatesScale.MULTIPLICATIVE,
+                               2,
+                               NormalizePlatesNegControls.NEG_SHARED);
+  }
+  
+  public void testNormalizePlatesNpiNeg()
+  throws RserveException,
+  REngineException,
+  REXPMismatchException
+{
+  this.normalizePlatesAssert(NormalizePlatesMethod.NPI,
+                             NormalizePlatesScale.ADDITIVE, // not relevant for NPI
+                             2);
+}
+
+
   public void normalizePlatesAssert(NormalizePlatesMethod normalizePlatesMethod,
+                                    NormalizePlatesScale normalizePlatesScale,
                                     int nrPlateColumns)
     throws RserveException,
     REngineException,
     REXPMismatchException
   {
+    normalizePlatesAssert(normalizePlatesMethod,
+                          normalizePlatesScale,
+                          nrPlateColumns,
+                          NormalizePlatesNegControls.NEG);
+  }
+  
 
+  public void normalizePlatesAssert(NormalizePlatesMethod normalizePlatesMethod,
+                                    NormalizePlatesScale normalizePlatesScale,
+                                    int nrPlateColumns,
+                                    NormalizePlatesNegControls normalizePlatesNegControls)
+    throws RserveException,
+    REngineException,
+    REXPMismatchException
+  {
+
+    boolean inclNS;
+    if (normalizePlatesNegControls == NormalizePlatesNegControls.NEG_SHARED) {
+      inclNS = true;
+    }else {
+      inclNS = false;
+    }
     ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult(false,
                                                                                       false,
-                                                                                      nrPlateColumns);
+                                                                                      nrPlateColumns,
+                                                                                      inclNS);
     String title = "Dummy_Experiment";
 
     CellHTS2 cellHts2 = null;
     try {
       cellHts2 = new CellHTS2(screenResult, title);
-      cellHts2.normalizePlatesInit(normalizePlatesMethod);
+      cellHts2.normalizePlatesInit(normalizePlatesMethod,
+                                   normalizePlatesScale,
+                                   normalizePlatesNegControls);
       cellHts2.run();
       cellHts2.normalizePlatesAddResult();
 
@@ -322,49 +413,222 @@ public class CellHTS2Test extends AbstractSpringTest
 
       ArrayList<Double> eValuesRep1 = new ArrayList<Double>();
       ArrayList<Double> eValuesRep2 = new ArrayList<Double>();
-      if (nrPlateColumns == 2) {
-        // expected values
-        eValuesRep1.add(new Double(-2));
-        eValuesRep1.add(new Double(-1));
-        eValuesRep1.add(new Double(0));
-        eValuesRep1.add(new Double(1));
-        eValuesRep1.add(new Double(-2.5));
-        eValuesRep1.add(new Double(-1.5));
-        eValuesRep1.add(new Double(-0.5));
-        eValuesRep1.add(new Double(1.5));
+ 
+      
+      if (normalizePlatesMethod.equals(NormalizePlatesMethod.NPI)) {
+        // NPI (x - mean(P)/(mean(P)- mean(N)) 
+/*        ##        (mean(P) -x)  / (mean(P) - mean(N)
+          ## P1R1
+          ## A01 P 1  (1-1)/ (1-3) = 0.0   
+          ## A02 X 2  (1-2)/ (1-3) = 0.5
+          ## B01 N 3  (1-3)/ (1-3) = 1.0
+          ## B02 X 4  (1-4)/ (1-3) = 1.5 
+          
+          ## P2R1
+          ## A01 P 5  (5-5)/ (5-7) = 0.0   
+          ## A02 X 6  (5-6)/ (5-7) = 0.5
+          ## B01 N 7  (5-7)/ (5-7) = 1.0
+          ## B02 X 9  (5-9)/ (5-7) = 2.0  
 
-        eValuesRep2.add(new Double(-3));
-        eValuesRep2.add(new Double(-2));
-        eValuesRep2.add(new Double(-1));
-        eValuesRep2.add(new Double(2));
-        eValuesRep2.add(new Double(-3.5));
-        eValuesRep2.add(new Double(-2.5));
-        eValuesRep2.add(new Double(-1.5));
-        eValuesRep2.add(new Double(2.5));
-
-      }
-      else if (nrPlateColumns == 3) {
-        // conf per plate per row: control sample sample sample
-        // p1r1: 1,2,3,4,5,6 => median(2,3,5,6) = 4 (with is also the mean)
-        // p2r1: 7,9,10,11,15,13 => median(9,10,13,15) = 11.5 (<> mean = 11.75 )
-        //p1r1
-        eValuesRep1.add(new Double(-3));
-        eValuesRep1.add(new Double(-2));
-        eValuesRep1.add(new Double(-1));
-        eValuesRep1.add(new Double(0));
-        eValuesRep1.add(new Double(1));
-        eValuesRep1.add(new Double(2));
+          ##P1R2 
+          ## A01 P 9  (9-9)/ (9-11)= 0.0
+          ## A02 X 10 (9-10)/ (9-11)= 0.5
+          ## B01 N 11 (9-11)/ (9-11)= 1
+          ## B02 X 14 (9-14)/ (9-11)= 2.5
+          
+          ##P2R2 
+          ## A01 P 13 (13-13)/ (13-15)= 0.0
+          ## A02 X 14 (13-14)/ (13-15)= 0.5
+          ## B01 N 15 (13-15)/ (13-15)= 1.0
+          ## B02 X 19 (13-19)/ (13-15)= 3.0*/
+          
+        Collections.addAll(eValuesRep1,
+                           new Double(-0.0),  //TODO check why it has to be -.0.0
+                           new Double(0.5),  
+                           new Double(1.0),    
+                           new Double(1.5),  
+                           new Double(-0.0),   
+                           new Double(0.5),  
+                           new Double(1.0),    
+                           new Double(2.0));   
+          
+          Collections.addAll(eValuesRep2,
+                             new Double(-0.0),  
+                             new Double(0.5),  
+                             new Double(1.0),    
+                             new Double(2.5),  
+                             new Double(-0.0),   
+                             new Double(0.5),  
+                             new Double(1.0),    
+                             new Double(3.0));             
         
-        //p2r1
-        eValuesRep1.add(new Double(-4.5));
-        eValuesRep1.add(new Double(-2.5));
-        eValuesRep1.add(new Double(-1.5));
-        eValuesRep1.add(new Double(-0.5));
-        eValuesRep1.add(new Double(3.5));
-        eValuesRep1.add(new Double(1.5));
-
-
       }
+      else {
+        if (normalizePlatesMethod.equals(NormalizePlatesMethod.NEGATIVES)) {
+  /*
+   * Negative controls 1 well: B01: voor rep1 plate 1: 3 voor rep1 plate 2: 7 voor
+   * rep2 plate 1: 11 voor rep2 plate 2: 15 NC plate 1: 2 original values for rep1
+   * (2 columns) : 1,2,3,4,5,6,7,9
+   */
+          if (normalizePlatesNegControls == NormalizePlatesNegControls.NEG_SHARED) {
+            if (normalizePlatesScale == NormalizePlatesScale.ADDITIVE) {
+              Collections.addAll(eValuesRep1,
+                                 new Double(-1),
+                                 new Double(0),
+                                 new Double(1),
+                                 new Double(2),
+                                 new Double(3),
+                                 new Double(4),
+                                 new Double(5),
+                                 new Double(7));
+            }
+            else { // multiplicative
+              Collections.addAll(eValuesRep1,
+                                 new Double(0.5),
+                                 new Double(1),
+                                 new Double(1.5),
+                                 new Double(2),
+                                 new Double(1), //for C01
+                                 CellHTS2.NA,
+                                 new Double(1.25),
+                                 new Double(1.50),
+                                 new Double(1.75),
+                                 new Double(2.25),
+                                 new Double(1),
+                                 CellHTS2.NA);
+            }
+          }
+          else // based on "N"
+          if (normalizePlatesScale == NormalizePlatesScale.ADDITIVE) {
+            Collections.addAll(eValuesRep1,
+                               new Double(-2),
+                               new Double(-1),
+                               new Double(0),
+                               new Double(1),
+                               new Double(-2),
+                               new Double(-1),
+                               new Double(-0),
+                               new Double(2));
+          }
+          else {
+            Collections.addAll(eValuesRep1,
+                               new Double(0.3333333333333333),
+                               new Double(0.6666666666666666),
+                               new Double(1),
+                               new Double(1.3333333333333333),
+                               new Double(0.7142857142857143),
+                               new Double(0.8571428571428571),
+                               new Double(1),
+                               new Double(1.2857142857142858));
+          }
+        }
+        else { // not NEGATIVES
+          if (normalizePlatesMethod.equals(NormalizePlatesMethod.LOESS)) {
+            // test only for nrPlateColumns==3
+            Collections.addAll(eValuesRep1,
+                               new Double(1),
+                               new Double(0.6649677294952294),
+                               new Double(0.9999512278450635),
+                               new Double(4),
+                               new Double(1.6799167589536141),
+                               new Double(2.0149002573034487),
+                               new Double(7),
+                               new Double(3.004852950739628),
+                               new Double(3.3448357162939013),
+                               new Double(11),
+                               new Double(5.034751009656404),
+                               new Double(4.359784745752295));
+  
+            Collections.addAll(eValuesRep2,
+                               new Double(9),
+                               new Double(3.3448357162939013),
+                               new Double(3.679819214643736),
+                               new Double(14),
+                               new Double(4.359784745752295),
+                               new Double(4.69476824410213),
+                               new Double(15),
+                               new Double(6.353021511836488),
+                               new Double(7.021322086134678),
+                               new Double(23),
+                               new Double(8.721235913906071),
+                               new Double(9.727852831357055));
+          }
+          else { // NOT LOESS, THAN MEDIAN OR MEAN
+            if (normalizePlatesScale == NormalizePlatesScale.ADDITIVE) {
+              if (nrPlateColumns == 2) {
+                // expected values
+                Collections.addAll(eValuesRep1,
+                                   new Double(-2),
+                                   new Double(-1),
+                                   new Double(0),
+                                   new Double(1),
+                                   new Double(-2.5),
+                                   new Double(-1.5),
+                                   new Double(-0.5),
+                                   new Double(1.5));
+  
+                Collections.addAll(eValuesRep2,
+                                   new Double(-3),
+                                   new Double(-2),
+                                   new Double(-1),
+                                   new Double(2),
+                                   new Double(-3.5),
+                                   new Double(-2.5),
+                                   new Double(-1.5),
+                                   new Double(2.5));
+              }
+              else if (nrPlateColumns == 3) {
+                // conf per plate per row: control sample sample sample
+                // p1r1: 1,2,3,4,5,6 => median(2,3,5,6) = 4 (which is also the
+                // mean)
+                // p2r1: 7,9,10,11,15,13 => median(9,10,13,15) = 11.5 (<> mean =
+                // 11.75 )
+  
+                // p1r1
+                Collections.addAll(eValuesRep1,
+                                   new Double(-3),
+                                   new Double(-2),
+                                   new Double(-1),
+                                   new Double(0),
+                                   new Double(1),
+                                   new Double(2));
+                // p2r1
+                Collections.addAll(eValuesRep1,
+                                   new Double(-4.5),
+                                   new Double(-2.5),
+                                   new Double(-1.5),
+                                   new Double(-0.5),
+                                   new Double(3.5),
+                                   new Double(1.5));
+              }
+            }
+            else {// NormalizePlatesScale.MULITPLICATIVE, only tested for
+              // nrPlateColumns=3 and median
+              {
+                // conf per plate per row: control sample sample sample
+                // p1r1: 1,2,3,4,5,6 => median(2,3,5,6) = 4 (which is also the
+                // mean)
+                // p2r1: 7,9,10,11,15,13 => median(9,10,13,15) = 11.5 (<> mean =
+                // 11.75 )
+  
+                // p1r1
+                Collections.addAll(eValuesRep1,
+                                   new Double(0.25),
+                                   new Double(0.50),
+                                   new Double(0.75),
+                                   new Double(1.00),
+                                   new Double(1.25),
+                                   new Double(1.50));
+                // p2r1
+                // Collections.addAll(eValuesRep1,new Double(7 / 11.5),new
+                // Double(9 / 11.5),new Double(10 / 11.5),new Double(11 /
+                // 11.5),new Double(15 / 11.5),new Double(13 / 11.5));
+              }
+  
+            }
+          }
+        }
+    }
       // compare the values of the two newly added normalized replicates (type:
       // ResultValueType)
       // check resultValueType cellhts2_norm_repq and cellhts2_norm_rep2 are
@@ -392,14 +656,17 @@ public class CellHTS2Test extends AbstractSpringTest
       }
       else { // compare the individual values
         for (int i = 0; i < eValuesRep1.size(); i++) {
-          assertEquals(eValuesRep1.get(i),
-                       new Double(actualValuesRep1.get(i)
-                                                  .getNumericValue()).doubleValue());
+          Double aValueRep1 = new Double(actualValuesRep1.get(i)
+                                                         .getNumericValue()).doubleValue();
+          assertEquals(eValuesRep1.get(i), aValueRep1);
+          // System.out.println(aValueRep1);
+
         }
-        for (int i = 0; i < eValuesRep2.size(); i++) {
-          assertEquals(eValuesRep2.get(i),
-                       new Double(actualValuesRep2.get(i)
-                                                  .getNumericValue()).doubleValue());
+        for (int i = 0; i < eValuesRep2.size(); i++) { //
+          Double aValueRep2 = new Double(actualValuesRep2.get(i)
+                                                         .getNumericValue()).doubleValue();
+          assertEquals(eValuesRep2.get(i), aValueRep2);
+          // System.out.println(aValueRep2);
         }
       }
     }
@@ -422,7 +689,9 @@ public class CellHTS2Test extends AbstractSpringTest
       cellHts2 = new CellHTS2(screenResult, title);
 
       // 2. RUN METHOD
-      cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN);
+      cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN,
+                                   NormalizePlatesScale.ADDITIVE,
+                                   NormalizePlatesNegControls.NEG);
       cellHts2.scoreReplicatesInit(ScoreReplicatesMethod.ZSCORE);
       cellHts2.run();
       cellHts2.scoreReplicatesAddResult();
@@ -508,7 +777,9 @@ public class CellHTS2Test extends AbstractSpringTest
       cellHts2 = new CellHTS2(screenResult, title);
 
       // 2. RUN
-      cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN);
+      cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN,
+                                   NormalizePlatesScale.ADDITIVE,
+                                   NormalizePlatesNegControls.NEG);
       cellHts2.scoreReplicatesInit(ScoreReplicatesMethod.ZSCORE);
       cellHts2.summarizeReplicatesInit(SummarizeReplicatesMethod.MEAN);
       cellHts2.run();
@@ -556,13 +827,17 @@ public class CellHTS2Test extends AbstractSpringTest
     REXPMismatchException
   {
     // 1. PREPARE INPUT
-    ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult(false,false,3);
+    ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult(false,
+                                                                                      false,
+                                                                                      3);
     String title = "Dummy_Experiment";
     String indexUrl = null;
     CellHTS2 cellHts2 = null;
     try {
       cellHts2 = new CellHTS2(screenResult, title);
-      cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN);
+      cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN,
+                                   NormalizePlatesScale.ADDITIVE,
+                                   NormalizePlatesNegControls.NEG);
       cellHts2.scoreReplicatesInit(ScoreReplicatesMethod.ZSCORE);
       cellHts2.summarizeReplicatesInit(SummarizeReplicatesMethod.MEAN);
       cellHts2.writeReportInit("/tmp/screensaver/output");

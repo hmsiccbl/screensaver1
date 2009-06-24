@@ -160,6 +160,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     assayWellTypeMap.put(AssayWellType.EMPTY.getAbbreviation(), AssayWellType.EMPTY);
     assayWellTypeMap.put(AssayWellType.LIBRARY_CONTROL.getAbbreviation(), AssayWellType.LIBRARY_CONTROL);
     assayWellTypeMap.put(AssayWellType.ASSAY_POSITIVE_CONTROL.getAbbreviation(), AssayWellType.ASSAY_POSITIVE_CONTROL);
+    assayWellTypeMap.put(AssayWellType.ASSAY_CONTROL_SHARED.getAbbreviation(), AssayWellType.ASSAY_CONTROL_SHARED);
     assayWellTypeMap.put(AssayWellType.ASSAY_CONTROL.getAbbreviation(), AssayWellType.ASSAY_CONTROL);
     assayWellTypeMap.put(AssayWellType.BUFFER.getAbbreviation(), AssayWellType.BUFFER);
     assayWellTypeMap.put(AssayWellType.DMSO.getAbbreviation(), AssayWellType.DMSO);

@@ -710,7 +710,8 @@
   <bean id="affiliationCategoryConverter" class="edu.harvard.med.screensaver.ui.util.AffiliationCategoryConverter" />
   
   <bean id="normalizePlatesMethodConverter" class="edu.harvard.med.screensaver.ui.util.NormalizePlatesMethodConverter" />
-
+  <bean id="normalizePlatesScaleConverter" class="edu.harvard.med.screensaver.ui.util.NormalizePlatesScaleConverter" />
+  <bean id="normalizePlatesNegControlsConverter" class="edu.harvard.med.screensaver.ui.util.NormalizePlatesNegControlsConverter" />
   <bean id="scoreReplicatesMethodConverter" class="edu.harvard.med.screensaver.ui.util.ScoreReplicatesMethodConverter" />
   
   <bean id="summarizeReplicatesMethodConverter" class="edu.harvard.med.screensaver.ui.util.SummarizeReplicatesMethodConverter" />
