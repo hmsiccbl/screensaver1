@@ -132,7 +132,7 @@ abstract public class AbstractPropertyTester<E extends AbstractEntity>
     if (AbstractEntity.class.isAssignableFrom(getPropertyType())) {
       Class propertyType = (Class) getPropertyType();
       ContainedEntity containedEntity =
-        propertyType.<ContainedEntity>getAnnotation(ContainedEntity.class);
+        (ContainedEntity) propertyType.getAnnotation(ContainedEntity.class);
       return
         containedEntity != null &&
         getBeanClass().isAssignableFrom(containedEntity.containingEntityClass());
@@ -145,7 +145,7 @@ abstract public class AbstractPropertyTester<E extends AbstractEntity>
     if (!AbstractEntity.class.isAssignableFrom(getPropertyType())) {
       Class propertyType = (Class) getPropertyType();
       Embeddable embeddable =
-        propertyType.<Embeddable>getAnnotation(Embeddable.class);
+        (Embeddable) propertyType.getAnnotation(Embeddable.class);
       return embeddable!= null;
     }
     return false;

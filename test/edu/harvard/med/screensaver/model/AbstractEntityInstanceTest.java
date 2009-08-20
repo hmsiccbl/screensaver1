@@ -1800,7 +1800,7 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     Class propertyType = (Class) propertyDescriptor.getPropertyType();
     if (!AbstractEntity.class.isAssignableFrom(propertyType)) {
       Embeddable embeddable =
-        propertyType.<Embeddable>getAnnotation(Embeddable.class);
+        (Embeddable) propertyType.getAnnotation(Embeddable.class);
       return embeddable!= null;
     }
     return false;
