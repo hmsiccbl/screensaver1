@@ -13,6 +13,8 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
@@ -23,13 +25,13 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-
-import org.apache.log4j.Logger;
 
 /**
  * Tests WedDataAccessPolicy implementation, as well as Hibernate interceptor-based
@@ -431,7 +433,76 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
   }
 
   // private methods
-  
+  public void testLibraryPermissions() 
+  {
+    final ScreeningRoomUser[] users = new ScreeningRoomUser[3];
+    final AdministratorUser[] admUsers = new AdministratorUser[1];
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        users[0] = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENER); 
+
+        users[1] = makeUserWithRoles(false, ScreensaverUserRole.SMALL_MOLECULE_SCREENER); 
+
+        users[2] = makeUserWithRoles(true, ScreensaverUserRole.RNAI_SCREENER); 
+        Lab lab = new Lab((LabHead) users[2]);
+        users[0].setLab(lab);
+        genericEntityDao.saveOrUpdateEntity(users[0]);
+        
+        //user with library_admin has to be an Administrator user otherwise error on validation. 
+         admUsers[0] = new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "", "");
+         genericEntityDao.saveOrUpdateEntity(admUsers[0]);
+         admUsers[0].addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
+        
+        Library library = new Library(
+          "library 1",
+          "lib1",
+          ScreenType.RNAI,
+          LibraryType.COMMERCIAL,
+          100001,
+          100002);
+        library.setOwner(users[0]);
+        librariesDao.loadOrCreateWellsForLibrary(library);
+        genericEntityDao.saveOrUpdateEntity(library);
+        genericEntityDao.flush();
+
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+
+        Library library = genericEntityDao.findEntityByProperty(Library.class, "shortName","lib1" );
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityById(
+          ScreensaverUser.class,
+          users[0].getEntityId()));
+        assertTrue("Owner can view (validation) library", !library.isRestricted());
+        
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityById(
+          ScreensaverUser.class,
+          users[1].getEntityId()));
+        assertTrue("Not owner cannot view Validation Library", library.isRestricted());
+        
+/*  TODO ADD CHECK WHEN "NO SESSION" error is solved 
+ *       currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityById(
+           ScreensaverUser.class,
+           users[2].getEntityId()));        
+        assertTrue("Library head of owner can view (validation) library", !library.isRestricted());*/
+        
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityById(
+           ScreensaverUser.class,
+           admUsers[0].getEntityId()));         
+        assertTrue("LibrarieAdmin can view (validation) library", !library.isRestricted());
+        
+        
+        
+
+      }
+    });
+  }  
+
  
   private ScreeningRoomUser makeUserWithRoles(boolean isLabHead, ScreensaverUserRole... roles)
   {

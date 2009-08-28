@@ -13,6 +13,9 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
@@ -33,10 +36,8 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 
 /**
@@ -274,6 +275,24 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     doTestDeleteLibraryContents(library);
   }
 
+  public void testCreateRNaiLibraryContentsInclOwner()
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 2);
+    ScreeningRoomUser owner = new ScreeningRoomUser("A",
+                                                   "B",
+                                                   "a.b@c");
+    genericEntityDao.saveOrUpdateEntity(owner);
+       
+    library.setOwner(owner);
+
+    genericEntityDao.saveOrUpdateEntity(library);
+    Library resultLibrary = genericEntityDao.findEntityById(Library.class,new Integer(library.getLibraryId()));
+    ScreeningRoomUser resultOwner = resultLibrary.getOwner();
+    resultOwner.equals(owner);
+    
+  }
+
+  
   private void doTestDeleteLibraryContents(Library library)
   {
     int i = 0;

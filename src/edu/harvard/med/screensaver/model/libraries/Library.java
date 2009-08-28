@@ -9,10 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -22,10 +19,19 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -34,16 +40,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.ImmutableList;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
  * A library represents a set of reagents and their layout into wells across
@@ -127,6 +124,8 @@ public class Library extends TimeStampedAbstractEntity
   private String _chemistryComments;
   private String _screeningSet;
   private PlateSize _plateSize;
+  private ScreeningRoomUser _owner;
+  
 
 
   // public constructor
@@ -994,5 +993,25 @@ public class Library extends TimeStampedAbstractEntity
       throw new DataModelViolationException("cannot change plate size after library is created");
     }
     _plateSize = plateSize;
+  }
+
+
+  //Set the FetchType to EAGER otherwise when browsing libraries: org.hibernate.LazyInitializationException: could not initialize proxy - no Session
+  @ManyToOne(fetch=FetchType.EAGER, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinColumn(name="ownerScreenerId", nullable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_library_to_owner")
+//  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE
+  })
+ 
+  public ScreeningRoomUser getOwner()
+  {
+    return _owner;
+  }
+
+  public void setOwner(ScreeningRoomUser owner)
+  {
+    _owner = owner;
   }
 }
