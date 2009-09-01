@@ -106,6 +106,22 @@
 			value="#{libraryDetailViewer.library.description}"
 			editable="#{libraryDetailViewer.editMode}" type="Textarea"
 			editWidth="80" editHeight="3" />
+			
+		<t:outputText id="ownerLabel" value="Owner"
+				title="When set, only owner can see library. (optional)"
+				escape="false" styleClass="label" />
+		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
+			<t:outputText id="ownerOutput" escape="false"
+				value="#{libraryDetailViewer.library.owner.fullNameLastFirst}"
+				converter="#{ownerConverter}" styleClass="propertyValue" />
+		</t:panelGroup>
+		<t:panelGroup rendered="#{libraryDetailViewer.editMode}">
+		   	<t:selectOneMenu id="owner"
+          		value="#{libraryDetailViewer.owner.value}"
+          		styleClass="inputText selectMenu">
+				<f:selectItems value="#{libraryDetailViewer.owner.selectItems}" />          		
+        	</t:selectOneMenu>
+		</t:panelGroup>			
 
   </ui:define>
 
