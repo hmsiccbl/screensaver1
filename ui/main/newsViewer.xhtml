@@ -17,6 +17,16 @@
   <form id="newsForm">
     <p>Check back here regularly for the latest Screensaver updates!</p>
 
+    <ss:roundedDiv styleClass="newsItem">Public Open Source Release, 2009.09.16</ss:roundedDiv>
+    <ul>
+      <li>Added "owner" property to Library, allowing individual screeners to "own" a custom, private library [NKI, clieftink]</li>
+      <li>Added access to additional cellHTS2 normalization methods: median, loess, NPI [NKI, clieftink]</li>
+      <li>Fixed [#1735] (CellHTS2 should handle sparse ResultValues on plates) [NKI, clieftink]</li>
+      <li>Fixed cellHTS2 reports (heatmaps, screen-wide image plots were missing) [NKI, clieftink]</li>
+      <li>cellHTS2 report generation now works even if Rserve is run via account lacking access rights to display (via configurable parameter "progressReport") [NKI, clieftink]</li>
+      <li>Resolved [#839] (Support for 96 wells plates). [ICCB-L]</li>
+    </ul>
+
     <ss:roundedDiv styleClass="newsItem">v1.8.0, 2009.09.03</ss:roundedDiv>
       The following is a <i>summary</i> of the changes
       introduced by Screensaver version 1.8.0.&nbsp; It is not

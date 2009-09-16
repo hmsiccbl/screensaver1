@@ -58,6 +58,8 @@ test/              Testing-related Java source code, including JUnit test
 
 web/               Web application-specific files, used to generate a WAR file.
 
+R/cellHTS2Db       cellHTS2 code for R (statistical package)  
+
 .classpath         The Eclipse .classpath file.
 
 .project           The Eclipse .project file.
