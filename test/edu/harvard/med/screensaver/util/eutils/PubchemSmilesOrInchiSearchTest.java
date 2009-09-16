@@ -11,28 +11,42 @@ package edu.harvard.med.screensaver.util.eutils;
 
 import java.util.List;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
+import junit.framework.TestCase;
+
+import org.apache.log4j.Logger;
 
 /**
- * Test the {@link PubchemCidListProvider}.
- * <p>
  * WARNING: this test requires an internet connection.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class PubchemSmilesOrInchiSearchTest extends AbstractSpringTest
+public class PubchemSmilesOrInchiSearchTest extends TestCase
 {
+  private static Logger log = Logger.getLogger(PubchemSmilesOrInchiSearchTest.class);
   private PubchemSmilesOrInchiSearch _pubchemSmilesOrInchiSearch = new PubchemSmilesOrInchiSearch();
 
   public void testGetPubchemCidsForSmiles1()
   {
+    String smiles = "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1";
     try {
-      List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(
-      "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1");
+      long before = System.currentTimeMillis();
+      List<String> pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(smiles);
+      log.info("query time: " + (System.currentTimeMillis()-before) + 
+          ", smiles:  " + smiles  + ": " + pubchemCids);
       assertEquals(2, pubchemCids.size());
       assertTrue(pubchemCids.contains("1268921"));
       assertTrue(pubchemCids.contains("1268922"));
+      
+      smiles = "O=C1CC(C)(C)CC(=O)C1C(c1ccccc1)C1=C(O)CC(C)(C)CC1=O";
+      before = System.currentTimeMillis();
+      pubchemCids = _pubchemSmilesOrInchiSearch.getPubchemCidsForSmilesOrInchi(smiles);
+      log.info("query time: " + (System.currentTimeMillis()-before) + 
+          ", smiles:  " + smiles  + ": " + pubchemCids);
+      assertEquals(2, pubchemCids.size());
+      assertTrue(pubchemCids.contains("558309"));
+      assertTrue(pubchemCids.contains("7335957"));
+      
     }
     catch (EutilsException e) {
       fail("PubchemSmilesOrInchiSearch threw an exception: " + e.getMessage());

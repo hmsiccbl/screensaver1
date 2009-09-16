@@ -11,22 +11,17 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
 
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import junit.framework.TestSuite;
 
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 public class CopyTest extends AbstractEntityInstanceTest<Copy>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(CopyTest.class);
-
-
-  // instance data members
-
+  public static TestSuite suite()
+  {
+    return buildTestSuite(CopyTest.class, Copy.class);
+  }
   
-  // public constructors and methods
-
   public CopyTest() throws IntrospectionException
   {
     super(Copy.class);

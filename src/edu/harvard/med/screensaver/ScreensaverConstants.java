@@ -40,17 +40,11 @@ public interface ScreensaverConstants
   public static final String FIND_WELL_VOLUMES = "findWellVolumes";
   public static final String BROWSE_LIBRARIES = "browseLibraries";
   public static final String VIEW_LIBRARY = "viewLibrary";
-  public static final String VIEW_REAGENT_SEARCH_RESULTS = "viewReagentSearchResults";
   public static final String VIEW_WELL_SEARCH_RESULTS = "viewWellSearchResults";
   public static final String VIEW_WELL_VOLUME_SEARCH_RESULTS = "viewWellVolumeSearchResults";
   public static final String VIEW_WELL_COPY_VOLUME_SEARCH_RESULTS = "viewWellCopyVolumeSearchResults";
-  public static final String VIEW_REAGENT = "viewReagent";
   public static final String VIEW_WELL = "viewWell";
-  public static final String VIEW_GENE = "viewGene";
-  public static final String VIEW_COMPOUND = "viewCompound";
-  public static final String IMPORT_COMPOUND_LIBRARY_CONTENTS = "importCompoundLibraryContents";
-  public static final String IMPORT_NATURAL_PRODUCTS_LIBRARY_CONTENTS = "importNaturalProductsLibraryContents";
-  public static final String IMPORT_RNAI_LIBRARY_CONTENTS = "importRNAiLibraryContents";
+  public static final String IMPORT_LIBRARY_CONTENTS = "importLibraryContents";
   public static final String VIEW_SCREENING_ROOM_USER_ACTION_RESULT = "viewScreeningRoomUser";
   public static final String SHOW_SEARCH_RESULTS_SUMMARY_ACTION = "showSearchResultsSummary";
   public static final String BROWSE_STUDIES = "browseStudies";
@@ -73,11 +67,11 @@ public interface ScreensaverConstants
   public static final String VIEW_USER = "viewUser";
   public static final String VIEW_LIBRARY_DETAIL = "viewLibraryDetail";
   public static final String RUN_CELLHTS2 = "runCellHTS2";
+  
   public static final String WEBAPP_ROOT = System.getProperty("webapp.root");
-  public static final int LIBRARY_UPLOAD_SUCCESSFULL = 2;
-  public static final int LIBRARY_UPLOAD_RUNNING = 1;
-  public static final int LIBRARY_UPLOAD_FAILED = 3;
-  public static final int LIBRARY_UPLOAD_IDLE = -1;
+
+  public static final String CELLHTS_ENABLED_PROPERTY = "cellHTS2.enabled";
+
   /**
    * Note: If you configure a larger default PlateSize, be sure to update
    * @Column(length=3) on WellName.getName() so that length is large enough to
@@ -89,5 +83,9 @@ public interface ScreensaverConstants
   public static final int VOLUME_SCALE = 9;
   public static final int CONCENTRATION_PRECISION = 12;
   public static final int CONCENTRATION_SCALE = 9;
+  public static final int MOLECULAR_MASS_PRECISION = 15;
+  public static final int MOLECULAR_MASS_SCALE = 9;
+  public static final int MOLECULAR_WEIGHT_PRECISION = 15;
+  public static final int MOLECULAR_WEIGHT_SCALE = 9;
   
 }

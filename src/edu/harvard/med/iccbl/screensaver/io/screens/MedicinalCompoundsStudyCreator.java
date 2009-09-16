@@ -14,7 +14,9 @@ import java.io.FileNotFoundException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import jxl.Sheet;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -25,10 +27,9 @@ import edu.harvard.med.screensaver.io.FatalParseException;
 import edu.harvard.med.screensaver.io.screens.ScreenCreator;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.CellVocabularyParser;
-import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
-import edu.harvard.med.screensaver.io.workbook2.Cell.Factory;
+import edu.harvard.med.screensaver.io.workbook2.Worksheet;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -40,10 +41,6 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
 
 public class MedicinalCompoundsStudyCreator
 {
@@ -119,16 +116,9 @@ public class MedicinalCompoundsStudyCreator
                                                                C_SUBSTANTIAL_LIABILITY + ". " +
                                                                "No value indicates the compound has not yet been reviewed by this study.",
                                                                false);
-          ParseErrorManager errors = new ParseErrorManager();
-          int n = loadAndCreateReagents(app.getCommandLineOptionValue("f", File.class), dao, annotType, errors);
+          int n = loadAndCreateReagents(app.getCommandLineOptionValue("f", File.class), dao, annotType);
           dao.saveOrUpdateEntity(study);
           log.info("created " + n + " annotations");
-          if (errors.getHasErrors()) {
-            log.error("Encountered " + errors.getErrors().size() + " error(s).");
-            for (WorkbookParseError error : errors.getErrors()) {
-              log.error(error.toString());
-            }
-          }
         }
         catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
@@ -140,25 +130,28 @@ public class MedicinalCompoundsStudyCreator
 
   protected static int loadAndCreateReagents(File workbookFile,
                                              GenericEntityDAO dao,
-                                             AnnotationType annotType,
-                                             ParseErrorManager errors)
+                                             AnnotationType annotType)
     throws FileNotFoundException
   {
     int n = 0;
-    Workbook workbook = new Workbook(workbookFile, errors);
+    Workbook workbook = new Workbook(workbookFile);
 
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
-      Sheet sheet = workbook.getWorkbook().getSheet(iSheet);
-      Factory cellFactory = new edu.harvard.med.screensaver.io.workbook2.Cell.Factory(workbook, iSheet, errors);
-      n += loadAndCreateReagentsFromSheet(sheet, cellFactory, dao, annotType, errors);
+      Worksheet sheet = workbook.getWorksheet(iSheet);
+      n += loadAndCreateReagentsFromSheet(sheet, dao, annotType);
+    }
+    if (workbook.getHasErrors()) {
+      log.error("Encountered " + workbook.getErrors().size() + " error(s).");
+      for (WorkbookParseError error : workbook.getErrors()) {
+        log.error(error.toString());
+      }
     }
     return n;
   }
 
-  private static int loadAndCreateReagentsFromSheet(Sheet sheet, Factory cellFactory, GenericEntityDAO dao, AnnotationType annotType, ParseErrorManager errors)
+  private static int loadAndCreateReagentsFromSheet(Worksheet sheet, GenericEntityDAO dao, AnnotationType annotType)
   {
     int n = 0;
-    CellVocabularyParser<String> MEDCHEM_COMMENT_CELL_PARSER = new CellVocabularyParser<String>(VALID_MEDCHEM_COMMENT_VALUES, null, errors, "bad annotation value");
     try {
       short iVendorColumn = (short) findColumnForHeader(sheet, VENDOR_COLUMN_HEADER);
       short iVendorIdColumn = (short) findColumnForHeader(sheet, VENDOR_ID_COLUMN_HEADER);
@@ -166,19 +159,18 @@ public class MedicinalCompoundsStudyCreator
       short iPlateColumn = (short) findColumnForHeader(sheet, PLATE_COLUMN_HEADER);
       short iWellColumn = (short) findColumnForHeader(sheet, WELL_COLUMN_HEADER);
       if (iVendorColumn >= 0 && iVendorIdColumn >= 0 && iMedChemCommentColumn >= 0) {
-        for (int iRow = 1; iRow < sheet.getRows(); ++iRow) {
-          Cell vendorCell = (Cell) cellFactory.getCell(iVendorColumn, iRow, true).clone();
-          Cell vendorIdCell = (Cell) cellFactory.getCell(iVendorIdColumn, iRow, true).clone();
-          if (vendorCell != null && vendorIdCell != null) {
-            Cell medChemCommentCell = (Cell) cellFactory.getCell(iMedChemCommentColumn, iRow, false).clone();
-            Reagent reagent = findReagent(cellFactory,
-                                          dao,
-                                          iPlateColumn,
-                                          iWellColumn,
-                                          iRow,
-                                          vendorCell,
-                                          vendorIdCell);
+        for (int iRow = 1; iRow < sheet.getRows(); ++iRow) {  // TODO: use iterator
+          if( !sheet.getCell(iVendorColumn, iRow, true).isEmpty()
+            && !sheet.getCell(iVendorIdColumn, iRow, true).isEmpty())
+          {
+            Reagent reagent = findReagent(dao,
+                                          sheet.getCell(iPlateColumn, iRow, true).getInteger(),
+                                          sheet.getCell(iWellColumn, iRow, true).getString(),
+                                          sheet.getCell(iVendorIdColumn, iRow, true).getAsString(),
+                                          sheet.getCell(iVendorIdColumn, iRow, true).getAsString());
             if (reagent != null) {
+              Cell medChemCommentCell = (Cell) sheet.getCell(iMedChemCommentColumn, iRow, false).clone();
+              CellVocabularyParser<String> MEDCHEM_COMMENT_CELL_PARSER = new CellVocabularyParser<String>(VALID_MEDCHEM_COMMENT_VALUES, null,  "bad annotation value");
               String value = MEDCHEM_COMMENT_CELL_PARSER.parse(medChemCommentCell);
               if (annotType.createAnnotationValue(reagent, value) != null) {
                 ++n;
@@ -190,32 +182,28 @@ public class MedicinalCompoundsStudyCreator
       return n;
     }
     catch (FatalParseException e) {
-      errors.addError(e.getMessage());
+      sheet.addWorkbookError(e.getClass().getName() + ":" + e.getMessage());
       return 0;
     }
   }
 
-  private static Reagent findReagent(Factory cellFactory,
-                                     GenericEntityDAO dao,
-                                     short iPlateColumn,
-                                     short iWellColumn,
-                                     int iRow,
-                                     Cell vendorCell,
-                                     Cell vendorIdCell)
+  private static Reagent findReagent(GenericEntityDAO dao,
+                                     Integer plateNumber,
+                                     String wellName,
+                                     String vendorName, 
+                                     String reagentIdentifier)
   {
-    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorCell.getAsString(), vendorIdCell.getAsString());
+    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorName, reagentIdentifier);
     Reagent reagent = dao.findEntityById(Reagent.class, rvi);
     if (reagent == null) {
-      Cell plateCell = (Cell) cellFactory.getCell(iPlateColumn, iRow, true).clone();
-      Cell wellCell = (Cell) cellFactory.getCell(iWellColumn, iRow, true).clone();
-      WellKey wellKey = new WellKey(plateCell.getInteger(), wellCell.getString());
+      WellKey wellKey = new WellKey(plateNumber, wellName);
       //log.warn("reagent does not exist with ID " + rvi);
       Well well = dao.findEntityById(Well.class, wellKey.toString());
       if (well == null) { 
         log.error("unknown reagent " + rvi + "; looking for reagent in well, but no such well " + wellKey);
       }
       else {
-        reagent = well.getReagent();
+        reagent = well.<Reagent>getLatestReleasedReagent();
         if (reagent == null) {
           log.error("unknown reagent " + rvi + " and no reagent in well " + wellKey);
         }
@@ -224,12 +212,11 @@ public class MedicinalCompoundsStudyCreator
     return reagent;
   }
 
-  private static int findColumnForHeader(Sheet sheet, String headerName)
+  private static int findColumnForHeader(Worksheet sheet, String headerName)
   {
-    for (int iColumn = 0; iColumn < sheet.getColumns(); ++iColumn) {
-      if (sheet.getRow(0)[iColumn].getContents().equals(headerName)) {
-        return iColumn;
-      }
+    for(Cell cell: sheet.getRow(0))
+    {
+      if(cell.getAsString().equals(headerName)) return cell.getColumn();
     }
     return -1;
   }

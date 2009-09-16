@@ -20,19 +20,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Function;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
-
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -46,6 +33,19 @@ import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.util.PowerSet;
+
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Function;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 
 /**
  * For a cherry pick request, selects source plate copies to draw from, and
@@ -170,8 +170,8 @@ public class CherryPickRequestAllocator
       //  remaining well volume checking is based upon the remaining well volumes as
       //  recorded in the database, and the implementation, above, does not currently handle
       //  the case where two or more reservations are being made from the same source
-      //  well (it could).
-      throw new DataModelViolationException("cannot allocate lab cherry picks if source wells are not unique");
+      //  well (though, it could be made to do so).
+      throw new BusinessRuleViolationException("cannot allocate lab cherry picks if source wells are not unique");
     }
   }
 
@@ -343,11 +343,15 @@ public class CherryPickRequestAllocator
       CherryPickAssayPlate newAssayPlate = (CherryPickAssayPlate) assayPlate.clone();
       Map<LabCherryPick,LabCherryPick> newLabCherryPicks = new HashMap<LabCherryPick,LabCherryPick>();
       for (LabCherryPick labCherryPick : assayPlate.getLabCherryPicks()) {
-        LabCherryPick newLabCherryPick =
-          labCherryPick.getScreenerCherryPick().getCherryPickRequest().createLabCherryPick(labCherryPick.getScreenerCherryPick(),
-                                                                                           labCherryPick.getSourceWell());
-        _dao.saveOrUpdateEntity(newLabCherryPick);
-        newLabCherryPicks.put(newLabCherryPick, labCherryPick);
+        if (labCherryPick.getSourceWell().getLatestReleasedReagent() == null) { // defensive check, for legacy data
+          log.warn("cannot create new lab cherry pick because original does not have a reagent");
+        }
+        else {
+          LabCherryPick newLabCherryPick =
+            labCherryPick.getScreenerCherryPick().createLabCherryPick(labCherryPick.getSourceWell());
+          _dao.saveOrUpdateEntity(newLabCherryPick);
+          newLabCherryPicks.put(newLabCherryPick, labCherryPick);
+        }
       }
       unfullfilable.addAll(allocate(newLabCherryPicks.keySet()));
       for (LabCherryPick newLabCherryPick : newLabCherryPicks.keySet()) {

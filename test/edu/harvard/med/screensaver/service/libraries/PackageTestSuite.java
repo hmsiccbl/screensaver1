@@ -27,7 +27,7 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(edu.harvard.med.screensaver.service.libraries.LibraryCopyGeneratorTest.class);
+    addTestSuite(edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManagerTest.class);
     addTestSuite(edu.harvard.med.screensaver.service.libraries.LibraryCreatorTest.class);
-    addTest(edu.harvard.med.screensaver.service.libraries.rnai.PackageTestSuite.suite());
   }
 }

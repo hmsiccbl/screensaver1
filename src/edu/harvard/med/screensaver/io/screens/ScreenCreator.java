@@ -9,7 +9,10 @@
 
 package edu.harvard.med.screensaver.io.screens;
 
+import java.io.FileNotFoundException;
+
 import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -92,13 +95,21 @@ public class ScreenCreator extends StudyCreator
   {
     if (screenResultFile != null) {
       ScreenResultParser parser = (ScreenResultParser) app.getSpringBean("screenResultParser");
-      parser.parse((Screen) screen, screenResultFile);
+      try {
+        parser.parse((Screen) screen, screenResultFile);
+      }
+      catch (FileNotFoundException e) {
+        String msg = "Screen result file not found: " + screenResultFile;
+        log.error(msg);
+        throw new DAOTransactionRollbackException(msg);
+      }
       if (parser.getHasErrors()) {
         log.error("errors found in screen result file");
         for (WorkbookParseError error : parser.getErrors()) {
           log.error(error.toString());
         }
-        System.exit(1);
+      }
+      else {
         log.info("screen result successfully imported");
       }
     }

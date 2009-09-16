@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -71,8 +72,6 @@ public class ScreenResultViewer extends AbstractEditableBackingBean
   private String _cellHTS2ReportFilePath;
   private CellHTS2Runner _cellHTS2Runner;
   
-  private boolean _isEditMode;
-  
   // constructors
 
   /**
@@ -82,7 +81,6 @@ public class ScreenResultViewer extends AbstractEditableBackingBean
   {
   }
 
-  // BII (Siew Cheng): added CellHTS2Runner
   public ScreenResultViewer(GenericEntityDAO dao,
                             ScreenResultsDAO screenResultsDao,
                             ScreenSearchResults screensBrowser,
@@ -126,7 +124,7 @@ public class ScreenResultViewer extends AbstractEditableBackingBean
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
-    _isEditMode=false;
+    setEditMode(false);
 
     // lazy initialization of _wellSearchResults, for performance (avoid expense of determining columns, if not being viewed)
     _wellSearchResults.searchWellsForScreenResult(null);
@@ -204,8 +202,11 @@ public class ScreenResultViewer extends AbstractEditableBackingBean
     return _screenDetailViewer.save();
   }
 
- 
-  // BII Start: To run and generate cellHTS2 analysis report
+   public boolean isCellHTS2Enabled()
+  {
+     return Boolean.parseBoolean(getApplicationProperties().get(ScreensaverConstants.CELLHTS_ENABLED_PROPERTY).toString());
+  }
+
   public boolean isCellHTS2ReportFileExists() 
   {
 	  File file = new File(_cellHTS2ReportFilePath);
@@ -226,7 +227,7 @@ public class ScreenResultViewer extends AbstractEditableBackingBean
   @UIControllerMethod
   public String cancel()
   {
-    _isEditMode = false;
+    setEditMode(false);
     if (_screenResult.getEntityId() == null) {
       return VIEW_MAIN;
     }
@@ -236,19 +237,14 @@ public class ScreenResultViewer extends AbstractEditableBackingBean
   @UIControllerMethod
   public String edit()
   {
-    _isEditMode = true;
+    setEditMode(true);
     return VIEW_SCREEN_RESULT_EDITOR;
-  }
-
-  public boolean isEditMode()
-  {
-    return !super.isReadOnly() && _isEditMode;
   }
 
   @UIControllerMethod
   public String save()
   {
-    _isEditMode = false;
+    setEditMode(false);
 
     _dao.reattachEntity(_screenResult.getScreen());
     _dao.flush();

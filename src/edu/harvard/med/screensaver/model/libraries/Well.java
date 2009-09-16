@@ -11,15 +11,11 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
@@ -28,10 +24,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -41,14 +38,20 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.IndexColumn;
 import org.hibernate.annotations.MapKeyManyToMany;
+
+import com.google.common.collect.Maps;
 
 
 /**
@@ -71,35 +74,60 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public static final Pattern _wellParsePattern = Pattern.compile("([A-Za-z])(\\d{1,2})");
 
   public static final Well NULL_WELL = new Well();
-
+  
   public static boolean isValidWellName(String wellName)
   {
     return _wellParsePattern.matcher(wellName).matches();
   }
 
+  public static final RelationshipPath<Well> library = new RelationshipPath<Well>(Well.class, "library");
+  public static final RelationshipPath<Well> reagents = new RelationshipPath<Well>(Well.class, "reagents");
+  public static final RelationshipPath<Well> latestReleasedReagent = new RelationshipPath<Well>(Well.class, "latestReleasedReagent");
+  public static final RelationshipPath<Well> resultValues = new RelationshipPath<Well>(Well.class, "resultValues");
+  public static final RelationshipPath<Well> deprecationActivity = new RelationshipPath<Well>(Well.class, "deprecationActivity");
+  public static final RelationshipPath<Well> screenResults = new RelationshipPath<Well>(Well.class, "screenResults");
+
 
   // instance fields
 
   private String _wellId;
+  private transient WellKey _wellKey;
   private Integer _version;
   private Library _library;
-  private Reagent _reagent;
-  private Set<Compound> _compounds = new HashSet<Compound>();
-  private Gene _gene;
-  private Set<SilencingReagent> _silencingReagents = new HashSet<SilencingReagent>();
-  private String _iccbNumber;
-  private WellType _wellType = WellType.EXPERIMENTAL;
-  private String _smiles;
-  private List<String> _molfile = new ArrayList<String>();
-  private String _genbankAccessionNumber;
+  private LibraryWellType _wellType = LibraryWellType.UNDEFINED;
+  private Map<LibraryContentsVersion,Reagent> _reagents = Maps.newHashMap();
+  private Reagent _latestReleasedReagent;
+  private String _facilityId;
   private Map<ResultValueType,ResultValue> _resultValues = new HashMap<ResultValueType,ResultValue>();
   private Set<ScreenResult> _screenResults = new HashSet<ScreenResult>();
   private AdministrativeActivity _deprecationActivity;
 
-  private transient WellKey _wellKey;
 
+  /**
+   * Construct an initialized <code>Well</code> object.
+   * @param library
+   * @param wellKey
+   * @param wellType
+   * @motivation for use of {@link Library#createWell(WellKey, LibraryWellType)} only
+   */
+  Well(Library library, WellKey wellKey, LibraryWellType wellType)
+  {
+    // TODO: reinstate once entity model test code can be made to respect this constraint
+//    if (wellKey.getPlateNumber() < library.getStartPlate() || wellKey.getPlateNumber() > library.getEndPlate()) {
+//      throw new DataModelViolationException("well " + wellKey +
+//                                            " is not within library plate range [" +
+//                                            library.getStartPlate() + "," +
+//                                            library.getEndPlate() + "]");
+//    }
+    _library = library;
+    _wellKey = wellKey;
+    setLibraryWellType(wellType);
+  }
 
-  // public instance methods
+  /**
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected Well() {}
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -130,10 +158,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     return getWellKey().toString();
   }
 
-  /**
-   * Get the library the well is in.
-   * @return the library the well is in.
-   */
   @ManyToOne
   @JoinColumn(name="libraryId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
@@ -144,191 +168,193 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     return _library;
   }
 
+  private void setLibrary(Library library)
+  {
+    _library = library;
+  }
+
   /**
-   * Get the set of compounds.
-   * @return the set of compounds
+   * The versioned reagents for this Well, accessible as a map, keyed on library
+   * contents version number. A Well has only one reagent at a given point in
+   * time.
+   * 
+   * @return
    */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-              fetch=FetchType.LAZY)
-  @JoinTable(
-    name="wellCompoundLink",
-    joinColumns=@JoinColumn(name="wellId"),
-    inverseJoinColumns=@JoinColumn(name="compoundId")
-  )
-  @org.hibernate.annotations.ForeignKey(name="fk_well_compound_link_to_well")
+  @MapKey(name="libraryContentsVersion")
+  @OneToMany(mappedBy="well", cascade={ CascadeType.PERSIST, CascadeType.MERGE }, fetch=FetchType.LAZY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-  public Set<Compound> getCompounds()
+  @ToMany(hasNonconventionalMutation=true) // Map-based collections not yet supported, tested in LibraryTest.testSmallCompoundLibraryAndrReagents
+  public Map<LibraryContentsVersion,Reagent> getReagents()
   {
-    return _compounds;
+    return _reagents;
+  }
+  
+  
+  public SilencingReagent createSilencingReagent(ReagentVendorIdentifier rvi,
+                                                 SilencingReagentType silencingReagentType,
+                                                 String sequence)
+  {
+    return createSilencingReagent(rvi, silencingReagentType, sequence, true);
   }
 
   /**
-   * Get the set of compounds, ordered by length of SMILES string, from longest to shortest.
-   * @return the set of compounds, ordered by length of SMILES string, from longest to shortest
+   * @param updateReagentsRelationship if false, Well.reagents relationship will
+   *          not be updated <i>in memory</i>, which avoids having to load
+   *          existing reagents from earlier library contents versions, thereby
+   *          saving memory (useful for library contents loading operations);
+   *          relationship will be updated when Well is loaded from persistent
+   *          storage.
    */
-  @Transient
-  public SortedSet<Compound> getOrderedCompounds()
+  public SilencingReagent createSilencingReagent(ReagentVendorIdentifier rvi,
+                                                 SilencingReagentType silencingReagentType,
+                                                 String sequence,
+                                                 boolean updateReagentsRelationship)
   {
-    SortedSet<Compound> orderedCompounds = new TreeSet<Compound>();
-    orderedCompounds.addAll(_compounds);
-    return orderedCompounds;
+    if (getLibrary().getLatestContentsVersion() == null) {
+      throw new DataModelViolationException("a library contents version must be created first");
+    }
+    if (_reagents.containsKey(getLibrary().getLatestContentsVersion())) {
+      throw new DuplicateEntityException(this, getLibrary().getLatestContentsVersion());
+    }
+    if (_library.getScreenType() != ScreenType.RNAI) {
+      throw new DataModelViolationException("silencing reagents can only be created for RNAi libraries");
+    }
+    SilencingReagent silencingReagent = new SilencingReagent(rvi,
+                                                             this, 
+                                                             getLibrary().getLatestContentsVersion(),                                                                         
+                                                             silencingReagentType,
+                                                             sequence);
+    if (updateReagentsRelationship) {
+      _reagents.put(getLibrary().getLatestContentsVersion(), silencingReagent);
+    }
+    return silencingReagent;
+  }
+  
+  /**
+  * @throws DuplicateEntityException if a Reagent already exists for this Well and LibraryContentsVersion
+  */
+  public SmallMoleculeReagent createSmallMoleculeReagent(ReagentVendorIdentifier rvi,
+                                                         String molfile,
+                                                         String smiles,
+                                                         String inChi,
+                                                         BigDecimal molecularMass,
+                                                         BigDecimal molecularWeight,
+                                                         MolecularFormula molecularFormula)
+  {
+    return createSmallMoleculeReagent(rvi, molfile, smiles, inChi, molecularMass, molecularWeight, molecularFormula, true);
   }
 
   /**
-   * Get the primary compound: the compound that is most likely the one being tested for
-   * bioactivity. {@link Compound Compounds} are comparable on just such a quality.
-   * @return the primary compound
+   * @param updateReagentsRelationship if false, Well.reagents relationship will
+   *          not be updated <i>in memory</i>, which avoids having to load
+   *          existing reagents from earlier library contents versions, thereby
+   *          saving memory (useful for library contents loading operations);
+   *          relationship will be updated when Well is loaded from persistent
+   *          storage.
+   * @throws DuplicateEntityException if a Reagent already exists for this Well and LibraryContentsVersion
    */
-  @Transient
-  public Compound getPrimaryCompound()
+  public SmallMoleculeReagent createSmallMoleculeReagent(ReagentVendorIdentifier rvi,
+                                                         String molfile,
+                                                         String smiles,
+                                                         String inChi,
+                                                         BigDecimal molecularMass,
+                                                         BigDecimal molecularWeight,
+                                                         MolecularFormula molecularFormula,
+                                                         boolean updateReagentsRelationship)
   {
-    if (_compounds.isEmpty()) {
+    if (getLibrary().getLatestContentsVersion() == null) {
+      throw new DataModelViolationException("a library contents version must be created first");
+    }
+    if (_reagents.containsKey(getLibrary().getLatestContentsVersion())) {
+      throw new DuplicateEntityException(this, getLibrary().getLatestContentsVersion());
+    }
+    if (_library.getScreenType() != ScreenType.SMALL_MOLECULE) {
+      throw new DataModelViolationException("small molecule reagents can only be created for small molecule libraries");
+    }
+    SmallMoleculeReagent smallMoleculeReagent = new SmallMoleculeReagent(rvi,
+                                                                         this, 
+                                                                         getLibrary().getLatestContentsVersion(),                                                                         
+                                                                         molfile,
+                                                                         smiles,
+                                                                         inChi,
+                                                                         molecularMass,
+                                                                         molecularWeight,
+                                                                         molecularFormula);
+    if (updateReagentsRelationship) {
+      _reagents.put(getLibrary().getLatestContentsVersion(), smallMoleculeReagent);
+    }
+    return smallMoleculeReagent;
+  }
+
+  public NaturalProductReagent createNaturalProductReagent(ReagentVendorIdentifier rvi)
+  {
+    return createNaturalProductReagent(rvi, true);
+  }
+
+  /**
+   * @param updateReagentsRelationship if false, Well.reagents relationship will
+   *          not be updated <i>in memory</i>, which avoids having to load
+   *          existing reagents from earlier library contents versions, thereby
+   *          saving memory (useful for library contents loading operations);
+   *          relationship will be updated when Well is loaded from persistent
+   *          storage.
+   */
+  public NaturalProductReagent createNaturalProductReagent(ReagentVendorIdentifier rvi,
+                                                           boolean updateReagentsRelationship)
+  {
+    if (getLibrary().getLatestContentsVersion() == null) {
+      throw new DataModelViolationException("a library contents version must be created first");
+    }
+    if (_reagents.containsKey(getLibrary().getLatestContentsVersion())) {
+      throw new DuplicateEntityException(this, getLibrary().getLatestContentsVersion());
+    }
+    if (!_library.getReagentType().equals(NaturalProductReagent.class)) {
+      throw new DataModelViolationException("natural product reagents can only be created for natural products libraries");
+    }
+    NaturalProductReagent naturalProductReagent = new NaturalProductReagent(rvi, this, getLibrary().getLatestContentsVersion());
+    if (updateReagentsRelationship) {
+      _reagents.put(getLibrary().getLatestContentsVersion(), naturalProductReagent);
+    }
+    return naturalProductReagent;
+    
+  }
+
+  private void setReagents(Map<LibraryContentsVersion,Reagent> reagents)
+  {
+    _reagents = reagents;
+  }
+
+  /**
+   * Get the most recently released version of this Well's Reagent.
+   * 
+   * @return the most recently released Reagent for this Well, or null if this Well's
+   *         Library has no contents versions that have been released.
+   */
+  @SuppressWarnings("unchecked")
+  @OneToOne(targetEntity=Reagent.class, cascade={}, fetch=FetchType.LAZY)
+  @JoinColumn(name="latestReleasedReagentId")
+  @ToOne(unidirectional=true, hasNonconventionalSetterMethod=true) /* managed by Well.reagents instead */
+  public <R extends Reagent> R getLatestReleasedReagent()
+  {
+    return (R) _latestReleasedReagent;
+  }
+
+  public void setLatestReleasedReagent(Reagent latestReleasedReagent)
+  {
+    _latestReleasedReagent = latestReleasedReagent;
+  }
+
+  @Transient
+  public <R extends Reagent> R getPendingReagent()
+  {
+    LibraryContentsVersion latestContentsVersion = getLibrary().getLatestContentsVersion();
+    if (latestContentsVersion.isReleased()) {
       return null;
     }
-    return getOrderedCompounds().first();
+    return (R) getReagents().get(latestContentsVersion);
   }
 
-  /**
-   * Add the compound.
-   * @param compound the compound to add
-   * @return true iff the compound was not already in the well
-   */
-  public boolean addCompound(Compound compound)
-  {
-    compound.getWells().add(this);
-    return _compounds.add(compound);
-  }
-
-  /**
-   * Remove the compound.
-   * @param compound the compound to remove
-   * @return true iff the compound was previously in the well
-   */
-  public boolean removeCompound(Compound compound)
-  {
-    compound.getWells().remove(this);
-    return _compounds.remove(compound);
-  }
-
-  /**
-   * Remove all the compounds.
-   *
-   * @param updateWell whether to update the well.Compounds relationship in
-   *          memory only (the database will reflect the removed relationship)
-   */
-  public void removeCompounds(boolean updateWell)
-  {
-    for (Compound compound : _compounds) {
-      if (updateWell) {
-        compound.getWells().remove(this);
-      }
-    }
-    _compounds.clear();
-  }
-
-  /**
-   * Get the set of silencing reagents.
-   * @return the set of silencing reagents
-   */
-  @ManyToMany(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-              fetch=FetchType.LAZY)
-  @JoinTable(
-    name="wellSilencingReagentLink",
-    joinColumns=@JoinColumn(name="wellId"),
-    inverseJoinColumns=@JoinColumn(name="silencingReagentId")
-  )
-  @org.hibernate.annotations.ForeignKey(name="fk_well_silencing_reagent_link_to_well")
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Cascade(value=org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-  public Set<SilencingReagent> getSilencingReagents()
-  {
-    return _silencingReagents;
-  }
-
-  /**
-   * Add the silencing reagent.
-   * @param silencingReagent the silencing reagent to add
-   * @return true iff the silencing reagent was not already in the well
-   */
-  public boolean addSilencingReagent(SilencingReagent silencingReagent)
-  {
-    silencingReagent.getWells().add(this);
-    boolean result = _silencingReagents.add(silencingReagent);
-    if (_silencingReagents.size() == 1) {
-      _gene = silencingReagent.getGene();
-    }
-    return result;
-  }
-
-  /**
-   * Remove the silencing reagent.
-   * @param silencingReagent the silencing reagent to remove
-   * @return true iff the compound was previously in the well
-   */
-  public boolean removeSilencingReagent(SilencingReagent silencingReagent)
-  {
-    silencingReagent.getWells().add(this);
-    boolean result = _silencingReagents.remove(silencingReagent);
-    if (_silencingReagents.size() == 0) {
-      _gene = null;
-    }
-    return result;
-  }
-
-  /**
-   * Remove all the silencing reagents.
-   *
-   * @param updateWell whether to update the well.Compounds relationship in
-   *          memory only (the database will reflect the removed relationship)
-   */
-  public void removeSilencingReagents(boolean updateWell)
-  {
-    for (SilencingReagent silencingReagent : _silencingReagents) {
-      if (updateWell) {
-        silencingReagent.getWells().remove(this);
-      }
-    }
-    _silencingReagents.clear();
-  }
-
-  /**
-   * Get the set of genes that have silencing reagents contained in this well.
-   * @return the set of genes that have silencing reagents contained in this well
-   */
-  @Transient
-  public Set<Gene> getGenes()
-  {
-    Set<Gene> genes = new HashSet<Gene>();
-    for (SilencingReagent silencingReagent : getSilencingReagents()) {
-      genes.add(silencingReagent.getGene());
-    }
-    return genes;
-  }
-
-  /**
-   * Get the gene that has silencing reagents contained in this well.
-   * @return the gene that have silencing reagents contained in this well
-   */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-             fetch=FetchType.LAZY)
-  @JoinColumn(name="geneId", nullable=true, updatable=true)
-  @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_well_to_gene")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE
-  })
-  @org.hibernate.annotations.Index(name="well_gene_id_index", columnNames={"gene_id"})
-  public Gene getGene()
-  {
-    return _gene;
-  }
-
-  /**
-   * Get the plate number for the well.
-   * @return the plate number for the well
-   */
   @org.hibernate.annotations.Immutable
   @Column(nullable=false)
   public Integer getPlateNumber()
@@ -336,10 +362,16 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     return _wellKey.getPlateNumber();
   }
 
-  /**
-   * Get the well name for the well.
-   * @return the well name for the well
-   */
+  private void setPlateNumber(Integer plateNumber)
+  {
+    if (_wellKey == null) {
+      _wellKey = new WellKey(plateNumber, 0, 0);
+    }
+    else {
+      _wellKey.setPlateNumber(plateNumber);
+    }
+  }
+
   @org.hibernate.annotations.Immutable
   @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
@@ -348,83 +380,65 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     return _wellKey.getWellName();
   }
 
-  /**
-   * Get the well key.
-   * @return the well key
-   */
+  private void setWellName(String wellName)
+  {
+    if (_wellKey == null) {
+      _wellKey = new WellKey(0, wellName);
+    }
+    else {
+      _wellKey.setWellName(wellName);
+    }
+  }
+
   @Transient
   public WellKey getWellKey()
   {
     return _wellKey;
   }
 
-  @Transient
-  public String getSimpleVendorIdentifier()
-  {
-    if (_reagent == null) {
-      return null;
-    }
-    return _reagent.getReagentId().getVendorIdentifier();
-  }
-
   /**
-   * Get the ICCB number for the well.
-   * @return the ICCB number for the well
+   * Get the facility ID for the well, which can be used an alternate identifier
+   * to plate/well pairs.
+   * 
+   * @return the facility ID for the well
    */
   @org.hibernate.annotations.Type(type="text")
-  public String getIccbNumber()
+  public String getFacilityId()
   {
-    return _iccbNumber;
+    return _facilityId;
   }
 
-  /**
-   * Set the ICCB number for the well.
-   * @param iccbNumber The new ICCB number for the well
-   */
-  public void setIccbNumber(String iccbNumber)
+  public void setFacilityId(String facilityId)
   {
-    _iccbNumber = iccbNumber;
+    _facilityId = facilityId;
   }
 
-  /**
-   * Get the well's type.
-   * @return the well's type
-   */
   @Column(nullable=false)
   @org.hibernate.annotations.Type(
-    type="edu.harvard.med.screensaver.model.libraries.WellType$UserType"
+    type="edu.harvard.med.screensaver.model.libraries.LibraryWellType$UserType"
   )
-  public WellType getWellType()
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* immutable after defined & persisted */)
+  public LibraryWellType getLibraryWellType()
   {
     return _wellType;
   }
 
-  /**
-   * Set the well's type.
-   * @param wellType the new type of the well
-   */
-  public void setWellType(WellType wellType)
+  public void setLibraryWellType(LibraryWellType libraryWellType)
   {
-    _wellType = wellType;
-  }
-
-  /**
-   * Get the SMILES for the well.
-   * @return the SMILES for the well
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getSmiles()
-  {
-    return _smiles;
-  }
-
-  /**
-   * Set the SMILES for the well.
-   * @param smiles The new SMILES for the well
-   */
-  public void setSmiles(String smiles)
-  {
-    _smiles = smiles;
+    if (!isHibernateCaller()) {
+      if (libraryWellType != _wellType) {
+        if (_wellType != LibraryWellType.UNDEFINED && libraryWellType != LibraryWellType.UNDEFINED && _library.getLibraryId() != null) {
+          throw new DataModelViolationException("cannot change library well type after it has been defined and persisted, unless the new well type is 'undefined'");
+        }
+      }
+      if (_wellType != LibraryWellType.EXPERIMENTAL && libraryWellType == LibraryWellType.EXPERIMENTAL) {
+        _library.incExperimentalWellCount();
+      }
+      else if (_wellType == LibraryWellType.EXPERIMENTAL && libraryWellType != LibraryWellType.EXPERIMENTAL) {
+        _library.decExperimentalWellCount();
+      }
+    }
+    _wellType = libraryWellType;
   }
 
   /**
@@ -436,13 +450,14 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    */
   //TODO @Formula("deprecation_admin_activity_id IS NOT NULL")
   @Column(name="isDeprecated", nullable=false)
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public boolean isDeprecated()
   {
     return _deprecationActivity != null;
   }
-
-  public void setDeprecated(boolean isDeprecated) {
-  }
+  
+  private void setDeprecated(boolean isDeprecated) {}
+  
 
   @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
              fetch=FetchType.LAZY)
@@ -450,7 +465,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   @org.hibernate.annotations.ForeignKey(name="fk_well_to_deprecation_admin_activity")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true, hasNonconventionalSetterMethod=true /*AdministrativeActivity.type must be AAT.WELL_DEPRECATION; tested in WellTest#testDeprecation()*/)
   //@org.hibernate.annotations.Index(name="well_deprecation_activity_id_index", columnNames={"deprecation_admin_activity"})
   public AdministrativeActivity getDeprecationActivity()
   {
@@ -466,100 +481,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
       }
     }
     _deprecationActivity = deprecationActivity;
-  }
-
-  /**
-   * Get the molfile for the well.
-   * @return the molfile for the well
-   */
-  @Transient
-  public String getMolfile()
-  {
-    if (_molfile.size() == 0) {
-      return null;
-    }
-    return _molfile.get(0);
-  }
-
-  /**
-   * Set the molfile for the well.
-   * @param molfile The new molfile for the well
-   */
-  public void setMolfile(String molfile)
-  {
-    _molfile.clear();
-    if (molfile != null) {
-      _molfile.add(molfile);
-    }
-  }
-
-  /**
-   * Get the GenBank Accession number.
-   * @return the GenBank Accession number
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getGenbankAccessionNumber()
-  {
-    return _genbankAccessionNumber;
-  }
-
-  /**
-   * Set the GenBank Accession number.
-   * @param genbankAccessionNumber the GenBank Accession number
-   */
-  public void setGenbankAccessionNumber(String genbankAccessionNumber)
-  {
-    _genbankAccessionNumber = genbankAccessionNumber;
-  }
-
-  /**
-   * Get the reagent.
-   * @return the reagent; can be null if library contents have not been loaded
-   */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE },
-             fetch=FetchType.LAZY)
-  @JoinColumn(nullable=true, updatable=true, name="reagent_id")
-  @org.hibernate.annotations.ForeignKey(name="fk_well_to_reagent")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @org.hibernate.annotations.Index(name="well_reagent_id_index", columnNames={"reagent_id"})
-  public Reagent getReagent()
-  {
-    return _reagent;
-  }
-
-  /**
-   * Set the new reagent.
-   * @param reagent the new reagent
-   */
-  public void setReagent(Reagent reagent)
-  {
-    if (isHibernateCaller()) {
-      _reagent = reagent;
-      return;
-    }
-
-    if (_reagent != null) {
-      _reagent.getWells().remove(this);
-    }
-    _reagent = reagent;
-    if (_reagent != null) {
-      _reagent.getWells().add(this);
-    }
-
-    if (_wellType.equals(WellType.EXPERIMENTAL) && _reagent == null) {
-      throw new DataModelViolationException("experimental well must have a reagent");
-    }
-  }
-
-  public void removeReagent(boolean updateWell)
-  {
-    if (_reagent != null) {
-      _reagent = null;
-      if (updateWell) {
-        _reagent.removeWell(this);
-      }
-    }
   }
 
   /**
@@ -600,9 +521,16 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
    */
   @OneToMany(fetch=FetchType.LAZY, mappedBy="well")
   @MapKeyManyToMany(joinColumns={ @JoinColumn(name="resultValueTypeId") }, targetEntity=ResultValueType.class)
+  @ToMany(hasNonconventionalMutation=true) // Map-based collections not yet supported, tested in WellTest.testResultValueMap()
   public Map<ResultValueType,ResultValue> getResultValues()
   {
     return _resultValues;
+  }
+
+
+  private void setResultValues(Map<ResultValueType,ResultValue> resultValues)
+  {
+    _resultValues = resultValues;
   }
 
   @ManyToMany(cascade={},
@@ -612,10 +540,15 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   @JoinColumn(name="screenResultId", nullable=false, updatable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_well_to_screen_result")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName="screenResult")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="screenResult")
   public Set<ScreenResult> getScreenResults()
   {
     return _screenResults;
+  }
+
+  private void setScreenResults(Set<ScreenResult> screenResults)
+  {
+    _screenResults = screenResults;
   }
 
   public boolean addScreenResult(ScreenResult screenResult)
@@ -636,55 +569,12 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
     return false;
   }
 
-  // package constructors
-
-  /**
-   * Construct an initialized <code>Well</code> object.
-   * @param library
-   * @param wellKey
-   * @param wellType
-   * @motivation for use of {@link Library#createWell(WellKey, WellType)} only
-   */
-  Well(Library library, WellKey wellKey, WellType wellType, Reagent reagent)
-  {
-    // TODO: reinstate once entity model test code can be made to respect this constraint
-//    if (wellKey.getPlateNumber() < library.getStartPlate() || wellKey.getPlateNumber() > library.getEndPlate()) {
-//      throw new DataModelViolationException("well " + wellKey +
-//                                            " is not within library plate range [" +
-//                                            library.getStartPlate() + "," +
-//                                            library.getEndPlate() + "]");
-//    }
-    _library = library;
-    _wellKey = wellKey;
-    _wellType = wellType;
-    _reagent = reagent;
-  }
-
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>Well</code> object.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected Well() {}
-
-
-  // private methods
-
-  /**
-   * Set the well id for the well.
-   * @param wellId the new well id for the well
-   * @motivation for hibernate
-   */
   private void setWellId(String wellId)
   {
     _wellId = wellId;
   }
 
   /**
-   * Get the version of the well.
-   * @return the version of the well
    * @motivation for hibernate
    */
   @Version
@@ -695,119 +585,10 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   }
 
   /**
-   * Set the version of the well.
-   * @param version the new version of the well
    * @motivation for hibernate
    */
   private void setVersion(Integer version)
   {
     _version = version;
-  }
-
-  /**
-   * Set the library the well is in.
-   * @param library the new library for the well
-   * @motivation for hibernate
-   */
-  private void setLibrary(Library library)
-  {
-    _library = library;
-  }
-
-  /**
-   * Set the set of compounds
-   * @param compounds the new set of compounds
-   * @motivation for hibernate
-   */
-  private void setCompounds(Set<Compound> compounds)
-  {
-    _compounds = compounds;
-  }
-
-  /**
-   * Set the set of silencing reagents
-   * @param silencingReagents the new set of silencing reagents
-   * @motivation for hibernate
-   */
-  private void setSilencingReagents(Set<SilencingReagent> silencingReagents)
-  {
-    _silencingReagents = silencingReagents;
-  }
-
-  private void setGene(Gene gene)
-  {
-    _gene = gene;
-  }
-
-  /**
-   * Set the plate number for the well.
-   * @param plateNumber the new plate number for the well
-   * @motivation for hibernate
-   */
-  private void setPlateNumber(Integer plateNumber)
-  {
-    if (_wellKey == null) {
-      _wellKey = new WellKey(plateNumber, 0, 0);
-    }
-    else {
-      _wellKey.setPlateNumber(plateNumber);
-    }
-  }
-
-  /**
-   * Set the well name for the well.
-   * @param wellName the new well name for the well
-   * @motivation for hibernate
-   */
-  private void setWellName(String wellName)
-  {
-    if (_wellKey == null) {
-      _wellKey = new WellKey(0, wellName);
-    }
-    else {
-      _wellKey.setWellName(wellName);
-    }
-  }
-
-  /**
-   * @motivation we want lazy loading of molfile property, due to its large data
-   *             size, but can only make it lazy loadable by mapping it in a
-   *             value collection
-   * @see #getMolfile()
-   */
-  @org.hibernate.annotations.CollectionOfElements(fetch=FetchType.LAZY)
-  @org.hibernate.annotations.Type(type="text")
-  @JoinTable(name="wellMolfile", joinColumns=@JoinColumn(name="well_id", unique=true)) // note "unique=true" ensures 1-to-1 mapping
-  @Column(name="molfile", nullable=false)
-  @IndexColumn(name="ordinal")
-  private List<String> getMolfileList()
-  {
-    return _molfile;
-  }
-
-  /**
-   * @motivation we want lazy loading of molfile property, due to its large data
-   *             size, but can only make it lazy loadable by mapping it in a
-   *             value collection
-   * @see #setMolfile(String)
-   */
-  private void setMolfileList(List<String> molfile)
-  {
-    _molfile = molfile;
-  }
-
-  /**
-   * Set the result values.
-   * @param resultValues the new result values
-   * @motivation for hibernate
-   */
-  private void setResultValues(Map<ResultValueType,ResultValue> resultValues)
-  {
-    _resultValues = resultValues;
-  }
-
-  private void setScreenResults(Set<ScreenResult> screenResults)
-  {
-    _screenResults = screenResults;
   }
 }

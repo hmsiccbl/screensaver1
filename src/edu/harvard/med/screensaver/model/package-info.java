@@ -1,4 +1,3 @@
-
 /**
  * Provides classes that implement the Screensaver object model. The model is broken out
  * into the following major sections, each in its own package:
@@ -8,13 +7,6 @@
  * <dt>{@link edu.harvard.med.screensaver.model.cherrypick cherrypicks}
  * <dd>Models the cherrypicks for a screen. Screeners choose their best and most interesting
  * hits for confirmation screens and other followup studies.
- * 
- * <dt>{@link edu.harvard.med.screensaver.model.derivatives derivatives}
- * <dd>Models compound derivatives produced by medicinal chemists, and the results of trial screens run by
- * medicinal chemists on these derivatives. This portion of the object model is most likely defunct, since there is
- * a tentative new approach for storing medicinal chemistry data. These derivatives are eventually going
- * to become new small molecules libraries, and the screen results performed by the medicinal chemists will probably
- * be modelled as {@link edu.harvard.med.screensaver.model.screen.Study Studies} on those libraries.
  * 
  * <dt>{@link edu.harvard.med.screensaver.model.libraries libraries}
  * <dd>Models all the information about the screening libraries, including their contents,
@@ -91,23 +83,13 @@
  * We use a set of conventions for modelling containment, or ownership, relationships.
  * First, the contained entity is annotated with {@link 
  * edu.harvard.med.screensaver.model.annotations.ContainedEntity}, which indicates
- * the containing class. There is currently a little hackery in <code>ContainedEntity</code>
- * to allow for two different containing classes, to satisfy the special case of {@link
- * edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment}. If we every need to
- * model more than two possible containers, or
- * if we end up with multiple entities that have two different containing classes, then we
- * will probably want to move from {@link
- * edu.harvard.med.screensaver.model.annotations.ContainedEntity#containingEntityClass()} and
- * {@link
- * edu.harvard.med.screensaver.model.annotations.ContainedEntity#alternateContainingEntityClass()}
- * to <code>Class&lt;? extends AbstractEntity&gt; [] ContainedEntity.containingClasses()</code>.
- * But for now, this is just an annoying and ugly special case.
+ * the containing class that is responsible for providing create*() methods for the contained entity.
  * 
  * <p>
  * 
  * For every containment relationship, there are one or more methods that match the pattern
  * <code>public Contained Container.createContained(...)</code>. For example, see
- * {@link edu.harvard.med.screensaver.model.libraries.Library#createWell(edu.harvard.med.screensaver.model.libraries.WellKey, edu.harvard.med.screensaver.model.libraries.WellType)},
+ * {@link edu.harvard.med.screensaver.model.libraries.Library#createWell(edu.harvard.med.screensaver.model.libraries.WellKey, edu.harvard.med.screensaver.model.libraries.LibraryWellType)},
  * This factory method is
  * responsible for adding the newly created entity into any bidirectional relationships,
  * almost always including the classes own
@@ -236,4 +218,6 @@
  * 
  * </dl>
  */
+
 package edu.harvard.med.screensaver.model;
+

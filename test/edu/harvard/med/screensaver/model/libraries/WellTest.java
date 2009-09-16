@@ -11,13 +11,15 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
+import junit.framework.TestSuite;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -26,12 +28,14 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
-import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 public class WellTest extends AbstractEntityInstanceTest<Well>
 {
-  private static Logger log = Logger.getLogger(WellTest.class);
+  public static TestSuite suite()
+  {
+    return buildTestSuite(WellTest.class, Well.class);
+  }
 
   protected LibrariesDAO librariesDao;
 
@@ -40,63 +44,6 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
     super(Well.class);
   }
 
-  /**
-   * Test the special-case molfile property, which is implemented as a set of
-   * strings (with size 0 or 1).
-   */
-  public void testMolfile()
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        Library library = new Library(
-          "dummy",
-          "shortDummy",
-          ScreenType.SMALL_MOLECULE,
-          LibraryType.COMMERCIAL,
-          1,
-          1);
-        genericEntityDao.saveOrUpdateEntity(library);
-        librariesDao.loadOrCreateWellsForLibrary(library);
-        for (Well well : library.getWells()) {
-          well.setMolfile("molfile:" + well.getEntityId());
-        }
-      }
-    });
-    class WellPocketDAOTransaction implements DAOTransaction
-    {
-      Well wellWithMolfileLoadedEagerly;
-      Well wellWithMolfileNotLoaded;
-      public void runTransaction()
-      {
-        // test that we can load the molfile on demand, within session
-        Well well = genericEntityDao.findEntityById(Well.class, "00001:A01");
-        assertEquals("molfile:00001:A01", well.getMolfile());
-
-        // test that we can eager load the molfile via our dao methods, and access after session is closed
-        wellWithMolfileLoadedEagerly = genericEntityDao.findEntityById(Well.class, "00001:A02");
-        genericEntityDao.need(well, "molfileList");
-
-        // test that a molfile not loaded is not accessible after session is closed
-        assertEquals("molfile:00001:A01", well.getMolfile());
-        wellWithMolfileNotLoaded = genericEntityDao.findEntityById(Well.class, "00001:A01");
-      }
-    }
-    WellPocketDAOTransaction wellPocketDAOTransaction = new WellPocketDAOTransaction();
-    genericEntityDao.doInTransaction(wellPocketDAOTransaction);
-
-    // this should cause an error because well.molfile should be lazily loaded
-    try {
-      assertEquals("molfile:00001A02",
-                   wellPocketDAOTransaction.wellWithMolfileLoadedEagerly.getMolfile());
-      wellPocketDAOTransaction.wellWithMolfileNotLoaded.getMolfile();
-      fail("failed to get a LazyInitException for well.molfileList");
-    }
-    catch (Exception e) {
-    }
-  }
 
   public void testResultValueMap()
   {
@@ -155,16 +102,14 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
 //    assertTrue(result.get(0).isDeprecated());
 //  }
 
-  @Override
-  public Object getTestValueForType(Class type,
-                                    AbstractEntity parentBean,
-                                    boolean persistEntities)
-  {
-    if (type.equals(AdministrativeActivityType.class)) {
-      return AdministrativeActivityType.WELL_DEPRECATION;
-    }
-    return super.getTestValueForType(type, parentBean, persistEntities);
-  }
+//  @Override
+//  public Object getTestValueForType(Class type, AbstractEntity parentBean)
+//  {
+//    if (type.equals(AdministrativeActivityType.class)) {
+//      return AdministrativeActivityType.WELL_DEPRECATION;
+//    }
+//    return dataFactory.getTestValueForType(type, parentBean);
+//  }
 
   private void initDeprecatedWells()
   {
@@ -173,7 +118,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
         genericEntityDao.persistEntity(library);
         Well well = genericEntityDao.findEntityById(Well.class, new WellKey(1000, "A01").toString());
-        AdministratorUser admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
+        AdministratorUser admin = new AdministratorUser("Admin2", "User", "admin_user@hms.harvard.edu", "", "", "", "admin2", "");
         AdministrativeActivity deprecationActivity =
           new AdministrativeActivity(admin,
                                      new LocalDate(),
@@ -188,20 +133,38 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
   
   public void testWellEdge()
   {
-    Library library = new Library("dummy",
-                                  "shortDummy",
-                                  ScreenType.SMALL_MOLECULE,
-                                  LibraryType.COMMERCIAL,
-                                  1,
-                                  1,
-                                  ScreensaverConstants.DEFAULT_PLATE_SIZE);
-    for (int row = 0; row <= library.getPlateSize().getRows(); ++row) {
-      for (int col = 0; col < library.getPlateSize().getColumns(); ++col) {
-        WellName wellName = new WellName(row, col);
-        assertEquals("is edge @ " + wellName,
-                     row == 0 || row == ScreensaverConstants.DEFAULT_PLATE_SIZE.getRows() - 1 || 
-                     col == 0 || col == ScreensaverConstants.DEFAULT_PLATE_SIZE.getColumns() - 1);
-      }
+    schemaUtil.truncateTablesOrCreateSchema();
+    Library library = dataFactory.newInstance(Library.class);
+    library.setStartPlate(1);
+    library.setEndPlate(1);
+    library.setPlateSize(PlateSize.WELLS_96);
+    librariesDao.loadOrCreateWellsForLibrary(library);
+    for (Well well : library.getWells()) {
+        assertEquals("is edge @ " + well.getWellName(),
+                     well.isEdgeWell(),
+                     well.getWellKey().getRow() == 0 || 
+                     well.getWellKey().getRow() == library.getPlateSize().getRows() - 1 || 
+                     well.getWellKey().getColumn() == 0 || 
+                     well.getWellKey().getColumn() == library.getPlateSize().getColumns() - 1);
+    }
+  }
+  
+  public void testLibraryWellTypeMutability()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    Well well = dataFactory.newInstance(Well.class);
+    well.setLibraryWellType(LibraryWellType.UNDEFINED);
+    well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
+    well.setLibraryWellType(LibraryWellType.UNDEFINED);
+    new EntityNetworkPersister(genericEntityDao, well).persistEntityNetwork();
+    well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
+    new EntityNetworkPersister(genericEntityDao, well).persistEntityNetwork();
+    try {
+      well.setLibraryWellType(LibraryWellType.DMSO);
+      fail("expecting DataModelViolationException");
+    }
+    catch (DataModelViolationException e) {
+      assertTrue(e.getMessage().contains("cannot change library well type"));
     }
   }
 }

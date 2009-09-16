@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition>
+
+  <ss:nameValueTable id="wellInfo" value="#{wellViewer.nameValueTable}" />
+
+  <t:panelGrid style="margin-top: 10px;">
+    <t:panelGroup
+      rendered="#{wellViewer.well.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; !empty wellViewer.versionedReagent &amp;&amp; !empty wellViewer.versionedReagent.molfile}">
+      <h:form id="wellContentsDownloadForm">
+        <h:commandButton value="Download SD File"
+          action="#{wellViewer.downloadSDFile}" styleClass="command"
+          title="Download the contents of the well as an SD File" />
+      </h:form>
+    </t:panelGroup>
+    <t:panelGroup rendered="#{! empty wellViewerSpecialMessage}"
+      style="color: fuchsia; font-size: small; margin-top: 10px;">
+      <t:outputText value="#{wellViewerSpecialMessage}" />
+    </t:panelGroup>
+  </t:panelGrid>
+
+  <h:form id="panelsForm">
+    <ss:collapsiblePanel id="duplexWellsPanel"
+      isCollapsed="#{wellViewer.isPanelCollapsedMap['duplexWells']}"
+      rendered="#{wellViewer.duplexWellsDataModel.rowCount > 0}"
+      label="Duplex Wells">
+      <ui:define name="content">
+        <t:dataTable id="duplexWellsTable" var="well"
+          value="#{wellViewer.duplexWellsDataModel}"
+          styleClass="standardTable" columnClasses="column"
+          rowClasses="row1,row2" headerClass="tableHeader">
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Well" />
+            </f:facet>
+            <ss:entityLink id="wellEntity" entity="#{well}"
+              bean="#{wellViewer}" action="viewWell" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Library Name" />
+            </f:facet>
+            <ss:entityLink id="libraryEntity"
+              entity="#{well.library}" bean="#{libraryViewer}"
+              property="libraryName" action="viewLibrary" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Reagent Vendor ID" />
+            </f:facet>
+            <t:outputText value="#{well.latestReleasedReagent.vendorId}" />
+          </t:column>
+          <t:column rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}">
+            <f:facet name="header">
+              <t:outputText value="Sequence" />
+            </f:facet>
+            <t:outputText value="#{well.latestReleasedReagent.sequence}" />
+          </t:column>
+        </t:dataTable>
+        <!-- h:commandButton value="Browse..."
+          action="#{wellViewer.browseDuplexWells}" styleClass="command"
+          rendered="#{wellViewer.duplexWellsDataModel.rowCount > 0}"
+          title="Browse the duplex wells to which this pool well deconvolutes" /-->
+      </ui:define>
+    </ss:collapsiblePanel>
+
+    <ss:collapsiblePanel id="otherWellsPanel"
+      isCollapsed="#{wellViewer.isPanelCollapsedMap['otherWells']}"
+      label="Other Wells With Reagent">
+      <ui:define name="content">
+        <t:outputText value="No other wells contain this reagent"
+          styleClass="label"
+          rendered="#{wellViewer.otherWellsDataModel.rowCount == 0}" />
+        <t:dataTable id="otherWellsTable" var="reagent"
+          value="#{wellViewer.otherWellsDataModel}"
+          styleClass="standardTable" columnClasses="column"
+          rowClasses="row1,row2" headerClass="tableHeader"
+          rendered="#{wellViewer.otherWellsDataModel.rowCount > 0}">
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Well" />
+            </f:facet>
+            <ss:entityLink id="wellEntity" entity="#{reagent.well}" bean="#{wellViewer}"
+              action="viewWell" />
+          </t:column>
+          <t:column>
+            <f:facet name="header">
+              <t:outputText value="Library Name" />
+            </f:facet>
+            <ss:entityLink id="libraryEntity" entity="#{reagent.well.library}"
+              bean="#{libraryViewer}" property="libraryName" action="viewLibrary" />
+          </t:column>
+        </t:dataTable>
+        <!--h:commandButton value="Browse..."
+          action="#{wellViewer.browseOtherWells}" styleClass="command"
+          rendered="#{wellViewer.otherWellsDataModel.rowCount > 0}"
+          title="Browse the other wells that contain this well's reagent" /-->
+      </ui:define>
+    </ss:collapsiblePanel>
+
+    <ss:collapsiblePanel id="annotationsPanel" label="Annotations"
+      isCollapsed="#{wellViewer.isPanelCollapsedMap['annotations']}">
+      <ui:define name="content">
+
+        <t:outputText value="No annotations exist" styleClass="label"
+          rendered="#{wellViewer.annotationNameValueTable.numRows == 0}" />
+
+        <t:div style="margin-top: 15px; margin-left: 20px;"
+          styleClass="annotationTable"
+          rendered="#{wellViewer.annotationNameValueTable.numRows > 0}">
+          <ss:nameValueTable id="annotationInfo"
+            value="#{wellViewer.annotationNameValueTable}" />
+        </t:div>
+      </ui:define>
+    </ss:collapsiblePanel>
+  </h:form>
+
+</ui:composition>
+
+</html>

@@ -10,28 +10,20 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public interface LibrariesDAO
 {
-
-  public List<Library> findLibrariesOfType(LibraryType[] libraryTypes,
-                                           ScreenType[] screenTypes);
-
   /**
    * Find and return the well. If the well is in the Hibernate session, but not
    * yet in the database, this method will return the managed instance of the
@@ -43,29 +35,15 @@ public interface LibrariesDAO
   public Well findWell(WellKey wellKey);
 
   /**
-   * Find and return the well. If the well is in the Hibernate session, but not
-   * yet in the database, this method will <i>not</i> return the managed
-   * instance of the Well.
+   * Find and return the latest released version of the reagents with the
+   * specified {@link ReagentVendorIdentifier}.
    * 
-   * @param wellKey the wellKey
-   * @param loadContents if true, then load all the compounds, silencing
-   *          reagents and genes associated with the well
-   * @return the well, null if there is no well
+   * @param rvi the {@link ReagentVendorIdentifier}
+   * @param latestReleasedVersionsOnly
+   * @return Set of reagents (possibly an empty set), where are reagent is the
+   *         latest released version.
    */
-  public Well findWell(WellKey wellKey, boolean loadContents);
-
-  /**
-   * Find and return the silencing reagent. Return null if there is no matching
-   * silencing reagent.
-   * @param gene the gene the silencing reagent silences
-   * @param silencingReagentType the type of silencing reagent
-   * @param sequence the sequence of the silencing reagent
-   * @return the silencing reagent. Return null if there is no matching
-   * silencing reagent.
-   */
-  public SilencingReagent findSilencingReagent(Gene gene,
-                                               SilencingReagentType silencingReagentType,
-                                               String sequence);
+  public Set<Reagent> findReagents(ReagentVendorIdentifier rvi, boolean latestReleasedVersionsOnly);
 
   /**
    * Find and return the library that contains the specified plate, or null if
@@ -78,12 +56,9 @@ public interface LibrariesDAO
   public Library findLibraryWithPlate(Integer plateNumber);
 
   /**
-   * Delete library contents. Null out all the content-oriented content of all the
-   * wells; delete any dangling {@link Compound Compounds}, {@link SilencingReagent
-   * SilencingReagents}, and {@link Gene Genes}.
-   * @param library the library to delete the contents of
+   * Delete library contents for the specified library version.
    */
-  public void deleteLibraryContents(Library library);
+  public void deleteLibraryContentsVersion(LibraryContentsVersion libraryContentsVersion);
 
   public Set<Well> findWellsForPlate(int plate);
 

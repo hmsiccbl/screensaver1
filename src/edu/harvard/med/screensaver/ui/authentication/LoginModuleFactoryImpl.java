@@ -38,15 +38,7 @@ public class LoginModuleFactoryImpl implements LoginModuleFactory, ApplicationCo
   
   public void initialize()
   {
-      // set the system property that will tell Tomcat where to find our login.config file
-      // TODO: this is a convenient place to perform this, but it's
-      // not really appropriate here (in fact it should be specified
-      // as a command-line Java system property when Tomcat is
-      // started, but us poor developers can't specify additional
-      // system properties when starting Tomcat on orchestra.  Sigh.
-    System.setProperty("java.security.auth.login.config", 
-                        System.getProperty("catalina.base") + "/conf/login.config");
-    log.debug("set 'java.security.auth.login.config' system property to " + 
+    log.debug("'java.security.auth.login.config' system property = " + 
               System.getProperty("java.security.auth.login.config"));
 
     // place ourselves into the JNDI directory, using our

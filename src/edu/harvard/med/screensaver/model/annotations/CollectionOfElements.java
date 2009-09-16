@@ -24,13 +24,22 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CollectionOfElements {
-  
   /**
-   * The expected initial cardinality of the set. Used by unit tests to test that the initial
-   * collection is the right size, and also to test that adding an element to a collection has
-   * the desired result.
-   * @return the initial cardinality of the collection of elements
+   * The "root" name of the method used to add and remove values to this
+   * collection. This annotation value is optional, since it is valid to modify
+   * the collection by calling methods on the collection itself (Collection.add,
+   * Collection.addAll, Map.put, etc.). It is also not necessary to specify this
+   * method if the add and remove method names can be inferred by removing the
+   * trailing 's' from the collection property name, and prepending 'add'
+   * or'remove'; in this case the model unit tests will automatically find the
+   * add method and test it.
    */
-  int initialCardinality() default 0;
+  String singularPropertyName() default "";
+
+  /**
+   * Indicates whether this collection cannot be tested via normal add/remove
+   * methods.
+   */
+  boolean hasNonconventionalMutation() default false;
 }
 

@@ -11,11 +11,13 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 
 public enum PlateSize implements VocabularyTerm
@@ -95,4 +97,19 @@ public enum PlateSize implements VocabularyTerm
     return getValue();
   }
 
+  public Set<WellName> getEdgeWellNames(int n) 
+  {
+    Set<WellName> emptyWells = Sets.newTreeSet();
+    for (int i = 0; i < n; ++i) {
+      for (int row = 0; row < getRows(); ++row) {
+        for (int col = 0; col < getColumns(); ++col) {
+          if (row < n || row >= getRows() - n ||
+            col < n || col >= getColumns() - n) {
+            emptyWells.add(new WellName(row, col));
+          }
+        }
+      }
+    }
+    return emptyWells;
+  }
 }

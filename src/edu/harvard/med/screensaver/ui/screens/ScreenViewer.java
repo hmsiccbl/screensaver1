@@ -17,8 +17,8 @@ import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
-import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,12 +60,12 @@ public class ScreenViewer extends StudyViewer
                       ScreenResultsDAO screenResultsDao,
                       ScreenDetailViewer screenDetailViewer,
                       ScreenSearchResults screensBrowser,
-                      ReagentSearchResults reagentSearchResults,
+                      WellSearchResults wellSearchResults,
                       ScreenResultViewer screenResultViewer,
                       HeatMapViewer heatMapViewer,
                       ScreenResultImporter screenResultImporter)
   {
-    super(screenViewer, dao, screenDetailViewer, null, reagentSearchResults);
+    super(screenViewer, dao, screenDetailViewer, null, wellSearchResults);
     _thisProxy = screenViewer;
     _dao = dao;
     _screenResultsDao = screenResultsDao;
@@ -118,6 +118,9 @@ public class ScreenViewer extends StudyViewer
     _dao.needReadOnly(screen.getScreenResult(),
                       "resultValueTypes.derivedTypes",
                       "resultValueTypes.typesDerivedFrom");
+    _dao.needReadOnly(screen, 
+                      "pinTransferApprovalActivity.approvedBy",
+                      "pinTransferApprovalActivity.performedBy");
     _screen = screen;
 
     setStudy(screen);

@@ -50,7 +50,7 @@ extends AbstractEntityTester<E>
 
   private void testIdentifierMetadata()
   {
-    if (isEntitySubclass()) {
+    if (ModelIntrospectionUtil.isEntitySubclass(_entityClass)) {
       // entity subclasses depend on their superclass for identifier methods
       // TODO: run this test on the superclasses
       return;
@@ -92,7 +92,7 @@ extends AbstractEntityTester<E>
 
   private boolean hasGeneratedValueAnnotation(String entityName, String identifierPropertyName)
   {
-    Method identifierGetter = getGetterMethodForPropertyName(identifierPropertyName);
+    Method identifierGetter = ModelIntrospectionUtil.getGetterMethodForPropertyName(_entityClass, identifierPropertyName);
     return identifierGetter.isAnnotationPresent(GeneratedValue.class);
   }
 }

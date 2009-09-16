@@ -96,7 +96,7 @@ public class LibraryScreening extends Screening
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="platesUsed")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="platesUsed")
   public SortedSet<PlatesUsed> getPlatesUsed()
   {
     return _platesUsed;

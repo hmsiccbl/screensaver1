@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class ParseErrorManager
+/*public*/ class ParseErrorManager
 {
   private static Logger log = Logger.getLogger(ParseErrorManager.class);
   
@@ -158,6 +158,14 @@ public class ParseErrorManager
 //  cellFeatures.setComment(error.getMessage());
 //  errorAnnotatedCell.setCellFeatures(cellFeatures);
     
+    // See [#1866]
+    // TODO: this may be where we are getting the error messages:
+    // "Warning:  Maximum number of format records exceeded.  Using default format."
+    // which eventually results in a failure to write the error workbook.
+    // see http://tech.groups.yahoo.com/group/JExcelApi/message/102
+    // Unfortunately, the solution is not (has no effect):
+    // errorLabel.setCellFormat(SOME_STATIC_FORMAT)
+   
     WritableCellFormat newFormat = new WritableCellFormat();
     newFormat.setBackground(Colour.RED);
     errorLabel.setCellFormat(newFormat);

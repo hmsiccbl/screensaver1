@@ -26,7 +26,8 @@ public enum SilencingReagentType implements VocabularyTerm
   SIRNA("siRNA"),
   SHRNA("shRNA"),
   DSRNA("dsRNA"),
-  ESIRNA("esiRNA")
+  ESIRNA("esiRNA"),
+  MIRNA("miRNA")
   ;
 
  

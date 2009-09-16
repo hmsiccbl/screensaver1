@@ -15,8 +15,6 @@ import java.util.List;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.libraries.Gene;
-import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
-import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
 
 import org.apache.log4j.Logger;
 
@@ -48,9 +46,7 @@ public class GeneNameValueTable extends NameValueTable
 
   // private instance fields
 
-  private GeneViewer _geneViewer;
   private Gene _gene;
-  private ReagentViewer _parentViewer;
   private List<String> _names = new ArrayList<String>();
   private List<Object> _values = new ArrayList<Object>();
   private List<ValueType> _valueTypes = new ArrayList<ValueType>();
@@ -59,16 +55,9 @@ public class GeneNameValueTable extends NameValueTable
 
   // public constructor and implementations of NameValueTable abstract methods
 
-  public GeneNameValueTable(Gene gene, GeneViewer geneViewer)
+  public GeneNameValueTable(Gene gene)
   {
-    this(gene, geneViewer, null);
-  }
-
-  public GeneNameValueTable(Gene gene, GeneViewer geneViewer, ReagentViewer parentViewer)
-  {
-    _geneViewer = geneViewer;
     _gene = gene;
-    _parentViewer = parentViewer;
     initializeLists(gene);
     setDataModel(new ListDataModel(_values));
   }
@@ -106,14 +95,6 @@ public class GeneNameValueTable extends NameValueTable
   @Override
   public String getAction(int index, String value)
   {
-    // only link from gene name to gene viewer page when embedded in the well viewer
-    if (isEmbedded()) {
-      String name = getName(index);
-      if (name.equals(GENE_NAME)) {
-        return _geneViewer.viewGene(_gene);
-      }
-    }
-    // other fields do not have actions
     return null;
   }
 
@@ -135,23 +116,18 @@ public class GeneNameValueTable extends NameValueTable
 
   // private instance methods
 
-  private boolean isEmbedded()
-  {
-    return _parentViewer != null;
-  }
-
   /**
    * Initialize the lists {@link #_names}, {@link #_values}, and {@link #_valueTypes}. Don't
    * add rows for missing values.
    */
   private void initializeLists(Gene gene)
   {
-    addItem(GENE_NAME, gene.getGeneName(), isEmbedded() ? ValueType.COMMAND : ValueType.TEXT, "The name of the gene, as labelled in EntrezGene");
-    addItem(ENTREZGENE_ID, gene.getEntrezgeneId(), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
-    addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbol(), ValueType.TEXT, "The EntrezGene Gene Symbol");
-    if (! gene.getOldEntrezgeneIds().isEmpty()) {
-      addItem(OLD_ENTREZGENE_IDS, gene.getOldEntrezgeneIds(), ValueType.LINK_LIST, "Old EntrezGene IDs that refer to the same gene");
+    if (gene == null) { 
+      gene = Gene.NullGene;
     }
+    addItem(GENE_NAME, gene.getGeneName(), ValueType.TEXT, "The name of the gene, as labelled in EntrezGene");
+    addItem(ENTREZGENE_ID, gene.getEntrezgeneId(), ValueType.LINK, "The EntrezGene ID, a.k.a. Locus ID");
+    addItem(ENTREZGENE_SYMBOL, gene.getEntrezgeneSymbols(), ValueType.TEXT_LIST, "The EntrezGene Gene Symbols");
     addItem(GENBANK_ACCESSION_NUMBERS, gene.getGenbankAccessionNumbers(), ValueType.LINK_LIST, "The GenBank Accession Numbers for the gene");
     addItem(SPECIES_NAME, gene.getSpeciesName(), ValueType.TEXT, "The species this gene is found in");
   }

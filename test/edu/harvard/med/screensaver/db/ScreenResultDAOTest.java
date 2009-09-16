@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
@@ -91,7 +91,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
                                           (iWell / library.getPlateSize().getRows()),
                                           (iWell % library.getPlateSize().getColumns()));
 
-            wells[iWell] = library.createWell(wellKey, WellType.EXPERIMENTAL);
+            wells[iWell] = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
               rvt[iResultValue].createResultValue(wells[iWell],
                                                AssayWellType.EXPERIMENTAL,
@@ -320,7 +320,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
         for (int i = 1; i <= 10; ++i) {
           int plateNumber = i;
           expectedPlateNumbers.add(i);
-          Well well = library.createWell(new WellKey(plateNumber, "A01"), WellType.EXPERIMENTAL);
+          Well well = library.createWell(new WellKey(plateNumber, "A01"), LibraryWellType.EXPERIMENTAL);
           expectedWells.add(well);
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           boolean exclude = i % 4 == 0;
@@ -374,7 +374,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
     for (int iPlate = 1; iPlate <= 3; ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {
-        Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), WellType.EXPERIMENTAL);
+        Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), LibraryWellType.EXPERIMENTAL);
         rvt1.createResultValue(well, (double) iWell, 3);
         rvt2.createResultValue(well, iWell + 10.0, 3);
       }

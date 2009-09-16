@@ -11,7 +11,6 @@ package edu.harvard.med.screensaver.model.users;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.util.CryptoUtils;
 
 import com.google.common.collect.ImmutableSortedSet;
 
@@ -21,29 +20,6 @@ import com.google.common.collect.ImmutableSortedSet;
  */
 public class ScreensaverUserTest extends AbstractSpringPersistenceTest
 {
-  public void testUserDigestedPassword()
-  {
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        ScreensaverUser user = new ScreeningRoomUser("First", "Last", "first_last@hms.harvard.edu");
-        user.setLoginId("myLoginId");
-        user.updateScreensaverPassword("myPassword");
-        genericEntityDao.saveOrUpdateEntity(user);
-      }
-    });
-    
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        ScreensaverUser user = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "loginId", "myLoginId");
-        assertNotNull(user);
-        assertEquals(CryptoUtils.digest("myPassword"),
-                     user.getDigestedPassword());
-      }
-    });
-  }
-  
   public void testAddRoleToUser()
   {
     final String userEmail1 = "first_last1@hms.harvard.edu";
@@ -74,7 +50,6 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
     });
   }
   
-  
   public void testFullName() 
   {
     ScreensaverUser user = new ScreeningRoomUser("First", "Last", null);
@@ -102,5 +77,4 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
     assertEquals("", user.getFullNameLastFirst());
     assertEquals("", user.getFullNameFirstLast());
   }
- 
 }

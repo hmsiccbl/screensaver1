@@ -9,50 +9,35 @@
 
 package edu.harvard.med.screensaver.ui.table.column.entity;
 
-import java.util.Comparator;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
-import edu.harvard.med.screensaver.ui.table.column.ColumnType;
-import edu.harvard.med.screensaver.util.NullSafeComparator;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.table.column.DateColumn;
 
-import org.joda.time.LocalDate;
-
-public abstract class DateEntityColumn<E extends AbstractEntity> extends EntityColumn<E,LocalDate>
+public abstract class DateEntityColumn<E extends AbstractEntity> extends DateColumn<E> implements HasFetchPaths<E>
 {
-  abstract protected LocalDate getDate(E o);
-
+  private FetchPaths<E> _fetchPaths;
+  
   public DateEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
-    super(relationshipPath, name, description, ColumnType.DATE, group);
+    super(name, description, group);
+    _fetchPaths = new FetchPaths<E>(relationshipPath);
   }
 
-  public DateEntityColumn(PropertyPath<E> propertyPath, String name, String description, String group)
+  public void addRelationshipPath(RelationshipPath<E> path)
   {
-    super(propertyPath, name, description, ColumnType.DATE, group);
+    _fetchPaths.addRelationshipPath(path);
   }
 
-  @Override
-  public LocalDate getCellValue(E o)
+  public PropertyPath<E> getPropertyPath()
   {
-    return getDate(o);
+    return _fetchPaths.getPropertyPath();
   }
-  @Override
-  protected Comparator<E> getAscendingComparator()
+
+  public Set<RelationshipPath<E>> getRelationshipPaths()
   {
-    return new NullSafeComparator<E>() {
-      NullSafeComparator<LocalDate> _dateComparator = new NullSafeComparator<LocalDate>() {
-        @Override
-        protected int doCompare(LocalDate d1, LocalDate d2)
-        {
-          return d1.compareTo(d2);
-        }
-      };
-
-      @Override
-      protected int doCompare(E o1, E o2) { return _dateComparator.compare(getDate(o1), getDate(o2)); }
-    };
+    return _fetchPaths.getRelationshipPaths();
   }
-
 }

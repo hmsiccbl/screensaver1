@@ -26,6 +26,7 @@ import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
+import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -62,7 +63,7 @@ public class Workbook2Utils
       cell = new Number(iCol, iRow, ((java.lang.Number) fieldValue).doubleValue());
     }
     else if (fieldValue instanceof Collection) {
-      cell = new Label(iCol, iRow, StringUtils.makeListString((Collection<?>) fieldValue, "; "));
+      cell = new Label(iCol, iRow, StringUtils.makeListString((Collection<?>) fieldValue, DataExporter.LIST_DELIMITER + " "));
     }
     else {
       cell = new Label(iCol, iRow, fieldValue.toString());

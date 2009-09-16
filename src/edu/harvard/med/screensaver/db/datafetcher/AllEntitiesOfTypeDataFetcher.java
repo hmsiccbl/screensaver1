@@ -14,7 +14,7 @@ import java.util.Map;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 import org.apache.log4j.Logger;
 

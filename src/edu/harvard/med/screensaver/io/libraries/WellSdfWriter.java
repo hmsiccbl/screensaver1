@@ -12,23 +12,13 @@ package edu.harvard.med.screensaver.io.libraries;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 
-import org.apache.log4j.Logger;
-
+// TODO: use common file specification with SDRecordParser
 public class WellSdfWriter extends PrintWriter 
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(WellSdfWriter.class);
-
-
-  // instance data members
-
-  
-  // public constructors and methods
-
   public WellSdfWriter(Writer writer)
   {
     super(writer);
@@ -37,12 +27,22 @@ public class WellSdfWriter extends PrintWriter
   /**
    * Write the well contents out as an SD file record to the print writer.
    */
-  public void write(Well well)
+  public void write(Well well, LibraryContentsVersion lcv)
   {
-    if (well.getMolfile() == null) {
-      return;
+    assert well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class);
+    SmallMoleculeReagent smallMoleculeReagent;
+    if (lcv == null) {
+      smallMoleculeReagent = (SmallMoleculeReagent) well.getLatestReleasedReagent();
     }
-    println(well.getMolfile());
+    else {
+      smallMoleculeReagent = (SmallMoleculeReagent) well.getReagents().get(lcv);
+    }
+    if (smallMoleculeReagent == null || smallMoleculeReagent.isRestricted()) {
+      smallMoleculeReagent = SmallMoleculeReagent.NullSmallMoleculeReagent;
+    }
+    if (smallMoleculeReagent.getMolfile() != null) {
+      println(smallMoleculeReagent.getMolfile());
+    }
     println(">  <Library>");
     println(well.getLibrary().getLibraryName());
     println();
@@ -56,53 +56,68 @@ public class WellSdfWriter extends PrintWriter
     println(well.getPlateNumber() + well.getWellName());
     println();
     println(">  <Well_Type>");
-    println(well.getWellType().getValue());
+    println(well.getLibraryWellType().getValue());
     println();
-    println(">  <Smiles>");
-    println(well.getSmiles());
+    println(">  <Library_Contents_Version>");
+    if (smallMoleculeReagent.getLibraryContentsVersion() != null) {
+      println(smallMoleculeReagent.getLibraryContentsVersion().getVersionNumber());
+    }
     println();
-    if (well.getIccbNumber() != null) {
-      println(">  <ICCB_Number>");
-      println(well.getIccbNumber());
+    println(">  <SMILES>");
+    if (smallMoleculeReagent.getSmiles() != null) {
+      println(smallMoleculeReagent.getSmiles());
+    }
+    println();
+    println(">  <InChi>");
+    if (smallMoleculeReagent.getInchi() != null) {
+      println(smallMoleculeReagent.getInchi());
+    }
+    println();
+    println(">  <Molecular_Formula>");
+    if (smallMoleculeReagent.getMolecularFormula() != null) {
+      println(smallMoleculeReagent.getMolecularFormula());
+    }
+    println();
+    println(">  <Molecular_Mass>");
+    if (smallMoleculeReagent.getMolecularMass() != null) {
+      println(smallMoleculeReagent.getMolecularMass());
+    }
+    println();
+    println(">  <Molecular_Weight>");
+    if (smallMoleculeReagent.getMolecularWeight() != null) {
+      println(smallMoleculeReagent.getMolecularWeight());
+    }
+    println();
+    println(">  <Facility_Reagent_ID>");
+    if (well.getFacilityId() != null) {
+      println(well.getFacilityId());
+    } 
+    println();
+    println(">  <Vendor>");
+    if (smallMoleculeReagent.getVendorId().getVendorName() != null) {
+      println(smallMoleculeReagent.getVendorId().getVendorName());
+    }
+    println();
+    println(">  <Vendor_Reagent_ID>");
+    if (smallMoleculeReagent.getVendorId().getVendorIdentifier() != null) {
+      println(smallMoleculeReagent.getVendorId().getVendorIdentifier());
+    }
+    println();
+    for (String compoundName : smallMoleculeReagent.getCompoundNames()) {
+      println(">  <Chemical_Name>");
+      println(compoundName);
       println();
     }
-    if (well.getReagent() != null) {
-      println(">  <Vendor_Identifier>");
-      println(well.getReagent().getReagentId().getVendorIdentifier());
+    for (Integer pubchemCid : smallMoleculeReagent.getPubchemCids()) {
+      println(">  <PubChem_CID>");
+      println(pubchemCid);
       println();
     }
-    Compound compound = well.getPrimaryCompound();
-    if (compound != null) {
-      for (String compoundName : compound.getCompoundNames()) {
-        println(">  <Compound_Name>");
-        println(compoundName);
-        println();
-      }
-      for (String casNumber : compound.getCasNumbers()) {
-        println(">  <CAS_Number>");
-        println(casNumber);
-        println();
-      }
-      for (String nscNumber : compound.getNscNumbers()) {
-        println(">  <NSC_Number>");
-        println(nscNumber);
-        println();
-      }
-      for (String pubchemCid : compound.getPubchemCids()) {
-        println(">  <PubChem_CID>");
-        println(pubchemCid);
-        println();
-      }
-      for (String chembankId : compound.getChembankIds()) {
-        println(">  <ChemBank_ID>");
-        println(chembankId);
-        println();
-      }
+    for (Integer chembankId : smallMoleculeReagent.getChembankIds()) {
+      println(">  <ChemBank_ID>");
+      println(chembankId);
+      println();
     }
     println("$$$$");
   }
-
-  
-  // private methods
-
 }

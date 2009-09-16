@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
 /**
  * The assay well type vocabulary.  
  * 
- * @see edu.harvard.med.screensaver.model.libraries.WellType
+ * @see edu.harvard.med.screensaver.model.libraries.LibraryWellType
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -31,7 +31,7 @@ public enum AssayWellType implements VocabularyTerm
   ASSAY_CONTROL("assay control", "N"), // aka "assay negative control", but stakeholders prefer simply "assay control"
   ASSAY_CONTROL_SHARED("assay control shared", "NS"), //shared between screens
   BUFFER("buffer", "B"), // RNAi only
-  DMSO("DMSO", "D"), // small compound only
+  DMSO("DMSO", "D"), // small molecule only
                      // note: as of 2007-01-31, screen result files don't use this; they use EMPTY for what should be DMSO wells
   OTHER("other", "O"),
   ;

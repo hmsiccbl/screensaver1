@@ -16,19 +16,11 @@ import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 
 public class LibraryAndPlatesUsed
 {
-  // static members
-
-
-  // instance data members
-
   private LibrariesDAO _librariesDAO;
   private Library _library;
   private PlatesUsed _platesUsed;
   private Integer _startPlate;
   private Integer _endPlate;
-
-
-  // public constructors and methods
 
   public LibraryAndPlatesUsed(LibrariesDAO librariesDao, PlatesUsed platesUsed)
   {
@@ -38,15 +30,10 @@ public class LibraryAndPlatesUsed
 
   public Library getLibrary()
   {
-    if (_platesUsed.getStartPlate() != _startPlate ||
-      _platesUsed.getEndPlate() != _endPlate) {
-      _library = null;
+    if (!!!_platesUsed.getStartPlate().equals(_startPlate) || !!!_platesUsed.getEndPlate().equals(_endPlate)) {
       _startPlate = _platesUsed.getStartPlate();
       _endPlate = _platesUsed.getEndPlate();
       _library = _librariesDAO.findLibraryWithPlate(_platesUsed.getStartPlate());
-      if (_library == null) {
-        return null;
-      }
     }
     return _library;
   }
@@ -64,14 +51,12 @@ public class LibraryAndPlatesUsed
 
   public String getAdminLibraryWarning()
   {
-    if (_library.getScreeningStatus() != LibraryScreeningStatus.ALLOWED) {
-      if (!_platesUsed.getLibraryScreening().getScreen().getLibrariesPermitted().contains(_library)) {
-        return _library.getScreeningStatus().getValue();
+    Library library = getLibrary();
+    if (library != null && library.getScreeningStatus() != LibraryScreeningStatus.ALLOWED) {
+      if (!_platesUsed.getLibraryScreening().getScreen().getLibrariesPermitted().contains(library)) {
+        return library.getScreeningStatus().getValue();
       }
     }
     return null;
   }
-
-  // private methods
-
 }

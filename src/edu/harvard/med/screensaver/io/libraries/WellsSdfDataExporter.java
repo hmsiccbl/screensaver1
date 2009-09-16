@@ -9,8 +9,10 @@
 
 package edu.harvard.med.screensaver.io.libraries;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -18,61 +20,89 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class WellsSdfDataExporter implements DataExporter<Collection<String>>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(WellsSdfDataExporter.class);
-
-
-  // instance data members
-
+  private static final Logger log = Logger.getLogger(WellsSdfDataExporter.class);
+  
+  private static final int MAX_FETCH_SIZE = 1 << 8;
+  
   private GenericEntityDAO _dao;
+  
+  private LibraryContentsVersion _libraryContentsVersion;
 
-
-  // public constructors and methods
+  /** for CGLIB2 */
+  protected WellsSdfDataExporter() {}
 
   public WellsSdfDataExporter(GenericEntityDAO dao)
   {
     _dao = dao;
   }
+  
+  public void setLibraryContentsVersion(LibraryContentsVersion lcv)
+  { 
+    _libraryContentsVersion = lcv;
+  }
 
-  public InputStream export(final Collection<String> wellKeys)
+  public WellsSdfDataExporter(GenericEntityDAO dao,
+                              LibraryContentsVersion libraryContentsVersion)
   {
-    // TODO: logUserActivity("downloadWellSearchResults");
-    final ByteArrayOutputStream out = new ByteArrayOutputStream();
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      @SuppressWarnings("unchecked")
-      public void runTransaction()
-      {
-        WellSdfWriter writer = new WellSdfWriter(new PrintWriter(out));
-        EntityDataFetcher<Well,String> dataFetcher = new EntitySetDataFetcher<Well,String>(Well.class, new HashSet<String>(wellKeys), _dao);
-        ArrayList<RelationshipPath<Well>> relationships = new ArrayList<RelationshipPath<Well>>();
-        relationships.add(new RelationshipPath<Well>(Well.class, "compounds.compoundNames"));
-        relationships.add(new RelationshipPath<Well>(Well.class, "compounds.casNumbers"));
-        relationships.add(new RelationshipPath<Well>(Well.class, "compounds.nscNumbers"));
-        relationships.add(new RelationshipPath<Well>(Well.class, "compounds.pubchemCids"));
-        relationships.add(new RelationshipPath<Well>(Well.class, "compounds.chembankIds"));
-        relationships.add(new RelationshipPath<Well>(Well.class, "silencingReagents.gene.genbankAccessionNumbers"));
-        relationships.add(new RelationshipPath<Well>(Well.class, "molfileList"));
-        dataFetcher.setRelationshipsToFetch(relationships);
-        writeSDFileSearchResults(writer, wellKeys, dataFetcher);
-        writer.close();
+    _libraryContentsVersion = libraryContentsVersion;
+  }
+
+  @Transactional(readOnly=true, propagation=Propagation.NEVER) /* avoid accumulating entity objects in the Hibernate session, for scalability */
+  public InputStream export(final Collection<String> wellKeys) throws IOException
+  {
+   WellSdfWriter writer = null;
+   File outFile = null;
+    try {
+      outFile = File.createTempFile("wellsSdfDataExporter", "sdf");
+      log.debug("creating temp file: " + outFile);
+      outFile.deleteOnExit();
+      FileWriter outWriter = new FileWriter(outFile);
+      writer = new WellSdfWriter(new PrintWriter(outWriter));
+      EntityDataFetcher<Well,String> dataFetcher = new EntitySetDataFetcher<Well,String>(Well.class, new HashSet<String>(wellKeys), _dao);
+      ArrayList<RelationshipPath<Well>> relationships = new ArrayList<RelationshipPath<Well>>();
+      relationships.add(Well.library);
+      RelationshipPath<Well> toReagentPath;
+      if (_libraryContentsVersion == null) {
+        toReagentPath = Well.latestReleasedReagent;
       }
-    });
-    return new ByteArrayInputStream(out.toByteArray());
+      else {
+        toReagentPath = Well.reagents.restrict("libraryContentsVersion", _libraryContentsVersion);
+      }
+      relationships.add(toReagentPath.to(Reagent.libraryContentsVersion));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.compoundNames));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.pubchemCids));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.chembankIds));
+      relationships.add(toReagentPath.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.molfileList));
+      dataFetcher.setRelationshipsToFetch(relationships);
+      writeSDFileSearchResults(writer, wellKeys, dataFetcher);
+    }
+    finally {
+      IOUtils.closeQuietly(writer);
+    }
+    return new FileInputStream(outFile);
   }
 
   public String getFileName()
@@ -90,19 +120,20 @@ public class WellsSdfDataExporter implements DataExporter<Collection<String>>
     return "chemical/x-mdl-sdfile";
   }
 
-
-  // private methods
-
   private void writeSDFileSearchResults(WellSdfWriter writer,
                                         Collection<String> keys,
                                         EntityDataFetcher<Well,String> dataFetcher)
   {
-    Map<String,Well> entities = dataFetcher.fetchData(new HashSet<String>(keys));
-    for (String key : keys) {
-      Well well = entities.get(key);
-      if (well.getLibrary().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-        writer.write(well);
+    Iterable<Iterable<String>> partitions = Iterables.partition(keys, MAX_FETCH_SIZE, false);
+    for (Iterable<String> partition : partitions) {
+      Map<String,Well> entities = dataFetcher.fetchData(Sets.newHashSet(partition));
+      for (Well well : entities.values()) {
+        if (well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class)) {
+          writer.write(well, _libraryContentsVersion);
+        }
       }
     }
+    // allow garbage collection
+    _libraryContentsVersion = null;
   }
 }

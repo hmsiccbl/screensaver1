@@ -41,19 +41,28 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
+import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -75,7 +84,7 @@ import org.joda.time.LocalDate;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-public class Screen extends Study
+public class Screen extends Study implements AttachedFilesEntity
 {
 
   // private static data
@@ -83,6 +92,16 @@ public class Screen extends Study
   private static final Logger log = Logger.getLogger(Screen.class);
   private static final long serialVersionUID = 0L;
 
+  public static final RelationshipPath<Screen> screenResult = new RelationshipPath<Screen>(Screen.class, "screenResult");
+  public static final RelationshipPath<Screen> labHead = new RelationshipPath<Screen>(Screen.class, "labHead");
+  public static final RelationshipPath<Screen> leadScreener = new RelationshipPath<Screen>(Screen.class, "leadScreener");
+  public static final RelationshipPath<Screen> collaborators = new RelationshipPath<Screen>(Screen.class, "collaborators");
+  public static final RelationshipPath<Screen> annotationTypes = new RelationshipPath<Screen>(Screen.class, "annotationTypes");
+  public static final RelationshipPath<Screen> cherryPickRequests = new RelationshipPath<Screen>(Screen.class, "cherryPickRequests");
+  public static final RelationshipPath<Screen> labActivities = new RelationshipPath<Screen>(Screen.class, "labActivities");
+  public static final RelationshipPath<Screen> statusItems = new RelationshipPath<Screen>(Screen.class, "statusItems");
+  public static final RelationshipPath<Screen> fundingSupports = new RelationshipPath<Screen>(Screen.class, "fundingSupports");
+  public static final RelationshipPath<Screen> billingItems = new RelationshipPath<Screen>(Screen.class, "billingItems");
 
   // private instance data
 
@@ -127,9 +146,12 @@ public class Screen extends Study
   private Set<AbaseTestset> _abaseTestsets = new HashSet<AbaseTestset>();
   private String _abaseStudyId;
   private String _abaseProtocolId;
+  private String _comsRegistrationNumber;
+  private LocalDate _comsApprovalDate;
   private String _publishableProtocolComments;
   private LocalDate _publishableProtocolDateEntered;
   private String _publishableProtocolEnteredBy;
+  private AdministrativeActivity _pinTransferApprovalActivity;
   private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
 
 
@@ -303,7 +325,7 @@ public class Screen extends Study
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE
   })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensLed")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="screensLed")
   public ScreeningRoomUser getLeadScreener()
   {
     return _leadScreener;
@@ -338,7 +360,7 @@ public class Screen extends Study
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="screensHeaded")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="screensHeaded")
   public LabHead getLabHead()
   {
     return _labHead;
@@ -379,7 +401,7 @@ public class Screen extends Study
   )
   @org.hibernate.annotations.ForeignKey(name="fk_collaborator_link_to_screen")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="screensCollaborated")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="screensCollaborated")
   @Sort(type=SortType.NATURAL)
   public SortedSet<ScreeningRoomUser> getCollaborators()
   {
@@ -588,7 +610,8 @@ public class Screen extends Study
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
   @Sort(type=SortType.NATURAL)
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="labActivity")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="labActivity", 
+                                                        hasNonconventionalMutation=true /* uses createLibraryScreening() and createRNAiCherryPickScreening */)
   public SortedSet<LabActivity> getLabActivities()
   {
     return _labActivities;
@@ -709,7 +732,7 @@ public class Screen extends Study
 
   /**
    * Create and return a new cherry pick request for the screen of the appropriate type ({@link
-   * CompoundCherryPickRequest} or {@link RNAiCherryPickRequest}. The cherry pick request will
+   * SmallMoleculeCherryPickRequest} or {@link RNAiCherryPickRequest}. The cherry pick request will
    * have the {@link #getLeadScreener() lead screener} as the {@link
    * CherryPickRequest#getRequestedBy() requestor}, and the current date as the {@link
    * CherryPickRequest#getDateRequested() date requested}. It will not be a legacy ScreenDB
@@ -723,7 +746,7 @@ public class Screen extends Study
 
   /**
    * Create and return a new cherry pick request for the screen of the appropriate type ({@link
-   * CompoundCherryPickRequest} or {@link RNAiCherryPickRequest}. The cherry pick request will
+   * SmallMoleculeCherryPickRequest} or {@link RNAiCherryPickRequest}. The cherry pick request will
    * not be a legacy ScreenDB cherry pick.
    * @param requestedBy the requestor
    * @param dateRequested the date requested
@@ -738,7 +761,7 @@ public class Screen extends Study
 
   /**
    * Create and return a new cherry pick request for the screen of the appropriate type ({@link
-   * CompoundCherryPickRequest} or {@link RNAiCherryPickRequest}.
+   * SmallMoleculeCherryPickRequest} or {@link RNAiCherryPickRequest}.
    * @param requestedBy the requestor
    * @param dateRequested the date requested
    * @param legacyId the ScreenDB legacy id
@@ -754,7 +777,7 @@ public class Screen extends Study
       cherryPickRequest = new RNAiCherryPickRequest(this, requestedBy, dateRequested, legacyId);
     }
     else if(getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-      cherryPickRequest = new CompoundCherryPickRequest(this, requestedBy, dateRequested, legacyId);
+      cherryPickRequest = new SmallMoleculeCherryPickRequest(this, requestedBy, dateRequested, legacyId);
     }
     else {
       throw new UnsupportedOperationException(
@@ -828,7 +851,8 @@ public class Screen extends Study
     return publication;
   }
 
-  public Publication createPublication(Publication publicationDTO)
+  // note: for automated model unit tests, we can't name this createPublication or addPublication
+  public Publication addCopyOfPublication(Publication publicationDTO)
   {
     Publication publication = createPublication();
     publication.setTitle(publicationDTO.getTitle());
@@ -855,6 +879,7 @@ public class Screen extends Study
     org.hibernate.annotations.CascadeType.DELETE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
+  @ToMany(hasNonconventionalMutation=true)
   public Set<AttachedFile> getAttachedFiles()
   {
     return _attachedFiles;
@@ -889,10 +914,16 @@ public class Screen extends Study
     return attachedFile;
   }
 
+  public void removeAttachedFile(AttachedFile attachedFile)
+  {
+    _attachedFiles.remove(attachedFile);
+  }
+
   /**
    * Get the billing information.
    * @return the billing information
    */
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public BillingInformation getBillingInformation()
   {
     return _billingInformation;
@@ -903,6 +934,7 @@ public class Screen extends Study
    * @return the billing items
    */
   @org.hibernate.annotations.CollectionOfElements
+  @CollectionOfElements(hasNonconventionalMutation=true)
   @JoinTable(name = "screen_billing_item",
              joinColumns = @JoinColumn(name = "screen_id"))
   @org.hibernate.annotations.IndexColumn(name="ordinal")
@@ -945,7 +977,7 @@ public class Screen extends Study
     return billingItem;
   }
 
-  public BillingItem createBillingItem(BillingItem dtoBillingItem)
+  public BillingItem addCopyOfBillingItem(BillingItem dtoBillingItem)
   {
     return createBillingItem(dtoBillingItem.getItemToBeCharged(),
                              dtoBillingItem.getAmount(),
@@ -1192,14 +1224,13 @@ public class Screen extends Study
    * Get the set of funding supports.
    * @return the set of funding supports
    */
-  @org.hibernate.annotations.CollectionOfElements
-  @Column(name="fundingSupport", nullable=false)
+  @ManyToMany(fetch=FetchType.LAZY)
   @JoinTable(
-    name="screenFundingSupport",
-    joinColumns=@JoinColumn(name="screenId")
-  )
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.FundingSupport$UserType")
-  @org.hibernate.annotations.ForeignKey(name="fk_screen_funding_support_to_screen")
+    name="screenFundingSupportLink",
+    joinColumns=@JoinColumn(name="screenId"),
+    inverseJoinColumns=@JoinColumn(name="fundingSupportId"))
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(unidirectional=true)
   public Set<FundingSupport> getFundingSupports()
   {
     return _fundingSupports;
@@ -1299,6 +1330,28 @@ public class Screen extends Study
   public void setAbaseProtocolId(String abaseProtocolId)
   {
     _abaseProtocolId = abaseProtocolId;
+  }
+
+  @org.hibernate.annotations.Type(type="text")
+  public String getComsRegistrationNumber()
+  {
+    return _comsRegistrationNumber;
+  }
+
+  public void setComsRegistrationNumber(String comsRegistrationNumber)
+  {
+    _comsRegistrationNumber = comsRegistrationNumber;
+  }
+
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  public LocalDate getComsApprovalDate()
+  {
+    return _comsApprovalDate;
+  }
+
+  public void setComsApprovalDate(LocalDate comsApprovalDate)
+  {
+    _comsApprovalDate = comsApprovalDate;
   }
 
   /**
@@ -1412,6 +1465,38 @@ public class Screen extends Study
     _publishableProtocolComments = publishableProtocolComments;
   }
 
+  @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
+  @JoinColumn(name = "pin_transfer_admin_activity_id")
+  @org.hibernate.annotations.ForeignKey(name = "fk_screen_to_pin_transfer_admin_activity")
+  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true, hasNonconventionalSetterMethod=true)
+  public AdministrativeActivity getPinTransferApprovalActivity()
+  {
+    return _pinTransferApprovalActivity;
+  }
+
+  private void setPinTransferApprovalActivity(AdministrativeActivity pinTransferApprovalActivity)
+  {
+    _pinTransferApprovalActivity = pinTransferApprovalActivity;
+  }
+  
+  public void setPinTransferApproved(AdministratorUser recordedBy,
+                                     AdministratorUser approvedBy,
+                                     LocalDate dateApproved,
+                                     String comments)
+  {
+    if (_pinTransferApprovalActivity != null) {
+      throw new BusinessRuleViolationException("pin transfer approval already recorded");
+    }
+    _pinTransferApprovalActivity = new AdministrativeActivity(recordedBy,
+                                                              new LocalDate(),
+                                                              approvedBy,
+                                                              dateApproved,
+                                                              AdministrativeActivityType.PIN_TRANSFER_APPROVAL);
+    _pinTransferApprovalActivity.setComments(comments);
+  }
+
   /**
    * Get the date of application.
    * @return the date of application
@@ -1486,12 +1571,11 @@ public class Screen extends Study
   @JoinTable(
     name="studyReagentLink",
     joinColumns=@JoinColumn(name="studyId"),
-    inverseJoinColumns=@JoinColumn(name="reagentId", nullable=true, updatable=true)
-
+    inverseJoinColumns=@JoinColumn(name="reagentId")
   )
   @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="studies")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="studies")
   public Set<Reagent> getReagents()
   {
     return _reagents;

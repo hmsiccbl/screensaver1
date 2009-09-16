@@ -51,7 +51,7 @@ public class RNAiCherryPickRequestAllowancePolicy implements CherryPickRequestAl
     Query query = new Query() {
       public List execute(Session session)
       {
-        org.hibernate.Query q = session.createQuery("select count(sr.id) from CherryPickRequest cpr join cpr.screenerCherryPicks scp join scp.screenedWell w join w.silencingReagents sr where cpr = ?");
+        org.hibernate.Query q = session.createQuery("select count(r.id) from CherryPickRequest cpr join cpr.screenerCherryPicks scp join scp.screenedWell w join w.reagents r join w.library l where cpr = ? and r.libraryContentsVersion = l.latestReleasedContentsVersion");
         q.setEntity(0, cpr);
         Object result = q.uniqueResult();
         return Lists.newArrayList(result);

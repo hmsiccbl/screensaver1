@@ -25,34 +25,22 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecific
  */
 public class WellNameParser implements CellValueParser<String>
 {
-
-  // static fields
-  
   private static Pattern plateNumberPattern = Pattern.compile(ScreenResultWorkbookSpecification.WELL_NAME_REGEX);
 
-  
-  // instance fields
-  
-  private ParseErrorManager _errors;
-  
-  
-  // public constructor and instance methods
-  
-  public WellNameParser(ParseErrorManager errors)
+  public WellNameParser()
   {
-    _errors = errors;
   }
   
   public String parse(Cell cell) 
   {
     String cellString = cell.getString();
     if (cellString == null) {
-      _errors.addError("well name cell is empty", cell);
+      cell.addError("well name cell is empty");
       return "";      
     }
     Matcher matcher = plateNumberPattern.matcher(cellString);
     if (!matcher.matches()) {
-      _errors.addError("unparseable well name '" + cellString + "'", cell);
+      cell.addError("unparseable well name '" + cellString + "'");
       return "";
     }
     return matcher.group(0);

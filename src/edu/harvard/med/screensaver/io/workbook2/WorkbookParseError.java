@@ -18,9 +18,8 @@ import edu.harvard.med.screensaver.io.ParseError;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class WorkbookParseError implements ParseError
+public class WorkbookParseError extends ParseError
 {
-  private String _message;
   private Cell _atCell;
 
   /**
@@ -31,8 +30,13 @@ public class WorkbookParseError implements ParseError
    */
   public WorkbookParseError(String message, Cell atCell)
   {
-   _message = message;
-   _atCell = (Cell) atCell.clone();
+    super(message, atCell.toString());
+    _atCell = (Cell) atCell.clone();
+  }
+
+  public WorkbookParseError(String message, Row atRow)
+  {
+    this(message, atRow.getCell(0));
   }
 
   /**
@@ -43,38 +47,11 @@ public class WorkbookParseError implements ParseError
    */
   public WorkbookParseError(String message)
   {
-    _message = message;
-  }
-
-  public String toString()
-  {
-    return _message + (_atCell == null ? "" : " @ " + _atCell);
-  }
-
-  public String getErrorMessage()
-  {
-    return _message;
-  }
-
-  public String getErrorLocation()
-  {
-    return getCell() == null ? "" : getCell().toString();
+    super(message, "general error");
   }
 
   public Cell getCell()
   {
     return _atCell;
-  }
-
-  /**
-   * @motivation for unit testing
-   */
-  public boolean equals(Object o)
-  {
-    if (!(o instanceof WorkbookParseError)) {
-      return false;
-    }
-    WorkbookParseError that = (WorkbookParseError) o;
-    return this.toString().equals(that.toString());
   }
 }

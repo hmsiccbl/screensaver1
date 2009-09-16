@@ -235,86 +235,17 @@ TODO:
             <ui:define name="editableData">
               <t:inputFileUpload id="uploadPublicationAttachedFile"
                 value="#{screenDetailViewer.uploadedPublicationAttachedFileContents}"
-                maxlength="#{1024 * 1024}" styleClass="inputText" />
+                styleClass="inputText" />
             </ui:define>
           </ss:property>
         </t:panelGrid>
       </ui:define>
     </ss:property>
 
-    <ss:property id="attachedFiles" label="Attached Files"
+    <ss:attachedFiles attachedFiles="#{screenDetailViewer.attachedFiles}"
+      entityTypeName="screen" 
       rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
-      adminOnly="true"
-      description="Downloadable files associated with the screen">
-      <ui:define name="data">
-        <ss:collectionTable id="attachedFilesTable"
-          dataModel="#{screenDetailViewer.attachedFilesDataModel}"
-          editable="#{screenDetailViewer.editMode}"
-          actionBean="#{screenDetailViewer}" addAction="addAttachedFile"
-          deleteAction="deleteAttachedFile">
-          <ui:define name="columns">
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="Date Added" />
-              </f:facet>
-              <t:outputText value="#{element.dateCreated}"
-                converter="#{dateConverter}" />
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="File Type" />
-              </f:facet>
-              <t:outputText value="#{element.fileType}" />
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="File Name" />
-              </f:facet>
-              <t:commandLink id="downloadAttachedFileCommandLink"
-                value="#{element.filename}"
-                action="#{screenDetailViewer.downloadAttachedFile}"
-                styleClass="dataText" />
-            </t:column>
-          </ui:define>
-          <ui:define name="addProperties">
-            <t:panelGrid columns="2"
-              columnClasses="propertyLabelColumn,column"
-              rendered="#{screenDetailViewer.editMode}">
-              <ss:property id="newAttachedFileType" label="File Type" adminOnly="true">
-                <ui:define name="editableData">
-                  <t:selectOneMenu id="newAttachedFileTypeMenu"
-                    value="#{screenDetailViewer.newAttachedFileType.value}"
-                    required="false" styleClass="inputText selectMenu">
-                    <f:selectItems
-                      value="#{screenDetailViewer.newAttachedFileType.selectItems}" />
-                  </t:selectOneMenu>
-                </ui:define>
-              </ss:property>
-              <ss:property id="uploadScreenAttachedFile"
-                label="Option #1: Upload File" adminOnly="true">
-                <ui:define name="editableData">
-                  <t:inputFileUpload id="uploadAttachedFile"
-                    value="#{screenDetailViewer.uploadedAttachedFileContents}"
-                    maxlength="#{1024 * 1024}" styleClass="inputText" />
-                </ui:define>
-              </ss:property>
-              <ss:propertyGroup
-                label="Option #2: Paste Text File Contents" columns="1"
-                columnClasses="column">
-                <ss:property id="newAttachedFilename" label="Name"
-                  type="Text"
-                  value="#{screenDetailViewer.newAttachedFileName}"
-                  editWidth="60" />
-                <ss:property id="newAttachedFileContents"
-                  label="Contents" type="Textarea"
-                  value="#{screenDetailViewer.newAttachedFileContents}"
-                  editWidth="60" editHeight="3" />
-              </ss:propertyGroup>
-            </t:panelGrid>
-          </ui:define>
-        </ss:collectionTable>
-      </ui:define>
-    </ss:property>
+      editMode="#{screenDetailViewer.editMode}" />
 
     <ss:property id="fundingSupports" label="Funding Support"
       rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
@@ -355,7 +286,21 @@ TODO:
       </ui:define>
     </ss:property>
 
+    <ss:property id="comsRegistrationNumber"
+      label="COMS Registration Number"
+      value="#{screenDetailViewer.screen.comsRegistrationNumber}"
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+      editable="#{screenDetailViewer.editMode}"
+      adminOnly="true" description="COMS number, provided by PI's lab" />
+    <ss:property id="comsApprovalDate"
+      label="ICCB-L/NSRB COMS Approval Date" type="Date"
+      value="#{screenDetailViewer.screen.comsApprovalDate}"
+      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
+      editable="#{screenDetailViewer.editMode}" adminOnly="true"
+      description="the date of approval by COMS or the date on which we determine that our existing approval already covers the proposed experiments" />
+
     <ss:property id="assayReadoutTypes" label="Assay Readout Types"
+      value="#{screenDetailViewer.screen.comsApprovalDate}"
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
       description="The assay readout types used">
       <ui:define name="data">
@@ -497,6 +442,43 @@ TODO:
         </t:collapsiblePanel>
       </ui:define>
     </ss:property>
+
+    <ss:property id="pinTransferApprovalNull" type="text"
+      label="Pin Transfer Approval" adminOnly="true"
+      rendered="#{!screenDetailViewer.editMode &amp;&amp; screenDetailViewer.adminViewMode &amp;&amp; empty screenDetailViewer.screen.pinTransferApprovalActivity}"
+      value="&lt;not yet approved&gt;" />
+    <ss:propertyGroup id="pinTransferApproval"
+      label="Pin Transfer Approval" adminOnly="true"
+      rendered="#{screenDetailViewer.editMode || (screenDetailViewer.adminViewMode &amp;&amp; !empty screenDetailViewer.screen.pinTransferApprovalActivity)}">
+      <ss:property id="approvedBy" label="Approved By"
+        description="The staff member that approved for this screen to have pin transfer to assay plates performed"
+        value="#{screenDetailViewer.pinTransferApprovedBy}"
+        editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.screen.pinTransferApprovalActivity}">
+        <ui:define name="data">
+          <ss:user user="#{value.selection}" />
+        </ui:define>
+        <ui:define name="editableData">
+          <t:selectOneMenu value="#{value.value}"
+            styleClass="inputText selectMenu">
+            <f:selectItems value="#{value.selectItems}" />
+          </t:selectOneMenu>
+        </ui:define>
+      </ss:property>
+
+      <ss:property id="pinTrasferApprovalDate" label="Date Approved"
+        type="Date"
+        description="The date this screen was approved to have pin transfer to assay plates performed"
+        value="#{screenDetailViewer.pinTransferApprovalDate}"
+        editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.screen.pinTransferApprovalActivity}" />
+        
+      <ss:property id="pinTransferApprovalComments" label="Comments"
+        type="Textarea" editWidth="80" editHeight="3"
+        description="Comments for the pin transfer approval"
+        value="#{screenDetailViewer.pinTransferApprovalComments}"
+        editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.screen.pinTransferApprovalActivity}" />
+        
+    </ss:propertyGroup>
+
   </ui:define>
 
   <ui:define name="tablesContent">

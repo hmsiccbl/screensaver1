@@ -15,17 +15,18 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
+import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 
@@ -44,6 +45,7 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
 
   private static Logger log = Logger.getLogger(LabActivitySearchResults.class);
   private ScreenViewer _screenViewer;
+  private CherryPickRequestViewer _cprViewer;
 
   /**
    * @motivation for CGLIB2
@@ -55,10 +57,12 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   public LabActivitySearchResults(ActivityViewer activityViewer,
                                   ScreenViewer screenViewer,
                                   UserViewer userViewer,
+                                  CherryPickRequestViewer cprViewer,
                                   GenericEntityDAO dao)
   {
     super(activityViewer, userViewer, LabActivity.class, dao);
     _screenViewer = screenViewer;
+    _cprViewer = cprViewer;
   }
 
   public void searchLabActivitiesForScreen(Screen screen)
@@ -73,10 +77,10 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   @Override
   protected List<? extends TableColumn<LabActivity,?>> buildColumns()
   {
-    List<EntityColumn<LabActivity,?>> columns =
-      (List<EntityColumn<LabActivity,?>>) super.buildColumns();
+    List<TableColumn<LabActivity,?>> columns =
+      (List<TableColumn<LabActivity,?>>) super.buildColumns();
     columns.add(1, new IntegerEntityColumn<LabActivity>(
-      new PropertyPath<LabActivity>(LabActivity.class, "screen", "screenNumber"),
+      LabActivity.Screen.toProperty("screenNumber"),
       "Screen Number", "The screen number", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(LabActivity activity) { return activity.getScreen().getScreenNumber(); }
@@ -87,6 +91,36 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
       @Override
       public boolean isCommandLink() { return true; }
     });
+    IntegerEntityColumn<LabActivity> column = new IntegerEntityColumn<LabActivity>(
+      (RelationshipPath) RNAiCherryPickScreening.rnaiCherryPickRequest,
+      "Cherry Pick Request #", "The cherry pick request number, if applicable", TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(LabActivity activity) 
+      { 
+        CherryPickRequest cherryPickRequest = getCherryPickRequest(activity);
+        return cherryPickRequest == null ? null : cherryPickRequest.getCherryPickRequestNumber();
+      }
+
+      private CherryPickRequest getCherryPickRequest(LabActivity activity)
+      {
+        if (activity instanceof CherryPickLiquidTransfer) {
+          return ((CherryPickLiquidTransfer) activity).getCherryPickRequest();
+        }
+        else if (activity instanceof RNAiCherryPickScreening) {
+          return ((RNAiCherryPickScreening) activity).getRnaiCherryPickRequest();
+        }
+        return null;
+      }
+
+      @Override
+      public Object cellAction(LabActivity activity) { return _cprViewer.viewCherryPickRequest(getCherryPickRequest(activity)); }
+
+      @Override
+      public boolean isCommandLink() { return true; }
+    };
+    column.addRelationshipPath((RelationshipPath) CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest));
+    column.setVisible(false);
+    columns.add(2, column);
     return columns;
   }
 

@@ -7,7 +7,7 @@
   /* at Harvard Medical School. This software is distributed under the terms of   */
   /* the GNU General Public License. */
 body {
-  font-family: helvetica, arial, sans-serif;
+  font-family: sans-serif;
   font-size: medium;
   font-weight: normal;
   color: #000000;
@@ -183,7 +183,6 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader {
-  font-family: sans-serif;
   font-size: small;
 }
 
@@ -205,6 +204,10 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .bigLabel {
   font-size: medium;
+}
+
+.smallLabel {
+  font-size: x-small;
 }
 
 .command,.inputText,.label {
@@ -325,7 +328,6 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .tableHeader {
   text-align: left;
-  font-family: sans-serif;
 }
 
 .heatMapTableHeader {
@@ -468,9 +470,9 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
   
 }
 
-.newsDate {
-  font-family: monospace;
-  font: Courier;
+.newsItem {
+  color: white;
+  size: larg;
   font-weight: bold;
 }
 
@@ -490,7 +492,6 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 }
 
 .popupText {
-  font-family: sans-serif;
   font-size: small;
   font-weight: normal;
 }

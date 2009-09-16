@@ -22,15 +22,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.Concentration;
 import edu.harvard.med.screensaver.model.ConcentrationUnit;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 
 /**
@@ -51,6 +52,7 @@ public abstract class LabActivity extends Activity
   private static final Logger log = Logger.getLogger(LabActivity.class);
   private static final long serialVersionUID = 0L;
 
+  public static final RelationshipPath<LabActivity> Screen = new RelationshipPath<LabActivity>(LabActivity.class, "screen");
 
   // private instance fields
 
@@ -72,7 +74,7 @@ public abstract class LabActivity extends Activity
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_lab_activity_to_screen")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="labActivities")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="labActivities")
   public Screen getScreen()
   {
     return _screen;
@@ -150,7 +152,7 @@ public abstract class LabActivity extends Activity
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE
   })
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(
+  @edu.harvard.med.screensaver.model.annotations.ToMany(
     singularPropertyName="equipmentUsed"
       //,
     //inverseProperty="labActivity"

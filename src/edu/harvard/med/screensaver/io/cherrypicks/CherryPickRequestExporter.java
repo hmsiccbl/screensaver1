@@ -28,11 +28,13 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -43,8 +45,6 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,11 +74,13 @@ public class CherryPickRequestExporter
       "Entrez Gene ID",
       "Genbank Acc. No.",
       "Gene Name",
-      "Sequences",
-      "Vendor IDs"
+      "Sequence",
+      "Vendor Name",
+      "Vendor ID"
     };
     SCREENER_CHERRY_PICK_HEADERS[ScreenType.SMALL_MOLECULE.ordinal()] = new String[] {
       "ICCB Number",
+      "Vendor Name",
       "Vendor ID"
     };
   };
@@ -92,12 +94,14 @@ public class CherryPickRequestExporter
       "Genbank Acc. No.",
       "Gene Name",
       "Sequence",
+      "Vendor Name",
       "Vendor ID" 
     };
     LAB_CHERRY_PICK_HEADERS[ScreenType.SMALL_MOLECULE.ordinal()] = new String[] { 
       "Cherry Pick Plate #",
       "Cherry Pick Plate Well",
       "ICCB Number",
+      "Vendor Name",
       "Vendor ID"
     }; 
   }
@@ -160,15 +164,14 @@ public class CherryPickRequestExporter
       CherryPickRequest cherryPickRequest =
         _dao.reloadEntity(cherryPickRequestIn,
                           true,
-                          "screen.screenResult.resultValueTypes");
+                          CherryPickRequest.screen.to(Screen.screenResult).to(ScreenResult.resultValueTypes).getPath());
       _dao.needReadOnly(cherryPickRequest,
-                        "cherryPickAssayPlates.cherryPickLiquidTransfer");
+                        CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).getPath());
       _dao.needReadOnly(cherryPickRequest,
-                        "labCherryPicks.sourceWell.silencingReagents",
-                        "labCherryPicks.wellVolumeAdjustments");
+                        CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell).to(Well.latestReleasedReagent).getPath(),
+                        CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments).getPath());
       _dao.needReadOnly(cherryPickRequest,
-                        "screenerCherryPicks.screenedWell.silencingReagents.gene.genbankAccessionNumbers",
-                        "screenerCherryPicks.rnaiKnockdownConfirmation");
+                        CherryPickRequest.screenerCherryPicks.to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).getPath());
 
       ByteArrayOutputStream rawBytes = new ByteArrayOutputStream();
       OutputStream out = new BufferedOutputStream(rawBytes);
@@ -226,26 +229,9 @@ public class CherryPickRequestExporter
     Well sourceWell = labCherryPick.getSourceWell();
     data.add(labCherryPick.getAssayPlate() == null ? null : labCherryPick.getAssayPlate().getPlateOrdinal() + 1);
     data.add(labCherryPick.getAssayPlateWellName() == null ? null : labCherryPick.getAssayPlateWellName());
-    if (labCherryPick.getCherryPickRequest().getScreen().getScreenType() == ScreenType.RNAI) {
-      Gene gene = sourceWell.getGene();
-      data.add(gene == null ? null : gene.getEntrezgeneSymbol());
-      data.add(gene == null ? null : gene.getEntrezgeneId());
-      data.add(gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), LIST_OF_VALUES_DELIMITER));
-      data.add(gene == null ? null : gene.getGeneName());
-      data.add(StringUtils.makeListString(CollectionUtils.
-                                          collect(sourceWell.getSilencingReagents(),
-                                                  new Transformer()
-                                          {
-                                            public Object transform(Object silencingReagent)
-                                            {
-                                              return ((SilencingReagent) silencingReagent).getSequence();
-                                            }
-                                          }), LIST_OF_VALUES_DELIMITER));
-    }
-    else {
-      data.add(sourceWell.getIccbNumber());
-    }
-    data.add(sourceWell.getSimpleVendorIdentifier());
+    getReagentData(labCherryPick.getCherryPickRequest().getScreen().getScreenType(),
+                   sourceWell, 
+                   data);
     return data.toArray();
   }
 
@@ -271,27 +257,9 @@ public class CherryPickRequestExporter
   {
     List<Object> data = new ArrayList<Object>();
     Well screenedWell = screenerCherryPick.getScreenedWell();
-    if (screenerCherryPick.getCherryPickRequest().getScreen().getScreenType() == ScreenType.RNAI) {
-      Gene gene = screenedWell.getGene();
-      data.add(gene == null ? null : gene.getEntrezgeneSymbol());
-      data.add(gene == null ? null : gene.getEntrezgeneId());
-      data.add(gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), LIST_OF_VALUES_DELIMITER));
-      data.add(gene == null ? null : gene.getGeneName());
-      data.add(StringUtils.makeListString(CollectionUtils.
-                                          collect(screenedWell.getSilencingReagents(),
-                                                  new Transformer()
-                                          {
-                                            public Object transform(Object silencingReagent)
-                                            {
-                                              return ((SilencingReagent) silencingReagent).getSequence();
-                                            }
-                                          }), 
-                                          LIST_OF_VALUES_DELIMITER));
-    }
-    else {
-      data.add(screenedWell.getIccbNumber());
-    }
-    data.add(screenedWell.getSimpleVendorIdentifier());
+    getReagentData(screenerCherryPick.getCherryPickRequest().getScreen().getScreenType(),
+                   screenedWell,
+                   data);
 
     ScreenResult screenResult = screenerCherryPick.getCherryPickRequest().getScreen().getScreenResult();
     if (screenResult != null) {
@@ -308,6 +276,27 @@ public class CherryPickRequestExporter
     return data.toArray();
   }
 
+  private void getReagentData(ScreenType screenType,
+                              Well well,
+                              List<Object> data)
+  {
+    if (screenType == ScreenType.RNAI) {
+      SilencingReagent reagent = (SilencingReagent) well.<Reagent>getLatestReleasedReagent();
+      Gene gene = reagent == null ? null : reagent.getFacilityGene();
+      data.add(gene == null || gene.getEntrezgeneSymbols().isEmpty()  ? null : gene.getEntrezgeneSymbols().iterator().next());
+      data.add(gene == null ? null : gene.getEntrezgeneId());
+      data.add(gene == null ? null : StringUtils.makeListString(gene.getGenbankAccessionNumbers(), LIST_OF_VALUES_DELIMITER));
+      data.add(gene == null ? null : gene.getGeneName());
+      data.add(reagent == null ? null : reagent.getSequence());
+    }
+    else {
+      data.add(well.getFacilityId());
+    }
+    Reagent reagent = well.<Reagent>getLatestReleasedReagent(); 
+    data.add(reagent == null ? null : reagent.getVendorId().getVendorName());
+    data.add(reagent == null ? null : reagent.getVendorId().getVendorIdentifier());
+  }
+
   private void writeLabCherryPicksHeaders(WritableSheet sheet, ScreenType screenType) throws RowsExceededException, WriteException
   {
     Workbook2Utils.writeRow(sheet,
@@ -317,15 +306,16 @@ public class CherryPickRequestExporter
 
   private void writeScreenerCherryPicksHeaders(WritableSheet sheet, Screen screen) throws RowsExceededException, WriteException
   {
+    String[] headers = SCREENER_CHERRY_PICK_HEADERS[screen.getScreenType().ordinal()];
     Workbook2Utils.writeRow(sheet,
                             0,
-                            (Object[]) SCREENER_CHERRY_PICK_HEADERS[screen.getScreenType().ordinal()]);
+                            (Object[]) headers);
     int resultValueCol = 0;
     if (screen.getScreenResult() != null) {
       for (ResultValueType rvt : screen.getScreenResult().getResultValueTypes()) {
         Workbook2Utils.writeCell(sheet,
                                  0,
-                                 6 + resultValueCol++,
+                                 headers.length + resultValueCol++,
                                  rvt.getName());
       }
     }

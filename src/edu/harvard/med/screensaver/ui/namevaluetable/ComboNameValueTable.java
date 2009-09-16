@@ -35,7 +35,7 @@ abstract public class ComboNameValueTable extends NameValueTable
 
   // private instance fields
 
-  private NameValueTable [] _childTables;
+  private List<NameValueTable> _childTables;
   private int [] _rowIndexToChildTableIndex;
   private int [] _rowIndexToChildTableRowIndex;
 
@@ -49,7 +49,7 @@ abstract public class ComboNameValueTable extends NameValueTable
    * @param childTables the child tables
    */
   @SuppressWarnings("unchecked")
-  protected void initializeComboNameValueTable(NameValueTable [] childTables)
+  protected void initializeComboNameValueTable(List<NameValueTable> childTables)
   {
     _childTables = childTables;
 
@@ -63,8 +63,8 @@ abstract public class ComboNameValueTable extends NameValueTable
 
     List<Object> dataModelContents = new ArrayList<Object>();
     int parentRowIndex = 0;
-    for (int childTableIndex = 0; childTableIndex < _childTables.length; childTableIndex ++) {
-      NameValueTable childTable = _childTables[childTableIndex];
+    for (int childTableIndex = 0; childTableIndex < _childTables.size(); childTableIndex ++) {
+      NameValueTable childTable = _childTables.get(childTableIndex);
       for (int childTableRowIndex = 0; childTableRowIndex < childTable.getNumRows(); childTableRowIndex ++) {
         _rowIndexToChildTableIndex[parentRowIndex] = childTableIndex;
         _rowIndexToChildTableRowIndex[parentRowIndex] = childTableRowIndex;
@@ -92,7 +92,7 @@ abstract public class ComboNameValueTable extends NameValueTable
       return HtmlUtils.NON_BREAKING_SPACE;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
-    return _childTables[childTableIndex].getDescription(childTableRowIndex);
+    return _childTables.get(childTableIndex).getDescription(childTableRowIndex);
   }
 
   @Override
@@ -103,7 +103,7 @@ abstract public class ComboNameValueTable extends NameValueTable
       return HtmlUtils.NON_BREAKING_SPACE;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
-    return _childTables[childTableIndex].getName(childTableRowIndex);
+    return _childTables.get(childTableIndex).getName(childTableRowIndex);
   }
 
   @Override
@@ -114,7 +114,7 @@ abstract public class ComboNameValueTable extends NameValueTable
       return ValueType.UNESCAPED_TEXT;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
-    return _childTables[childTableIndex].getValueType(childTableRowIndex);
+    return _childTables.get(childTableIndex).getValueType(childTableRowIndex);
   }
 
   @Override
@@ -125,7 +125,7 @@ abstract public class ComboNameValueTable extends NameValueTable
       return HtmlUtils.NON_BREAKING_SPACE;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
-    return _childTables[childTableIndex].getValue(childTableRowIndex);
+    return _childTables.get(childTableIndex).getValue(childTableRowIndex);
   }
 
   @Override
@@ -136,7 +136,7 @@ abstract public class ComboNameValueTable extends NameValueTable
       return null;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
-    return _childTables[childTableIndex].getAction(childTableRowIndex, value);
+    return _childTables.get(childTableIndex).getAction(childTableRowIndex, value);
   }
 
   @Override
@@ -147,17 +147,14 @@ abstract public class ComboNameValueTable extends NameValueTable
       return null;
     }
     int childTableRowIndex = _rowIndexToChildTableRowIndex[rowIndex];
-    return _childTables[childTableIndex].getLink(childTableRowIndex, value);
+    return _childTables.get(childTableIndex).getLink(childTableRowIndex, value);
   }
 
-
-  // private instance methods
-
-  private int countRows(NameValueTable [] childTables)
+  private int countRows(List<NameValueTable> childTables)
   {
     int numRows = 0;
-    for (int i = 0; i < childTables.length; i++) {
-      numRows += childTables[i].getNumRows() + 1;
+    for (NameValueTable nameValueTable : childTables) {
+      numRows += nameValueTable.getNumRows() + 1;
     }
     return Math.max(-- numRows, 0);
   }

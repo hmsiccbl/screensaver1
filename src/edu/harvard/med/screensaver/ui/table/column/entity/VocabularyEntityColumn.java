@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.ui.table.column.entity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -20,25 +19,27 @@ import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
-import edu.harvard.med.screensaver.ui.table.column.ColumnType;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.table.column.VocabularyColumn;
 
-public abstract class VocabularyEntityColumn<E extends AbstractEntity,V> extends EntityColumn<E,V>
+public abstract class VocabularyEntityColumn<E extends AbstractEntity,V> extends VocabularyColumn<E,V> implements HasFetchPaths<E>
 {
   private Set<V> _items;
   private ArrayList<SelectItem> _selectItems;
-
+  private FetchPaths<E> _fetchPaths;
+  
   public VocabularyEntityColumn(RelationshipPath<E> relationshipPath,
-                          String name,
-                          String description,
-                          String group,
-                          Converter converter, 
-                          Set<V> items)
+                                String name,
+                                String description,
+                                String group,
+                                Converter converter, 
+                                Set<V> items)
   {
-    super(relationshipPath, name, description, ColumnType.VOCABULARY, group);
+    super(name, description, group, converter, items);
     setConverter(converter);
     _items = new LinkedHashSet<V>(items);
+    _fetchPaths = new FetchPaths<E>(relationshipPath);    
   }
 
   public VocabularyEntityColumn(RelationshipPath<E> relationshpPath,
@@ -51,42 +52,18 @@ public abstract class VocabularyEntityColumn<E extends AbstractEntity,V> extends
     this(relationshpPath, name, description, group, converter, new TreeSet<V>(Arrays.asList(items)));
   }
 
-  public VocabularyEntityColumn(PropertyPath<E> propertyPath,
-                          String name,
-                          String description,
-                          String group,
-                          Converter converter, 
-                          Set<V> items)
+  public void addRelationshipPath(RelationshipPath<E> path)
   {
-    super(propertyPath, name, description, ColumnType.VOCABULARY, group);
-    setConverter(converter);
-    _items = new LinkedHashSet<V>(items);
+    _fetchPaths.addRelationshipPath(path);
   }
 
-  public VocabularyEntityColumn(PropertyPath<E> propertyPath,
-                          String name,
-                          String description,
-                          String group,
-                          Converter converter, 
-                          V[] items)
+  public PropertyPath<E> getPropertyPath()
   {
-    this(propertyPath, name, description, group, converter, new TreeSet<V>(Arrays.asList(items)));
+    return _fetchPaths.getPropertyPath();
   }
 
-  public Set<V> getVocabulary()
+  public Set<RelationshipPath<E>> getRelationshipPaths()
   {
-    return _items;
-  }
-
-  public List<SelectItem> getVocabularySelections()
-  {
-    if (_selectItems == null) {
-      _selectItems = new ArrayList<SelectItem>();
-      _selectItems.add(new SelectItem("", ""));
-      for (V v : getVocabulary()) {
-        _selectItems.add(new SelectItem(v));
-      }
-    }
-    return _selectItems;
+    return _fetchPaths.getRelationshipPaths();
   }
 }

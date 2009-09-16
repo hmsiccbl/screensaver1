@@ -22,7 +22,6 @@
 
   <!-- Data sources -->
 
-  <!-- Will be modified by our dataSourceConfigurer (PropertyPlaceholderConfigurer) bean, to replace the ${...} variable references with real values from a properties file. -->
   <bean
     id="screensaverDataSource"
     class="org.apache.commons.dbcp.BasicDataSource">
@@ -46,24 +45,6 @@
       value="0" />
   </bean>
 
-  <bean
-    id="dataSourceConfigurer"
-    class="edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer">
-    <property
-      name="location"
-      value="classpath:screensaver.properties" />
-    <property
-      name="ignoreResourceNotFound"
-      value="true" />
-    <!-- if datasource settings are available as environment variables, use them instead of screensaver.properties file -->
-    <property
-      name="searchSystemEnvironment"
-      value="true" />
-    <property
-      name="systemPropertiesModeName"
-      value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
-  </bean>
-
 
   <!-- Hibernate configuration -->
 
@@ -73,11 +54,10 @@
     <constructor-arg ref="dataAccessPolicy" />
   </bean>
 
-
   <bean
     id="hibernateSessionFactory"
     class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
-    <!-- Have Spring gather settings from the hibernate.cfg.xml file, which we are auto-generating -->
+    <!-- Have Spring gather settings from the hibernate.cfg.xml file -->
     <property
       name="configLocation"
       value="classpath:hibernate.cfg.xml" />
@@ -166,7 +146,7 @@
       name="hibernateTemplate"
       ref="hibernateTemplate" />
   </bean>
-
+  
   <bean
     id="usersDao"
     class="edu.harvard.med.screensaver.db.UsersDAO">

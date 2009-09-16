@@ -26,19 +26,14 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    // ignored abstract classes
-    // addTestSuite(Screening.class);
-    // addTestSuite(LabActivityTest.class);
-    
     // test entity model classes (ignoring abstract classes)
-    addTestSuite(AbaseTestsetTest.class);
-    addTestSuite(AttachedFileTest.class);
-    addTestSuite(EquipmentUsedTest.class);
-    addTestSuite(LibraryScreeningTest.class);
-    addTestSuite(PlatesUsedTest.class);
-    addTestSuite(PublicationTest.class);
-    addTestSuite(RNAiCherryPickScreeningTest.class);
-    addTestSuite(ScreenTest.class);
-    addTestSuite(StatusItemTest.class);
+    addTest(AbaseTestsetTest.suite());
+    addTest(EquipmentUsedTest.suite());
+    addTest(LibraryScreeningTest.suite());
+    addTest(PlatesUsedTest.suite());
+    addTest(PublicationTest.suite());
+    addTest(RNAiCherryPickScreeningTest.suite());
+    addTest(ScreenTest.suite());
+    addTest(StatusItemTest.suite());
   }
 }

@@ -25,9 +25,9 @@ import edu.harvard.med.screensaver.db.hibernate.Disjunction;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.db.hibernate.JoinType;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyNameAndValue;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyNameAndValue;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
@@ -264,7 +264,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
         for (RelationshipPath<E> path : _relationships) {
           String groupName = "<unrestricted>";
           if (path.hasRestrictions()) {
-            groupName = path.getFormattedPath();
+            groupName = path.getPath();
           }
           Set<RelationshipPath<E>> group = groupedPaths.get(groupName);
           if (group == null) {
@@ -385,7 +385,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
     // that satisfies the *basic* path (i.e., ignoring any restrictions on
     // the path's nodes)
     for (Map.Entry<RelationshipPath<E>,String> entry : path2Alias.entrySet()) {
-      if (entry.getKey().getFormattedPath().equals(path.getFormattedPath())) {
+      if (entry.getKey().getPath().equals(path.getPath())) {
         alias = entry.getValue();
         //log.debug("using alias " + alias + " for " + path);
         break;

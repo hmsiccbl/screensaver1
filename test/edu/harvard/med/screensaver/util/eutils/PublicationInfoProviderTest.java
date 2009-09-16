@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
+import junit.framework.TestCase;
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screens.Publication;
 
@@ -20,7 +21,7 @@ import edu.harvard.med.screensaver.model.screens.Publication;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class PublicationInfoProviderTest extends AbstractSpringTest
+public class PublicationInfoProviderTest extends TestCase
 {
   private PublicationInfoProvider _publicationInfoProvider = new PublicationInfoProvider();
 

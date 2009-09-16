@@ -14,12 +14,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.TestSuite;
+
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -32,7 +35,10 @@ import org.apache.log4j.Logger;
 
 public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryPickRequest>
 {
-  private static Logger log = Logger.getLogger(RNAiCherryPickRequestTest.class);
+  public static TestSuite suite()
+  {
+    return buildTestSuite(RNAiCherryPickRequestTest.class, RNAiCherryPickRequest.class);
+  }
 
   protected LibrariesDAO librariesDao;
   protected RNAiCherryPickRequestAllowancePolicy rnaiCherryPickRequestAllowancePolicy;
@@ -55,6 +61,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
         CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
+        cherryPickRequest.addEmptyWellsOnAssayPlate(cherryPickRequest.getAssayPlateType().getPlateSize().getEdgeWellNames(2));
         cherryPickRequest.addEmptyWellsOnAssayPlate(requestedEmptyWells);
         genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
@@ -107,29 +114,16 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
     });
   }
 
-  /**
-   * Test creating two screener cherry picks for the same cherry pick request / well causes
-   * some kind of error. Right now, it causes a DataIntegrityViolationException on commit, so
-   * we test for that.
-   */
-  public void testDuplicateScreenerCherryPick()
+  public void testUniqueScreenerCherryPicksOnly()
   {
     schemaUtil.truncateTablesOrCreateSchema();
     try {
-      genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-          RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
-          genericEntityDao.saveOrUpdateEntity(CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384));
-          WellKey wellKey = new WellKey(50001, 0, 0);
-          Well well = librariesDao.findWell(wellKey);
-          cherryPickRequest.createScreenerCherryPick(well);
-          cherryPickRequest.createScreenerCherryPick(well);
-          genericEntityDao.saveOrUpdateEntity(cherryPickRequest);
-        }
-      });
+      Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
+      RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
+      Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
+      Well well = library.getWells().iterator().next();
+      cherryPickRequest.createScreenerCherryPick(well);
+      cherryPickRequest.createScreenerCherryPick(well);
       fail("DuplicateEntityException was not thrown for duplicate screener cherry picks");
     }
     catch (DuplicateEntityException e) {

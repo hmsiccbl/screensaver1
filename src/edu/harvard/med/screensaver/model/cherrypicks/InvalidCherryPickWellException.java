@@ -29,7 +29,7 @@ public class InvalidCherryPickWellException extends BusinessRuleViolationExcepti
 
   public InvalidCherryPickWellException(WellKey wellKey, String message)
   {
-    super(message);
+    super(message + ": " + wellKey);
     _wellKey = wellKey;
   }
   

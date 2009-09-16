@@ -9,8 +9,19 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import edu.harvard.med.screensaver.model.VocabularyTerm;
-import edu.harvard.med.screensaver.model.VocabularyUserType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 
 /**
  * The funding support vocabulary.
@@ -18,76 +29,78 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum FundingSupport implements VocabularyTerm
+@Entity
+@Immutable
+@org.hibernate.annotations.Proxy
+public class FundingSupport extends AbstractEntity implements Comparable<FundingSupport>
 {
-
-  // the vocabulary
-
-  CLARDY_GRANTS("Clardy Grants"),
-  D_ANDREA_CMCR("D'Andrea CMCR"),
-  ICCBL_HMS_AFFILIATE("ICCB-L HMS Affiliate"),
-  ICCBL_HMS_QUAD_INTERNAL("ICCB-L HMS Quad (Internal)"),
-  ICCBL_EXTERNAL("ICCB-L External"),
-  MITCHISON_P01("Mitchison P01"),
-  ICG("ICG"),
-  MARCUS_LIBRARY_SCREEN("Marcus Library Screen"),
-  NERCE_NSRB("NERCE/NSRB"),
-  NOVARTIS("Novartis"),
-  NSRB_RNAI_QUAD_INTERNAL("NSRB-RNAi Quad (internal)"),
-  NSRB_RNAI_HMS_AFFILIATE("NSRB-RNAi HMS Affiliate"),
-  NSRB_RNAI_EXTERNAL("NSRB-RNAi External"),
-  SANOFI_AVENTIS("Sanofi-Aventis"),
-  YUAN_NIH_06_07("Yuan NIH 06-07"),
-  OTHER("Other"),
-  UNSPECIFIED("Unspecified")
-  ;
-
-
-  // static inner class
-
-  /**
-   * A Hibernate <code>UserType</code> to map the {@link FundingSupport} vocabulary.
-   */
-  public static class UserType extends VocabularyUserType<FundingSupport>
-  {
-    public UserType()
-    {
-      super(FundingSupport.values());
-    }
-  }
-
-
-  // private instance field and constructor
-
+  private static final long serialVersionUID = 1L;
+  
+  private Integer _fundingSupportId;
   private String _value;
 
-  /**
-   * Constructs a <code>FundingSupport</code> vocabulary term.
-   * @param value The value of the term.
-   */
-  private FundingSupport(String value)
+  private FundingSupport()
+  {
+  }
+
+  public FundingSupport(String value)
   {
     _value = value;
   }
 
+  @Override
+  @Transient
+  public Integer getEntityId()
+  {
+    return getFundingSupportId();
+  }
 
-  // public instance methods
+  @Id
+  @org.hibernate.annotations.GenericGenerator(
+    name="funding_support_id_seq",
+    strategy="sequence",
+    parameters = { @Parameter(name="sequence", value="funding_support_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="funding_support_id_seq")
+  public Integer getFundingSupportId()
+  {
+    return _fundingSupportId;
+  }
+  
+  private void setFundingSupportId(Integer fundingSupportId)
+  {
+    _fundingSupportId = fundingSupportId;
+  }
 
-  /**
-   * Get the value of the vocabulary term.
-   * @return the value of the vocabulary term
-   */
+  @Column(unique=true)
+  @Type(type="text")
   public String getValue()
   {
     return _value;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
+  private void setValue(String value)
+  {
+    _value = value;
+  }
+
   @Override
   public String toString()
   {
     return getValue();
+  }
+
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
+  {
+    return visitor.visit(this);
+  }
+
+  public int compareTo(FundingSupport other)
+  {
+    if (other == null) { 
+      return 1;
+    }
+    return this.getValue().compareTo(other.getValue());
   }
 }

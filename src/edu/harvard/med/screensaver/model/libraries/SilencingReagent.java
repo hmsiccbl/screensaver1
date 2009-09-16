@@ -9,253 +9,62 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
-import org.apache.log4j.Logger;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import com.google.common.base.Function;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 
 /**
- * A Hibernate entity bean representing a silencing reagent.
+ * Silencing reagent of an RNAi library.
  *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Table(uniqueConstraints={
-  @UniqueConstraint(columnNames={ "geneId", "silencingReagentType", "sequence" })
-})
-@org.hibernate.annotations.Proxy
-@ContainedEntity(containingEntityClass=Gene.class)
-public class SilencingReagent extends SemanticIDAbstractEntity
+@Immutable
+@ContainedEntity(containingEntityClass=Well.class)
+public class SilencingReagent extends Reagent
 {
-
-  // static fields
-
-  private static final Logger log = Logger.getLogger(SilencingReagent.class);
   private static final long serialVersionUID = 0L;
 
-
-  // instance fields
-
-  private String _silencingReagentId;
-  private Integer _version;
-  private Gene _gene;
-  private Set<Well> _wells = new HashSet<Well>();
+  public static final RelationshipPath<SilencingReagent> vendorGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "vendorGene");
+  public static final RelationshipPath<SilencingReagent> facilityGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "facilityGene");
+  public static final RelationshipPath<SilencingReagent> duplexWells = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "duplexWells");
+  
+  private static final Function<Well,SilencingReagent> wellToReagentTransformer = 
+    new Function<Well, SilencingReagent>() { public SilencingReagent apply(Well well) { return well.<SilencingReagent>getLatestReleasedReagent(); } };
+    
   private SilencingReagentType _silencingReagentType;
   private String _sequence;
-  private Set<String> _nonTargettedGenbankAccessionNumbers = new HashSet<String>();
-  private boolean _isPoolOfUnknownSequences;
-
-
-  // public instance methods
-
-  @Override
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
-  {
-    return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public String getEntityId()
-  {
-    return getSilencingReagentId();
-  }
-
-  /**
-   * Get the id for the silencing reagent.
-   * @return the id for the silencing reagent
-   */
-  @Id
-  @org.hibernate.annotations.Type(type="text")
-  public String getSilencingReagentId()
-  {
-    return _silencingReagentId;
-  }
-
-  /**
-   * Get the gene.
-   * @return the gene
-   */
-  @ManyToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-             fetch=FetchType.LAZY)
-  @JoinColumn(name="geneId", nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_silencing_reagent_to_gene")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
-  public Gene getGene()
-  {
-    return _gene;
-  }
-
-  /**
-   * Get the set of wells.
-   * @return the set of wells
-   */
-  @ManyToMany(
-    mappedBy="silencingReagents",
-    targetEntity=Well.class,
-    fetch=FetchType.LAZY
-  )
-  @org.hibernate.annotations.ForeignKey(name="fk_well_silencing_reagent_link_to_silencing_reagent")
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  public Set<Well> getWells()
-  {
-    return _wells;
-  }
-
-  /**
-   * Add the well.
-   * @param well the well to add
-   * @return true iff the silencing reagent did not already have the well
-   */
-  public boolean addWell(Well well)
-  {
-    well.getSilencingReagents().add(this);
-    return _wells.add(well);
-  }
-
-  /**
-   * Remove the well.
-   * @param well the well to remove
-   * @return true iff the silencing reagent previously had the well
-   */
-  public boolean removeWell(Well well)
-  {
-    well.getSilencingReagents().remove(this);
-    return _wells.remove(well);
-  }
-
-  /**
-   * Get the silencing reagent type.
-   * @return the silencing reagent type
-   */
-  @Immutable
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(
-    type="edu.harvard.med.screensaver.model.libraries.SilencingReagentType$UserType"
-  )
-  public SilencingReagentType getSilencingReagentType()
-  {
-    return _silencingReagentType;
-  }
-
-  /**
-   * Get the sequence.
-   * @return the sequence
-   */
-  @org.hibernate.annotations.Immutable
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="text")
-  public String getSequence()
-  {
-    return _sequence;
-  }
-
-  /**
-   * Get the non-targetted GenBank accession numbers.
-   * @return the non-targetted GenBank accession numbers
-   */
-  @org.hibernate.annotations.CollectionOfElements
-  @Column(name="nonTargettedGenbankAccessionNumber", nullable=false)
-  @JoinTable(
-    name="silencingReagentNonTargettedGenbankAccessionNumber",
-    joinColumns=@JoinColumn(name="silencingReagentId")
-  )
-  @org.hibernate.annotations.Type(type="text")
-  @org.hibernate.annotations.ForeignKey(name="fk_silencing_reagent_non_targetted_genbank_accession_number_to_silencing_reagent")
-  @OrderBy("nonTargettedGenbankAccessionNumber")
-  public Set<String> getNonTargettedGenbankAccessionNumbers()
-  {
-    return _nonTargettedGenbankAccessionNumbers;
-  }
-
-  /**
-   * Add the non-targetted GenBank accession number.
-   * @param nonTargettedGenbankAccessionNumber the non-targetted GenBank accession number to add
-   * @return true iff the silencing reagent did not already have the non-targetted GenBank accession number
-   */
-  public boolean addNonTargettedGenbankAccessionNumber(String nonTargettedGenbankAccessionNumber)
-  {
-    return _nonTargettedGenbankAccessionNumbers.add(nonTargettedGenbankAccessionNumber);
-  }
-
-  /**
-   * Remove the non-targetted GenBank accession number.
-   * @param nonTargettedGenbankAccessionNumber the non-targetted GenBank accession number to remove
-   * @return true iff the silencing reagent previously had the non-targetted GenBank accession number
-   */
-  public boolean removeNonTargettedGenbankAccessionNumber(String nonTargettedGenbankAccessionNumber)
-  {
-    return _nonTargettedGenbankAccessionNumbers.remove(nonTargettedGenbankAccessionNumber);
-  }
-
-  /**
-   * Get the isPoolOfUnknownSequences.
-   * @return the isPoolOfUnknownSequences
-   */
-  @org.hibernate.annotations.Immutable
-  @Column(nullable=false, name="isPoolOfUnknownSequences")
-  public boolean isPoolOfUnknownSequences()
-  {
-    return _isPoolOfUnknownSequences;
-  }
-
-
-  // package constructor
-
-  /**
-   * Construct a <code>SilencingReagent</code>.
-   *
-   * @param gene the gene
-   * @param silencingReagentType the silencing reagent type
-   * @param sequence the sequence
-   * @param isPoolOfUnknownSequences
-   * @motivation for use of {@link Gene#createSilencingReagent} methods only
-   */
-  SilencingReagent(
-    Gene gene,
-    SilencingReagentType silencingReagentType,
-    String sequence,
-    boolean isPoolOfUnknownSequences)
-  {
-    _gene = gene;
-    _silencingReagentType = silencingReagentType;
-    _sequence = sequence;
-    _isPoolOfUnknownSequences = isPoolOfUnknownSequences;
-    _silencingReagentId =
-      getGene().toString() + ":" +
-      getSilencingReagentType().toString() + ":" +
-      getSequence();
-  }
-
-
-  // protected constructor
+  private Gene _vendorGene;
+  private Gene _facilityGene;
+  private Set<Well> _duplexWells = Sets.newHashSet();
 
   /**
    * Construct an uninitialized <code>SilencingReagent</code>.
@@ -263,105 +72,159 @@ public class SilencingReagent extends SemanticIDAbstractEntity
    */
   protected SilencingReagent() {}
 
-
-  // private constructor and instance methods
-
   /**
-   * Set the id for the silencing reagent.
-   * @param silencingReagentId the new id for the silencing reagent
-   * @motivation for hibernate
-   */
-  private void setSilencingReagentId(String silencingReagentId)
-  {
-    _silencingReagentId = silencingReagentId;
-  }
-
-  /**
-   * Get the version for the silencing reagent.
-   * @return the version for the silencing reagent
-   * @motivation for hibernate
-   */
-  @Version
-  @Column(nullable=false)
-  private Integer getVersion()
-  {
-    return _version;
-  }
-
-  /**
-   * Set the version for the silencing reagent.
-   * @param version the new version for the silencing reagent
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version)
-  {
-    _version = version;
-  }
-
-  /**
-   * Set the gene.
-   * Throw a NullPointerException when the gene is null.
+   * Construct a <code>SilencingReagent</code>.
    *
-   * @param gene the new gene
-   * @throws NullPointerException when the gene is null
-   * @motivation for hibernate and maintenance of bi-directional relationships
+   * @param vendorGene the gene information provided by the vendor of the library
+   * @param gene the gene information as provided by the screening facility
+   * @param silencingReagentType the silencing reagent type
+   * @param sequence the sequence
+   * @motivation for use of {@link Gene#createSilencingReagent} methods only
    */
-  private void setGene(Gene gene)
+  SilencingReagent(ReagentVendorIdentifier rvi,
+                   Well well,
+                   LibraryContentsVersion libraryContentsVersion,
+                   SilencingReagentType silencingReagentType,
+                   String sequence)
   {
-    if (gene == null) {
-      throw new NullPointerException();
-    }
-    _gene = gene;
+    super(rvi, well, libraryContentsVersion);
+    _silencingReagentType = silencingReagentType;
+    _sequence = sequence;
   }
 
-  /**
-   * Set the set of wells.
-   * @param wells the new set of wells
-   * @motivation for hibernate
-   */
-  private void setWells(Set<Well> wells)
+  @Override
+  public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
-    _wells = wells;
+    return visitor.visit(this);
   }
 
-  /**
-   * Set the silencing reagent type.
-   * @param silencingReagentType the new silencing reagent type
-   * @motivation for hibernate
-   */
+  @Column(nullable=true)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.libraries.SilencingReagentType$UserType")
+  public SilencingReagentType getSilencingReagentType()
+  {
+    return _silencingReagentType;
+  }
+
   private void setSilencingReagentType(SilencingReagentType silencingReagentType)
   {
     _silencingReagentType = silencingReagentType;
   }
 
   /**
-   * Set the sequence.
-   * @param sequence the new sequence
-   * @motivation for hibernate
+   * The genetic sequence of the silencing reagent. For pool wells, this may be
+   * null (or empty), or can be a delimited list of the sequences of the
+   * constituent duplexes. If left null/empty, it is still possible to find the
+   * duplex sequences via {@link #getDuplexWells()}.{@link Well#getReagent}.
+   * 
+   * @return
    */
+  @Column(nullable=true)
+  @org.hibernate.annotations.Type(type="text")
+  public String getSequence()
+  {
+    return _sequence;
+  }
+
   private void setSequence(String sequence)
   {
     _sequence = sequence;
   }
 
-  /**
-   * Set the non-targetted GenBank accession numbers.
-   *
-   * @param nonTargettedGenbankAccessionNumbers the new non-targetted GenBank accession numbers
-   * @motivation for hibernate
-   */
-  private void setNonTargettedGenbankAccessionNumbers(Set<String> nonTargettedGenbankAccessionNumbers)
+  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch=FetchType.LAZY)
+  @JoinColumn(name="vendorGeneId", nullable=true, unique=true)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
+  @ToOne(hasNonconventionalSetterMethod=true) /* lazy-created in getter */
+  public Gene getVendorGene()
   {
-    _nonTargettedGenbankAccessionNumbers = nonTargettedGenbankAccessionNumbers;
+    // lazy instantiate the Gene iff SilencingReagent has not yet been persisted
+    // (since SilencingReagent and Gene are immutable)
+    if (_vendorGene == null && getReagentId() == null) {
+      _vendorGene = new Gene();
+    }
+    return _vendorGene;
+  }
+
+  private void setVendorGene(Gene vendorGene)
+  {
+    _vendorGene = vendorGene;
   }
 
   /**
-   * Set the isPoolOfUnknownSequences.
-   * @param isPoolOfUnknownSequences the isPoolOfUnknownSequences
-   * @motivatin for hibernate
+   * Optional gene information provided by the screening facility, which can
+   * differ from the vendor-provided gene information ({@link #getVendorGene()}).
+   * In particular if updated gene information is available (names, symbols,
+   * etc.), this can be reflected here, without affecting the original gene
+   * information provided by the vendor. Also, if it is determined that this
+   * silencing reagent in fact targets a different gene than expected, the
+   * facility gene information can be used reflect this fact.
+   * 
+   * @return
    */
-  private void setPoolOfUnknownSequences(boolean isPoolOfUnknownSequences)
+  @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch=FetchType.LAZY)
+  @JoinColumn(name="facilityGeneId", nullable=true, unique=true)
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
+  @ToOne(hasNonconventionalSetterMethod=true) /* lazy-created in getter */
+  public Gene getFacilityGene()
   {
-    _isPoolOfUnknownSequences = isPoolOfUnknownSequences;
+    // lazy instantiate the Gene iff SilencingReagent has not yet been persisted
+    // (since SilencingReagent and Gene are immutable)
+    if (_facilityGene == null && getReagentId() == null) {
+      _facilityGene = new Gene();
+    }
+    return _facilityGene;
+  }
+
+  private void setFacilityGene(Gene facilityGene)
+  {
+   _facilityGene = facilityGene;
+  }
+
+  @ManyToMany(cascade={}, fetch=FetchType.LAZY)
+  @JoinTable(
+    joinColumns=@JoinColumn(name="silencing_reagent_id"),
+    inverseJoinColumns=@JoinColumn(name="wellId")
+  )
+  @Cascade({})
+  @LazyCollection(LazyCollectionOption.TRUE)
+  @ToMany(unidirectional=true, hasNonconventionalMutation=true)
+  public Set<Well> getDuplexWells()
+  {
+    return _duplexWells;
+  }
+  
+  private void setDuplexWells(Set<Well> duplexWells)
+  {
+    _duplexWells = duplexWells;
+  }
+
+  /**
+   * Builder method when creating a new SilencingReagent, prior to being
+   * persisted. Note: it is up to the client code to validate that the duplex
+   * well targets the same gene as the pool (e.g., entrezgene IDs match, or
+   * whatever "similarity" criteria is deemed appropriate for determining that
+   * targeted gene is the same); the model allows for real-world errors, where a
+   * pool well is erroneously contains silencing reagents that target different
+   * genes.
+   * 
+   * @param duplexWell
+   * @return
+   */
+  public SilencingReagent withDuplexWell(Well duplexWell)
+  {
+    if (getReagentId() != null) {
+      throw new DataModelViolationException("cannot add duplex wells after silencing reagent is persisted");
+    }
+    _duplexWells.add(duplexWell);
+    return this;
+  }
+
+  @Transient
+  public Set<SilencingReagent> getDuplexSilencingReagents()
+  {
+    Iterable<SilencingReagent> reagents = Iterables.transform(getDuplexWells(), wellToReagentTransformer);
+    reagents = Iterables.filter(reagents, Predicates.notNull());
+    return ImmutableSet.copyOf(reagents);
   }
 }

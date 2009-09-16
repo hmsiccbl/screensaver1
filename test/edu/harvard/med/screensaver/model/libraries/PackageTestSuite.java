@@ -24,20 +24,22 @@ public class PackageTestSuite extends TestSuite
     return new PackageTestSuite();
   }
 
-  public PackageTestSuite()
+  public PackageTestSuite() 
   {
     // test entity model classes
-    addTestSuite(CompoundTest.class);
-    addTestSuite(CopyTest.class);
-    addTestSuite(CopyActionTest.class);
-    addTestSuite(CopyInfoTest.class);
-    addTestSuite(GeneTest.class);
-    addTestSuite(LibraryTest.class);
-    addTestSuite(ReagentTest.class);
-    addTestSuite(SilencingReagentTest.class);
-    addTestSuite(WellTest.class);
-    addTestSuite(WellVolumeAdjustmentTest.class);
-    addTestSuite(WellVolumeCorrectionActivityTest.class);
+    addTest(CopyTest.suite());
+    addTest(CopyActionTest.suite());
+    addTest(CopyInfoTest.suite());
+    addTest(GeneTest.suite());
+    addTest(LibraryTest.suite());
+    addTest(LibraryContentsVersionTest.suite());
+    addTest(ReagentTest.suite());
+    addTest(SilencingReagentTest.suite());
+    addTest(SmallMoleculeReagentTest.suite());
+    addTest(NaturalProductReagentTest.suite());
+    addTest(WellTest.suite());
+    addTest(WellVolumeAdjustmentTest.suite());
+    addTest(WellVolumeCorrectionActivityTest.suite());
 
     // test non-entity model classes
     addTestSuite(WellNameTest.class);

@@ -130,7 +130,23 @@ public class BillingItem
    */
   public BillingItem() {}
 
-
-  // private constructor and instance methods
-
+  @Override
+  public boolean equals(Object other)
+  {
+    if (this == other) {
+      return true;
+    }
+    if (other instanceof BillingItem) {
+      return _amount.equals(((BillingItem) other)._amount) &&
+      _dateSentForBilling.equals(((BillingItem) other)._dateSentForBilling) &&
+      _itemToBeCharged.equals(((BillingItem) other)._itemToBeCharged);
+    }
+    return false; 
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return (_itemToBeCharged + _amount + _dateSentForBilling).hashCode(); 
+  }
 }

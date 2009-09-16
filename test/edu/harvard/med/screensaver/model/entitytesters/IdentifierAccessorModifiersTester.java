@@ -45,16 +45,16 @@ extends AbstractEntityTester<E>
    */
   private void testIdentifierAccessorModifiers()
   {
-    if (isEntitySubclass()) {
-      // entity subclasses depend on their superclass for identifier methods
-      // TODO: run this test on the superclasses
+    if (ModelIntrospectionUtil.isEntitySubclass(_entityClass)) {
+      // entity subclasses depend on their superclass for identifier methods,
+      // which will be tested when that superclass is tested
       return;
     }
     
     ClassMetadata classMetadata = _sessionFactory.getClassMetadata(_entityClass);
     String identifierPropertyName = classMetadata.getIdentifierPropertyName();
     
-    Method identifierGetter = getGetterMethodForPropertyName(identifierPropertyName);
+    Method identifierGetter = ModelIntrospectionUtil.getGetterMethodForPropertyName(_entityClass, identifierPropertyName);
     assertTrue("private getId for " + _entityClass,
       Modifier.isPublic(identifierGetter.getModifiers()));
     assertFalse("instance getId for " + _entityClass,
@@ -64,7 +64,7 @@ extends AbstractEntityTester<E>
     assertNotNull("identifier getter returns type", identifierType);
     
     Method identifierSetter =
-      getSetterMethodForPropertyName(identifierPropertyName, (Class) identifierType);
+      ModelIntrospectionUtil.getSetterMethodForPropertyName(_entityClass, identifierPropertyName, (Class) identifierType);
     assertTrue("private getId for " + _entityClass,
       Modifier.isPrivate(identifierSetter.getModifiers()));
     assertFalse("instance getId for " + _entityClass,

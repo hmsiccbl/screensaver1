@@ -29,6 +29,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -293,7 +294,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     out.print(cherryPick.getAssayPlate().getAssayPlateType().getFullName());
     out.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());
     out.print(cherryPick.getCherryPickRequest().getScreen().getScreenNumber());
-    out.print(cherryPick.getCherryPickRequest().getTransferVolumePerWellApproved().getValue().setScale(2, RoundingMode.HALF_UP));
+    out.print(cherryPick.getCherryPickRequest().getTransferVolumePerWellApproved().convert(VolumeUnit.MICROLITERS).getValue().setScale(2, RoundingMode.HALF_UP));
     out.println();
   }
 

@@ -104,5 +104,15 @@
       <tag-name>nameValueTable</tag-name>
       <source>../util/nameValueTable.xhtml</source>
     </tag>
+    
+    <tag>
+      <tag-name>attachedFiles</tag-name>
+      <source>../util/attachedFiles.xhtml</source>
+    </tag>
+
+    <tag>
+      <tag-name>checklistItems</tag-name>
+      <source>../util/checklistItems.xhtml</source>
+    </tag>
 
 </facelet-taglib>

@@ -16,11 +16,11 @@ import java.util.Map;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
 import edu.harvard.med.screensaver.ui.util.ValueReference;
 
 import org.apache.log4j.Logger;
@@ -48,7 +48,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
   @Override
   public void fetch(List<? extends TableColumn<E,?>> columns)
   {
-    List<RelationshipPath<E>> newRelationshipsToFetch = EntityColumn.getRelationshipPaths(columns);
+    List<RelationshipPath<E>> newRelationshipsToFetch = FetchPaths.getRelationshipPaths(columns);
     ((EntityDataFetcher<E,K>) _dataFetcher).setRelationshipsToFetch(newRelationshipsToFetch);
     _fetchedRows.clear();
     log.debug("cleared sorted/filtered row data (forces future re-query of row data)");
@@ -57,7 +57,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
   public void sort(List<? extends TableColumn<E,?>> sortColumns,
                    SortDirection sortDirection)
   {
-    List<PropertyPath<E>> newOrderByProperties = EntityColumn.getPropertyPaths(sortColumns);
+    List<PropertyPath<E>> newOrderByProperties = FetchPaths.getPropertyPaths(sortColumns);
     // if only sortDirection has changed do not clear sortKeys, as this does not require a database fetch
     if (!newOrderByProperties.equals(_lastOrderByProperties)) {
       ((EntityDataFetcher<E,K>) _dataFetcher).setOrderBy(newOrderByProperties);
@@ -71,7 +71,7 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity> extends Vi
   
   public void filter(List<? extends TableColumn<E,?>> columns)
   {
-    Map<PropertyPath<E>,List<? extends Criterion<?>>> newFilterCriteria = EntityColumn.getFilteringCriteria(columns);
+    Map<PropertyPath<E>,List<? extends Criterion<?>>> newFilterCriteria = FetchPaths.getFilteringCriteria(columns);
     ((EntityDataFetcher<E,K>) _dataFetcher).setFilteringCriteria(newFilterCriteria);
     _sortedKeys = null; // force re-fetch
     log.debug("cleared filter (forces future re-query of sorted/filtered keys)");

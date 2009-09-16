@@ -19,6 +19,8 @@
 
 <beans>
 
+  <import resource="spring-context-config.xml"/>
+
   <bean id="dataAccessPolicy"
    class="edu.harvard.med.screensaver.db.accesspolicy.UnrestrictedDataAccessPolicy">
   </bean>

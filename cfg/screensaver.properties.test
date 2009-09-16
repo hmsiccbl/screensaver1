@@ -3,12 +3,12 @@
 
 ### build-time properties
 
-log4j.properties.file=cfg/ant4/log4j.properties.debug
+log4j.properties.file=cfg/log4j.properties.debug
+debug=true
+test=true
 
 
 ### run-time properties
-
-babel.executable.path=/usr/local/openbabel/bin/babel
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost

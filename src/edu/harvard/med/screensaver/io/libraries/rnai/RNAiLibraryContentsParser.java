@@ -1,328 +1,221 @@
-//$HeadURL$
-//$Id$
+// $HeadURL:
+// http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/library-mgmt-rework/src/edu/harvard/med/screensaver/io/libraries/rnai/RNAiLibraryContentsParser.java
+// $
+// $Id$
 
-//Copyright 2006 by the President and Fellows of Harvard College.
-
-//Screensaver is an open-source project developed by the ICCB-L and NSRB labs
-//at Harvard Medical School. This software is distributed under the terms of
-//the GNU General Public License.
+// Copyright 2006 by the President and Fellows of Harvard College.
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
 
 package edu.harvard.med.screensaver.io.libraries.rnai;
 
-import java.io.File;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Set;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
-import edu.harvard.med.screensaver.io.libraries.ParseLibraryContentsException;
-import edu.harvard.med.screensaver.io.workbook.Cell;
-import edu.harvard.med.screensaver.io.workbook.ParseErrorManager;
-import edu.harvard.med.screensaver.io.workbook.PlateNumberParser;
-import edu.harvard.med.screensaver.io.workbook.WellNameParser;
-import edu.harvard.med.screensaver.io.workbook.Workbook;
-import edu.harvard.med.screensaver.io.workbook.WorkbookParseError;
-import edu.harvard.med.screensaver.io.workbook.Cell.Factory;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.parseutil.CsvColumn;
+import edu.harvard.med.screensaver.io.parseutil.CsvIntegerColumn;
+import edu.harvard.med.screensaver.io.parseutil.CsvSetColumn;
+import edu.harvard.med.screensaver.io.parseutil.CsvTextColumn;
+import edu.harvard.med.screensaver.io.parseutil.CsvTextSetColumn;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
-import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProvider;
-import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProviderImpl;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.util.AlphabeticCounter;
+import edu.harvard.med.screensaver.util.Pair;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
 
 
 /**
- * Parses the contents (either partial or complete) of an RNAi library
- * from an Excel spreadsheet into the domain model.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * This class accomplishes both:
+ * <ul>
+ * <li>Parsing of the library input file, and
+ * <li>Loading of the data into Library and related domain model objects on the
+ * database.
  */
-public class RNAiLibraryContentsParser implements LibraryContentsParser
+public class RNAiLibraryContentsParser extends WorkbookLibraryContentsParser<SilencingReagent>
 {
-
-  // static fields
-
   private static final Logger log = Logger.getLogger(RNAiLibraryContentsParser.class);
-  public static final SilencingReagentType DEFAULT_SILENCING_REAGENT_TYPE =
-    SilencingReagentType.SIRNA;
 
+  private static LibraryWellType.UserType _libraryWellTypeParser = new LibraryWellType.UserType();
+  private static SilencingReagentType.UserType _silencingReagentTypeParser = new SilencingReagentType.UserType();
 
-  // private instance fields
+  private CsvIntegerColumn PLATE = new CsvIntegerColumn("Plate", AlphabeticCounter.toIndex("A"), true);
+  private CsvColumn<WellName> WELL = new CsvColumn<WellName>("Well", AlphabeticCounter.toIndex("B"), true) {
+    @Override public WellName parseField(String value) throws ParseException { return new WellName(value); }
+  };
+  private CsvColumn<LibraryWellType> WELL_TYPE = new CsvColumn<LibraryWellType>("Well Type", AlphabeticCounter.toIndex("C"), true) {
+    @Override
+    public LibraryWellType parseField(String value)throws ParseException
+    {
+      return _libraryWellTypeParser.getTermForValueCaseInsensitive(value);
+    }
+  };
+  private CsvTextColumn VENDOR = new CsvTextColumn("Vendor", AlphabeticCounter.toIndex("D"), false) {
+    public boolean isConditionallyRequired(String[] row) throws ParseException { return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL; }
+  };
+  private CsvTextColumn VENDOR_REAGENT_ID = new CsvTextColumn("Vendor Reagent ID", AlphabeticCounter.toIndex("E"), false) {
+    public boolean isConditionallyRequired(String[] row) throws ParseException { return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL; }
+  };
+  
+  private CsvTextColumn FACILITY_REAGENT_ID = new CsvTextColumn("Facility Reagent ID", AlphabeticCounter.toIndex("F"), false);
+  private CsvColumn<SilencingReagentType> SILENCING_REAGENT_TYPE = new CsvColumn<SilencingReagentType>("Silencing Reagent Type", AlphabeticCounter.toIndex("G"), false) {
+    @Override
+    protected SilencingReagentType parseField(String value) throws ParseException {
+      return _silencingReagentTypeParser.getTermForValueCaseInsensitive(value);
+    }
+    public boolean isConditionallyRequired(String[] row) throws ParseException { return WELL_TYPE.getValue(row) == LibraryWellType.EXPERIMENTAL; }
+  };
+  private CsvTextColumn SEQUENCES = new CsvTextColumn("Sequences", AlphabeticCounter.toIndex("H"), false);
+  private CsvIntegerColumn VENDOR_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("I"), false);
+  private CsvTextSetColumn VENDOR_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("J"), false);
+  private CsvTextColumn VENDOR_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("K"), false);
+  private CsvTextSetColumn VENDOR_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("L"), false);
+  private CsvTextColumn VENDOR_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("M"), false);
+  private CsvIntegerColumn FACILITY_ENTREZGENE_ID = new CsvIntegerColumn("Vendor Entrezgene ID", AlphabeticCounter.toIndex("N"), false);
+  private CsvTextSetColumn FACILITY_ENTREZGENE_SYMBOLS = new CsvTextSetColumn("Vendor Entrezgene Symbols", AlphabeticCounter.toIndex("O"), false);
+  private CsvTextColumn FACILITY_GENE_NAME = new CsvTextColumn("Vendor Gene Name", AlphabeticCounter.toIndex("P"), false);
+  private CsvTextSetColumn FACILITY_GENBANK_ACCESSION_NUMBERS = new CsvTextSetColumn("Vendor Genbank Accession Numbers", AlphabeticCounter.toIndex("Q"), false);
+  private CsvTextColumn FACILITY_SPECIES = new CsvTextColumn("Vendor Species", AlphabeticCounter.toIndex("R"), false);
+  private CsvSetColumn<WellKey> DUPLEX_WELLS = new CsvSetColumn<WellKey>("Duplex Wells", AlphabeticCounter.toIndex("S"), false) {
+    @Override protected WellKey parseElement(String value) { return new WellKey(value); } 
+  };
 
-  private GenericEntityDAO _dao;
-  private LibrariesDAO _librariesDao;
-  private Library _library;
-  private Workbook _workbook;
-  private ParseErrorManager _errorManager;
-  private PlateNumberParser _plateNumberParser;
-  private WellNameParser _wellNameParser;
-  private NCBIGeneInfoProvider _geneInfoProvider;
-  private SilencingReagentType _silencingReagentType = DEFAULT_SILENCING_REAGENT_TYPE;
-
-
-  // public constructor and instance methods
-
-  /**
-   * Construct a new <code>RNAiLibraryContentsParser</code> object.
-   */
-  public RNAiLibraryContentsParser(GenericEntityDAO dao,
-                                   LibrariesDAO librariesDao,
-                                   NCBIGeneInfoProvider ncbiGeneInfoProvider)
+  public RNAiLibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library)
   {
-    _dao = dao;
-    _librariesDao = librariesDao;
-    _geneInfoProvider = ncbiGeneInfoProvider;
+    super(dao, stream, library);
   }
 
-  /**
-   * Get the {@link SilencingReagentType} for the {@link SilencingReagent SilencingReagents}
-   * in this RNAi library.
-   * @return the SilencingReagentType for the SilencingReagents
-   * in this RNAi library.
-   */
-  public SilencingReagentType getSilencingReagentType()
+  @Override
+  protected Pair<Well,SilencingReagent> parse(String[] row) throws ParseException
   {
-    return _silencingReagentType;
-  }
+    if (row.length == 0 || StringUtils.isEmpty(row[PLATE.getColumn()])) {
+      return EMPTY_PARSE_RESULT; 
+    }
+    
+    Integer plate = PLATE.getValue(row);
+    WellName wellName = WELL.getValue(row);
+    WellKey wellKey = new WellKey(plate, wellName);
+    Well well = getDao().findEntityById(Well.class, wellKey.getKey(), false, Well.library.getPath());
 
-  /**
-   * Set the {@link SilencingReagentType} for the {@link SilencingReagent SilencingReagents}
-   * in this RNAi library.
-   * @param reagentType the SilencingReagentType for the SilencingReagents
-   * in this RNAi library.
-   */
-  public void setSilencingReagentType(SilencingReagentType reagentType)
-  {
-    _silencingReagentType = reagentType;
-  }
+    if (well == null) {
+      throw new ParseException(new ParseError("specified well does not exist: " + wellKey + " (this is probably due to an erroneous plate number)")); 
+    }
 
-  /**
-   * Load library contents (either partial or complete) from an input
-   * stream of an Excel spreadsheet into a library.
-   * @param library the library to load contents of
-   * @param file the name of the file that contains the library contents
-   * @param stream the input stream to load library contents from
-   * @param startPlate the first plate in the plate range to be loaded; null
-   *          okay; if endPlate is null, all plate after and including
-   *          startPlate will be loaded
-   * @param endPlate the last plate, inclusive, in the plate range to be loaded;
-   *          null okay; if startPlate is null, all plates before and including
-   *          endPlate will be loaded
-   * @return the library with the contents loaded
-   * @throws ParseLibraryContentsException if parse errors encountered. The
-   *           exception will contain a reference to a ParseErrors object which
-   *           can be inspected and/or reported to the user.
-   */
-  public Library parseLibraryContents(final Library library,
-                                      final File file,
-                                      final InputStream stream, 
-                                      final Integer startPlate, 
-                                      final Integer endPlate)
-  throws ParseLibraryContentsException
-  {
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        initialize(library, file, stream);
-        HSSFWorkbook hssfWorkbook = _workbook.getWorkbook();
-        for (int i = 0; i < hssfWorkbook.getNumberOfSheets(); i++) {
-          loadLibraryContentsFromHSSFSheet(i, hssfWorkbook.getSheetAt(i), startPlate, endPlate);
-        }
-        if (getHasErrors()) {
-          throw new ParseLibraryContentsException(_errorManager);
-        }
+    if (!well.getLibrary().equals(getLibrary())) {
+      throw new ParseException(new ParseError("Well: " + well.getLibrary().getLibraryName() + " does not match specified input library " + getLibrary().getLibraryName()));
+    }
+    LibraryWellType wellType = WELL_TYPE.getValue(row);
+    well.setLibraryWellType(wellType);
+    String vendorName = VENDOR.getValue(row);
+    String vendorReagentId = VENDOR_REAGENT_ID.getValue(row);
+    if (vendorName == null ^ vendorReagentId == null) {
+      throw new ParseException(new ParseError(VENDOR.getName() + " and " + VENDOR_REAGENT_ID.getName() + " must both be specified, or neither should be specified", 
+                                              VENDOR_REAGENT_ID.getLocation(row)));
+    }
+    ReagentVendorIdentifier rvi = null;;
+    if (vendorReagentId != null) {
+      rvi = new ReagentVendorIdentifier(vendorName, vendorReagentId);
+    }
+
+    well.setFacilityId((String) FACILITY_REAGENT_ID.getValue(row));
+
+    if (wellType != LibraryWellType.EXPERIMENTAL &&
+      wellType != LibraryWellType.LIBRARY_CONTROL) {
+      // TODO: this is just the first field that should be blank; same
+      // applies for the later ones,
+      // but we're just going to check this one, ignore the rest
+      if (rvi != null) {
+        throw new ParseException(new ParseError(VENDOR.getName() + " and " + VENDOR_REAGENT_ID.getName() +
+                                                " must be null for well type: " + wellType, 
+                                                VENDOR_REAGENT_ID.getLocation(row)));
       }
-    });
-    return _library;
-  }
-
-  /**
-   * Return all errors the were detected during parsing. This class attempts to
-   * parse as much of the workbook as possible, continuing on after finding an
-   * error. The hope is that multiple errors will help a user/administrator
-   * correct a workbook's errors in a batch fashion, rather than in a piecemeal
-   * fashion.
-   *
-   * @return a <code>List&lt;String&gt;</code> of all errors generated during
-   *         parsing
-   */
-  public List<WorkbookParseError> getErrors()
-  {
-    if (_errorManager == null) {
-      return null;
+      // skip other fields for empty and buffer type wells
+      log.debug("empty/buffer well: " + well + ", " + well.getLibraryWellType());
+      return new Pair<Well,SilencingReagent>(well, null);
     }
-    return _errorManager.getErrors();
-  }
+    else {
+      // parse reagent info
+      SilencingReagentType srt = SILENCING_REAGENT_TYPE.getValue(row);
+      String sequences = SEQUENCES.getValue(row);
+      if (sequences != null && (rvi == null || srt == null)) {
+        throw new ParseException(new ParseError("if sequence is specified, " + VENDOR_REAGENT_ID.getName() + " and " + SILENCING_REAGENT_TYPE.getName() + " must be specified",
+                                                SEQUENCES.getLocation(row)));
+      }
+      else if (wellType == LibraryWellType.LIBRARY_CONTROL && rvi == null) {
+        // reagent info optional for control wells
+        return new Pair<Well,SilencingReagent>(well, null);
+      }
+      
+      SilencingReagent reagent = 
+        well.createSilencingReagent(rvi,
+                                    srt,
+                                    sequences,
+                                    false);
+      updateGene(reagent.getVendorGene(),
+                 VENDOR_ENTREZGENE_ID.getValue(row),
+                 VENDOR_GENE_NAME.getValue(row),
+                 VENDOR_SPECIES.getValue(row),
+                 VENDOR_ENTREZGENE_SYMBOLS.getValue(row),
+                 VENDOR_GENBANK_ACCESSION_NUMBERS.getValue(row));
+      updateGene(reagent.getFacilityGene(),
+                 FACILITY_ENTREZGENE_ID.getValue(row),
+                 FACILITY_GENE_NAME.getValue(row),
+                 FACILITY_SPECIES.getValue(row),
+                 FACILITY_ENTREZGENE_SYMBOLS.getValue(row),
+                 FACILITY_GENBANK_ACCESSION_NUMBERS.getValue(row));
 
-  public boolean getHasErrors()
-  {
-    return _errorManager != null && _errorManager.getHasErrors();
-  }
-
-  public void clearErrors()
-  {
-    _errorManager = null;
-  }
-
-
-  // package getters, for the DataRowParser
-
-  /**
-   * Get the {@link GenericEntityDAO data access object}.
-   * @return the data access object
-   */
-  GenericEntityDAO getDAO()
-  {
-    return _dao;
-  }
-
-  LibrariesDAO getLibrariesDAO()
-  {
-    return _librariesDao;
-  }
-
-  /**
-   * Get the {@link NCBIGeneInfoProviderImpl}.
-   * @return the geneInfoProvider.
-   */
-  NCBIGeneInfoProvider getGeneInfoProvider()
-  {
-    return _geneInfoProvider;
-  }
-
-  /**
-   * Get the {@link Library}.
-   * @return the library.
-   */
-  Library getLibrary()
-  {
-    return _library;
-  }
-
-  /**
-   * Get the {@link PlateNumberParser}.
-   * @return the plateNumberParser.
-   */
-  PlateNumberParser getPlateNumberParser()
-  {
-    return _plateNumberParser;
-  }
-
-  /**
-   * Get the {@link WellNameParser}.
-   * @return the wellNameParser.
-   */
-  WellNameParser getWellNameParser()
-  {
-    return _wellNameParser;
-  }
-
-
-  // private instance methods
-
-  /**
-   * Initialize the instance variables.
-   * @param library the library to load contents of
-   * @param file the name of the file that contains the library contents
-   * @param stream the input stream to load library contents from
-   */
-  private void initialize(Library library, File file, InputStream stream)
-  {
-    _library = library;
-    _errorManager = new ParseErrorManager();
-    _workbook = new Workbook(file, stream, _errorManager);
-    _plateNumberParser = new PlateNumberParser(_errorManager);
-    _wellNameParser = new WellNameParser(_errorManager);
-
-    // create the library's wells, if necessary
-    _librariesDao.loadOrCreateWellsForLibrary(_library);
-    _dao.flush(); // allow LibariesDAO.findWell(id, true) to find well in database
-  }
-
-
-  /**
-   * Load library contents from a single worksheet.
-   * @param sheetIndex the index of the worksheet to load library contents from
-   * @param hssfSheet the worksheet to load library contents from
-   * @param startPlate the first plate in the plate range to be loaded; null
-   *          okay; if endPlate is null, all plate after and including
-   *          startPlate will be loaded
-   * @param endPlate the last plate, inclusive, in the plate range to be loaded;
-   *          null okay; if startPlate is null, all plates before and including
-   *          endPlate will be loaded
-   */
-  private void loadLibraryContentsFromHSSFSheet(int sheetIndex, 
-                                                HSSFSheet hssfSheet, 
-                                                Integer startPlate, 
-                                                Integer endPlate)
-  {
-    Cell.Factory cellFactory = new Cell.Factory(_workbook, sheetIndex, _errorManager);
-    String sheetName = _workbook.getWorkbook().getSheetName(sheetIndex);
-    RNAiLibraryColumnHeaders columnHeaders =
-      parseColumnHeaders(hssfSheet.getRow(0), sheetName, cellFactory);
-    if (columnHeaders == null) {
-      return;
-    }
-    int nLoaded = 0;
-    for (int i = 1; i <= hssfSheet.getLastRowNum(); i++) {
-      if (hssfSheet.getRow(i) != null) {
-        DataRowParser dataRowParser = new DataRowParser(this,
-                                                        columnHeaders,
-                                                        hssfSheet.getRow(i),
-                                                        i,
-                                                        cellFactory,
-                                                        _errorManager);
-        try {
-          dataRowParser.parseDataRow();
-          if (dataRowParser.getPlateNumber() != null) {
-            if ((startPlate == null || startPlate <= dataRowParser.getPlateNumber()) &&
-              (endPlate == null || endPlate >= dataRowParser.getPlateNumber())) {
-              dataRowParser.processDataRow();
-              ++nLoaded;
-            }
+      Set<WellKey> duplexWells = DUPLEX_WELLS.getValue(row);
+      if (duplexWells != null) {
+        if (!getLibrary().isPool()) {
+          throw new ParseException(new ParseError("non-pool library cannot specify duplex wells", 
+                                                  DUPLEX_WELLS.getLocation(row)));
+        }
+        for (WellKey key : duplexWells) {
+          well = getDao().findEntityById(Well.class, key.getKey(), false);
+          if (well == null) {
+            throw new ParseException(new ParseError("specified duplex well does not exist: " + wellKey, 
+                                                    DUPLEX_WELLS.getLocation(row)));
           }
-        }
-        catch (DataRowParserException e) {
-          _errorManager.addError(e.getMessage(), e.getCell());
+          reagent.withDuplexWell(well);
         }
       }
-      if (i % 100 == 0) {
-        log.info("parsed " + i + ", loaded " + nLoaded + " for library " + _library.getLibraryName());
+      else if (getLibrary().isPool()) {
+        // NOTE: per discussion with Informatix (Dave), we don't want to
+        // be so restrictive as to say that
+        // the Duplex Wells field _must_ have a value - sde4
+        String msg = "Pool Well " + wellKey + " does not reference any duplex wells, cell: " + DUPLEX_WELLS.getLocation(row);
+        log.warn(msg);
       }
+      return new Pair<Well,SilencingReagent>(well, reagent);        
     }
-    log.info("loaded " + nLoaded + " for library " + _library.getLibraryName());
   }
 
-  /**
-   * Parse the column headers. Return the resulting {@link RNAiLibraryColumnHeaders}.
-   * @param columnHeaderRow the row containing the column headers
-   * @param sheetName the name of the worksheet
-   * @param cellFactory the cell factory
-   * @return the ParsedRNAiLibraryColumn
-   */
-  private RNAiLibraryColumnHeaders parseColumnHeaders(
-                                                      HSSFRow columnHeaderRow,
-                                                      String sheetName,
-                                                      Factory cellFactory)
+  private void updateGene(Gene gene,
+                          Integer entrezGeneId,
+                          String geneName,
+                          String speciesName,
+                          Set<String> entrezSymbols,
+                          Set<String> accessionNumbers)
   {
-    if (columnHeaderRow == null) {
-      _errorManager.addError("encountered a sheet without any rows: " + sheetName);
-      return null;
+    gene.withEntrezgeneId(entrezGeneId).withGeneName(geneName).withSpeciesName(speciesName);
+    if (entrezSymbols != null) {
+      gene.getEntrezgeneSymbols().addAll(entrezSymbols);
     }
-    RNAiLibraryColumnHeaders columnHeaders = new RNAiLibraryColumnHeaders(columnHeaderRow,
-                                                                          _errorManager,
-                                                                          cellFactory,
-                                                                          sheetName);
-    if (! columnHeaders.parseColumnHeaders()) {
-      _errorManager.addError("couldn't import sheet contents due to problems with column headers: " + sheetName);
-      return null;
+    if (accessionNumbers != null) {
+      gene.getGenbankAccessionNumbers().addAll(accessionNumbers);
     }
-    return columnHeaders;
   }
 }

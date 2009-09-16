@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,13 +27,17 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.model.meta.RelatedProperty;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
-
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 
 /**
  * Traverses an entity network, persisting entities in an appropriate order, so that all
@@ -61,7 +66,7 @@ public class EntityNetworkPersister
   private AbstractEntity _rootEntity;
   private Set<AbstractEntity> _visitedEntities = new HashSet<AbstractEntity>();
   private EntityNetworkPersisterException _entityNetworkPersisterException;
-  public class EntityNetworkPersisterException extends Exception {
+  public static class EntityNetworkPersisterException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     public EntityNetworkPersisterException(Exception inner) { super(inner); }
     public EntityNetworkPersisterException(String message) { super(message); }
@@ -90,22 +95,26 @@ public class EntityNetworkPersister
    */
   public void persistEntityNetwork() throws EntityNetworkPersisterException
   {
-    log.debug("persistEntityNetwork: start transaction");
+    log.debug("start transaction");
     _genericEntityDAO.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         try {
           persistEntityNetwork(_rootEntity);
+          // TODO: HACK, ENP doesn't work for WVAs
+          if (_rootEntity instanceof WellVolumeAdjustment) {
+            _genericEntityDAO.saveOrUpdateEntity(_rootEntity);
+          }
         }
         catch (EntityNetworkPersisterException e) {
           _entityNetworkPersisterException = e;
         }
       }
     });
-    log.debug("persistEntityNetwork: transaction complete");
+    log.debug("end transaction");
     if (_entityNetworkPersisterException != null) {
-      log.debug("persistEntityNetwork: exception thrown: " + _entityNetworkPersisterException);
+      log.debug("exception thrown: " + _entityNetworkPersisterException);
       throw _entityNetworkPersisterException;
     }
   }
@@ -125,9 +134,9 @@ public class EntityNetworkPersister
   private class EntityPersister
   {
     private AbstractEntity _entity;
-    private Set<AbstractEntity> _downstreamRelations;
+    private LinkedHashSet<AbstractEntity> _downstreamRelations;
     private AbstractEntity _cascadingUpstreamRelation;
-    private Set<AbstractEntity> _upstreamRelations;
+    private LinkedHashSet<AbstractEntity> _upstreamRelations;
 
     public EntityPersister(AbstractEntity entity) throws EntityNetworkPersisterException
     {
@@ -137,32 +146,40 @@ public class EntityNetworkPersister
 
     public void persistEntity() throws EntityNetworkPersisterException
     {
-      log.debug("persistEntity: begin persisting " + _entity);
+      log.debug("begin persisting " + _entity);
       for (AbstractEntity downstreamRelation  : _downstreamRelations) {
-        log.debug("persistEntity: persist downstream relation: " + downstreamRelation);
+        // TODO: HACK
+        if (_entity instanceof LabCherryPick && downstreamRelation instanceof CherryPickRequest) {
+          continue;
+        } else {
+/*        if (isReachableViaUpstreamRelations(downstreamRelation)) {
+          log.debug("skipping downstream relation, which is reachable via upstream relations " + downstreamRelation);
+        }*/
+        log.debug("persist downstream relation: " + downstreamRelation);
         persistEntityNetwork(downstreamRelation);
-        log.debug("persistEntity: persist downstream relation complete: " + downstreamRelation);
+        log.debug("persist downstream relation complete: " + downstreamRelation);
+        }
       }
       if (_cascadingUpstreamRelation != null) {
-        log.debug("persistEntity: persist cascading upstream relation: " + _cascadingUpstreamRelation);
+        log.debug("persist cascading upstream relation: " + _cascadingUpstreamRelation);
     	  persistEntityNetwork(_cascadingUpstreamRelation);
       }
       else {
-        log.debug("persistEntity: saveOrUpdateEntity: " + _entity);
+        log.debug("saveOrUpdateEntity: " + _entity);
         _genericEntityDAO.saveOrUpdateEntity(_entity);
       }
       for (AbstractEntity upstreamRelation : _upstreamRelations) {
-        log.debug("persistEntity: persist upstream relation: " + upstreamRelation);
+        log.debug("persist upstream relation: " + upstreamRelation);
         persistEntityNetwork(upstreamRelation);
       }
-      log.debug("persistEntity: done persisting " + _entity);
+      log.debug("done persisting " + _entity);
     }
 
     private void initialize() throws EntityNetworkPersisterException
     {
-      _downstreamRelations = new HashSet<AbstractEntity>();
+      _downstreamRelations = new LinkedHashSet<AbstractEntity>();
       _cascadingUpstreamRelation = null;
-      _upstreamRelations =  new HashSet<AbstractEntity>();
+      _upstreamRelations =  new LinkedHashSet<AbstractEntity>();
 
       BeanInfo beanInfo = getBeanInfo();
       for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
@@ -217,10 +234,8 @@ public class EntityNetworkPersister
           }
         }
         else if (Map.class.isAssignableFrom(getter.getReturnType())) {
-          log.debug("getter for map: " + _entity + ":" + getter);
           Map relatedMap = (Map) getter.invoke(_entity);
           for (Object relatedMapMember : relatedMap.values()) {
-            log.debug("related Map member: " + relatedMapMember);
             if (relatedMapMember instanceof AbstractEntity) {
               relatedEntities.add((AbstractEntity) relatedMapMember);
             }
@@ -237,15 +252,17 @@ public class EntityNetworkPersister
     {
       Method relatedGetter = getRelatedGetter(propertyDescriptor);
       if (relatedGetter == null) {
+        log.debug(_entity.getClass().getName() + " has downstream relationship to " + relatedEntity);
         _downstreamRelations.add(relatedEntity);
         return;
       }
       if (isCascadingRelationship(getter) && isCascadingRelationship(relatedGetter)) {
         throw new EntityNetworkPersisterException(
-          "Bi-directional cascade: " + getter + " and " + relatedGetter);
+          "bi-directional cascade: " + getter + " and " + relatedGetter);
       }
       if (isCascadingRelationship(getter)) {
         _downstreamRelations.add(relatedEntity);
+        log.debug(_entity.getClass().getName() + " has cascading downstream relationship to " + relatedEntity);
         return;
       }
       if (isCascadingRelationship(relatedGetter)) {
@@ -255,13 +272,16 @@ public class EntityNetworkPersister
             _cascadingUpstreamRelation + " and " + relatedEntity);
         }
         _cascadingUpstreamRelation = relatedEntity;
+        log.debug(_entity.getClass().getName() + " has cascading upstream relationship from " + relatedEntity);
         return;
       }
 
-      if (isNonCascadingRelationshipDownstream(getter, relatedGetter)) {
+      if (isManagingSideOfRelationship(getter)) {
+        log.debug(_entity.getClass().getName() + " has (managed) downstream relationship to " + relatedEntity);
         _downstreamRelations.add(relatedEntity);
       }
       else {
+        log.debug(_entity.getClass().getName() + " has (managed) upstream relationship to " + relatedEntity);
         _upstreamRelations.add(relatedEntity);
       }
     }
@@ -291,9 +311,9 @@ public class EntityNetworkPersister
 
     // NOTE this method must be reciprocal - ie, if it returns true for (getter1,getter2)
     // then it must return false for (getter2,getter1), and vice-versa
-    private boolean isNonCascadingRelationshipDownstream(Method getter, Method relatedGetter) throws EntityNetworkPersisterException
+    private boolean isManagingSideOfRelationship(Method getter) throws EntityNetworkPersisterException
     {
-      // TODO: assuming OneToMany mirrors ManyToOne and vice-versa
+      // TODO: assuming ToMany mirrors ManyToOne and vice-versa
       if (getter.getAnnotation(OneToMany.class) != null) {
         return false;
       }
@@ -307,7 +327,7 @@ public class EntityNetworkPersister
         }
         return true;
       }
-      // TODO: assuming exactly one side of OneToOne has mappedBy
+      // TODO: assuming exactly one side of ToOne has mappedBy
       if (getter.getAnnotation(OneToOne.class) != null) {
         if (getter.getAnnotation(OneToOne.class).mappedBy() != null) {
           return false;

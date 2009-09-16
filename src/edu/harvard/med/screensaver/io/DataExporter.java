@@ -14,6 +14,8 @@ import java.io.InputStream;
 
 public interface DataExporter<D>
 {
+  public static final String LIST_DELIMITER = ";";
+
   public String getFormatName();
   public String getMimeType();
   public String getFileName();

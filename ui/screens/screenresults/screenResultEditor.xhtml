@@ -13,6 +13,8 @@
 	<ui:param name="pageTitle" value="Screen Result Editor" />
 	<!-- TODO: create the help page -->
 	<ui:param name="pageHelpURL" value="screens/screenresults/screenResultEditorHelp.jsf" />
+  <ui:param name="hideMenu" value="#{screenResultViewer.editMode}"/>
+  
 
 	<ui:define name="body">
 		<h:form id="screenResultEditorForm" enctype="multipart/form-data">

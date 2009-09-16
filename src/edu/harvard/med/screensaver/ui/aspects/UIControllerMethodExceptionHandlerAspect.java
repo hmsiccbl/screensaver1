@@ -13,6 +13,7 @@ import java.util.ConcurrentModificationException;
 
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.Messages;
@@ -50,6 +51,9 @@ public class UIControllerMethodExceptionHandlerAspect extends OrderedAspect
   {
     try {
       return joinPoint.proceed();
+    }
+    catch (OperationRestrictedException e) {
+      return handleException(joinPoint, e, "restrictedOperation", e.getMessage());
     }
     catch (ConcurrencyFailureException e) {
       return handleException(joinPoint, e, "concurrentModificationConflict", null);

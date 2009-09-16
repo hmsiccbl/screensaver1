@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
@@ -242,16 +243,17 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 
         _cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(3));
         ScreenerCherryPick dummyScreenerCherryPick = _cherryPickRequest.createScreenerCherryPick(plate1WellA01);
-        // note: you cannot normally have 2 LCP for the same well in a CPR,
-        // but we do that here anyway to test aggregation of 2 LCPs in the same well;
-        // to do this correctly, we should create 2 CPRs
-        _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate1WellA01).setAllocated(copyC);
-        _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate1WellA01).setAllocated(copyD);
-        _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate2WellA01).setAllocated(copyC);
-        _cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, plate2WellB01).setAllocated(copyD);
+        // note: 2 LCPs for the same well (which have to be in 2 separate CPRs) to test aggregation of 2 LCPs in the same well
+        CherryPickRequest cherryPickRequest2 = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(2, new Volume(3));
+        ScreenerCherryPick dummyScreenerCherryPick2 = cherryPickRequest2.createScreenerCherryPick(plate1WellA01);
+        dummyScreenerCherryPick.createLabCherryPick(plate1WellA01).setAllocated(copyC);
+        dummyScreenerCherryPick2.createLabCherryPick(plate1WellA01).setAllocated(copyD);
+        dummyScreenerCherryPick.createLabCherryPick(plate2WellA01).setAllocated(copyC);
+        dummyScreenerCherryPick.createLabCherryPick(plate2WellB01).setAllocated(copyD);
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(_cherryPickRequest.getScreen());
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest2.getScreen());
 
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new Volume(-1), null));
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyC, plate1WellB01, new Volume(-1), null));

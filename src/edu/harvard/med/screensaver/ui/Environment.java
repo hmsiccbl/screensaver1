@@ -228,6 +228,7 @@ public class Environment extends AbstractBackingBean
     throw new ConcurrencyFailureException("You asked for it!");
   }
 
+  @edu.umd.cs.findbugs.annotations.SuppressWarnings(justification="developer-only feature")
   public String runGC()
   {
     Runtime.getRuntime().gc();

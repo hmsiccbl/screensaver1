@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -50,6 +51,8 @@ public class CherryPickLiquidTransfer extends LabActivity
   private static Logger log = Logger.getLogger(CherryPickLiquidTransfer.class);
 
   public static final String ACTIVITY_TYPE_NAME =  "Cherry Pick Plate Activity";
+  
+  public static final RelationshipPath<CherryPickLiquidTransfer> cherryPickAssayPlates = new RelationshipPath<CherryPickLiquidTransfer>(CherryPickLiquidTransfer.class, "cherryPickAssayPlates");
 
   
   // private instance data
@@ -167,6 +170,22 @@ public class CherryPickLiquidTransfer extends LabActivity
     boolean result = _cherryPickAssayPlates.add(assayPlate);
     assayPlate.setCherryPickLiquidTransfer(this);
     return result;
+  }
+
+  /**
+   * @return the {@link CherryPickRequest} that is (indirectly) associated with
+   *         this {@link CherryPickLiquidTransfer}, derived from associated
+   *         {@link CherryPickAssayPlate}s; null if this
+   *         {@link CherryPickLiquidTransfer} has no associated
+   *         {@link CherryPickAssayPlate}s.
+   */
+  @Transient
+  public CherryPickRequest getCherryPickRequest()
+  {
+    if (_cherryPickAssayPlates.size() > 0) {
+      return _cherryPickAssayPlates.iterator().next().getCherryPickRequest();
+    }
+    return null;
   }
 
 

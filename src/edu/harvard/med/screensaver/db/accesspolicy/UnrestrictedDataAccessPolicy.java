@@ -10,16 +10,17 @@
 package edu.harvard.med.screensaver.db.accesspolicy;
 
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
-import edu.harvard.med.screensaver.model.derivatives.Derivative;
-import edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult;
-import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyAction;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
@@ -35,10 +36,10 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
@@ -47,8 +48,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -117,7 +118,7 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(Compound entity)
+  public boolean visit(SmallMoleculeReagent entity)
   {
     return true;
   }
@@ -133,16 +134,6 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   }
 
   public boolean visit(CopyInfo entity)
-  {
-    return true;
-  }
-
-  public boolean visit(Derivative entity)
-  {
-    return true;
-  }
-
-  public boolean visit(DerivativeScreenResult entity)
   {
     return true;
   }
@@ -165,6 +156,11 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
   public boolean visit(Library entity)
   {
     return true;
+  }
+
+  public boolean visit(LibraryContentsVersion libraryContentsVersion)
+  {
+    return false;
   }
 
   public boolean visit(PlatesUsed entity)
@@ -232,7 +228,7 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(CompoundCherryPickRequest entity)
+  public boolean visit(SmallMoleculeCherryPickRequest entity)
   {
     return true;
   }
@@ -282,9 +278,24 @@ public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
     return false;
   }
 
+  public boolean visit(NaturalProductReagent entity)
+  {
+    return true;
+  }
+
+  public boolean visit(FundingSupport fundingSupport)
+  {
+    return true;
+  }
+
   public boolean isScreenerAllowedAccessToScreenDetails(Screen screen)
   {
-    return false;
+    return true;
+  }
+
+  public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent)
+  {
+    return true;
   }
 }
 

@@ -13,9 +13,7 @@
    the GNU General Public License.
 -->
 
-<!-- A top-level, composite Spring context configuration file, intended for unit testing
-  Screensaver.  Allows a full Spring configuration to be referenced 
-  via a single file.  -->
+<!-- Spring beans for Tomcat web application authentication -->
   
 <beans>
 

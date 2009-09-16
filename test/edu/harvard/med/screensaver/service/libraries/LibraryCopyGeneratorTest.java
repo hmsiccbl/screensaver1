@@ -20,7 +20,7 @@ import org.joda.time.LocalDate;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.io.screenresults.ExtantLibraryException;
+import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;

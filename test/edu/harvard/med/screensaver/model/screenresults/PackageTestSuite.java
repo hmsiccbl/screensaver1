@@ -26,13 +26,10 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    // test entity model classes
-    addTestSuite(AnnotationTypeTest.class);
-    addTestSuite(AnnotationValueTest.class);
-    addTestSuite(ResultValueTypeTest.class);
-    addTestSuite(ScreenResultTest.class);
-
-    // test non-entity model classes
-    addTestSuite(ResultValueTest.class);
+    addTest(AnnotationTypeTest.suite());
+    addTest(AnnotationValueTest.suite());
+    addTest(ResultValueTest.suite());
+    addTest(ResultValueTypeTest.suite());
+    addTest(ScreenResultTest.suite());
   }
 }

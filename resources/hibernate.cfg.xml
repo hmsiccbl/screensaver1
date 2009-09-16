@@ -11,37 +11,37 @@
 
     <mapping class="edu.harvard.med.screensaver.model.Activity" />
     <mapping class="edu.harvard.med.screensaver.model.AdministrativeActivity" />
+    <mapping class="edu.harvard.med.screensaver.model.AttachedFile" />
 
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest" />
-    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest" />
+    <mapping class="edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.LegacyCherryPickAssayPlate" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick" />
 
-    <mapping class="edu.harvard.med.screensaver.model.derivatives.Derivative" />
-    <mapping class="edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult" />
-
-    <mapping class="edu.harvard.med.screensaver.model.libraries.Compound" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Copy" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.CopyAction" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.CopyInfo" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Gene" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Library" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.NaturalProductReagent" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.SilencingReagent" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Reagent" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Well" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity" />
 
     <mapping class="edu.harvard.med.screensaver.model.screens.AbaseTestset" />
-    <mapping class="edu.harvard.med.screensaver.model.screens.AttachedFile" />
     <mapping class="edu.harvard.med.screensaver.model.screens.BillingInformation" />
     <mapping class="edu.harvard.med.screensaver.model.screens.BillingItem" />
     <mapping class="edu.harvard.med.screensaver.model.screens.EquipmentUsed" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.FundingSupport" />
     <mapping class="edu.harvard.med.screensaver.model.screens.LibraryScreening" />
     <mapping class="edu.harvard.med.screensaver.model.screens.PlatesUsed" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Publication" />

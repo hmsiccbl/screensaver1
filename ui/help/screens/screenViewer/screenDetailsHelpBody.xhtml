@@ -41,7 +41,7 @@
       </p>
   </t:panelGroup>
   <!-- TODO: until ScreensAdmins are allowed to edit Screens (once ScreenDB is replaced), we will defer to the security policy of ScreenViewer itself to decide who can see this help; currently just developers! -->
-  <t:panelGroup rendered="#{screenViewer.editable}">
+  <t:panelGroup rendered="#{screenViewer.readAdmin}">
       <p>
         As a <i>Screens Administrator</i>, you can make various screen details editable by
         clicking the "Edit" button. <span class="helpNB">Please note</span> that any changes you make here

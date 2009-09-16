@@ -31,9 +31,9 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
 
   private static Logger log = Logger.getLogger(ScreenResultsDAOImpl.class);
 
-  public static int SORT_BY_PLATE_WELL = -3;
-  public static int SORT_BY_WELL_PLATE = -2;
-  public static int SORT_BY_ASSAY_WELL_TYPE = -1;
+  public static final int SORT_BY_PLATE_WELL = -3;
+  public static final int SORT_BY_WELL_PLATE = -2;
+  public static final int SORT_BY_ASSAY_WELL_TYPE = -1;
 
   // instance data members
 

@@ -11,43 +11,43 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.TestSuite;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.engine.EntityKey;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Lists;
+
 public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(ScreenTest.class);
-
-
-  // instance data members
-
-
-  // public constructors and methods
+  public static TestSuite suite()
+  {
+    return buildTestSuite(ScreenTest.class, Screen.class);
+  }
 
   public ScreenTest() throws IntrospectionException
   {
     super(Screen.class);
   }
-
 
   public void testGetLabActivities() throws Exception
   {
@@ -240,6 +240,48 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     genericEntityDao.saveOrUpdateEntity(screen);
     screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true, "attachedFiles");
     assertEquals("delete attached file from detached screen", 0, screen.getAttachedFiles().size());
+  }
+  
+  public void testPinTransferApproved()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    AdministratorUser recorderAdmin = new AdministratorUser("Recorder", "Admin", "", "", "", "", "", "");
+    AdministratorUser approverAdmin = new AdministratorUser("Approver", "Admin", "", "", "", "", "", "");
+    Screen screen = MakeDummyEntities.makeDummyScreen(1);
+    screen.setPinTransferApproved(recorderAdmin,
+                                  approverAdmin,
+                                  new LocalDate(2009, 1, 1),
+                                  "comments");
+    assertEquals("Recorder", screen.getPinTransferApprovalActivity().getPerformedBy().getFirstName());
+    assertEquals("Approver", screen.getPinTransferApprovalActivity().getApprovedBy().getFirstName());
+    assertEquals(new LocalDate(2009, 1, 1), screen.getPinTransferApprovalActivity().getDateApproved());
+    assertEquals(new LocalDate(), screen.getPinTransferApprovalActivity().getDateOfActivity());
+    assertEquals("comments", screen.getPinTransferApprovalActivity().getComments());
+  }
+
+
+  public void testBillingItems() 
+  {
+    LocalDate date = new LocalDate(2000, 1, 1);
+    Screen screen = initTestEntity();
+    screen.createBillingItem("item1", new BigDecimal("1.11"), date);
+    screen.createBillingItem("item2", new BigDecimal("2.22"), date);
+    screen.addCopyOfBillingItem(new BillingItem("item3", new BigDecimal("3.33"), date));
+    genericEntityDao.saveOrUpdateEntity(screen);
+    
+    Screen screen2 = genericEntityDao.findEntityById(Screen.class, screen.getEntityId(), true, Screen.billingItems.getPath());
+    assertEquals(Lists.newArrayList(new BillingItem("item1", new BigDecimal("1.11"), date),
+                                    new BillingItem("item2", new BigDecimal("2.22"), date),
+                                    new BillingItem("item3", new BigDecimal("3.33"), date)),
+                 screen2.getBillingItems());
+    
+    screen2.getBillingItems().remove(screen2.getBillingItems().get(1));
+    genericEntityDao.saveOrUpdateEntity(screen2);
+    
+    Screen screen3 = genericEntityDao.findEntityById(Screen.class, screen.getEntityId(), true, Screen.billingItems.getPath());
+    assertEquals(Lists.newArrayList(new BillingItem("item1", new BigDecimal("1.11"), date),
+                                    new BillingItem("item3", new BigDecimal("3.33"), date)),
+                 screen3.getBillingItems());
   }
 
 }

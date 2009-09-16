@@ -9,15 +9,14 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -27,12 +26,13 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
+
+import com.google.common.collect.Lists;
 
 
 /**
@@ -92,7 +92,7 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
   @Override
   protected List<? extends TableColumn<Screen,?>> buildColumns()
   {
-    List<EntityColumn<Screen,?>> columns = new ArrayList<EntityColumn<Screen,?>>();
+    List<TableColumn<Screen,?>> columns = Lists.newArrayList();
     columns.add(new IntegerEntityColumn<Screen>(
       new PropertyPath(Screen.class, "screenNumber"),
       "Study Number", "The study number", TableColumn.UNGROUPED) {

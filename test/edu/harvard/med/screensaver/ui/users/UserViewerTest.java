@@ -26,6 +26,8 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.util.AttachedFiles;
+import edu.harvard.med.screensaver.ui.util.ChecklistItems;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
@@ -59,8 +61,8 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
   
   public void testVirginChecklistItemsDataModel()
   {
-    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null);
-    userViewer.setCurrentScreensaverUser(_currentScreensaverUser);
+    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null, new AttachedFiles(genericEntityDao), new ChecklistItems(genericEntityDao));
+    userViewer.getChecklistItems().setCurrentScreensaverUser(_currentScreensaverUser);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -74,7 +76,7 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
         userViewer.setUser(user);
       }
     });
-    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItemsDataModelMap();
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItems().getChecklistItemsDataModelMap();
     assertEquals(4, checklistItemDataModels.size());
     assertFalse(checklistItemDataModels.containsKey(ChecklistItemGroup.LEGACY));
     final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group1 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels.get(ChecklistItemGroup.FORMS).getWrappedData();
@@ -92,8 +94,8 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
   public void testPopulatedChecklistItemsDataModel()
   {    
     final LocalDate today = new LocalDate();
-    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null);
-    userViewer.setCurrentScreensaverUser(_currentScreensaverUser);
+    final UserViewer userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null, new AttachedFiles(genericEntityDao), new ChecklistItems(genericEntityDao));
+    userViewer.getChecklistItems().setCurrentScreensaverUser(_currentScreensaverUser);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
@@ -113,7 +115,7 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
         userViewer.setUser(user);
       }
     });
-    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItemsDataModelMap();
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItems().getChecklistItemsDataModelMap();
     final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels.get(ChecklistItemGroup.NON_HARVARD_SCREENERS).getWrappedData();
     assertEquals("trained", group.get(0).getKey().getItemName());
     assertNull("trained", group.get(0).getValue());
@@ -136,7 +138,7 @@ public class UserViewerTest extends AbstractSpringPersistenceTest
         userViewer.setUser(activation.getScreeningRoomUser());
       }
     });
-    Map<ChecklistItemGroup,DataModel> checklistItemDataModels2 = userViewer.getChecklistItemsDataModelMap();
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels2 = userViewer.getChecklistItems().getChecklistItemsDataModelMap();
     final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group2 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels2.get(ChecklistItemGroup.NON_HARVARD_SCREENERS).getWrappedData();
     assertEquals("ID assigned", group2.get(1).getKey().getItemName());
     assertEquals(today, group2.get(1).getValue().getDatePerformed());

@@ -121,7 +121,7 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
   {
     String sessionId = ((HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false)).getId();
     StringBuilder builder = new StringBuilder();
-    builder.append("[...").append(sessionId.substring(sessionId.length() - 6)).append(']').append(' ');
+    builder.append("[").append(sessionId).append(']').append(' ');
     if (super.getScreensaverUser() == null) {
       builder.append("<unauthenticated>");
     }
@@ -177,5 +177,10 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
       log.warn("could not find a user for username " + username);
     }
     return user;
+  }
+
+  public GenericEntityDAO getDao()
+  {
+    return _dao;
   }
 }

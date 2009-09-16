@@ -43,7 +43,7 @@ abstract public class EutilsUtils
     "&tool=screensaver" +
     "&email=screensaver-feedback%40hms.harvard.edu";
 
-  protected class EutilsConnectionException extends Exception {
+  protected static class EutilsConnectionException extends Exception {
     private static final long serialVersionUID = 1L;
   };
 
@@ -234,6 +234,5 @@ abstract public class EutilsUtils
     }
     catch (IOException e) {
     }
-    System.exit(0);
   }
 }

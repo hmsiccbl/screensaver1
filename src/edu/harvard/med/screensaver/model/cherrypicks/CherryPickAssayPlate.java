@@ -32,13 +32,14 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 /**
  * A CherryPickAssayPlate represents an assay plate that is created as the
@@ -116,6 +117,9 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(CherryPickAssayPlate.class);
 
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickRequest = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickRequest");
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickLiquidTransfer = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickLiquidTransfer");
+  public static final RelationshipPath<CherryPickAssayPlate> labCherryPicks = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "labCherryPicks");
 
   // private instance data
 
@@ -261,7 +265,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
    * @return the set of lab cherry picks mapped onto this cherry pick assay plate
    */
   @OneToMany(mappedBy="assayPlate", fetch=FetchType.LAZY)
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(hasNonconventionalMutation=true)
   public Set<LabCherryPick> getLabCherryPicks()
   {
     return _labCherryPicks;
@@ -342,9 +346,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
                                                requestedStatus + "' since it is already " +
                                                getStatusLabel());
     }
-    if (_cherryPickLiquidTransfer != null) {
-      _cherryPickLiquidTransfer.getCherryPickAssayPlates().remove(this);
-    }
+
     _cherryPickLiquidTransfer = cherryPickLiquidTransfer;
     if (_cherryPickLiquidTransfer != null) {
       _cherryPickLiquidTransfer.getCherryPickAssayPlates().add(this);

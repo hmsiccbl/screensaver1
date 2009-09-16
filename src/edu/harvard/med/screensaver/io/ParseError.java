@@ -9,8 +9,52 @@
 
 package edu.harvard.med.screensaver.io;
 
-public interface ParseError
+
+public class ParseError
 {
-  public String getErrorLocation();
-  public String getErrorMessage();
+  private String _message;
+  private Object _location;
+  
+  public ParseError(String message, Object location)
+  {
+    _message = message;
+    _location = location;
+  }
+  
+  public ParseError(String message)
+  {
+    _message = message;
+  }
+  
+  public String toString()
+  {
+    return _location + ": " + _message;
+  }
+  
+  public String getErrorMessage() 
+  {
+    return _message;
+  }
+  
+  public Object getErrorLocation()
+  {
+    return _location;
+  }
+  
+  /**
+   * @motivation for unit testing
+   */
+  public boolean equals(Object o)
+  {
+    if (!(o instanceof ParseError)) {
+      return false;
+    }
+    ParseError that = (ParseError) o;
+    return this.toString().equals(that.toString());
+  }
+  
+  public int hashCode() 
+  {
+    return toString().hashCode();
+  }
 }

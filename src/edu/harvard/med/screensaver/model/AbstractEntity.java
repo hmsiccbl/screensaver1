@@ -22,7 +22,7 @@ import javax.persistence.Transient;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener;
 import edu.harvard.med.screensaver.model.annotations.Column;
-import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
@@ -74,8 +74,8 @@ public abstract class AbstractEntity implements Serializable
    * Get the entity id. This is the identifier used by Hibernate, and is
    * generally implemented as a separate property in the entity classes. The
    * property is generally named by postfixing the entity name with "Id". For
-   * instance, for {@link Compound}, this method delegates to the property read
-   * method {@link Compound#getCompoundId()}.
+   * instance, for {@link SmallMoleculeReagent}, this method delegates to the property read
+   * method {@link SmallMoleculeReagent#getSmallMoleculeId()}.
    * 
    * @return the entity id
    */
@@ -197,10 +197,9 @@ public abstract class AbstractEntity implements Serializable
    * Get whether this entity is restricted, based upon the data access policy
    * that was provided (if any). This is a passive data access policy
    * enforcement mechanism, in that it is up to the service and/or UI layers to
-   * check for and determine how to handle restricted entities. In general, a
-   * restricted entity is one whose data cannot be displayed to the current
-   * user. However, the semantics of "restricted" is really defined by the data
-   * access policy that is in force.
+   * check for and determine how to handle restricted entities. A
+   * restricted entity is one whose data should not be made visible to the current
+   * user.
    * 
    * @see DataAccessPolicyInjectorPostLoadEventListener
    */

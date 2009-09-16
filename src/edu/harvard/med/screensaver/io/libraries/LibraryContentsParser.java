@@ -1,45 +1,58 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+// $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
-//
+// 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
 package edu.harvard.med.screensaver.io.libraries;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.util.Pair;
 
-/**
- * Parses library contents (either partial or complete) from an input
- * stream into the domain model.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- */
-public interface LibraryContentsParser
+public abstract class LibraryContentsParser<R extends Reagent>
 {
+  private GenericEntityDAO _dao;
+  private InputStream _stream;
+  private Library _library;
 
   /**
-   * Parse library contents (either partial or complete) from an input
-   * stream into a library into the entity model.
-   *
-   * @param library the library to load contents of
-   * @param file the name of the file that contains the library contents
-   * @param stream the input stream to load library contents from
-   * @param startPlate the first plate in the plate range to be loaded; null
-   *          okay; if endPlate is null, all plate after and including
-   *          startPlate will be loaded
-   * @param endPlate the last plate, inclusive, in the plate range to be loaded;
-   *          null okay; if startPlate is null, all plates before and including
-   *          endPlate will be loaded
-   * @return the library with the contents loaded
-   * @throws ParseLibraryContentsException if parse errors encountered. The
-   *           exception will contain a reference to a ParseErrors object which
-   *           can be inspected and/or reported to the user.
+   * @param stream containing the Library in the proper format (sdf for Small Molecule, xls...)
+   * @param dao persistence bean for writing to the db
+   * @param library - library being loaded
+   * @throws ParseErrorsException
+   * @throws IOException 
    */
-  public Library parseLibraryContents(Library library, File file, InputStream stream, Integer startPlate, Integer endPlate) throws ParseLibraryContentsException;
+  public LibraryContentsParser(GenericEntityDAO dao, InputStream stream, Library library)
+  {
+    _dao = dao;
+    _stream = stream;
+    _library = library;
+  }
+
+  abstract public Pair<Well,R> parseNext() throws IOException, ParseException;
+  
+  protected GenericEntityDAO getDao()
+  {
+    return _dao;
+  }
+
+  protected InputStream getStream()
+  {
+    return _stream;
+  }
+
+  protected Library getLibrary()
+  {
+    return _library;
+  }
 }

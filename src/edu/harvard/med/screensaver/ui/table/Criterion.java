@@ -315,6 +315,11 @@ public class Criterion<T> extends Observable
     return false;
   }
 
+  public int hashCode() 
+  {
+    throw new UnsupportedOperationException("hashCode not implemented");
+  }
+
   public String toString()
   {
     return "[" + _operator + " " + getValue() + "]";

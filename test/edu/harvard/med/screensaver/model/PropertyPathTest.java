@@ -13,7 +13,9 @@ import java.io.Serializable;
 
 import junit.framework.TestCase;
 
-import edu.harvard.med.screensaver.model.RelationshipPath.RelationshipPathIterator;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath.RelationshipPathIterator;
 
 public class PropertyPathTest extends TestCase
 {
@@ -46,32 +48,32 @@ public class PropertyPathTest extends TestCase
     assertEquals(propertyPath.getRootEntityClass(), AbstractEntity.class);
     assertEquals("size", 0, propertyPath.getPathLength());
     assertEquals("<AbstractEntity>.name", propertyPath.toString());
-    assertEquals("name", propertyPath.getFormattedPath());
+    assertEquals("name", propertyPath.getPath());
     assertEquals("name", propertyPath.getPropertyName());
     assertEquals("<AbstractEntity>", propertyPath.getAncestryPath().toString());
-    assertEquals("", propertyPath.getAncestryPath().getFormattedPath());
+    assertEquals("", propertyPath.getAncestryPath().getPath());
     assertEquals("", propertyPath.getLeaf());
   }
 
   public void testOneElementPath()
   {
-    PropertyPath propertyPath = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child", "name");
+    PropertyPath<AbstractEntity> propertyPath = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").toProperty("name");
     assertEquals(propertyPath.getRootEntityClass(), AbstractEntity.class);
     assertEquals("size", 1, propertyPath.getPathLength());
     assertEquals("<AbstractEntity>.child.name", propertyPath.toString());
-    assertEquals("child.name", propertyPath.getFormattedPath());
+    assertEquals("child.name", propertyPath.getPath());
     assertEquals("name", propertyPath.getPropertyName());
     assertEquals("<AbstractEntity>", propertyPath.getAncestryPath().toString());
-    assertEquals("", propertyPath.getAncestryPath().getFormattedPath());
+    assertEquals("", propertyPath.getAncestryPath().getPath());
     assertEquals("child", propertyPath.getLeaf());
   }
 
   public void testMultipleElementsPath()
   {
-    PropertyPath propertyPath = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.sibling" , "name");
+    PropertyPath propertyPath = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("sibling").toProperty("name");
     assertEquals("size", 2, propertyPath.getPathLength());
     assertEquals("<AbstractEntity>.child.sibling.name", propertyPath.toString());
-    assertEquals("child", propertyPath.getAncestryPath().getFormattedPath());
+    assertEquals("child", propertyPath.getAncestryPath().getPath());
     assertEquals("<AbstractEntity>.child", propertyPath.getAncestryPath().toString());
     assertEquals("sibling", propertyPath.getLeaf());
 
@@ -92,16 +94,14 @@ public class PropertyPathTest extends TestCase
   {
     AbstractEntity sibling = new DummyEntity(1);
     AbstractEntity toy = new DummyEntity(2);
-    PropertyPath propertyPath = new PropertyPath<AbstractEntity>(AbstractEntity.class,
-                                                 "child.siblings[id].toys[id]",
-                                                 "name",
-                                                 sibling.getEntityId(),
-                                                 toy.getEntityId());
+    PropertyPath propertyPath = 
+      new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", sibling.getEntityId()).
+      to("toys").restrict("id", toy.getEntityId()).toProperty("name");
     assertEquals("size", 3, propertyPath.getPathLength());
     assertEquals("<AbstractEntity>.child.siblings[id=1].toys[id=2].name", propertyPath.toString());
-    assertEquals("child.siblings.toys.name", propertyPath.getFormattedPath());
+    assertEquals("child.siblings.toys.name", propertyPath.getPath());
     assertEquals("<AbstractEntity>.child.siblings[id=1]", propertyPath.getAncestryPath().toString());
-    assertEquals("child.siblings", propertyPath.getAncestryPath().getFormattedPath());
+    assertEquals("child.siblings", propertyPath.getAncestryPath().getPath());
     assertEquals("toys", propertyPath.getLeaf());
     RelationshipPathIterator iter = propertyPath.iterator();
 
@@ -131,24 +131,20 @@ public class PropertyPathTest extends TestCase
   {
     AbstractEntity sibling = new DummyEntity(1);
     AbstractEntity toy = new DummyEntity(2);
-    PropertyPath propertyPath = new PropertyPath<AbstractEntity>(AbstractEntity.class,
-                                                 "child.siblings[id].toys[id]",
-                                                 "name",
-                                                 sibling.getEntityId(),
-                                                 toy.getEntityId());
+    PropertyPath propertyPath = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", sibling.getEntityId()).to("toys").restrict("id", toy.getEntityId()).toProperty("name");
     RelationshipPathIterator iterator = propertyPath.iterator();
     iterator.next();
     RelationshipPath intermediatePropertyPath = iterator.getIntermediatePath();
     assertEquals("<AbstractEntity>.child", intermediatePropertyPath.toString());
-    assertEquals("child", intermediatePropertyPath.getFormattedPath());
+    assertEquals("child", intermediatePropertyPath.getPath());
     iterator.next();
     intermediatePropertyPath = iterator.getIntermediatePath();
     assertEquals("<AbstractEntity>.child.siblings[id=1]", intermediatePropertyPath.toString());
-    assertEquals("child.siblings", intermediatePropertyPath.getFormattedPath());
+    assertEquals("child.siblings", intermediatePropertyPath.getPath());
     iterator.next();
     intermediatePropertyPath = iterator.getIntermediatePath();
     assertEquals("<AbstractEntity>.child.siblings[id=1].toys[id=2]", intermediatePropertyPath.toString());
-    assertEquals("child.siblings.toys", intermediatePropertyPath.getFormattedPath());
+    assertEquals("child.siblings.toys", intermediatePropertyPath.getPath());
     assertFalse(iterator.hasNext());
   }
 
@@ -157,11 +153,11 @@ public class PropertyPathTest extends TestCase
     AbstractEntity sibling = new DummyEntity(1);
     AbstractEntity toy1 = new DummyEntity(2);
     AbstractEntity toy2 = new DummyEntity(3);
-    PropertyPath propertyPath1a = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings[id].toys[id]", "name", sibling.getEntityId(), toy1.getEntityId());
-    PropertyPath propertyPath1b = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings[id].toys[id]", "name", sibling.getEntityId(), toy1.getEntityId());
-    PropertyPath propertyPath1c = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings[id].toys[id]", "size", sibling.getEntityId(), toy1.getEntityId());
-    PropertyPath propertyPath2 = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings[id].toys[id]", "name", sibling.getEntityId(), toy2.getEntityId());
-    PropertyPath propertyPath3 = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings[id]", sibling.getEntityId(), toy1.getEntityId());
+    PropertyPath propertyPath1a = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", sibling.getEntityId()).to("toys").restrict("id", toy1.getEntityId()).toProperty("name");
+    PropertyPath propertyPath1b = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", sibling.getEntityId()).to("toys").restrict("id", toy1.getEntityId()).toProperty("name");
+    PropertyPath propertyPath1c = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", sibling.getEntityId()).to("toys").restrict("id", toy1.getEntityId()).toProperty("size");
+    PropertyPath propertyPath2 =  new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", sibling.getEntityId()).to("toys").restrict("id", toy2.getEntityId()).toProperty("name");
+    RelationshipPath propertyPath3 = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", sibling.getEntityId()).to("toys").restrict("id", toy1.getEntityId());
 
     assertEquals(propertyPath1a, propertyPath1b);
     assertEquals(propertyPath1a.hashCode(), propertyPath1b.hashCode());
@@ -181,26 +177,35 @@ public class PropertyPathTest extends TestCase
   
   public void testHasRestrictions()
   {
-    assertTrue("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child.siblings[id]", 1).hasRestrictions());
-    assertTrue("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child[id].siblings[id]", 1, 1).hasRestrictions());
-    assertTrue("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child[id].siblings", 1).hasRestrictions());
-    assertFalse("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child.siblings").hasRestrictions());
+    assertTrue("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").restrict("id", 1).hasRestrictions());
+    assertTrue("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").restrict("id", 1).to("siblings").restrict("id", 1).hasRestrictions());
+    assertTrue("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").restrict("id", 1).to("siblings").hasRestrictions());
+    assertFalse("has restrictions", new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").hasRestrictions());
   }
   
   /**
-   * Test that PropertyPath allows an empty string the property name value,
+   * Test that PropertyPath allows an empty string for the property name value,
    * since this usage is required for collections of elements, which have no
    * properties other than their immediate value (as opposed to collections of
    * entities, which are comprised of one or more properties).
    */
   public void testCollectionOfElementsUsage()
   {
-    PropertyPath propertyPath1 = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings.nicknames", "");
+    PropertyPath propertyPath1 = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").to("nicknames").toCollectionOfValues();
+    assertEquals("child.siblings.nicknames", propertyPath1.getPath());
     assertEquals("", propertyPath1.getPropertyName());
     
-    PropertyPath propertyPath2 = new PropertyPath<AbstractEntity>(AbstractEntity.class, "child.siblings.nicknames", "");
+    PropertyPath propertyPath2 = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to("siblings").to("nicknames").toCollectionOfValues();
     assertEquals(propertyPath1, propertyPath2);
-    
+  }
+  
+  public void testAppend()
+  {
+    PropertyPath<AbstractEntity> relationship2 = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "grandchild").restrict("age", new Integer(1)).to("greatgrandchild").toProperty("name");
+    PropertyPath<AbstractEntity> relationship = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").to(relationship2);
+    assertEquals(3, relationship.getPathLength());
+    assertEquals("child.grandchild.greatgrandchild.name", relationship.getPath());
+    assertEquals("<AbstractEntity>.child.grandchild[age=1].greatgrandchild.name", relationship.toString());
   }
 
 }

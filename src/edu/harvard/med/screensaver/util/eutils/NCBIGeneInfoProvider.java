@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import edu.harvard.med.screensaver.model.libraries.Gene;
-
 /**
  * Retrieves basic information about a gene with a given EntrezGene ID.
  */

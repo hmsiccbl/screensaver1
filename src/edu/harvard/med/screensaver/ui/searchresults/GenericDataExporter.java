@@ -31,24 +31,18 @@ import org.apache.log4j.Logger;
 
 public class GenericDataExporter<T> implements TableDataExporter<T> 
 {
-  // static members
-
   private static Logger log = Logger.getLogger(GenericDataExporter.class);
 
   public static final String FORMAT_NAME = "Excel Workbook";
   public static final String FORMAT_MIME_TYPE = "application/excel";
   public static final String FILE_EXTENSION = ".xls";
-
   private static final int HEADER_ROW_INDEX = 0;
 
-
-  // instance data members
+  private static final int MAX_DATA_ROWS = 65536 - 1;
 
   private String _dataTypeName;
   private List<TableColumn<T,?>> _columns;
 
-
-  // public constructors and methods
 
   public GenericDataExporter(String dataTypeName)
   {
@@ -99,30 +93,37 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
     return FORMAT_MIME_TYPE;
   }
 
-  
-  // private methods
-  
   private void writeWorkbook(WritableWorkbook workbook, 
                              DataTableModel<T> model) 
     throws RowsExceededException, WriteException
   {
-    WritableSheet sheet = workbook.createSheet("data", 0);
-    writeHeaders(sheet);
-    writeData(sheet, model);
+    WritableSheet sheet = null;
+    for (int i = 0; i < model.getRowCount(); ++i) {
+      if (i % MAX_DATA_ROWS == 0) {
+        sheet = createSheet(workbook);
+      }
+      writeRow(i, sheet, model);
+    }
   }
 
-  private void writeData(WritableSheet sheet, 
-                         DataTableModel<T> model) 
+  private void writeRow(int i, WritableSheet sheet, DataTableModel<T> model)
+    throws WriteException, RowsExceededException
+  {
+    model.setRowIndex(i);
+    T entity = (T) model.getRowData();
+    int colIndex = 0;
+    for (TableColumn<T,?> column : _columns) {
+      Workbook2Utils.writeCell(sheet, (i % MAX_DATA_ROWS) + 1, colIndex++, column.getCellValue(entity));
+    }
+  }
+
+  private WritableSheet createSheet(WritableWorkbook workbook)
     throws RowsExceededException, WriteException
   {
-    for (int i = 0; i < model.getRowCount(); ++i) {
-      model.setRowIndex(i);
-      T entity = (T) model.getRowData();
-      int colIndex = 0;
-      for (TableColumn<T,?> column : _columns) {
-        Workbook2Utils.writeCell(sheet, i + 1, colIndex++, column.getCellValue(entity));
-      }
-    }
+      int nextSheetIndex = workbook.getNumberOfSheets();
+      WritableSheet sheet = workbook.createSheet("data" + (nextSheetIndex + 1), nextSheetIndex);
+      writeHeaders(sheet);
+      return sheet;
   }
 
   private void writeHeaders(WritableSheet sheet) throws RowsExceededException, WriteException

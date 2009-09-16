@@ -11,24 +11,24 @@ package edu.harvard.med.iccbl.screensaver.policy;
 
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.CompoundCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
-import edu.harvard.med.screensaver.model.derivatives.Derivative;
-import edu.harvard.med.screensaver.model.derivatives.DerivativeScreenResult;
-import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyAction;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -37,10 +37,10 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
-import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
@@ -51,8 +51,8 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -63,6 +63,9 @@ import edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+
 /**
  * A DataAccessPolicy implementation that is used by the web
  * application.  It is parameterized with a {@link
@@ -72,18 +75,15 @@ import org.apache.log4j.Logger;
  */
 public class WebDataAccessPolicy implements DataAccessPolicy
 {
-  // static members
+  private static final String CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
+  private static final String MARCUS_LIBRARY_PREFIX = "Marcus";
+  public static final String MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Marcus Library Screen";
 
   private static Logger log = Logger.getLogger(WebDataAccessPolicy.class);
 
-
-  // instance data
-
   private CurrentScreensaverUser _currentScreensaverUser;
 
-
-  // public methods
-
+  
   public WebDataAccessPolicy(CurrentScreensaverUser user)
   {
     _currentScreensaverUser = user;
@@ -154,8 +154,20 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return visit((LabActivity) entity);
   }
 
-  public boolean visit(Compound entity)
+  public boolean visit(SmallMoleculeReagent entity)
   {
+    if (entity.getWell().getLibrary().getLibraryName().equals(CHEMDIV6_LIBRARY_NAME)) {
+      return isReadEverythingAdmin();
+    }
+    return true;
+  }
+
+  public boolean visit(NaturalProductReagent entity)
+  {
+    if (entity.getWell().getLibrary().getLibraryName().startsWith(MARCUS_LIBRARY_PREFIX)) {
+      return isReadEverythingAdmin() || 
+      _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.MARCUS_ADMIN);
+    }
     return true;
   }
 
@@ -174,17 +186,12 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(Derivative entity)
-  {
-    return true;
-  }
-
-  public boolean visit(DerivativeScreenResult entity)
-  {
-    return true;
-  }
-
   public boolean visit(EquipmentUsed entity)
+  {
+    return true;
+  }
+
+  public boolean visit(FundingSupport fundingSupport) 
   {
     return true;
   }
@@ -218,6 +225,11 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     }
   }
     
+  public boolean visit(LibraryContentsVersion libraryContentsVersion)
+  {
+    return true;
+  }
+
   public boolean visit(PlatesUsed entity)
   {
     return true;
@@ -226,11 +238,6 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   public boolean visit(Publication entity)
   {
 
-    return true;
-  }
-
-  public boolean visit(Reagent entity)
-  {
     return true;
   }
 
@@ -260,6 +267,18 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   public boolean visit(Screen screen)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
+    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.MARCUS_ADMIN)) {
+      if (_currentScreensaverUser instanceof WebCurrentScreensaverUser) {
+        // TODO: HACK: Screen.fundingSupports is not always initialized in a web
+        // context, so we need to explicitly load from the database
+        WebCurrentScreensaverUser webUser = (WebCurrentScreensaverUser) _currentScreensaverUser;
+        screen = webUser.getDao().reloadEntity(screen, true, Screen.fundingSupports.getPath());
+      }
+      // note: marcusAdmins are NOT allowed access to non-Marcus screens, even though they are also readEverythingAdmins
+      return Iterables.any(screen.getFundingSupports(), 
+                           new Predicate<FundingSupport>() { 
+        public boolean apply(FundingSupport fs) { return fs.toString().equals(MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME); } });
+    }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENS_ADMIN)) {
       return true;
@@ -278,13 +297,13 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   public boolean visit(ScreenResult screenResult)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
+    // if user is restricted from parent Screen, they are restricted from the Screen Result
+    if (screenResult.getScreen().isRestricted()) {
+      return false;
+    }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREEN_RESULTS_ADMIN)) {
       return true;
-    }
-    if (screenResult.getScreen().isRestricted()) {
-      // if user is restricted from parent Screen, they are restricted from the Screen Result
-      return false;
     }
     if (user instanceof ScreeningRoomUser) {
       ScreeningRoomUser screener = (ScreeningRoomUser) user;
@@ -345,7 +364,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean visit(CompoundCherryPickRequest entity)
+  public boolean visit(SmallMoleculeCherryPickRequest entity)
   {
     return visit((CherryPickRequest) entity);
   }
@@ -379,16 +398,29 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     }
     return false;
   }
-
   
-  // private methods
+  public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent)
+  {
+    if (reagent.isRestricted()) {
+      return false;
+    }
+    return isReadEverythingAdmin();
+  }
 
   private boolean visit(CherryPickRequest entity) {
+    // if user is restricted from parent Screen, they are restricted from the CherryPickRequest
+    if (entity.getScreen().isRestricted()) {
+      return false;
+    }
     return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
   }
 
   private boolean visit(LabActivity entity)
   {
+    // if user is restricted from parent Screen, they are restricted from the CherryPickRequest
+    if (entity.getScreen().isRestricted()) {
+      return false;
+    }
     return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
   }
 
@@ -397,7 +429,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
-  public boolean isScreenerAssociatedWithScreen(Screen screen)
+  private boolean isScreenerAssociatedWithScreen(Screen screen)
   {
     ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
     if (user instanceof ScreeningRoomUser) {

@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable;
-import edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
@@ -42,7 +42,7 @@ public class StudyViewer extends AbstractBackingBean implements EntityViewer
   private GenericEntityDAO _dao;
   private StudyDetailViewer _studyDetailViewer;
   private AnnotationTypesTable _annotationTypesTable;
-  private ReagentSearchResults _reagentSearchResults;
+  private WellSearchResults _wellSearchResults;
 
   private Study _study;
   private Map<String,Boolean> _isPanelCollapsedMap;
@@ -60,13 +60,13 @@ public class StudyViewer extends AbstractBackingBean implements EntityViewer
                      GenericEntityDAO dao,
                      StudyDetailViewer studyDetailViewer,
                      AnnotationTypesTable annotationTypesTable,
-                     ReagentSearchResults reagentSearchResults)
+                     WellSearchResults wellSearchResults)
   {
     _thisProxy = thisProxy;
     _dao = dao;
     _annotationTypesTable = annotationTypesTable;
     _studyDetailViewer = studyDetailViewer;
-    _reagentSearchResults = reagentSearchResults;
+    _wellSearchResults = wellSearchResults;
 
     _isPanelCollapsedMap = new HashMap<String,Boolean>();
     _isPanelCollapsedMap.put("reagentsData", false);
@@ -85,9 +85,9 @@ public class StudyViewer extends AbstractBackingBean implements EntityViewer
     return _study;
   }
 
-  public ReagentSearchResults getReagentSearchResults()
+  public WellSearchResults getWellSearchResults()
   {
-    return _reagentSearchResults;
+    return _wellSearchResults;
   }
 
   public AnnotationTypesTable getAnnotationTypesTable()
@@ -144,7 +144,7 @@ public class StudyViewer extends AbstractBackingBean implements EntityViewer
     _studyDetailViewer.setStudy(study);
     if (_study.isStudyOnly()) {
       _annotationTypesTable.initialize(new ArrayList<AnnotationType>(study.getAnnotationTypes()));
-      _reagentSearchResults.searchReagentsForStudy(study);
+      _wellSearchResults.searchReagentsForStudy(study);
     }
   }
 }

@@ -28,6 +28,7 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -196,7 +197,8 @@ public class Publication extends AbstractEntity
   @JoinColumn(name="attachedFileId", nullable=true, updatable=true, unique=true)
   @org.hibernate.annotations.ForeignKey(name="fk_publication_to_attached_file")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.OneToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true, 
+                                                       hasNonconventionalSetterMethod=true)
   public AttachedFile getAttachedFile()
   {
     return _attachedFile;

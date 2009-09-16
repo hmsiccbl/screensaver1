@@ -11,39 +11,43 @@
 
 package edu.harvard.med.screensaver.ui.table.column.entity;
 
+import java.util.Set;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
-import edu.harvard.med.screensaver.ui.util.VocabularlyConverter;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.table.column.EnumColumn;
 
 
-public abstract class EnumEntityColumn<E extends AbstractEntity, ENUM extends Enum<ENUM>> extends VocabularyEntityColumn<E,ENUM>
+public abstract class EnumEntityColumn<E extends AbstractEntity, ENUM extends Enum<ENUM>> extends EnumColumn<E,ENUM> implements HasFetchPaths<E>
 {
-  public EnumEntityColumn(PropertyPath<E> propertyPath,
-                          String name,
-                          String description,
-                          String group,
-                          ENUM[] items)
-  {
-    super(propertyPath,
-          name,
-          description,
-          group,
-          new VocabularlyConverter<ENUM>(items),
-          items);
-  }
-
+  private FetchPaths<E> _fetchPaths;
+  
   public EnumEntityColumn(RelationshipPath<E> relationshipPath,
                           String name,
                           String description,
                           String group,
                           ENUM[] items)
   {
-    super(relationshipPath,
-          name,
+    super(name,
           description,
           group,
-          new VocabularlyConverter<ENUM>(items),
           items);
+    _fetchPaths = new FetchPaths<E>(relationshipPath);
+  }
+
+  public void addRelationshipPath(RelationshipPath<E> path)
+  {
+    _fetchPaths.addRelationshipPath(path);
+  }
+
+  public PropertyPath<E> getPropertyPath()
+  {
+    return _fetchPaths.getPropertyPath();
+  }
+
+  public Set<RelationshipPath<E>> getRelationshipPaths()
+  {
+    return _fetchPaths.getRelationshipPaths();
   }
 }

@@ -10,9 +10,13 @@
 package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
+import java.math.BigDecimal;
+
+import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
@@ -20,13 +24,12 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 
-import org.apache.log4j.Logger;
-
 public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
 {
-  private static Logger log = Logger.getLogger(ReagentTest.class);
-
-  //protected LibrariesDAO librariesDao;
+  public static TestSuite suite()
+  {
+    return buildTestSuite(ReagentTest.class, Reagent.class);
+  }
 
   public ReagentTest() throws IntrospectionException
   {
@@ -38,13 +41,15 @@ public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
     schemaUtil.truncateTablesOrCreateSchema();
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
-        genericEntityDao.persistEntity(library);
+        Library library = dataFactory.getTestValueForType(Library.class);
+        dataFactory.newInstance(LibraryContentsVersion.class, library);
+        Well well1 = library.createWell(new WellKey(library.getStartPlate(), 0, 0), LibraryWellType.EXPERIMENTAL);
+        Well well2 = library.createWell(new WellKey(library.getStartPlate(), 0, 1), LibraryWellType.EXPERIMENTAL);
+        library.setScreenType(ScreenType.SMALL_MOLECULE);
 
-        Reagent reagent1 = new Reagent(new ReagentVendorIdentifier("Vendor:1"));
-        Reagent reagent2 = new Reagent(new ReagentVendorIdentifier("Vendor:2"));
-        genericEntityDao.persistEntity(reagent1);
-        genericEntityDao.persistEntity(reagent2);
+        Reagent reagent1 = well1.createSmallMoleculeReagent(new ReagentVendorIdentifier("Vendor", "1"), "molfile", "smiles", "inchi", new BigDecimal("1.000"), new BigDecimal("1.000"), new MolecularFormula("CCC"));
+        Reagent reagent2 = well2.createSmallMoleculeReagent(new ReagentVendorIdentifier("Vendor", "2"), "molfile", "smiles", "inchi", new BigDecimal("2.000"), new BigDecimal("2.000"), new MolecularFormula("CCCCCC"));
+        genericEntityDao.persistEntity(library);
 
         Screen study = MakeDummyEntities.makeDummyScreen(Study.MIN_STUDY_NUMBER);
         AnnotationType annotType1 = study.createAnnotationType("annotType1", "", false);
@@ -53,16 +58,14 @@ public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
         annotType1.createAnnotationValue(reagent2, "annotType1_annotValue2");
         annotType2.createAnnotationValue(reagent1, "annotType2_annotValue1");
         annotType2.createAnnotationValue(reagent2, "annotType2_annotValue2");
-        genericEntityDao.saveOrUpdateEntity(study.getLeadScreener());
-        genericEntityDao.saveOrUpdateEntity(study.getLabHead());
-        genericEntityDao.persistEntity(study);
+        new EntityNetworkPersister(genericEntityDao, study).persistEntityNetwork();
       }
     });
 
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Reagent reagent1 = genericEntityDao.findEntityById(Reagent.class, new ReagentVendorIdentifier("Vendor:1"));
-        Reagent reagent2 = genericEntityDao.findEntityById(Reagent.class, new ReagentVendorIdentifier("Vendor:2"));
+        Reagent reagent1 = genericEntityDao.findEntityByProperty(Reagent.class, "vendorId.vendorIdentifier", "1");
+        Reagent reagent2 = genericEntityDao.findEntityByProperty(Reagent.class, "vendorId.vendorIdentifier", "2");
         assertEquals("reagent1.annotationValues size", 2, reagent1.getAnnotationValues().size());
         assertEquals("reagent2.annotationValues size", 2, reagent2.getAnnotationValues().size());
 
@@ -77,8 +80,6 @@ public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
         assertEquals(at2, av2.getAnnotationType());
       }
     });
-
   }
-
 }
 

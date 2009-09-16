@@ -11,12 +11,14 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import java.beans.IntrospectionException;
 import java.io.File;
+import java.io.FileNotFoundException;
+
+import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -26,45 +28,24 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
-import org.apache.log4j.Logger;
-
 public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueType>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(ResultValueTypeTest.class);
+  public static TestSuite suite()
+  {
+    return buildTestSuite(ResultValueTypeTest.class, ResultValueType.class);
+  }
 
   public static final String SCREEN_RESULT_FILE = "ScreenResultTest115-result-values-size.xls";
 
 
-  // instance data members
-
   protected ScreenResultParser screenResultParser;
   protected LibrariesDAO librariesDao;
-
-
-  // public constructors and methods
 
   public ResultValueTypeTest() throws IntrospectionException
   {
     super(ResultValueType.class);
   }
 
-  @Override
-  protected <NE extends AbstractEntity> NE newInstanceViaParent(Class<NE> entityClass,
-                                                                AbstractEntity parentBean,
-                                                                boolean persistEntities)
-  {
-    if (entityClass.equals(ResultValueType.class)) {
-      ScreenResult screenResult = (ScreenResult) parentBean;
-      ResultValueType rvt = screenResult.createResultValueType(getTestValueForType(String.class).toString());
-      if (persistEntities) {
-        genericEntityDao.persistEntity(rvt);
-      }
-      return (NE) rvt;
-    }
-    return super.newInstanceViaParent(entityClass, parentBean, persistEntities);
-  }
   /**
    * Dual-purpose test:
    * 1. Regression test for (apparent) Hibernate bug, which determines size of
@@ -86,8 +67,12 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
       {
         File workbookFile = new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, SCREEN_RESULT_FILE);
         final Screen screen = MakeDummyEntities.makeDummyScreen(115);
-        screenResultParser.parse(screen, workbookFile);
-        log.debug(screenResultParser.getErrors());
+        try {
+          screenResultParser.parse(screen, workbookFile);
+        }
+        catch (FileNotFoundException e) {
+          fail(e.getMessage());
+        }
         assertFalse("screen result had no errors", screenResultParser.getHasErrors());
         persistEntityNetwork(screen);
       }

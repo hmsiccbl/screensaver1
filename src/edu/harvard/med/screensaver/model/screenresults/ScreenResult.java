@@ -41,7 +41,9 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
@@ -70,6 +72,8 @@ public class ScreenResult extends TimeStampedAbstractEntity
 
   private static final long serialVersionUID = 0;
 
+  public static final RelationshipPath<ScreenResult> screen = new RelationshipPath<ScreenResult>(ScreenResult.class, "screen");
+  public static final RelationshipPath<ScreenResult> resultValueTypes = new RelationshipPath<ScreenResult>(ScreenResult.class, "resultValueTypes");
 
   // private instance data
 
@@ -280,6 +284,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
     return resultValueType;
   }
 
+
   public boolean deleteResultValueType(ResultValueType rvt)
   {
     if (!rvt.getDerivedTypes().isEmpty()) {
@@ -364,7 +369,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
   @OrderBy("plateNumber")
   @org.hibernate.annotations.ForeignKey(name="fk_screen_result_plate_number_to_screen_result")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
+  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(hasNonconventionalMutation=true)
   public SortedSet<Integer> getPlateNumbers()
   {
     return _plateNumbers;

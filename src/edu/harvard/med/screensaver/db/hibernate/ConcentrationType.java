@@ -29,7 +29,7 @@ public class ConcentrationType implements UserType
 
   // static members
 
-  public static ConcentrationUnit NORMALIZED_UNITS = ConcentrationUnit.NORMALIZED_UNITS; 
+  public static final ConcentrationUnit NORMALIZED_UNITS = ConcentrationUnit.NORMALIZED_UNITS; 
 
 
   // instance data members

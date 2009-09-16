@@ -28,11 +28,16 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 public @interface Column {
 
   /**
-   * True whenever this property has any kind of non-conventional way to update its value.
-   * Used by the unit tests to know not to look for a setter method with the standard naming
-   * convention for bean properties. This is not intended to be used for immutable fields -
-   * instead, use org.hibernate.annotations.Immutable.
-   * @return true whenever this property has a non-conventional way to update its value
+   * True whenever this property has any kind of non-conventional way to update
+   * its value. Used by the unit tests to know not to look for a setter method
+   * with the standard naming convention for bean properties. This is not
+   * intended to be used for immutable fields - instead, use
+   * org.hibernate.annotations.Immutable. If true, it is the developer's
+   * responsibility to write a custom unit test should be written for this
+   * property.
+   * 
+   * @return true whenever this property has a non-conventional way to update
+   *         its value
    */
   boolean hasNonconventionalSetterMethod() default false;
 

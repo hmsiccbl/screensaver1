@@ -9,47 +9,35 @@
 
 package edu.harvard.med.screensaver.ui.table.column.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.faces.model.SelectItem;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
-import edu.harvard.med.screensaver.ui.table.column.ColumnType;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.table.column.BooleanColumn;
 
-public abstract class BooleanEntityColumn<E extends AbstractEntity> extends EntityColumn<E,Boolean>
+public abstract class BooleanEntityColumn<E extends AbstractEntity> extends BooleanColumn<E> implements HasFetchPaths<E>
 {
-  private ArrayList<SelectItem> _selectItems;
-
+  private FetchPaths<E> _fetchPaths;
+  
   public BooleanEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
-    super(relationshipPath,
-          name,
-          description,
-          ColumnType.BOOLEAN, 
-          group);
+    super(name, description, group);
+    _fetchPaths = new FetchPaths<E>(relationshipPath);    
   }
 
-  public BooleanEntityColumn(PropertyPath<E> propertyPath, String name, String description, String group)
+  public void addRelationshipPath(RelationshipPath<E> path)
   {
-    super(propertyPath,
-          name,
-          description,
-          ColumnType.BOOLEAN,
-          group);
+    _fetchPaths.addRelationshipPath(path);
   }
 
-  public List<SelectItem> getBooleanSelections()
+  public PropertyPath<E> getPropertyPath()
   {
-    if (_selectItems == null) {
-      _selectItems = new ArrayList<SelectItem>();
-      _selectItems.add(new SelectItem("", ""));
-      _selectItems.add(new SelectItem(true, "true"));
-      _selectItems.add(new SelectItem(false, "false"));
-    }
-    return _selectItems;
+    return _fetchPaths.getPropertyPath();
   }
 
+  public Set<RelationshipPath<E>> getRelationshipPaths()
+  {
+    return _fetchPaths.getRelationshipPaths();
+  }
 }

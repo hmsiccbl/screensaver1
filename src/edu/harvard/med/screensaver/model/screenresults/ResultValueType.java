@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
@@ -69,6 +70,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private static final Logger log = Logger.getLogger(ResultValueType.class);
   private static final long serialVersionUID = -2325466055774432202L;
 
+  public static final RelationshipPath<ResultValueType> ScreenResult = new RelationshipPath<ResultValueType>(ResultValueType.class, "screenResult"); 
+
 
   // private instance data
 
@@ -96,7 +99,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private boolean _isNumeric;
   private Integer _positivesCount;
   private Integer channel;
-
 
   // public instance methods
 
@@ -384,10 +386,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @org.hibernate.annotations.ForeignKey(name="fk_derived_from_result_value_type")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(
-    inverseProperty="derivedTypes",
-    singularPropertyName="typeDerivedFrom"
-  )
+  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="derivedTypes", singularPropertyName="typeDerivedFrom")
   public SortedSet<ResultValueType> getTypesDerivedFrom()
   {
     return _typesDerivedFrom;
@@ -462,7 +461,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @org.hibernate.annotations.ForeignKey(name="fk_derived_result_value_type")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(inverseProperty="typesDerivedFrom")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="typesDerivedFrom")
   public SortedSet<ResultValueType> getDerivedTypes()
   {
     return _derivedTypes;
@@ -840,7 +839,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     setChannel(channel);
   }
 
-
   // protected constructor
 
   /**
@@ -863,8 +861,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   }
 
   /**
-   * Get the version number of the compound.
-   * @return the version number of the <code>ResultValueType</code>
    * @motivation for hibernate
    */
   @Column(nullable=false)

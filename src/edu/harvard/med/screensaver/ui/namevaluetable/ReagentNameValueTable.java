@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/library-mgmt-rework/src/edu/harvard/med/screensaver/ui/namevaluetable/GeneNameValueTable.java $
+// $Id: GeneNameValueTable.java 3278 2009-07-17 14:59:04Z atolopko $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
@@ -10,76 +10,83 @@
 package edu.harvard.med.screensaver.ui.namevaluetable;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import edu.harvard.med.screensaver.io.libraries.compound.StructureImageProvider;
-import edu.harvard.med.screensaver.model.libraries.Compound;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
-import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
-import edu.harvard.med.screensaver.ui.libraries.ReagentViewer;
-
-import org.apache.log4j.Logger;
 
 /**
- * A NameValueTable for the Reagent Viewer.
+ * A NameValueTable for Reagents.
  *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ReagentNameValueTable extends ComboNameValueTable
+abstract public class ReagentNameValueTable<R extends Reagent> extends NameValueTable
 {
-  private static Logger log = Logger.getLogger(ReagentNameValueTable.class);
+  private static final String VERSION = "Library Contents Version";
 
-  public ReagentNameValueTable(Reagent reagent,
-                               ReagentViewer reagentViewer,
-                               GeneViewer geneViewer,
-                               CompoundViewer compoundViewer,
-                               StructureImageProvider structureImageProvider)
+  protected R _reagent;
+  protected List<String> _names = new ArrayList<String>();
+  protected List<Object> _values = new ArrayList<Object>();
+  protected List<ValueType> _valueTypes = new ArrayList<ValueType>();
+  protected List<String> _descriptions = new ArrayList<String>();
+
+  public ReagentNameValueTable(R reagent)
   {
-    initialize(reagent, reagentViewer, geneViewer, compoundViewer, structureImageProvider, new ReagentDetailsNameValueTable(reagent));
+    _reagent = reagent;
   }
 
-  protected ReagentNameValueTable(Reagent reagent,
-                                  ReagentViewer reagentViewer,
-                                  GeneViewer geneViewer,
-                                  CompoundViewer compoundViewer,
-                                  StructureImageProvider structureImageProvider,
-                                  NameValueTable detailsNameValueTable)
+  @Override
+  public int getNumRows()
   {
-    initialize(reagent, reagentViewer, geneViewer, compoundViewer, structureImageProvider, detailsNameValueTable);
+    return _names.size();
   }
 
-  private void initialize(Reagent reagent,
-                          ReagentViewer reagentViewer,
-                          GeneViewer geneViewer,
-                          CompoundViewer compoundViewer,
-                          StructureImageProvider structureImageProvider,
-                          NameValueTable detailsNameValueTable)
+  @Override
+  public String getDescription(int index)
   {
-    List<NameValueTable> comboNameValueTables = new ArrayList<NameValueTable>();
-    comboNameValueTables.add(detailsNameValueTable);
-    // TODO: once Well.{compounds,silencingReagents} are moved to Reagent, we won't need to go through well anymore
-    if (reagent != null) {
-      Iterator<Well> iterator = reagent.getWells().iterator();
-      if (iterator.hasNext()) {
-        Well well = iterator.next();
-        for (Gene gene : well.getGenes()) {
-          comboNameValueTables.add(new GeneNameValueTable(gene, geneViewer, reagentViewer));
-        }
-        for (Compound compound : well.getOrderedCompounds()) {
-          comboNameValueTables.add(new CompoundNameValueTable(compound, 
-                                                              compoundViewer,
-                                                              structureImageProvider,
-                                                              reagentViewer));
-        }
-      }
-    }
-    initializeComboNameValueTable((NameValueTable [])
-      comboNameValueTables.toArray(new NameValueTable [0]));
+    return _descriptions.get(index);
   }
 
+  @Override
+  public String getName(int index)
+  {
+    return _names.get(index);
+  }
+
+  @Override
+  public ValueType getValueType(int index)
+  {
+    return _valueTypes.get(index);
+  }
+
+  @Override
+  public Object getValue(int index)
+  {
+    return _values.get(index);
+  }
+
+  @Override
+  public String getAction(int index, String value)
+  {
+    return null;
+  }
+
+  @Override
+  public String getLink(int index, String value)
+  {
+    return null;
+  }
+
+  protected void initializeLists(R reagent)
+  {
+    addItem(VERSION, reagent.getLibraryContentsVersion().getVersionNumber(), ValueType.TEXT, "The reagent's library contents version");
+  }
+
+  protected void addItem(String name, Object value, ValueType valueType, String description)
+  {
+    _names.add(name);
+    _values.add(value);
+    _valueTypes.add(valueType);
+    _descriptions.add(description);
+  }
 }
+

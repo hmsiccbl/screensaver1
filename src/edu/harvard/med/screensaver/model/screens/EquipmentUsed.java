@@ -91,7 +91,7 @@ public class EquipmentUsed extends AbstractEntity
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_equipment_used_to_lab_activity")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="equipmentUsed")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="equipmentUsed")
   public LabActivity getLabActivity()
   {
     return _labActivity;

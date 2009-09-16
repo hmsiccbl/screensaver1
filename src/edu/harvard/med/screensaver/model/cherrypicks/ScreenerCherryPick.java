@@ -29,14 +29,16 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentation;
 import edu.harvard.med.screensaver.model.screens.Screen;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -59,6 +61,10 @@ public class ScreenerCherryPick extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(ScreenerCherryPick.class);
   private static final long serialVersionUID = 0L;
+  
+  public static final RelationshipPath<ScreenerCherryPick> cherryPickRequest = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "cherryPickRequest");
+  public static final RelationshipPath<ScreenerCherryPick> screenedWell = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell");
+  public static final RelationshipPath<ScreenerCherryPick> labCherryPicks = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "labCherryPicks");
 
 
   // private instance data
@@ -149,7 +155,7 @@ public class ScreenerCherryPick extends AbstractEntity
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_screener_cherry_pick_to_screened_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
   public Well getScreenedWell()
   {
     return _screenedWell;
@@ -354,5 +360,22 @@ public class ScreenerCherryPick extends AbstractEntity
   private void setRnaiKnockdownConfirmation(RNAiKnockdownConfirmation rnaiKnockdownConfirmation)
   {
     _rnaiKnockdownConfirmation = rnaiKnockdownConfirmation;
+  }
+
+  /**
+   * Create and return a new lab cherry pick for the cherry pick request.
+   * @param cherryPickRequest TODO
+   * @param sourceWell the source well
+   * @return the new lab cherry pick
+   * @throws DataModelViolationException whenever the cherry pick request for the provided
+   * screener cherry pick does not match the cherry pick request asked to create the lab cherry
+   * pick
+   */
+  public LabCherryPick createLabCherryPick(Well sourceWell)
+  {
+    LabCherryPick labCherryPick = new LabCherryPick(this, sourceWell);
+    _cherryPickRequest.addLabCherryPick(labCherryPick);
+    getLabCherryPicks().add(labCherryPick);
+    return labCherryPick;
   }
 }

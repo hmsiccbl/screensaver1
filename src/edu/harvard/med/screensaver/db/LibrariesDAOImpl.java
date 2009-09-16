@@ -14,25 +14,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Query;
-import org.springframework.orm.hibernate3.HibernateCallback;
-
-import com.google.common.collect.Maps;
-
+import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
+import edu.harvard.med.screensaver.db.hibernate.JoinType;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 {
@@ -65,16 +71,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return _dao.findEntityById(Well.class, wellKey.getKey());
   }
 
-  public Well findWell(WellKey wellKey, boolean loadContents)
-  {
-    return _dao.findEntityById(
-      Well.class,
-      wellKey.getKey(),
-      false,
-      "compounds",
-      "silencingReagents.gene");
-  }
-
   public List<String> findAllVendorNames()
   {
     String hql = "select distinct l.vendor from Library l where l.vendor is not null";
@@ -83,15 +79,28 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     return vendorNames;
   }
 
-  public SilencingReagent findSilencingReagent(
-    Gene gene,
-    SilencingReagentType silencingReagentType,
-    String sequence)
+  public Set<Reagent> findReagents(ReagentVendorIdentifier rvi, 
+                                   boolean latestReleasedOnly)
   {
-    return _dao.findEntityById(SilencingReagent.class,
-                               gene.toString() + ":" +
-                               silencingReagentType.toString() + ":" +
-                               sequence);
+    final HqlBuilder hql = new HqlBuilder();
+    hql.from(Reagent.class, "r").
+    from("r", Reagent.well.getLeaf(), "w", JoinType.LEFT_FETCH).
+    from("w", Well.library.getLeaf(), "l", JoinType.LEFT_FETCH).
+    where("r", Reagent.vendorIdentifier.getPath(), Operator.EQUAL, rvi.getVendorIdentifier()).
+    where("r", Reagent.vendorName.getPath(), Operator.EQUAL, rvi.getVendorName());
+    if (latestReleasedOnly) {
+      hql.from("w", "latestReleasedReagent", "lrr").
+      where("lrr", Operator.EQUAL, "r");
+    }
+    hql.select("r");
+    log.debug(hql.toString());
+    List<Reagent> reagents = _dao.runQuery(new Query<Reagent>() {
+      public List<Reagent> execute(Session session)
+      {
+        return hql.toQuery(session, true).list();
+      }
+    });
+    return Sets.newHashSet(reagents);
   }
 
   @SuppressWarnings("unchecked")
@@ -130,33 +139,46 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
 
   /**
-   * Converts each well in the library back to an empty well, deleting
-   * information about its contents. Associated reagents are not deleted, but
-   * their association with the well is removed. <i>For time and memory
-   * performance reasons, the reagents' well associations are not updated in
-   * memory, so reload the library in a new Hibernate session if you need the
-   * in-memory representation to reflect the update.</i>
+   * Delete the reagents of the specified contents version, as well the contents
+   * version record itself. The contents version must not have been previously
+   * "released" (see
+   * {@link LibraryContentsVersion#release(edu.harvard.med.screensaver.model.AdministrativeActivity)}
+   * ). Converts each well in the library back to an undefined well if there are
+   * no contents versions remaining after the deletion.
    */
-  public void deleteLibraryContents(Library library)
+  public void deleteLibraryContentsVersion(LibraryContentsVersion libraryContentsVersionIn)
   {
-    library = _dao.reloadEntity(library,
-                                false,
-                                "wells.compounds",
-                                "wells.silencingReagents",
-                                "wells.reagent");
+    if (libraryContentsVersionIn.isReleased()) {
+      throw new BusinessRuleViolationException("cannot delete a library contents version that has been released");
+    }
+    LibraryContentsVersion libraryContentsVersion = 
+      _dao.reloadEntity(libraryContentsVersionIn, false, LibraryContentsVersion.library.getPath()); 
+    Library library = libraryContentsVersion.getLibrary();
+    if (library.getScreenType() == ScreenType.SMALL_MOLECULE) {
+      _dao.need(library, 
+                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols).getPath(),
+                Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).getPath());
+      _dao.need(library, 
+                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.entrezgeneSymbols).getPath(),
+                Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.genbankAccessionNumbers).getPath());
+    }
+    else {
+      _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.compoundNames).getPath());
+      _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.molfileList).getPath());
+    }
+    
+    library.getContentsVersions().remove(libraryContentsVersion); // will be deleted by Hibernate, thanks to delete-orphan cascade
     for (Well well : library.getWells()) {
-      if (well.getWellType().equals(WellType.EXPERIMENTAL)) {
-        well.setGenbankAccessionNumber(null);
-        well.setIccbNumber(null);
-        well.setMolfile(null);
-        well.setSmiles(null);
-        well.removeCompounds(false);
-        well.removeSilencingReagents(false);
-        well.setWellType(WellType.EMPTY);
-        well.removeReagent(false); // do this after well type, exp well must have reagent!
+      Reagent reagent = well.getReagents().remove(libraryContentsVersion);  // will be deleted by Hibernate, thanks to delete-orphan cascade
+      if (reagent != null) {
+        _dao.deleteEntity(reagent);
+      }
+      if (library.getContentsVersions().isEmpty()) {
+        well.setFacilityId(null);
+        well.setLibraryWellType(LibraryWellType.UNDEFINED);
       }
     }
-    log.info("deleted library contents for " + library.getLibraryName());
+    log.info("deleted library contents version " + libraryContentsVersion.getVersionNumber() + " for library " + library.getLibraryName());
   }
 
   @SuppressWarnings("unchecked")
@@ -219,10 +241,11 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
           for (int iCol = 0; iCol < library.getPlateSize().getColumns(); ++iCol) {
             WellKey wellKey = new WellKey(iPlate, iRow, iCol);
             try {
-              library.createWell(wellKey, WellType.EMPTY);
+              library.createWell(wellKey, LibraryWellType.UNDEFINED);
               ++nWellsCreated;
             }
             catch (DuplicateEntityException e) {
+              log.debug("ignore failed creation attempt for any well that has been created in the past: " + e.getMessage());
               // ignore failed creation attempt for any well that has been created in the past
             }
           }
@@ -232,27 +255,11 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       // (as opposed t saveOrUpdate(), which does upon session flush), so that
       // subsequent code can find them in the Hibernate session
       _dao.persistEntity(library);
-      log.info("created wells for library " + library.getLibraryName());
+      log.info("created " + nWellsCreated + " wells for library " + library.getLibraryName());
       if (nWellsCreated < nominalWellCount) {
         log.warn("needed to create only " + nWellsCreated + " of " + nominalWellCount + " wells for library " + library.getLibraryName());
       }
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  public List<Library> findLibrariesOfType(final LibraryType[] libraryTypes,
-                                           final ScreenType[] screenTypes)
-  {
-    return (List<Library>) getHibernateTemplate().executeFind(new HibernateCallback() {
-      public Object doInHibernate(org.hibernate.Session session)
-      throws org.hibernate.HibernateException, java.sql.SQLException
-      {
-        Query query = session.createQuery("from Library where libraryType in (:libraryTypes) and screenType in (:screenTypes)");
-        query.setParameterList("libraryTypes", libraryTypes);
-        query.setParameterList("screenTypes", screenTypes);
-        return query.list();
-      }
-    });
   }
 
   @SuppressWarnings("unchecked")
@@ -277,7 +284,4 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
     return remainingVolumes;
   }
-
-  // private methods
-
 }

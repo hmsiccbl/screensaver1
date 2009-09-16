@@ -27,16 +27,16 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     // ignored abstract classes
-    // addTestSuite(CherryPickRequestTest.class);
+    // addTest(CherryPickRequestTest.suite());
     
     // test entity model classes (ignoring abstract classes)
-    addTestSuite(CherryPickAssayPlateTest.class);
-    addTestSuite(CherryPickLiquidTransferTest.class);
-    addTestSuite(CompoundCherryPickRequestTest.class);
-    addTestSuite(LabCherryPickTest.class);
-    addTestSuite(LegacyCherryPickAssayPlateTest.class);
-    addTestSuite(RNAiCherryPickRequestTest.class);
-    addTestSuite(ScreenerCherryPickTest.class);
-    addTestSuite(RNAiKnockdownConfirmationTest.class);
+    addTest(CherryPickAssayPlateTest.suite());
+    addTest(CherryPickLiquidTransferTest.suite());
+    addTest(SmallMoleculeCherryPickRequestTest.suite());
+    addTest(LabCherryPickTest.suite());
+    addTest(LegacyCherryPickAssayPlateTest.suite());
+    addTest(RNAiCherryPickRequestTest.suite());
+    addTest(RNAiKnockdownConfirmationTest.suite());
+    addTest(ScreenerCherryPickTest.suite());
   }
 }

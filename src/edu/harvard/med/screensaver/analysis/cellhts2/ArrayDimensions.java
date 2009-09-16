@@ -72,7 +72,10 @@ public class ArrayDimensions {
             return true;
         }
         else return false;
-    }
-
-
+	}
+	
+	public int hashCode() 
+	{
+	  throw new UnsupportedOperationException("hashCode not implemented");
+	}
 }

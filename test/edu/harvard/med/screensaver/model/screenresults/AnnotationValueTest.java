@@ -11,26 +11,16 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import java.beans.IntrospectionException;
 
-import org.apache.log4j.Logger;
+import junit.framework.TestSuite;
 
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 public class AnnotationValueTest extends AbstractEntityInstanceTest<AnnotationValue>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(AnnotationValueTest.class);
-
-
-  // instance data members
-
-  protected ScreenResultParser screenResultParser;
-  protected LibrariesDAO librariesDao;
-  
-  
-  // public constructors and methods
+  public static TestSuite suite()
+  {
+    return buildTestSuite(AnnotationValueTest.class, AnnotationValue.class);
+  }
 
   public AnnotationValueTest() throws IntrospectionException
   {

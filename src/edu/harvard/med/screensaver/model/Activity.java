@@ -25,16 +25,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 
 /**
@@ -53,6 +50,8 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
 
   private static final Logger log = Logger.getLogger(Activity.class);
   private static final long serialVersionUID = 0L;
+  
+  public static final RelationshipPath<Activity> performedBy = new RelationshipPath<Activity>(Activity.class, "performedBy");
 
 
   // instance fields
@@ -126,13 +125,12 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
    * Get the user that performed the activity.
    * @return the user that performed the activity
    */
-  @ManyToOne(fetch=FetchType.LAZY,
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
   @JoinColumn(name="performedById", nullable=false)
   @org.hibernate.annotations.ForeignKey(name="fk_activity_to_screensaver_user")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="activitiesPerformed")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="activitiesPerformed")
   public ScreensaverUser getPerformedBy()
   {
     return _performedBy;

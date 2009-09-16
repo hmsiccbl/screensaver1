@@ -26,8 +26,8 @@
 
 		<ss:property id="concentration" label="Concentration"
 			value="#{activityViewer.concentrationValue}"
-			typeValue="#{activityViewer.concentrationType}"
-			type="typedValue"
+      type="Concentration"
+			unitsSelector="#{activityViewer.concentrationType}"
 			description="concentration"
 			rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening' || activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}"
 			editable="#{activityViewer.editMode}" />
@@ -64,8 +64,8 @@
     <ss:property id="volumeTransferredPerWell"
       label="Volume Transferred per Replicate"
 			value="#{activityViewer.volumeTransferredPerWellValue}"
-			typeValue="#{activityViewer.volumeTransferredPerWellType}"
-			type="typedValue"
+      type="Concentration"
+			unitsSelector="#{activityViewer.volumeTransferredPerWellType}"
 			description="The volume transferred per replicate well"
       editable="#{activityViewer.editMode}" editWidth="6"
       rendered="#{activityViewer.activity.class.simpleName == 'LibraryScreening' || activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}" />
@@ -189,12 +189,26 @@
 
     <!-- LibraryScreening properties -->
 
-    <ss:property id="cherryPickRequest" label="For Cherry Pick Request"
+    <ss:property id="rcpsCherryPickRequest" label="For Cherry Pick Request"
       description="The cherry pick request for which this screening was performed"
       rendered="#{activityViewer.activity.class.simpleName == 'RNAiCherryPickScreening'}">
       <ui:define name="data">
         <ss:entityLink
           entity="#{activityViewer.activity.rnaiCherryPickRequest}"
+          property="cherryPickRequestNumber"
+          bean="#{cherryPickRequestViewer}"
+          action="viewCherryPickRequest" />
+      </ui:define>
+    </ss:property>
+
+    <!-- CherryPickLiquidTransfer properties -->
+
+    <ss:property id="cpltCherryPickRequest" label="For Cherry Pick Request"
+      description="The cherry pick request for which this liquid transfer was performed"
+      rendered="#{activityViewer.activity.class.simpleName == 'CherryPickLiquidTransfer' &amp;&amp; !empty activityViewer.activity.cherryPickRequest}">
+      <ui:define name="data">
+        <ss:entityLink
+          entity="#{activityViewer.activity.cherryPickRequest}"
           property="cherryPickRequestNumber"
           bean="#{cherryPickRequestViewer}"
           action="viewCherryPickRequest" />

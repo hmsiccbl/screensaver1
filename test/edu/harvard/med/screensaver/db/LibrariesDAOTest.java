@@ -13,31 +13,38 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
-import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 
 /**
@@ -52,139 +59,33 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
   private static final Logger log = Logger.getLogger(LibrariesDAOTest.class);
 
   protected LibrariesDAO librariesDao;
-
-
-  public void testCreateAndModifyCompound()
+  
+  public void testFindReagent()
   {
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Compound compound = new Compound("compound P", "inchi");
-          compound.addChembankId("P");
-          genericEntityDao.saveOrUpdateEntity(compound);
-        }
-      });
-
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          // look up a compound and modify it
-          Compound compound = genericEntityDao.findEntityByProperty(
-            Compound.class,
-            "smiles",
-            "compound P");
-          assertNotNull("compound exists", compound);
-          assertEquals("chembank id", "P", compound.getChembankIds().iterator().next());
-          compound.removeChembankId("P");
-          compound.addChembankId("P'");
-        }
-      });
-
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          // look up a compound and modify it
-          Compound compound = genericEntityDao.findEntityByProperty(
-            Compound.class,
-            "smiles",
-            "compound P");
-          assertNotNull("compound exists", compound);
-          assertEquals("chembank id modified", "P'", compound.getChembankIds().iterator().next());
-        }
-      });
-  }
-
-  public void testCreateLibraryWellCompound()
-  {
-    // create a new well, add compound p to it
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Library library = new Library(
-            "library Q",
-            "Q",
-            ScreenType.SMALL_MOLECULE,
-            LibraryType.KNOWN_BIOACTIVES,
-            1,
-            2);
-          Compound compound = new Compound("compound P", "inchi");
-          Well well = library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
-          well.addCompound(compound);
-          genericEntityDao.saveOrUpdateEntity(library);
-        }
-      });
-
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Library library = genericEntityDao.findEntityByProperty(
-            Library.class,
-            "libraryName",
-            "library Q");
-          assertEquals("Library's Well count", 1, library.getWells().size());
-          assertEquals("library has type", LibraryType.KNOWN_BIOACTIVES, library.getLibraryType());
-          Well well = library.getWells().iterator().next();
-          Compound compound = genericEntityDao.findEntityByProperty(
-            Compound.class,
-            "smiles",
-            "compound P");
-          assertEquals("library has well", "A01", well.getWellName());
-          assertEquals("Well's Compound count", 1, well.getCompounds().size());
-          assertEquals("Compound's Well count", 1, compound.getWells().size());
-          assertEquals("Well-Compound association", "compound P", well.getCompounds().iterator().next().getSmiles());
-          assertEquals("Compound-Well association", "A01", compound.getWells().iterator().next().getWellName());
-      }
-    });
-  }
-
-  /**
-   * Tests whether a Well's compounds can be modified after it has been loaded
-   * from the database. (This is more a test of Hibernate than of our
-   * application.)
-   */
-  public void testCreateWellModifyLater()
-  {
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Library library = new Library(
-            "library Q",
-            "Q",
-            ScreenType.SMALL_MOLECULE,
-            LibraryType.KNOWN_BIOACTIVES,
-            1,
-            2);
-          library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
-          genericEntityDao.saveOrUpdateEntity(library);
-        }
-      });
-
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library Q");
-          Well well = library.getWells().iterator().next();
-          Compound compound = new Compound("compound P", "inchi");
-          well.addCompound(compound);
-        }
-      });
-
-    genericEntityDao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library Q");
-          Well well = library.getWells().iterator().next();
-          assertTrue(well.getCompounds().contains(new Compound("compound P", "inchi P")));
-        }
-      });
+    TestDataFactory dataFactory = new TestDataFactory();
+    SilencingReagent silencingReagent = dataFactory.newInstance(SilencingReagent.class);
+    new EntityNetworkPersister(genericEntityDao, silencingReagent).persistEntityNetwork();
+    
+    Set<Reagent> reagents = librariesDao.findReagents(silencingReagent.getVendorId(), false);
+    assertEquals(1, reagents.size());
+    assertEquals(silencingReagent.getVendorId(), reagents.iterator().next().getVendorId());
+    assertTrue(reagents.iterator().next() instanceof SilencingReagent);
+    
+    reagents = librariesDao.findReagents(silencingReagent.getVendorId(), true);
+    assertEquals(0, reagents.size());
+   
+    Library library = silencingReagent.getWell().getLibrary();
+    LibraryContentsVersion lcv = library.getContentsVersions().first();
+    lcv.release(new AdministrativeActivity(lcv.getLoadingActivity().getPerformedBy(),
+                                           new LocalDate(),
+                                           AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    LibraryContentsVersion lcv2 = library.createContentsVersion(new AdministrativeActivity(lcv.getLoadingActivity().getPerformedBy(),
+                                                                                           new LocalDate(),
+                                                                                           AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    silencingReagent.getWell().createSilencingReagent(silencingReagent.getVendorId(), SilencingReagentType.SIRNA, "AAAC");
+    genericEntityDao.saveOrUpdateEntity(lcv2.getLibrary());
+    reagents = librariesDao.findReagents(silencingReagent.getVendorId(), true);    
+    assertEquals(1, reagents.size());
   }
 
   public void testRemainingWellVolume()
@@ -224,9 +125,9 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
 
         RNAiCherryPickRequest cherryPickRequest = CherryPickRequestAllocatorTest.createRNAiCherryPickRequest(1, new Volume(2));
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(wellA01);
-        LabCherryPick labCherryPick1 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, wellA01);
+        LabCherryPick labCherryPick1 = dummyScreenerCherryPick.createLabCherryPick(wellA01);
         labCherryPick1.setAllocated(copyE);
-        LabCherryPick labCherryPick2 = cherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, wellB02);
+        LabCherryPick labCherryPick2 = dummyScreenerCherryPick.createLabCherryPick(wellB02);
         labCherryPick2.setAllocated(copyF);
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLabHead());
@@ -261,18 +162,140 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     assertEquals("G:C03", null,  librariesDao.findRemainingVolumesInWellCopies(wellC03).get(copyG));
   }
   
-  public void testDeleteSmallMoleculeLibraryContents()
+  public void testDeleteLibraryContentsVersion()
   {
-    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 20);
-    genericEntityDao.persistEntity(library);
-    doTestDeleteLibraryContents(library);
-  }
+    final TestDataFactory dataFactory = new TestDataFactory();
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = dataFactory.newInstance(Library.class);
+        library.setScreenType(ScreenType.RNAI);
+        librariesDao.loadOrCreateWellsForLibrary(library);
+        LibraryContentsVersion lcv1 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+        for (Well well : library.getWells()) {
+          if (well.getWellKey().getColumn() == 0) {
+            well.setLibraryWellType(LibraryWellType.EMPTY);
+          }
+          else {
+            well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
+            int x = well.getWellKey().hashCode();
+            SilencingReagent reagent = well.createSilencingReagent(new ReagentVendorIdentifier("vendor", "rvi" + x),
+                                                                   SilencingReagentType.SIRNA,
+                                                                   "ACTG");
+            reagent.getFacilityGene().withEntrezgeneId(x).withGeneName("gene" + x).withGenbankAccessionNumber("gb" + x).withSpeciesName("species");
+            reagent.getVendorGene().withEntrezgeneId(x).withGeneName("gene" + x).withGenbankAccessionNumber("gb" + x).withSpeciesName("species");
+          }
+        }
 
-  public void testDeleteRnaiLibraryContents()
-  {
-    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 2);
-    genericEntityDao.persistEntity(library);
-    doTestDeleteLibraryContents(library);
+        LibraryContentsVersion lcv2 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+        for (Well well : library.getWells()) {
+          if (well.getWellKey().getColumn() == 0) {
+            well.setLibraryWellType(LibraryWellType.EMPTY);
+          }
+          else {
+            well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
+            int x = well.getWellKey().hashCode() * 17;
+            SilencingReagent reagent = well.createSilencingReagent(new ReagentVendorIdentifier("vendor", "rvi" + x),
+                                                                   SilencingReagentType.SIRNA,
+                                                                   "ACTG");
+            reagent.getFacilityGene().withEntrezgeneId(x).withGeneName("gene" + x).withGenbankAccessionNumber("gb" + x).withSpeciesName("species");
+            reagent.getVendorGene().withEntrezgeneId(x).withGeneName("gene" + x).withGenbankAccessionNumber("gb" + x).withSpeciesName("species");
+          }
+        }
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = genericEntityDao.findAllEntitiesOfType(Library.class).get(0);
+        LibraryContentsVersion lcv2 = library.getLatestContentsVersion();
+        assertEquals(Integer.valueOf(2), lcv2.getVersionNumber());
+        librariesDao.deleteLibraryContentsVersion(lcv2);
+        // test in-memory representation updated properly
+        assertEquals(1, library.getContentsVersions().size());
+        LibraryContentsVersion lcv1 = library.getLatestContentsVersion();
+        assertEquals(1, lcv1.getVersionNumber().intValue());
+        for (Well well : library.getWells()) {
+          if (well.getColumn() != 0) {
+            assertEquals(1, well.getReagents().size());
+            assertNull(well.getReagents().get(lcv2));
+            assertNotNull(well.getReagents().get(lcv1));
+          }
+        }
+      }
+    });
+    // test in-database representation updated properly
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = genericEntityDao.findAllEntitiesOfType(Library.class).get(0);
+        assertEquals(1, library.getContentsVersions().size());
+        LibraryContentsVersion lcv1 = library.getLatestContentsVersion();
+        assertEquals(1, lcv1.getVersionNumber().intValue());
+        for (Well well : library.getWells()) {
+          if (well.getColumn() != 0) {
+            assertEquals(1, well.getReagents().size());
+            assertNotNull(well.getReagents().get(lcv1));
+          }
+        }
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = genericEntityDao.findAllEntitiesOfType(Library.class).get(0);
+        LibraryContentsVersion lcv1 = library.getLatestContentsVersion();
+        assertEquals(Integer.valueOf(1), lcv1.getVersionNumber());
+        librariesDao.deleteLibraryContentsVersion(lcv1);
+      }
+    });
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = genericEntityDao.findAllEntitiesOfType(Library.class).get(0);
+        assertEquals(0, library.getContentsVersions().size());
+        assertNull(library.getLatestContentsVersion());
+        for (Well well : library.getWells()) {
+          assertEquals(0, well.getReagents().size());
+          assertEquals(LibraryWellType.UNDEFINED, well.getLibraryWellType());
+        }
+      }
+    });
+
+    // sanity check
+    assertTrue(genericEntityDao.findAllEntitiesOfType(LibraryContentsVersion.class).isEmpty());
+    assertTrue(genericEntityDao.findAllEntitiesOfType(Reagent.class).isEmpty());
+    
+    // verify that released contents versions cannot be deleted
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = genericEntityDao.findAllEntitiesOfType(Library.class).get(0);
+        LibraryContentsVersion lcv1 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+        AdministrativeActivity releaseAdminActivity = new AdministrativeActivity(lcv1.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE);
+        lcv1.release(releaseAdminActivity);
+      }
+    });
+    try {
+      genericEntityDao.doInTransaction(new DAOTransaction() {
+        public void runTransaction()
+        {
+          Library library = genericEntityDao.findAllEntitiesOfType(Library.class).get(0);
+          LibraryContentsVersion releasedContentsVersion = library.getLatestReleasedContentsVersion();
+          assertNotNull(releasedContentsVersion);
+          assertTrue(releasedContentsVersion.isReleased());
+          try {
+            librariesDao.deleteLibraryContentsVersion(releasedContentsVersion);
+            fail("expecting BusinessRuleViolationException when deleting released library contents version");
+          }
+          catch (Exception e) {}
+        }
+      });
+    }
+    catch (UnexpectedRollbackException e) { /* why are we getting this? */}
   }
 
   public void testCreateRNaiLibraryContentsInclOwner()
@@ -289,49 +312,5 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     Library resultLibrary = genericEntityDao.findEntityById(Library.class,new Integer(library.getLibraryId()));
     ScreeningRoomUser resultOwner = resultLibrary.getOwner();
     resultOwner.equals(owner);
-    
   }
-
-  
-  private void doTestDeleteLibraryContents(Library library)
-  {
-    int i = 0;
-    for (Well well : library.getWells()) {
-      if (well.getWellType() == WellType.EXPERIMENTAL) {
-        if (library.getScreenType() == ScreenType.SMALL_MOLECULE && well.getCompounds().size() > 0) {
-          ++i;
-        }
-        else if (library.getScreenType() == ScreenType.RNAI && well.getSilencingReagents().size() > 0) {
-          ++i;
-        }
-      }
-    }
-    assertTrue("has library contents before delete library contents", i > 0);
-
-    librariesDao.deleteLibraryContents(library);
-    Library library2 = genericEntityDao.findEntityByProperty(Library.class,
-                                                             "libraryName",
-                                                             "library 1",
-                                                             true,
-                                                             "wells.compounds", 
-                                                             "wells.silencingReagents", 
-                                                             "wells.molfileList");
-    doTestWellsAreEmpty(library2);
-  }
-
-  private void doTestWellsAreEmpty(Library library)
-  {
-    for (Well well : library.getWells()) {
-      assertEquals("compounds", 0, well.getCompounds().size());
-      assertEquals("silencing reagents count", 0, well.getSilencingReagents().size());
-      assertEquals("genes count", 0, well.getGenes().size());
-      assertNull(well.getReagent());
-      assertNull(well.getGenbankAccessionNumber());
-      assertNull(well.getIccbNumber());
-      assertNull(well.getMolfile());
-      assertNull(well.getSmiles());
-      assertEquals(WellType.EMPTY, well.getWellType());
-    }
-  }
-
 }

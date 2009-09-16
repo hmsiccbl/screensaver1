@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.util;
 
 import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * A 2-tuple.
@@ -31,6 +32,10 @@ public class Pair<F,S>
   {
     _first = first;
     _second = second;
+  }
+  
+  public static <F, S> Pair<F, S> newPair(F first, S second) {
+    return new Pair<F, S>(first, second);
   }
 
   /**

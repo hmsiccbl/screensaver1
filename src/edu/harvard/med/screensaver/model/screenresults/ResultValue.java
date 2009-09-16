@@ -26,10 +26,12 @@ import javax.persistence.Transient;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 
 
@@ -50,7 +52,7 @@ import org.hibernate.annotations.Index;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@org.hibernate.annotations.Entity(mutable=false)
+@Immutable
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ResultValueType.class)
 @org.hibernate.annotations.Table(appliesTo = "result_value",
@@ -72,6 +74,8 @@ public class ResultValue extends AbstractEntity
       FORMAT_STRINGS[i] = "%1." + i + "f";
     }
   }
+
+  public static final RelationshipPath<ResultValue> ResultValueType = new RelationshipPath<ResultValue>(ResultValue.class, "resultValueType");
 
 
   // public static methods
@@ -660,12 +664,12 @@ public class ResultValue extends AbstractEntity
     if (assayWellType == AssayWellType.ASSAY_CONTROL ||
       assayWellType == AssayWellType.ASSAY_POSITIVE_CONTROL ||
       assayWellType == AssayWellType.OTHER) {
-      if (_well.getWellType() != WellType.EMPTY) {
+      if (_well.getLibraryWellType() != LibraryWellType.EMPTY) {
         log.warn(/*(
         throw new DataModelViolationException(*/"result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
       }
     }
-    else if (!_well.getWellType().getValue().equals(assayWellType.getValue())) {
+    else if (!_well.getLibraryWellType().getValue().equals(assayWellType.getValue())) {
       log.warn(/*
       throw new DataModelViolationException(*/"result value assay well type does not match library well type of associated well");
     }

@@ -52,6 +52,7 @@ public abstract class PubchemPugClient extends EutilsUtils
   abstract protected List<String> getResultsFromOutputDocument(Document outputDocument) throws EutilsException;
 
 
+  //TODO: this does the same thing as initializeDocumentBuilder on the base class
   protected PubchemPugClient()
   {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -119,7 +120,7 @@ public abstract class PubchemPugClient extends EutilsUtils
       return connection.getInputStream();
     }
     catch (Exception e) {
-      log.warn("failed to connect to PUG URL \"" + url + "\"");
+      log.warn("failed to connect to PUG URL \"" + url + "\"", e);
       throw new EutilsConnectionException();
     }
   }
@@ -241,6 +242,10 @@ public abstract class PubchemPugClient extends EutilsUtils
   }
 
   protected String getReqidFromOutputDocument(Document outputDocument) {
+    if (outputDocument == null) {
+      log.warn("outputDocument == null, in getReqidFromOutputDocument.");
+      return null;
+    }
     NodeList nodes = outputDocument.getElementsByTagName("PCT-Waiting_reqid");
     if (nodes.getLength() == 0) {
       return null;

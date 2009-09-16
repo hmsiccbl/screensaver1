@@ -11,22 +11,16 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.beans.IntrospectionException;
 
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
+import junit.framework.TestSuite;
 
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 public class RNAiKnockdownConfirmationTest extends AbstractEntityInstanceTest<RNAiKnockdownConfirmation>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(RNAiKnockdownConfirmationTest.class);
-
-
-  // instance data members
-
-  
-  // public constructors and methods
+  public static TestSuite suite()
+  {
+    return buildTestSuite(RNAiKnockdownConfirmationTest.class, RNAiKnockdownConfirmation.class);
+  }
 
   public RNAiKnockdownConfirmationTest() throws IntrospectionException
   {

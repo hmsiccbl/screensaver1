@@ -25,29 +25,29 @@ import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.ui.libraries.WellCopy;
 
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * A DAO implementation that can be used in a database-free environment.
@@ -67,14 +67,12 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 
   private Library _library;
 
-  private Screen _screen;
-
   public MockDaoForScreenResultImporter()
   {
     _library =
       new Library(NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
                   NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
-                  ScreenType.OTHER,
+                  ScreenType.SMALL_MOLECULE,
                   LibraryType.OTHER,
                   1,
                   Integer.MAX_VALUE);
@@ -83,7 +81,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public Well findWell(WellKey wellKey)
   {
     try {
-      return _library.createWell(wellKey, WellType.EXPERIMENTAL);
+      return _library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
     }
     catch (DuplicateEntityException e) {
       for (Well well : _library.getWells()) {
@@ -93,17 +91,6 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
       }
       return null;
     }
-  }
-
-  public Well findWell(WellKey wellKey, boolean loadContents)
-  {
-    return findWell(wellKey);
-  }
-
-
-  public List<Well> findReagentWellsByVendorId(ReagentVendorIdentifier reagentVendorIdentifier)
-  {
-    return new ArrayList<Well>();
   }
 
   public Collection<String> findAllVendorNames()
@@ -116,18 +103,13 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return _library;
   }
 
-  public void deleteLibraryContents(Library library)
+  public Set<Reagent> findReagents(ReagentVendorIdentifier rvi, boolean latestReleasedVersionsOnly)
   {
+    return Sets.newHashSet();
   }
 
-  public List<Library> findLibrariesDisplayedInLibrariesBrowser()
+  public void deleteLibraryContentsVersion(LibraryContentsVersion libraryContentsVersion)
   {
-    return null;
-  }
-
-  public SilencingReagent findSilencingReagent(Gene gene, SilencingReagentType silencingReagentType, String sequence)
-  {
-    return null;
   }
 
   public Set<Well> findWellsForPlate(int plate)
@@ -192,7 +174,13 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
   {
     if (entityClass.equals(Screen.class) && propertyName.equals("screenNumber")) {
-      return (E) MakeDummyEntities.makeDummyScreen(((Integer) propertyValue));
+      LabHead user = new LabHead("First", "Last", "email", null);
+      Screen screen = new Screen(user,
+                                 user,
+                                 (Integer) propertyValue,
+                                 ScreenType.SMALL_MOLECULE,
+                                 "title");
+      return (E) screen;
     }
     return null;
   }

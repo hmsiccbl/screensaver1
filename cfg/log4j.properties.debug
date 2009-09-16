@@ -30,28 +30,29 @@ log4j.logger.userActivity=info
 
 log4j.logger.edu.harvard.med.screensaver=info
 #log4j.logger.edu.harvard.med.screensaver.db=debug
+#log4j.logger.edu.harvard.med.screensaver.db.datafetcher=debug
 #log4j.logger.edu.harvard.med.screensaver.ui=debug
 #log4j.logger.edu.harvard.med.screensaver.io=debug
+#log4j.logger.edu.harvard.med.screensaver.io.libraries=debug
 #log4j.logger.edu.harvard.med.screensaver.ui.table=debug
 #log4j.logger.edu.harvard.med.screensaver.ui.searchresults=debug
 #log4j.logger.edu.harvard.med.screensaver.service.cherrypicks=debug
 #log4j.logger.edu.harvard.med.screensaver.model=debug
+#log4j.logger.edu.harvard.med.screensaver.model.AbstractEntityInstanceTester=info
+#log4j.logger.edu.harvard.med.screensaver.model.EntityNetworkPersister=debug
 #log4j.logger.edu.harvard.med.screensaver.util.eutils=debug
 
 #log4j.logger.org.apache.commons.dbcp=debug
 #log4j.logger.springframework.jdbc=debug
-
-
 
 log4j.logger.edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter=debug
 
 # filter out debug output that is especially verbose and common
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessCollectionDaoMethodInterceptor=warn
 log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInterceptor=warn
-log4j.logger.edu.harvard.med.screensaver.db.SchemaUtil=debug
+log4j.logger.edu.harvard.med.screensaver.db.SchemaUtil=info
 log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl.EntityInflator=warn
 log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
-log4j.logger.edu.harvard.med.screensaver.io.libraries.compound.OpenBabelClient=info
 
 # avoid writing database passwords to the log!
 log4j.logger.edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer=info
@@ -167,3 +168,4 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 # enable the following line if you want to track down connection
 # leakages when using DriverManagerConnectionProvider
 #log4j.logger.org.hibernate.connection.DriverManagerConnectionProvider=trace
+

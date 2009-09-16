@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.io.screens;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import jxl.BooleanCell;
 import jxl.Cell;
@@ -29,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class StudyAnnotationParser
 {
@@ -89,19 +91,28 @@ public class StudyAnnotationParser
       for (int iRow = 0; iRow < sheet.getRows(); ++iRow) {
         Cell reagentIdCell = sheet.getCell(0, iRow);
         String reagentId = reagentIdCell.getContents();
-        ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(reagentId);
-        Reagent reagent = _dao.findEntityById(Reagent.class, rvi, true, "studies");
-        _dao.needReadOnly(reagent, "annotationValues");
-        if (reagent == null) {
+        ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(reagentId.split(":", 2)[0], 
+                                                                  reagentId.split(":", 2)[1]);
+        
+        Map<String,Object> queryProps = Maps.newHashMap();
+        queryProps.put(Reagent.vendorIdentifier.getPath(), rvi.getVendorIdentifier());
+        queryProps.put(Reagent.vendorName.getPath(), rvi.getVendorName());
+        List<Reagent> reagents = _dao.findEntitiesByProperties(Reagent.class, 
+                                                               queryProps, 
+                                                               true, 
+                                                               Reagent.studies.getPath());
+        if (reagents.isEmpty()) {
           throw new UnrecoverableParseException("no such reagent with identifier " + rvi);
-          //reagent = new Reagent(rvi);
         }
-        study.addReagent(reagent);
-        for (int iAnnot = 0; iAnnot < study.getAnnotationTypes().size(); ++iAnnot) {
-          int iCol = iAnnot + 1;
-          AnnotationType annotationType = annotationTypes.get(iAnnot);
-          Cell valueCell = sheet.getCell(iCol, iRow);
-          annotationType.createAnnotationValue(reagent, valueCell.getContents());
+        for (Reagent reagent : reagents) {
+          _dao.needReadOnly(reagent, Reagent.annotationValues.getPath());
+          study.addReagent(reagent);
+          for (int iAnnot = 0; iAnnot < study.getAnnotationTypes().size(); ++iAnnot) {
+            int iCol = iAnnot + 1;
+            AnnotationType annotationType = annotationTypes.get(iAnnot);
+            Cell valueCell = sheet.getCell(iCol, iRow);
+            annotationType.createAnnotationValue(reagent, valueCell.getContents());
+          }
         }
       }
     }

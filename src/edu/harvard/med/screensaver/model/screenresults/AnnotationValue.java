@@ -22,24 +22,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 
 /**
- * Annotation value on a particular library member (e.g. a compound or silencing
- * reagent). A single annotation value can be associated with multiple wells,
- * since it is possible for different wells to contains the same library member
- * (since Screensaver does not (currently) represent library members as
- * first-class entities, we use this many-to-many relationship instead). In
- * general, all wells that share the same annotation will also share the same
- * vendor identifier (though this is not enforced by the model).
+ * Annotation value on a library reagent.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -47,7 +41,7 @@ import org.hibernate.annotations.Immutable;
 @Entity
 @Immutable
 @org.hibernate.annotations.Proxy
-@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "annotationTypeId", "reagent_id" }) })
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "annotationTypeId", "reagentId" }) })
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=AnnotationType.class)
 public class AnnotationValue extends AbstractEntity
 {
@@ -57,11 +51,11 @@ public class AnnotationValue extends AbstractEntity
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationValue.class);
 
+  public static final RelationshipPath<AnnotationValue> annotationType = new RelationshipPath<AnnotationValue>(AnnotationValue.class, "annotationType");
 
   // private instance data
 
   private Integer _annotationValueId;
-  private Integer _version;
   private AnnotationType _annotationType;
   private Reagent _reagent;
   private String _value;
@@ -120,11 +114,11 @@ public class AnnotationValue extends AbstractEntity
    * @return the reagent the well is in.
    */
   @ManyToOne(fetch=FetchType.LAZY)
-  @JoinColumn(nullable=false, updatable=false, name="reagent_id")
+  @JoinColumn(name="reagentId", nullable=false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_reagent")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Index(name="annotation_value_reagent_id_index", columnNames={"reagent_id"})
+  @org.hibernate.annotations.Index(name="annotation_value_reagent_id_index", columnNames={"reagentId"})
   public Reagent getReagent()
   {
     return _reagent;
@@ -212,28 +206,6 @@ public class AnnotationValue extends AbstractEntity
   private void setAnnotationValueId(Integer annotationValueId)
   {
     _annotationValueId = annotationValueId;
-  }
-
-  /**
-   * Get the version for the annotation value.
-   * @return the version for the annotation value
-   * @motivation for hibernate
-   */
-  @Column(nullable=false)
-  @Version
-  private Integer getVersion()
-  {
-    return _version;
-  }
-
-  /**
-   * Set the version for the annotation value.
-   * @param version the new version for the annotation value
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version)
-  {
-    _version = version;
   }
 
   /**

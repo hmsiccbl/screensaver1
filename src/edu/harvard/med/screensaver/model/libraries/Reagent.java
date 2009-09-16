@@ -19,175 +19,154 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
+import javax.persistence.UniqueConstraint;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.MapKeyManyToMany;
-
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.MapKeyManyToMany;
+import org.hibernate.annotations.Type;
+
 
 /**
- * A substance, such as a {@link Compound} or {@link SilencingReagent}, used to
+ * A substance, such as a {@link SmallMoleculeReagent} or {@link SilencingReagent}, used to
  * test the response of a biological system to a specific perturbation. Reagents
  * are contained in {@link Library} {@link Well wells}.
- * <p>
- * <i>Note: The Reagent entity has been recently added to the data model, and
- * will ultimately be renamed to LibraryReagent and will become the parent of
- * {@link Compound} and {@link SilencingReagent}. This entity currently only
- * maintains a {@link ReagentVendorIdentifier} property, and all other useful
- * properties about a Well's reagent(s) can be found in the aforementioned
- * entity types.</i>
- * 
+ *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
-@Table(uniqueConstraints = {})
-@org.hibernate.annotations.Proxy
-public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reagent>
+@Immutable
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={"wellId", "libraryContentsVersionId"})})
+@org.hibernate.annotations.Proxy(lazy=false) // proxying causes problems with casts of getLatestReleasedReagent() return value
+@Inheritance(strategy=InheritanceType.JOINED)
+@ContainedEntity(containingEntityClass=Well.class)
+public abstract class Reagent extends AbstractEntity implements Comparable<Reagent>
 {
-
-  // static fields
-
-  private static final Logger log = Logger.getLogger(Well.class);
   private static final long serialVersionUID = 1;
 
-  // instance fields
+  public static final RelationshipPath<Reagent> libraryContentsVersion = new RelationshipPath<Reagent>(Reagent.class, "libraryContentsVersion");
+  public static final RelationshipPath<Reagent> well = new RelationshipPath<Reagent>(Reagent.class, "well");
+  public static final RelationshipPath<Reagent> annotationValues = new RelationshipPath<Reagent>(Reagent.class, "annotationValues");
+  public static final RelationshipPath<Reagent> studies = new RelationshipPath<Reagent>(Reagent.class, "studies");
+  public static final PropertyPath<Reagent> vendorName = new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorName");
+  public static final PropertyPath<Reagent> vendorIdentifier = new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorIdentifier");
 
-  private ReagentVendorIdentifier _reagentId;
-  private Integer _version;
-  private Set<Well> _wells = new HashSet<Well>();
+  private Integer _reagentId;
+  private LibraryContentsVersion _libraryContentsVersion;
+  private Well _well;
+  private ReagentVendorIdentifier _vendorId;
   private Map<AnnotationType,AnnotationValue> _annotationValues = new HashMap<AnnotationType,AnnotationValue>();
   private Set<Screen> _studies = new HashSet<Screen>();
 
 
-  // public instance methods
+  /**
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected Reagent() {}
 
   /**
-   * Construct an initialized <code>Reagent</code> object.
-   * 
-   * @param reagentVendorIdentifier
    * @motivation for {@link Library#createWell}
    */
-  public Reagent(ReagentVendorIdentifier reagentVendorIdentifier)
+  protected Reagent(ReagentVendorIdentifier reagentVendorIdentifier, Well well, LibraryContentsVersion libraryContentsVersion)
   {
-    _reagentId = reagentVendorIdentifier;
-  }
-
-  @Override
-  public Object acceptVisitor(AbstractEntityVisitor visitor)
-  {
-    return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public ReagentVendorIdentifier getEntityId()
-  {
-    return getReagentId();
+    _vendorId = reagentVendorIdentifier;
+    _well = well;
+    _libraryContentsVersion = libraryContentsVersion;
   }
 
   public int compareTo(Reagent o)
   {
-    return _reagentId.compareTo(o._reagentId);
+    return _vendorId.compareTo(o._vendorId);
   }
 
-  /**
-   * Get the well id for the well.
-   * 
-   * @return the well id for the well
-   */
+  @Override
+  @Transient
+  public Integer getEntityId()
+  {
+    return getReagentId();
+  }
+
   @Id
-  public ReagentVendorIdentifier getReagentId()
+  @org.hibernate.annotations.GenericGenerator(
+    name="reagent_id_seq",
+    strategy="sequence",
+    parameters = { @org.hibernate.annotations.Parameter(name="sequence", value="reagent_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="reagent_id_seq")
+  public Integer getReagentId()
   {
     return _reagentId;
   }
 
-  /**
-   * Get the reagent ID as a string. Note that this Hibernate property mapping
-   * is an alias for the reagentId property (they map to the same schema field).
-   * 
-   * @motivation We cannot directly use the reagentId property (a
-   *             ReagentVendorIdentifier type) in a PropertyPath, since if such
-   *             as PropertyPath is passed to
-   *             EntityDataFetcher.buildFetchKeysQuery() to create a Hibernate
-   *             filter query, it needs a String type argument for the query
-   *             parameter, not a ReagentVendorIdentifier object (and not sure
-   *             if we can make Hibernate perform the necessary implicit cast
-   *             when setting this query argument). See
-   *             ReagentSearchResults.buildReagentPropertyColumns(), "Reagent
-   *             Source ID" column.
-   * @return reagent ID as a String
-   */
-  @Column(name = "reagentId", updatable = false, insertable = false)
-  public String getReagentIdString()
+  private void setReagentId(Integer reagentId)
   {
-    return _reagentId.getReagentId();
+    _reagentId = reagentId;
   }
 
-  public void setReagentIdString(String reagentIdString)
+  @Column
+  @Type(type="text")
+  public ReagentVendorIdentifier getVendorId()
   {
-  // do nothing; set by setReagentId()
-  }
-
-  /**
-   * Get the set of wells.
-   * 
-   * @return the set of wells
-   */
-  @OneToMany(mappedBy = "reagent", fetch = FetchType.LAZY)
-  public Set<Well> getWells()
-  {
-    return _wells;
-  }
-
-  /**
-   * Add the well.
-   * 
-   * @param well the well to add
-   * @return true iff the reagent did not already have the well
-   */
-  public boolean addWell(Well well)
-  {
-    if (!_wells.contains(well)) {
-      well.setReagent(this);
-      return _wells.contains(well);
+    if (_vendorId == null) {
+      return ReagentVendorIdentifier.NULL_VENDOR_ID;
     }
-    return false;
+    return _vendorId;
   }
 
-  /**
-   * Remove the well.
-   * 
-   * @param well the well to remove
-   * @return true iff the reagent previously had the well
-   */
-  public boolean removeWell(Well well)
+  private void setVendorId(ReagentVendorIdentifier vendorId)
   {
-    if (_wells.contains(well)) {
-      well.setReagent(null);
-      return !_wells.contains(well);
-    }
-    return false;
+    _vendorId = vendorId;
   }
 
-  /**
-   * Get the set of annotation values.
-   * 
-   * @return the set of annotation values
-   */
+  @ManyToOne(fetch=FetchType.LAZY)
+  @JoinColumn(name="wellId", nullable=false, updatable=false)
+  @org.hibernate.annotations.ForeignKey(name="fk_reagent_to_well")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  public Well getWell()
+  {
+    return _well;
+  }
+
+  private void setWell(Well well)
+  {
+    _well = well;
+  }
+
+  @ManyToOne(fetch=FetchType.LAZY)
+  @JoinColumn(name="libraryContentsVersionId", nullable=false, updatable=false)
+  @org.hibernate.annotations.ForeignKey(name="fk_reagent_to_library_contents_version")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  public LibraryContentsVersion getLibraryContentsVersion()
+  {
+    return _libraryContentsVersion;
+  }
+
+  private void setLibraryContentsVersion(LibraryContentsVersion libraryContentsVersion)
+  {
+    _libraryContentsVersion = libraryContentsVersion;
+  }
+
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "reagent")
+  @ToMany(hasNonconventionalMutation=true /* model unit tests don't handle Maps yet, tested in ReagentTest#testAnnotationValueMap */)
   /* @LazyCollection(LazyCollectionOption.EXTRA) */
   @MapKeyManyToMany(joinColumns = { @JoinColumn(name = "annotationTypeId") }, targetEntity = AnnotationType.class)
   public Map<AnnotationType,AnnotationValue> getAnnotationValues()
@@ -196,10 +175,10 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
   }
 
   @ManyToMany(targetEntity = Screen.class, mappedBy = "reagents", fetch = FetchType.LAZY)
+  @ToMany(singularPropertyName = "study", hasNonconventionalMutation=true /* model unit tests don't handle immutable to-many relationships, tested in ReagentTest#testAnnotationValueMap */) 
   @JoinColumn(name = "studyId", nullable = false, updatable = false)
   @org.hibernate.annotations.ForeignKey(name = "fk_reagent_to_study")
   @org.hibernate.annotations.LazyCollection(value = org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName = "study")
   public Set<Screen> getStudies()
   {
     return _studies;
@@ -223,69 +202,9 @@ public class Reagent extends SemanticIDAbstractEntity implements Comparable<Reag
     return false;
   }
 
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>Reagent</code> object.
-   * 
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected Reagent()
-  {}
-
-
-  // private methods
-
-  /**
-   * Set the reagent id for the reagent.
-   * 
-   * @param reagentId the new reagent id for the reagent
-   * @motivation for hibernate
-   */
-  private void setReagentId(ReagentVendorIdentifier reagentId)
-  {
-    _reagentId = reagentId;
-  }
-
-  /**
-   * Get the version of the reagent.
-   * 
-   * @return the version of the reagent
-   * @motivation for hibernate
-   */
-  @Version
-  @Column(nullable = false)
-  private Integer getVersion()
-  {
-    return _version;
-  }
-
-  /**
-   * Set the version of the reagent.
-   * 
-   * @param version the new version of the reagent
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version)
-  {
-    _version = version;
-  }
-
-  /**
-   * Set the set of wells
-   * 
-   * @param wells the new set of wells
-   * @motivation for hibernate
-   */
-  private void setWells(Set<Well> wells)
-  {
-    _wells = wells;
-  }
-
   /**
    * Set the set of annotation values
-   * 
+   *
    * @param annotationValues the new set of annotation values
    * @motivation for hibernate
    */

@@ -183,7 +183,7 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
 
   public String[] getHeatMapRowLabels()
   {
-    return getHeatMaps().get(_plateNumber.getSelectionIndex()).getPlateSize().getRowsLabels().toArray(new String[] {});
+    return getHeatMaps().get(_heatMapConfigurationsDataModel.getRowIndex()).getPlateSize().getRowsLabels().toArray(new String[] {});
   }
 
   public DataModel getCellTypeLegendDataModel()

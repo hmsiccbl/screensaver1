@@ -113,7 +113,7 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_plates_used_to_library_screening")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="platesUsed")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="platesUsed")
   public LibraryScreening getLibraryScreening()
   {
     return _libraryScreening;

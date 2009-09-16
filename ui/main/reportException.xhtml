@@ -26,13 +26,17 @@
 					escape="true"
 					title="If you are really upset about it, try the 'Feedback' link down at the very bottom" />
 				<h:panelGroup>
-					<h:commandButton id="tryAgain" value="Back"
-						style="font-size: large; font-weight: bold"
-						onclick="javascript:history.back()" disabled="true" />
-					<h:commandButton id="loginAgain"
+          <input type="button" value="Back"
+            style="font-size: large; font-weight: bold"
+            onclick="javascript:history.back()" />
+          <h:commandButton id="loginAgain"
 						action="#{exceptionReporter.loginAgain}" value="Login Again"
 						style="font-size: large; font-weight: bold" />
 				</h:panelGroup>
+        <br/>
+        <h:outputLink value="#{appInfo.feedbackUrl}" styleClass="label">
+          <h:outputText value="Report this problem to the authorities" />
+        </h:outputLink>
 			</t:panelGrid>
 
 			<t:panelGrid visibleOnUserRole="developer">

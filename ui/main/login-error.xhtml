@@ -19,12 +19,17 @@
     <h:form id="loginErrorForm">
       <t:outputText
         value="Based upon the user ID and password you provided, we are not yet sure of who you are.  In keeping with our policy of protecting data from unauthorized users, we cannot give you the benefit of the doubt and let you into this system. Instead, we must ask that you try once again to tell us who you are."
-        styleClass="" />
+        styleClass="label" />
+      <t:div styleClass="errorMessage">If you are a small molecule screener and have not yet signed the <a
+        href="http://iccb.med.harvard.edu/screening/application/ICCBL_NSRB_User%20Agreement_20090630.pdf">2009
+      Small Molecule User Agreement</a>, your Screensaver account has been disabled.  Please submit a signed <a
+        href="http://iccb.med.harvard.edu/screening/application/ICCBL_NSRB_User%20Agreement_20090630.pdf">agreement</a> to reinstate your account.</t:div>  
       <t:panelGrid columns="1">
         <t:commandButton value="Try again" action="#{menu.viewMain}"
           styleClass="command" />
-        <t:commandLink value="Forgot your user ID or password?"
-          action="#{menu.forgotIdOrPassword}" styleClass="command" />
+        <h:outputLink value="#{appInfo.feedbackUrl}" styleClass="label">
+          <h:outputText value="I am having trouble logging into Screensaver" />
+        </h:outputLink>
       </t:panelGrid>
     </h:form>
 

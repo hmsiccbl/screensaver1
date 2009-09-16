@@ -98,7 +98,7 @@ public class AdministratorUser extends ScreensaverUser
     fetch=FetchType.LAZY
   )
   @OrderBy("dateApproved")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="activityApproved")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="activityApproved")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public Set<AdministrativeActivity> getActivitiesApproved()
   {

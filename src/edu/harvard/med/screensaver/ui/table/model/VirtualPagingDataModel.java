@@ -11,8 +11,8 @@
 
 package edu.harvard.med.screensaver.ui.table.model;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,29 +39,24 @@ import org.apache.log4j.Logger;
  */
 public abstract class VirtualPagingDataModel<K,E> extends DataTableModel<E>
 {
-
-  // static members
-
-  private static final int DEFAULT_ROWS_TO_FETCH = 1;
-
-
   private static Logger log = Logger.getLogger(VirtualPagingDataModel.class);
 
-
-  // instance data
+  private static final int MAX_CACHE_SIZE_ROWS = 1 << 8;
 
   protected DataFetcher<E,K,?> _dataFetcher;
   protected ValueReference<Integer> _rowsToFetch;
   protected int _rowIndex = -1;
   protected List<K> _sortedKeys;
   protected SortDirection _sortDirection;
-  protected Map<K,E> _fetchedRows = new HashMap<K,E>();
-
-  // constructors
-
-  protected VirtualPagingDataModel()
-  {
-  }
+  protected LinkedHashMap<K,E> _fetchedRows = new LinkedHashMap<K,E>(MAX_CACHE_SIZE_ROWS, 0.75F, true /* ordered by access */) {
+    private static final long serialVersionUID = 1L;
+    protected boolean removeEldestEntry(Map.Entry<K,E> eldest) { 
+      return _fetchedRows.size() >= MAX_CACHE_SIZE_ROWS;
+    }
+  };
+  
+  
+  protected VirtualPagingDataModel() {}
 
   public VirtualPagingDataModel(DataFetcher<E,K,?> dataFetcher,
                                 ValueReference<Integer> rowsToFetch)
@@ -187,10 +182,12 @@ public abstract class VirtualPagingDataModel<K,E> extends DataTableModel<E>
 
   private void cacheFetchedData(Map<K,E> fetchedData)
   {
+    assert fetchedData.size() <= MAX_CACHE_SIZE_ROWS : "number of new data rows are larger than cache size";
     _fetchedRows.putAll(fetchedData);
     if (log.isDebugEnabled()) {
       log.debug("fetched " + fetchedData.size() + " rows: " + _rowIndex +
                 " to " + ((_rowIndex + fetchedData.size()) - 1));
     }
+    assert _fetchedRows.size() <= MAX_CACHE_SIZE_ROWS;
   }
 }

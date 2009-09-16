@@ -107,9 +107,9 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   @JoinColumn(name = "checklistItemId", nullable = false, updatable = false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name = "fk_checklist_item_event_to_checklist_item")
-  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value = {})
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional = true)
+  @org.hibernate.annotations.LazyToOne(org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade({})
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
   public ChecklistItem getChecklistItem()
   {
     return _checklistItem;
@@ -142,12 +142,12 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
    * 
    * @return the screening room user
    */
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @ManyToOne(fetch = FetchType.LAZY, cascade = { /*CascadeType.PERSIST, CascadeType.MERGE*/ })
   @JoinColumn(name = "screeningRoomUserId", nullable = false, updatable = false)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name = "fk_checklist_item_event_to_screening_room_user")
-  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade({ /*org.hibernate.annotations.CascadeType.SAVE_UPDATE*/ })
+  @org.hibernate.annotations.LazyToOne(org.hibernate.annotations.LazyToOneOption.PROXY)
   public ScreeningRoomUser getScreeningRoomUser()
   {
     return _screeningRoomUser;
@@ -178,9 +178,9 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
   @JoinColumn(nullable = false, updatable = false, name = "entry_admin_activity_id")
   @org.hibernate.annotations.ForeignKey(name = "fk_well_to_entry_admin_activity")
-  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional = true)
+  @org.hibernate.annotations.LazyToOne(org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
   @Immutable
   public AdministrativeActivity getEntryActivity()
   {

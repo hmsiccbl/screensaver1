@@ -34,7 +34,6 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 
@@ -80,19 +79,19 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
             librariesDao.findWell(new WellKey(1, "A01")));
           // these cherry picks will force subsequent picks from the same well to be allocated from copy D
           Copy copyC = duplexLibrary.getCopy("C");
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A01"))).setAllocated(copyC);
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A02"))).setAllocated(copyC);
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A03"))).setAllocated(copyC);
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A01"))).setAllocated(copyC);
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A02"))).setAllocated(copyC);
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(6, "A03"))).setAllocated(copyC);
+          dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(5, "A01"))).setAllocated(copyC);
+          dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(5, "A02"))).setAllocated(copyC);
+          dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(5, "A03"))).setAllocated(copyC);
+          dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(6, "A01"))).setAllocated(copyC);
+          dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(6, "A02"))).setAllocated(copyC);
+          dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(6, "A03"))).setAllocated(copyC);
           // due to the "minimal copy usage" allocation feature, we need force
           // at least one D copy well on library plate 5 to be depleted, so that all cherry picks
           // (in the next cpr) are not allocated exclusively from copy D; the
           // effect will be that future picks from the above wells will be
           // allocated from copy D, and all others from copy C.
           Copy copyD = duplexLibrary.getCopy("D");
-          earlierCherryPickRequest.createLabCherryPick(dummyScreenerCherryPick, librariesDao.findWell(new WellKey(5, "A24"))).setAllocated(copyD);
+          dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(5, "A24"))).setAllocated(copyD);
 
           genericEntityDao.saveOrUpdateEntity(earlierCherryPickRequest.getScreen());
           genericEntityDao.flush(); // needed to make sure above allocations are in the database; allocate(), below, will query db (not just session) for existing well volume reservations
@@ -102,10 +101,9 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(
           librariesDao.findWell(new WellKey(1, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(false);
-        Set<WellName> emptyWells =
-          makeEmptyWellsFromColumnsAndRows(Arrays.asList(/*2,*/ 3, 4, 5, 6, /*7,*/ 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21),
-                                           Arrays.asList(3), 
-                                           duplexLibrary);
+        Set<WellName> emptyWells = makeEmptyWellsFromColumnsAndRows(Arrays.asList(/*2,*/ 3, 4, 5, 6, /*7,*/ 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 21),
+                                                                    Arrays.asList(3), 
+                                                                    duplexLibrary);
         cherryPickRequest.addEmptyWellsOnAssayPlate(emptyWells);
         // cherry picks intended for plate 1
         addLabCherryPicks(dummyScreenerCherryPick, 1, "A01", "A14"); // to assay plate 1, col 3 (fully) and 8 (partially)
@@ -206,9 +204,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         ScreenerCherryPick dummyScreenerCherryPick2 = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(2, "A01")));
         cherryPickRequest.setRandomizedAssayPlateLayout(true);
         Set<Integer> emptyColumns = Sets.newHashSet(3);
-        cherryPickRequest.addEmptyWellsOnAssayPlate(makeEmptyWellsFromColumnsAndRows(emptyColumns,
-                                                                                     Sets.<Integer>newHashSet(), 
-                                                                                     library));
+        cherryPickRequest.addEmptyWellsOnAssayPlate(makeEmptyWellsFromColumnsAndRows(emptyColumns, Sets.<Integer>newHashSet(), library));
         addLabCherryPicks(dummyScreenerCherryPick1, 1, "A01", "C24"); // create 72 cherry picks, to fill exactly 6 left-most available columns
         addLabCherryPicks(dummyScreenerCherryPick2, 2, "A01", "J12"); // create 228 cherry picks, to create an indivisible block of cherry picks that must be mapped to next plate
         genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen().getLeadScreener());
@@ -241,7 +237,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
    * Test that all available wells on a cherry pick plate are being assigned to
    * exactly once. By "available wells" we mean any well that is not in the
    * "required empty columns", "required empty rows", "screener-requested
-   * empty columns", and "screener-requested empty rows" are unused.
+   * empty columns", and "screener-requested empty rows" sets.
    */
   public void testCherryPickPlateIsFullyUtilized()
   {
@@ -396,9 +392,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         iColLast = plateSize.getColumns() - 1;
       }
       for (int iCol = iColFirst; iCol <= iColLast; ++iCol) {
-        screenerCherryPick.getCherryPickRequest().createLabCherryPick(
-          screenerCherryPick,
-          librariesDao.findWell(new WellKey(libraryPlateNumber, new WellName(iRow, iCol))));
+        screenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(libraryPlateNumber, new WellName(iRow, iCol))));
       }
     }
   }
@@ -456,7 +450,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
                                                          Collection<Integer> emptyRows, 
                                                          Library library)
   {
-    Set<WellName> emptyWells = new HashSet<WellName>();
+    Set<WellName> emptyWells = Sets.newHashSet(PlateSize.WELLS_384.getEdgeWellNames(2));
     if (emptyColumns != null) {
       for (Integer emptyColumn : emptyColumns) {
         for (int emptyRow = 0; emptyRow <= library.getPlateSize().getRows(); ++emptyRow) {

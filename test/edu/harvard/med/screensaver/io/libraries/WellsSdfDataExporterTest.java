@@ -21,13 +21,20 @@ import java.util.regex.Pattern;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 
 public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
@@ -40,8 +47,10 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
 
   class WellListDAOTransaction implements DAOTransaction
   {
+
     public void runTransaction()
     {
+      TestDataFactory dataFactory = new TestDataFactory();
       Library library = new Library(
         "dummy",
         "shortDummy",
@@ -49,11 +58,30 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
         LibraryType.COMMERCIAL,
         1,
         1);
-      genericEntityDao.saveOrUpdateEntity(library);
       librariesDao.loadOrCreateWellsForLibrary(library);
+      LibraryContentsVersion lcv1 = dataFactory.newInstance(LibraryContentsVersion.class, library);
       Set<Well> wellSet = library.getWells();
       for (Well well : wellSet) {
-        well.setMolfile("molfile for well " + well.getWellKey());
+        well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", well.getWellKey().toString()), 
+                                        "molfile " + lcv1.getVersionNumber() + " for well " + well.getWellKey(),
+                                        "",
+                                        "",
+                                        null,
+                                        null,
+                                        null);
+      }
+      library.getLatestContentsVersion().release(new AdministrativeActivity(library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+      
+      LibraryContentsVersion lcv2 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+      for (Well well : wellSet) {
+        well.createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor2", well.getWellKey().toString()), 
+                                        "molfile " + lcv2.getVersionNumber() + " for well " + well.getWellKey(),
+                                        "",
+                                        "",
+                                        null,
+                                        null,
+                                        null);
+        genericEntityDao.saveOrUpdateEntity(library);
       }
     }
   }
@@ -70,40 +98,47 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
   {
     WellsSdfDataExporter wellsDataExporter =
       new WellsSdfDataExporter(genericEntityDao);
+    wellsDataExporter.setLibraryContentsVersion(null);
     
     Set<String> wellKeys = new HashSet<String>();
     wellKeys.add("00001:A01");
     wellKeys.add("00001:A02");
     wellKeys.add("00001:A03");
-    InputStream exportedData = wellsDataExporter.export(wellKeys);
-    
-    verifyExpectedWellsExported(wellKeys, exportedData);
-  }
 
-  public void testExportWellDataToSDF() throws IOException 
-  {
-    WellSdfDataExporter exporter = new WellSdfDataExporter(genericEntityDao);
-    InputStream exportedData = exporter.export(genericEntityDao.findEntityById(Well.class, new WellKey("00001:A02").toString()));
-    Set<String> expectedWellKeys = new HashSet<String>();
-    expectedWellKeys.add("00001:A02");
-    verifyExpectedWellsExported(expectedWellKeys, exportedData);
+    LibraryContentsVersion lcv1 = genericEntityDao.findEntityByProperty(LibraryContentsVersion.class, "versionNumber", Integer.valueOf(1));
+    LibraryContentsVersion lcv2 = genericEntityDao.findEntityByProperty(LibraryContentsVersion.class, "versionNumber", Integer.valueOf(2));
+
+    InputStream exportedData = wellsDataExporter.export(wellKeys);
+    verifyExpectedWellsExported(wellKeys, lcv1, exportedData);
+    
+    wellsDataExporter.setLibraryContentsVersion(lcv1);
+    exportedData = wellsDataExporter.export(wellKeys);
+    verifyExpectedWellsExported(wellKeys, lcv1, exportedData);
+    
+    wellsDataExporter.setLibraryContentsVersion(lcv2);
+    exportedData = wellsDataExporter.export(wellKeys);
+    verifyExpectedWellsExported(wellKeys, lcv2, exportedData);
   }
 
   private void verifyExpectedWellsExported(Set<String> wellKeys,
+                                           LibraryContentsVersion lcv,
                                            InputStream exportedData)
     throws IOException
   {
     BufferedReader reader = new BufferedReader(new InputStreamReader(exportedData));
     String line;
-    Pattern p = Pattern.compile("molfile for well (.+)");
+    Pattern p = Pattern.compile("molfile (.+) for well (.+)");
+    Set<String> actualVersionNumbers = new HashSet<String>();
     Set<String> actualWellKeys = new HashSet<String>();
     while ((line = reader.readLine()) != null) {
       Matcher m = p.matcher(line);
       if (m.matches()) {
-        actualWellKeys.add(m.group(1));
+        actualVersionNumbers.add(m.group(1));
+        actualWellKeys.add(m.group(2));
       }
     }
     reader.close();
+    assertEquals("library contents version numbers", Sets.newHashSet(lcv.getVersionNumber().toString()), actualVersionNumbers); 
     assertEquals("exported well molfiles", wellKeys, actualWellKeys);
   }
 }

@@ -6,7 +6,6 @@
 	<classpathentry kind="src" path="web"/>
 	<classpathentry kind="src" path="database"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/cdk-1.0.1/cdk-1.0.1-custom.jar"/>
 	<classpathentry kind="lib" path="lib/endorsed/xalan-2.6.1-dev-20041008T0304.jar"/>
 	<classpathentry kind="lib" path="lib/endorsed/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="lib/endorsed/xml-apis.jar"/>
@@ -31,7 +30,7 @@
 	<classpathentry kind="lib" path="lib/testing/jsfunit/httpunit-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/testing/jsfunit/jboss-jsfunit-core-1.0.0.Beta2.jar"/>
 	<classpathentry kind="lib" path="lib/testing/jsfunit/jtidy-4aug2000r7-dev.jar"/>
-	<classpathentry kind="lib" path="lib/testing/junit-3.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/testing/junit-3.8.1.jar" sourcepath="/usr/local/dev/junit3.8.2/src.jar"/>
 	<classpathentry kind="lib" path="lib/util/jakarta-commons/commons-cli-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/util/jakarta-commons/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/util/jakarta-commons/commons-dbcp-1.2.2.jar"/>
@@ -81,11 +80,13 @@
 	<classpathentry kind="lib" path="lib/web/facelets/tomahawk-facelets-taglib.jar"/>
 	<classpathentry kind="lib" path="lib/web/jsp-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/web/struts-1.2.7.jar"/>
-	<classpathentry kind="lib" path="lib/springframework-2.5.4/.dev/spring-test.jar"/>
+	<classpathentry kind="lib" path="lib/springframework-2.5.4/.dev/spring-test.jar" sourcepath="/usr/local/dev/spring-framework-2.5.4/mock"/>
 	<classpathentry kind="lib" path="lib/web/.dev/servlet-api-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/REngine.jar"/>
 	<classpathentry kind="lib" path="lib/Rserve.jar"/>
-	<classpathentry kind="lib" path="lib/persistence/postgresql-8.3-603.jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/util/google-collect-snapshot-20080820.jar"/>
+	<classpathentry kind="lib" path="lib/util/findbugs/annotations.jar"/>
+	<classpathentry kind="lib" path="lib/pipelinepilot/pilot.jar"/>
+	<classpathentry kind="lib" path="lib/persistence/postgresql-8.4-701.jdbc3.jar"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>

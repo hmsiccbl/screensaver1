@@ -30,6 +30,8 @@ import edu.harvard.med.screensaver.util.Pair;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 /**
  * For a cherry pick request, generates the layout of the cherry picks onto a
  * set of assay plates.
@@ -74,7 +76,7 @@ public class CherryPickRequestPlateMapper
 
   private void doGeneratePlateMapping(CherryPickRequest cherryPickRequest)
   {
-    SortedSet<LabCherryPick> toBeMapped = findLabCherryPicksToBeMapped(cherryPickRequest);
+    List<LabCherryPick> toBeMapped = findLabCherryPicksToBeMapped(cherryPickRequest);
     List<WellName> availableWellNamesMaster = findAvailableWellNames(cherryPickRequest);
     if (availableWellNamesMaster.size() == 0) {
       throw new BusinessRuleViolationException("cannot map cherry picks because all cherry pick assay plate wells have been requested to be kept empty"); 
@@ -118,7 +120,7 @@ public class CherryPickRequestPlateMapper
 
       availableWellNamesOnCurrentPlate = new ArrayList<WellName>(availableWellNamesMaster);
       if (cherryPickRequest.isRandomizedAssayPlateLayout()) {
-        // only randomize over the left-most set of wells whose size is sufficent
+        // only randomize over the left-most set of wells whose size is sufficient
         // to accommodate the remaining cherry picks to be mapped
         availableWellNamesOnCurrentPlate.subList(Math.min(labCherryPicksAssignedToCurrentPlate.size(),
                                                           availableWellNamesOnCurrentPlate.size()),
@@ -157,7 +159,7 @@ public class CherryPickRequestPlateMapper
     return plateWellMapping;
   }
 
-  private List<LabCherryPick> findNextIndivisibleBlock(SortedSet<LabCherryPick> toBeMapped)
+  private List<LabCherryPick> findNextIndivisibleBlock(List<LabCherryPick> toBeMapped)
   {
     List<LabCherryPick> block = new ArrayList<LabCherryPick>();
     Integer plateNumber = null;
@@ -190,9 +192,9 @@ public class CherryPickRequestPlateMapper
     return availableWellNames;
   }
 
-  private SortedSet<LabCherryPick> findLabCherryPicksToBeMapped(CherryPickRequest cherryPickRequest)
+  private List<LabCherryPick> findLabCherryPicksToBeMapped(CherryPickRequest cherryPickRequest)
   {
-    SortedSet<LabCherryPick> toBeMapped = new TreeSet<LabCherryPick>(PlateMappingCherryPickComparator.getInstance());
+    List<LabCherryPick> toBeMapped = Lists.newArrayList();
     for (Iterator iter = cherryPickRequest.getLabCherryPicks().iterator(); iter.hasNext();) {
       LabCherryPick cherryPick = (LabCherryPick) iter.next();
       if (cherryPick.isMapped() || cherryPick.isPlated()) {
@@ -206,6 +208,7 @@ public class CherryPickRequestPlateMapper
         toBeMapped.add(cherryPick);
       }
     }
+    Collections.sort(toBeMapped, PlateMappingCherryPickComparator.getInstance());
     return toBeMapped;
   }
 }

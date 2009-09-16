@@ -21,13 +21,15 @@
 
   <!--  Policy & Service configuration section for web application-->
 
+  <import resource="spring-context-config.xml"/>
+
   <bean id="dataAccessPolicy"
    class="edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy">
    <constructor-arg ref="currentScreensaverUser" />
   </bean>
   
-  <bean id="compoundCherryPickRequestAllowancePolicy"
-   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.CompoundCherryPickRequestAllowancePolicy" >
+  <bean id="smallMoleculeCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy" >
     <constructor-arg ref="genericEntityDao"/>
   </bean>
 
@@ -37,14 +39,9 @@
   </bean>
  
   <bean id="structureImageProvider"
-        class="edu.harvard.med.iccbl.screensaver.io.libraries.compound.DaylightOrchestraStructureImageProvider" />
-  <!--
-  <<bean id="structureImageProvider" class="edu.harvard.med.screensaver.io.libraries.compound.PubChemStructureImageProvider" />
-  <bean id="structureImageProvider"
-   class="edu.harvard.med.iccbl.screensaver.io.libraries.compound.StaticHashedSmilesStructureImageProvider">
-     <constructor-arg value="http://localhost:8080/screensaver/images/sm/" />
-   </bean>
-  -->
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
+    <constructor-arg value="${screensaver.ui.structure_images_base_url}" />
+  </bean>
 
 
   <!--  Top-level web application construction -->

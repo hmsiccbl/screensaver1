@@ -66,6 +66,7 @@ implements UserType
   // private instance fields
 
   private Map<String,VT> _valueToTerm = new HashMap<String,VT>();
+  private Map<String,VT> _valueToTermCaseInsensitive = new HashMap<String,VT>();
 
 
   // protected constructor
@@ -74,6 +75,7 @@ implements UserType
   {
     for (VT vocabularyTerm : vocabularyTerms) {
       _valueToTerm.put(vocabularyTerm.getValue(), vocabularyTerm);
+      _valueToTermCaseInsensitive.put(vocabularyTerm.getValue().toLowerCase(), vocabularyTerm);
     }
   }
 
@@ -83,6 +85,18 @@ implements UserType
   public VT getTermForValue(String value)
   {
     return _valueToTerm.get(value);
+  }
+
+  public VT getTermForValueCaseInsensitive(String value)
+  {
+    if (value == null) {
+      return null;
+    }
+    VT vt = _valueToTermCaseInsensitive.get(value.toLowerCase());
+    if (vt == null) {
+      throw new IllegalArgumentException("'" + value + "' must be one of: " + _valueToTerm.keySet());
+    }
+    return vt;
   }
 
 

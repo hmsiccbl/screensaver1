@@ -17,6 +17,7 @@ import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
+import org.hibernate.annotations.Immutable;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 
@@ -60,6 +61,9 @@ extends AbstractEntityTester<E>
     org.hibernate.annotations.Entity entityAnnotation =
       _entityClass.getAnnotation(org.hibernate.annotations.Entity.class);
     if (entityAnnotation != null && ! entityAnnotation.mutable()) {
+      return;
+    }
+    if (_entityClass.getAnnotation(Immutable.class) != null) {
       return;
     }
   

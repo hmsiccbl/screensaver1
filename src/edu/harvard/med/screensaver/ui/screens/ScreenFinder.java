@@ -94,7 +94,7 @@ public class ScreenFinder extends AbstractBackingBean
   public String addLibraryScreening()
   {
     String result = findScreen();
-    if (result == BROWSE_SCREENS) {
+    if (result.equals(BROWSE_SCREENS)) {
       return _screenDetailViewer.addLibraryScreening();
     }
     return result;
@@ -103,7 +103,7 @@ public class ScreenFinder extends AbstractBackingBean
   public String addCherryPickRequest()
   {
     String result = findScreen();
-    if (result == BROWSE_SCREENS) {
+    if (result.equals(BROWSE_SCREENS)) {
       return _screenDetailViewer.addCherryPickRequest();
     }
     return result;

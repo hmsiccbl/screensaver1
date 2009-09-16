@@ -58,7 +58,7 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   {
     super(objects, isEmptyValueAllowed);
     if (defaultSelection == null) {
-      if (!_isEmptyValueAllowed && defaultSelection == null) {
+      if (!_isEmptyValueAllowed) {
         if (objects.size() > 0) {
           defaultSelection = objects.iterator().next(); 
         }

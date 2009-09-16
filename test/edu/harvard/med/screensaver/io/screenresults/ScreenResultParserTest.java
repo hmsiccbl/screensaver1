@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -37,10 +38,9 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultWorkbookSpecification.ScreenInfoRow;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
-import edu.harvard.med.screensaver.io.workbook2.ParseErrorManager;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
-import edu.harvard.med.screensaver.io.workbook2.Cell.Factory;
+import edu.harvard.med.screensaver.io.workbook2.Worksheet;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -69,7 +69,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String SCREEN_RESULT_116_TEST_WORKBOOK_FILE = "ScreenResultTest116.xls";
   public static final String SCREEN_RESULT_117_TEST_WORKBOOK_FILE = "ScreenResultTest117.xls";
-    public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
+  public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
   public static final String SCREEN_RESULT_MISSING_DERIVED_FROM_WORKBOOK_FILE = "ScreenResultTest115-missing-derived-from.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "ScreenResultErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
@@ -149,12 +149,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  4,
                  ((NumberFormulaCell) numericFormulaCell).getNumberFormat().getMaximumFractionDigits());
 
-    ParseErrorManager errors = new ParseErrorManager();
-    Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, FORMULA_VALUE_TEST_WORKBOOK_FILE),
-                                     errors);
-    Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
-    Cell cell = cellFactory.getCell((short) 3, (short) 1, false);
-    assertNotNull(cell);
+//    ParseErrorManager errors = new ParseErrorManager();
+    Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR, FORMULA_VALUE_TEST_WORKBOOK_FILE));
+    Worksheet worksheet = workbook.getWorksheet(0);
+//    Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
+    Cell cell = worksheet.getCell(3,1, false);
+    assertTrue(!cell.isEmpty());
     Double parsedNumericValue = cell.getDouble();
     assertEquals("parse numeric value",
                  numericValue,
@@ -162,7 +162,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  0.0001);
 
     // test numeric precision (TODO: should probably be a separate unit test)
-    Cell numericFormatFormulaCell = cellFactory.getCell((short) 3, (short) 1, false);
+    Cell numericFormatFormulaCell = worksheet.getCell(3,1, false);
     assertEquals("precision of numeric format on formula cell", 4,
                  numericFormatFormulaCell.getDoublePrecision());
 //    Cell generalFormatFormulaCell = cellFactory.getCell((short) 4, (short) 1);
@@ -171,13 +171,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
 //    Cell generalFormatNumericCell = cellFactory.getCell((short) 1, (short) 1);
 //    assertEquals("precision of general format on numeric cell", -1,
 //                 generalFormatNumericCell.getDoublePrecision());
-    Cell numericFormatNumericCell = cellFactory.getCell((short) 2, (short) 1);
+    Cell numericFormatNumericCell = worksheet.getCell(2, 1);
     assertEquals("precision of numeric format on numeric cell", 3,
                  numericFormatNumericCell.getDoublePrecision());
-    Cell integerNumericFormatNumericCell = cellFactory.getCell((short) 5, (short) 1);
+    Cell integerNumericFormatNumericCell = worksheet.getCell(5, 1);
     assertEquals("precision of integer number format on numeric cell", 0,
                  integerNumericFormatNumericCell.getDoublePrecision());
-    Cell percentageNumericCell = cellFactory.getCell((short) 6, (short) 1);
+    Cell percentageNumericCell = worksheet.getCell(6, 1);
     assertEquals("precision of percentage number format on numeric cell", 3,
                  percentageNumericCell.getDoublePrecision());
   }
@@ -207,7 +207,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     if (mockScreenResultParser.getHasErrors()) {
       log.debug("parse errors:\n" + StringUtils.makeListString(mockScreenResultParser.getErrors(), "\n"));
     }
-    assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
+    assertFalse("screen result had errors: " + mockScreenResultParser.getErrors(),
+        mockScreenResultParser.getHasErrors());
     assertEquals("well count", 4, (int) mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
   }
 
@@ -242,11 +243,12 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("formula", "G2>0.01", formula);
 
     // test boolean formula cell, read via our own Cell class
-    ParseErrorManager errors = new ParseErrorManager();
+//    ParseErrorManager errors = new ParseErrorManager();
     Workbook workbook = new Workbook(new File(TEST_INPUT_FILE_DIR,
-                                              FORMULA_VALUE_TEST_WORKBOOK_FILE), errors);
-    Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
-    Cell cell = cellFactory.getCell((short) 7, (short) 1, false);
+                                              FORMULA_VALUE_TEST_WORKBOOK_FILE));
+    Worksheet worksheet = workbook.getWorksheet(0);
+//    Cell.Factory cellFactory = new Cell.Factory(workbook, 0, errors);
+    Cell cell = worksheet.getCell(7, 1, false);
     assertNotNull(cell);
     assertEquals("parse boolean value",
                  booleanValue,
@@ -254,64 +256,24 @@ public class ScreenResultParserTest extends AbstractSpringTest
   }
 
   /**
-   * Tests that screen result errors are saved to a new set of workbooks.
-   * @throws IOException
-   * @throws BiffException
-   * @throws WriteException
+   * Tests that screen result errors are saved to an annotated error workbook.
    */
-  public void testErrorAnnotatedWorkbook() throws IOException, BiffException, WriteException
+  public void testErrorReporting() throws IOException, BiffException, WriteException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
-    WritableWorkbook errorAnnotatedWorkbook = mockScreenResultParser.getErrorAnnotatedWorkbook();
-    File file = File.createTempFile(ERRORS_TEST_WORKBOOK_FILE, ".xls");
-    errorAnnotatedWorkbook.setOutputFile(file);
-    errorAnnotatedWorkbook.write();
-    errorAnnotatedWorkbook.close();
-
-    assertTrue("error-annotated workbook file exists", file.exists());
-
-    // test error-annotated workbook contents
-    jxl.Workbook errorAnnotatedWorkbook2 = jxl.Workbook.getWorkbook(file);
-
-    // note: data sheets w/o errors are not exported
-    assertEquals("number of sheets", 2,
-                 errorAnnotatedWorkbook2.getNumberOfSheets());
-
-    Sheet sheet0 = errorAnnotatedWorkbook2.getSheet(0);
-
-    int i = ScreenResultWorkbookSpecification.SCREENINFO_FIRST_DATA_ROW_INDEX;
-    for (ScreenInfoRow screenInfoRow : ScreenInfoRow.values()) {
-      assertEquals("row " + i + " label",
-                   screenInfoRow.getDisplayText(),
-                   sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_ROW_HEADER_COLUMN_INDEX, i).getContents());
-      if (screenInfoRow.equals(ScreenInfoRow.ID)) {
-        assertEquals(screenInfoRow.name() + " value",
-                     new Integer(115),
-                     new Integer((int) ((NumberCell) sheet0.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, i)).getValue()));
-      }
-      ++i;
-    }
-
-    Sheet sheet1 = errorAnnotatedWorkbook2.getSheet(1);
-    assertEquals("SushiRaw: unparseable value \"sushiraw\" (expected one of [, derived, raw])",
-                 sheet1.getCell('C' - 'A', 6).getContents());
-    assertEquals("B: invalid Data Header column reference 'B' (expected one of [E, F])",
-                 sheet1.getCell('D' - 'A', 8).getContents());
-    assertEquals("H: invalid Data Header column reference 'H' (expected one of [E, F, G])",
-                 sheet1.getCell('E' - 'A', 8).getContents());
-    assertEquals("D,E: invalid Data Header column reference 'D' (expected one of [E, F, G, H])",
-                 sheet1.getCell('F' - 'A', 8).getContents());
-    assertEquals("unparseable value \"\" (expected one of [<, >])",
-                 sheet1.getCell('F' - 'A', 11).getContents());
-    assertEquals("Follow-up: unparseable value \"follow-up\" (expected one of [, follow up, primary])",
-                 sheet1.getCell('E' - 'A', 13).getContents());
-    assertEquals("Baloonean: unparseable value \"baloonean\" (expected one of [Boolean, Numeric, Numerical, Partition, Partitioned])",
-                 sheet1.getCell('H' - 'A', 10).getContents());
-    assertEquals("unparseable value \"\" (expected one of [<, >])",
-                 sheet1.getCell('H' - 'A', 11).getContents());
-    assertEquals("value required",
-                 sheet1.getCell('H' - 'A', 12).getContents());
+    List<WorkbookParseError> errors = mockScreenResultParser.getErrors();
+    assertTrue(errors.contains(new ParseError("unparseable value \"sushiraw\" (expected one of [, derived, raw])", "Data Headers:(C,7)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'B' (expected one of [E, F])", "Data Headers:(D,9)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"follow-up\" (expected one of [, follow up, primary])", "Data Headers:(E,14)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'H' (expected one of [E, F, G])", "Data Headers:(E,9)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'D' (expected one of [E, F, G, H])", "Data Headers:(F,9)")));
+    assertTrue(errors.contains(new ParseError("value required", "Data Headers:(F,12)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"\" (expected one of [<, >])", "Data Headers:(F,12)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"baloonean\" (expected one of [Boolean, Numeric, Numerical, Partition, Partitioned])", "Data Headers:(H,11)")));
+    assertTrue(errors.contains(new ParseError("value required", "Data Headers:(H,12)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"\" (expected one of [<, >])", "Data Headers:(H,12)")));
+    assertTrue(errors.contains(new ParseError("value required", "Data Headers:(H,13)")));
   }
 
   /**
@@ -323,12 +285,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testParseDateCell() throws IOException, BiffException, WriteException
   {
     File file = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-    ParseErrorManager errors = new ParseErrorManager();
-    Workbook workbook = new Workbook(file, errors);
-    Factory cellFactory = new Cell.Factory(workbook, 0, errors);
+//    ParseErrorManager errors = new ParseErrorManager();
+    Workbook workbook = new Workbook(file);
+    Worksheet worksheet = workbook.getWorksheet(0);
+//    Factory cellFactory = new Cell.Factory(workbook, 0, errors);
     assertEquals(ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING + " value",
                  new LocalDateTime(2006, 1, 1, 0, 0),
-                 cellFactory.getCell((short) ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, 
+                 worksheet.getCell(ScreenResultWorkbookSpecification.SCREENINFO_VALUE_COLUMN_INDEX, 
                                      ScreenInfoRow.DATE_FIRST_LIBRARY_SCREENING.ordinal()).getDate());
   }
 
@@ -338,8 +301,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
    * errorAnnotatedWorkbooks do not have more than 1 error per cell, which is a possibility in
    * the real world, but would break our naive test. (I suppose we could also
    * test simply that at least some of our ParseErrors' cells were different.)
+   * @throws FileNotFoundException 
    */
-  public void testRecycledCellUsage()
+  public void testRecycledCellUsage() throws FileNotFoundException
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
@@ -370,10 +334,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    }
 
   /**
-   * Tests parsing of the new ScreenResult workbook format, which is an
-   * "all-in-one" format, and has significant structural changes.
-   *
-   * @throws Exception
+   * This is the primary test of the ScreenResultParser.
    */
   public void testParseScreenResult() throws Exception
   {
@@ -449,7 +410,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
 
-  public void testIllegalScreenNumber()
+  public void testIllegalScreenNumber() throws FileNotFoundException
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(999);
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
@@ -459,7 +420,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  mockScreenResultParser.getErrors().get(0).getErrorMessage());
   }
 
-  public void testMultiCharColumnLabels()
+  public void testMultiCharColumnLabels() throws FileNotFoundException
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE);
@@ -514,7 +475,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
   
-  public void testMissingDerivedFrom()
+  public void testMissingDerivedFrom() throws FileNotFoundException
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_MISSING_DERIVED_FROM_WORKBOOK_FILE);

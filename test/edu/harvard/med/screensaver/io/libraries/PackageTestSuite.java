@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.io.libraries;
 
-import edu.harvard.med.screensaver.io.libraries.PackageTestSuite;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -28,9 +26,8 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
+    addTestSuite(LibraryContentsLoaderTest.class);
     addTestSuite(PlateWellListParserTest.class);
     addTestSuite(WellsSdfDataExporterTest.class);
-    addTest(edu.harvard.med.screensaver.io.libraries.rnai.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.io.libraries.compound.PackageTestSuite.suite());
   }
 }

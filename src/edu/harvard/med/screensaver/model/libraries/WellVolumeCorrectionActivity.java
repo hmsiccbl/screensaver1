@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 /**
@@ -97,6 +98,7 @@ public class WellVolumeCorrectionActivity extends AdministrativeActivity
     fetch=FetchType.LAZY
   )
   @JoinColumn(name="wellVolumeCorrectionActivityId")
+  @ToMany(hasNonconventionalMutation=true)
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well_volume_correction_activity")
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,

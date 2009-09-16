@@ -12,8 +12,7 @@
 
 	<ss:searchResult searchResults="#{wellsBrowser}">
 		<ui:define name="entityViewer">
-			<ui:include src="reagentViewerBody.xhtml">
-				<ui:param name="reagentViewer" value="#{wellViewer}" />
+			<ui:include src="wellViewerBody.xhtml">
         <ui:param name="wellViewerSpecialMessage" value="#{wellViewer.specialMessage}" />
 			</ui:include>
 		</ui:define>

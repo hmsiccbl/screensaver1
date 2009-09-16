@@ -14,6 +14,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
+import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.io.screens.ScreenCreator;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
@@ -73,23 +74,23 @@ public class IccbCompoundsStudyCreator
           AnnotationType unsuitableAnnotType = study.createAnnotationType("Unsuitable", "Flag indicating whether compound is unsuitable for screening.", false);
           AnnotationType commentAnnotType = study.createAnnotationType("Notes on Suitability", "Explanation of why compound may be undesirable for screening.", false);
 
-          Reagent reagent = findOrCreateReagent(dao);
+          Reagent reagent = find(dao);
           unsuitableAnnotType.createAnnotationValue(reagent, "true");
           commentAnnotType.createAnnotationValue(reagent, "Chelates metal and has shown up in a number of assays; from Rez Halese (Novartis), December 2007.");
-
-          dao.saveOrUpdateEntity(study);
+            
+            dao.saveOrUpdateEntity(study);
         }
         catch (Exception e) {
           throw new DAOTransactionRollbackException(e);
         }
       }
 
-      private Reagent findOrCreateReagent(final GenericEntityDAO dao)
+      private Reagent find(final GenericEntityDAO dao) throws ExtantLibraryException
       {
         ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("Novartis", "NIBR1 K839-0057");
         Reagent reagent = dao.findEntityById(Reagent.class, rvi);
         if (reagent == null) {
-          reagent = new Reagent(rvi);
+          throw new ExtantLibraryException("no library contains reagent " + rvi);
         }
         return reagent;
       }

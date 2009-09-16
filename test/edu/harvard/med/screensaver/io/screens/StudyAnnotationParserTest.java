@@ -35,7 +35,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 
   public void testStudyAnnotationParser() throws UnrecoverableParseException
   {
-    String[] reagentIds = { "Vendor1:1", "Vendor1:2", "Vendor1:3" };
+    String[] rvIds = { "Vendor1 1", "Vendor1 2", "Vendor1 3" };
     Object[][] expectedData = {
       { 1.0, 2.0, 3.0 },
       { "a", "b", "c" }
@@ -47,7 +47,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     Screen study = MakeDummyEntities.makeDummyScreen(Study.MIN_STUDY_NUMBER, library.getScreenType());
     studyAnnotationParser.parse(study, getClass().getClassLoader().getResourceAsStream(WORKBOOK_FILE));
     assertEquals("annotation type count", expectedData.length, study.getAnnotationTypes().size());
-    assertEquals("reagent count", reagentIds.length, study.getReagents().size());
+    assertEquals("reagent count", rvIds.length, study.getReagents().size());
     
     AnnotationType numericAnnotationType = study.getAnnotationTypes().first(); 
     AnnotationType textAnnotationType = study.getAnnotationTypes().last();
@@ -66,7 +66,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     
     int i = 0;
     for (Reagent reagent : new TreeSet<Reagent>(study.getReagents())) {
-      assertEquals(reagentIds[i], reagent.getReagentId().getReagentId());
+      assertEquals(rvIds[i], reagent.getVendorId().toString());
       assertEquals(expectedData[0][i], numericAnnotationValues.get(reagent).getNumericValue());
       assertEquals(expectedData[0][i], reagent.getAnnotationValues().get(numericAnnotationType).getNumericValue());
       assertEquals(expectedData[1][i], textAnnotationValues.get(reagent).getValue());

@@ -39,13 +39,13 @@ public class ScreenResultImporter
   public static final int SHORT_OPTION = 0;
   public static final int LONG_OPTION = 1;
 
-  public static final String[] INPUT_FILE_OPTION = { "f", "input-file" };
-  public static final String[] SCREEN_OPTION = { "s", "screen" };
-  public static final String[] IMPORT_OPTION = { "i", "import" };
-  public static final String[] WELLS_OPTION = { "w", "wells" };
-  public static final String[] APPEND_OPTION = { "a", "append" };
-  public static final String[] PLATE_NUMBER_START_OPTION = { "sp", "start-plate" };
-  public static final String[] PLATE_NUMBER_END_OPTION = { "ep", "end-plate" };
+  static final String[] INPUT_FILE_OPTION = { "f", "input-file" };
+  static final String[] SCREEN_OPTION = { "s", "screen" };
+  static final String[] IMPORT_OPTION = { "i", "import" };
+  static final String[] WELLS_OPTION = { "w", "wells" };
+  static final String[] APPEND_OPTION = { "a", "append" };
+  static final String[] PLATE_NUMBER_START_OPTION = { "sp", "start-plate" };
+  static final String[] PLATE_NUMBER_END_OPTION = { "ep", "end-plate" };
 
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
@@ -144,24 +144,21 @@ public class ScreenResultImporter
             }
           }
 
-          ScreenResult screenResult = finalScreenResultParser.parse(finalScreen,
-                                                                    inputFile,
-                                                                    finalPlateNumberRange);
+          ScreenResult screenResult;
+          try {
+            screenResult = finalScreenResultParser.parse(finalScreen,
+                                                                      inputFile,
+                                                                      finalPlateNumberRange);
+          }
+          catch (FileNotFoundException e) {
+            String msg = "Screen result file not found: " + inputFile;
+            log.error(msg);
+            throw new DAOTransactionRollbackException(msg);
+          }
           if (finalScreenResultParser.getHasErrors()) {
             log.error("Errors encountered during parse:");
             for (WorkbookParseError error : finalScreenResultParser.getErrors()) {
               log.error(error.toString());
-            }
-
-            try {
-              WritableWorkbook errorAnnotatedWorkbook = finalScreenResultParser.getErrorAnnotatedWorkbook();
-              File errorAnnotatedWorkbookFile = FileUtils.modifyFileDirectoryAndExtension(inputFile, (File) null, ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION);
-              errorAnnotatedWorkbook.setOutputFile(errorAnnotatedWorkbookFile);
-              errorAnnotatedWorkbook.write();
-              errorAnnotatedWorkbook.close();
-            }
-            catch (Exception e) {
-              log.error("could not create error-annotated workbook: " + e.getMessage());
             }
             throw new DAOTransactionRollbackException("screen result errors");
           }

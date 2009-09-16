@@ -39,14 +39,14 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
-import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -85,6 +85,14 @@ public abstract class CherryPickRequest extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(CherryPickRequest.class);
   private static final long serialVersionUID = 0L;
+  
+  public static final RelationshipPath<CherryPickRequest> screen = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen");
+  public static final RelationshipPath<CherryPickRequest> requestedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "requestedBy");
+  public static final RelationshipPath<CherryPickRequest> volumeApprovedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "volumeApprovedBy");
+  public static final RelationshipPath<CherryPickRequest> emptyWellsOnAssayPlate = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "emptyWellsOnAssayPlate");
+  public static final RelationshipPath<CherryPickRequest> screenerCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screenerCherryPicks");
+  public static final RelationshipPath<CherryPickRequest> labCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class,"labCherryPicks");
+  public static final RelationshipPath<CherryPickRequest> cherryPickAssayPlates = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickAssayPlates");
 
 
   // private instance data
@@ -110,6 +118,12 @@ public abstract class CherryPickRequest extends AbstractEntity
   private transient List<CherryPickAssayPlate> _activeAssayPlates;
   private transient HashSet<CherryPickAssayPlate> _pendingAssayPlates;
   private transient HashSet<CherryPickAssayPlate> _completedAssayPlates;
+  private transient SortedSet<WellKey> _labCherryPickWellKeys;
+
+  // assay protocol-related fields
+  private CherryPickAssayProtocolsFollowed _cherryPickAssayProtocolsFollowed;
+  private String _cherryPickAssayProtocolComments;
+  private CherryPickFollowupResultsStatus _cherryPickFollowupResultsStatus;
 
 
   // public instance methods
@@ -157,6 +171,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    */
   @Column(updatable=false)
   @org.hibernate.annotations.Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true) /* no new CPRs should use this property */
   public Integer getLegacyCherryPickRequestNumber()
   {
     return _legacyCherryPickRequestNumber;
@@ -250,28 +265,6 @@ public abstract class CherryPickRequest extends AbstractEntity
   public int getNumberUnfulfilledLabCherryPicks()
   {
     return _numberUnfulfilledLabCherryPicks;
-  }
-
-  /**
-   * Create and return a new lab cherry pick for the cherry pick request.
-   * @param sourceWell the source well
-   * @param screenerCherryPick the screener cherry pick
-   * @return the new lab cherry pick
-   * @throws DataModelViolationException whenever the cherry pick request for the provided
-   * screener cherry pick does not match the cherry pick request asked to create the lab cherry
-   * pick
-   */
-  public LabCherryPick createLabCherryPick(ScreenerCherryPick screenerCherryPick, Well sourceWell)
-  {
-    if (! this.equals(screenerCherryPick.getCherryPickRequest())) {
-      throw new DataModelViolationException(
-        "screener cherry pick has different cherry pick request than the attempted lab cherry pick");
-    }
-    LabCherryPick labCherryPick = new LabCherryPick(screenerCherryPick, sourceWell);
-    _labCherryPicks.add(labCherryPick);
-    screenerCherryPick.getLabCherryPicks().add(labCherryPick);
-    incUnfulfilledLabCherryPicks();
-    return labCherryPick;
   }
 
   /**
@@ -419,6 +412,7 @@ public abstract class CherryPickRequest extends AbstractEntity
    * @param plateType the plate type
    * @param legacyPlateName the legacy plate name
    * @return the new legacy cherry pick assay plate
+   * @deprecated use {@link #createCherryPickAssayPlate(Integer, Integer, PlateType)} for all new {@link CherryPickAssayPlate}s
    */
   public LegacyCherryPickAssayPlate createLegacyCherryPickAssayPlate(
     Integer plateOrdinal,
@@ -446,7 +440,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_to_screening_room_user")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(unidirectional=true)
   public ScreeningRoomUser getRequestedBy()
   {
     return _requestedBy;
@@ -470,7 +464,7 @@ public abstract class CherryPickRequest extends AbstractEntity
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_to_administrator_user")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
   public AdministratorUser getVolumeApprovedBy()
   {
     return _volumeApprovedBy;
@@ -595,8 +589,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     joinColumns=@JoinColumn(name="cherryPickRequestId")
   )
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_request_empty_wells_to_cherry_pick_request")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="emptyWellOnAssayPlate")
-  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(initialCardinality=144)
+  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(singularPropertyName="emptyWellOnAssayPlate") 
   public Set<WellName> getEmptyWellsOnAssayPlate()
   {
     return _emptyWellsOnAssayPlate;
@@ -667,6 +660,39 @@ public abstract class CherryPickRequest extends AbstractEntity
   public void setComments(String comments)
   {
     _comments = comments;
+  }
+
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayProtocolsFollowed$UserType")
+  public CherryPickAssayProtocolsFollowed getCherryPickAssayProtocolsFollowed()
+  {
+    return _cherryPickAssayProtocolsFollowed;
+  }
+
+  public void setCherryPickAssayProtocolsFollowed(CherryPickAssayProtocolsFollowed cherryPickAssayProtocolsFollowed)
+  {
+    _cherryPickAssayProtocolsFollowed = cherryPickAssayProtocolsFollowed;
+  }
+
+  @org.hibernate.annotations.Type(type="text")
+  public String getAssayProtocolComments()
+  {
+    return _cherryPickAssayProtocolComments;
+  }
+
+  public void setAssayProtocolComments(String assayProtocolComments)
+  {
+    _cherryPickAssayProtocolComments = assayProtocolComments;
+  }
+
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.cherrypicks.CherryPickFollowupResultsStatus$UserType")
+  public CherryPickFollowupResultsStatus getCherryPickFollowupResultsStatus()
+  {
+    return _cherryPickFollowupResultsStatus;
+  }
+
+  public void setCherryPickFollowupResultsStatus(CherryPickFollowupResultsStatus cherryPickFollowupResultsStatus)
+  {
+    _cherryPickFollowupResultsStatus = cherryPickFollowupResultsStatus;
   }
 
   /**
@@ -808,23 +834,8 @@ public abstract class CherryPickRequest extends AbstractEntity
     if (getDefaultAssayPlateType() != null) {
       setAssayPlateType(getDefaultAssayPlateType());
     }
-    addEmptyWellsOnAssayPlate(makeDefaultEmptyWells(getAssayPlateType().getPlateSize()));
   }
-
-  private Set<WellName> makeDefaultEmptyWells(PlateSize plateSize) 
-  {
-    Set<WellName> emptyWells = Sets.newTreeSet();
-    for (int row = 0; row < plateSize.getRows(); ++row) {
-      for (int col = 0; col < plateSize.getColumns(); ++col) {
-        if (row <= 1 || row >= plateSize.getRows() - 2 ||
-            col <= 1 || col >= plateSize.getColumns() - 2) {
-          emptyWells.add(new WellName(row, col));
-        }
-      }
-    }
-    return emptyWells;
-  }
-
+  
   /**
    * Construct an uninitialized <code>CherryPickRequest</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
@@ -925,5 +936,11 @@ public abstract class CherryPickRequest extends AbstractEntity
   private void setEmptyWellsOnAssayPlate(Set<WellName> emptyWellsOnAssayPlate)
   {
     _emptyWellsOnAssayPlate = emptyWellsOnAssayPlate;
+  }
+
+  void addLabCherryPick(LabCherryPick labCherryPick)
+  {
+    _labCherryPicks.add(labCherryPick);
+    incUnfulfilledLabCherryPicks();
   }
 }

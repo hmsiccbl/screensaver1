@@ -36,7 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -95,18 +95,12 @@ public class MakeDummyEntitiesCellHTS2
       int row = (i % (nrPlateColumns * nrPlateRows)) / nrPlateColumns;
       int col = (i % (nrPlateColumns * nrPlateRows)) % nrPlateColumns;
       WellKey wellKey = new WellKey(plate, row, col);
-      Well well = library.createWell(wellKey, WellType.EXPERIMENTAL);
-      Gene gene = new Gene("geneName" + wellKey,
-                           wellKey.hashCode(),
-                           "geneEntrezSym" + wellKey,
-                           "species");
-      gene.addGenbankAccessionNumber("GB" + wellKey.hashCode());
-      SilencingReagent silencingReagent = gene.createSilencingReagent(SilencingReagentType.SIRNA,
-                                                                      "ACTG");
-      well.addSilencingReagent(silencingReagent);
-      well.setReagent(new Reagent(new ReagentVendorIdentifier("Vendor" + id +
-                                                              ":" + i)));
-      wells.add(well);
+      Well well = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
+      ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("Vendor" + id, "" + i);
+      SilencingReagent reagent = well.createSilencingReagent(rvi, SilencingReagentType.SIRNA, "ACTG");
+      reagent.getVendorGene().withEntrezgeneSymbol("geneEntrezSym" + wellKey)
+      .withSpeciesName("species")
+      .withGenbankAccessionNumber("GB" + wellKey.hashCode());      wells.add(well);
     }
     return library;
   }

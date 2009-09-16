@@ -31,7 +31,9 @@ import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 
@@ -40,7 +42,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.OptimisticLock;
 
 /**
- * Annotation type on a library member (e.g., a compound or silencing reagent).
+ * Annotation type on a reagent.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -56,6 +58,9 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
 
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationType.class);
+  
+  public static final RelationshipPath<AnnotationType> study = new RelationshipPath<AnnotationType>(AnnotationType.class, "study");
+  public static final RelationshipPath<AnnotationType> annotationValues = new RelationshipPath<AnnotationType>(AnnotationType.class, "annotationValues");
 
 
   // private instance data
@@ -168,6 +173,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
   @OneToMany(fetch=FetchType.LAZY,
              cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
              mappedBy="annotationType")
+  @ToMany(hasNonconventionalMutation=true /* model unit tests don't handle Maps yet, tested in AnnotationTypeTest#testAnnotationValues */)             
   @MapKey(name="reagent")
   @OptimisticLock(excluded=true)
   @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})

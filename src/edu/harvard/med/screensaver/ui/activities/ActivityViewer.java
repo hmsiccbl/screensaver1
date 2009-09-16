@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.model.Concentration;
 import edu.harvard.med.screensaver.model.ConcentrationUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -65,7 +66,6 @@ public class ActivityViewer extends AbstractEditableBackingBean
   private LibrariesDAO _librariesDao;
 
   private Activity _activity;
-  private boolean _isEditMode;
   private UISelectOneEntityBean<ScreensaverUser> _performedBy;
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
   private UISelectOneBean<ConcentrationUnit> _concentrationType;
@@ -135,6 +135,10 @@ public class ActivityViewer extends AbstractEditableBackingBean
       if (activity instanceof RNAiCherryPickScreening) {
         _dao.need(activity, "rnaiCherryPickRequest");
       }
+      if (activity instanceof CherryPickLiquidTransfer) {
+        // note: for CPLT.getCherryPickRequest() method
+        _dao.need(activity, "cherryPickAssayPlates.cherryPickRequest");
+      }
     }
     _activity = activity;
 
@@ -169,9 +173,9 @@ public class ActivityViewer extends AbstractEditableBackingBean
         Volume v = (_activity instanceof LabActivity ?
                                     ((LabActivity) _activity).getVolumeTransferredPerWell() :
                                     null );
-        VolumeUnit unit = ( v == null ? null: v.getUnits());
+        VolumeUnit unit = ( v == null ? VolumeUnit.NANOLITERS : v.getUnits());
 
-        _volumeType = new UISelectOneBean<VolumeUnit>( Arrays.asList(VolumeUnit.DISPLAY_VALUES), unit )
+        _volumeType = new UISelectOneBean<VolumeUnit>(VolumeUnit.DISPLAY_VALUES, unit )
           {
             @Override
             protected String makeLabel(VolumeUnit t)
@@ -230,7 +234,7 @@ public class ActivityViewer extends AbstractEditableBackingBean
   private void setConcentrationType( ConcentrationUnit unit )
   {
     _concentrationType =
-      new UISelectOneBean<ConcentrationUnit>(Arrays.asList(ConcentrationUnit.DISPLAY_VALUES),unit)
+      new UISelectOneBean<ConcentrationUnit>(ConcentrationUnit.DISPLAY_VALUES, unit)
       {
         @Override
         protected String makeLabel(ConcentrationUnit t) { return t.getValue(); }
@@ -289,15 +293,10 @@ public class ActivityViewer extends AbstractEditableBackingBean
     return _thisProxy.viewActivity(_activity);
   }
 
-  public boolean isEditMode()
-  {
-    return _isEditMode;
-  }
-
   @UIControllerMethod
   public String edit()
   {
-    _isEditMode = true;
+    setEditMode(true);
     _returnToViewAfterEdit = _thisProxy;
     return VIEW_ACTIVITY;
   }
@@ -305,7 +304,7 @@ public class ActivityViewer extends AbstractEditableBackingBean
   @UIControllerMethod
   public String cancel()
   {
-    _isEditMode = false;
+    setEditMode(false);
     return _returnToViewAfterEdit.reload();
   }
 
@@ -320,7 +319,7 @@ public class ActivityViewer extends AbstractEditableBackingBean
     {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    _isEditMode = false;
+    setEditMode(false);
 
     _dao.saveOrUpdateEntity(getActivity());
     _dao.flush();
@@ -430,14 +429,15 @@ public class ActivityViewer extends AbstractEditableBackingBean
   @Transactional
   public String viewActivity(Activity activity)
   {
+    // do this before restricted check, below, to eager fetch screen.fundingSupports
+    setActivity(activity);
+
     // TODO: implement as aspect
-    if (activity.isRestricted()) {
-      showMessage("restrictedEntity", "Activity " + activity.getActivityId());
-      log.warn("user unauthorized to view " + activity);
+    if (_activity.isRestricted()) {
+      showMessage("restrictedEntity", "Activity " + _activity.getActivityId());
+      log.warn("user unauthorized to view " + _activity);
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-
-    setActivity(activity);
 
     // calling viewActivity() is a request to view the most up-to-date, persistent
     // version of the activity, which means the labActivitesBrowser must also be
@@ -462,7 +462,7 @@ public class ActivityViewer extends AbstractEditableBackingBean
     setActivity(activity);
     // TODO: this model shouldn't allow this null value, and we should really set to null at the UI component level only
     activity.setDateOfActivity(null);
-    _isEditMode = true;
+    setEditMode(true);
     _returnToViewAfterEdit = returnToViewerAfterEdit;
     return VIEW_ACTIVITY;
   }
@@ -540,7 +540,7 @@ public class ActivityViewer extends AbstractEditableBackingBean
 
   private void resetView()
   {
-    _isEditMode = false;
+    setEditMode(false);
     _returnToViewAfterEdit = _thisProxy;
     _performedBy = null;
     _libraryAndPlatesScreenedDataModel = null;

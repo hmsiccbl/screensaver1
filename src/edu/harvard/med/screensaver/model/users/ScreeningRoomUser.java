@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.model.users;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -28,9 +31,15 @@ import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
@@ -50,7 +59,7 @@ import com.google.common.collect.Sets;
 @PrimaryKeyJoinColumn(name="screensaverUserId")
 @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_screensaver_user")
 @org.hibernate.annotations.Proxy
-public class ScreeningRoomUser extends ScreensaverUser
+public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesEntity, ChecklistItemsEntity
 {
 
   // private static data
@@ -58,18 +67,20 @@ public class ScreeningRoomUser extends ScreensaverUser
   private static final Logger log = Logger.getLogger(ScreeningRoomUser.class);
   private static final long serialVersionUID = 0L;
 
+  public static final RelationshipPath<ScreeningRoomUser> LabHead = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead"); 
 
   // private instance data
 
   private SortedSet<ChecklistItemEvent> _checklistItemEvents = new TreeSet<ChecklistItemEvent>();
   private Set<Screen> _screensLed = new HashSet<Screen>();
   private Set<Screen> _screensCollaborated = new HashSet<Screen>();
+  private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
   protected ScreeningRoomUserClassification _userClassification;
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
 
   private LabHead _labHead;
-  protected Lab _lab;
+  protected transient Lab _lab;
 
 
   // public constructor
@@ -241,25 +252,25 @@ public class ScreeningRoomUser extends ScreensaverUser
     fetch=FetchType.LAZY
   )
   @OrderBy("screenNumber")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="screenLed")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="screenLed", inverseProperty="leadScreener")
   public Set<Screen> getScreensLed()
   {
     return _screensLed;
   }
 
-  /**
-   * Add the screen for which this user was the lead screener.
-   * @param screenLed the screen for which this user was the lead screener
-   * @return true iff the screening room user was not already lead screener for this screen
-   */
-  public boolean addScreenLed(Screen screenLed)
-  {
-    if (_screensLed.add(screenLed)) {
-      screenLed.setLeadScreener(this);
-      return true;
-    }
-    return false;
-  }
+//  /**
+//   * Add the screen for which this user was the lead screener.
+//   * @param screenLed the screen for which this user was the lead screener
+//   * @return true iff the screening room user was not already lead screener for this screen
+//   */
+//  public boolean addScreenLed(Screen screenLed)
+//  {
+//    if (_screensLed.add(screenLed)) {
+//      screenLed.setLeadScreener(this);
+//      return true;
+//    }
+//    return false;
+//  }
 
   /**
    * Get the set of screens for which this user was a collaborator.
@@ -272,7 +283,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   )
   @org.hibernate.annotations.ForeignKey(name="fk_collaborator_link_to_screening_room_user")
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ManyToMany(singularPropertyName="screenCollaborated")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="screenCollaborated", inverseProperty="collaborators")
   public Set<Screen> getScreensCollaborated()
   {
     return _screensCollaborated;
@@ -398,6 +409,48 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
+   * Get the attached files.
+   * @return the attached files
+   */
+  @OneToMany(
+    mappedBy="screeningRoomUser",
+    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+    fetch=FetchType.LAZY
+  )
+  @org.hibernate.annotations.Cascade(value={
+    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
+    org.hibernate.annotations.CascadeType.DELETE,
+    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
+  })
+  @ToMany(hasNonconventionalMutation=true)
+  public Set<AttachedFile> getAttachedFiles()
+  {
+    return _attachedFiles;
+  }
+
+  private void setAttachedFiles(Set<AttachedFile> attachedFiles)
+  {
+    _attachedFiles = attachedFiles;
+  }
+
+  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, String fileContents) throws IOException
+  {
+    return createAttachedFile(filename, fileType, new ByteArrayInputStream(fileContents.getBytes()));
+  }
+
+  public AttachedFile createAttachedFile(String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
+  {
+    AttachedFile attachedFile = new AttachedFile(this, filename, fileType, fileContents);
+    _attachedFiles.add(attachedFile);
+    return attachedFile;
+  }
+
+  public void removeAttachedFile(AttachedFile attachedFile)
+  {
+    _attachedFiles.remove(attachedFile);
+  }
+
+  /**
    * Get whether this user is an RNAi screener.
    * @return <code>true</code> iff this user is an RNAi screener.
    */
@@ -408,8 +461,8 @@ public class ScreeningRoomUser extends ScreensaverUser
   }
 
   /**
-   * Get whether this user is a small compound screener.
-   * @return <code>true</code> iff this user is a small compound screener.
+   * Get whether this user is a small molecule screener.
+   * @return <code>true</code> iff this user is a small molecule screener.
    */
   @Transient
   public boolean isSmallMoleculeUser()
@@ -545,7 +598,7 @@ public class ScreeningRoomUser extends ScreensaverUser
   @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_lab_head")
   @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty = "labMembers")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty = "labMembers")
   private LabHead getLabHead()
   {
     return _labHead;

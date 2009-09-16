@@ -14,8 +14,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -45,8 +45,8 @@ public abstract class UserNameColumn<E extends AbstractEntity> extends TextEntit
   {
     List<PropertyPath<E2>> propertyPaths = new ArrayList<PropertyPath<E2>>();
     if (userEntityPath != null) {
-      propertyPaths.add(new PropertyPath<E2>(userEntityPath, "lastName"));
-      propertyPaths.add(new PropertyPath<E2>(userEntityPath, "firstName"));
+      propertyPaths.add(userEntityPath.toProperty("lastName"));
+      propertyPaths.add(userEntityPath.toProperty("firstName"));
     }
     return propertyPaths;
   }

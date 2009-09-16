@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -178,7 +179,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
   @SuppressWarnings("unchecked")
   public void truncateTablesOrCreateSchema()
   {
-    log.info("truncating tables for " + makeDataSourceString());
+    log.debug("truncating tables for " + makeDataSourceString());
     verifyIsTestDatabase();
     Session session = getSession();
     Connection connection = session.connection();
@@ -341,12 +342,13 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
         String url = connection.getMetaData().getURL();
         String schemaName = url.substring(url.lastIndexOf('/') + 1);
 
-        Statement statement = connection.createStatement();
-        statement.execute("SELECT table_name FROM information_schema.tables\n" +
-                          "WHERE\n" +
-                          " table_catalog = '" + schemaName + "' AND\n" +
-                          " table_schema = 'public'\n");
-
+        PreparedStatement statement = connection.prepareStatement("SELECT table_name FROM information_schema.tables\n" +
+                                                          "WHERE\n" +
+                                                          " table_catalog = ? AND\n" +
+                                                          " table_schema = 'public'\n");
+        statement.setString(1, schemaName);
+        statement.execute();
+        
         ResultSet resultSet = statement.getResultSet();
         while (resultSet.next()) {
           _schemaTableNames.add(resultSet.getString(1));

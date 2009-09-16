@@ -34,6 +34,11 @@ public class Triple<F,S,T>
     _third = third;
   }
 
+  public static <F, S, T> Triple<F, S, T> newTriple(F first, S second, T third) 
+  {
+    return new Triple<F, S, T>(first, second, third);
+  }
+
   /**
    * Get the first element of the triple.
    * @return the first element of the triple

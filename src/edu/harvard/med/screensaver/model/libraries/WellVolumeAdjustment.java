@@ -23,15 +23,17 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+
+import org.apache.log4j.Logger;
 
 /**
  * A Hibernate entity bean representing a well volume adjustment. A well volume
@@ -55,11 +57,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
   "wellVolumeCorrectionActivityId"
 }) })
 @org.hibernate.annotations.Proxy
-@edu.harvard.med.screensaver.model.annotations.ContainedEntity(
-  containingEntityClass=LabCherryPick.class,
-  hasAlternateContainingEntityClass=true,
-  alternateContainingEntityClass=WellVolumeCorrectionActivity.class
-)
 public class WellVolumeAdjustment extends AbstractEntity
 {
 
@@ -67,6 +64,11 @@ public class WellVolumeAdjustment extends AbstractEntity
 
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(WellVolumeAdjustment.class);
+    
+  public static final RelationshipPath<WellVolumeAdjustment> copy = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "copy");
+  public static final RelationshipPath<WellVolumeAdjustment> well = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "well");
+  public static final RelationshipPath<WellVolumeAdjustment> labCherryPick = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "labCherryPick");
+  public static final RelationshipPath<WellVolumeAdjustment> wellVolumeorrectionActivity = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "wellVolumeorrectionActivity");
 
 
   // private instance data
@@ -141,7 +143,7 @@ public class WellVolumeAdjustment extends AbstractEntity
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_copy")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
   public Copy getCopy()
   {
     return _copy;
@@ -160,7 +162,7 @@ public class WellVolumeAdjustment extends AbstractEntity
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
   public Well getWell()
   {
     return _well;
@@ -185,6 +187,7 @@ public class WellVolumeAdjustment extends AbstractEntity
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={})
   @JoinColumn(name="labCherryPickId", nullable=true, updatable=false)
+  @ToOne(hasNonconventionalSetterMethod=true /* model unit tests do not yet handle nullable, immutable to-one relationships */)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_lab_cherry_pick")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
@@ -200,6 +203,7 @@ public class WellVolumeAdjustment extends AbstractEntity
   @ManyToOne(fetch=FetchType.LAZY,
              cascade={})
   @JoinColumn(name="wellVolumeCorrectionActivityId", nullable=true, updatable=false)
+  @ToOne(hasNonconventionalSetterMethod=true /* model unit tests do not yet handle nullable, immutable to-one relationships */)
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_well_volume_correction_activity")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)

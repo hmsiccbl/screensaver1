@@ -12,15 +12,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.harvard.med.screensaver.ScreensaverProperties;
+
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.ScreensaverProperties;
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener;
-
 public class DataServlet extends HttpServlet {
-	MimetypesFileTypeMap mimeTypesFileTypeMap = new MimetypesFileTypeMap();
+
+  private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(DataServlet.class);
 
+  MimetypesFileTypeMap mimeTypesFileTypeMap = new MimetypesFileTypeMap();
 	
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
@@ -62,11 +63,7 @@ public class DataServlet extends HttpServlet {
     
     byte[] file = result;
 
-    if (file == null) {
-      log.debug("NULL FILE");
-    } else {   
-      log.debug("Returning File");
-    }
+    log.debug("Returning File");
     
 		out.write(file);
   }

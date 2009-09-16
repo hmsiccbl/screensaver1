@@ -12,54 +12,37 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 import java.beans.IntrospectionException;
 import java.util.List;
 
+import junit.framework.TestSuite;
+
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
-import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 public abstract class CherryPickRequestTest<CPR extends CherryPickRequest> extends AbstractEntityInstanceTest<CPR>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(CherryPickRequestTest.class);
-
-
-  // instance data members
+  public static TestSuite suite()
+  {
+    return buildTestSuite(CherryPickRequestTest.class, CherryPickRequest.class);
+  }
 
   protected CherryPickRequestDAO cherryPickRequestDao;
   protected LibrariesDAO librariesDao;
   
-  // public constructors and methods
-
   public CherryPickRequestTest(Class<CPR> clazz) throws IntrospectionException
   {
     super(clazz);
   }
 
-  @Override
-  public Object getTestValueForType(Class type,
-                                    AbstractEntity parentBean,
-                                    boolean persistEntities)
-  {
-    if (getName().equals("testCollectionProperties") &&
-      getTestedPropertyDescriptor() != null &&
-      getTestedPropertyDescriptor().getName().equals("emptyWellsOnAssayPlate")) {
-      if (type.equals(WellName.class)) {
-        return new WellName("C03");
-      }
-    }
-    return super.getTestValueForType(type, parentBean, persistEntities);
-  }
-  
   public void testGetActiveCherryPickAssayPlates()
   {
     schemaUtil.truncateTablesOrCreateSchema();
@@ -109,6 +92,6 @@ public abstract class CherryPickRequestTest<CPR extends CherryPickRequest> exten
     CherryPickRequest cherryPickRequest2 = genericEntityDao.findEntityById(CherryPickRequest.class, txn._cherryPickRequest.getEntityId());
     assertEquals("cherryPickRequestNumber", new Integer(4000), cherryPickRequest2.getCherryPickRequestNumber());
   }
-  
+
 }
 

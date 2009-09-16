@@ -19,19 +19,19 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
@@ -40,6 +40,8 @@ import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Lists;
 
 
 /**
@@ -101,7 +103,7 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
       }
     });
 
-    EntityColumn<Library,ScreenType> column = (EntityColumn<Library,ScreenType>) getColumnManager().getColumn("Screen Type");
+    TableColumn<Library,ScreenType> column = (TableColumn<Library,ScreenType>) getColumnManager().getColumn("Screen Type");
     column.clearCriteria();
     column.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, screenType));
   }
@@ -109,7 +111,7 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
   @SuppressWarnings("unchecked")
   protected List<? extends TableColumn<Library,?>> buildColumns()
   {
-    ArrayList<EntityColumn<Library,?>> columns = new ArrayList<EntityColumn<Library,?>>();
+    ArrayList<TableColumn<Library,?>> columns = Lists.newArrayList();
     columns.add(new TextEntityColumn<Library>(new PropertyPath(Library.class, "shortName"),
       "Short Name", "The abbreviated name for the library", TableColumn.UNGROUPED) {
       @Override
@@ -141,12 +143,23 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
       @Override
       public LibraryType getCellValue(Library library) { return library==null? null : library.getLibraryType(); }
     });
-    columns.add(new IntegerEntityColumn<Library>(new PropertyPath(Library.class, "startPlate"),
-      "Start Plate", "The plate number for the first plate in the library", TableColumn.UNGROUPED) {
+    columns.add(new BooleanEntityColumn<Library>(new PropertyPath(Library.class, "pool"),
+      "Is Pool", 
+      "Whether wells contains pools of reagents or single reagents",
+      TableColumn.UNGROUPED) {
+      @Override
+      public Boolean getCellValue(Library library) { return library==null? null : library.isPool(); }
+    });
+    columns.add(new IntegerEntityColumn<Library>(
+      Library.startPlate,
+      "Start Plate", 
+      "The plate number for the first plate in the library", 
+      TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(Library library) { return library==null? null : library.getStartPlate(); }
     });
-    columns.add(new IntegerEntityColumn<Library>(new PropertyPath(Library.class, "endPlate"),
+    columns.add(new IntegerEntityColumn<Library>(
+      Library.endPlate,
       "End Plate", "The plate number for the last plate in the library", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(Library library) { return library==null? null : library.getEndPlate(); }
@@ -159,7 +172,8 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
         @Override
         public String getCellValue(Library library) { return library==null? null : library.getVendor(); }
       });
-      columns.add(new ListEntityColumn<Library>(new PropertyPath(Library.class, "copies", "name"),
+      columns.add(new ListEntityColumn<Library>(
+        Library.copies.toProperty("name"),
         "Copies",
         "The copies that have been made of this library",
         TableColumn.ADMIN_COLUMN_GROUP) {

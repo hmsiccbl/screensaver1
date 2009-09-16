@@ -9,11 +9,10 @@
 
 package edu.harvard.med.screensaver.io.workbook2;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
-
-import edu.harvard.med.screensaver.util.AlphabeticCounter;
 
 import jxl.BooleanCell;
 import jxl.CellType;
@@ -23,6 +22,7 @@ import jxl.Sheet;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
 /**
@@ -38,7 +38,7 @@ import org.joda.time.LocalDateTime;
  * Instantiate new Cells via a Cell.Factory, which must first be instantiated
  * with a set of arguments that will be common to a set of related
  * <code>Cell</code>s. The Cell returned by the factory may be the instance
- * returned by a previous {@link Factory#getCell} call, so if you need the
+ * returned by a previous {@link Worksheet#getCell} call, so if you need the
  * Cell to have a longer lifetime, clone it.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -51,8 +51,8 @@ public class Cell
   
   private static final Logger log = Logger.getLogger(Cell.class);
 
-  private static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
-  private static final String CELL_VALUE_REQUIRED_ERROR = "value required";
+  public static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
+  public static final String CELL_VALUE_REQUIRED_ERROR = "value required";
   private static final Pattern DECIMAL_PRECISION_PATTERN = Pattern.compile(".*?(\\.([0#]+))?(%?)");
   private static final String GENERAL_FORMAT = "GENERAL";
 
@@ -67,14 +67,13 @@ public class Cell
 
   // instance data members
   
-  protected ParseErrorManager _errors;
   protected Workbook _workbook;
   protected jxl.Sheet _sheet;
   protected jxl.Cell _cell;
   protected int _sheetIndex;
-  private short _column;
-  private int _row;
-  private boolean _required;
+  int _column;
+  int _row;
+  boolean _required;
   /**
    * Used to build formatted cell strings.
    */
@@ -82,104 +81,35 @@ public class Cell
   
   // inner class definitions
   
-  /**
-   * Instantiates Cell objects with shared arguments. (For lisp-o-philes,
-   * this is akin to "currying" a function.)
-   * 
-   * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
-   * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
-   */
-  public static class Factory
+  public static String columnIndexToLabel(int columnIndex)
   {
-    private ParseErrorManager _errors;
-    private Workbook _workbook;
-    private int _sheetIndex;
-    /**
-     * @motivation we don't want to instantiate a new Cell object for every cell
-     *             we must read, since we do this a whole lot
-     */
-    private Cell _recycledCell;
-    private short _columnOffset;
-    private int _rowOffset;
-    
-
-    /**
-     * Constructs a Factory object that can be used instantiate Cell
-     * objects with a shared set of arguments.
-     */
-    public Factory(Workbook workbook,
-                   int sheetIndex,
-                   ParseErrorManager errors)
-    {
-      _workbook = workbook;
-      _sheetIndex = sheetIndex;
-      _errors = errors;
+    String columnLabel = "";
+    if (columnIndex >= 26) {
+      columnLabel += (char) ('A' + (columnIndex / 26) - 1);
     }
-    
-    /**
-     * Constructs a Factory object that can be used instantiate Cell objects
-     * with a shared set of arguments and a new origin, allowing requested Cell
-     * coordinates to be made relative to this origin.
-     * 
-     * @param columnOffset the "x" component of the new origin, to which all requested Cell coordinates will be relative
-     * @param rowOffset the "y" component of the new origin, to which all requested Cell coordinates will be relative
-     */
-    public Factory(Workbook workbook,
-                   int sheetIndex,
-                   short columnOffset,
-                   int rowOffset,
-                   ParseErrorManager errors)
-    {
-      _workbook = workbook;
-      _sheetIndex = sheetIndex;
-      _columnOffset = columnOffset;
-      _rowOffset = rowOffset;
-      _errors = errors;
-    }
-    
-    /**
-     * Get a (recycled) Cell object, initialized with this factory's shared
-     * arguments. Subsequent calls return the same object with a modified
-     * configuration!
-     * 
-     * @param column the physical zero-based column in the worksheet
-     * @param row the physical zero-based row in the worksheet
-     * @return a (recycled) Cell, ready to parse the value in the cell it's
-     *         associated with
-     */
-    public Cell getCell(short column, int row, boolean required)
-    {
-      if (_recycledCell == null) {
-        _recycledCell = new Cell(_workbook,
-                                 _sheetIndex,
-                                 _errors,
-                                 column,
-                                 row,
-                                 required);
-      }
-      else {
-        _recycledCell._column = (short) (column + _columnOffset);
-        _recycledCell._row = row + _rowOffset;
-        _recycledCell._required = required;
-      }
-      return _recycledCell;
-    }
-    
-    /**
-     * @see #getCell(short, int, boolean)
-     */
-    public Cell getCell(short column, int row)
-    {
-      return getCell(column, row, /* required= */false);
-    }
-    
-    public Cell getNullCell()
-    {
-      return new NullCell(_workbook, _sheetIndex, _errors);
-    }
+    columnLabel += (char) ('A' + (columnIndex % 26));
+    return columnLabel;
   }
-  
 
+  public static int columnLabelToIndex(String columnLabel)
+    throws IllegalArgumentException
+  {
+    if (!columnLabel.matches("^[A-Za-z][A-Za-z]?$")) {
+      throw new IllegalArgumentException("malformed column label string:" + columnLabel);
+    }
+    
+    columnLabel = columnLabel.toUpperCase();
+    int columnIndex= 1;
+    if (columnLabel.length() == 2) {
+      columnIndex = 26 * (columnLabel.charAt(0) - 'A' + 1) + (columnLabel.charAt(1) - 'A');
+    }
+    else if (columnLabel.length() == 1) {
+      columnIndex = columnLabel.charAt(0) - 'A';
+    }
+    return columnIndex;
+  }
+
+  
   // public methods
   
   /**
@@ -207,7 +137,7 @@ public class Cell
    * Get the column containing the cell.
    * @return the column
    */
-  public short getColumn() { return _column; }
+  public int getColumn() { return _column; }
   
   /**
    * Get the row containing the cell.
@@ -217,9 +147,10 @@ public class Cell
   
   public String getFormattedRowAndColumn()
   {
+
     _formattedRowAndColumnBuilder.setLength(0);
     _formattedRowAndColumnBuilder.append('(');
-    _formattedRowAndColumnBuilder.append(AlphabeticCounter.toLabel(_column));
+    _formattedRowAndColumnBuilder.append(columnIndexToLabel(_column));
     _formattedRowAndColumnBuilder.append(',');
     _formattedRowAndColumnBuilder.append(Integer.toString(_row + 1));
     _formattedRowAndColumnBuilder.append(')');
@@ -252,7 +183,7 @@ public class Cell
       jxl.Cell cell = getJxlCell();
       if (cell.getType() == CellType.EMPTY) {
         if (_required) {
-          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          addError(CELL_VALUE_REQUIRED_ERROR);
           return 0.0;
         }
         return null;
@@ -262,20 +193,38 @@ public class Cell
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
-        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        addError(CELL_VALUE_REQUIRED_ERROR);
         return 0.0;
       }
       return null;
     }
     catch (ClassCastException e) {
       if (_required) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a number)", this);
+        addError(INVALID_CELL_TYPE_ERROR + " (expected a number)");
         return 0.0;
       }
       return null;
     }
   }
   
+  /**
+   * Get a <code>BigDecimal</code> value from the cell.
+   * 
+   * @return a <code>BigDecimal</code> value if cell contains a valid numeric 
+   *         value; if cell does not contain a number or an error occurs
+   *         <code>null</code> is returned, unless cell is required, in which
+   *         case <code>0.0</code> is returned (to allow parsing
+   *         code to proceed w/a default value) contain a value
+   */
+  public BigDecimal getBigDecimal()
+  {
+    Double value = getDouble();
+    if (value != null) {
+      return new BigDecimal(value.toString());
+    }
+    return null;
+  }
+
   /**
    * Get an <code>Integer</code> value for the cell.
    * 
@@ -291,7 +240,7 @@ public class Cell
       jxl.Cell cell = getJxlCell();
       if (cell.getType() == CellType.EMPTY) {
         if (_required) {
-          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          addError(CELL_VALUE_REQUIRED_ERROR);
           return 0;
         }
         return null;
@@ -300,14 +249,14 @@ public class Cell
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
-        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        addError(CELL_VALUE_REQUIRED_ERROR);
         return 0;
       }
       return null;
     }
     catch (ClassCastException e) {
       if (_required) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a number)", this);
+        addError(INVALID_CELL_TYPE_ERROR + " (expected a number)");
         return 0;
       }
       return null;
@@ -329,13 +278,13 @@ public class Cell
       jxl.Cell cell = getJxlCell();
       if (cell.getType() == CellType.EMPTY) {
         if (_required) {
-          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          addError(CELL_VALUE_REQUIRED_ERROR);
           return false;
         }
         return null;
       }
       if (!isBoolean()) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected boolean)", this);
+        addError(INVALID_CELL_TYPE_ERROR + " (expected boolean)");
         if (_required) {
           return false;
         }
@@ -345,7 +294,7 @@ public class Cell
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
-        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        addError(CELL_VALUE_REQUIRED_ERROR);
         return false;
       }
       return null;
@@ -367,7 +316,7 @@ public class Cell
       jxl.Cell cell = getJxlCell();
       if (cell.getType() == CellType.EMPTY) {
         if (_required) {
-          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+          addError(CELL_VALUE_REQUIRED_ERROR);
           return new LocalDateTime();
         }
         return null;
@@ -377,18 +326,31 @@ public class Cell
     } 
     catch (CellOutOfRangeException e) {
       if (_required) {
-        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        addError(CELL_VALUE_REQUIRED_ERROR);
         return new LocalDateTime();
       }
       return null;
     }
     catch (ClassCastException e) {
       if (_required) {
-        _errors.addError(INVALID_CELL_TYPE_ERROR + " (expected a date)", this);
+        addError(INVALID_CELL_TYPE_ERROR + " (expected a date)");
         return new LocalDateTime();
       }
       return null;
     }
+  }
+
+  /**
+   * Convenience method to get a LocaleDate from a date cell, when cell might be
+   * empty. Behaves same as {@link #getDate()}.
+   */
+  public LocalDate getLocalDate()
+  {
+    LocalDateTime date = getDate();
+    if (date == null) {
+      return null;
+    }
+    return date.toLocalDate();
   }
   
   /**
@@ -402,11 +364,22 @@ public class Cell
    */
   public String getString()
   {
+    return getString(_required);
+  }
+  
+  /**
+   * @param required if <code>true</code>, performs "is required"
+   *          validation and annotates cell with error as necessary; set to
+   *          false, if you need to query the value of the cell, without
+   *          generating a validation error.
+   */
+  public String getString(boolean required)
+    {
     try {
       jxl.Cell cell = getJxlCell();
       if (cell.getType() == CellType.EMPTY) {
-        if (_required) {
-          _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+        if (required) {
+          addError(CELL_VALUE_REQUIRED_ERROR);
           return "";
         }
         return null;
@@ -414,8 +387,8 @@ public class Cell
       return cell.getContents();
     } 
     catch (CellOutOfRangeException e) {
-      if (_required) {
-        _errors.addError(CELL_VALUE_REQUIRED_ERROR, this);
+      if (required) {
+        addError(CELL_VALUE_REQUIRED_ERROR);
         return "";
       }
       return null;
@@ -584,18 +557,15 @@ public class Cell
 
   // protected and private methods and constructors
 
-  protected Cell(
-    Workbook workbook,
-    int sheetIndex,
-    ParseErrorManager errors,
-    short column,
-    int row,
-    boolean required)
+  Cell(Workbook workbook,
+       int sheetIndex,
+       int column,
+       int row,
+       boolean required)
   {
     _workbook = workbook;
     _sheetIndex = sheetIndex;
     _sheet = workbook.getWorkbook().getSheet(sheetIndex);
-    _errors = errors;
     _column = column;
     _row = row;
     _required = required;
@@ -636,9 +606,14 @@ public class Cell
   {
     return new Cell(_workbook,
                     _sheetIndex,
-                    _errors,
                     _column,
                     _row,
                     _required);
+  }
+
+  public void addError(String msg)
+  {
+    _workbook.getParseErrorManager().addError(msg, this);
+    
   }
 }

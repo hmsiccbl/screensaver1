@@ -18,6 +18,7 @@ import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -45,6 +46,9 @@ public class RNAiCherryPickScreening extends Screening
   private static Logger log = Logger.getLogger(RNAiCherryPickScreening.class);
 
   public static final String ACTIVITY_TYPE_NAME = "RNAi Cherry Pick Screening";
+  
+  //public static final RelationshipPath<LabActivity> rnaiCherryPickRequest = new RelationshipPath<LabActivity>(LabActivity.class, "rnaiCherryPickRequest");
+  public static final RelationshipPath<RNAiCherryPickScreening> rnaiCherryPickRequest = new RelationshipPath<RNAiCherryPickScreening>(RNAiCherryPickScreening.class, "rnaiCherryPickRequest");
 
   
   // private instance datum
@@ -76,7 +80,7 @@ public class RNAiCherryPickScreening extends Screening
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_rnai_cherry_pick_screening_to_rnai_cherry_pick_request")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="RNAiCherryPickScreenings")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="RNAiCherryPickScreenings")
   public RNAiCherryPickRequest getRnaiCherryPickRequest()
   {
     return _rnaiCherryPickRequest;

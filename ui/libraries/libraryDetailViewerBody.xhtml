@@ -70,6 +70,11 @@
 			</t:selectOneMenu>
 		</t:panelGroup>
 
+    <ss:property id="isPool" label="Is Pool" type="Boolean"
+      description="Whether wells contains pools of reagents or single reagents"
+      value="#{libraryDetailViewer.library.pool}"
+      editable="#{libraryDetailViewer.editMode}" />
+
     <ss:property id="screeningStatus" label="Screening Status"
       description="Status of the library for screening."
       value="#{libraryDetailViewer.library.screeningStatus}"
@@ -123,6 +128,10 @@
         	</t:selectOneMenu>
 		</t:panelGroup>			
 
+    <ss:property id="experimentalWellCount"
+      label="# Experimental Wells"
+      description="The number of wells in the library with well type 'Experimental'"
+      value="#{libraryDetailViewer.library.experimentalWellCount}" />
   </ui:define>
 
 </ui:composition>

@@ -145,38 +145,8 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewReagent</from-outcome>
-      <to-view-id>/libraries/reagentViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>viewReagentSearchResults</from-outcome>
-      <to-view-id>/libraries/reagentSearchResults</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>viewGene</from-outcome>
-      <to-view-id>/libraries/geneViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>viewCompound</from-outcome>
-      <to-view-id>/libraries/compoundViewer</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>importCompoundLibraryContents</from-outcome>
-      <to-view-id>/libraries/admin/compoundLibraryContentsImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>importNaturalProductsLibraryContents</from-outcome>
-      <to-view-id>/libraries/admin/naturalProductsLibraryContentsImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>importRNAiLibraryContents</from-outcome>
-      <to-view-id>/libraries/admin/rnaiLibraryContentsImporter</to-view-id>
+      <from-outcome>importLibraryContents</from-outcome>
+      <to-view-id>/libraries/admin/libraryContentsImporter</to-view-id>
       <redirect/>
     </navigation-case>
 

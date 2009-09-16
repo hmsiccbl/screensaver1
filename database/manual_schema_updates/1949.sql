@@ -2,7 +2,7 @@ BEGIN;
 
 INSERT INTO schema_history (screensaver_revision, date_updated, comment)
 SELECT
-1948,
+1949,
 current_timestamp,
 'added unique constraint for screensaver_user.login_id';
 

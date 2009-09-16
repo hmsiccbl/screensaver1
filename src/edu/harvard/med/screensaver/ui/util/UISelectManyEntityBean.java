@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -35,7 +36,7 @@ public class UISelectManyEntityBean<E extends AbstractEntity> extends UISelectMa
 
   public UISelectManyEntityBean(Collection<E> entities, GenericEntityDAO dao)
   {
-    this(entities, null, dao);
+    this(entities, Collections.<E>emptySet(), dao);
   }
   
   public UISelectManyEntityBean(Collection<E> entities, Collection<E> defaultSelections, GenericEntityDAO dao)
@@ -44,7 +45,6 @@ public class UISelectManyEntityBean<E extends AbstractEntity> extends UISelectMa
     _dao = dao;
   }
   
-  @SuppressWarnings("unchecked")
   @Override
   public List<E> getSelections()
   {

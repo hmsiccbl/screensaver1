@@ -16,26 +16,33 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.libraries.Compound;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
+import org.hibernate.stat.SessionStatistics;
+import org.hibernate.stat.Statistics;
 import org.joda.time.LocalDate;
 
 
@@ -43,42 +50,38 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 {
 
   private static final Logger log = Logger.getLogger(GenericEntityDAOTest.class);
+  private AbstractEntity _anEntity;
 
 
   // public instance methods
-
-  public void testPersistEntity()
+  
+  @Override
+  protected void onSetUp() throws Exception
   {
-    Compound compound = new Compound("smiles", "inchi", true);
-    genericEntityDao.saveOrUpdateEntity(compound);
-    List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
-    assertEquals("one compound in the machine", compounds.size(), 1);
-    assertEquals("names match", compounds.get(0).getSmiles(), "smiles");
-    assertEquals("salty match", compounds.get(0).isSalt(), true);
+    super.onSetUp();
+    _anEntity = new Library("Library Name", "libName", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
   }
 
-  public void testFindAllEntitiesWithType()
+  @SuppressWarnings("unchecked")
+  public void testPersistAndFindAllOfType()
   {
-    List<Compound> compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
-    assertEquals("no compounds in an empty database", 0, compounds.size());
-
-    genericEntityDao.saveOrUpdateEntity(new Compound("smiles", "inchi"));
-    compounds = genericEntityDao.findAllEntitiesOfType(Compound.class);
-    assertEquals("one compound in the machine", compounds.size(), 1);
-    assertEquals("smiles match", "smiles", compounds.get(0).getSmiles());
+    genericEntityDao.saveOrUpdateEntity(_anEntity);
+    List<AbstractEntity> result = (List<AbstractEntity>) genericEntityDao.findAllEntitiesOfType(_anEntity.getEntityClass());
+    assertEquals(result.size(), 1);
+    AbstractEntity e = result.get(0);
+    e.isEquivalent(_anEntity);
   }
 
   public void testFindEntityById()
   {
-    Compound compound = new Compound("smilesZ", "inchiZ");
-    genericEntityDao.saveOrUpdateEntity(compound);
-    Serializable id = compound.getCompoundId();
+    genericEntityDao.saveOrUpdateEntity(_anEntity);
+    Serializable id = _anEntity.getEntityId();
 
-    Compound compound2 = genericEntityDao.findEntityById(Compound.class, id);
+    AbstractEntity e = genericEntityDao.findEntityById(_anEntity.getEntityClass(), id);
+    assertEquals(_anEntity, e);
 
-    assertEquals(compound, compound2);
-    compound2 = genericEntityDao.findEntityById(Compound.class, id + "'");
-    assertEquals(null, compound2);
+    AbstractEntity e2 = genericEntityDao.findEntityById(_anEntity.getEntityClass(), new Integer(-1));
+    assertEquals(null, e2);
   }
 
   public void testFindEntitiesByProperties()
@@ -160,17 +163,16 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     });
   }
 
+  @SuppressWarnings("unchecked")
   public void testFindEntitiesByProperty1()
   {
-    Compound compound = new Compound("spaz", "inchi");
-    genericEntityDao.saveOrUpdateEntity(compound);
+    genericEntityDao.saveOrUpdateEntity(_anEntity);
+    List<AbstractEntity> result = (List<AbstractEntity>) genericEntityDao.findAllEntitiesOfType(_anEntity.getEntityClass());
+    assertEquals(1, result.size());
+    assertEquals(_anEntity, result.get(0));
 
-    List<Compound> compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "spaz");
-    assertEquals(1, compounds.size());
-    assertEquals(compound, compounds.get(0));
-
-    compounds = genericEntityDao.findEntitiesByProperty(Compound.class, "smiles", "something other than spaz");
-    assertEquals(0, compounds.size());
+    result = (List<AbstractEntity>) genericEntityDao.findEntitiesByProperty(_anEntity.getEntityClass(), "shortName", "something other than ID");
+    assertEquals(0, result.size());
   }
 
   public void testFindEntitiesByProperty2()
@@ -188,14 +190,13 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 
   public void testFindEntitybyProperty()
   {
-    Compound compound = new Compound("spaz", "inchi");
-    genericEntityDao.saveOrUpdateEntity(compound);
+    genericEntityDao.saveOrUpdateEntity(_anEntity);
 
-    Compound compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "spaz");
-    assertEquals(compound, compound2);
+    AbstractEntity e = genericEntityDao.findEntityByProperty(_anEntity.getClass(), "shortName", "libName");
+    assertEquals(_anEntity, e);
 
-    compound2 = genericEntityDao.findEntityByProperty(Compound.class, "smiles", "something other than spaz");
-    assertNull(compound2);
+    AbstractEntity e2 = genericEntityDao.findEntityByProperty(_anEntity.getClass(), "shortName", "not libName");
+    assertNull(e2);
   }
 
   public void testFindEntitiesByPropertyWithInflation()
@@ -209,25 +210,40 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
         expectedLibrary[0] = new Library(
           "ln1",
           "sn1",
-          ScreenType.SMALL_MOLECULE,
-          LibraryType.NATURAL_PRODUCTS,
+          ScreenType.RNAI,
+          LibraryType.COMMERCIAL,
           1,
           50);
-        Well well1 = expectedLibrary[0].createWell(new WellKey(1, "A01"), WellType.EXPERIMENTAL);
-        Gene gene1 = new Gene("ANT1", 1, "ENTREZ-ANT1", "Human");
-        gene1.addGenbankAccessionNumber("GBAN1");
-        SilencingReagent siReagent1 = gene1.createSilencingReagent(SilencingReagentType.SIRNA, "AAAA");
-        well1.addSilencingReagent(siReagent1);
-        Gene gene2 = new Gene("ANT2", 2, "ENTREZ-ANT2", "Human");
-        gene2.addGenbankAccessionNumber("GBAN2");
-        SilencingReagent siReagent2 = gene2.createSilencingReagent(SilencingReagentType.SIRNA, "CCCC");
-        Well well2 = expectedLibrary[0].createWell(new WellKey(2, "A01"), WellType.EXPERIMENTAL);
-        well2.addSilencingReagent(siReagent2);
-        Gene gene3 = new Gene("ANT3", 3, "ENTREZ-ANT3", "Human");
-        gene3.addGenbankAccessionNumber("GBAN3");
-        SilencingReagent siReagent3 = gene3.createSilencingReagent(SilencingReagentType.SIRNA, "TTTT");
-        Well well3 = expectedLibrary[0].createWell(new WellKey(3, "A01"), WellType.EXPERIMENTAL);
-        well3.addSilencingReagent(siReagent3);
+        expectedLibrary[0].createContentsVersion(new AdministrativeActivity(new AdministratorUser("Joe", "Admin", "", "", "", "", "jadmin", ""), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+        Well well1 = expectedLibrary[0].createWell(new WellKey(1, "A01"), LibraryWellType.EXPERIMENTAL);
+        SilencingReagent reagent1 = well1.createSilencingReagent(new ReagentVendorIdentifier("vendor", "1a01"), SilencingReagentType.SIRNA, "AAAA");
+        reagent1.getVendorGene().
+        withGeneName("ANT1").
+        withEntrezgeneSymbol("ENTREZ-ANT1").
+        withEntrezgeneId(1).
+        withSpeciesName("Human").
+        withGenbankAccessionNumber("GBAN1");
+
+        Well well2 = expectedLibrary[0].createWell(new WellKey(2, "A01"), LibraryWellType.EXPERIMENTAL);
+        SilencingReagent reagent2 = well2.createSilencingReagent(new ReagentVendorIdentifier("vendor", "2a01"), SilencingReagentType.SIRNA, "CCCC");
+        reagent2.getVendorGene().
+        withGeneName("ANT2").
+        withEntrezgeneSymbol("ENTREZ-ANT2").
+        withEntrezgeneId(2).
+        withSpeciesName("Human").
+        withGenbankAccessionNumber("GBAN2");
+
+        Well well3 = expectedLibrary[0].createWell(new WellKey(3, "A01"), LibraryWellType.EXPERIMENTAL);
+        SilencingReagent reagent3 = well3.createSilencingReagent(new ReagentVendorIdentifier("vendor", "3a01"), SilencingReagentType.SIRNA, "TTTT");
+        reagent3.getVendorGene().
+        withGeneName("ANT3").
+        withEntrezgeneSymbol("ENTREZ-ANT3").
+        withEntrezgeneId(3).
+        withSpeciesName("Human").
+        withGenbankAccessionNumber("GBAN3");
+
+        expectedLibrary[0].getLatestContentsVersion().release(new AdministrativeActivity(expectedLibrary[0].getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy1");
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy2");
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy3");
@@ -244,10 +260,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
                                                                  "startPlate",
                                                                  1,
                                                                  false,
-                                                                 //"wells", // implicit
-                                                                 //"hbnWells.silencingReagents", // implicit
-                                                                 "wells.silencingReagents.gene", // implicit
-                                                                 "wells.silencingReagents.gene.genbankAccessionNumbers");
+                                                                 Library.wells.to(Well.latestReleasedReagent).to(SilencingReagent.vendorGene).to(Gene.genbankAccessionNumbers).getPath());
         assertTrue(expectedLibrary[0].isEquivalent(actualLibrary[0]));
       }
     });
@@ -258,13 +271,13 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
          assertEquals("inflated well", "A01", well.getWellName());
          assertEquals("inflated silencing reagent",
                       new String[] { "AAAA", "CCCC", "TTTT" }[i - 1],
-                      well.getSilencingReagents().iterator().next().getSequence());
+                      well.<SilencingReagent>getLatestReleasedReagent().getSequence());
          assertEquals("inflated gene",
                       "ANT" + i,
-                      well.getSilencingReagents().iterator().next().getGene().getGeneName());
+                      well.<SilencingReagent>getLatestReleasedReagent().getVendorGene().getGeneName());
          assertEquals("inflated genbankAccessionNumbers",
                       "GBAN" + i,
-                      well.getSilencingReagents().iterator().next().getGene().getGenbankAccessionNumbers().iterator().next());
+                      well.<SilencingReagent>getLatestReleasedReagent().getVendorGene().getGenbankAccessionNumbers().iterator().next());
          ++i;
       }
     }
@@ -340,7 +353,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
                                   LibraryType.COMMERCIAL,
                                   1,
                                   1);
-    library.createWell(new WellKey(1, "A01"), WellType.EXPERIMENTAL);
+    library.createWell(new WellKey(1, "A01"), LibraryWellType.EXPERIMENTAL);
     genericEntityDao.saveOrUpdateEntity(library);
     try {
         // oops...should've been "wells"!
@@ -371,7 +384,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 
     class Txn implements DAOTransaction
     {
-      Screen screen;
+      //Screen screen;
       LabActivity activity;
       public void runTransaction()
       {
@@ -431,5 +444,29 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
                      genericEntityDao.relationshipSize(screen, "collaborators", "lastName", "Laborator2"));
       }
     });
+  }
+  
+  public void testFlushAndClearSession()
+  {
+    genericEntityDao.runQuery(new Query() {
+      public List execute(Session session)
+      {
+        Library library = new Library("library", "library", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
+        library.createWell(new WellKey(1, "A01"), LibraryWellType.EMPTY);
+        genericEntityDao.saveOrUpdateEntity(library);
+        genericEntityDao.flush();
+        assertTrue(session.contains(library));
+        assertEquals(2, session.getStatistics().getEntityCount());
+        assertEquals(library.getLibraryId(), session.getIdentifier(library));
+        genericEntityDao.clear();
+        assertEquals(0, session.getStatistics().getEntityCount());
+        assertFalse(session.contains(library));
+        return null;
+      }
+    });
+    
+    assertNotNull(genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library"));
+    assertNotNull(genericEntityDao.findEntityById(Well.class, "00001:A01"));
+    
   }
 }

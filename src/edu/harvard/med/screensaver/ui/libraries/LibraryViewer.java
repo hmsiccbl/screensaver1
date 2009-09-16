@@ -9,34 +9,39 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpSession;
+import java.util.Map;
+
+import javax.faces.model.DataModel;
+import javax.faces.model.ListDataModel;
+
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
+import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
+import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.namevaluetable.LibraryNameValueTable;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibraryViewer extends AbstractEditableBackingBean implements EntityViewer
+public class LibraryViewer extends AbstractEditableBackingBean
 {
   private static Logger log = Logger.getLogger(LibraryViewer.class);
 
@@ -48,17 +53,18 @@ public class LibraryViewer extends AbstractEditableBackingBean implements Entity
   private LibrariesDAO _librariesDao;
   private WellSearchResults _wellsBrowser;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
+  private LibraryContentsVersionManager _libraryContentsVersionManager;
 
   private Library _library;
-  private int _librarySize;
-  private LibraryNameValueTable _libraryNameValueTable;
-  private CompoundLibraryContentsImporter _compoundLibraryContentsImporter;
-  private RNAiLibraryContentsImporter _rnaiLibraryContentsImporter;
-  private NaturalProductsLibraryContentsImporter _naturalProductsLibraryContentsImporter;
+  private LibraryContentsImporter _libraryContentsImporter;
   private LibraryDetailViewer _libraryDetailViewer;
   private LibrarySearchResults _librariesBrowser;
 
   private int _uploadStatus;
+  private Map<String,Boolean> _isPanelCollapsedMap;
+  private DataModel _contentsVersionsDataModel;
+
+
 
   /**
    * @motivation for CGLIB2
@@ -72,11 +78,10 @@ public class LibraryViewer extends AbstractEditableBackingBean implements Entity
                        LibrariesDAO librariesDao,
                        WellSearchResults wellsBrowser,
                        WellCopyVolumeSearchResults wellCopyVolumesBrowser,
-                       CompoundLibraryContentsImporter compoundLibraryContentsImporter,
-                       RNAiLibraryContentsImporter rnaiLibraryContentsImporter,
-                       NaturalProductsLibraryContentsImporter naturalProductsLibraryContentsImporter,
+                       LibraryContentsImporter libraryContentsImporter,
                        LibraryDetailViewer libraryDetailViewer,
-                       LibrarySearchResults librarySearchResults)
+                       LibrarySearchResults librarySearchResults,
+                       LibraryContentsVersionManager libraryContentsVersionManager)
   {
     super(ScreensaverUserRole.LIBRARIES_ADMIN);
     _thisProxy = thisProxy;
@@ -84,11 +89,12 @@ public class LibraryViewer extends AbstractEditableBackingBean implements Entity
     _librariesDao = librariesDao;
     _wellsBrowser = wellsBrowser;
     _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
-    _compoundLibraryContentsImporter = compoundLibraryContentsImporter;
-    _rnaiLibraryContentsImporter = rnaiLibraryContentsImporter;
-    _naturalProductsLibraryContentsImporter = naturalProductsLibraryContentsImporter;
+    _libraryContentsImporter = libraryContentsImporter;
     _libraryDetailViewer = libraryDetailViewer;
     _librariesBrowser = librarySearchResults;
+    _libraryContentsVersionManager = libraryContentsVersionManager;
+    _isPanelCollapsedMap = Maps.newHashMap();
+    _isPanelCollapsedMap.put("contentsVersions", Boolean.TRUE);
   }
 
 
@@ -110,36 +116,16 @@ public class LibraryViewer extends AbstractEditableBackingBean implements Entity
     return _library;
   }
 
-  public boolean getIsCompoundLibrary()
+  public Map getIsPanelCollapsedMap()
   {
-    return _library != null && _library.getScreenType().equals(ScreenType.SMALL_MOLECULE);
+    return _isPanelCollapsedMap;
   }
 
-  public int getLibrarySize()
-  {
-    // note: do not call _library.getWells().size(), as this is very expensive, as it loads all wells
-    return _librarySize;
-  }
-
-  public void setLibrarySize(int librarySize)
-  {
-    _librarySize = librarySize;
-  }
-
-  public LibraryNameValueTable getLibraryNameValueTable()
-  {
-    return _libraryNameValueTable;
-  }
-
-  public void setLibraryNameValueTable(LibraryNameValueTable libraryNameValueTable)
-  {
-    _libraryNameValueTable = libraryNameValueTable;
-  }
 
   @UIControllerMethod
   public String viewLibrary()
   {
-    String libraryIdAsString = (String) getRequestParameter("libraryId");
+    String libraryIdAsString = (String) getRequestParameter("entityId");
     Integer libraryId = Integer.parseInt(libraryIdAsString);
     Library library = _dao.findEntityById(Library.class, libraryId);
     return _thisProxy.viewLibrary(library);
@@ -149,38 +135,44 @@ public class LibraryViewer extends AbstractEditableBackingBean implements Entity
   @Transactional
   public String viewLibrary(Library library)
   {
-    setLibrary(_dao.reloadEntity(library, true));
-    setLibrarySize(_dao.relationshipSize(_library, "wells", "wellType", "experimental"));
-    setLibraryNameValueTable(new LibraryNameValueTable(_library, getLibrarySize()));
-    
-    HttpSession http = (HttpSession) FacesContext.getCurrentInstance()
-                                                 .getExternalContext()
-                                                 .getSession(false);
-    LibraryUploadThread t = (LibraryUploadThread) http.getAttribute("libraryUploadThread");
-    if (t == null)
-      _uploadStatus = -1;
-    else
-      _uploadStatus = t.getStatus();
-
-    if (_uploadStatus == 2)
-      http.setAttribute("libraryUploadThread", null);
-    
+    setLibrary(_dao.reloadEntity(library));
+    _dao.needReadOnly(_library, 
+                      Library.contentsVersions.to(LibraryContentsVersion.loadingActivity).to(Activity.performedBy).getPath(),
+                      Library.contentsVersions.to(LibraryContentsVersion.releaseActivity).to(Activity.performedBy).getPath());
+    _contentsVersionsDataModel = null;
     return VIEW_LIBRARY;
   }
 
-  // If library content upload still in progress, disable the upload button
-  public String getUploading() {
-    if (_uploadStatus == ScreensaverConstants.LIBRARY_UPLOAD_SUCCESSFULL) {
-      return "Library content has been successfully uploaded.";
+  public DataModel getContentsVersionsDataModel()
+  {
+    if (_contentsVersionsDataModel == null) {
+      _contentsVersionsDataModel = new ListDataModel(Lists.newArrayList(Iterables.reverse(Lists.newArrayList(_library.getContentsVersions()))));
     }
-    else if (_uploadStatus == ScreensaverConstants.LIBRARY_UPLOAD_RUNNING) {
-      return "Library content is being uploaded. An email will be sent to you once the uploading is done.";
-    }
-    else if (_uploadStatus == ScreensaverConstants.LIBRARY_UPLOAD_FAILED) {
-      return "Library content uploading failed. Please ensure that the file is formatted correctly.";
-    }
-    
-    return "";
+    return _contentsVersionsDataModel;
+  }
+  
+  @UIControllerMethod
+  public String browseLibraryContentsVersionWells()
+  {
+    LibraryContentsVersion lcv = (LibraryContentsVersion) getRequestMap().get("lcv");
+    _wellsBrowser.searchWellsForLibraryContentsVersion(lcv);
+    return VIEW_WELL_SEARCH_RESULTS;
+  }
+
+  @UIControllerMethod
+  public String deleteLibraryContentsVersion()
+  {
+    LibraryContentsVersion lcv = (LibraryContentsVersion) getRequestMap().get("lcv");
+    _librariesDao.deleteLibraryContentsVersion(lcv);
+    return _thisProxy.viewLibrary(_library);
+  }
+
+  @UIControllerMethod
+  public String releaseLibraryContentsVersion()
+  {
+    _libraryContentsVersionManager.releaseLibraryContentsVersion((LibraryContentsVersion) getRequestMap().get("lcv"),
+                                                                  (AdministratorUser) getScreensaverUser());
+    return _thisProxy.viewLibrary(_library);
   }
 
   @UIControllerMethod
@@ -202,27 +194,9 @@ public class LibraryViewer extends AbstractEditableBackingBean implements Entity
   public String viewLibraryContentsImporter()
   {
     if (_library != null) {
-      if (_library.getScreenType().equals(ScreenType.RNAI)) {
-        return _rnaiLibraryContentsImporter.viewRNAiLibraryContentsImporter(_library);
-      }
-      if (_library.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-        if (_library.getLibraryType().equals(LibraryType.NATURAL_PRODUCTS)) {
-          return _naturalProductsLibraryContentsImporter.viewNaturalProductsLibraryContentsImporter(_library);
-
-        }
-        else {
-          return _compoundLibraryContentsImporter.viewCompoundLibraryContentsImporter(_library);
-        }
-      }
+      return _libraryContentsImporter.viewLibraryContentsImporter(_library);
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String unloadLibraryContents()
-  {
-    _librariesDao.deleteLibraryContents(_library);
-    return _thisProxy.viewLibrary(_library);
   }
 
   @UIControllerMethod
@@ -253,31 +227,18 @@ public class LibraryViewer extends AbstractEditableBackingBean implements Entity
     }
   }
 
-  public int getUploadStatus()
-  {
-    return _uploadStatus;
-  }
-
-  public void setUploadStatus(int uploadStatus)
-  {
-    _uploadStatus = uploadStatus;
-  }
-
   public String cancel()
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public String edit()
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   public String save()
   {
-    // TODO Auto-generated method stub
     return null;
   }
 }

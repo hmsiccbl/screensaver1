@@ -16,9 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -27,27 +25,14 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
-import edu.harvard.med.screensaver.model.users.ChecklistItem;
-import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
@@ -65,21 +50,30 @@ import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.util.EditableViewer;
+import edu.harvard.med.screensaver.ui.util.AttachedFiles;
+import edu.harvard.med.screensaver.ui.util.ChecklistItems;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
-import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 /**
  * User Viewer backing bean.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class UserViewer extends AbstractEditableBackingBean implements EditableViewer
+public class UserViewer extends AbstractEditableBackingBean
 {
   // static members
 
@@ -106,9 +100,10 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
   private ScreenerSearchResults _screenerSearchResults;
   private StaffSearchResults _staffSearchResults;
   private ScreenSearchResults _screensBrowser;
+  private AttachedFiles _attachedFiles;
+  private ChecklistItems _checklistItems;
 
   private ScreensaverUser _user;
-  private boolean _isEditMode;
   private DataModel _userRolesDataModel;
   private UISelectOneBean<ScreensaverUserRole> _newUserRole;
   private UISelectOneEntityBean<LabHead> _labName;
@@ -121,11 +116,7 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
   private boolean _isScreenAssociatesCollapsed = true;
   private boolean _isSmallMoleculeScreensCollapsed = false;
   private boolean _isRnaiScreensCollapsed = false;
-  private boolean _isChecklistItemsCollapsed = true;
   private boolean _isScreensCollapsed = false;
-  private Map<ChecklistItemGroup,DataModel> _checklistItemDataModelMap;
-  private AdministratorUser _checklistItemEventEnteredBy;
-  private Map<ChecklistItem,LocalDate> _newChecklistItemDatePerformed;
 
 
   // constructors
@@ -143,7 +134,9 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
                     UsersDAO usersDao,
                     ScreenerSearchResults screenerSearchResults,
                     StaffSearchResults staffSearchResults,
-                    ScreenSearchResults screensBrowser)
+                    ScreenSearchResults screensBrowser,
+                    AttachedFiles attachedFiles,
+                    ChecklistItems checklistItems)
   {
     super(ScreensaverUserRole.USERS_ADMIN);
     _thisProxy = _userViewerProxy;
@@ -153,6 +146,9 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
     _screenerSearchResults = screenerSearchResults;
     _staffSearchResults = staffSearchResults;
     _screensBrowser = screensBrowser;
+    _attachedFiles = attachedFiles;
+    _checklistItems = checklistItems;
+    _checklistItems.setParentViewer(_thisProxy);
   }
 
 
@@ -232,16 +228,6 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
     _isRnaiScreensCollapsed = isRnaiScreensCollapsed;
   }
 
-  public boolean isChecklistItemsCollapsed()
-  {
-    return _isChecklistItemsCollapsed;
-  }
-
-  public void setChecklistItemsCollapsed(boolean isChecklistItemsCollapsed)
-  {
-    _isChecklistItemsCollapsed = isChecklistItemsCollapsed;
-  }
-
   public boolean isScreensCollapsed()
   {
     return _isScreensCollapsed;
@@ -279,6 +265,8 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
   @Transactional
   public void setUser(ScreensaverUser user)
   {
+    resetView();
+
     if (user.getEntityId() != null) {
       user = _dao.reloadEntity(user,
                                true,
@@ -309,17 +297,15 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
                   "checklistItemEvents.checklistItem",
                   "checklistItemEvents.screeningRoomUser",
                   "checklistItemEvents.entryActivity.performedBy");
+        _dao.need(user, 
+                  "attachedFiles");
       }
     }
     _user = user;
-
-    // HACK: must find the logged in admin user now, so we can re-use same instance, if multiple activations/expirations are entered before save()
-    if (getScreensaverUser() instanceof AdministratorUser) {
-      _checklistItemEventEnteredBy = _dao.reloadEntity((AdministratorUser) getScreensaverUser(), false, "activitiesPerformed");
-    }
-
-
-    resetView();
+    _attachedFiles.setAttachedFilesEntity(getScreeningRoomUser());
+    _attachedFiles.setAttachedFileTypes(Sets.newHashSet(AttachedFileType.RNAI_USER_AGREEMENT, AttachedFileType.SMALL_MOLECULE_USER_AGREEMENT));
+    _checklistItems.setChecklistItemsEntity(getScreeningRoomUser());
+    _checklistItems.setChecklistItemGroups(CHECKLIST_ITEM_GROUPS);
   }
 
   @Override
@@ -332,22 +318,17 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
     return _thisProxy.viewUser(_user);
   }
 
-  public boolean isEditMode()
-  {
-    return _isEditMode;
-  }
-
   @UIControllerMethod
   public String edit()
   {
-    _isEditMode = true;
+    setEditMode(true);
     return VIEW_USER;
   }
 
   @UIControllerMethod
   public String cancel()
   {
-    _isEditMode = false;
+    setEditMode(false);
     if (_user.getEntityId() == null) {
       return VIEW_MAIN;
     }
@@ -358,12 +339,11 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
   @Transactional
   public String save()
   {
-    _isEditMode = false;
+    setEditMode(false);
 
     
     if (_user.getEntityId() == null) {
       updateUserProperties();
-      _dao.reattachEntity(_checklistItemEventEnteredBy);
       _dao.persistEntity(_user);
     }
     else {
@@ -514,7 +494,9 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
         getScreeningRoomUser().getScreensLed().contains(screen) ? "Lead Screener" :
           (getLabHead() != null && getLabHead().getScreensHeaded().contains(screen)) ? "Lab Head (PI)" :
             "Collaborator";
-        screensAndRoles.add(new ScreenAndRole(screen, role));
+        if (!screen.isRestricted()) {
+          screensAndRoles.add(new ScreenAndRole(screen, role));
+        }
       }
       Multimap<ScreenType,ScreenAndRole> screenType2ScreenAndRole = new HashMultimap<ScreenType,ScreenAndRole>();
       for (ScreenAndRole screenAndRole : screensAndRoles) {
@@ -561,7 +543,17 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
     return _screenAssociatesDataModel;
   }
 
+  public AttachedFiles getAttachedFiles()
+  {
+    return _attachedFiles;
+  }
 
+  public ChecklistItems getChecklistItems()
+  {
+    return _checklistItems;
+  }
+
+  
   /* JSF Application methods */
 
   @UIControllerMethod
@@ -631,7 +623,7 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
     }
 
     setUser(newUser);
-    _isEditMode = true;
+    setEditMode(true);
     return VIEW_USER;
   }
 
@@ -779,111 +771,12 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
     return BROWSE_SCREENERS;
   }
 
-  public List<ChecklistItemGroup> getChecklistItemGroups()
-  {
-    return CHECKLIST_ITEM_GROUPS;
-  }
-
-  public Map<ChecklistItemGroup,DataModel> getChecklistItemsDataModelMap()
-  {
-    if (_checklistItemDataModelMap == null) {
-      _checklistItemDataModelMap = new HashMap<ChecklistItemGroup,DataModel>();
-      for (ChecklistItemGroup group : getChecklistItemGroups()) {
-        Map<ChecklistItem,ChecklistItemEvent> checklistItemsMap = new LinkedHashMap<ChecklistItem,ChecklistItemEvent>();
-        List<ChecklistItem> checklistItems = _dao.findEntitiesByProperty(ChecklistItem.class, "checklistItemGroup", group);
-        Collections.sort(checklistItems);
-        for (ChecklistItem type : checklistItems) {
-          checklistItemsMap.put(type, null);
-        }
-        for (ChecklistItemEvent checklistItemEvent : getScreeningRoomUser().getChecklistItemEvents()) {
-          if (checklistItemEvent.getChecklistItem().getChecklistItemGroup() == group) {
-            checklistItemsMap.put(checklistItemEvent.getChecklistItem(), checklistItemEvent);
-          }
-        }
-        DataModel checklistItemDataModel = new ListDataModel(Lists.newArrayList(checklistItemsMap.entrySet()));
-        _checklistItemDataModelMap.put(group, checklistItemDataModel);
-      }
-    }
-    return _checklistItemDataModelMap;
-  }
-  
-  public Map<ChecklistItem,LocalDate> getNewChecklistItemDatePerformed()
-  {
-    if (_newChecklistItemDatePerformed == null) {
-      LocalDate today = new LocalDate();
-      _newChecklistItemDatePerformed = new HashMap<ChecklistItem,LocalDate>();
-      for (DataModel groupDataModel : getChecklistItemsDataModelMap().values()) {
-        for (Map.Entry<ChecklistItem,ChecklistItemEvent> entry : (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) groupDataModel.getWrappedData()) {
-          _newChecklistItemDatePerformed.put(entry.getKey(), today);
-        }
-      }
-    }
-    return _newChecklistItemDatePerformed;
-  }
-
-  @UIControllerMethod
-  public String checklistItemActivated()
-  {
-    Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
-    assert entry.getKey().isExpirable() && (entry.getValue() == null || entry.getValue().isExpiration());
-    getScreeningRoomUser().createChecklistItemActivationEvent(entry.getKey(),
-                                                              getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                                              new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                                         new LocalDate(),
-                                                                                         AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
-    _checklistItemDataModelMap = null;
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String checklistItemDeactivated()
-  {
-    Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
-    assert entry.getKey().isExpirable() && entry.getValue() != null && !entry.getValue().isExpiration();
-    entry.getValue().createChecklistItemExpirationEvent(getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                                        new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                                   new LocalDate(),
-                                                                                   AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
-    _checklistItemDataModelMap = null;
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String checklistItemCompleted()
-  {
-    Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
-    assert !entry.getKey().isExpirable() && entry.getValue() == null;
-    getScreeningRoomUser().createChecklistItemActivationEvent(entry.getKey(),
-                                                              getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                                              new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                                         new LocalDate(),
-                                                                                         AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
-    _checklistItemDataModelMap = null;
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  @SuppressWarnings("unchecked")
-  public String checklistItemNotApplicable()
-  {
-    Map.Entry<ChecklistItem,ChecklistItemEvent> entry = 
-      (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
-
-    assert entry.getValue() == null || entry.getKey().isExpirable() || entry.getValue().isExpiration();
-    getScreeningRoomUser().createChecklistItemNotApplicableEvent(entry.getKey(),
-                                                              getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                                              new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                                         new LocalDate(),
-                                                                                         AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
-    _checklistItemDataModelMap = null;
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
   
   // private methods
 
   private void resetView()
   {
-    _isEditMode = false;
+    setEditMode(false);
     _userRolesDataModel = null;
     _newUserRole = null;
     _labName = null;
@@ -892,8 +785,8 @@ public class UserViewer extends AbstractEditableBackingBean implements EditableV
     _screensDataModel = null;
     _labMembersDataModel = null;
     _screenAssociatesDataModel = null;
-    _checklistItemDataModelMap = null;
-    _newChecklistItemDatePerformed = null;
+    _attachedFiles.reset();
+    _checklistItems.reset();
   }
 }
 

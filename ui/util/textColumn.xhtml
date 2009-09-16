@@ -22,10 +22,10 @@
 		<f:facet name="header">
 			<ss:popup popupText="#{description}" value="#{columnName}" />
 		</f:facet>
-		<ui:insert name="content">
-			<t:outputText id="#{id}Cell" value="#{cellValue}"
-				styleClass="dataText" />
-		</ui:insert>
+		<ui:insert name="textColumnContent">
+      <t:outputText id="#{id}Cell" value="#{cellValue}"
+        styleClass="dataText" />
+    </ui:insert>
 	</t:column>
 </ui:composition>
 </html>

@@ -2,6 +2,401 @@
 <body>
 <h1>Screensaver Change Log</h1>
 
+<h2>1.8.0</h2>
+      The following is a <i>summary</i> of the changes
+      introduced by Screensaver version 1.8.0.&nbsp; It is not
+      comprehensive.&nbsp; For more details:
+      <ul>
+        <li>See <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemBrowse&amp;tracker_id=497&amp;tracker_query_id=51">Tickets
+        resolved in 1.8.0</a></li>
+        <li>Query <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=AccessInfo">Subversion
+        repository</a> <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2Fbranches%2Ficcbl%2Flibrary-mgmt-rework%2F">/branches/iccbl/lib-mgmt-rework</a>
+        (commit logs and diffs) for a full description of the changes</li>
+        <li>Inquire on the <a
+          href="mailto:screensaver-development@forge.abcd.harvard.edu">screensaver-development</a>
+        mailing list</li>
+      </ul>
+
+      <h4>Library Contents Versions</h4>
+      <ul>
+        <li>The reagent information for a library can be reloaded,
+        allowing the information to be updated and/or corrected, while
+        keeping past versions of the library contents information intact
+        for auditing purposes <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1765">[#1765]</a>.
+        <ul>
+          <li>The Screensaver database becomes the master
+          repository of library information, freeing the facility from
+          having to store past library contents versions as external
+          files.</li>
+          <li>As gene and compound information provided by
+          third-party resources (NCBI, etc.) evolves, new library
+          contents versions can be loaded to reflect more up-to-date
+          information.</li>
+          <li>Vendor-provided corrections to library information
+          can be loaded, while maintaining a record of the formerly
+          erroneous information.</li>
+        </ul>
+        </li>
+        <li>When a new version of a library's contents are imported
+        by an administrator, the new version is initially viewable only
+        by administrators, but after review can be "released", making it
+        visible to normal users <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1907">[#1907]</a>.
+        </li>
+        <li>Library contents versions that have not yet been
+        released may be deleted <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1908">[#1908]</a>.
+        </li>
+      </ul>
+
+      <h4>Library Contents Loading</h4>
+      <ul>
+        <li>New file formats for library contents loading:
+        <ul>
+          <li><a
+            href="https://wiki.med.harvard.edu/ICCBL/Screensaver/RNAiLibraryContentsFileFormat2">RNAi
+          Libraries</a></li>
+          <li><a
+            href="https://wiki.med.harvard.edu/ICCBL/Screensaver/SmallMoleculeLibraryContentsFileFormat2">Small
+          Molecule Libraries</a></li>
+        </ul>
+        </li>
+        <li>Each library contents loading is tracked via an
+        Administrative Activity, recording who/when/why for the loading
+        activity.</li>
+        <li>Queries that were made to online services (NCBI, etc.)
+        during library loading operation have been eliminated <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1362">[#1362]</a>.&nbsp;
+        Data that were previously acquired via these network queries are
+        now represented by explicit fields in the library contents input
+        files.&nbsp; This makes library loading a significantly faster
+        operation, and more transparent in terms of what data is
+        actually being loaded into the database.&nbsp; Moved the
+        respective web service clients to
+        edu.harvard.med.iccbl.screensaver, as they are no longer part of
+        Screensaver proper.&nbsp; They are now only used outside of the
+        running Screensaver application as a means of obtaining the data
+        needed for library contents input files: at ICCB-L we have
+        packaged these Java classes into Pipeline Pilot components,
+        which we use to generate the library contents input files.</li>
+        <li>Removed dynamic calculation of molecular mass and
+        formula <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1338">[#1338]</a>.&nbsp;
+        These data are specified via explicit fields in the small
+        molecule library contents input file and stored in the database.
+        </li>
+        <li>Removed dynamic calculation of SMILES and InChi from
+        molfile chemical structures <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1767">[#1767]</a>.&nbsp;
+        These data are specified via explicit fields in the small
+        molecule library contents input file and stored in the database.
+        </li>
+        <li>Gene information provided by library vendors is stored
+        independently from the gene information that is provided/updated
+        by the facility <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1586">[#1586]</a>.&nbsp;
+        Previously, some vendor-provided gene attributes were
+        overwritten by Screensaver during the loading process if updated
+        information was acquired via calls to NCBI.&nbsp; Now,
+        vendor-provided gene information can be stored verbatim, while a
+        facility-provided gene information is stored independently (in
+        general, the facility gene information will be derived from the
+        vendor gene information, with updates made as desired).</li>
+        <li>For RNAi pool libraries, pool-to-duplex well
+        deconvolutions are stored explicitly in the database and
+        specified in the RNAi library contents input file <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1204">[#1204]</a>.&nbsp;
+        Screensaver no longer dynamically calculates this mapping.</li>
+        <li>New LibraryContentsLoader command-line application.</li>
+        <li>Removed background loading of RNAi libraries, as it did
+        not work well with respect to error reporting and was not
+        supported for other library types <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1610">[#1610]</a>.
+        </li>
+      </ul>
+
+      <h4>User Interface</h4>
+      <ul>
+        <li>Library Viewer has new section, "Library Contents
+        Versions" (administrators only).&nbsp; Allows administrators to
+        view, import, delete, and release contents versions for a
+        library.</li>
+        <li>Well Viewer has new sections:
+        <ul>
+          <li>"Other Wells With Reagents" (used to be in Gene
+          Viewer, which is now defunct)</li>
+          <li>"Duplexes", shows the duplexes for RNAi library pool
+          wells</li>
+        </ul>
+        </li>
+        <li>Now that reagent information (compounds, genes,
+        silencing reagents, etc.) is managed by each well independently,
+        the following pages have been eliminated:
+        <ul>
+          <li>Reagent Search Results (subsumed by Well Search
+          Results).&nbsp; The "Find Reagents" command shows results
+          Wells Browser, potentially showing multiple well rows for a
+          single reagent vendor identifier.</li>
+          <li>Gene Viewer (subsumed by Well Viewer)</li>
+          <li>Compound Viewer (subsumed by Well Viewer)</li>
+        </ul>
+        </li>
+        <li>"Well Type" renamed to "Library Well Type", to
+        differentiate from "Assay Well Type".</li>
+        <li>Facility gene information is exposed to end users,
+        whereas vendor gene information is currently only accessible via
+        direct database queries.</li>
+        <li>Reagent vendor IDs, previously shown as a single field
+        "&lt;vendor&gt;:&lt;ID&gt;" now exposed as separate columns in
+        data tables, for more effective sorting and filtering. <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1256">[#1256]</a>
+        </li>
+        <li>Silencing Reagent sequences exposed by user interface,
+        but only to administrators <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1209">[#1209]</a>.
+        </li>
+      </ul>
+
+      <h4>Scalability Improvements (to handle larger data set
+      sizes)</h4>
+      <ul>
+        <li>Reduced memory usage during data table export
+        operations (Excel and SDF exports)</li>
+        <li>Reduced memory usage during library contents loading
+        operations</li>
+        <li>Export to Excel writes out to multiple worksheets, if
+        necessary <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1990">[#1990]</a>
+        </li>
+      </ul>
+
+      <h4>Miscellaneous</h4>
+      <ul>
+        <li>Small molecule image structures are now retrieved from
+        pre-generated static files, by default, and are no longer
+        dynamically generated <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1192">[#1192]</a>.&nbsp;
+        This removes Screensaver's run-time dependency on Daylight
+        Chemical software.&nbsp;</li>
+        <li>Fixed Cherry Pick Request Viewer's "Record Failed Assay
+        Plates" command <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2012">[#2012]</a>.
+        </li>
+        <li>Fixed error that occurred when user specified a funding
+        support on new screen <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1950">[#1950]</a>.
+        </li>
+        <li>"Fixed" incorrect molecular mass and formula
+        calculations by removing run-time calculations altogether, and
+        now requiring values to be specified in library contents input
+        file (now stored with small molecule reagents)<a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1358">[#1358]</a>,
+        <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1554">[#1554]</a>.
+        </li>
+        <li>Added "miRNA" silencing reagent type <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1961">[#1961]</a>.
+        </li>
+        <li>cellHTS2 feature can enabled or disabled via system
+        property in screensaver.properties <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=840">[#840]</a>.
+        </li>
+      </ul>
+
+      <h4>Domain Model (for developers)</h4>
+      <ul>
+        <li>Renamed "Compound" to "SmallMoleculeReagent" <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1270">[#1270]</a>.
+        </li>
+        <li>Added NaturalProductReagent <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1769">[#1769]</a>.
+        </li>
+        <li>Reagent entity is now parent of SmallMoleculeReagent,
+        SilencingReagent, and NaturalProductReagent.&nbsp; Each well may
+        have a single reagent.</li>
+        <li>The entities representing reagent information are no
+        longer shared among multiple wells.&nbsp; Each well "owns" it
+        own reagent records, and so there is no longer an attempt to
+        maintain canonical versions of reagents or genes.&nbsp; This
+        includes compound information (was Compound, now
+        SmallMoleculeReagent), Gene, and SilencingReagent.&nbsp; This
+        allows the contents of different libraries to be updated (by
+        adding a new contents version) without affecting other libraries
+        that may contain the same reagents. This also allows for an
+        overall simplified design and library-loading performance
+        improvements.</li>
+        <li>Explicit relationship from pool SilencingReagent to the
+        wells containing the constituent duplex SilencingReagents.&nbsp;
+        This allows a pool well to maintain a single pool reagent, while
+        allowing information about all duplexes to be acquired
+        efficiently and accurately <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1204">[#1204]</a>.
+        </li>
+        <li>SmallMoleculeReagent now has molecular mass, molecular
+        weight, and molecular formula fields [#1338, #1963].</li>
+        <li>Single reagent per well (either a SmallMoleculeReagent,
+        SilencingReagent, or NaturalProductReagent).
+        <ul>
+          <li>Previously, a well could contain multiple compounds,
+          though this only occurred for "composite" compounds (usually a
+          compound and a salt).&nbsp; However, since such "composite"
+          small molecules can be handled by within a molfile structure,
+          SMILES and InChi identifiers, and structure images, there
+          is&nbsp; no need to break them up into multiple
+          SmallMoleculeReagents.&nbsp; This also eliminates the
+          complexities of determining/maintaining a "primary" compound.
+          </li>
+          <li>Previously, a well could maintain multiple silencing
+          reagents to handle pool wells.&nbsp; Now, pools of silencing
+          reagents are considered a single reagent, with explicit
+          associations to to associated duplex silencing reagents <a
+            href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1204">[#1204]</a>.
+          </li>
+          <li>Well tracks its historical set of "reagents", one
+          reagent per library contents version. Only one of these
+          reagents is active at a given point in time, represented by
+          the "latestReleasedReagent" relationship.</li>
+        </ul>
+        </li>
+        <li>Well entity changes:
+        <ul>
+          <li>molfile, smiles moved to SmallMoleculeReagent</li>
+          <li>genbankAccessionNumber moved to
+          Gene.genbankAccessionNumbers (exclusively)</li>
+          <li>gene now in SilencingReagent</li>
+        </ul>
+        </li>
+        <li>SilencingReagent now has two distinct gene records:
+        vendor ("theirs"), facility ("ours").</li>
+        <li>Library stores pre-calculated experimental well count
+        value in database, for performance <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1292">[#1292]</a>.
+        </li>
+        <li>Added Library.isPool flag <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1954">[#1954]</a>.
+        </li>
+        <li>Removed:
+        <ul>
+          <li>edu.harvard.med.screensaver.model.derivatives package
+          and its entities <a
+            href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1291">[#1291]</a>
+          </li>
+          <li>Gene.oldEntrezegeneIds and Gene.oldEntrezegeneSymobls
+          </li>
+          <li>Many Library attributes (see <a
+            href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2Fbranches%2Ficcbl%2Flibrary-mgmt-rework%2Fsrc%2Fedu%2Fharvard%2Fmed%2Fscreensaver%2Fmodel%2Flibraries%2FLibrary.java&amp;r1=3019&amp;r2=3020&amp;pathrev=3020">diff
+          from 3020 to 3019</a>, and <a
+            href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2F&amp;view=rev&amp;root=screensaver&amp;revision=3224">3224</a>)
+          <a
+            href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1494">[#1494]</a>
+          </li>
+          <li>CAS, NSC numbers for small molecules</li>
+        </ul>
+        </li>
+      </ul>
+
+      <h4>Refactorings and APIs (for developers)</h4>
+      <ul>
+        <li>Library parsers/loaders now unified as subclasses of
+        LibraryContentsParser, all invoked via LibraryContentsLoader.</li>
+        <li>RelationshipPath and PropertyPath <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1225">[#1225]</a>
+        [rev <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2F&amp;view=rev&amp;root=screensaver&amp;revision=3102">3102</a>
+        commit log].&nbsp; Supports building paths incrementally via
+        method calls, rather than dot-separated strings, providing
+        improved compile-time safety. Model entities can now statically
+        define their single-hop relationships as RelationshipPaths,
+        allowing compile-type checking of domain model structure.</li>
+        <li>TableColumn hierarchy [rev <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2F&amp;view=rev&amp;root=screensaver&amp;revision=3236">3236</a>
+        commit log].&nbsp; Combined parallel hierarchies of TableColumn
+        subclass and EntityColumn subclasses by factoring out
+        RelationshipPath-related methods into HasFetchPatch interface.</li>
+        <li>Domain model automated unit testing framework [see rev
+        <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2F&amp;view=rev&amp;root=screensaver&amp;revision=3120">3120</a>-3173
+        commit log].&nbsp; Major rewrite.</li>
+        <li>edu.harvard.med.screensaver.io.Workbook2 [see rev <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2F&amp;view=rev&amp;root=screensaver&amp;revision=3174">3174</a>
+        commit log].&nbsp; Support for iterator-style row and column
+        reading.</li>
+        <li>Workbook-based library contents parsers now use jxl
+        (JExcel API) instead of POI/HSSF library.</li>
+      </ul>
+
+      <h4>Build-related (for developers)</h4>
+      <ul>
+        <li>Removed CDK library <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1338">[#1338]</a>.
+        </li>
+        <li>Removed OpenBabel library <a
+          href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1767">[#1767]</a>.
+        </li>
+        <li>Removed JSFUnit support from build.xml, as these JSF
+        units tests are no longer being maintained.</li>
+        <li>edu.mit.* classes (SOAP) must now be compiled via
+        chembank-wsimport Ant target, as it is no longer managed in
+        source control repository.</li>
+        <li>Support for Cobertura unit test code coverage in
+        build.xml.</li>
+        <li>Support for FindBugs in build.xml (fixed all
+        high-priority warnings, and many others).</li>
+      </ul>
+
+<h2>1.7.5</h2>
+<p></p>
+<table>
+<thead>
+<tr>
+<th>Tracker Item ID</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1934'>1934</a></td><td>screen funding supports managed in database</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1935'>1935</a></td><td>add screen "pin transfer approval" administrative activity</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1890'>1890</a></td><td>userActivity log session ID is no longer useful</td></tr></tbody>
+</table>
+
+<h2>1.7.4</h2>
+<p></p>
+<table>
+<thead>
+<tr>
+<th>Tracker Item ID</th>
+<th>Summary</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1363'>1363</a></td><td>duplicate 'performedBy' for new screening activities</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1368'>1368</a></td><td>prevent leaving unsaved viewer page in edit mode</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1565'>1565</a></td><td>link CherryPickPlateActivity to CPR</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1673'>1673</a></td><td>add &quot;cherry pick request&quot; column to activities browser</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1693'>1693</a></td><td>add &quot;date performed&quot; column to cpr browser</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1705'>1705</a></td><td>add &quot;Library&quot; column to cpr viewer lcp and scp data tables</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1710'>1710</a></td><td>improve handling of user login attempt w/o &quot;screensaverUser&quot; role</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1758'>1758</a></td><td>Add &quot;COMS registration number&quot; and &quot;ICCB-L/NSRB COMS approval for this screen&quot; fields for screens</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1774'>1774</a></td><td>default volumes to uL in cprv</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1848'>1848</a></td><td>migrate example database</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1852'>1852</a></td><td>add new role for &quot;QPCR User&quot;</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1856'>1856</a></td><td>add 'Added to QPCR email list' user checklist item</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1857'>1857</a></td><td>marcus user agreement user checklist item changes</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1858'>1858</a></td><td>support file attachments to user entity</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1859'>1859</a></td><td>add 'marcusAdmin' role and rights</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1861'>1861</a></td><td>library screening activity viewer should default to nL units</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1862'>1862</a></td><td>new cherry pick request fields</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1863'>1863</a></td><td>remove molecular mass and formula fields</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1869'>1869</a></td><td>new admin role for editing user checklist items only</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1876'>1876</a></td><td>use consistent font</td></tr>
+<tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1877'>1877</a></td><td>add login help links</td></tr>
+</tbody>
+</table>
+
 <h2>1.7.3</h2>
 <p></p>
 <table>

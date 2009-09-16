@@ -31,12 +31,12 @@ import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
@@ -348,6 +348,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     try {
       DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
       InputStream inputStream;
+      log.debug("starting exporting data for download");
       if (dataExporter instanceof TableDataExporter) {
         ((TableDataExporter<E>) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
         inputStream = ((TableDataExporter<E>) dataExporter).export(getDataTableModel());
@@ -355,6 +356,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       else {
         inputStream = ((DataExporter<Collection<K>>) dataExporter).export(getDataFetcher().findAllKeys());
       }
+      log.debug("finished exporting data for download");
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          dataExporter.getFileName(),
@@ -453,7 +455,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   {
     boolean allColumnsHavePropertyPaths = true;
     for (TableColumn<E,?> column : columns) {
-      EntityColumn entityColumn = (EntityColumn) column;
+      HasFetchPaths entityColumn = (HasFetchPaths) column;
       if (entityColumn.getPropertyPath() == null) {
         allColumnsHavePropertyPaths = false;
         break;

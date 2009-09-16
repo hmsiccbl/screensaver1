@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+
+import org.apache.log4j.Logger;
 
 public class WellVolume implements Comparable<WellVolume>
 {
@@ -51,7 +51,7 @@ public class WellVolume implements Comparable<WellVolume>
       {
         activeVolumes.add(wc);
       }
-      else if(ci != null && ci.isRetired())
+      else if(ci.isRetired())
       {
         retiredVolumes.add(wc);
       }
@@ -74,7 +74,7 @@ public class WellVolume implements Comparable<WellVolume>
       return true;
     }
     if (obj instanceof WellVolume) {
-      return _well.equals(_well);
+      return _well.equals(((WellVolume) obj)._well);
     }
     return false;
   }

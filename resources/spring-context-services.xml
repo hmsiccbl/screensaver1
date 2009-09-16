@@ -34,12 +34,6 @@
   </bean>
 
   <bean
-    id="screenResultExporter"
-    class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
-    scope="singleton">
-  </bean>
-
-  <bean
     id="studyAnnotationParser"
     class="edu.harvard.med.screensaver.io.screens.StudyAnnotationParser"
     scope="prototype">
@@ -47,81 +41,9 @@
   </bean>
 
   <bean
-    id="compoundLibraryContentsParser"
-    class="edu.harvard.med.screensaver.io.libraries.compound.SDFileCompoundLibraryContentsParser"
-    scope="singleton"
-  >
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="librariesDao"/>
-  </bean>
-
-  <bean
-    id="naturalProductsLibraryContentsParser"
-    class="edu.harvard.med.screensaver.io.libraries.compound.NaturalProductsLibraryContentsParser"
-    scope="singleton"
-  >
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="librariesDao"/>
-  </bean>
-
-  <bean
-    id="ncbiGeneInfoProvider"
-    class="edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProviderImpl"
-  />
-
-  <bean
     id="publicationInfoProvider"
     class="edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider"
     scope="prototype" />
-
-  <bean
-    id="rnaiLibraryContentsParser"
-    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsParser"
-    scope="singleton"
-  >
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="librariesDao"/>
-    <constructor-arg ref="ncbiGeneInfoProvider"/>
-  </bean>
-
-  <bean
-    id="bulkCompoundLibraryLoader"
-    class="edu.harvard.med.screensaver.io.libraries.compound.BulkCompoundLibraryLoader"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="compoundLibraryContentsParser"/>
-  </bean>
-
-  <bean
-    id="bulkRNAiLibraryLoader"
-    class="edu.harvard.med.screensaver.io.libraries.rnai.BulkRNAiLibraryLoader"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="rnaiLibraryContentsParser"/>
-  </bean>
-
-  <bean
-    id="rnaiLibraryContentsFileLoader"
-    class="edu.harvard.med.screensaver.io.libraries.rnai.RNAiLibraryContentsFileLoader"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="rnaiLibraryContentsParser"/>
-  </bean>
-
-  <bean
-    id="bulkScreenResultImporter"
-    class="edu.harvard.med.screensaver.io.screenresults.BulkScreenResultImporter"
-    scope="singleton">
-    <constructor-arg>
-     <bean
-      class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser">
-      <constructor-arg ref="librariesDao" />
-     </bean>
-    </constructor-arg>
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="screenResultsDao"/>
-    <constructor-arg ref="hibernateTemplate"/>
-  </bean>
 
   <bean
     id="reagentVendorIdentiferListParser"
@@ -143,16 +65,31 @@
   scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="librariesDao"/>
-  <constructor-arg ref="rnaiLibraryContentsParser"/>
-  <constructor-arg ref="compoundLibraryContentsParser"/>
+    <constructor-arg ref="libraryContentsLoader"/>
   </bean>
-
+ 
+  <bean
+  id="libraryContentsLoader"
+  class="edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader"
+  scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="libraryContentsVersionManager"/>
+  </bean>
+ 
   <bean
     id="libraryCopyGenerator"
     class="edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator"
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="librariesDao"/>
+  </bean>
+
+  <bean
+    id="libraryContentsVersionManager"
+    class="edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
   </bean>
 
   <bean
@@ -186,9 +123,10 @@
   </bean>
 
   <bean
-    id="libraryPoolToDuplexWellMapper"
-    class="edu.harvard.med.screensaver.service.libraries.rnai.LibraryPoolToDuplexWellMapper"
+    id="cherryPickRequestCherryPicksAdder"
+    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder"
     scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
   </bean>
 
   <bean
@@ -204,7 +142,14 @@
     scope="singleton">
     <constructor-arg ref="genericEntityDao" />
   </bean>
-
+  
+  <bean
+    id="screeningDuplicator"
+    class="edu.harvard.med.screensaver.service.screens.ScreeningDuplicator"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
+ 
   <bean
     id="cellHts2Annotator"
     class="edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator"

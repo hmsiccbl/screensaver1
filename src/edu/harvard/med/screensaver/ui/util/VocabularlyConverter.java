@@ -120,6 +120,9 @@ public class VocabularlyConverter<V> implements Converter
     @Override
     public boolean equals(Object o)
     {
+      if (o == null) {
+        return false;
+      }
       return normalize(o.toString()).equals(_normalized);
     }
 

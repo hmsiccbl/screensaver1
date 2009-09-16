@@ -9,8 +9,10 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
  * The attached file type vocabulary.
@@ -19,18 +21,18 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  */
 public enum AttachedFileType implements VocabularyTerm
 {
-
+  
   // the vocabulary
-
-  APPLICATION("Application"),
-  PRIMARY_SCREEN_REPORT("Primary Screen Report"), // a document containing both original and publishable protocol, from which the publishable protocol field will ultimately be popuplated (manually)
-  LETTER_OF_SUPPORT("Letter of Support"),
-  SCREENER_CORRESPONDENCE("Screener Correspondence"),
-  MIARE_DOCUMENT("MIARE Document"),
-  PUBLICATION("Publication")
-  ;
-
-
+  APPLICATION("Application", Screen.class),
+  PRIMARY_SCREEN_REPORT("Primary Screen Report", Screen.class), // a document containing both original and publishable protocol, from which the publishable protocol field will ultimately be popuplated (manually)
+  LETTER_OF_SUPPORT("Letter of Support", Screen.class),
+  SCREENER_CORRESPONDENCE("Screener Correspondence", Screen.class),
+  MIARE_DOCUMENT("MIARE Document", Screen.class),
+  PUBLICATION("Publication", Screen.class),
+  
+  SMALL_MOLECULE_USER_AGREEMENT("ICCB-L/NSRB Small Molecule User Agreement", ScreeningRoomUser.class),
+  RNAI_USER_AGREEMENT("ICCB-L/NSRB RNAi User Agreement", ScreeningRoomUser.class);
+  
   // static inner class
 
   /**
@@ -48,14 +50,16 @@ public enum AttachedFileType implements VocabularyTerm
   // private instance field and constructor
 
   private String _value;
+  private Class<? extends AbstractEntity> _forUseWithType;
 
   /**
    * Constructs an <code>AttachedFileType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private AttachedFileType(String value)
+  private AttachedFileType(String value, Class<? extends AbstractEntity> forUseWithType)
   {
     _value = value;
+    _forUseWithType = forUseWithType;
   }
 
 

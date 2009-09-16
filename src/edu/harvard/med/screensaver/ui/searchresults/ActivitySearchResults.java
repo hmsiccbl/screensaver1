@@ -19,14 +19,13 @@ import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn;
@@ -36,6 +35,8 @@ import edu.harvard.med.screensaver.util.CollectionUtils;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Lists;
 
 
 /**
@@ -111,7 +112,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   @Override
   protected List<? extends TableColumn<A,?>> buildColumns()
   {
-    ArrayList<EntityColumn<A,?>> columns = new ArrayList<EntityColumn<A,?>>();
+    ArrayList<TableColumn<A,?>> columns = Lists.newArrayList();
     columns.add(new IntegerEntityColumn<A>(
       new PropertyPath<A>(_type, "activityId"),
       "Activity ID",

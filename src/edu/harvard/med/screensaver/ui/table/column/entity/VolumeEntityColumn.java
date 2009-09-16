@@ -9,21 +9,35 @@
 
 package edu.harvard.med.screensaver.ui.table.column.entity;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
-import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.ui.table.column.ColumnType;
+import java.util.Set;
 
-public abstract class VolumeEntityColumn<E extends AbstractEntity> extends EntityColumn<E,Volume>
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
+
+public abstract class VolumeEntityColumn<E extends AbstractEntity> extends VolumeColumn<E> implements HasFetchPaths<E>
 {
+  private FetchPaths<E> _fetchPaths;
+  
   public VolumeEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
-    super(relationshipPath, name, description, ColumnType.VOLUME, group);
+    super(name, description, group);
+    _fetchPaths = new FetchPaths<E>(relationshipPath);
   }
 
-  public VolumeEntityColumn(PropertyPath<E> propertyPath, String name, String description, String group)
+  public void addRelationshipPath(RelationshipPath<E> path)
   {
-    super(propertyPath, name, description, ColumnType.VOLUME, group);
+    _fetchPaths.addRelationshipPath(path);
+  }
+
+  public PropertyPath<E> getPropertyPath()
+  {
+    return _fetchPaths.getPropertyPath();
+  }
+
+  public Set<RelationshipPath<E>> getRelationshipPaths()
+  {
+    return _fetchPaths.getRelationshipPaths();
   }
 }

@@ -36,6 +36,8 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -73,6 +75,10 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
 
   private static final Logger log = Logger.getLogger(ScreensaverUser.class);
   private static final long serialVersionUID = 0L;
+
+  public static final RelationshipPath<ScreensaverUser> LabAffiliation = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "labAffiliation"); 
+  public static final RelationshipPath<ScreensaverUser> activitiesPerformed = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "activitiesPerformed"); 
+  public static final RelationshipPath<ScreensaverUser> Roles = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "roles");
 
 
   // instance fields
@@ -154,9 +160,10 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
    *
    * @return the set of user roles that this user belongs to
    */
+  @org.hibernate.annotations.CollectionOfElements
+  @CollectionOfElements(hasNonconventionalMutation=true) /* valid roles depend upon concrete entity type */
   @Column(name = "screensaverUserRole", nullable = false)
   @JoinTable(name = "screensaverUserRole", joinColumns = @JoinColumn(name = "screensaverUserId"))
-  @org.hibernate.annotations.CollectionOfElements
   @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.users.ScreensaverUserRole$UserType")
   @org.hibernate.annotations.ForeignKey(name = "fk_screensaver_user_role_type_to_screensaver_user")
   public Set<ScreensaverUserRole> getScreensaverUserRoles()
@@ -248,7 +255,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
     fetch=FetchType.LAZY
   )
   @OrderBy("dateOfActivity")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="activityPerformed")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="activityPerformed")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
   public Set<Activity> getActivitiesPerformed()
   {

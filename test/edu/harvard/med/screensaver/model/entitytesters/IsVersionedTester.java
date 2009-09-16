@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.entitytesters;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.metadata.ClassMetadata;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -41,9 +42,13 @@ extends AbstractEntityTester<E>
    */
   private void testIsVersioned()
   {
+    
     org.hibernate.annotations.Entity entityAnnotation =
       _entityClass.getAnnotation(org.hibernate.annotations.Entity.class);
     if (entityAnnotation != null && ! entityAnnotation.mutable()) {
+      return;
+    }
+    if (_entityClass.getAnnotation(Immutable.class) != null) {
       return;
     }
       

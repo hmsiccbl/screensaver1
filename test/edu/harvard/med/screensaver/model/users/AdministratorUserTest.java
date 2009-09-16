@@ -11,25 +11,48 @@ package edu.harvard.med.screensaver.model.users;
 
 import java.beans.IntrospectionException;
 
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import junit.framework.TestSuite;
 
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+
+import com.google.common.collect.Sets;
 
 public class AdministratorUserTest extends AbstractEntityInstanceTest<AdministratorUser>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(AdministratorUserTest.class);
-
-
-  // instance data members
-
-  
-  // public constructors and methods
+  public static TestSuite suite()
+  {
+    return buildTestSuite(AdministratorUserTest.class, AdministratorUser.class);
+  }
 
   public AdministratorUserTest() throws IntrospectionException
   {
     super(AdministratorUser.class);
   }
+  
+  public void testRoles() {
+    final AdministratorUser user = new AdministratorUser("first", "last", "", "", "", "", "", "");
+
+    user.addScreensaverUserRole(ScreensaverUserRole.SCREENS_ADMIN);
+    user.addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
+    genericEntityDao.saveOrUpdateEntity(user);
+
+    AdministratorUser user2 = genericEntityDao.findEntityById(AdministratorUser.class, user.getEntityId(), false, "screensaverUserRoles");
+    assertEquals(Sets.newHashSet(ScreensaverUserRole.READ_EVERYTHING_ADMIN,
+                                 ScreensaverUserRole.SCREENS_ADMIN,
+                                 ScreensaverUserRole.LIBRARIES_ADMIN),
+                 user2.getScreensaverUserRoles());
+
+    try {
+      AdministratorUser user3 = genericEntityDao.findEntityById(AdministratorUser.class, user.getEntityId(), false, "screensaverUserRoles");
+      user3.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+      fail("expected DataModelViolationException after adding screening room user role to administrator user ");
+    }
+    catch (Exception e) {
+      assertTrue(e instanceof DataModelViolationException);
+    }
+  }
+
+  
 }
 

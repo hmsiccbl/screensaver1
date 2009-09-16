@@ -10,6 +10,9 @@
 package edu.harvard.med.screensaver.model;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 
 public enum VolumeUnit implements QuantityUnit<VolumeUnit>
 {
@@ -18,16 +21,15 @@ public enum VolumeUnit implements QuantityUnit<VolumeUnit>
   MICROLITERS("uL", 6),
   NANOLITERS("nL", 9);
 
-  public static VolumeUnit DEFAULT = MICROLITERS;
-  public static VolumeUnit NORMALIZED_UNITS = LITERS;
+  public static final VolumeUnit DEFAULT = MICROLITERS;
+  public static final VolumeUnit NORMALIZED_UNITS = LITERS;
 
-  public static Volume ZERO = new Volume(new BigDecimal(0), VolumeUnit.DEFAULT);  //since it's immutable, consider lazy flyweight impl
+  public static final Volume ZERO = new Volume(new BigDecimal(0), VolumeUnit.DEFAULT);  //since it's immutable, consider lazy flyweight impl
 
   private String _symbol;
   private int _scale;
 
-  public static VolumeUnit[] DISPLAY_VALUES = 
-    new VolumeUnit[] { MILLILITERS,MICROLITERS,NANOLITERS };    
+  public static final List<VolumeUnit> DISPLAY_VALUES = ImmutableList.of(MILLILITERS,MICROLITERS,NANOLITERS);    
   
   private VolumeUnit(String symbol, int scale)
   {

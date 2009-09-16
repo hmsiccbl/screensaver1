@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,9 +23,24 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -33,14 +49,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import com.google.common.collect.Sets;
 
 /**
  * A library represents a set of reagents and their layout into wells across
@@ -51,7 +60,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  * Reagents may belong to multiple libraries.
  * <ul>
  * <li>Screensaver supports libraries for either RNAi and Small Molecule
- * (compound) screens. RNAi library wells contain silencing reagents and small
+ * screens. RNAi library wells contain silencing reagents and small
  * molecule library wells contain compounds.</li>
  * <li>Only 384 well plate configurations are currently supported.</li>
  * <li>A library must be defined for a set of plates that have a sequential
@@ -87,6 +96,12 @@ public class Library extends TimeStampedAbstractEntity
   private static final Logger log = Logger.getLogger(Library.class);
   private static final long serialVersionUID = 0L;
 
+  public static final RelationshipPath<Library> contentsVersions = new RelationshipPath<Library>(Library.class, "contentsVersions");
+  public static final RelationshipPath<Library> latestReleasedContentsVersion = new RelationshipPath<Library>(Library.class, "latestReleasedContentsVersion");
+  public static final RelationshipPath<Library> wells = new RelationshipPath<Library>(Library.class, "wells");
+  public static final RelationshipPath<Library> copies = new RelationshipPath<Library>(Library.class, "copies");
+  public static final PropertyPath<Library> startPlate = new PropertyPath<Library>(Library.class, "startPlate");
+  public static final PropertyPath<Library> endPlate = new PropertyPath<Library>(Library.class, "endPlate");
 
 
   // private instance data
@@ -101,30 +116,18 @@ public class Library extends TimeStampedAbstractEntity
   private String _vendor;
   private ScreenType _screenType;
   private LibraryType _libraryType;
+  private boolean _isPool;
   private Integer _startPlate;
   private Integer _endPlate;
-  private String _alias;
   private LibraryScreeningStatus _screeningStatus;
-  private Integer _compoundCount;
-  private String _screeningCopy;
-  private String _compoundConcentrationInScreeningCopy;
-  private String _cherryPickCopy;
   private LocalDate _dateReceived;
   private LocalDate _dateScreenable;
-  private String _nonCompoundWells;
-  private String _screeningRoomComments;
-  private String _diversitySetPlates;
-  private String _mappedFromCopy;
-  private String _mappedFromPlate;
-  private String _purchasedUsingFundsFrom;
-  private String _platingFundsSuppliedBy;
-  private String _informaticsComments;
-  private String _dataFileLocation;
-  private String _chemistDOS;
-  private String _chemistryComments;
-  private String _screeningSet;
+  private String _comments;
   private PlateSize _plateSize;
   private ScreeningRoomUser _owner;
+  private Integer _experimentalWellCount = new Integer(0);	
+  private SortedSet<LibraryContentsVersion> _contentsVersions = Sets.newTreeSet();
+  private LibraryContentsVersion _latestReleasedContentsVersion;	
   
 
 
@@ -240,9 +243,9 @@ public class Library extends TimeStampedAbstractEntity
    * @param wellType the well type for the new well
    * @return the new well
    */
-  public Well createWell(WellKey wellKey, WellType wellType)
+  public Well createWell(WellKey wellKey, LibraryWellType wellType)
   {
-    Well well = new Well(this, wellKey, wellType, null);
+    Well well = new Well(this, wellKey, wellType);
     if (!_wells.add(well)) {
       throw new DuplicateEntityException(this, well);
     }
@@ -440,6 +443,40 @@ public class Library extends TimeStampedAbstractEntity
   }
 
   /**
+   * Determines whether this library's well contains pools of reagents. Intended
+   * for use with RNAi libraries (in particular, Dharmacon siGENOME libraries),
+   * but can be commandeered for any applicable library.
+   * 
+   * @return true if this library's wells contains pools of reagents, otherwise
+   *         may return false or null.
+   */
+  @Column(name="isPool", nullable=false)
+  public boolean isPool()
+  {
+    return _isPool;
+  }
+
+  public void setPool(boolean isPool)
+  {
+    _isPool = isPool;
+  }
+
+  @Transient
+  public Class<? extends Reagent> getReagentType()
+  {
+    if (_screenType == ScreenType.SMALL_MOLECULE) {
+      if (_libraryType == LibraryType.NATURAL_PRODUCTS) {
+        return NaturalProductReagent.class;
+      }
+      return SmallMoleculeReagent.class;
+    }
+    else if (_screenType == ScreenType.RNAI) { 
+      return SilencingReagent.class;
+    }
+    throw new DevelopmentException("unhandled screen/library type");
+  }
+
+  /**
    * Get the start plate.
    *
    * @return the start plate
@@ -494,27 +531,6 @@ public class Library extends TimeStampedAbstractEntity
   }
 
   /**
-   * Get the alias.
-   *
-   * @return the alias
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getAlias()
-  {
-    return _alias;
-  }
-
-  /**
-   * Set the alias.
-   *
-   * @param alias the new alias
-   */
-  public void setAlias(String alias)
-  {
-    _alias = alias;
-  }
-
-  /**
    * Get the screening status of this library, indicating whether this library
    * is available for screening.
    *
@@ -535,94 +551,6 @@ public class Library extends TimeStampedAbstractEntity
   public void setScreeningStatus(LibraryScreeningStatus screeningStatus)
   {
     _screeningStatus = screeningStatus;
-  }
-
-  /**
-   * Get the compound count.
-   *
-   * @return the compound count
-   * @motivation from the libraries Filemaker database. we dont need to store
-   *             this forever, since we can always compute it, but we need to
-   *             reconcile the values from the Filemaker database with reality
-   *             before we can get rid of it.
-   */
-  public Integer getCompoundCount()
-  {
-    return _compoundCount;
-  }
-
-  /**
-   * Set the compound count.
-   *
-   * @param compoundCount the new compound count
-   */
-  public void setCompoundCount(Integer compoundCount)
-  {
-    _compoundCount = compoundCount;
-  }
-
-  /**
-   * Get the screening copy.
-   *
-   * @return the screening copy
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getScreeningCopy()
-  {
-    return _screeningCopy;
-  }
-
-  /**
-   * Set the screening copy.
-   *
-   * @param screeningCopy the new screening copy
-   */
-  public void setScreeningCopy(String screeningCopy)
-  {
-    _screeningCopy = screeningCopy;
-  }
-
-  /**
-   * Get the compound concentration in the screening copy.
-   *
-   * @return the compound concentration in the screening copy
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getCompoundConcentrationInScreeningCopy()
-  {
-    return _compoundConcentrationInScreeningCopy;
-  }
-
-  /**
-   * Set the compound concentration in the screening copy.
-   *
-   * @param compoundConcentrationInScreeningCopy the new compound concentration
-   *          in the screening copy
-   */
-  public void setCompoundConcentrationInScreeningCopy(String compoundConcentrationInScreeningCopy)
-  {
-    _compoundConcentrationInScreeningCopy = compoundConcentrationInScreeningCopy;
-  }
-
-  /**
-   * Get the cherry pick copy.
-   *
-   * @return the cherry pick copy
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getCherryPickCopy()
-  {
-    return _cherryPickCopy;
-  }
-
-  /**
-   * Set the cherry pick copy.
-   *
-   * @param cherryPickCopy the new cherry pick copy
-   */
-  public void setCherryPickCopy(String cherryPickCopy)
-  {
-    _cherryPickCopy = cherryPickCopy;
   }
 
   /**
@@ -667,256 +595,15 @@ public class Library extends TimeStampedAbstractEntity
     _dateScreenable = dateScreenable;
   }
 
-  /**
-   * Get the non-compound wells.
-   *
-   * @return the non-compound wells
-   */
   @org.hibernate.annotations.Type(type = "text")
-  public String getNonCompoundWells()
+  public String getComments()
   {
-    return _nonCompoundWells;
+    return _comments;
   }
 
-  /**
-   * Set the non-compound wells.
-   *
-   * @param nonCompoundWells the new non-compound wells
-   */
-  public void setNonCompoundWells(String nonCompoundWells)
+  public void setComments(String comments)
   {
-    _nonCompoundWells = nonCompoundWells;
-  }
-
-  /**
-   * Get the screening room comments.
-   *
-   * @return the screening room comments
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getScreeningRoomComments()
-  {
-    return _screeningRoomComments;
-  }
-
-  /**
-   * Set the screening room comments.
-   *
-   * @param screeningRoomComments the new screening room comments
-   */
-  public void setScreeningRoomComments(String screeningRoomComments)
-  {
-    _screeningRoomComments = screeningRoomComments;
-  }
-
-  /**
-   * Get the diversity set plates.
-   *
-   * @return the diversity set plates
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getDiversitySetPlates()
-  {
-    return _diversitySetPlates;
-  }
-
-  /**
-   * Set the diversity set plates.
-   *
-   * @param diversitySetPlates the new diversity set plates
-   */
-  public void setDiversitySetPlates(String diversitySetPlates)
-  {
-    _diversitySetPlates = diversitySetPlates;
-  }
-
-  /**
-   * Get the mapped-from copy.
-   *
-   * @return the mapped-from copy
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getMappedFromCopy()
-  {
-    return _mappedFromCopy;
-  }
-
-  /**
-   * Set the mapped-from copy.
-   *
-   * @param mappedFromCopy the new mapped-from copy
-   */
-  public void setMappedFromCopy(String mappedFromCopy)
-  {
-    _mappedFromCopy = mappedFromCopy;
-  }
-
-  /**
-   * Get the mapped-from plate.
-   *
-   * @return the mapped-from plate
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getMappedFromPlate()
-  {
-    return _mappedFromPlate;
-  }
-
-  /**
-   * Set the mapped-from plate.
-   *
-   * @param mappedFromPlate the new mapped-from plate
-   */
-  public void setMappedFromPlate(String mappedFromPlate)
-  {
-    _mappedFromPlate = mappedFromPlate;
-  }
-
-  /**
-   * Get the purchased using funds from.
-   *
-   * @return the purchased using funds from
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getPurchasedUsingFundsFrom()
-  {
-    return _purchasedUsingFundsFrom;
-  }
-
-  /**
-   * Set the purchased using funds from.
-   *
-   * @param purchasedUsingFundsFrom the new purchased using funds from
-   */
-  public void setPurchasedUsingFundsFrom(String purchasedUsingFundsFrom)
-  {
-    _purchasedUsingFundsFrom = purchasedUsingFundsFrom;
-  }
-
-  /**
-   * Get the plating funds supplied by.
-   *
-   * @return the plating funds supplied by
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getPlatingFundsSuppliedBy()
-  {
-    return _platingFundsSuppliedBy;
-  }
-
-  /**
-   * Set the plating funds supplied by.
-   *
-   * @param platingFundsSuppliedBy the new plating funds supplied by
-   */
-  public void setPlatingFundsSuppliedBy(String platingFundsSuppliedBy)
-  {
-    _platingFundsSuppliedBy = platingFundsSuppliedBy;
-  }
-
-  /**
-   * Get the informatics comments.
-   *
-   * @return the informatics comments
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getInformaticsComments()
-  {
-    return _informaticsComments;
-  }
-
-  /**
-   * Set the informatics comments.
-   *
-   * @param informaticsComments the new informatics comments
-   */
-  public void setInformaticsComments(String informaticsComments)
-  {
-    _informaticsComments = informaticsComments;
-  }
-
-  /**
-   * Get the data file location.
-   *
-   * @return the data file location
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getDataFileLocation()
-  {
-    return _dataFileLocation;
-  }
-
-  /**
-   * Set the data file location.
-   *
-   * @param dataFileLocation the new data file location
-   */
-  public void setDataFileLocation(String dataFileLocation)
-  {
-    _dataFileLocation = dataFileLocation;
-  }
-
-  /**
-   * Get the chemist DOS.
-   *
-   * @return the chemist DOS
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getChemistDOS()
-  {
-    return _chemistDOS;
-  }
-
-  /**
-   * Set the chemist DOS.
-   *
-   * @param chemistDOS the new chemist DOS
-   */
-  public void setChemistDOS(String chemistDOS)
-  {
-    _chemistDOS = chemistDOS;
-  }
-
-  /**
-   * Get the chemistry comments.
-   *
-   * @return the chemistry comments
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getChemistryComments()
-  {
-    return _chemistryComments;
-  }
-
-  /**
-   * Set the chemistry comments.
-   *
-   * @param chemistryComments the new chemistry comments
-   */
-  public void setChemistryComments(String chemistryComments)
-  {
-    _chemistryComments = chemistryComments;
-  }
-
-  /**
-   * Get the screening set.
-   *
-   * @return the screening set
-   */
-  @org.hibernate.annotations.Type(type = "text")
-  public String getScreeningSet()
-  {
-    return _screeningSet;
-  }
-
-  /**
-   * Set the screening set.
-   *
-   * @param screeningSet the new screening set
-   */
-  public void setScreeningSet(String screeningSet)
-  {
-    _screeningSet = screeningSet;
+    _comments = comments;
   }
 
 
@@ -979,20 +666,117 @@ public class Library extends TimeStampedAbstractEntity
     _copies = copies;
   }
 
-  @Column(nullable=false, updatable=false)
-  @org.hibernate.annotations.Immutable
+  @Column(nullable=false/*, updatable=false*/)
+  //@org.hibernate.annotations.Immutable
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.libraries.PlateSize$UserType")
   public PlateSize getPlateSize()
   {
     return _plateSize;
   }
 
+  /**
+   * Note: if plateSize is changed, it is the responsibility of the caller to
+   * also add/remove wells, as necessary, to match the new plate size.
+   *
+   * @param plateSize the new PlateSize
+   */
   public void setPlateSize(PlateSize plateSize)
   {
-    if (!isHibernateCaller() && getEntityId() != null && plateSize != _plateSize) {
-      throw new DataModelViolationException("cannot change plate size after library is created");
-    }
+//    if (!isHibernateCaller() && getEntityId() != null && plateSize != _plateSize) {
+//      throw new DataModelViolationException("cannot change plate size after library is created");
+//    }
     _plateSize = plateSize;
+  }
+
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
+  public Integer getExperimentalWellCount()
+  {
+    return _experimentalWellCount;
+  }
+
+  private void setExperimentalWellCount(Integer experimentalWellCount)
+  {
+    this._experimentalWellCount = experimentalWellCount;
+  }
+
+  void incExperimentalWellCount()
+  {
+    _experimentalWellCount = _experimentalWellCount + 1;
+  }
+
+  void decExperimentalWellCount()
+  {
+    assert _experimentalWellCount > 0;
+    _experimentalWellCount = Math.max(0, _experimentalWellCount - 1);
+  }
+
+  @OneToMany(targetEntity = LibraryContentsVersion.class, 
+             mappedBy = "library", 
+             cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, 
+             fetch = FetchType.LAZY)
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
+  public SortedSet<LibraryContentsVersion> getContentsVersions()
+  {
+    return _contentsVersions;
+  }
+
+  private void setContentsVersions(SortedSet<LibraryContentsVersion> contentsVersions)
+  {
+    _contentsVersions = contentsVersions;
+  }
+
+  /**
+   * Get the most recently released {@link LibraryContentsVersion}, which
+   * represents the latest contents version that is available for viewing by
+   * {@link ScreeningRoomUser}s. Note that there may exist a newer
+   * contents versions that has not yet been released for viewing, and so is
+   * only available to {@link AdministratorUser}s.
+   */
+  @OneToOne(cascade={}, fetch=FetchType.LAZY)
+  @JoinColumn(name="latest_released_contents_version_id")
+  @ToOne(hasNonconventionalSetterMethod=true) /* the released contents versions must be one of the library's contents versions */
+  public LibraryContentsVersion getLatestReleasedContentsVersion()
+  {
+    return _latestReleasedContentsVersion;
+  }
+
+  /*package*/ void setLatestReleasedContentsVersion(LibraryContentsVersion latestReleasedContentsVersion)
+  {
+    _latestReleasedContentsVersion = latestReleasedContentsVersion;
+  }
+
+  /**
+   * Get the most recently created {@link LibraryContentsVersion}, which may be
+   * newer than the latest <i>released</i> contents version, and so may only be
+   * available to {@link AdministratorUser}s.
+   */
+  @Transient
+  public LibraryContentsVersion getLatestContentsVersion()
+  {
+    if (_contentsVersions.isEmpty()) { 
+      return null; 
+  }
+    return _contentsVersions.last();
+  }
+
+  /**
+   * Create a new {@link LibraryContentsVersion}. This contents version will not
+   * be available for viewing by {@link ScreeningRoomUser}s until its has been
+   * released by calling
+   * {@link #setLatestReleasedContentsVersion(LibraryContentsVersion)}.
+   *
+   * @param loadingAdminActivity
+   * @return the new {@link LibraryContentsVersion}
+   */
+  public LibraryContentsVersion createContentsVersion(AdministrativeActivity loadingAdminActivity)
+  {
+    LibraryContentsVersion libraryContentsVersion = 
+      new LibraryContentsVersion(this, 
+                                 _contentsVersions.isEmpty() ? LibraryContentsVersion.FIRST_VERSION_NUMBER : _contentsVersions.last().getVersionNumber() + 1,
+                                 loadingAdminActivity);
+    _contentsVersions.add(libraryContentsVersion);
+    return libraryContentsVersion;
   }
 
 

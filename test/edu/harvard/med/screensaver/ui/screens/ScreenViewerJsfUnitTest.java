@@ -20,8 +20,8 @@ import java.util.SortedSet;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.screens.AttachedFile;
 import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.Screen;

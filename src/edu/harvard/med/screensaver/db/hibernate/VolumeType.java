@@ -29,7 +29,7 @@ public class VolumeType implements UserType
 
   // static members
 
-  public static VolumeUnit NORMALIZED_UNITS = VolumeUnit.LITERS; 
+  public static final VolumeUnit NORMALIZED_UNITS = VolumeUnit.LITERS; 
 
 
   // instance data members

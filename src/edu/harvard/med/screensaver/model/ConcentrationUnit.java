@@ -9,6 +9,10 @@
 
 package edu.harvard.med.screensaver.model;
 
+import java.util.List;
+
+import com.google.common.collect.ImmutableList;
+
 public enum ConcentrationUnit implements QuantityUnit<ConcentrationUnit>
 {
   MOLAR("M", 0),
@@ -17,11 +21,9 @@ public enum ConcentrationUnit implements QuantityUnit<ConcentrationUnit>
   NANOMOLAR("nM", 9),
   PICOMOLAR("pM", 12);
   
-  public static ConcentrationUnit DEFAULT = MILLIMOLAR;
-  public static ConcentrationUnit NORMALIZED_UNITS = MOLAR;
-
-  public static ConcentrationUnit[] DISPLAY_VALUES = 
-    new ConcentrationUnit[] { MILLIMOLAR,MICROMOLAR, NANOMOLAR, PICOMOLAR };    
+  public static final ConcentrationUnit DEFAULT = MILLIMOLAR;
+  public static final ConcentrationUnit NORMALIZED_UNITS = MOLAR;
+  public static final List<ConcentrationUnit> DISPLAY_VALUES = ImmutableList.of(MILLIMOLAR,MICROMOLAR, NANOMOLAR, PICOMOLAR);    
   
   private String _symbol;
   private int _scale;
@@ -52,7 +54,7 @@ public enum ConcentrationUnit implements QuantityUnit<ConcentrationUnit>
     return getSymbol();
   }
   
-  public String printAsVocabularyTerm()
+  public String printAsVocabularyTerm() 
   {
     return _symbol;
   }

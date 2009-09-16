@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -58,6 +59,9 @@ public class BuildNumber
       catch (Exception e) {
         log.warn("cannot determine build number: " + e.getMessage());
         buildNumber = "";
+      }
+      finally {
+        IOUtils.closeQuietly(reader);
       }
     }
     return buildNumber;

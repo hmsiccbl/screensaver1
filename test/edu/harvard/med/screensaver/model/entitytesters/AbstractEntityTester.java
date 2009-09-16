@@ -9,16 +9,13 @@
 
 package edu.harvard.med.screensaver.model.entitytesters;
 
-import java.lang.reflect.Method;
-
 import junit.framework.Assert;
-
-import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
-import edu.harvard.med.screensaver.util.StringUtils;
+
+import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
 
 /**
  * An abstract class for testing various aspects of a model entity. Implementing classes
@@ -61,52 +58,4 @@ abstract public class AbstractEntityTester<E extends AbstractEntity> extends Ass
    * Perform the test for the entity.
    */
   abstract public void testEntity();
-  
-  
-  // protected instance methods
-
-  /**
-   * Return true iff this entity class is a subclass of another entity class.
-   * @return true iff this entity class is a subclass of another entity class
-   */
-  protected boolean isEntitySubclass()
-  {
-    Class entitySuperclass = _entityClass.getSuperclass();
-    return ! (
-      entitySuperclass.equals(AbstractEntity.class) ||
-      entitySuperclass.equals(SemanticIDAbstractEntity.class));
-  }
-
-  /**
-   * Get the getter method for a property based on the property name.
-   * @param propertyName the property name
-   * @return the getter method
-   */
-  protected Method getGetterMethodForPropertyName(String propertyName)
-  {
-    String getterName = "get" + StringUtils.capitalize(propertyName);
-    try {
-      return _entityClass.getDeclaredMethod(getterName);
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Get the setter method for a property based on the property name and the property type.
-   * @param propertyName the property name
-   * @param propertyType the property type
-   * @return the setter method
-   */
-  protected Method getSetterMethodForPropertyName(String propertyName, Class propertyType)
-  {
-    String setterName = "set" + StringUtils.capitalize(propertyName);
-    try {
-      return _entityClass.getDeclaredMethod(setterName, propertyType);
-    }
-    catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

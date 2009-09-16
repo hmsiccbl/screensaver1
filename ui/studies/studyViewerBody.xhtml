@@ -74,8 +74,8 @@
 
 		<t:div
 			rendered="#{! empty studyViewer.study &amp;&amp; ! studyViewer.isPanelCollapsedMap['reagentsData']}">
-            <ui:include src="../libraries/reagentSearchResultsBody.xhtml">
-                <ui:param name="reagentsBrowser" value="#{studyViewer.reagentSearchResults}" />
+            <ui:include src="../libraries/wellSearchResultsBody.xhtml">
+                <ui:param name="wellsBrowser" value="#{studyViewer.wellSearchResults}" />
             </ui:include>
 		</t:div>
 		

@@ -13,7 +13,6 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
@@ -32,14 +32,19 @@ import edu.harvard.med.screensaver.db.hibernate.Disjunction;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.db.hibernate.JoinType;
 import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
-import edu.harvard.med.screensaver.model.libraries.Compound;
+import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
@@ -47,9 +52,8 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.libraries.CompoundViewer;
-import edu.harvard.med.screensaver.ui.libraries.GeneViewer;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
@@ -59,8 +63,8 @@ import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.RealEntityColumn;
@@ -72,6 +76,11 @@ import edu.harvard.med.screensaver.util.Triple;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 
 /**
  * A {@link SearchResults} for {@link Well Wells}.
@@ -81,14 +90,10 @@ import org.hibernate.Session;
  */
 public class WellSearchResults extends EntitySearchResults<Well,String>
 {
-
-  // private static final fields
-
   private static final Logger log = Logger.getLogger(WellSearchResults.class);
 
-
   private static final String WELL_COLUMNS_GROUP = TableColumn.UNGROUPED;
-  private static final String GENE_COLUMNS_GROUP = "Silencing Reagent";
+  private static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent";
   private static final String COMPOUND_COLUMNS_GROUP = "Compound";
   private static final String OUR_DATA_HEADERS_COLUMNS_GROUP = "Data Headers";
   private static final String OTHER_DATA_HEADERS_COLUMNS_GROUP = "Data Headers (Other Screen Results)";
@@ -97,27 +102,33 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
   private enum WellSearchResultMode {
     SCREEN_RESULT_WELLS,
+    STUDY_REAGENT_WELLS,
     LIBRARY_WELLS,
     ALL_WELLS,
-    SET_OF_WELLS };
+    SET_OF_WELLS 
+  };
 
-
-  // instance fields
+  private static Function<Well,String> silencingReagentToDuplexWells = new Function<Well,String>() { 
+    public String apply(Well well) {
+      return well.getWellKey().toString();
+    }
+  };
 
   private GenericEntityDAO _dao;
+  private DataAccessPolicy _dataAccessPolicy;
   private LibraryViewer _libraryViewer;
   private WellViewer _wellViewer;
-  private CompoundViewer _compoundViewer;
-  private GeneViewer _geneViewer;
+  private WellsSdfDataExporter _wellsSdfDataExporter;
 
   private WellSearchResultMode _mode;
   private Library _library;
+  private LibraryContentsVersion _libraryContentsVersion;
+  private Study _study;
+  private Set<ReagentVendorIdentifier> _reagentIds;
   private ScreenResult _screenResult;
   private Set<Integer> _plateNumbers;
 
-
-  // constructors
-
+  
   /**
    * @motivation for CGLIB2
    */
@@ -128,18 +139,18 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
    * Construct a new <code>WellSearchResultsViewer</code> object.
    */
   public WellSearchResults(GenericEntityDAO dao,
+                           DataAccessPolicy dataAccessPolicy,
                            LibraryViewer libraryViewer,
                            WellViewer wellViewer,
-                           CompoundViewer compoundViewer,
-                           GeneViewer geneViewer,
+                           WellsSdfDataExporter wellsSdfDataExporter,
                            List<DataExporter<?>> dataExporters)
   {
-    super(dataExporters);
+    super(Lists.newArrayList(Iterables.concat(Lists.newArrayList(wellsSdfDataExporter), dataExporters)));
+    _wellsSdfDataExporter = wellsSdfDataExporter;
     _dao = dao;
+    _dataAccessPolicy = dataAccessPolicy;
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
-    _compoundViewer = compoundViewer;
-    _geneViewer = geneViewer;
   }
 
   /**
@@ -156,9 +167,9 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     _library = null;
     _screenResult = null;
     _plateNumbers = null;
+    _libraryContentsVersion = null;
     // initially, show an empty search result
     initialize(new NoOpDataFetcher<Well,String,PropertyPath<Well>>());
-    updateColumnVisibilityForScreenType(true, true);
 
     // start with search panel open
     setTableFilterMode(true);
@@ -166,21 +177,45 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   
   public void searchWellsForLibrary(Library library)
   {
-    _mode = WellSearchResultMode.LIBRARY_WELLS;
     _library = library;
+    _libraryContentsVersion = null;
+    _mode = WellSearchResultMode.LIBRARY_WELLS;
     _screenResult = null;
     _plateNumbers = null;
     initialize(new ParentedEntityDataFetcher<Well,String>(Well.class,
-      new RelationshipPath<Well>(Well.class, "library"),
-      library,
+      Well.library,
+      _library,
       _dao));
-    updateColumnVisibilityForScreenType(library.getScreenType() == ScreenType.SMALL_MOLECULE,
-                                        library.getScreenType() == ScreenType.RNAI);
 
     // start with search panel closed
     setTableFilterMode(false);
   }
 
+  public void searchWellsForLibraryContentsVersion(final LibraryContentsVersion lcv)
+  {
+    _library = lcv.getLibrary();
+    _libraryContentsVersion = lcv;
+    _mode = WellSearchResultMode.LIBRARY_WELLS;
+    _screenResult = null;
+    _plateNumbers = null;
+    initialize(new ParentedEntityDataFetcher<Well,String>(Well.class,
+      Well.library,
+      _library,
+      _dao) {
+      @Override
+      protected void addDomainRestrictions(HqlBuilder hql,
+                                           Map<RelationshipPath<Well>,String> path2Alias)
+      {
+        super.addDomainRestrictions(hql, path2Alias);
+        // filter through only the specified released version of the reagent 
+        getOrCreateJoin(hql, Well.reagents.restrict("libraryContentsVersion", _libraryContentsVersion), path2Alias, JoinType.LEFT);
+      }
+    });
+
+    // start with search panel closed
+    setTableFilterMode(false);
+  }
+  
   public void searchWellsForScreenResult(ScreenResult screenResult)
   {
     _mode = WellSearchResultMode.SCREEN_RESULT_WELLS;
@@ -191,12 +226,12 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       initialize(new NoOpDataFetcher<Well,String,PropertyPath<Well>>());
     }
     else {
-      initialize(new ParentedEntityDataFetcher<Well,String>(Well.class,
-        new RelationshipPath<Well>(Well.class, "screenResults"),
+      initialize(new ParentedEntityDataFetcher<Well,String>(
+        Well.class,
+        Well.screenResults,
         screenResult,
         _dao));
-      updateColumnVisibilityForScreenType(screenResult.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE,
-                                          screenResult.getScreen().getScreenType() == ScreenType.RNAI);
+      
       // show columns for this screenResult's data headers
       for (ResultValueType rvt : screenResult.getResultValueTypes()) {
         TableColumn<Well,?> column = getColumnManager().getColumn(makeColumnName(rvt, screenResult.getScreen().getScreenNumber()));
@@ -216,20 +251,55 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     _library = null;
     _screenResult = null;
     _plateNumbers = new HashSet<Integer>();
+    _libraryContentsVersion = null;
     Set<String> wellKeyStrings = new HashSet<String>(wellKeys.size());
     for (WellKey wellKey : wellKeys) {
       wellKeyStrings.add(wellKey.toString());
       _plateNumbers.add(wellKey.getPlateNumber());
     }
-    initialize(new EntitySetDataFetcher<Well,String>(Well.class,
-      wellKeyStrings,
-      _dao));
-    updateColumnVisibilityForScreenType(true, true);
+    initialize(new EntitySetDataFetcher<Well,String>(Well.class,wellKeyStrings, _dao));
 
     // start with search panel closed
     setTableFilterMode(false);
   }
 
+  public void searchReagentsForStudy(Study study)
+  {
+    _study = study;
+    _reagentIds = null;
+    _libraryContentsVersion = null;
+    initialize(new ParentedEntityDataFetcher<Well,String>(
+      Well.class,
+      Well.reagents.to(Reagent.studies),
+      study,
+      _dao));
+    getColumnManager().getColumn("Vendor").setVisible(true);
+    getColumnManager().getColumn("Vendor ID").setVisible(true);
+    // show columns for this screenResult's data headers
+    for (AnnotationType at : study.getAnnotationTypes()) {
+      getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getStudyNumber())).setVisible(true);
+    }
+  }
+
+  public void searchReagents(final Set<ReagentVendorIdentifier> reagentIds)
+  {
+    _study = null;
+    _reagentIds = reagentIds;
+    _libraryContentsVersion = null;
+    
+    initialize(new EntityDataFetcher<Well,String>(Well.class, _dao) {
+      @Override
+      protected void addDomainRestrictions(HqlBuilder hql,
+                                           Map<RelationshipPath<Well>,String> path2Alias)
+      {
+        hql.from(getRootAlias(), "reagents", "r").whereIn("r", "vendorId", reagentIds);
+      }
+    });
+    getColumnManager().getColumn("Vendor").setVisible(true);
+    getColumnManager().getColumn("Vendor ID").setVisible(true);
+  }
+
+  
   // SearchResults abstract method implementations
 
 
@@ -253,288 +323,293 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   @Override
   protected List<? extends TableColumn<Well,?>> buildColumns()
   {
-    List<EntityColumn<Well,?>> columns = new ArrayList<EntityColumn<Well,?>>();
+    List<TableColumn<Well,?>> columns = Lists.newArrayList();
     buildWellPropertyColumns(columns);
     buildReagentPropertyColumns(columns);
     buildCompoundPropertyColumns(columns);
-    buildGenePropertyColumns(columns);
+    buildSilencingReagentPropertyColumns(columns);
     buildResultValueTypeColumns(columns);
     buildAnnotationTypeColumns(columns);
     return columns;
   }
 
-  private void buildGenePropertyColumns(List<EntityColumn<Well,?>> columns)
+  private void buildSilencingReagentPropertyColumns(List<TableColumn<Well,?>> columns)
   {
-    columns.add(new TextEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-      "gene",
-    "geneName"),
-    "Gene Name",
-    "The gene name for the silencing reagent in the well",
-    GENE_COLUMNS_GROUP) {
-      @Override
-      public String getCellValue(Well well)
-      {
-        return well.getGene() == null ? null : well.getGene().getGeneName();
-      }
+    columns.add(new WellReagentEntityColumn<SilencingReagent,String>(
+      SilencingReagent.class,
+      new TextEntityColumn<SilencingReagent>(
+        SilencingReagent.facilityGene.toProperty("geneName"),
+        "Gene Name",
+        "The gene name for the silencing reagent in the well",
+        SILENCING_REAGENT_COLUMNS_GROUP) {
+        @Override
+        public String getCellValue(SilencingReagent reagent)
+        {
+          Gene gene = reagent.getFacilityGene();
+          return gene == null ? null : gene.getGeneName();
+        }
+      }));
+    columns.get(columns.size() - 1).setVisible(false);
 
-      @Override
-      public boolean isCommandLink() { return true; }
+    columns.add(new WellReagentEntityColumn<SilencingReagent,Integer>(
+      SilencingReagent.class,
+      new IntegerEntityColumn<SilencingReagent>(
+        SilencingReagent.facilityGene.toProperty("entrezgeneId"),
+        "Entrez Gene ID",
+        "The Entrez gene ID for the gene targeted by silencing reagent in the well",
+        SILENCING_REAGENT_COLUMNS_GROUP) {
+        @Override
+        public Integer getCellValue(SilencingReagent reagent)
+        {
+          Gene gene = reagent.getFacilityGene();
+          return gene == null ? null : gene.getEntrezgeneId();
+        }
+      }));
+    columns.get(columns.size() - 1).setVisible(false);
 
-      @Override
-      public Object cellAction(Well well)
-      {
-        return _geneViewer.viewGene(well.getGene());
-      }
-    });
+    columns.add(new WellReagentEntityColumn<SilencingReagent,String>(
+      SilencingReagent.class,
+      new TextEntityColumn<SilencingReagent>(
+        new PropertyPath<SilencingReagent>(SilencingReagent.class, "silencingReagentType"),
+        "Silencing Reagent Type",
+        "The enumerated Silencing Reagent Type",
+        SILENCING_REAGENT_COLUMNS_GROUP) {
+        @Override
+        public String getCellValue(SilencingReagent reagent)
+        {
+          return reagent.getSilencingReagentType().getValue();
+        }
+      }));
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new IntegerEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-      "gene",
-    "entrezgeneId"),
-    "Entrez Gene ID",
-    "The Entrez gene ID for the gene targeted by silencing reagent in the well",
-    GENE_COLUMNS_GROUP) {
+
+    columns.add(new WellReagentEntityColumn<SilencingReagent,List<String>>(
+      SilencingReagent.class,
+      new ListEntityColumn<SilencingReagent>(
+      SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols).toCollectionOfValues(),
+      "Entrez Gene Symbol",
+      "The Entrez gene symbol for the gene targeted by silencing reagent in the well",
+      SILENCING_REAGENT_COLUMNS_GROUP) {
       @Override
-      public Integer getCellValue(Well well)
+      public List<String> getCellValue(SilencingReagent reagent)
       {
-        return well.getGene() == null ? null : well.getGene().getEntrezgeneId();
+        Gene gene = reagent.getFacilityGene();
+        if (gene == null) { return null; }
+        return Lists.transform(Lists.newArrayList(reagent.getFacilityGene().getEntrezgeneSymbols()),
+                               Functions.TO_STRING);
       }
-    });
+    }));
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new TextEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-      "gene",
-    "entrezgeneSymbol"),
-    "Entrez Gene Symbol",
-    "The Entrez gene symbol for the gene targeted by silencing reagent in the well",
-    GENE_COLUMNS_GROUP) {
+
+    columns.add(new WellReagentEntityColumn<SilencingReagent,List<String>>(
+      SilencingReagent.class,
+      new ListEntityColumn<SilencingReagent>(
+      SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers).toCollectionOfValues(),
+      "Genbank Accession Numbers",
+      "The Genbank Accession Numbers for the gene targeted by silencing reagent in the well",
+      SILENCING_REAGENT_COLUMNS_GROUP) {
       @Override
-      public String getCellValue(Well well)
+      public List<String> getCellValue(SilencingReagent reagent)
       {
-        return well.getGene() == null ? null : well.getGene().getEntrezgeneSymbol();
+        Gene gene = reagent.getFacilityGene();
+        if (gene == null) { return null; }
+        return new ArrayList<String>(reagent.getFacilityGene().getGenbankAccessionNumbers());
       }
-    });
+    }));
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "gene.genbankAccessionNumbers", ""),
-    "Genbank Accession Numbers",
-    "The Genbank Accession Numbers for the gene targeted by silencing reagent in the well",
-    GENE_COLUMNS_GROUP) {
+
+    columns.add(new WellReagentEntityColumn<SilencingReagent,String>(
+      SilencingReagent.class,
+      new TextEntityColumn<SilencingReagent>(
+      new PropertyPath<SilencingReagent>(SilencingReagent.class, "sequence"),
+      "Sequence",
+      "The nucleotide sequence of this silencing reagent",
+      SILENCING_REAGENT_COLUMNS_GROUP) {
       @Override
-      public List<String> getCellValue(Well well)
+      public String getCellValue(SilencingReagent reagent)
       {
-        return well.getGene() == null ? null : new ArrayList<String>(well.getGene().getGenbankAccessionNumbers());
+        if (_dataAccessPolicy.isAllowedAccessToSilencingReagentSequence(reagent)) {
+          return reagent.getSequence();
+        }
+        return null;
       }
-    });
+    }));
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new WellReagentEntityColumn<SilencingReagent,String>(
+      SilencingReagent.class,
+      new TextEntityColumn<SilencingReagent>(
+      SilencingReagent.facilityGene.toProperty("species"),
+      "Species",
+      "The species of this silencing reagent",
+      SILENCING_REAGENT_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(SilencingReagent reagent)
+      {
+        Gene gene = reagent.getFacilityGene();
+        if (gene == null) { return null; }
+        return reagent.getFacilityGene().getSpeciesName();
+      }
+    }));
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new WellReagentEntityColumn<SilencingReagent,List<String>>(
+      SilencingReagent.class,
+      new ListEntityColumn<SilencingReagent>(
+        SilencingReagent.duplexWells.toProperty("wellId"),
+        "Duplex Wells",
+        "The duplex wells to which this pool well deconvolutes",
+        SILENCING_REAGENT_COLUMNS_GROUP) {
+        @Override
+        public List<String> getCellValue(SilencingReagent reagent)
+        {
+          return Lists.newArrayList(Iterables.transform(reagent.getDuplexWells(), silencingReagentToDuplexWells));
+        }
+      }));
     columns.get(columns.size() - 1).setVisible(false);
   }
 
-  private void buildCompoundPropertyColumns(List<EntityColumn<Well,?>> columns)
+  private void buildCompoundPropertyColumns(List<TableColumn<Well,?>> columns)
   {
-
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-      "compounds",
-    "smiles"),
-    "Compounds SMILES",
-    "The SMILES for the compound(s) in the well",
-    COMPOUND_COLUMNS_GROUP) {
-      @Override
-      public List<String> getCellValue(Well well)
-      {
-        List<String> smiles = new ArrayList<String>();
-        for (Compound compound : well.getOrderedCompounds()) {
-          smiles.add(compound.getSmiles());
+    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,String>(
+      SmallMoleculeReagent.class,
+      new TextEntityColumn<SmallMoleculeReagent>(
+        new PropertyPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "smiles"),
+        "Compound SMILES",
+        "The SMILES for the compound in the well",
+        COMPOUND_COLUMNS_GROUP) {
+        @Override
+        public String getCellValue(SmallMoleculeReagent reagent)
+        {
+          return reagent.getSmiles();
         }
-        return smiles;
-      }
-
+      }));
+    columns.get(columns.size() - 1).setVisible(false);
+    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,String>(
+      SmallMoleculeReagent.class,
+      new TextEntityColumn<SmallMoleculeReagent>(
+        new PropertyPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "inchi"),
+      "Compound InChi",
+      "The InChi for the compound in the well", 
+      COMPOUND_COLUMNS_GROUP) {
       @Override
-      public boolean isCommandLink() { return true; }
-
-      @Override
-      public Object cellAction(Well well)
+      public String getCellValue(SmallMoleculeReagent reagent)
       {
-        if (well.getCompounds().size() > 0) {
-          // commandValue is really a smiles, not a compoundId
-          String smiles = (String) getRequestParameter("commandValue");
-          Compound compound = null;
-          for (Compound compound2 : well.getCompounds()) {
-            if (compound2.getSmiles().equals(smiles)) {
-              compound = compound2;
-              break;
-            }
+        return reagent.getInchi();
+      }
+    }));
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,List<String>>(
+      SmallMoleculeReagent.class,
+      new ListEntityColumn<SmallMoleculeReagent>(
+        SmallMoleculeReagent.compoundNames.toCollectionOfValues(),
+        "Compound Names",
+        "The names of the compound in the well",
+        COMPOUND_COLUMNS_GROUP) {
+        @Override
+        public List<String> getCellValue(SmallMoleculeReagent reagent)
+        {
+          return Lists.newArrayList(reagent.getCompoundNames());
+        }
+      }));
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(
+      new WellReagentEntityColumn<SmallMoleculeReagent,List<String>>(
+        SmallMoleculeReagent.class,
+        new ListEntityColumn<SmallMoleculeReagent>(
+          SmallMoleculeReagent.pubchemCids.toCollectionOfValues(),
+          "PubChem CIDs",
+          "The PubChem CIDs of the compound in the well",
+          COMPOUND_COLUMNS_GROUP) {
+          @Override
+          public List<String> getCellValue(SmallMoleculeReagent reagent)
+          {
+            return Lists.transform(Lists.newArrayList(reagent.getPubchemCids()),
+                                   Functions.TO_STRING);
           }
-          return _compoundViewer.viewCompound(compound);
+        }));
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,List<String>>(
+      SmallMoleculeReagent.class,
+      new ListEntityColumn<SmallMoleculeReagent>(
+        SmallMoleculeReagent.chembankIds.toCollectionOfValues(),
+        "ChemBank IDs",
+        "The ChemBank IDs of the primary compound in the well",
+        COMPOUND_COLUMNS_GROUP) {
+        @Override
+        public List<String> getCellValue(SmallMoleculeReagent reagent)
+        {
+          return Lists.transform(Lists.newArrayList(reagent.getChembankIds()),
+                                 Functions.TO_STRING);
         }
-        return REDISPLAY_PAGE_ACTION_RESULT;
-      }
-    });
+      }));
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-      "compounds",
-    "inchi"),
-    "Compounds InChi",
-    "The InChi for the compound(s) in the well", COMPOUND_COLUMNS_GROUP) {
+  }
+  
+  private void buildReagentPropertyColumns(List<TableColumn<Well,?>> columns)
+  {
+    columns.add(new WellReagentEntityColumn<Reagent,String>(Reagent.class,
+      new TextEntityColumn<Reagent>(
+        new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorName"),
+        "Vendor",
+        "The vendor of the reagent in this well.", 
+        WELL_COLUMNS_GROUP) {
       @Override
-      public List<String> getCellValue(Well well)
+      public String getCellValue(Reagent reagent)
       {
-        List<String> smiles = new ArrayList<String>();
-        for (Compound compound : well.getOrderedCompounds()) {
-          smiles.add(compound.getInchi());
-        }
-        return smiles;
+        return reagent.getVendorId().getVendorName();
       }
-
+    }));
+    
+    columns.add(new WellReagentEntityColumn<Reagent,String>(Reagent.class,
+      new TextEntityColumn<Reagent>(
+        new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorIdentifier"),
+        "Vendor ID",
+        "The vendor-assigned identifier for the reagent in this well.", 
+        WELL_COLUMNS_GROUP) {
       @Override
-      public boolean isCommandLink() { return true; }
-
-      @Override
-      public Object cellAction(Well well)
+      public String getCellValue(Reagent reagent)
       {
-        if (well.getCompounds().size() > 0) {
-          // commandValue is really a smiles, not a compoundId
-          String smiles = (String) getRequestParameter("commandValue");
-          Compound compound = null;
-          for (Compound compound2 : well.getCompounds()) {
-            if (compound2.getSmiles().equals(smiles)) {
-              compound = compound2;
-              break;
-            }
-          }
-          return _compoundViewer.viewCompound(compound);
-        }
-        return REDISPLAY_PAGE_ACTION_RESULT;
+        return reagent.getVendorId().getVendorIdentifier();
       }
-    });
-    columns.get(columns.size() - 1).setVisible(false);
+    }));
 
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.compoundNames", ""),
-      "Primary Compound Names",
-      "The names of the primary compound in the well",
-      COMPOUND_COLUMNS_GROUP) {
+    columns.add(new WellReagentEntityColumn<Reagent,Integer>(Reagent.class,
+      new IntegerEntityColumn<Reagent>(
+        Reagent.libraryContentsVersion.toProperty("versionNumber"),
+        "Library Contents Version",
+        "The reagent's library contents version", 
+        WELL_COLUMNS_GROUP) {
       @Override
-      public List<String> getCellValue(Well well)
+      public Integer getCellValue(Reagent reagent)
       {
-        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getCompoundNames());
+        return reagent.getLibraryContentsVersion().getVersionNumber();
       }
-    });
-    columns.get(columns.size() - 1).setVisible(false);
-
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.casNumbers", ""),
-      "CAS Numbers",
-      "The CAS Numbers of the primary compound in the well",
-      COMPOUND_COLUMNS_GROUP) {
-      @Override
-      public List<String> getCellValue(Well well)
-      {
-        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getCasNumbers());
-      }
-    });
-    columns.get(columns.size() - 1).setVisible(false);
-
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.nscNumbers", ""),
-      "NSC Numbers",
-      "The NSC Numbers of the primary compound in the well",
-      COMPOUND_COLUMNS_GROUP) {
-      @Override
-      public List<String> getCellValue(Well well)
-      {
-        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getNscNumbers());
-      }
-    });
-    columns.get(columns.size() - 1).setVisible(false);
-
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.pubchemCids", ""),
-      "PubChem CIDs",
-      "The PubChem CIDs of the primary compound in the well",
-      COMPOUND_COLUMNS_GROUP) {
-      @Override
-      public List<String> getCellValue(Well well)
-      {
-        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getPubchemCids());
-      }
-    });
-    columns.get(columns.size() - 1).setVisible(false);
-
-    columns.add(new ListEntityColumn<Well>(new PropertyPath<Well>(Well.class, "compounds.chembankIds", ""),
-      "ChemBank IDs",
-      "The ChemBank IDs of the primary compound in the well",
-      COMPOUND_COLUMNS_GROUP) {
-      @Override
-      public List<String> getCellValue(Well well)
-      {
-        return well.getPrimaryCompound() == null ? null : new ArrayList<String>(well.getPrimaryCompound().getChembankIds());
-      }
-    });
+    }));
     columns.get(columns.size() - 1).setVisible(false);
   }
 
-  private void buildReagentPropertyColumns(List<EntityColumn<Well,?>> columns)
+  private void buildWellPropertyColumns(List<TableColumn<Well,?>> columns)
   {
-    columns.add(new TextEntityColumn<Well>(
-      new PropertyPath<Well>(Well.class, "reagent", "reagentIdString"),
-      "Reagent Source ID",
-      "The vendor-assigned identifier for the reagent in this well.", WELL_COLUMNS_GROUP) {
-      @Override
-      public String getCellValue(Well well)
-      {
-        Reagent reagent = well.getReagent();
-        return reagent == null ? null : reagent.getEntityId().getReagentId();
-      }
-    });
-  }
-
-  private void buildWellPropertyColumns(List<EntityColumn<Well,?>> columns)
-  {
-    columns.add(new TextEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-                                                            "library",
-                                                            "libraryName"),
-                                     "Library",
-                                     "The library containing the well",
-                                     WELL_COLUMNS_GROUP) {
-      @Override
-      public String getCellValue(Well well)
-      {
-        return well.getLibrary().getLibraryName();
-      }
-
-      @Override
-      public boolean isCommandLink()
-      {
-        return true;
-      }
-
-      @Override
-      public Object cellAction(Well well)
-      {
-        return _libraryViewer.viewLibrary(well.getLibrary());
-      }
-    });
-    columns.add(new IntegerEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-                                                               "plateNumber"),
-                                        "Plate",
-                                        "The number of the plate the well is located on",
-                                        WELL_COLUMNS_GROUP) {
+    columns.add(new IntegerEntityColumn<Well>(
+      new PropertyPath<Well>(Well.class, "plateNumber"),
+      "Plate",
+      "The number of the plate the well is located on",
+      WELL_COLUMNS_GROUP) {
       @Override
       public Integer getCellValue(Well well)
       {
         return well.getPlateNumber();
       }
-
-      @Override
-      protected Comparator<Well> getAscendingComparator()
-      {
-        return new Comparator<Well>() {
-          @SuppressWarnings("unchecked")
-          public int compare(Well w1, Well w2)
-          {
-            return w1.getWellKey().compareTo(w2.getWellKey());
-          }
-        };
-      }
     });
-    columns.add(new TextEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-                                                            "wellName"),
-                                     "Well",
-                                     "The plate coordinates of the well",
-                                     WELL_COLUMNS_GROUP) {
+
+    columns.add(new TextEntityColumn<Well>(
+      new PropertyPath<Well>(Well.class, "wellName"),
+      "Well",
+      "The plate coordinates of the well",
+      WELL_COLUMNS_GROUP) {
       @Override
       public String getCellValue(Well well)
       {
@@ -553,27 +628,66 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         return viewSelectedEntity();
       }
     });
-    columns.add(new EnumEntityColumn<Well,WellType>(new PropertyPath<Well>(Well.class, "wellType"),
-                                              "Well Type",
-                                              "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.",
-                                              WELL_COLUMNS_GROUP,
-                                              WellType.values()) {
-      @Override
-      public WellType getCellValue(Well well)
-      {
-        return well.getWellType();
-      }
-    });
 
-    columns.add(new TextEntityColumn<Well>(new PropertyPath<Well>(Well.class,
-      "iccbNumber"),
-      "ICCB Number",
-      "The identifier assigned by ICCB-L to the contents of this well",
+    columns.add(new TextEntityColumn<Well>(
+      Well.library.toProperty("libraryName"),
+      "Library",
+      "The library containing the well",
       WELL_COLUMNS_GROUP) {
       @Override
       public String getCellValue(Well well)
       {
-        return well.getIccbNumber();
+        return well.getLibrary().getLibraryName();
+      }
+
+      @Override
+      public boolean isCommandLink()
+      {
+        return true;
+      }
+
+      @Override
+      public Object cellAction(Well well)
+      {
+        return _libraryViewer.viewLibrary(well.getLibrary());
+      }
+    });
+
+    columns.add(new EnumEntityColumn<Well,ScreenType>(
+      Well.library.toProperty("screenType"),
+      "Screen Type",
+      "The library screen type",
+      WELL_COLUMNS_GROUP,
+      ScreenType.values()) {
+      @Override
+      public ScreenType getCellValue(Well well)
+      {
+        return well.getLibrary().getScreenType();
+      }
+    });
+
+    columns.add(new EnumEntityColumn<Well,LibraryWellType>(
+      new PropertyPath<Well>(Well.class, "libraryWellType"),
+      "Library Well Type",
+      "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.",
+      WELL_COLUMNS_GROUP,
+      LibraryWellType.values()) {
+      @Override
+      public LibraryWellType getCellValue(Well well)
+      {
+        return well.getLibraryWellType();
+      }
+    });
+
+    columns.add(new TextEntityColumn<Well>(
+      new PropertyPath<Well>(Well.class, "facilityId"),
+      "Facility ID",
+      "An alternate identifier assigned by the facility to identify this well",
+      WELL_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(Well well)
+      {
+        return well.getFacilityId();
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
@@ -588,8 +702,9 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
     columns.get(columns.size() - 1).setVisible(false);
+
     columns.add(new TextEntityColumn<Well>(
-      new PropertyPath<Well>(Well.class, "deprecationActivity", "comments"),
+      Well.deprecationActivity.toProperty("comments"),
       "Deprecation Reason", "Why the well has been deprecated", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Well well)
@@ -600,16 +715,16 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     columns.get(columns.size() - 1).setVisible(false);
   }
 
-  private void buildResultValueTypeColumns(List<EntityColumn<Well,?>> columns)
+  private void buildResultValueTypeColumns(List<TableColumn<Well,?>> columns)
   {
-    List<EntityColumn<Well,?>> otherColumns = new ArrayList<EntityColumn<Well,?>>();
+    List<TableColumn<Well,?>> otherColumns = Lists.newArrayList();
     boolean isAssayWellTypeColumnCreated = false; 
     for (Triple<ResultValueType,Integer,String> rvtAndScreenNumberAndTitle : findValidResultValueTypes()) {
       final ResultValueType rvt = rvtAndScreenNumberAndTitle.getFirst();
       Integer screenNumber = rvtAndScreenNumberAndTitle.getSecond();
       String screenTitle = rvtAndScreenNumberAndTitle.getThird();
 
-      EntityColumn<Well,?> column;
+      TableColumn<Well,?> column;
 //      if (rvt.isPositiveIndicator() &&
 //        rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
 //          column = new BooleanEntityColumn<Well>(
@@ -675,10 +790,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 //      else
       if (rvt.isNumeric()) {
         column = new RealEntityColumn<Well>(
-          new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "numericValue", rvt),
+          Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), rvt).toProperty("numericValue"),
           makeColumnName(rvt, screenNumber),
           makeColumnDescription(rvt, screenNumber, screenTitle),
-          makeColumnGroup(screenNumber, screenTitle)) {
+          makeScreenColumnGroup(screenNumber, screenTitle)) {
           @Override
           public Double getCellValue(Well well)
           {
@@ -689,10 +804,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
       else {
         column = new TextEntityColumn<Well>(
-          new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "value", rvt),
+          Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), rvt).toProperty("value"),
           makeColumnName(rvt, screenNumber),
           makeColumnDescription(rvt, screenNumber, screenTitle),
-          makeColumnGroup(screenNumber, screenTitle)) {
+          makeScreenColumnGroup(screenNumber, screenTitle)) {
           @Override
           public String getCellValue(Well well)
           {
@@ -703,11 +818,12 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
 
       // request eager fetching of resultValueType, since Hibernate will otherwise fetch these with individual SELECTs
-      column.addRelationshipPath(new RelationshipPath<Well>(Well.class, "resultValues.resultValueType"));
+      ((HasFetchPaths<Well>) column).addRelationshipPath(Well.resultValues.to(ResultValue.ResultValueType));
 
       // BII start: (Siew Cheng) Add assay well type column 
       if (!isAssayWellTypeColumnCreated && column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
-        columns.add(new EnumEntityColumn<Well,AssayWellType>(new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "assayWellType", rvt),
+        columns.add(new EnumEntityColumn<Well,AssayWellType>(
+          Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), rvt).toProperty("assayWellType"),
           "Assay Well Type",
           "The type of assay well, e.g., 'Experimental', 'Empty', 'Library Control', " +
           "'Assay Positive Control', 'Assay Control', 'Buffer', etc.",
@@ -735,7 +851,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     columns.addAll(otherColumns);
   }
 
-  private String makeColumnGroup(Integer screenNumber, String screenTitle)
+  private String makeScreenColumnGroup(Integer screenNumber, String screenTitle)
   {
     String columnGroup;
     if (_screenResult != null && _screenResult.getScreen().getScreenNumber().equals(screenNumber)) {
@@ -747,6 +863,18 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     return columnGroup;
   }
 
+  private String makeStudyColumnGroup(Integer studyNumber, String studyTitle)
+  {
+    String columnGroup;
+    if (_study != null && studyNumber.equals(_study.getStudyNumber())) {
+      columnGroup = OUR_ANNOTATION_TYPES_COLUMN_GROUP;
+    }
+    else {
+      columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + studyNumber + " (" + studyTitle + ")";
+    }
+    return columnGroup;
+  }
+  
   /**
    * @return a list of RVTs that have RVs for wells in common with the wells of this search result, ordered by screen number and RVT ordinal
    */
@@ -798,36 +926,27 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     });
   }
 
-  private void buildAnnotationTypeColumns(List<EntityColumn<Well,?>> columns)
+  private void buildAnnotationTypeColumns(List<TableColumn<Well,?>> columns)
   {
-    List<EntityColumn<Well,?>> otherColumns = new ArrayList<EntityColumn<Well,?>>();
+    List<TableColumn<Well,?>> otherColumns = Lists.newArrayList();
     for (Triple<AnnotationType,Integer,String> atAndStudyNumberAndTitle : findValidAnnotationTypes()) {
       final AnnotationType annotationType = atAndStudyNumberAndTitle.getFirst();
       Integer studyNumber = atAndStudyNumberAndTitle.getSecond();
       String studyTitle = atAndStudyNumberAndTitle.getThird();
-      EntityColumn<Well,?> column;
+      TableColumn<Well,?> column;
 
-      String columnGroup;
-      if (_screenResult != null && _screenResult.getScreen().isStudyOnly() && _screenResult.getScreen().getScreenNumber().equals(studyNumber)) {
-        columnGroup = OUR_ANNOTATION_TYPES_COLUMN_GROUP;
-      }
-      else {
-        columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + studyNumber + " (" + studyTitle + ")";
-      }
-
+      String columnGroup = makeStudyColumnGroup(studyNumber, studyTitle);
       if (annotationType.isNumeric()) {
         column = new RealEntityColumn<Well>(
-          new PropertyPath<Well>(Well.class,
-            "reagent.annotationValues[annotationType]",
-            "numericValue",
-            annotationType),
-            makeColumnName(annotationType, studyNumber),
-            WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
-            columnGroup) {
+          Well.reagents.to(Reagent.annotationValues).restrict(AnnotationValue.annotationType.getLeaf(), annotationType).toProperty("numericValue"),
+          makeColumnName(annotationType, studyNumber),
+          WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
+          columnGroup) {
           @Override
           public Double getCellValue(Well well)
           {
-            Reagent reagent = well.getReagent();
+            // TODO: find appropriate version of reagent
+            Reagent reagent = well.<Reagent>getLatestReleasedReagent();
             if (reagent != null) {
               AnnotationValue av = reagent.getAnnotationValues().get(annotationType);
               if (av != null) {
@@ -840,17 +959,15 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
       else {
         column = new TextEntityColumn<Well>(
-          new PropertyPath<Well>(Well.class,
-            "reagent.annotationValues[annotationType]",
-            "value",
-            annotationType),
-            makeColumnName(annotationType, studyNumber),
-            WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
-            columnGroup) {
+          Well.reagents.to(Reagent.annotationValues).restrict(AnnotationValue.annotationType.getLeaf(), annotationType).toProperty("value"),
+          makeColumnName(annotationType, studyNumber),
+          WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
+          columnGroup) {
           @Override
           public String getCellValue(Well well)
           {
-            Reagent reagent = well.getReagent();
+            // TODO: find appropriate version of reagent
+            Reagent reagent = well.<Reagent>getLatestReleasedReagent();
             if (reagent != null) {
               AnnotationValue av = reagent.getAnnotationValues().get(annotationType);
               if (av != null) {
@@ -863,7 +980,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
 
       // request eager fetching of annotationType, since Hibernate will otherwise fetch these with individual SELECTs
-      column.addRelationshipPath(new RelationshipPath<Well>(Well.class, "reagent.annotationValues.annotationType.study"));
+      ((HasFetchPaths<Well>) column).addRelationshipPath(Well.reagents.to(Reagent.annotationValues).to(AnnotationValue.annotationType).to(AnnotationType.study));
 
       if (column.getName().equals(OUR_ANNOTATION_TYPES_COLUMN_GROUP)) {
         columns.add(column);
@@ -894,6 +1011,16 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           }
           hql.where("s", "screenType", Operator.EQUAL, _screenResult.getScreen().getScreenType());
         }
+        else if (_mode == WellSearchResultMode.STUDY_REAGENT_WELLS) {
+          if (_reagentIds.size() == 0) {
+            return Collections.emptyList();
+          }
+          // select annotation types for studies that have same screenType of the libraries containing the set of reagents in this search result
+          hql.from(Library.class, "l").from("l", "wells", "w", JoinType.INNER).from("w", "reagent", "r", JoinType.INNER);
+          hql.whereIn("r", "id", _reagentIds);
+          hql.where("l", "screenType", Operator.EQUAL, "s", "screenType");
+        }
+
         else if (_mode == WellSearchResultMode.LIBRARY_WELLS) {
           if (_library == null) {
             return Collections.emptyList();
@@ -933,7 +1060,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   @Override
   protected void setEntityToView(Well well)
   {
-    _wellViewer.viewWell(well);
+    _wellViewer.viewWell(well.getWellKey(), _libraryContentsVersion);
   }
 
   /**
@@ -968,6 +1095,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           protected void addDomainRestrictions(HqlBuilder hql,
                                                Map<RelationshipPath<Well>,String> path2Alias)
           {
+            super.addDomainRestrictions(hql, path2Alias);
             hql.from(getRootAlias(), "library", "l");
             hql.whereIn("l", "libraryType", LibrarySearchResults.LIBRARY_TYPES_TO_DISPLAY);
           }
@@ -993,9 +1121,9 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   @Override
   public String resetColumnFilter()
   {
-    TableColumn<Well,?> resetColumn = (TableColumn<Well,?>) getRequestMap().get("column");
     if (_mode == WellSearchResultMode.ALL_WELLS) {
       // if no other columns have criteria defined, reset to empty search result
+      TableColumn<Well,?> resetColumn = (TableColumn<Well,?>) getRequestMap().get("column");
       boolean willHaveEmptyCriteria = true;
       for (TableColumn<Well,?> column : getColumnManager().getAllColumns()) {
         if (!column.getCriterion().isUndefined() && column != resetColumn) {
@@ -1012,21 +1140,30 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     return super.resetColumnFilter();
   }
 
-  // private instance methods
-
-  public static String makeColumnName(MetaDataType mdt, Integer parentIdentifier)
+  @Override
+  @UIControllerMethod
+  public String downloadSearchResults()
+  {
+    DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
+    if (dataExporter == _wellsSdfDataExporter) {
+      _wellsSdfDataExporter.setLibraryContentsVersion(_libraryContentsVersion);
+    }
+    return super.downloadSearchResults();
+  }
+  
+  static String makeColumnName(MetaDataType mdt, Integer parentIdentifier)
   {
     // note: replacing "_" with white space allows column headers to wrap, creating narrower columns
     return String.format("%s [%d]", mdt.getName().replaceAll("_", " "), parentIdentifier);
   }
 
-  public static String makeColumnDescription(MetaDataType mdt, Integer parentIdentifier, String parentTitle)
+  static String makeColumnDescription(MetaDataType mdt, Integer parentIdentifier, String parentTitle)
   {
 
     return makeColumnDescription(mdt.getName(), mdt.getDescription(), parentIdentifier, parentTitle);
   }  
   
-  public static String makeColumnDescription(String name, String description, Integer parentIdentifier, String parentTitle)
+  static String makeColumnDescription(String name, String description, Integer parentIdentifier, String parentTitle)
   {
     StringBuilder columnDescription = new StringBuilder();
     columnDescription.append("<i>").append(parentIdentifier).append(": ").append(parentTitle).
@@ -1036,16 +1173,33 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     }
     return columnDescription.toString();
   }
-
-  private void updateColumnVisibilityForScreenType(boolean showCompounds, boolean showGenes)
+  
+  class WellReagentEntityColumn<R extends Reagent,T> extends ReagentEntityColumn<Well,R,T> 
   {
-    for (TableColumn<Well,?> s : getColumnManager().getAllColumns()) {
-//      if (column.getGroup().equals(COMPOUND_COLUMNS_GROUP)) {
-//        column.setVisible(showCompounds);
-//      }
-//      else if (column.getGroup().equals(GENE_COLUMNS_GROUP)) {
-//        column.setVisible(showGenes);
-//      }
+
+    private WellSearchResults _wellSearchResults;
+
+    public WellReagentEntityColumn(Class<R> reagentClass,
+                                   TableColumn<R,T> delegateEntityColumn)
+    {
+      super(reagentClass, 
+            (accessSpecificLibraryContentsVersion() ? Well.reagents.restrict(Reagent.libraryContentsVersion.getLeaf(), _libraryContentsVersion) : Well.latestReleasedReagent),
+            delegateEntityColumn);
+    }
+
+    @Override
+    protected R getReagent(Well well)
+    {
+      if (accessSpecificLibraryContentsVersion()) {
+        return (R) well.getReagents().get(_libraryContentsVersion);
+      }
+      return (R) well.getLatestReleasedReagent();
     }
   }
+
+  private boolean accessSpecificLibraryContentsVersion()
+  {
+    return _mode == WellSearchResultMode.LIBRARY_WELLS && _libraryContentsVersion != null;
+  }
+
 }

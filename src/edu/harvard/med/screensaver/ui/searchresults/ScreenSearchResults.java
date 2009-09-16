@@ -21,8 +21,8 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
@@ -31,14 +31,15 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
@@ -49,6 +50,8 @@ import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 import org.apache.commons.collections.Transformer;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Lists;
 
 
 /**
@@ -129,7 +132,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
   @SuppressWarnings("unchecked")
   protected List<? extends TableColumn<Screen,?>> buildColumns()
   {
-    ArrayList<EntityColumn<Screen,?>> columns = new ArrayList<EntityColumn<Screen,?>>();
+    ArrayList<TableColumn<Screen,?>> columns = Lists.newArrayList();
     columns.add(new IntegerEntityColumn<Screen>(
       new PropertyPath(Screen.class, "screenNumber"),
       "Screen Number", "The screen number", TableColumn.UNGROUPED) {
@@ -149,28 +152,27 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       public String getCellValue(Screen screen) { return screen.getTitle(); }
     });
     columns.add(new UserNameColumn<Screen>(
-      new RelationshipPath(Screen.class, "labHead"),
+      Screen.labHead,
       "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED, _userViewer) {
-
       @Override
       public ScreensaverUser getUser(Screen screen) { return screen.getLabHead(); }
     });
-    columns.get(columns.size() - 1).addRelationshipPath(new RelationshipPath(Screen.class, "labHead.labAffiliation"));
+    ((HasFetchPaths<Screen>) columns.get(columns.size() - 1)).addRelationshipPath(Screen.labHead.to(LabHead.LabAffiliation));
     columns.add(new TextEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "labHead.labAffiliation", "affiliationName"),
+      Screen.labHead.to(ScreensaverUser.LabAffiliation).toProperty("affiliationName"),
       "Lab Affiliation", "The affiliation of the lab performing the screen", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Screen screen) { return screen.getLabHead().getLab().getLabAffiliationName(); }
     });
     columns.get(columns.size() - 1).setVisible(false);
     columns.add(new UserNameColumn<Screen>(
-      new RelationshipPath(Screen.class, "leadScreener"),
+      Screen.leadScreener,
       "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(Screen screen) { return screen.getLeadScreener(); }
     });
     columns.add(new EnumEntityColumn<Screen,ScreenResultAvailability>(
-      new RelationshipPath(Screen.class, "screenResult"),
+      Screen.screenResult,
       "Screen Result",
       "'available' if the screen result is loaded into Screensaver and viewable by the current user;" +
       " 'not shared' if loaded but not viewable by the current user; otherwise 'none'",
@@ -231,15 +233,14 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     });
     columns.get(columns.size() - 1).setVisible(false);
     columns.add(new DateEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "labActivities", "dateOfActivity"),
+      Screen.labActivities.toProperty("dateOfActivity"),
       "Date Of Last Activity", "The date of the last lab activity performed for this screen",
       TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
       protected LocalDate getDate(Screen screen) { return screen.getLabActivities().isEmpty() ? null : screen.getLabActivities().last().getDateOfActivity(); }
     });
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new EnumEntityColumn<Screen,StatusValue>(
-      new PropertyPath(Screen.class, "statusItems", "statusValue"),
+    columns.add(new EnumEntityColumn<Screen,StatusValue>(Screen.statusItems.toProperty("statusValue"),
       "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
       TableColumn.ADMIN_COLUMN_GROUP,
       StatusValue.values()) {
@@ -251,7 +252,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       }
     });
     columns.add(new DateEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "statusItems", "statusDate"),
+      Screen.statusItems.toProperty("statusDate"),
       "Status Date", "The date of the most recent change of status for the screen",
       TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
@@ -262,7 +263,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     });
     // TODO: should make this a vocab list, but need support for list-of-vocab column type
     columns.add(new ListEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "fundingSupports", "value"),
+      Screen.fundingSupports.toProperty("value"),
       "Funding Supports", "The list of funding supports for the screen",
       TableColumn.ADMIN_COLUMN_GROUP) {
       @Override
@@ -278,7 +279,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
 
     // TODO: should make this a vocab list, but need support for list-of-vocab column type
     columns.add(new ListEntityColumn<Screen>(
-      new RelationshipPath(Screen.class, "screenResult.resultValueTypes"),
+      Screen.screenResult.to(ScreenResult.resultValueTypes),
       "Assay Readout Type", "The assay readout type for the screen",
       TableColumn.ADMIN_COLUMN_GROUP) {
       @Override

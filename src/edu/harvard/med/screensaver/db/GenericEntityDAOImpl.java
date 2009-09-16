@@ -434,8 +434,11 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   /**
-   * Retrieve and return an entity by its identifier (primary key).
-   *
+   * Retrieve and return an entity by its identifier (primary key). If the
+   * requested entity is in the Hibernate session, no database I/O will occur.
+   * Therefore this method provide an efficient means of retrieving entities
+   * that have already been fetched from the database.
+   * 
    * @param <E> the type of the entity to retrieve
    * @param id the identifier of the entity to retrieve
    * @param entityClass the class of the entity to retrieve
@@ -443,7 +446,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *         Return null if there is no such entity.
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id)
+  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
+                                                     Serializable id)
   {
     return (E) getHibernateTemplate().get(entityClass, id);
   }

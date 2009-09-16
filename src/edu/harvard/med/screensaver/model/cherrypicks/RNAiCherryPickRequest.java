@@ -18,15 +18,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 /**
  * A hibernate entity representing an RNAi cherry pick request.
@@ -48,7 +49,9 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
   public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
   private static final Volume DEFAULT_TRANSFER_VOLUME = null;
-
+  
+  public static final RelationshipPath<RNAiCherryPickRequest> rnaiCherryPickScreenings = new RelationshipPath<RNAiCherryPickRequest>(RNAiCherryPickRequest.class, "RNAiCherryPickScreenings");
+  
 
   // private instance datum
 
@@ -109,7 +112,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   @OneToMany(mappedBy="rnaiCherryPickRequest",
              cascade={},
              fetch=FetchType.LAZY)
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="rnaiCherryPickScreening")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="rnaiCherryPickScreening")
   public Set<RNAiCherryPickScreening> getRNAiCherryPickScreenings()
   {
     return _rnaiCherryPickScreenings;

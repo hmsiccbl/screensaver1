@@ -16,29 +16,34 @@
   <ui:param name="viewer" value="#{screenResultViewer}" />
   <ui:param name="hideId" value="#{true}" />
 
-	<ui:define name="entityCommands">
-		<t:commandButton action="#{screenResultViewer.delete}" value="Delete"
-			onclick="javascript: return confirm('Delete this screen result permanently?');"
-			styleClass="command" rendered="#{screenResultViewer.editable}"
-			title="Delete the screen results for this screen" />
-    <t:commandButton action="#{screenResultViewer.viewCellHTS2Runner}"
-      value="Click here to enter CellHTS2 parameters"
-      styleClass="command"
-      rendered="#{screenResultViewer.editable &amp;&amp; !screenResultViewer.cellHTS2ReportFileExists}"
-      title="Run CellHTS2 on the screen result for this screen" />
-    <t:panelGroup id="screenResultReportLink" rendered="#{screenResultViewer.cellHTS2ReportFileExists}">
+  <ui:define name="entityCommands">
+    <t:commandButton action="#{screenResultViewer.delete}"
+      value="Delete"
+      onclick="javascript: return confirm('Delete this screen result permanently?');"
+      styleClass="command" rendered="#{screenResultViewer.editable}"
+      title="Delete the screen results for this screen" />
+    <t:panelGroup rendered="#{screenResultViewer.cellHTS2Enabled}">
       <t:commandButton action="#{screenResultViewer.viewCellHTS2Runner}"
-        value="Click here to reenter CellHTS2 parameters"
-        styleClass="command" rendered="#{screenResultViewer.editable}"
-        title="Rerun CellHTS2 analysis on the screen result for this screen" />
-      <h:outputLink value="#{screenResultViewer.reportURL}"
-        title="Click here for CellHTS2 report">
-        <h:outputText value="CellHTS2 Report" styleClass="dataText" />
-      </h:outputLink>
+        value="Click here to enter CellHTS2 parameters"
+        styleClass="command"
+        rendered="#{screenResultViewer.editable &amp;&amp; !screenResultViewer.cellHTS2ReportFileExists}"
+        title="Run CellHTS2 on the screen result for this screen" />
+      <t:panelGroup id="screenResultReportLink"
+        rendered="#{screenResultViewer.cellHTS2ReportFileExists}">
+        <t:commandButton
+          action="#{screenResultViewer.viewCellHTS2Runner}"
+          value="Click here to reenter CellHTS2 parameters"
+          styleClass="command" rendered="#{screenResultViewer.editable}"
+          title="Rerun CellHTS2 analysis on the screen result for this screen" />
+        <h:outputLink value="#{screenResultViewer.reportURL}"
+          title="Click here for CellHTS2 report">
+          <h:outputText value="CellHTS2 Report" styleClass="dataText" />
+        </h:outputLink>
+      </t:panelGroup>
     </t:panelGroup>
-	</ui:define>
+  </ui:define>
 
-	<ui:define name="propertiesContent">
+  <ui:define name="propertiesContent">
 		<ss:property id="screenResultLastImported" label="Last Imported"
 						type="Date"
 						description="The date the current screen results were loaded into the database"

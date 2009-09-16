@@ -18,21 +18,30 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Iterators;
 
 
 /**
@@ -88,9 +97,8 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
     Iterator<ScreenerCherryPick> scpIter = cherryPickRequest1.getScreenerCherryPicks().iterator();
     ScreenerCherryPick duplicateScreenerCherryPick1 = scpIter.next();
-    cherryPickRequest2.createLabCherryPick(
-      cherryPickRequest2.createScreenerCherryPick(duplicateScreenerCherryPick1.getScreenedWell()),
-      duplicateScreenerCherryPick1.getLabCherryPicks().iterator().next().getSourceWell());
+    cherryPickRequest2.createScreenerCherryPick(duplicateScreenerCherryPick1.getScreenedWell())
+    .createLabCherryPick(duplicateScreenerCherryPick1.getLabCherryPicks().iterator().next().getSourceWell());
     genericEntityDao.saveOrUpdateEntity(screen);
     Map<WellKey,Number> duplicateCherryPickWells = cherryPickRequestDao.findDuplicateCherryPicksForScreen(screen);
     assertEquals("duplicate cherry picks count", 1, duplicateCherryPickWells.size());
@@ -100,9 +108,8 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
 
     CherryPickRequest cherryPickRequest3 = screen.createCherryPickRequest();
     ScreenerCherryPick duplicateScreenerCherryPick2 = scpIter.next();
-    cherryPickRequest3.createLabCherryPick(
-      cherryPickRequest3.createScreenerCherryPick(duplicateScreenerCherryPick2.getScreenedWell()),
-      duplicateScreenerCherryPick2.getLabCherryPicks().iterator().next().getSourceWell());
+    cherryPickRequest3.createScreenerCherryPick(duplicateScreenerCherryPick2.getScreenedWell())
+    .createLabCherryPick(duplicateScreenerCherryPick2.getLabCherryPicks().iterator().next().getSourceWell());
     genericEntityDao.saveOrUpdateEntity(screen);
     duplicateCherryPickWells = cherryPickRequestDao.findDuplicateCherryPicksForScreen(screen);
     assertEquals("duplicate cherry picks count", 2, duplicateCherryPickWells.size());
@@ -198,7 +205,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
                      2,
                      cherryPickRequest.getLabCherryPicks().size());
         assertEquals("lab cherry picks exist in well1 before delete", 1, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
-        assertEquals("lab cherry picks exist in well2 before delete", 1, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(4, "P24"))).size());
+        assertEquals("lab cherry picks exist in well2 before delete", 1, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A02"))).size());
         Set<LabCherryPick> cherryPicksToDelete = new HashSet<LabCherryPick>(cherryPickRequest.getLabCherryPicks());
         for (LabCherryPick cherryPick : cherryPicksToDelete) {
           cherryPickRequestDao.deleteLabCherryPick(cherryPick);
@@ -214,7 +221,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("lab cherry picks deleted from cherry pick request", 0, cherryPickRequest.getLabCherryPicks().size());
         assertEquals("lab cherry picks deleted from well1", 0, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
-        assertEquals("lab cherry picks deleted from well2", 0, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(4, "P24"))).size());
+        assertEquals("lab cherry picks deleted from well2", 0, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A02"))).size());
         assertEquals("number of unfulfilled cherry picks", 0, cherryPickRequest.getNumberUnfulfilledLabCherryPicks());  
       }
     });
@@ -225,42 +232,45 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   
   private CherryPickRequest makeCherryPickRequest(final int screenNumber)
   {
-    final CherryPickRequest[] result = new CherryPickRequest[1];
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        Library poolLibrary = new Library("Pools library 1",
-                                          "poollib1",
-                                          ScreenType.RNAI,
-                                          LibraryType.COMMERCIAL,
-                                          1,
-                                          2);
-        Well poolWell1 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 1, new WellName("A01"));
-        Well poolWell2 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 2, new WellName("P24"));
-        genericEntityDao.saveOrUpdateEntity(poolLibrary);
+    Library duplexLibrary = new Library("Duplexes library 1",
+                                        "duplib1",
+                                        ScreenType.RNAI,
+                                        LibraryType.COMMERCIAL,
+                                        3,
+                                        4);
+    duplexLibrary.createContentsVersion(new AdministrativeActivity(new AdministratorUser("Admin" + screenNumber, "User1", "", "", "", "", "admin1" + screenNumber, ""), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    for (int i = 0; i < 2; ++i ) {
+      Well well = duplexLibrary.createWell(new WellKey(duplexLibrary.getStartPlate(), 0, i), LibraryWellType.EXPERIMENTAL);
+      well.createSilencingReagent(new ReagentVendorIdentifier("vendor", "d" + i), 
+                                  SilencingReagentType.SIRNA, "ATCG");
+    }
+    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity(duplexLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    genericEntityDao.saveOrUpdateEntity(duplexLibrary);
+    duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, Library.wells.to(Well.reagents).getPath(), Library.wells.to(Well.latestReleasedReagent).getPath());
 
-        Library duplexLibrary = new Library("Duplexes library 1",
-                                            "duplib1",
-                                            ScreenType.RNAI,
-                                            LibraryType.COMMERCIAL,
-                                            3,
-                                            4);
-        Set<Well> pool1DuplexWells = CherryPickRequestAllocatorTest.makeRNAiDuplexWellsForPoolWell(duplexLibrary, poolWell1, 3, new WellName("A01"));
-        Set<Well> pool2DuplexWells = CherryPickRequestAllocatorTest.makeRNAiDuplexWellsForPoolWell(duplexLibrary, poolWell2, 4, new WellName("P24"));
-        genericEntityDao.saveOrUpdateEntity(duplexLibrary);
+    Library poolLibrary = new Library("Pools library 1",
+                                      "poollib1",
+                                      ScreenType.RNAI,
+                                      LibraryType.COMMERCIAL,
+                                      1,
+                                      2);
+    poolLibrary.createContentsVersion(new AdministrativeActivity(new AdministratorUser("Admin" + screenNumber, "User2", "", "", "", "", "admin2" + screenNumber, ""), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    Well poolWell1 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 1, new WellName("A01"));
+    Iterator<Well> duplexWellsIter = duplexLibrary.getWells().iterator();
+    poolWell1.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
+    Well poolWell2 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 2, new WellName("P24"));
+    poolWell2.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
+    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity(poolLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    genericEntityDao.saveOrUpdateEntity(poolLibrary);
 
-        Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
-        CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
-        cherryPickRequest.createLabCherryPick(cherryPickRequest.createScreenerCherryPick(poolWell1), pool1DuplexWells.iterator().next());
-        cherryPickRequest.createLabCherryPick(cherryPickRequest.createScreenerCherryPick(poolWell2), pool2DuplexWells.iterator().next());
-        genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
-        genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
-        genericEntityDao.saveOrUpdateEntity(screen);
-        result[0] = cherryPickRequest;
-      }
-    });
-    return result[0];
+    Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
+    CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
+    cherryPickRequest.createScreenerCherryPick(poolWell1).createLabCherryPick(poolWell1.<SilencingReagent>getLatestReleasedReagent().getDuplexWells().iterator().next());
+    cherryPickRequest.createScreenerCherryPick(poolWell2).createLabCherryPick(poolWell2.<SilencingReagent>getLatestReleasedReagent().getDuplexWells().iterator().next());
+
+    genericEntityDao.saveOrUpdateEntity(screen);
+        
+    return cherryPickRequest;
   }
 
   

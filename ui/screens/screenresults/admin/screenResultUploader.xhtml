@@ -16,7 +16,7 @@
 		<t:inputFileUpload id="uploadScreenResultFile"
 			value="#{screenResultImporter.uploadedFile}" storage="file"
 			accept="application/vnd.ms-excel" required="true"
-			maxlength="134217728" styleClass="inputText" />
+			styleClass="inputText" />
 		<t:commandButton
 			value="#{empty screenResultViewer.screenResult ? &quot;Load&quot; : &quot;Reload&quot;}"
 			action="#{screenResultImporter.doImport}" styleClass="command" />

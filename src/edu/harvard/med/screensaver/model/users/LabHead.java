@@ -25,9 +25,11 @@ import javax.persistence.Transient;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 
 /**
  * A Hibernate entity bean representing a lab head.
@@ -121,6 +123,20 @@ public class LabHead extends ScreeningRoomUser
     return _lab;
   }
 
+  /**
+   * @motivation: overriding superclass only to add annotations needed by model
+   *              unit tests, since this is an immutable property in the
+   *              subclass, but not in the superclass
+   */
+  @Override
+  @Immutable
+  @Column(hasNonconventionalSetterMethod=true)
+  @Transient
+  public ScreeningRoomUserClassification getUserClassification() 
+  {
+    return super.getUserClassification();
+  }
+
   @Override
   public void setUserClassification(ScreeningRoomUserClassification userClassification)
   {
@@ -139,7 +155,7 @@ public class LabHead extends ScreeningRoomUser
     fetch=FetchType.LAZY
   )
   @OrderBy("screenNumber")
-  @edu.harvard.med.screensaver.model.annotations.OneToMany(singularPropertyName="screenHeaded")
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="screenHeaded")
   public Set<Screen> getScreensHeaded()
   {
     return _screensHeaded;
@@ -223,7 +239,7 @@ public class LabHead extends ScreeningRoomUser
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE
   })
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
   private LabAffiliation getLabAffiliation()
   {
     if (_lab != null) {

@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
+import junit.framework.TestCase;
 
 /**
  * WARNING: this test requires an internet connection.
@@ -17,7 +17,7 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class PubchemSmilesOrInchiStandardizerTest extends AbstractSpringTest
+public class PubchemSmilesOrInchiStandardizerTest extends TestCase
 {
   private PubchemSmilesOrInchiStandardizer _pubchemSmilesOrInchiStandardizer = new PubchemSmilesOrInchiStandardizer();
 
@@ -40,7 +40,7 @@ public class PubchemSmilesOrInchiStandardizerTest extends AbstractSpringTest
       String standardizedSmiles = _pubchemSmilesOrInchiStandardizer.getPubchemStandardizedSmilesOrInchi(
       "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1", 
       CompoundIdType.SMILES);      
-      assertEquals("CC1=C(C(=O)N(N1C)C2=CC=CC=C2)\\C=C/C3=C(C=C(C=C3)Cl)Cl", standardizedSmiles);
+      assertEquals("CC1=C(C(=O)N(N1C)C2=CC=CC=C2)/C=C\\C3=C(C=C(C=C3)Cl)Cl", standardizedSmiles);
     }
     catch (EutilsException e) {
       fail("PubchemSmilesOrInchiStandardizer threw an exception: " + e.getMessage());
@@ -60,3 +60,4 @@ public class PubchemSmilesOrInchiStandardizerTest extends AbstractSpringTest
 //    }
 //  }
 }
+

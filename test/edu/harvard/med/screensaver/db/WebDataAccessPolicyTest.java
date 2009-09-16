@@ -10,19 +10,34 @@
 package edu.harvard.med.screensaver.db;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
+import edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy;
 import edu.harvard.med.screensaver.AbstractSpringTest;
+import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
+import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -32,6 +47,9 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 /**
  * Tests WedDataAccessPolicy implementation, as well as Hibernate interceptor-based
@@ -53,6 +71,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
   protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
   protected CurrentScreensaverUser currentScreensaverUser;
+  protected DataAccessPolicy dataAccessPolicy;
   protected ScreenResultParser screenResultParser;
   
   // public constructors and methods
@@ -158,29 +177,28 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
   public void testScreenPermissions()
   {
     ScreeningRoomUser rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENER);
-    ScreeningRoomUser compoundUser = makeUserWithRoles(false, ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
-    ScreeningRoomUser compoundRnaiUser = makeUserWithRoles(false, 
-                                                           ScreensaverUserRole.SMALL_MOLECULE_SCREENER, ScreensaverUserRole.RNAI_SCREENER);
+    ScreeningRoomUser smallMoleculeUser = makeUserWithRoles(false, ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+    ScreeningRoomUser smallMoleculeRnaiUser = makeUserWithRoles(false, ScreensaverUserRole.SMALL_MOLECULE_SCREENER, ScreensaverUserRole.RNAI_SCREENER);
 
     Screen rnaiScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
     ScreenResult screenResult1 = rnaiScreen.createScreenResult();
     screenResult1.setShareable(true);
-    Screen compoundScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
-    ScreenResult screenResult2 = compoundScreen.createScreenResult();
+    Screen smallMoleculeScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
+    ScreenResult screenResult2 = smallMoleculeScreen.createScreenResult();
     screenResult2.setShareable(true);
 
     rnaiScreen.setLeadScreener(rnaiUser);
-    compoundScreen.setLeadScreener(compoundUser);
-    rnaiScreen.addCollaborator(compoundRnaiUser);
-    compoundScreen.addCollaborator(compoundRnaiUser);
+    smallMoleculeScreen.setLeadScreener(smallMoleculeUser);
+    rnaiScreen.addCollaborator(smallMoleculeRnaiUser);
+    smallMoleculeScreen.addCollaborator(smallMoleculeRnaiUser);
     
     genericEntityDao.saveOrUpdateEntity(rnaiUser);
-    genericEntityDao.saveOrUpdateEntity(compoundUser);
-    genericEntityDao.saveOrUpdateEntity(compoundRnaiUser);
+    genericEntityDao.saveOrUpdateEntity(smallMoleculeUser);
+    genericEntityDao.saveOrUpdateEntity(smallMoleculeRnaiUser);
     genericEntityDao.saveOrUpdateEntity(rnaiScreen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(rnaiScreen);
-    genericEntityDao.saveOrUpdateEntity(compoundScreen.getLabHead());
-    genericEntityDao.saveOrUpdateEntity(compoundScreen);
+    genericEntityDao.saveOrUpdateEntity(smallMoleculeScreen.getLabHead());
+    genericEntityDao.saveOrUpdateEntity(smallMoleculeScreen);
 
     List<Screen> screens = genericEntityDao.findAllEntitiesOfType(Screen.class);
     assertEquals("screens count", 2, screens.size());
@@ -189,23 +207,23 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         currentScreensaverUser.setScreensaverUser(rnaiUser);
         assertTrue("rnai user is not restricted from rnai screens", !screen.isRestricted());
         assertTrue("rnai user is not restricted from shared rnai screen result", !screen.getScreenResult().isRestricted());
-        currentScreensaverUser.setScreensaverUser(compoundUser);
-        assertTrue("compound user is restricted from rnai screens", screen.isRestricted());
-        assertTrue("compound user is restricted from shared rnai screen result", screen.getScreenResult().isRestricted());
-        currentScreensaverUser.setScreensaverUser(compoundRnaiUser);
-        assertTrue("compound+rnai user is not restricted from rnai screens", !screen.isRestricted());
-        assertTrue("compound+rnai user is not restricted from shared rnai screen result", !screen.getScreenResult().isRestricted());
+        currentScreensaverUser.setScreensaverUser(smallMoleculeUser);
+        assertTrue("small molecule user is restricted from rnai screens", screen.isRestricted());
+        assertTrue("small molecule user is restricted from shared rnai screen result", screen.getScreenResult().isRestricted());
+        currentScreensaverUser.setScreensaverUser(smallMoleculeRnaiUser);
+        assertTrue("small molecule+rnai user is not restricted from rnai screens", !screen.isRestricted());
+        assertTrue("small molecule+rnai user is not restricted from shared rnai screen result", !screen.getScreenResult().isRestricted());
       } 
       else if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
         currentScreensaverUser.setScreensaverUser(rnaiUser);
-        assertTrue("rnai user is restricted from compound screens", screen.isRestricted());
-        assertTrue("rnai user is restricted from shared compound screen result", screen.getScreenResult().isRestricted());
-        currentScreensaverUser.setScreensaverUser(compoundUser);
-        assertTrue("compound user is not restricted from compound screens", !screen.isRestricted());
-        assertTrue("compound user is not restricted from shared compound screen result", !screen.getScreenResult().isRestricted());
-        currentScreensaverUser.setScreensaverUser(compoundRnaiUser);
-        assertTrue("compound+rnai user is not restricted from compound screens", !screen.isRestricted());
-        assertTrue("compound+rnai user is not restricted from shared compound screen result", !screen.getScreenResult().isRestricted());
+        assertTrue("rnai user is restricted from small molecule screens", screen.isRestricted());
+        assertTrue("rnai user is restricted from shared small molecule screen result", screen.getScreenResult().isRestricted());
+        currentScreensaverUser.setScreensaverUser(smallMoleculeUser);
+        assertTrue("small molecule user is not restricted from small molecule screens", !screen.isRestricted());
+        assertTrue("small molecule user is not restricted from shared small molecule screen result", !screen.getScreenResult().isRestricted());
+        currentScreensaverUser.setScreensaverUser(smallMoleculeRnaiUser);
+        assertTrue("small molecule+rnai user is not restricted from small molecule screens", !screen.isRestricted());
+        assertTrue("small molecule+rnai user is not restricted from shared small molecule screen result", !screen.getScreenResult().isRestricted());
       }
       else {
         fail("unknown screen type" + screen.getScreenType());
@@ -218,7 +236,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
     doTestScreenResultPermissionsForScreenType(ScreenType.RNAI);
   }
 
-  public void testCompoundScreenResultPermissions()
+  public void testSmallMoleculeScreenResultPermissions()
   {
     doTestScreenResultPermissionsForScreenType(ScreenType.SMALL_MOLECULE);
   }
@@ -256,8 +274,13 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         users[2].setLab(users[3].getLab());
 
         Screen screen115 = MakeDummyEntities.makeDummyScreen(115, screenType);
-        screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
-                                                     ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
+        try {
+          screenResultParser.parse(screen115, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
+                                                       ScreenResultParserTest.SCREEN_RESULT_115_TEST_WORKBOOK_FILE));
+        }
+        catch (FileNotFoundException e) {
+          fail(e.getMessage());
+        }
 
         if (screenResultParser.getHasErrors()) {
           log.error(screenResultParser.getErrors());
@@ -269,8 +292,13 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         screen115.addCollaborator(users[1]);
         
         Screen screen116 = MakeDummyEntities.makeDummyScreen(116, screenType);
-        screenResultParser.parse(screen116, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
-                                                     ScreenResultParserTest.SCREEN_RESULT_116_TEST_WORKBOOK_FILE));
+        try {
+          screenResultParser.parse(screen116, new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, 
+                                                       ScreenResultParserTest.SCREEN_RESULT_116_TEST_WORKBOOK_FILE));
+        }
+        catch (FileNotFoundException e) {
+          fail(e.getMessage());
+        }
         screen116.getScreenResult().setShareable(true);
         assertEquals("screenresult import successful", 0, screenResultParser.getErrors().size());
         screen116.setLeadScreener(users[4]);
@@ -380,7 +408,7 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
         users[2] = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENER); // lab member with above users, but not associated with screen 115
         users[3] = makeUserWithRoles(true, ScreensaverUserRole.RNAI_SCREENER); // lab head of above users, not otherwise associated with screen 115
         users[4] = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENER); // unaffiliated with previous users
-        users[5] = makeUserWithRoles(false, ScreensaverUserRole.SMALL_MOLECULE_SCREENER); // unaffiliated with previous users, compound screener role only
+        users[5] = makeUserWithRoles(false, ScreensaverUserRole.SMALL_MOLECULE_SCREENER); // unaffiliated with previous users, small molecule screener role only
         
         users[0].setLab(users[3].getLab());
         users[1].setLab(users[3].getLab());
@@ -431,8 +459,241 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
       }
     });
   }
+  
+  public void testMarcusAdminRestrictions()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        AdministratorUser marcusAdmin = new AdministratorUser("Marcus", "Admin", "", "", "", "", null, "");
+        marcusAdmin.addScreensaverUserRole(ScreensaverUserRole.MARCUS_ADMIN);
+        AdministratorUser normalAdmin = new AdministratorUser("Normal", "Admin", "", "", "", "", null, "");
+        normalAdmin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+        Screen nonMarcusScreen = MakeDummyEntities.makeDummyScreen(2);
+        nonMarcusScreen.createCherryPickRequest();
+        nonMarcusScreen.createLibraryScreening(nonMarcusScreen.getLeadScreener(), new LocalDate());
+        nonMarcusScreen.createScreenResult();
+        Screen marcusScreen = MakeDummyEntities.makeDummyScreen(1);
+        FundingSupport marcusFundingSupport = new FundingSupport(WebDataAccessPolicy.MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME);
+        marcusScreen.addFundingSupport(marcusFundingSupport);
+        marcusScreen.createCherryPickRequest();
+        marcusScreen.createLibraryScreening(marcusScreen.getLeadScreener(), new LocalDate());
+        marcusScreen.createScreenResult();
+        genericEntityDao.persistEntity(marcusFundingSupport);
+        genericEntityDao.persistEntity(marcusAdmin);
+        genericEntityDao.persistEntity(normalAdmin);
+        genericEntityDao.persistEntity(marcusScreen);
+        genericEntityDao.persistEntity(nonMarcusScreen);
+      }
+    });
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Screen marcusScreen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen nonMarcusScreen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 2);
 
-  // private methods
+        AdministratorUser marcusAdmin = genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Marcus");
+        currentScreensaverUser.setScreensaverUser(marcusAdmin);
+        assertFalse(marcusScreen.isRestricted());
+        assertFalse(marcusScreen.getScreenResult().isRestricted());
+        assertFalse(marcusScreen.getLabActivities().iterator().next().isRestricted());
+        assertFalse(marcusScreen.getCherryPickRequests().iterator().next().isRestricted());
+        assertTrue(nonMarcusScreen.isRestricted());
+        assertTrue(nonMarcusScreen.getScreenResult().isRestricted());
+        assertTrue(nonMarcusScreen.getLabActivities().iterator().next().isRestricted());
+        assertTrue(nonMarcusScreen.getCherryPickRequests().iterator().next().isRestricted());
+        
+        AdministratorUser normalAdmin = genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Normal");
+        currentScreensaverUser.setScreensaverUser(normalAdmin);
+        assertFalse(marcusScreen.isRestricted());
+        assertFalse(marcusScreen.getScreenResult().isRestricted());
+        assertFalse(marcusScreen.getLabActivities().iterator().next().isRestricted());
+        assertFalse(marcusScreen.getCherryPickRequests().iterator().next().isRestricted());
+        assertFalse(nonMarcusScreen.isRestricted());
+        assertFalse(nonMarcusScreen.getScreenResult().isRestricted());
+        assertFalse(nonMarcusScreen.getLabActivities().iterator().next().isRestricted());
+        assertFalse(nonMarcusScreen.getCherryPickRequests().iterator().next().isRestricted());
+      }
+    });
+  }
+  
+  public void testSilencingReagentSequenceRestriction()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = new Library(
+          "rnai library",
+          "rnai lib",
+          ScreenType.RNAI,
+          LibraryType.COMMERCIAL,
+          1,
+          1);
+        new TestDataFactory().newInstance(LibraryContentsVersion.class, library);
+        library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL).createSilencingReagent(new ReagentVendorIdentifier("vendor", "sirnai1"), SilencingReagentType.SIRNA, "ACTG");
+        genericEntityDao.saveOrUpdateEntity(library);
+        
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        admin.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+        admin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+        genericEntityDao.saveOrUpdateEntity(admin);
+        
+        ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User", "");
+        screener.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+        screener.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENER);
+        genericEntityDao.saveOrUpdateEntity(screener);
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        SilencingReagent reagent = genericEntityDao.findAllEntitiesOfType(SilencingReagent.class, true, Reagent.well.to(Well.library).getPath()).get(0);
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin"));
+        assertTrue("admin can access SilencingReagent.sequence", dataAccessPolicy.isAllowedAccessToSilencingReagentSequence(reagent));
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Screener"));
+        assertFalse("screener cannot access SilencingReagent.sequence", dataAccessPolicy.isAllowedAccessToSilencingReagentSequence(reagent));
+      }
+    });
+  }
+  
+  public void testChemDiv6Restriction()
+  {
+    final TestDataFactory dataFactory = new TestDataFactory();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library chemDiv6Library = new Library(
+          "ChemDiv6",
+          "ChemDiv6",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.COMMERCIAL,
+          1,
+          1);
+        dataFactory.newInstance(LibraryContentsVersion.class, chemDiv6Library);
+        chemDiv6Library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL).createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", "Cdiv0001"), "molfile", "smiles", "inchi", new BigDecimal(1), new BigDecimal(1), new MolecularFormula("CCC")); 
+        genericEntityDao.saveOrUpdateEntity(chemDiv6Library);
+        
+        Library notCDiv6Library = new Library(
+                                              "NotChemDiv6",
+                                              "NotChemDiv6",
+                                              ScreenType.SMALL_MOLECULE,
+                                              LibraryType.COMMERCIAL,
+                                              2,
+                                              2);
+        dataFactory.newInstance(LibraryContentsVersion.class, notCDiv6Library);
+        notCDiv6Library.createWell(new WellKey(2, 0, 0), LibraryWellType.EXPERIMENTAL).createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", "notCdiv0001"), "molfile", "smiles", "inchi", new BigDecimal(1), new BigDecimal(1), new MolecularFormula("CCC")); 
+        genericEntityDao.saveOrUpdateEntity(notCDiv6Library);
+                                            
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        admin.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+        admin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+        genericEntityDao.saveOrUpdateEntity(admin);
+        
+        ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User", "");
+        screener.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+        screener.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+        genericEntityDao.saveOrUpdateEntity(screener);
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        SmallMoleculeReagent reagent = genericEntityDao.findEntityByProperty(SmallMoleculeReagent.class, SmallMoleculeReagent.vendorIdentifier.getPath(), "Cdiv0001", true, Reagent.well.to(Well.library).getPath());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin"));
+        assertFalse("admin can access ChemDiv6 reagent", reagent.isRestricted());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Screener"));
+        assertTrue("screener cannot access ChemDiv6 reagent", reagent.isRestricted());
+
+        reagent = genericEntityDao.findEntityByProperty(SmallMoleculeReagent.class, SmallMoleculeReagent.vendorIdentifier.getPath(), "notCdiv0001", true, Reagent.well.to(Well.library).getPath());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin"));
+        assertFalse("admin can access non-ChemDiv6 reagent", reagent.isRestricted());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Screener"));
+        assertFalse("screener can access non-ChemDiv6 reagent", reagent.isRestricted());
+      }
+    });
+  }
+ 
+  public void testMarcusNaturalProductReagentRestriction()
+  {
+    final TestDataFactory dataFactory = new TestDataFactory();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library marcusLibrary = new Library(
+          "Marcus Lib",
+          "MarcusLib",
+          ScreenType.SMALL_MOLECULE,
+          LibraryType.NATURAL_PRODUCTS,
+          1,
+          1);
+        dataFactory.newInstance(LibraryContentsVersion.class, marcusLibrary);
+        marcusLibrary.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL).createNaturalProductReagent(new ReagentVendorIdentifier("vendor", "marcus0001"));
+        genericEntityDao.saveOrUpdateEntity(marcusLibrary);
+        
+        Library notMarcusLibrary = new Library("Not Marcus Library",
+                                              "NotMarcusLib",
+                                              ScreenType.SMALL_MOLECULE,
+                                              LibraryType.NATURAL_PRODUCTS,
+                                              2,
+                                              2);
+        dataFactory.newInstance(LibraryContentsVersion.class, notMarcusLibrary);
+        notMarcusLibrary.createWell(new WellKey(2, 0, 0), LibraryWellType.EXPERIMENTAL).createNaturalProductReagent(new ReagentVendorIdentifier("vendor", "notmarcus0001"));
+        genericEntityDao.saveOrUpdateEntity(notMarcusLibrary);
+                                            
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        admin.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+        admin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+        genericEntityDao.saveOrUpdateEntity(admin);
+        
+        ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User", "");
+        screener.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
+        screener.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+        genericEntityDao.saveOrUpdateEntity(screener);
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        NaturalProductReagent reagent = genericEntityDao.findEntityByProperty(NaturalProductReagent.class, NaturalProductReagent.vendorIdentifier.getPath(), "marcus0001", true, Reagent.well.to(Well.library).getPath());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin"));
+        assertFalse("admin can access Marcus nat prod reagent", reagent.isRestricted());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Screener"));
+        assertTrue("screener cannot access Marcus nat prod reagent", reagent.isRestricted());
+
+        reagent = genericEntityDao.findEntityByProperty(NaturalProductReagent.class, NaturalProductReagent.vendorIdentifier.getPath(), "notmarcus0001", true, Reagent.well.to(Well.library).getPath());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(AdministratorUser.class, "firstName", "Admin"));
+        assertFalse("admin can access non-Marcus nat prod reagent", reagent.isRestricted());
+        currentScreensaverUser.setScreensaverUser(genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "firstName", "Screener"));
+        assertFalse("screener can access non-Marcus nat prod reagent", reagent.isRestricted());
+      }
+    });
+  }
+
+  private ScreeningRoomUser makeUserWithRoles(boolean isLabHead, ScreensaverUserRole... roles)
+  {
+    
+    ScreeningRoomUser user;
+    if (isLabHead) {
+      user = new LabHead("first", 
+                         "last" + new Object().hashCode(),
+                         "email@hms.harvard.edu",
+                         null);
+    }
+    else {
+      user = new ScreeningRoomUser("first",
+                                   "last" + new Object().hashCode(),
+                                   "email@hms.harvard.edu");
+    }
+    for (ScreensaverUserRole role : roles) {
+      user.addScreensaverUserRole(role);
+    }
+    genericEntityDao.saveOrUpdateEntity(user);
+    return user;
+  }
+  
   public void testLibraryPermissions() 
   {
     final ScreeningRoomUser[] users = new ScreeningRoomUser[3];
@@ -502,28 +763,5 @@ public class WebDataAccessPolicyTest extends AbstractSpringTest
       }
     });
   }  
-
- 
-  private ScreeningRoomUser makeUserWithRoles(boolean isLabHead, ScreensaverUserRole... roles)
-  {
-    
-    ScreeningRoomUser user;
-    if (isLabHead) {
-      user = new LabHead("first", 
-                         "last" + new Object().hashCode(),
-                         "email@hms.harvard.edu",
-                         null);
-    }
-    else {
-      user = new ScreeningRoomUser("first",
-                                   "last" + new Object().hashCode(),
-                                   "email@hms.harvard.edu");
-    }
-    for (ScreensaverUserRole role : roles) {
-      user.addScreensaverUserRole(role);
-    }
-    genericEntityDao.saveOrUpdateEntity(user);
-    return user;
-  }
 }
 

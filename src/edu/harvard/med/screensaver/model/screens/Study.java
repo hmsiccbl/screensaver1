@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.SortedSet;
 
 import javax.persistence.Transient;
@@ -43,7 +43,7 @@ public abstract class Study extends TimeStampedAbstractEntity
 
   abstract public SortedSet<AnnotationType> getAnnotationTypes();
 
-  abstract public Collection<Reagent> getReagents();
+  abstract public Set<Reagent> getReagents();
 
   abstract public ScreenType getScreenType();
 

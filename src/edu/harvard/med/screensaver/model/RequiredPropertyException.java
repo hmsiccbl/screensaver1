@@ -14,14 +14,24 @@ public class RequiredPropertyException extends DataModelViolationException
 {
   private static final long serialVersionUID = -1;
 
+  public RequiredPropertyException(Class<? extends AbstractEntity> entityClass, Class<? extends AbstractEntity> relatedEntityClass)
+  {
+    super("value required for " + entityClass.getSimpleName() + " " + relatedEntityClass.getSimpleName());
+  }
+
+  public RequiredPropertyException(Class<? extends AbstractEntity> entityClass, String propertyName)
+  {
+    super("value required for " + entityClass.getSimpleName() + " " + propertyName);
+  }
+
   public RequiredPropertyException(AbstractEntity entity, Class<? extends AbstractEntity> relatedEntityClass)
   {
-    super("value required for " + entity.getEntityClass().getSimpleName() + " " + relatedEntityClass.getSimpleName());
+    this(entity.getEntityClass(), relatedEntityClass);
   }
 
   public RequiredPropertyException(AbstractEntity entity, String propertyName)
   {
-    super("value required for " + entity.getEntityClass().getSimpleName() + " " + propertyName);
+    this(entity.getEntityClass(), propertyName);
   }
 }
 

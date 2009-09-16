@@ -43,13 +43,17 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   SCREENSAVER_USER("screensaverUser", "Screensaver User", "Basic role for users, admins, and guests that have login privileges to Screensaver.  The person may or may not be a user of the screening facility."),
 
   READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", "Administrators that can view and search over data of all categories, except screen billing information."),
+  
   LIBRARIES_ADMIN("librariesAdmin", "Libraries Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify libraries."),
-  USERS_ADMIN("usersAdmin", "Users Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify user accounts that are not lab heads."),
+  USER_CHECKLIST_ITEMS_ADMIN("userChecklistItemsAdmin", "User Checklist Items Administrator", READ_EVERYTHING_ADMIN, "Administrators that can edit the checklist items for a user, even if they are not a Users Adminstrator."),
+  USERS_ADMIN("usersAdmin", "Users Administrator", USER_CHECKLIST_ITEMS_ADMIN, "Administrators that can create and modify user accounts that are not lab heads."),
   LAB_HEADS_ADMIN("labHeadsAdmin", "Lab Heads Administrator", USERS_ADMIN, "Administrators that can create and modify user accounts that are lab heads."),
   SCREENS_ADMIN("screensAdmin", "Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screens."),
   SCREEN_RESULTS_ADMIN("screenResultsAdmin", "Screen Results Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screen results."),
   CHERRY_PICK_REQUESTS_ADMIN("cherryPickRequestsAdmin", "Cherry Pick Requests Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
   BILLING_ADMIN("billingAdmin", "Billing Information Administrator", SCREENS_ADMIN, "Administrators that can view, create, and modify billing information for a screen."),
+
+  MARCUS_ADMIN("marcusAdmin", "Marcus Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that have access to Marcus library-related screens (only)."),
 
   SCREENER("screener", "Screener", "Generic role for  users that are performing screens."),
   SMALL_MOLECULE_SCREENER("smallMoleculeScreener", "Small Molecule Screener", SCREENER, "Users that are conducting small molecule screens at the facility.'."),
@@ -57,6 +61,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   // note: nonScreeningUser is *not* mutually exclusive with screener roles; user may have been a nonScreeningUser initially, then became screener later on
   NON_SCREENER("nonScreeningUser", "Non-screening User", "Users that are using the facility for purposes other than conducting a screen."),
   MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemist User", "Users that are medicinal chemists."),
+  QPCR_USER("qpcrUser", "QPRC User", "Users that are performing Quantitative PCR analyses at the facility."),
 
   // note: developers do not automatically get admin roles (other than readEverythingAdmin), allowing developers to restrict themselves from mutating data in production environments
   DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information.")
@@ -80,7 +85,6 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
 
   private String _roleName;
   private String _displayableRoleName;
-  private boolean _isAdministrative;
   private String _comment;
   private ScreensaverUserRole _impliedRole;
   private List<ScreensaverUserRole> _impliedRoles;

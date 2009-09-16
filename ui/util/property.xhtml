@@ -11,10 +11,10 @@
 	   facelets parameters:
 	     - id
 	     - label
-	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'Volume', 'Currency', 'Concentration', 'typedValue'
+	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'Currency', 'Volume', 'Concentration'
 	     - description
 	     - value
-	     - typeValue: required if type==typedValue, must be instance of edu.harvard.med.screensaver.ui.util.UiSelectOneBean
+	     - unitsSelector: required if type=='Volume' || type=='Concentration', must be instance of edu.harvard.med.screensaver.ui.util.UiSelectOneBean
 	     - editable: boolean, (optional, defaults to false)
 	     - rendered: boolean, (optional, defaults to true)
        - adminOnly: boolean (optional, defaults to false)
@@ -46,7 +46,7 @@
       styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}">
       <ui:insert name="data">
         <t:outputText id="#{id}#{type}Value" value="#{value}"
-          rendered="#{!(type == 'Textarea' || type == 'typedValue')}"
+          rendered="#{!(type == 'Textarea' || type == 'Volume' || type == 'Concentration')}"
           converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Concentration' ? concentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
         <!-- TODO: not sure why we need to repeat styleClass attribute here to make it take effect... -->
         <t:inputTextarea id="#{id}#{type}Value1"
@@ -54,15 +54,15 @@
           readonly="true" cols="#{editWidth}" rows="#{editHeight}"
           styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}" />
 				<t:outputText id="#{id}#{type}Value2"
-					rendered="#{type == 'typedValue' &amp;&amp; !empty value }"
-					value="#{value} #{typeValue.selection}" />
+					rendered="#{(type == 'Volume' || type == 'Concentration') &amp;&amp; !empty value }"
+					value="#{value} #{unitsSelector.selection}" />
       </ui:insert>
     </t:div>
 
     <t:div rendered="#{editable}">
 			<ui:insert name="editableData">
 				<t:inputText id="#{id}#{type}Field"
-					rendered="#{!(type == 'Textarea' || type == 'Boolean' || type == 'typedValue' )}"
+					rendered="#{!(type == 'Textarea' || type == 'Boolean' || type == 'Volume' || type == 'Concentration' )}"
 					required="#{required}" value="#{value}" size="#{editWidth}"
 					styleClass="inputText"
 					converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Concentration' ? concentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
@@ -74,20 +74,19 @@
 					rendered="#{type == 'Boolean'}" required="#{required}"
 					onclick="#{submitOnChange ? 'javascript:submit()' : ''}"
 					immediate="#{submitOnChange}" />
-				<t:div rendered="#{type == 'typedValue'}">
-					<t:inputText id="#{id}#{type}typedValue" rendered="#{type == 'typedValue'}"
+				<t:div rendered="#{type == 'Volume' || type == 'Concentration'}">
+					<t:inputText id="#{id}#{type}Field3" 
 						value="#{value}" size="4" styleClass="inputText">
 						<ui:insert name="editValidator"/>
 					</t:inputText>
 					<t:selectOneMenu id="#{id}#{type}SelectMenu"
-						rendered="#{type == 'typedValue'}"
-						value="#{typeValue.value}" styleClass="inputText selectMenu"
+						value="#{unitsSelector.value}" styleClass="inputText selectMenu"
 						displayValueOnlyStyleClass="selectMenu">
-						<f:selectItems value="#{typeValue.selectItems}" />
+						<f:selectItems value="#{unitsSelector.selectItems}" />
 					</t:selectOneMenu>
 					<t:message showDetail="true" showSummary="true"
-						styleClass="errorMessage" id="#{id}#{type}ValueFieldError"
-						for="#{id}#{type}typedValue" />
+						styleClass="errorMessage" id="#{id}#{type}FieldError"
+						for="#{id}#{type}Field3" />
 				</t:div>
 			</ui:insert>
 		</t:div>

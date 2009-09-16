@@ -88,6 +88,7 @@
   <!-- JSF Unit Testing -->
 
   <!-- Note: this filter must appear first! -->
+  <!-- 
    <filter>
      <filter-name>JSFUnitFilter</filter-name>
      <filter-class>org.jboss.jsfunit.framework.JSFUnitFilter</filter-class>
@@ -122,7 +123,7 @@
       <servlet-name>ServletTestRunner</servlet-name>
       <url-pattern>/ServletTestRunner</url-pattern>
    </servlet-mapping> 
-
+ -->
 
   <!-- Screensaver filter -->
 
@@ -325,8 +326,8 @@
     <filter-name>MyFacesExtensionsFilter</filter-name>
     <filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
     <init-param>
-      <param-name>maxFileSize</param-name>
-      <param-value>20m</param-value>
+      <param-name>uploadMaxFileSize</param-name>
+      <param-value>512m</param-value>
       <!-- description>Set the size limit for uploaded files</description-->
     </init-param>
   </filter>
@@ -347,6 +348,44 @@
     <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
   </filter-mapping>
 
+  <filter>
+    <description>
+      Restrict access for a set of servlet paths to a role.
+      Params:
+      
+      - roles: comma separated list of roles
+      
+      - preRegexString: a regex pattern that is used to pre-filter; 
+      group(1) for this pattern (the "subDir") is used in a second-level match
+      against each of the "regexes".  Should have the form regex_pattern(subDir pattern) 
+      
+      - regexes: comma separated list of regex patterns 
+      to match against the group(1) match (the "subDir") from the preRegexString
+      
+      Operation: if one of the regexes matches a subDir, then see if the current user is in 
+      one of the roles (using HttpServletRequest.isUserInRole ) 
+    </description>
+    <filter-name>AuthenticationFilter</filter-name>
+    <filter-class>edu.harvard.med.iccbl.screensaver.io.AuthenticationFilter</filter-class>
+    <init-param>
+      <param-name>roles</param-name>
+      <param-value>
+        readEverythingAdmin
+      </param-value>
+    </init-param>
+    <init-param>
+      <param-name>regexs</param-name>
+      <param-value>0179[5-9]+/.*,018\d\d/.*,0190\d/.*,0191\d/.*</param-value>
+    </init-param>
+    <init-param>
+      <param-name>preRegexString</param-name>
+      <param-value>/images/structure-images/(.*)</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>AuthenticationFilter</filter-name>
+    <url-pattern>/images/structure-images/*</url-pattern>
+  </filter-mapping>
 
   <!-- Log4j setup -->
 
@@ -468,7 +507,7 @@
       <!--  TODO: transport-guarantee>CONFIDENTIAL</transport-guarantee -->
     </user-data-constraint>
   </security-constraint>
-
+  
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>screener</web-resource-name>

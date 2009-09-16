@@ -182,6 +182,20 @@
     <aop:scoped-proxy/>
   </bean>
 
+  <bean id="attachedFiles"
+        class="edu.harvard.med.screensaver.ui.util.AttachedFiles" 
+        parent="uiBean"
+        scope="prototype">
+      <constructor-arg ref="genericEntityDao" />
+  </bean>
+
+  <bean id="checklistItems"
+        class="edu.harvard.med.screensaver.ui.util.ChecklistItems" 
+        parent="uiBean"
+        scope="prototype">
+      <constructor-arg ref="genericEntityDao" />
+  </bean>
+
 
   <!-- === libraries backing beans === -->
 
@@ -192,8 +206,7 @@
     class="edu.harvard.med.screensaver.ui.libraries.ReagentFinder">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
-    <constructor-arg ref="reagentsBrowser" />
-    <constructor-arg ref="reagentViewer" />
+    <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="reagentVendorIdentiferListParser" />
     <aop:scoped-proxy/>
   </bean>
@@ -232,26 +245,10 @@
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
-    <constructor-arg ref="compoundLibraryContentsImporter" />
-    <constructor-arg ref="rnaiLibraryContentsImporter" />
-    <constructor-arg ref="naturalProductsLibraryContentsImporter" />
+    <constructor-arg ref="libraryContentsImporter" />
     <constructor-arg ref="libraryDetailViewer" />
     <constructor-arg ref="librariesBrowser" />
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="reagentsBrowser"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.searchresults.ReagentSearchResults">
-    <constructor-arg ref="reagentViewer" />
-    <constructor-arg ref="compoundViewer" />
-    <constructor-arg ref="geneViewer" />
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg>
-      <list />
-    </constructor-arg>
+    <constructor-arg ref="libraryContentsVersionManager" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -261,15 +258,11 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.WellSearchResults">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="dataAccessPolicy" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="wellViewer" />
-    <constructor-arg ref="compoundViewer" />
-    <constructor-arg ref="geneViewer" />
-    <constructor-arg>
-      <list>
-        <ref bean="sdfWellsDataExporter" />
-      </list>
-    </constructor-arg>
+    <constructor-arg ref="sdfWellsDataExporter" />
+    <constructor-arg><list/></constructor-arg>
     <aop:scoped-proxy/>
   </bean>
 
@@ -314,81 +307,30 @@
   </bean>
 
   <bean
-    id="reagentViewer"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.ReagentViewer">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="geneViewer" />
-    <constructor-arg ref="compoundViewer" />
-    <constructor-arg ref="structureImageProvider" />
-    <constructor-arg ref="studyViewer" />
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
     id="wellViewer"
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.WellViewer">
+    <constructor-arg ref="wellViewer" />
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="dataAccessPolicy" />
     <constructor-arg ref="libraryViewer" />
-    <constructor-arg ref="geneViewer" />
-    <constructor-arg ref="compoundViewer" />
     <constructor-arg ref="structureImageProvider" />
     <constructor-arg ref="studyViewer" />
+    <constructor-arg ref="wellsBrowser" />
+    <constructor-arg ref="sdfWellsDataExporter" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
-    id="geneViewer"
+    id="libraryContentsImporter"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.GeneViewer">
-    <constructor-arg ref="genericEntityDao" />
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="compoundViewer"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.CompoundViewer">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="structureImageProvider" />
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="compoundLibraryContentsImporter"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.CompoundLibraryContentsImporter">
+    class="edu.harvard.med.screensaver.ui.libraries.LibraryContentsImporter">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="libraryViewer" />
-    <constructor-arg ref="compoundLibraryContentsParser" />
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="naturalProductsLibraryContentsImporter"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.NaturalProductsLibraryContentsImporter">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="libraryViewer" />
-    <constructor-arg ref="naturalProductsLibraryContentsParser" />
-    <aop:scoped-proxy/>
-  </bean>
-
-  <bean
-    id="rnaiLibraryContentsImporter"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.libraries.RNAiLibraryContentsImporter">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="libraryViewer" />
-    <constructor-arg ref="rnaiLibraryContentsParser" />
+    <constructor-arg ref="libraryContentsLoader" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -419,7 +361,7 @@
         class="edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable"
         parent="uiBean" />
     </constructor-arg>
-    <constructor-arg ref="reagentsBrowser" />
+    <constructor-arg ref="wellsBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -457,7 +399,7 @@
     <constructor-arg ref="screenResultsDao" />
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="screensBrowser" />
-    <constructor-arg ref="reagentsBrowser" />
+    <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />
     <constructor-arg ref="screenResultImporter" />
@@ -481,6 +423,8 @@
     <constructor-arg ref="publicationInfoProvider" />
     <constructor-arg ref="labActivitiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
+    <constructor-arg ref="screeningDuplicator" />
+    <constructor-arg ref="attachedFiles" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -533,19 +477,20 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer">
+    <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="cherryPickRequestDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
     <constructor-arg ref="plateWellListParser" />
+    <constructor-arg ref="cherryPickRequestCherryPicksAdder" />
     <constructor-arg ref="cherryPickRequestAllocator" />
     <constructor-arg ref="cherryPickRequestPlateMapper" />
     <constructor-arg ref="cherryPickRequestPlateMapFilesBuilder" />
     <constructor-arg ref="cherryPickRequestPlateStatusUpdater" />
-    <constructor-arg ref="libraryPoolToDuplexWellMapper" />
     <constructor-arg ref="cherryPickRequestExporter" />
-    <constructor-arg ref="compoundCherryPickRequestAllowancePolicy" />
+    <constructor-arg ref="smallMoleculeCherryPickRequestAllowancePolicy" />
     <constructor-arg ref="rnaiCherryPickRequestAllowancePolicy" />
     <aop:scoped-proxy/>
   </bean>
@@ -636,8 +581,11 @@
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="staffBrowser" />
     <constructor-arg ref="screensBrowser" />
+    <constructor-arg ref="attachedFiles"/>
+    <constructor-arg ref="checklistItems"/>
     <aop:scoped-proxy/>
   </bean>
+  
 
   <!-- === activities backing beans === -->
 
@@ -650,6 +598,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="userViewer" />
+    <constructor-arg ref="cherryPickRequestViewer" />
     <aop:scoped-proxy />
   </bean>
 
@@ -703,8 +652,6 @@
 
   <bean id="statusValueConverter" class="edu.harvard.med.screensaver.ui.util.StatusValueConverter" />
 
-  <bean id="fundingSupportConverter" class="edu.harvard.med.screensaver.ui.util.FundingSupportConverter" />
-
   <bean id="screeningRoomUserClassificationConverter" class="edu.harvard.med.screensaver.ui.util.ScreeningRoomUserClassificationConverter" />
 
   <bean id="affiliationCategoryConverter" class="edu.harvard.med.screensaver.ui.util.AffiliationCategoryConverter" />
@@ -719,6 +666,11 @@
   <bean id="libraryScreeningStatusConverter" class="edu.harvard.med.screensaver.ui.util.LibraryScreeningStatusConverter" />
 
   <bean id="libraryTypeConverter" class="edu.harvard.med.screensaver.ui.util.LibraryTypeConverter" />
+
+  <bean id="cherryPickAssayProtocolsFollowedConverter" class="edu.harvard.med.screensaver.ui.util.CherryPickAssayProtocolsFollowedConverter" />
+
+  <bean id="cherryPickFollowupResultsStatusConverter" class="edu.harvard.med.screensaver.ui.util.CherryPickFollowupResultsStatusConverter" />
+
 
   <!-- Development/Debug related beans -->
 

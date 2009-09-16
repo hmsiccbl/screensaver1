@@ -29,30 +29,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <li>Generates "flanking" debug output around the handling of JSF requests.
  * </ul>
  */
-// TODO: this filter has taken on too many roles: txn mgmt, HTTP session mgmt, and error handling.  We should break up responsibilities into individual filters (or, minimally, rename this class)
-public class ScreensaverServletFilter extends OncePerRequestFilter {
-  
-  // static data members
-
+public class ScreensaverServletFilter extends OncePerRequestFilter 
+{
   private static Logger log = Logger.getLogger(ScreensaverServletFilter.class);
 
   public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
   public static final String CLOSE_HTTP_SESSION = "closeHttpSession";
-  public static final String SYSTEM_ERROR_ENCOUNTERED = "systemError";
-  private static final String CONCURRENT_MODIFICATION_MESSAGE = "concurrentModificationConflict";
   private static final String REPORT_EXCEPTION_URL = "/screensaver/main/reportException.jsf";
-  private static final String LOGIN_URL = "/screensaver/main/login.jsf";
 
-  private static final String RELOAD_VIEW_ENTITIES_SESSION_PARAM = "reloadViewEntities";
-
-
-  // instance data members
-  
   private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
 
-
-  // methods
-  
   @Override
   protected void initFilterBean() throws ServletException
   {
@@ -70,12 +56,6 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
   throws ServletException, IOException 
   {
 
-    // we don't perform Hibernate session management unless:
-    // 1) this is a request for one of our application's JSF views 
-    //    (static resources do not require us to perform these steps)
-    // 2) a logged-in user is associated with the session (to avoid 
-    //    consuming Hibernate session & associated database resources 
-    //    unnecessarily)
     if (!isRequestForApplicationView(request) ||
       request.getRemoteUser() == null) {
       filterChain.doFilter(request, response);
@@ -86,7 +66,6 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
     String httpSessionId = httpSession.getId();
     log.debug(">>>> Screensaver STARTING to process HTTP request for session " + 
               httpSessionId + " @ " + request.getRequestURI());
-
 
     Throwable caughtException = null;
     try {
@@ -139,6 +118,6 @@ public class ScreensaverServletFilter extends OncePerRequestFilter {
    */
   private boolean isRequestForApplicationView(HttpServletRequest request)
   {
-    return request.getRequestURI().endsWith(".jsf") || request.getRequestURI().endsWith(".jsp");
+    return request.getRequestURI().endsWith(".jsf");
   }
 }

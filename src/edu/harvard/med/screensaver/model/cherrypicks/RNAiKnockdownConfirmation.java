@@ -99,7 +99,7 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_rnai_knockdown_confirmation_to_screener_cherry_pick")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.OneToOne(inverseProperty="rnaiKnockdownConfirmation")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="rnaiKnockdownConfirmation")
   public ScreenerCherryPick getScreenerCherryPick()
   {
     return _screenerCherryPick;

@@ -83,10 +83,6 @@
 		<h:form id="commandForm">
 			<h:commandButton id="cancel" action="#{screenResultImporter.cancel}"
 				immediate="true" value="Cancel" styleClass="command" />
-			<h:commandButton id="downloadCommand"
-				actionListener="#{screenResultImporter.downloadErrorAnnotatedWorkbookListener}"
-				value="View Error-Annotated Workbook"
-				rendered="#{screenResultImporter.hasErrors}" styleClass="command" />
 		</h:form>
 
 		<t:div />

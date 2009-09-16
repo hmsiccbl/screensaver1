@@ -19,12 +19,14 @@
 
 <beans>
 
+  <import resource="spring-context-config.xml"/>
+
   <bean id="dataAccessPolicy"
    class="edu.harvard.med.screensaver.db.accesspolicy.UnrestrictedDataAccessPolicy">
   </bean>
 
-  <bean id="compoundCherryPickRequestAllowancePolicy"
-   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.CompoundCherryPickRequestAllowancePolicy">
+  <bean id="smallMoleculeCherryPickRequestAllowancePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy">
     <constructor-arg ref="genericEntityDao"/>
    </bean>
 

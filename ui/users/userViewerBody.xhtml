@@ -235,94 +235,20 @@
 					styleClass="command" />
 			</ui:define>
 		</ss:property>
-	</ui:define>
 
-	<ui:define name="tablesContent">
+    <ss:attachedFiles attachedFiles="#{userViewer.attachedFiles}"
+      entityTypeName="screener"
+      rendered="#{userViewer.editMode || userViewer.readAdmin}"
+      editMode="#{userViewer.editMode}" />
 
-		<ss:property id="checklistItems" label="Checklist Items"
-			description="The checklist item statuses for this user"
-			rendered="#{userViewer.readAdmin}">
-			<ui:define name="data">
-				<t:collapsiblePanel var="isChecklistItemsCollapsed"
-					value="#{userViewer.checklistItemsCollapsed}">
-					<f:facet name="header">
-            <t:headerLink immediate="true">
-              <t:outputText id="checklistItemsToggleText"
-                value="#{isChecklistItemsCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-                styleClass="dataText" />
-            </t:headerLink>
-          </f:facet>
-          <ui:repeat value="#{userViewer.checklistItemGroups}"
-            var="group">
-            <t:outputText value="#{group}" styleClass="propertyLabel" />
-            <ss:collectionTable id="checklistItemsTable"
-              dataModel="#{userViewer.checklistItemsDataModelMap[group]}"
-              columnClasses="fixedColumn200,fixedColumn100,fixedColumn100,fixedColumn100">
-              <ui:define name="columns">
-                <ss:textColumn columnName="Item"
-                  description="The checklist item"
-                  cellValue="#{element.key.itemName}" />
-                <t:column id="statusColumn">
-                  <f:facet name="header">
-                    <ss:popup value="Status"
-                      popupText="The checklist item status" />
-                  </f:facet>
-                  <t:outputText
-                    value="#{empty element.value ? 'Not Completed' : (element.value.notApplicable ? 'N/A' : (element.key.expirable ? (element.value.expiration ? 'Deactivated' : 'Activated') : 'Completed')) }"
-                    styleClass="dataText #{empty element.value || element.value.expiration || element.value.notApplicable  ? 'subdued' : 'eyeCatcher'}" />
-                </t:column>
-                <ss:textColumn columnName="Date"
-                  description="The date the checklist item event was performed"
-                  cellValue="#{empty element.value ? null : element.value.datePerformed}" />
-                <t:column id="enteredByColumn">
-                  <f:facet name="header">
-                    <ss:popup popupText="The administrator that recorded this checklist item event"
-                      value="Entered By" >
-                      </ss:popup>
-                  </f:facet>
-                  <ss:user showEmail="false"
-                    user="#{empty element.value ? null : element.value.entryActivity.performedBy}" />
-                </t:column>
-                <t:column columnName="Action"
-                  description="Actions to update the checklist item"
-                  rendered="#{userViewer.editMode}">
-                  <t:panelGrid columns="3">
-                    <t:inputText id="newChecklistItemDatePerformedField"
-                      value="#{userViewer.newChecklistItemDatePerformed[element.key]}"
-                      rendered="#{empty element.value || (element.key.expirable &amp;&amp; !element.value.notApplicable)}"
-                      size="8" styleClass="inputText"
-                      converter="#{dateConverter}" />
-                    <t:commandButton id="activateChecklistItemCommand"
-                      rendered="#{element.key.expirable &amp;&amp; (empty element.value || (element.value.expiration &amp;&amp; !element.value.notApplicable))}"
-                      value="Activate"
-                      action="#{userViewer.checklistItemActivated}"
-                      styleClass="command" />
-                    <t:commandButton id="deactivateChecklistItemCommand"
-                      rendered="#{element.key.expirable &amp;&amp; (!empty element.value &amp;&amp; !element.value.expiration &amp;&amp; !element.value.notApplicable)}"
-                      value="Deactivate"
-                      action="#{userViewer.checklistItemDeactivated}"
-                      styleClass="command" />
-                    <t:commandButton id="completedChecklistItemCommand"
-                      rendered="#{!element.key.expirable &amp;&amp; empty element.value}"
-                      value="Completed"
-                      action="#{userViewer.checklistItemCompleted}"
-                      styleClass="command" />
-                    <t:commandButton id="notApplicableChecklistItemCommand"
-                      rendered="#{empty element.value}"
-                      value="N/A"
-                      action="#{userViewer.checklistItemNotApplicable}"
-                      styleClass="command" />
+  </ui:define>
 
-									</t:panelGrid>
-                </t:column>
-              </ui:define>
-            </ss:collectionTable>
-          </ui:repeat>
-        </t:collapsiblePanel>
-			</ui:define>
-		</ss:property>
 
-	</ui:define>
+  <ui:define name="tablesContent">
+    <t:div rendered="#{!userViewer.editMode}">
+      <ss:checklistItems checklistItems="#{userViewer.checklistItems}" />
+    </t:div>
+  </ui:define>
 
 	<ui:define name="footerContent">
 		<ss:collapsiblePanel id="userScreenInfo" label="Screens"

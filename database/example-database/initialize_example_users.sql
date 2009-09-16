@@ -25,6 +25,7 @@ insert into administrator_user (screensaver_user_id) values (currval('screensave
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screensaverUser';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'developer';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'readEverythingAdmin';
+insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'userChecklistItemsAdmin';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'usersAdmin';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'labHeadsAdmin';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'librariesAdmin';

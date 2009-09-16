@@ -23,6 +23,7 @@ public abstract class AbstractEditableBackingBean
   private static Logger log = Logger.getLogger(AbstractEditableBackingBean.class);
 
   private ScreensaverUserRole _editableAdminRole;
+  private boolean _isEditMode;
 
   public AbstractEditableBackingBean(ScreensaverUserRole editableAdminRole)
   {
@@ -43,7 +44,12 @@ public abstract class AbstractEditableBackingBean
 
   public boolean isEditMode()
   {
-    return false;
+    return _isEditMode;
+  }
+  
+  protected void setEditMode(boolean isEditMode)
+  {
+    _isEditMode = isEditMode;
   }
 
   public boolean isReadOnly()

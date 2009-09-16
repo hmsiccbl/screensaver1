@@ -1,6 +1,4 @@
 # screensaver.properties.web
-#
-#
 
 
 ### build-time properties
@@ -14,22 +12,22 @@ log4j.properties.file=cfg/log4j.properties.web
 ### run-time properties
 
 screensaver.ui.application_name=Screensaver
-screensaver.ui.version=1.x
+screensaver.ui.version=1.8.0
 screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
+screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/images/structure-images/
 
 datatable.use_column_reorder_list_widget=false
 screens.allow_delete=false
 
-babel.executable.path=/usr/local/openbabel/bin/babel
-
-# cellHTS2 report properties
+### cellHTS2 properties
+cellHTS2.enabled=false
 # The cellHTS2 report directory
 # is <appserver.dir>/webapps/screensaver/<cellHTS2report.filepath.prefix><screen result Id>
 cellHTS2report.filepath.prefix=cellHTS2/output/cellHts2_output_screenResultId_
 #parameter setting cellHTS2 function writeReport for showing progress window. 
 cellHTS2report.writeReport.progressReport=FALSE
 
-# database connection
+### database connection
 SCREENSAVER_PGSQL_SERVER=localhost
 SCREENSAVER_PGSQL_DB=screensaver
 SCREENSAVER_PGSQL_USER=screensaver

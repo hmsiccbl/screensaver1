@@ -27,6 +27,10 @@ public class ScreensaverUserRoleTest extends TestCase
     assertEquals(Arrays.asList(ScreensaverUserRole.SCREENS_ADMIN,
                                ScreensaverUserRole.READ_EVERYTHING_ADMIN),
                  ScreensaverUserRole.BILLING_ADMIN.getImpliedRoles());
+    assertEquals(Arrays.asList(ScreensaverUserRole.USERS_ADMIN,
+                               ScreensaverUserRole.USER_CHECKLIST_ITEMS_ADMIN,
+                               ScreensaverUserRole.READ_EVERYTHING_ADMIN),
+                 ScreensaverUserRole.LAB_HEADS_ADMIN.getImpliedRoles());
     assertEquals(Arrays.asList(ScreensaverUserRole.READ_EVERYTHING_ADMIN),
                  ScreensaverUserRole.DEVELOPER.getImpliedRoles());
     assertEquals(Arrays.asList(ScreensaverUserRole.SCREENER),

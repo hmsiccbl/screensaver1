@@ -94,8 +94,8 @@
 					    <ss:property id="requestedVolume"
 					      label="Requested Volume"
 								value="#{cherryPickRequestViewer.transferVolumePerWellRequestedValue}"
-								typeValue="#{cherryPickRequestViewer.transferVolumePerWellRequestedType}"
-								type="typedValue"
+                type="Concentration"
+								unitsSelector="#{cherryPickRequestViewer.transferVolumePerWellRequestedType}"
 								description="The volume per well that the screener requested"
 					      editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
 					      editWidth="5" />
@@ -103,8 +103,8 @@
 					    <ss:property id="approvedVolume"
 					      label="Approved Volume"
 								value="#{cherryPickRequestViewer.transferVolumePerWellApprovedValue}"
-								typeValue="#{cherryPickRequestViewer.transferVolumePerWellApprovedType}"
-								type="typedValue"
+                type="Concentration"
+								unitsSelector="#{cherryPickRequestViewer.transferVolumePerWellApprovedType}"
 								description="The volume per well approved by the screening room"
 					      editable="#{cherryPickRequestViewer.editMode &amp;&amp; !cherryPickRequestViewer.cherryPickRequest.allocated}"
 					      editWidth="5" />
@@ -196,7 +196,59 @@
 				</t:panelGrid>
 			</ui:define>
 		</ss:collapsiblePanel>
-	</h:form>
+    
+    <ss:collapsiblePanel id="cherryPickFollowupAssaysPanel"
+      isCollapsed="#{cherryPickRequestViewer.isPanelCollapsedMap['cherryPickFollowupAssays']}"
+      label="Cherry Pick Follow-up Assays">
+      <ui:define name="content">
+        <t:panelGrid id="cherryPickRequestInfoTable" columns="2"
+          styleClass="layoutPanel"
+          columnClasses="propertyLabelColumn,column">
+          <ss:propertyGroup label="Cherry Pick Protocol Information">
+            <ss:property id="assayProtocolsFollowed"
+              label="Assay protocols followed" adminOnly="true"
+              type="Text"
+              value="#{cherryPickRequestViewer.cherryPickRequest.cherryPickAssayProtocolsFollowed}"
+              converter="#{cherryPickAssayProtocolsFollowedConverter}"
+              editable="#{cherryPickRequestViewer.editMode}">
+              <ui:define name="editableData">
+                <t:selectOneMenu id="assayProtocolsFollowed"
+                  value="#{cherryPickRequestViewer.cherryPickRequest.cherryPickAssayProtocolsFollowed}"
+                  converter="#{cherryPickAssayProtocolsFollowedConverter}"
+                  required="false" styleClass="inputText selectMenu">
+                  <f:selectItems
+                    value="#{cherryPickRequestViewer.cherryPickAssayProtocolsFollowedSelectItems}" />
+                </t:selectOneMenu>
+              </ui:define>
+            </ss:property>
+            <ss:property id="assayProtocolComments"
+              label="Assay Protocol Comments" adminOnly="true"
+              type="Textarea" editWidth="80" editHeight="5"
+              value="#{cherryPickRequestViewer.cherryPickRequest.assayProtocolComments}"
+              editable="#{cherryPickRequestViewer.editMode}" />
+          </ss:propertyGroup>
+          <ss:propertyGroup label="Cherry Pick Result Data">
+            <ss:property id="followupResultsReceived"
+              label="Follow-up Results Status" adminOnly="true"
+              type="Text"
+              value="#{cherryPickRequestViewer.cherryPickRequest.cherryPickFollowupResultsStatus}"
+              converter="#{cherryPickFollowupResultsStatusConverter}"
+              editable="#{cherryPickRequestViewer.editMode}">
+              <ui:define name="editableData">
+                <t:selectOneMenu id="followupResultsReceived"
+                  value="#{cherryPickRequestViewer.cherryPickRequest.cherryPickFollowupResultsStatus}"
+                  converter="#{cherryPickFollowupResultsStatusConverter}"
+                  required="false" styleClass="inputText selectMenu">
+                  <f:selectItems
+                    value="#{cherryPickRequestViewer.cherryPickFollowupResultsStatusSelectItems}" />
+                </t:selectOneMenu>
+              </ui:define>
+            </ss:property>
+          </ss:propertyGroup>
+        </t:panelGrid>
+      </ui:define>
+    </ss:collapsiblePanel>
+  </h:form>
 
 	<h:form id="screenCherryPicksPanelForm">
 

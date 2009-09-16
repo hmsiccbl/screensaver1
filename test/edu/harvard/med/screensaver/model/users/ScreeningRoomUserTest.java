@@ -10,41 +10,82 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.beans.IntrospectionException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.TestSuite;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DomainModelDefinitionException;
+import edu.harvard.med.screensaver.model.TestDataFactory;
+import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.util.CryptoUtils;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningRoomUser>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(ScreeningRoomUserTest.class);
-
-
-  // instance data members
-
-
-  // public constructors and methods
+  public static TestSuite suite()
+  {
+    return buildTestSuite(ScreeningRoomUserTest.class, ScreeningRoomUser.class);
+  }
 
   public ScreeningRoomUserTest() throws IntrospectionException
   {
     super(ScreeningRoomUser.class);
+    dataFactory = new TestDataFactory() {
+      @Override
+      public <T> T getTestValueForType(Class<T> type) throws DomainModelDefinitionException
+      {
+        if (getName().endsWith("screensaverUserRoles") &&
+          ScreensaverUserRole.class.isAssignableFrom(type)) {
+           return (T) ScreensaverUserRole.SCREENSAVER_USER;
+        }
+        return super.getTestValueForType(type);
+      }
+    };
   }
 
+  public void testUserDigestedPassword()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ScreensaverUser user = new ScreeningRoomUser("First", "Last", "first_last@hms.harvard.edu");
+        user.setLoginId("myLoginId");
+        user.updateScreensaverPassword("myPassword");
+        genericEntityDao.saveOrUpdateEntity(user);
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        ScreensaverUser user = genericEntityDao.findEntityByProperty(ScreensaverUser.class, "loginId", "myLoginId");
+        assertNotNull(user);
+        assertEquals(CryptoUtils.digest("myPassword"),
+                     user.getDigestedPassword());
+      }
+    });
+  }
+  
   public void testLabName()
   {
     initLab();
@@ -59,28 +100,21 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     assertEquals("lab head", "Head, Lab - LabAffiliation", labHead.getLab().getLabName());
   }
 
-  public void testAdministrativeRoleNotAllowed() {
+  public void testRoles() {
     final ScreeningRoomUser user = new ScreeningRoomUser("first",
                                                          "last",
                                                          "first_last@hms.harvard.edu");
-    user.setECommonsId("ec1");
 
     user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENER);
     genericEntityDao.saveOrUpdateEntity(user);
 
     ScreeningRoomUser user2 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-    assertEquals(new HashSet<ScreensaverUserRole>(Arrays.asList(ScreensaverUserRole.RNAI_SCREENER, 
-                                                                ScreensaverUserRole.SCREENER)),
+    assertEquals(Sets.newHashSet(ScreensaverUserRole.RNAI_SCREENER, ScreensaverUserRole.SCREENER),
                  user2.getScreensaverUserRoles());
 
     try {
-      genericEntityDao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
-        {
-          ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
-          user3.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-        };
-      });
+      ScreeningRoomUser user3 = genericEntityDao.findEntityById(ScreeningRoomUser.class, user.getEntityId(), false, "screensaverUserRoles");
+      user3.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
       fail("expected DataModelViolationException after adding administrative role to screening room user");
     }
     catch (Exception e) {
@@ -339,5 +373,46 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
       }
     });
   }
+  
+  public void testAddAndDeleteAttachedFiles() throws IOException
+  {
+    initLab();
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", false);
+        try {
+          user.createAttachedFile("file1.txt", AttachedFileType.SCREENER_CORRESPONDENCE, "file1 contents");
+        }
+        catch (IOException e) {
+          throw new DAOTransactionRollbackException(e);
+        }
+        genericEntityDao.saveOrUpdateEntity(user);
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        ScreeningRoomUser user = (ScreeningRoomUser) genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", true, "attachedFiles");
+        assertEquals("add attached file to user", 1, user.getAttachedFiles().size());
+        try {
+          assertEquals("attached file contents accessible",
+                       "file1 contents",
+                       IOUtils.toString(user.getAttachedFiles().iterator().next().getFileContents().getBinaryStream()));
+        }
+        catch (Exception e) {
+          throw new DAOTransactionRollbackException(e);
+        }
+      }
+    });
+
+    ScreeningRoomUser user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", false, "attachedFiles");
+    Iterator<AttachedFile> iter = user.getAttachedFiles().iterator();
+    AttachedFile attachedFile = iter.next();
+    user.getAttachedFiles().remove(attachedFile);
+    genericEntityDao.saveOrUpdateEntity(user);
+    user = genericEntityDao.findEntityByProperty(ScreeningRoomUser.class, "lastName", "Head", true, "attachedFiles");
+    assertEquals("delete attached file from detached user", 0, user.getAttachedFiles().size());
+  }
+  
 }
 

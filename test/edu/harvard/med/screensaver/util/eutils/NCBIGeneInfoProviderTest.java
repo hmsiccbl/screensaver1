@@ -9,7 +9,10 @@
 
 package edu.harvard.med.screensaver.util.eutils;
 
-import edu.harvard.med.screensaver.AbstractSpringTest;
+import junit.framework.TestCase;
+
+import org.apache.log4j.Logger;
+
 
 /**
  * Test the {@link NCBIGeneInfoProviderImpl}.
@@ -19,19 +22,46 @@ import edu.harvard.med.screensaver.AbstractSpringTest;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class NCBIGeneInfoProviderTest extends AbstractSpringTest
+public class NCBIGeneInfoProviderTest extends TestCase
 {
+  private static Logger log = Logger.getLogger(PubchemSmilesOrInchiSearchTest.class);
+  
   private NCBIGeneInfoProvider _geneInfoProvider = new NCBIGeneInfoProviderImpl();
 
   // Gnb4
   public void testGetGeneInfoForEntrezgeneId()
   {
     try {
-      NCBIGeneInfo geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(14696);
+      long before = System.currentTimeMillis();
+      int id = 14696;
+      NCBIGeneInfo geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(id);
+      log.info("query time: " + (System.currentTimeMillis()-before) + 
+          ", entrezGeneId:  " + id + ", geneInfo: " + geneInfo);
       assertNotNull(geneInfo);
       assertEquals(geneInfo.getGeneName(), "guanine nucleotide binding protein (G protein), beta 4");
       assertEquals(geneInfo.getSpeciesName(), "Mus musculus");
       assertEquals(geneInfo.getEntrezgeneSymbol(), "Gnb4");
+
+    
+      before = System.currentTimeMillis();
+      id = 22848;
+      geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(id);
+      log.info("query time: " + (System.currentTimeMillis()-before) + 
+          ", entrezGeneId:  " + id + ", geneInfo: " + geneInfo);
+      assertNotNull(geneInfo);
+      assertEquals(geneInfo.getGeneName(), "AP2 associated kinase 1");
+      assertEquals(geneInfo.getSpeciesName(), "Homo sapiens");
+      assertEquals(geneInfo.getEntrezgeneSymbol(), "AAK1");
+      
+      before = System.currentTimeMillis();
+      id = 9625;
+      geneInfo = _geneInfoProvider.getGeneInfoForEntrezgeneId(id);
+      log.info("query time: " + (System.currentTimeMillis()-before) + 
+          ", entrezGeneId:  " + id + ", geneInfo: " + geneInfo);
+      assertNotNull(geneInfo);
+      assertEquals(geneInfo.getGeneName(), "apoptosis-associated tyrosine kinase");
+      assertEquals(geneInfo.getSpeciesName(), "Homo sapiens");
+      assertEquals(geneInfo.getEntrezgeneSymbol(), "AATK");
     }
     catch (EutilsException e) {
       fail("NCBIGeneInfoProviderImpl threw exception: " + e.getMessage());

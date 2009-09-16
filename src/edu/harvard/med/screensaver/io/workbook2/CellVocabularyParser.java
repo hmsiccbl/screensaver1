@@ -38,62 +38,59 @@ public class CellVocabularyParser<T> implements CellValueParser<T>
   private SortedMap<String,T> _parsedValue2SystemValue;
   private T _valueToReturnIfUnparseable = null;
   private String _delimiterRegex = ",";
-  private ParseErrorManager _errors;
+//  private ParseErrorManager _errors;
   private String _errorMessage;
   
   
   // constructors
 
   public CellVocabularyParser(
-    SortedMap<String,T> parsedValue2SystemValue,
-    ParseErrorManager errors) 
+    SortedMap<String,T> parsedValue2SystemValue)
+//    ParseErrorManager errors) 
   {
     this(parsedValue2SystemValue,
          null,
-         errors,
+//         errors,
          DEFAULT_ERROR_MESSAGE,
          DEFAULT_DELIMITER_REGEX);
   }
                          
   public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
-                              T valueToReturnIfUnparseable,
-                              ParseErrorManager errors)
+                              T valueToReturnIfUnparseable)
+//                              ParseErrorManager errors)
   {
     this(parsedValue2SystemValue,
          valueToReturnIfUnparseable,
-         errors,
+//         errors,
          DEFAULT_ERROR_MESSAGE,
          DEFAULT_DELIMITER_REGEX);
   }
   
   public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
                               T valueToReturnIfUnparseable,
-                              ParseErrorManager errors,
+//                              ParseErrorManager errors,
                               String errorMessage)
   {
     this(parsedValue2SystemValue,
          valueToReturnIfUnparseable,
-         errors,
+//         errors,
          errorMessage,
          DEFAULT_DELIMITER_REGEX);
   }
   
   public CellVocabularyParser(SortedMap<String,T> parsedValue2SystemValue,
                               T valueToReturnIfUnparseable,
-                              ParseErrorManager errors,
+//                              ParseErrorManager errors,
                               String errorMessage,
                               String delimiterRegex)
   {
     _parsedValue2SystemValue = parsedValue2SystemValue;
     _valueToReturnIfUnparseable = valueToReturnIfUnparseable;
-    _errors = errors;
+//    _errors = errors;
     _errorMessage = errorMessage;
     _delimiterRegex = delimiterRegex;
   }
   
-  
-  // public methods
-
   public T parse(Cell cell) 
   {
     return doParse(cell.getString(), cell);
@@ -128,7 +125,7 @@ public class CellVocabularyParser<T> implements CellValueParser<T>
         return _parsedValue2SystemValue.get(pattern);
       }
     }
-    _errors.addError(_errorMessage + " \"" + text + "\" (expected one of " + _parsedValue2SystemValue.keySet() + ")", cell);
+    cell.addError(_errorMessage + " \"" + text + "\" (expected one of " + _parsedValue2SystemValue.keySet() + ")");
     return _valueToReturnIfUnparseable;
   }
 

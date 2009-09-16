@@ -18,21 +18,25 @@
 		<!-- To invoke the Servlet container's /j_security_check servlet (instead of FacesServlet), we have to invoke some Javascript to override JSF behavior -->
 		<h:form id="loginForm"
 			onsubmit="javascript:document.forms['loginForm'].action='j_security_check'">
-			<t:outputText
-				value="If you are a screener, you may use your eCommons ID and password to login." />
-			<t:panelGrid columns="2" columnClasses="keyColumn,column">
-				<t:outputText value="User&#160;ID:" styleClass="label"
-					escape="false"
-					title="Enter your eCommons ID or Screensaver login ID here" />
-				<t:inputText id="j_username" forceId="true" styleClass="inputText" />
-				<t:outputText value="Password:" styleClass="label"
-					title="Enter your password here" />
-				<t:inputSecret id="j_password" forceId="true" styleClass="inputText" />
-				<s:focus id="focuser" for="j_username" />
-			</t:panelGrid>
-			<t:div />
-			<f:verbatim>
-				<p><font size="-2">Confidentiality Agreement: The
+		  If you are a screener, you may use your eCommons ID and password to login.<br />
+      <t:div styleClass="errorMessage">If you are a small molecule screener and have not yet signed the <a
+        href="http://iccb.med.harvard.edu/screening/application/ICCBL_NSRB_User%20Agreement_20090630.pdf">2009
+      Small Molecule User Agreement</a>, your Screensaver account has been disabled.  Please submit a signed <a
+        href="http://iccb.med.harvard.edu/screening/application/ICCBL_NSRB_User%20Agreement_20090630.pdf">agreement</a> to reinstate your account.</t:div>  
+      <t:panelGrid columns="2" columnClasses="keyColumn,column">
+        <t:outputText value="User&#160;ID:" styleClass="label"
+          escape="false"
+          title="Enter your eCommons ID or Screensaver login ID here" />
+        <t:inputText id="j_username" forceId="true"
+          styleClass="inputText" />
+        <t:outputText value="Password:" styleClass="label"
+          title="Enter your password here" />
+        <t:inputSecret id="j_password" forceId="true"
+          styleClass="inputText" />
+        <s:focus id="focuser" for="j_username" />
+      </t:panelGrid>
+      <t:div styleClass="smallLabel">
+				Confidentiality Agreement: The
 				information in this database is confidential and is to be shared
 				only among members of the ICCB-Longwood and NSRB screening
 				communities. By logging into this database, I am agreeing to hold in
@@ -41,14 +45,14 @@
 				information into this database does not constitute a public
 				disclosure and those who deposit information, including myself, can
 				preserve their ability to publish and patent the results of their
-				work if they so choose.</font></p>
-			</f:verbatim>
-			<t:panelGroup>
-				<t:commandButton id="loginCommand" value="Login" styleClass="command"
-					title="Once you have entered your username and password, and read the Confidentiality Agreement, click this button to log in" />
-				<!--t:commandLink value="Forgot your ID or password?" immediate="true"
-        action="#{menu.forgotIdOrPassword}" styleClass="command" /-->
-			</t:panelGroup>
+				work if they so choose.
+      </t:div>
+      <t:panelGrid columns="1">
+				<t:commandButton id="loginCommand" value="Login" styleClass="command" />
+        <h:outputLink value="#{appInfo.feedbackUrl}" styleClass="smallLabel">
+          <h:outputText value="Request account or login help" />
+        </h:outputLink>
+			</t:panelGrid>
 		</h:form>
 	</ui:define>
 

@@ -1,0 +1,42 @@
+<FindBugsFilter>
+
+  <!-- ignore test classes, including anon classes defined within test classes -->
+  <Match>
+    <Class
+      name="~.+Test(\$.+)?" />
+  </Match>
+
+  <!--  exclude non-Screensaver code -->
+  <Match>
+    <Or>
+      <Class
+        name="org.hibernate.hql.ast.tree.FromElementFactory" />
+      <Package
+        name="edu.mit.broad.chembank.shared.mda.webservices.service" />
+    </Or>
+  </Match>
+
+  <!-- ignore fact that anon classes are not static -->
+  <Match>
+    <Class
+      name="~.*\$.+" />
+    <Bug
+      pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+  </Match>
+
+  <!-- many entity classes have set methods that are only called directly by Hibernate -->
+  <Match>
+    <Package
+      name="~edu\.harvard\.med\.screensaver\.model.*" />
+    <Or>
+      <Method
+        name="~set.*" />
+      <Method
+        name="getVersion" />
+    </Or>
+    <Bug
+      pattern="UPM_UNCALLED_PRIVATE_METHOD" />
+  </Match>
+
+</FindBugsFilter>
+

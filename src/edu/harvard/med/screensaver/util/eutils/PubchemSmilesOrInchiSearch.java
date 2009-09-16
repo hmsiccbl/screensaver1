@@ -25,10 +25,6 @@ import org.w3c.dom.NodeList;
  * For details on how the PUG interface works, see the
  * <a href="ftp://ftp.ncbi.nlm.nih.gov/pubchem/specifications/pubchem_pug.pdf">PubChem PUG
  * documentation</a>.
- * <p>
- * If things go well, this class should supercede {@link PubchemCidListProvider}. It should be
- * a more comprehensive way to retrieve PubChem CIDs for compounds structures, but that has yet to
- * be shown out.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

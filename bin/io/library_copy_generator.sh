@@ -15,9 +15,8 @@ THIS=`basename $0 .sh`
 
 LIBS=`for s in $SCREENSAVER/lib/*.jar ; do printf ":$s" ; done`
 CLASSPATH="$SCREENSAVER/classes$LIBS"
-JAVA=/opt/java/jdk1.5/bin/java
 
-$JAVA -Xmx1500m -cp $CLASSPATH \
+java -Xmx1500m -cp $CLASSPATH \
     edu.harvard.med.screensaver.io.libraries.LibraryCopyGenerator "$@" \
     > $THIS.out 2> $THIS.err
 

@@ -33,7 +33,6 @@ import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.RelationshipPath;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -44,6 +43,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -141,7 +141,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
   {
     EntityDataFetcher<WellVolumeAdjustment,Integer> wvaFetcher =
       new ParentedEntityDataFetcher<WellVolumeAdjustment,Integer>(WellVolumeAdjustment.class,
-        new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "well.library"),
+        WellVolumeAdjustment.well.to(Well.library),
         library,
         _dao);
     addRelationshipsToFetch(wvaFetcher);
@@ -539,8 +539,8 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
   private void addRelationshipsToFetch(EntityDataFetcher<WellVolumeAdjustment,Integer> wvaFetcher)
   {
     List<RelationshipPath<WellVolumeAdjustment>> relationships = new ArrayList<RelationshipPath<WellVolumeAdjustment>>();
-    relationships.add(new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "well.library"));
-    relationships.add(new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "copy.copyInfos"));
+    relationships.add(WellVolumeAdjustment.well.to(Well.library));
+    relationships.add(WellVolumeAdjustment.copy.to(Copy.copyInfos));
     wvaFetcher.setRelationshipsToFetch(relationships);
   }
 }

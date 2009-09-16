@@ -24,7 +24,10 @@ public enum AdministrativeActivityType implements VocabularyTerm
 
   WELL_VOLUME_CORRECTION("Well Volume Correction"),
   WELL_DEPRECATION("Well Deprecation"), 
-  CHECKLIST_ITEM_EVENT("Checklist Item Event")
+  CHECKLIST_ITEM_EVENT("Checklist Item Event"),
+  PIN_TRANSFER_APPROVAL("Pin Transfer Approval"),
+  LIBRARY_CONTENTS_LOADING("Library Contents Loading"),
+  LIBRARY_CONTENTS_VERSION_RELEASE("Library Contents Version Release");
   ;
 
 

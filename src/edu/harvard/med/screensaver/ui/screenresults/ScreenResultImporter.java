@@ -135,9 +135,10 @@ public class ScreenResultImporter extends AbstractBackingBean
 
           try {
             if (_uploadedFile.getInputStream().available() > 0) {
-              _screenResultParser.parse(screen,
-                           "screen_result_" + screen.getScreenNumber(),
-                           _uploadedFile.getInputStream());
+//              _screenResultParser.parse(screen,
+//                                        "screen_result_" + screen.getScreenNumber(),
+//                                        _uploadedFile.getInputStream());
+              _screenResultParser.parse(screen,_uploadedFile.getInputStream());              
               if (_screenResultParser.getErrors().size() > 0) {
                 // these are data-related "user" errors, so we log at "info" level
                 log.info("parse errors encountered during import of ScreenResult for Screen " + _screen);
@@ -169,32 +170,4 @@ public class ScreenResultImporter extends AbstractBackingBean
   {
     return VIEW_SCREEN_RESULT_IMPORT_ERRORS;
   }
-
-
-  // JSF event handlers
-
-  public void downloadErrorAnnotatedWorkbookListener(ActionEvent event)
-  {
-    File errorAnnotatedWorkbookFile = null;
-    try {
-      WritableWorkbook errorAnnotatedWorkbook = _screenResultParser.getErrorAnnotatedWorkbook();
-      errorAnnotatedWorkbookFile = File.createTempFile(_uploadedFile.getName(), ERRORS_XLS_FILE_EXTENSION);
-      errorAnnotatedWorkbook.setOutputFile(errorAnnotatedWorkbookFile);
-      errorAnnotatedWorkbook.write();
-      errorAnnotatedWorkbook.close();
-      JSFUtils.handleUserFileDownloadRequest(getFacesContext(),
-                                             errorAnnotatedWorkbookFile,
-                                             Workbook.MIME_TYPE);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      reportSystemError(e);
-    }
-    finally {
-      if (errorAnnotatedWorkbookFile != null) {
-        errorAnnotatedWorkbookFile.delete();
-      }
-    }
-  }
-
 }

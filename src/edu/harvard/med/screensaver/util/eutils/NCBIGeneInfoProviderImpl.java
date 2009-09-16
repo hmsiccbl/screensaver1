@@ -13,9 +13,6 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import edu.harvard.med.screensaver.model.libraries.Gene;
-
-
 /**
  * Retrieves the information needed from NCBI for a {@link Gene}, based on the EntrezGene ID.
  * The information needed from NCBI is encapsulated in an {@link NCBIGeneInfo} object.

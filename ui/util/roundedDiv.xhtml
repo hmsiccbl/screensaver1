@@ -17,6 +17,7 @@
 
 <ui:composition>
   <t:div rendered="#{empty rendered ? true : rendered}"
+    styleClass="#{styleClass}"
     style="background-color: #336699; padding: 2px; margin-bottom: 2px; -moz-border-radius: #{empty radius ? 4 : radius}px; border-radius: #{empty radius ? 4 : radius}px; #{style}">
     <ui:insert />
   </t:div>

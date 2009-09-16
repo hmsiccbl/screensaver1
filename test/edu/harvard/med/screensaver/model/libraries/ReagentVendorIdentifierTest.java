@@ -19,13 +19,13 @@ public class ReagentVendorIdentifierTest extends TestCase
 
   public void testInstantiate()
   {
-    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("vendor:id");
-    assertEquals(rvi.getReagentId(), "vendor:id");
+    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("vendor", "id");
+    assertEquals(rvi.toString(), "vendor id");
     assertEquals(rvi.getVendorName(), "vendor");
     assertEquals(rvi.getVendorIdentifier(), "id");
 
     rvi = new ReagentVendorIdentifier("vendor", "id");
-    assertEquals(rvi.getReagentId(), "vendor:id");
+    assertEquals(rvi.toString(), "vendor id");
     assertEquals(rvi.getVendorName(), "vendor");
     assertEquals(rvi.getVendorIdentifier(), "id");
 
@@ -39,46 +39,42 @@ public class ReagentVendorIdentifierTest extends TestCase
       fail("null vendor identifier: expected DataModelViolationException");
     }
     catch (DataModelViolationException e) {}
-    // this is valid usage until ticket #11048 is resolved
-    rvi = new ReagentVendorIdentifier(null, "id");
-    assertEquals(rvi.getReagentId(), ":id");
-    assertEquals(rvi.getVendorName(), "");
-    assertEquals(rvi.getVendorIdentifier(), "id");
+    try {
+      rvi = new ReagentVendorIdentifier(null, "id");
+      fail("null vendor name: expected DataModelViolationException");
+    }
+    catch (DataModelViolationException e) {}
+    try {
+      rvi = new ReagentVendorIdentifier("", "id");
+      fail("empty vendor name: expected DataModelViolationException");
+    }
+    catch (DataModelViolationException e) {}
   }
 
   public void testToString()
   {
-    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("vendor:id");
+    ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("vendor", "id");
     assertEquals(rvi.toString(), "vendor id");
   }
 
   public void testEquals()
   {
-    ReagentVendorIdentifier rvi1 = new ReagentVendorIdentifier("vendor1:id");
-    ReagentVendorIdentifier rvi2 = new ReagentVendorIdentifier("vendor2:id");
+    ReagentVendorIdentifier rvi1 = new ReagentVendorIdentifier("vendor1", "id");
+    ReagentVendorIdentifier rvi2 = new ReagentVendorIdentifier("vendor2", "id");
     assertFalse(rvi1.equals(rvi2));
     assertFalse(rvi2.equals(rvi1));
 
-    rvi1 = new ReagentVendorIdentifier("vendor:id1");
-    rvi2 = new ReagentVendorIdentifier("vendor:id2");
+    rvi1 = new ReagentVendorIdentifier("vendor", "id1");
+    rvi2 = new ReagentVendorIdentifier("vendor", "id2");
     assertFalse(rvi1.equals(rvi2));
     assertFalse(rvi2.equals(rvi1));
 
-    rvi1 = new ReagentVendorIdentifier("vendor1:id1");
-    rvi2 = new ReagentVendorIdentifier("vendor1:id1");
+    rvi1 = new ReagentVendorIdentifier("vendor1", "id1");
+    rvi2 = new ReagentVendorIdentifier("vendor1", "id1");
     assertTrue(rvi1.equals(rvi2));
     assertTrue(rvi2.equals(rvi1));
   }
 
-  public void testInstantiateWithIllegalVendorName()
-  {
-    try {
-      new ReagentVendorIdentifier("vendorPart1:vendorPart2", "id");
-      fail("expected DataModelViolationException");
-    }
-    catch (DataModelViolationException e) {
-    }
-  }
 
   // private methods
 

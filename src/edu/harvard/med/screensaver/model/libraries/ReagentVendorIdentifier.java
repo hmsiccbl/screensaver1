@@ -11,11 +11,11 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.RequiredPropertyException;
+
+import org.hibernate.annotations.Type;
 
 
 /**
@@ -27,45 +27,29 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
 {
   private static final long serialVersionUID = 1L;
 
-  private static final String COMPOUND_KEY_DELIMITER = ":";
+  static final ReagentVendorIdentifier NULL_VENDOR_ID = new ReagentVendorIdentifier();
+  static { NULL_VENDOR_ID._asString = ""; }
 
-
-  // instance data members
-
-  private String _id;
-
-  private transient String _vendorName;
-  private transient String _vendorIdentifier;
+  private String _vendorName;
+  private String _vendorIdentifier;
   private transient String _asString;
-
-
-  // public constructors and methods
-
-  public ReagentVendorIdentifier(String id)
-  {
-    setReagentId(id);
-  }
 
   public ReagentVendorIdentifier(String vendorName, String reagentIdentifier)
   {
+    if (vendorName == null) {
+      throw new RequiredPropertyException(Reagent.class, "reagent vendor name");
+    }
+    if (reagentIdentifier == null) {
+      throw new RequiredPropertyException(Reagent.class, "reagent vendor identifier");
+    }
     setVendorName(vendorName);
     setVendorIdentifier(reagentIdentifier);
-  }
-
-  @Column
-  @org.hibernate.annotations.Type(type="text")
-  public String getReagentId()
-  {
-    if (_id == null) {
-      _id = _vendorName + COMPOUND_KEY_DELIMITER + _vendorIdentifier;
-    }
-    return _id;
   }
 
   /**
    * @return vendor the library vendor (from {@link Library#getVendor}).
    */
-  @Transient
+  @Type(type="text")
   public String getVendorName()
   {
     return _vendorName;
@@ -74,23 +58,30 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
   /**
    * @return vendorId the vendor ID
    */
-  @Transient
+  @Type(type="text")
   public String getVendorIdentifier()
   {
     return _vendorIdentifier;
   }
 
   @Override
-  public boolean equals(Object other)
+  public boolean equals(Object o)
   {
-    return ((ReagentVendorIdentifier) other).getVendorName().equals(_vendorName) &&
-    ((ReagentVendorIdentifier) other).getVendorIdentifier().equals(_vendorIdentifier);
+    if (o == null) { 
+      return false;
+    }
+    ReagentVendorIdentifier other = (ReagentVendorIdentifier) o;
+    if (_vendorName == null) {
+      return other.getVendorName() == null;
+    }
+    assert _vendorIdentifier != null;
+    return _vendorName.equals(other.getVendorName()) && _vendorIdentifier.equals(other.getVendorIdentifier());
   }
 
   @Override
   public int hashCode()
   {
-    return getReagentId().hashCode();
+    return toString().hashCode();
   }
 
   @Override
@@ -111,50 +102,18 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
     return result;
   }
 
-
-  // private methods
-
-  /**
-   * Set the value for this ReagentVendorIdentifier via a string that contains
-   * both the vendor name and a reagent identifier (assigned by the vendor).
-   *
-   * @param id compound key value for reagent, in format "<vendor name>::<vendor
-   *          reagent identifier>"
-   */
-  private void setReagentId(String id)
-  {
-    int delimPos = id.indexOf(COMPOUND_KEY_DELIMITER);
-    if (delimPos < 0) {
-      throw new DataModelViolationException("illegal reagent ID '" + id +
-                                            "': expected format '<vendor name>" +
-                                            COMPOUND_KEY_DELIMITER + "<vendor reagent identifier>'");
-    }
-    setVendorName(id.substring(0, delimPos));
-    setVendorIdentifier(id.substring(delimPos + 1));
-  }
-
   private void setVendorName(String vendorName)
   {
-    if (vendorName == null) {
-      // convert nulls to empty strings, for safety and db constraints
-      vendorName = "";
-    }
-    if (vendorName.contains(COMPOUND_KEY_DELIMITER)) {
-      throw new DataModelViolationException("vendorName '" + vendorName + "' may not contain '" + COMPOUND_KEY_DELIMITER + "'");
-    }
     _vendorName = vendorName;
   }
 
   private void setVendorIdentifier(String vendorIdentifier)
   {
-    if (vendorIdentifier == null || vendorIdentifier.length() == 0) {
-      throw new DataModelViolationException("vendorIdentifier may not be null or empty");
-    }
     _vendorIdentifier = vendorIdentifier;
   }
 
   /**
-   * @motivation for Hibernate
+   * @motivation for Hibernate and NULL_VENDOR_ID
    */
   private ReagentVendorIdentifier()
   {

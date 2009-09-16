@@ -305,6 +305,11 @@ public class ScreensaverLoginModule implements LoginModule
         log.info(msg);
         throw new LoginException(msg);
       }
+      else if (!switchToUser.isUserInRole(ScreensaverUserRole.SCREENSAVER_USER)) {
+        String msg = "switching to user that does not have login privileges is forbidden: " + switchToUser;
+        log.info(msg);
+        throw new LoginException(msg);
+      }
       else {
         log.info("switching to screening room user " + switchToUser); 
         _user = switchToUser;

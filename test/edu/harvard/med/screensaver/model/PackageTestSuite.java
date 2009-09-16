@@ -31,6 +31,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(PropertyPathTest.class);
     addTestSuite(VolumeTest.class); // TODO: remove once Volume extends Quantity
     addTestSuite(QuantityTest.class);
+    addTestSuite(AttachedFileTest.class);
 
     // ignored abstract classes
     // addTestSuite(ActivityTest.class);
@@ -38,7 +39,6 @@ public class PackageTestSuite extends TestSuite
 
     // test model subpackages
     addTest(edu.harvard.med.screensaver.model.cherrypicks.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.model.derivatives.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.model.libraries.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.model.screens.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.model.screenresults.PackageTestSuite.suite());

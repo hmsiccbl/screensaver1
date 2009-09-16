@@ -11,13 +11,16 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.beans.IntrospectionException;
 
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import junit.framework.TestSuite;
 
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
 public class LegacyCherryPickAssayPlateTest extends AbstractEntityInstanceTest<LegacyCherryPickAssayPlate>
 {
-  private static Logger log = Logger.getLogger(LegacyCherryPickAssayPlateTest.class);
+  public static TestSuite suite()
+  {
+    return buildTestSuite(LegacyCherryPickAssayPlateTest.class, LegacyCherryPickAssayPlate.class);
+  }
 
   public LegacyCherryPickAssayPlateTest() throws IntrospectionException
   {

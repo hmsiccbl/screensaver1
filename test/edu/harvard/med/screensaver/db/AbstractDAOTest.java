@@ -15,7 +15,7 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.WellType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 import org.apache.log4j.Logger;
@@ -50,9 +50,9 @@ public class AbstractDAOTest extends AbstractSpringPersistenceTest
               LibraryType.KNOWN_BIOACTIVES,
               1,
               2);
-            library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A02"), WellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A03"), WellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A01"), LibraryWellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A02"), LibraryWellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A03"), LibraryWellType.EXPERIMENTAL);
             genericEntityDao.saveOrUpdateEntity(library);
             throw new RuntimeException("fooled ya!");
           }
@@ -78,9 +78,9 @@ public class AbstractDAOTest extends AbstractSpringPersistenceTest
               LibraryType.KNOWN_BIOACTIVES,
               1,
               2);
-            library.createWell(new WellKey(27, "A01"), WellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A02"), WellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A03"), WellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A01"), LibraryWellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A02"), LibraryWellType.EXPERIMENTAL);
+            library.createWell(new WellKey(27, "A03"), LibraryWellType.EXPERIMENTAL);
             genericEntityDao.saveOrUpdateEntity(library);
           }
         });

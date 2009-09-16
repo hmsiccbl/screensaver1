@@ -13,8 +13,7 @@
   <ui:param name="pageHelpURL" value="libraries/wellViewerHelp.jsf" />
 
   <ui:define name="body">
-    <ui:include src="/libraries/reagentViewerBody.xhtml" >
-      <ui:param name="reagentViewer" value="#{wellViewer}" />
+    <ui:include src="/libraries/wellViewerBody.xhtml" >
       <ui:param name="wellViewerSpecialMessage" value="#{wellViewer.specialMessage}" />
     </ui:include>
   </ui:define>

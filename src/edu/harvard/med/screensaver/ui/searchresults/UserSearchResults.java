@@ -16,13 +16,12 @@ import java.util.Set;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
@@ -30,6 +29,8 @@ import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Lists;
 
 
 /**
@@ -94,7 +95,7 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
 
   protected List<? extends TableColumn<E,?>> buildColumns()
   {
-    ArrayList<EntityColumn<E,?>> columns = new ArrayList<EntityColumn<E,?>>();
+    ArrayList<TableColumn<E,?>> columns = Lists.newArrayList();
     columns.add(new IntegerEntityColumn<E>(
       new PropertyPath<E>(_type, "userId"),
       "User ID",

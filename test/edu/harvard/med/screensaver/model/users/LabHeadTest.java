@@ -11,25 +11,16 @@ package edu.harvard.med.screensaver.model.users;
 
 import java.beans.IntrospectionException;
 
+import junit.framework.TestSuite;
+
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 
-import org.apache.log4j.Logger;
-
 public class LabHeadTest extends AbstractEntityInstanceTest<LabHead>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(LabHeadTest.class);
-
-
-  // instance data members
-
-
-  // public constructors and methods
-
-  protected void onSetUp() {
-    schemaUtil.truncateTablesOrCreateSchema();
+  public static TestSuite suite()
+  {
+    return buildTestSuite(LabHeadTest.class, LabHead.class);
   }
 
   public LabHeadTest() throws IntrospectionException
@@ -39,6 +30,7 @@ public class LabHeadTest extends AbstractEntityInstanceTest<LabHead>
 
   public void testLabHeadClassificationImmutable()
   {
+    schemaUtil.truncateTablesOrCreateSchema();
     ScreeningRoomUserTest.initLab(genericEntityDao, schemaUtil);
     ScreeningRoomUser labHead =
       genericEntityDao.findEntityByProperty(ScreeningRoomUser.class,
@@ -52,7 +44,5 @@ public class LabHeadTest extends AbstractEntityInstanceTest<LabHead>
     }
     catch (BusinessRuleViolationException e) {}
   }
-
-
 }
 

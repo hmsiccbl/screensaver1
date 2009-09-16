@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.io.screenresults;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -64,8 +65,13 @@ public class ScreenResultPersistenceTest extends AbstractSpringTest
         genericEntityDao.saveOrUpdateEntity(library);
         genericEntityDao.flush();
 
-        screenResultParser.parse(screen,
-                                 workbookFile);
+        try {
+          screenResultParser.parse(screen,
+                                   workbookFile);
+        }
+        catch (FileNotFoundException e) {
+          fail(e.getMessage());
+        }
         for (WorkbookParseError error: screenResultParser.getErrors()) {
           System.out.println("error: " + error);
         }

@@ -22,22 +22,26 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
-import edu.harvard.med.screensaver.model.libraries.WellType;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -137,7 +141,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=CherryPickRequest.class)
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenerCherryPick.class)
 public class LabCherryPick extends AbstractEntity
 {
 
@@ -145,8 +149,13 @@ public class LabCherryPick extends AbstractEntity
 
   private static final Logger log = Logger.getLogger(LabCherryPick.class);
   private static final long serialVersionUID = 0L;
-
-
+  
+  public static final RelationshipPath<LabCherryPick> cherryPickRequest = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "cherryPickRequest");
+  public static final RelationshipPath<LabCherryPick> screenerCherryPick = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "screenerCherryPick");
+  public static final RelationshipPath<LabCherryPick> sourceWell = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "sourceWell");
+  public static final RelationshipPath<LabCherryPick> wellVolumeAdjustments = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "wellVolumeAdjustments");
+  public static final RelationshipPath<LabCherryPick> assayPlate = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "assayPlate");
+  
   // private instance data
 
   private Integer _labCherryPickId;
@@ -167,9 +176,6 @@ public class LabCherryPick extends AbstractEntity
     Failed,
     Plated
   };
-
-
-
 
   // public instance methods
 
@@ -243,19 +249,19 @@ public class LabCherryPick extends AbstractEntity
 
   /**
    * Get the source well for this cherry pick. The source well corresponds to
-   * the well that will provide the liquid (compound or reagent) used to produce
-   * the cherry pick assay plate. For compound screens, the screened well will
-   * be the same as the source well. For RNAi screens, the screened well will
-   * map to a set of source wells (to accommodate pool-to-duplex mapping).
+   * the well that will provide the reagent used to produce the cherry pick
+   * assay plate. For small molecule screens, the screened well will be the same as
+   * the source well. For RNAi screens, the screened well will map to a set of
+   * source wells (to accommodate pool-to-duplex mapping).
    * <p>
    * Note: Since we must allow a LabCherryPick to be plate mapped after
-   * instantiation time, we instantiate it with only a sourceWell, but not with a
-   * sourceCopy. This means we cannot create an association with a
+   * instantiation time, we instantiate it with only a sourceWell, but not with
+   * a sourceCopy. This means we cannot create an association with a
    * WellVolumeAdjustment until the sourceCopy is specified via
    * {@link #setAllocated}. So we must redundantly store the sourceWell in both
    * the LabCherryPick and, later on, in the related wellVolumeAdjustment
    * entity.
-   *
+   * 
    * @return the source well
    * @see ScreenerCherryPick#getScreenedWell()
    */
@@ -264,7 +270,7 @@ public class LabCherryPick extends AbstractEntity
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_lab_cherry_pick_to_source_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(unidirectional=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
   public Well getSourceWell()
   {
     return _sourceWell;
@@ -295,6 +301,7 @@ public class LabCherryPick extends AbstractEntity
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
+  @ToMany(hasNonconventionalMutation=true)
   @JoinColumn(name="labCherryPickId")
   @org.hibernate.annotations.ForeignKey(name="fk_well_volume_adjustment_to_lab_cherry_pick")
   @org.hibernate.annotations.Cascade(value={
@@ -430,7 +437,7 @@ public class LabCherryPick extends AbstractEntity
   @JoinColumn(name="cherryPickAssayPlateId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_lab_cherry_pick_to_cherry_pick_assay_plate")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(hasNonconventionalSetterMethod=true)
   @org.hibernate.annotations.Cascade(value={
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE
@@ -555,21 +562,8 @@ public class LabCherryPick extends AbstractEntity
     }
     _cherryPickRequest = screenerCherryPick.getCherryPickRequest();
 
-    // TODO: reinstate the following BusinessRuleViolationExceptions once we have some means of setting the well
-    // type for experimental wells in natural products libraries. (see rt#72830)
-    if (!sourceWell.getWellType().equals(WellType.EXPERIMENTAL)) {
-      log.warn(sourceWell + " is not a valid source well (not experimental)");
-      //throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (not experimental)");
-    }
-    if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE) &&
-      sourceWell.getCompounds().size() == 0) {
-      log.warn(sourceWell + " is not a valid source well (does not contain a compound)");
-      //throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a compound)");
-    }
-
-    if (_cherryPickRequest.getScreen().getScreenType().equals(ScreenType.RNAI) &&
-      sourceWell.getSilencingReagents().size() == 0) {
-      throw new InvalidCherryPickWellException(sourceWell.getWellKey(), "does not contain any reagents");
+    if (sourceWell.<Reagent>getLatestReleasedReagent() == null) {
+      throw new BusinessRuleViolationException(sourceWell + " is not a valid source well (does not contain a reagent)");
     }
 
     _sourceWell = sourceWell;

@@ -12,7 +12,6 @@
 package edu.harvard.med.screensaver.db.datafetcher;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -25,12 +24,16 @@ import java.util.Set;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.PropertyPath;
-import edu.harvard.med.screensaver.model.RelationshipPath;
+import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -42,6 +45,9 @@ import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.Criterion.OperatorClass;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
 {
@@ -132,13 +138,11 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     _relationships.add(_plateNumberPropPath.getRelationshipPath());
     _relationships.add(_wellNamePropPath.getRelationshipPath());
 
-    _screenResultWellFetcher = new ParentedEntityDataFetcher<Well,String>(Well.class,
-                                                                          new RelationshipPath<Well>(Well.class,
-                                                                                                     "screenResults"),
-                                                                          _screenResult,
-                                                                          genericEntityDao);
-    Set<String> wellKeys = new HashSet<String>(Arrays.asList("02000:A01",
-                                                             "02001:P24"));
+    _screenResultWellFetcher = new ParentedEntityDataFetcher<Well,String>(Well.class, 
+      Well.screenResults,
+      _screenResult,
+      genericEntityDao);
+    Set<String> wellKeys = Sets.newHashSet("02000:A01", "02001:P24");
     _wellSetFetcher = new EntitySetDataFetcher<Well,String>(Well.class,
                                                             wellKeys,
                                                             genericEntityDao);
@@ -199,8 +203,8 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
   {
     _screenResultWellFetcher.setRelationshipsToFetch(_relationships);
     _screenResultWellFetcher.setOrderBy(_properties);
-    _criteria.put(_wellNamePropPath, Arrays.asList(new Criterion<String>(Operator.TEXT_STARTS_WITH, "B2")));
-    _criteria.put(_plateNumberPropPath, Arrays.asList(new Criterion<Integer>(Operator.EQUAL, 2001)));
+    _criteria.put(_wellNamePropPath, Collections.singletonList(new Criterion<String>(Operator.TEXT_STARTS_WITH, "B2")));
+    _criteria.put(_plateNumberPropPath, Collections.singletonList(new Criterion<Integer>(Operator.EQUAL, 2001)));
     _screenResultWellFetcher.setFilteringCriteria(_criteria);
 
     List<String> expectedWellKeys = new ArrayList<String>();
@@ -231,28 +235,16 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     ResultValueType rvt2 = _screenResult.getResultValueTypesList().get(2);
     ResultValueType rvt3 = _screenResult.getResultValueTypesList().get(6);
     ResultValueType rvt4 = _screenResult.getResultValueTypesList().get(7); // "comments", with sparse result values
-    PropertyPath<Well> propertyPath1 = new PropertyPath<Well>(Well.class,
-                                                              "resultValues[resultValueType]",
-                                                              "value",
-                                                              rvt1);
-    PropertyPath<Well> propertyPath2 = new PropertyPath<Well>(Well.class,
-                                                              "resultValues[resultValueType]",
-                                                              "value",
-                                                              rvt2);
-    PropertyPath<Well> propertyPath3 = new PropertyPath<Well>(Well.class,
-                                                              "resultValues[resultValueType]",
-                                                              "positive",
-                                                              rvt3);
-    PropertyPath<Well> propertyPath4 = new PropertyPath<Well>(Well.class,
-                                                              "resultValues[resultValueType]",
-                                                              "value",
-                                                              rvt4);
+    PropertyPath<Well> propertyPath1 = Well.resultValues.restrict("resultValueType", rvt1).toProperty("value");
+    PropertyPath<Well> propertyPath2 = Well.resultValues.restrict("resultValueType", rvt2).toProperty("value");
+    PropertyPath<Well> propertyPath3 = Well.resultValues.restrict("resultValueType", rvt3).toProperty("positive");
+    PropertyPath<Well> propertyPath4 = Well.resultValues.restrict("resultValueType", rvt4).toProperty("value");
     _relationships.add(propertyPath1.getRelationshipPath());
     _relationships.add(propertyPath2.getRelationshipPath());
     _relationships.add(propertyPath3.getRelationshipPath());
     _relationships.add(propertyPath4.getRelationshipPath());
-    _criteria.put(propertyPath3, Arrays.asList(new Criterion<Boolean>(Operator.EQUAL, true)));
-    _criteria.put(propertyPath4, Arrays.asList(new Criterion<String>(Operator.NOT_EMPTY, null)));
+    _criteria.put(propertyPath3, Collections.singletonList(new Criterion<Boolean>(Operator.EQUAL, true)));
+    _criteria.put(propertyPath4, Collections.singletonList(new Criterion<String>(Operator.NOT_EMPTY, null)));
 
     _screenResultWellFetcher.setRelationshipsToFetch(_relationships);
     _screenResultWellFetcher.setFilteringCriteria(_criteria);
@@ -293,12 +285,13 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     EntityDataFetcher<Library,Integer> librariesDataFetcher =
       new AllEntitiesOfTypeDataFetcher<Library,Integer>(Library.class, genericEntityDao);
     List<RelationshipPath<Library>> relationships = new ArrayList<RelationshipPath<Library>>();
-    relationships.add(new RelationshipPath<Library>(Library.class, "wells.gene.genbankAccessionNumbers"));
+    relationships.add(Library.wells.to(Well.latestReleasedReagent).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers));
+    relationships.add(Library.contentsVersions);
     librariesDataFetcher.setRelationshipsToFetch(relationships);
     List<Library> libraries = librariesDataFetcher.fetchAllData();
     assertEquals("library.wells.gene.genbankAccessionNumbers size",
                  1,
-                 libraries.iterator().next().getWells().iterator().next().getGene().getGenbankAccessionNumbers().size());
+                 libraries.iterator().next().getWells().iterator().next().<SilencingReagent>getLatestReleasedReagent().getFacilityGene().getGenbankAccessionNumbers().size());
   }
 
   /**
@@ -307,8 +300,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchUnrestrictedCollections()
   {
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues"));
-    _allWellsFetcher.setRelationshipsToFetch(_relationships);
+    _allWellsFetcher.setRelationshipsToFetch(Lists.newArrayList(Well.resultValues, Well.library.to(Library.contentsVersions)));
     List<Well> allData = _allWellsFetcher.fetchAllData();
     Collections.sort(allData);
     Well well = allData.get(0);
@@ -316,15 +308,13 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
                  _screenResult.getResultValueTypes().size() /*RVTs per screen result*/ * 2 /* screen results*/,
                  well.getResultValues().size());
 
-    _relationships.clear();
-    _relationships.add(new RelationshipPath<Well>(Well.class, "reagent.annotationValues"));
-    _allWellsFetcher.setRelationshipsToFetch(_relationships);
+    _allWellsFetcher.setRelationshipsToFetch(Lists.newArrayList(Well.latestReleasedReagent.to(Reagent.annotationValues), Well.library.to(Library.contentsVersions)));
     allData = _allWellsFetcher.fetchAllData();
     Collections.sort(allData);
     well = allData.get(0);
     assertEquals("well.reagent.annotationValues restricted size",
                  _study.getAnnotationTypes().size() /*ATs per study*/ * 1 /*study*/,
-                 well.getReagent().getAnnotationValues().size());
+                 well.<Reagent>getLatestReleasedReagent().getAnnotationValues().size());
   }
 
   /**
@@ -333,7 +323,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchRestrictedCollection()
   {
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues.resultValueType[screenResult]", _screenResult));
+    _relationships.add(Well.resultValues.to(ResultValue.ResultValueType).restrict(ResultValueType.ScreenResult.getLeaf(), _screenResult));
     _allWellsFetcher.setRelationshipsToFetch(_relationships);
     List<Well> allData = _allWellsFetcher.fetchAllData();
     Collections.sort(allData);
@@ -367,16 +357,16 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
 //   */
 //  public void testEagerFetchTriplyRestrictedCollection()
 //  {
-//    _allWellsFetcher.setRelationshipsToFetch(Arrays.asList(new RelationshipPath<Well>(Well.class, "screenResults[screenResult].annotationTypes[annotationType].annotationValues[reagent]", _screenResult, annotationType, reagent)));
+//    _allWellsFetcher.setRelationshipsToFetch(Collections.singletonList(new RelationshipPath<Well>(Well.class, "screenResults[screenResult].annotationTypes[annotationType].annotationValues[reagent]", _screenResult, annotationType, reagent)));
 //    Well well = _allWellsFetcher.fetchAllData().get(0);
 //    assertEquals("well.screenResults restricted size", 1, well.getScreenResults().size());
-//    ScreenResult restrictedScreenResult = well.getScreenResults().iterator().next();
+//    screenResult restrictedScreenResult = well.getScreenResults().iterator().next();
 //    assertEquals("well.screenResults restricted", _screenResult, restrictedScreenResult);
 //    assertTrue("well.screenResult.annotationTypes",
 //               well.getScreenResults().size() == 1 && well.getScreenResults().iterator().next().equals(_screenResult));
 //    assertEquals("well.screenResult[].annotationTypes[] restricted size",
 //                 1,
-//                 well.getScreenResults(). ResultValues().size());
+//                 well.getScreenResults(). resultValues().size());
 //  }
 
   /**
@@ -385,13 +375,13 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchEmptyRestrictedCollection()
   {
-    Set<String> wellKeys = new HashSet<String>(Arrays.asList("02000:A04", "02000:A08", "02000:A12"));
+    Set<String> wellKeys = Sets.newHashSet("02000:A04", "02000:A08", "02000:A12");
     EntityDataFetcher<Well,String> wellSetFetcher = new EntitySetDataFetcher<Well,String>(Well.class,
       wellKeys,
       genericEntityDao);
     ResultValueType commentsRvt = _screenResult.getResultValueTypesList().get(7); // has with sparse result values
-    _relationships.add(new RelationshipPath<Well>(Well.class, "reagent.annotationValues"));
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues[resultValueType]", commentsRvt));
+    _relationships.add(Well.latestReleasedReagent.to(Reagent.annotationValues));
+    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), commentsRvt));
     wellSetFetcher.setRelationshipsToFetch(_relationships);
 
     List<Well> allData = wellSetFetcher.fetchAllData();
@@ -402,7 +392,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
       // Hibernate does not naturally support this via
       // EntityDataFetcher.getOrCreateFetchJoin()
 //      assertEquals("empty restricted collection (resultValues)", 0, well.getResultValues().size());
-//      assertEquals("empty restricted collection (annotationValues)", 0, well.getReagent().getAnnotationValues().size());
+//      assertEquals("empty restricted collection (annotationValues)", 0, well.<Reagent>getLatestReleasedReagent().getAnnotationValues().size());
     }
   }
 
@@ -412,8 +402,8 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchMultipleRestrictedCollectionsOfSameType()
   {
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues[resultValueType]", _screenResult.getResultValueTypesList().get(0)));
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues[resultValueType]", _screenResult.getResultValueTypesList().get(2)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(0)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(2)));
     _allWellsFetcher.setRelationshipsToFetch(_relationships);
     List<Well> allData = _allWellsFetcher.fetchAllData();
     Collections.sort(allData);
@@ -436,14 +426,15 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchMultipleRestrictedSparseCollectionsOfDifferentTypes()
   {
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues[resultValueType]", _screenResult.getResultValueTypesList().get(0)));
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues[resultValueType]", _screenResult.getResultValueTypesList().get(2)));
-    _relationships.add(new RelationshipPath<Well>(Well.class, "resultValues[resultValueType]", _screenResult.getResultValueTypesList().get(7)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(0)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(2)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(7)));
     Iterator<AnnotationType> annotationTypesIter = _study.getAnnotationTypes().iterator();
     AnnotationType annotationType1 = annotationTypesIter.next();
     AnnotationType annotationType2 = annotationTypesIter.next();
-    _relationships.add(new RelationshipPath<Well>(Well.class, "reagent.annotationValues[annotationType]", annotationType1));
-    _relationships.add(new RelationshipPath<Well>(Well.class, "reagent.annotationValues[annotationType]", annotationType2));
+    _relationships.add(Well.latestReleasedReagent.to(Reagent.annotationValues).restrict(AnnotationValue.annotationType.getLeaf(), annotationType1));
+    _relationships.add(Well.latestReleasedReagent.to(Reagent.annotationValues).restrict(AnnotationValue.annotationType.getLeaf(), annotationType2));
+    _relationships.add(Well.library.to(Library.contentsVersions));
     _allWellsFetcher.setRelationshipsToFetch(_relationships);
     List<Well> allData = _allWellsFetcher.fetchAllData();
     Collections.sort(allData);
@@ -465,7 +456,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
                  well.getResultValues().size());
     assertEquals("well.reagent.annotationValues restricted size",
                  2 /* selected annotationTypes */,
-                 well.getReagent().getAnnotationValues().size());
+                 well.<Reagent>getLatestReleasedReagent().getAnnotationValues().size());
 
     // this well should have values for all RVTs, but undefined values for all AnnotTypes
     well = allData.get(2);
@@ -475,7 +466,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
                  well.getResultValues().size());
     assertEquals("well.reagent.annotationValues restricted size",
                  0 /* selected annotationTypes */,
-                 well.getReagent().getAnnotationValues().size());
+                 well.<Reagent>getLatestReleasedReagent().getAnnotationValues().size());
 
     // this well should have undefined values for one RVT and all AnnotTypes
     well = allData.get(3);
@@ -485,7 +476,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
                  well.getResultValues().size());
     assertEquals("well.reagent.annotationValues restricted size",
                  0 /* selected annotationTypes */,
-                 well.getReagent().getAnnotationValues().size());
+                 well.<Reagent>getLatestReleasedReagent().getAnnotationValues().size());
   }
 
   /**
@@ -502,11 +493,11 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     final ResultValueType textRvt = _screenResult.getResultValueTypesList().get(2);
     final ResultValueType positiveRvt = _screenResult.getResultValueTypesList().get(6);
     final ResultValueType commentRvt = _screenResult.getResultValueTypesList().get(7);
-    PropertyPath<Well> numericRvtPropPath = new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "numericValue", numericRvt);
-    PropertyPath<Well> textRvtPropPath = new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "value", textRvt);
-    PropertyPath<Well> positiveRvtPropPath = new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "value", positiveRvt);
-    // the "comments" RVT contains blank and missing (null) ResultValues, allowing us to test the EMPTY and NOT_EMPTY operators
-    PropertyPath<Well> commentRvtPropPath = new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "value", commentRvt);
+    PropertyPath<Well> numericRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), numericRvt).toProperty("numericValue");
+    PropertyPath<Well> textRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), textRvt).toProperty("value");
+    PropertyPath<Well> positiveRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), positiveRvt).toProperty("value");
+    // the "comments" RVT contains blank and missing (null) resultValues, allowing us to test the EMPTY and NOT_EMPTY operators
+    PropertyPath<Well> commentRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), commentRvt).toProperty("value");
     _relationships.add(numericRvtPropPath.getRelationshipPath());
     _relationships.add(textRvtPropPath.getRelationshipPath());
     _relationships.add(positiveRvtPropPath.getRelationshipPath());
@@ -557,9 +548,10 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testFetchCollectionOfElements()
   {
-    _wellSetFetcher.setRelationshipsToFetch(Arrays.asList(new RelationshipPath<Well>(Well.class, "gene.genbankAccessionNumbers")));
+    _wellSetFetcher.setRelationshipsToFetch(Lists.newArrayList(Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers),
+                                                               Well.library.to(Library.contentsVersions)));
     List<Well> data = _wellSetFetcher.fetchAllData();
-    assertEquals("well.gene.genbankAccessionNumbers size", 1, data.get(0).getGene().getGenbankAccessionNumbers().size());
+    assertEquals("well.reagents.facilityGene.genbankAccessionNumbers size", 1, data.get(0).<SilencingReagent>getLatestReleasedReagent().getFacilityGene().getGenbankAccessionNumbers().size());
   }
 
 
@@ -569,10 +561,10 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testFilterCollectionOfElements()
   {
-    PropertyPath<Well> propertyPath = new PropertyPath<Well>(Well.class, "gene.genbankAccessionNumbers", "");
-    _wellSetFetcher.setRelationshipsToFetch(Arrays.asList(propertyPath.getRelationshipPath()));
+    RelationshipPath<Well> relPath = Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers);
+    _wellSetFetcher.setRelationshipsToFetch(Collections.singletonList(relPath));
     Map<PropertyPath<Well>,List<? extends Criterion<?>>> filteringCriteria = new HashMap<PropertyPath<Well>,List<? extends Criterion<?>>>();
-    filteringCriteria.put(propertyPath, Arrays.asList(new Criterion<String>(Operator.EQUAL, "GB3074279")));
+    filteringCriteria.put(relPath.toCollectionOfValues(), Collections.singletonList(new Criterion<String>(Operator.EQUAL, "GB3074279")));
     _wellSetFetcher.setFilteringCriteria(filteringCriteria);
     List<String> keys = _wellSetFetcher.findAllKeys();
     assertEquals("result size", 1, keys.size());
@@ -606,7 +598,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     log.debug("expected data size = " + expectedKeys.size());
 
     Map<PropertyPath<Well>,List<? extends Criterion<?>>> criteria = new HashMap<PropertyPath<Well>,List<? extends Criterion<?>>>();
-    criteria.put(propertyPath, Arrays.asList(criterion));
+    criteria.put(propertyPath, Collections.singletonList(criterion));
     _allWellsFetcher.setFilteringCriteria(criteria);
     Set<String> actualKeys = new HashSet<String>(_allWellsFetcher.findAllKeys());
     assertEquals(expectedKeys, actualKeys);

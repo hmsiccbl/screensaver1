@@ -10,8 +10,6 @@ log4j.properties.file=cfg/log4j.properties.util
 
 ### run-time properties
 
-babel.executable.path=/usr/local/openbabel/bin/babel
-
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
 SCREENSAVER_PGSQL_DB=screensaver

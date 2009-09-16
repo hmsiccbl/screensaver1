@@ -27,9 +27,8 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(NCBIGeneInfoProviderTest.class);
-    addTestSuite(PubchemCidListProviderTest.class);
-    addTestSuite(PubchemMolfileSearchTest.class);
     addTestSuite(PubchemSmilesOrInchiSearchTest.class);
+    addTestSuite(PubchemSmilesOrInchiStandardizerTest.class);
     addTestSuite(PublicationInfoProviderTest.class);
   }
 }

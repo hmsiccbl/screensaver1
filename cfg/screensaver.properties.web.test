@@ -15,11 +15,10 @@ log4j.properties.file=cfg/log4j.properties.debug
 screensaver.ui.application_name=Screensaver
 screensaver.ui.version=Test
 screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
+screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/images/structure-images/
 
 datatable.use_column_reorder_list_widget=false
 screens.allow_delete=false
-
-babel.executable.path=/usr/local/openbabel/bin/babel
 
 # cellHTS2 report properties
 # The cellHTS2 report directory

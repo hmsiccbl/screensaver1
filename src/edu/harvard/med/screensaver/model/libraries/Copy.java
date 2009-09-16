@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -57,6 +58,9 @@ public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
 
   private static final Logger log = Logger.getLogger(Copy.class);
   private static final long serialVersionUID = 0L;
+  
+  public static final RelationshipPath<Copy> copyInfos = new RelationshipPath<Copy>(Copy.class, "copyInfos");
+  public static final RelationshipPath<Copy> library = new RelationshipPath<Copy>(Copy.class, "library");
 
 
   // instance fields
@@ -109,7 +113,7 @@ public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_copy_to_library")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @edu.harvard.med.screensaver.model.annotations.ManyToOne(inverseProperty="copies")
+  @edu.harvard.med.screensaver.model.annotations.ToOne(inverseProperty="copies")
   public Library getLibrary()
   {
     return _library;
