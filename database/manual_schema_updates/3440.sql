@@ -6,6 +6,7 @@ SELECT
 current_timestamp,
 'remove unique index on lab_cherry_pick';
 
-alter table lab_cherry_pick drop constraint lab_cherry_pick_cherry_pick_request_id_key;
+/* Only needed for legacy data! */
+/*alter table lab_cherry_pick drop constraint lab_cherry_pick_cherry_pick_request_id_key;*/
 
 COMMIT;

@@ -1,5 +1,5 @@
 /*
- * WARNING: This is a major update to the schema!  Review the changes below, modify as necessary, and test rigorously on your own data!
+ * WARNING: This is a major update to the schema!  Review the changes below, modify as necessary, and test rigorously on your own data!  In particular, see TODO comments, below.
  */
 
 BEGIN;
@@ -10,9 +10,21 @@ SELECT
 current_timestamp,
 'migration of library contents for v1.8.0';
 
+CREATE FUNCTION concat(text, text) RETURNS text
+  AS 'select $1 || case length($1) when 0 then '''' else ''~'' end || $2 '
+  LANGUAGE sql;
+
+CREATE AGGREGATE flatten (
+  BASETYPE = text,
+  SFUNC = concat,
+  STYPE = text,
+  INITCOND = ''
+);
+
+
 alter table lab_cherry_pick add constraint lab_cherry_pick_cherry_pick_request_id_key unique (cherry_pick_request_id, source_well_id);
 
-alter table compound_cherry_pick_request drop constraint fk_compound_cherry_pick_request_to_cherry_pick_request;
+alter table compound_cherry_pick_request drop constraint fk15f250c38e09cc35;
 alter table compound_cherry_pick_request rename to small_molecule_cherry_pick_request;
 alter table small_molecule_cherry_pick_request 
     add constraint fk_small_molecule_cherry_pick_request_to_cherry_pick_request 
@@ -68,8 +80,10 @@ insert into library_contents_version
 select nextval('library_contents_version_id_seq'), 0, now(), 1, library_id, nextval('activity_id_seq') from library l;
 
 /* insert lcv loading admin activities */
+/* TODO: update value for performed_by_id to an administrator user of your choice */
 insert into activity (activity_id, version, date_created, comments, performed_by_id, date_of_activity)
-select library_contents_loading_activity_id, 1, now(), 'original library contents (migration)', 755, now() 
+select library_contents_loading_activity_id, 1, now(), 'original library contents (migration)', 
+(select min(screensaver_user_id) from administrator_user), now() 
 from library_contents_version lcv;
 
 insert into administrative_activity (activity_id, administrative_activity_type)
@@ -80,7 +94,9 @@ from library_contents_version lcv;
 update library_contents_version set library_contents_release_activity_id = nextval('activity_id_seq');
 
 insert into activity (activity_id, version, date_created, comments, performed_by_id, date_of_activity) 
-select library_contents_release_activity_id, 1, now(), 'automated release (migration)', 755, now() 
+/* TODO: update value for performed_by_id to an administrator user of your choice */
+select library_contents_release_activity_id, 1, now(), 'automated release (migration)', 
+(select min(screensaver_user_id) from administrator_user), now() 
 from library_contents_version;
 
 insert into administrative_activity (activity_id, administrative_activity_type) 
@@ -120,9 +136,6 @@ from well w join reagent_old ro using(reagent_id) join library_contents_version 
 
 /* 
  * create reagents for wells that were missing vendor-{names,ids}, but have a smiles string 
- * Notes:
- * - No (old) well has a compound if well.smiles is null, so we only need to check smiles
- * - 1540:B02 is only well that has a well.smiles, but no compounds (TODO)
 */
 insert into reagent (reagent_id, library_contents_version_id, well_id)
 select nextval('reagent_id_seq'), 
@@ -481,7 +494,7 @@ drop table annotation_value_old;
 drop table study_reagent_link_old;
 
 /* TODO: this is only a heuristic; update as necessary to work with your facility's libraries */
-update library set is_pool = true where screen_type = 'RNAi' and library_name like '%Pool%'
+update library set is_pool = true where screen_type = 'RNAi' and library_name like '%Pool%';
 
 /* create pool-to-duplex mapping (works for ICCB-L RNAI libraries only, due to dependency on specific library naming conventions) */
 /*
@@ -508,7 +521,7 @@ pl.library_name not like '%Pool%' and pl.screen_type = 'RNAi' and pl.is_pool and
 dl.library_name like '%Duplex%' and dl.screen_type = 'RNAi' and
 pg.entrezgene_id=dg.entrezgene_id;
 
-/* TODO: ensure all reagent tuples have an associated {small_molecule,silencing,natural_product}_reagent tuple:
+/* pre-condition: ensure all reagent tuples have an associated {small_molecule,silencing,natural_product}_reagent tuple:
   select l.short_name, count(*) from library l join well w
   using(library_id) join reagent r using(well_id) left join
   small_molecule_reagent r2 on(r.reagent_id=r2.reagent_id) left join
