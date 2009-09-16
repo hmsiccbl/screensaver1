@@ -1,3 +1,5 @@
+/* ICCB-L specific!  Modify as necessary for your facility's data */
+
 BEGIN;
 
 INSERT INTO schema_history (screensaver_revision, date_updated, comment)

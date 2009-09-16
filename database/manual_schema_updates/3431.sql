@@ -1,3 +1,7 @@
+/*
+ * WARNING: This is a major update to the schema!  Review the changes below, modify as necessary, and test rigorously on your own data!
+ */
+
 BEGIN;
 
 INSERT INTO schema_history (screensaver_revision, date_updated, comment)
@@ -6,11 +10,9 @@ SELECT
 current_timestamp,
 'migration of library contents for v1.8.0';
 
+alter table lab_cherry_pick add constraint lab_cherry_pick_cherry_pick_request_id_key unique (cherry_pick_request_id, source_well_id);
 
-/* ICCB-L legacy data does not comply with constraint */
-/*alter table lab_cherry_pick add constraint lab_cherry_pick_cherry_pick_request_id_key unique (cherry_pick_request_id, source_well_id);*/
-
-alter table compound_cherry_pick_request drop constraint fk15f250c38e09cc35 /*fk_small_molecule_cherry_pick_request_to_cherry_pick_request*/;
+alter table compound_cherry_pick_request drop constraint fk_compound_cherry_pick_request_to_cherry_pick_request;
 alter table compound_cherry_pick_request rename to small_molecule_cherry_pick_request;
 alter table small_molecule_cherry_pick_request 
     add constraint fk_small_molecule_cherry_pick_request_to_cherry_pick_request 
@@ -282,10 +284,6 @@ alter table molfile add primary key (reagent_id, ordinal);
 alter table molfile add constraint molfile_reagent_id_key unique (reagent_id);
 
 
-/* For ICCB only! */
-alter table compound_cas_number rename column compound_id to smiles;
-alter table compound_cas_number rename to _legacy_small_molecule_cas_number;
-
 /* Study and Annotation links to reagent */
 
 alter table annotation_value rename to annotation_value_old;
@@ -436,8 +434,7 @@ create index annotation_value_reagent_id_index on annotation_value (reagent_id);
 
 /* drop old data */
 
-/* Uncomment next line for non-ICCB installations! */
-/*drop table compound_cas_number;*/
+drop table compound_cas_number;
 drop table compound_pubchem_cid cascade;
 drop table compound_chembank_id cascade;
 drop table compound_compound_name cascade;
@@ -483,11 +480,11 @@ drop table gene_genbank_accession_number_old;
 drop table annotation_value_old; 
 drop table study_reagent_link_old;
 
-/* ICCB-L specific */
-update library set is_pool = true where screen_type = 'RNAi' and 
-(library_name not like '%Duplex%' and library_name not like 'miRNA%');
+/* TODO: this is only a heuristic; update as necessary to work with your facility's libraries */
+update library set is_pool = true where screen_type = 'RNAi' and library_name like '%Pool%'
 
 /* create pool-to-duplex mapping (works for ICCB-L RNAI libraries only, due to dependency on specific library naming conventions) */
+/*
 insert into silencing_reagent_duplex_wells (silencing_reagent_id, well_id)
 select psr.reagent_id, dw.well_id
 from
@@ -498,6 +495,7 @@ pl.library_name like '%Pool%' and pl.screen_type = 'RNAi' and
 dl.library_name like '%Duplex%' and dl.screen_type = 'RNAi' and
 substring(dl.library_name from 1 for 6) = substring(pl.library_name from 1 for 6) and
 pg.entrezgene_id=dg.entrezgene_id;
+*/
 
 /* create pool-to-duplex mapping for non-conventionally-named libraries */
 insert into silencing_reagent_duplex_wells (silencing_reagent_id, well_id)
@@ -509,8 +507,6 @@ where
 pl.library_name not like '%Pool%' and pl.screen_type = 'RNAi' and pl.is_pool and
 dl.library_name like '%Duplex%' and dl.screen_type = 'RNAi' and
 pg.entrezgene_id=dg.entrezgene_id;
-
-/* TODO: fix primary keys with '1' suffix (drop existing primary keys of same name first) */
 
 /* TODO: ensure all reagent tuples have an associated {small_molecule,silencing,natural_product}_reagent tuple:
   select l.short_name, count(*) from library l join well w
@@ -525,21 +521,18 @@ pg.entrezgene_id=dg.entrezgene_id;
 /* fix missing small molecule reagents (due to missing compounds in old schema) */
 insert into small_molecule_reagent (reagent_id) select r.reagent_id from library l join well w using(library_id) join reagent r using(well_id) left join small_molecule_reagent r2 on(r.reagent_id=r2.reagent_id) where r2.reagent_id is null and l.screen_type = 'Small Molecule' and l.library_type <> 'Natural Products';
 
-/* TODO: ensure both vendor name and identifier are specified together:
+/* pre-condition: ensure both vendor name and identifier are specified together:
   select count(*) from reagent where (vendor_name is null and
   vendor_identifier is not null) or (vendor_name is not null and
   vendor_identifier is null);
 */
 
-/* TODO: verify that exactly 4 duplex wells exist for each pool; report those that don't:
+/* pre-condition: verify that exactly 4 duplex wells exist for each pool; report those that don't:
     select pw.well_id, count(*) from well pw join reagent r
     using(well_id) join silencing_reagent_duplex_wells l
     on(l.silencing_reagent_id=r.reagent_id) group by pw.well_id having
     count(*) <> 4;
 */
-
-/* [#1902] */
-update small_molecule_reagent set smiles = 'C12(CC3CC(C2)CC(C1)C3)[CH](NCc1sccc1)C' from reagent r where well_id = '01540:B02' and r.reagent_id = small_molecule_reagent.reagent_id;
 
 /* set wells' latest released regeant */
 analyze;

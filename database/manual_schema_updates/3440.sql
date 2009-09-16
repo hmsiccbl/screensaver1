@@ -6,7 +6,6 @@ SELECT
 current_timestamp,
 'remove unique index on lab_cherry_pick';
 
-/* ICCB-L data never actually was given this constraint; but including here, commented-out, for other deployments */
-/*alter table lab_cherry_pick drop constraint lab_cherry_pick_cherry_pick_request_id_key;*/
+alter table lab_cherry_pick drop constraint lab_cherry_pick_cherry_pick_request_id_key;
 
 COMMIT;
