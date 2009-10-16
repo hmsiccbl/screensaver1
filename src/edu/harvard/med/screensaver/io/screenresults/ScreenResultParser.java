@@ -417,7 +417,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                  dataHeadersSheet
                                      .getCell(iDataHeader,DataHeaderRow.ASSAY_PHENOTYPE.getRowIndex()).getString(),
                                  dataHeadersSheet
-                                     .getCell(iDataHeader, DataHeaderRow.CHANNEL.getRowIndex()).getInteger());
+                                     .getCell(iDataHeader, DataHeaderRow.CHANNEL.getRowIndex()).getInteger(),
+                                 dataHeadersSheet
+                                     .getCell(iDataHeader, DataHeaderRow.TIME_POINT_ORDINAL.getRowIndex()).getInteger(),
+                                 dataHeadersSheet
+                                     .getCell(iDataHeader, DataHeaderRow.ZDEPTH_ORDINAL.getRowIndex()).getInteger());
         rvt.setDescription(dataHeadersSheet
                            .getCell(iDataHeader,DataHeaderRow.DESCRIPTION.getRowIndex()).getString());
         rvt.setTimePoint(dataHeadersSheet

@@ -99,6 +99,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   private boolean _isNumeric;
   private Integer _positivesCount;
   private Integer channel;
+  private Integer timePointOrdinal;
+  private Integer zdepthOrdinal;
 
   // public instance methods
 
@@ -112,6 +114,27 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     this.channel = channel;
   }
 
+  public Integer getTimePointOrdinal()
+  {
+    return timePointOrdinal;
+  }
+
+  public void setTimePointOrdinal(Integer timePointOrdinal)
+  {
+    this.timePointOrdinal = timePointOrdinal;
+  }
+
+  public Integer getZdepthOrdinal()
+  {
+    return zdepthOrdinal;
+  }
+
+  public void setZdepthOrdinal(Integer zdepthOrdinal)
+  {
+    this.zdepthOrdinal = zdepthOrdinal;
+  }
+  
+  
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
@@ -820,7 +843,9 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     boolean isPositiveIndicator,
     boolean isFollowupData,
     String assayPhenotype,
-    Integer channel)
+    Integer channel,
+    Integer timePointOrdinal,
+    Integer zdepthOrdinal)
   {
     if (screenResult == null) {
       throw new NullPointerException();
@@ -837,6 +862,8 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     setFollowUpData(isFollowupData);
     setAssayPhenotype(assayPhenotype);
     setChannel(channel);
+    setTimePointOrdinal(timePointOrdinal);
+    setZdepthOrdinal(zdepthOrdinal);
   }
 
   // protected constructor

@@ -29,7 +29,7 @@ public enum AssayWellType implements VocabularyTerm
   LIBRARY_CONTROL("library control", "C"),
   ASSAY_POSITIVE_CONTROL("assay positive control", "P"),
   ASSAY_CONTROL("assay control", "N"), // aka "assay negative control", but stakeholders prefer simply "assay control"
-  ASSAY_CONTROL_SHARED("assay control shared", "NS"), //shared between screens
+  ASSAY_CONTROL_SHARED("assay control shared", "S"), //shared between screens
   BUFFER("buffer", "B"), // RNAi only
   DMSO("DMSO", "D"), // small molecule only
                      // note: as of 2007-01-31, screen result files don't use this; they use EMPTY for what should be DMSO wells

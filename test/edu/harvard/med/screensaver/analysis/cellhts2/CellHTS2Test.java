@@ -320,7 +320,9 @@ public class CellHTS2Test extends AbstractSpringTest
   {
     this.normalizePlatesAssert(NormalizePlatesMethod.NEGATIVES,
                                NormalizePlatesScale.ADDITIVE,
-                               2);
+                               2,
+                               NormalizePlatesNegControls.NEG,
+                               true);
   }
 
   public void testNormalizePlatesNegativesMultiplicative()
@@ -330,7 +332,9 @@ public class CellHTS2Test extends AbstractSpringTest
   {
     this.normalizePlatesAssert(NormalizePlatesMethod.NEGATIVES,
                                NormalizePlatesScale.MULTIPLICATIVE,
-                               2);
+                               2,
+                               NormalizePlatesNegControls.NEG,
+                               true);
   }
 
   public void testNormalizePlatesNegativesNegSharedMultiplicative()
@@ -341,9 +345,10 @@ public class CellHTS2Test extends AbstractSpringTest
     this.normalizePlatesAssert(NormalizePlatesMethod.NEGATIVES,
                                NormalizePlatesScale.MULTIPLICATIVE,
                                2,
-                               NormalizePlatesNegControls.NEG_SHARED);
+                               NormalizePlatesNegControls.NEG_SHARED,
+                               true);
   }
-  
+
   public void testNormalizePlatesNpiNeg()
   throws RserveException,
   REngineException,
@@ -365,28 +370,26 @@ public class CellHTS2Test extends AbstractSpringTest
     normalizePlatesAssert(normalizePlatesMethod,
                           normalizePlatesScale,
                           nrPlateColumns,
-                          NormalizePlatesNegControls.NEG);
+                          NormalizePlatesNegControls.NEG,
+                          false);
   }
   
 
   public void normalizePlatesAssert(NormalizePlatesMethod normalizePlatesMethod,
                                     NormalizePlatesScale normalizePlatesScale,
                                     int nrPlateColumns,
-                                    NormalizePlatesNegControls normalizePlatesNegControls)
+                                    NormalizePlatesNegControls normalizePlatesNegControls,
+                                    boolean inclNS)
     throws RserveException,
     REngineException,
     REXPMismatchException
   {
 
-    boolean inclNS;
-    if (normalizePlatesNegControls == NormalizePlatesNegControls.NEG_SHARED) {
-      inclNS = true;
-    }else {
-      inclNS = false;
-    }
+
     ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult(false,
                                                                                       false,
                                                                                       nrPlateColumns,
+                                                                                      false,
                                                                                       inclNS);
     String title = "Dummy_Experiment";
 
@@ -471,6 +474,13 @@ public class CellHTS2Test extends AbstractSpringTest
    * (2 columns) : 1,2,3,4,5,6,7,9
    */
           if (normalizePlatesNegControls == NormalizePlatesNegControls.NEG_SHARED) {
+            /* plate : 2 cols,3 rows
+             * R1P1: AO1 1 , A02 2 , B01 3 , B02 4 , C01 2 , C02 null
+             * R1P2: AO1 5 , A02 6 , B01 7 , B02 9 , C01 4 , C02 null
+             * BO1: (normal) negative control, ic.  P1: 3, P2: 7)
+             * CO1: S (shared negative control, ic. P1: 2, P2: 4)
+             */
+            
             if (normalizePlatesScale == NormalizePlatesScale.ADDITIVE) {
               Collections.addAll(eValuesRep1,
                                  new Double(-1),
@@ -488,7 +498,7 @@ public class CellHTS2Test extends AbstractSpringTest
                                  new Double(1),
                                  new Double(1.5),
                                  new Double(2),
-                                 new Double(1), //for C01
+                                 new Double(1), 
                                  CellHTS2.NA,
                                  new Double(1.25),
                                  new Double(1.50),
@@ -498,17 +508,21 @@ public class CellHTS2Test extends AbstractSpringTest
                                  CellHTS2.NA);
             }
           }
-          else // based on "N"
+          else // based on "N" {
           if (normalizePlatesScale == NormalizePlatesScale.ADDITIVE) {
             Collections.addAll(eValuesRep1,
                                new Double(-2),
                                new Double(-1),
                                new Double(0),
                                new Double(1),
+                               new Double(-1),
+                               CellHTS2.NA,
                                new Double(-2),
                                new Double(-1),
                                new Double(-0),
-                               new Double(2));
+                               new Double(2),
+                               new Double(-3),
+                               CellHTS2.NA);
           }
           else {
             Collections.addAll(eValuesRep1,
@@ -516,10 +530,15 @@ public class CellHTS2Test extends AbstractSpringTest
                                new Double(0.6666666666666666),
                                new Double(1),
                                new Double(1.3333333333333333),
+                               new Double(0.6666666666666666),
+                               CellHTS2.NA,
                                new Double(0.7142857142857143),
                                new Double(0.8571428571428571),
                                new Double(1),
-                               new Double(1.2857142857142858));
+                               new Double(1.2857142857142858),
+                               new Double(0.5714285714285714), 
+                               CellHTS2.NA
+                              );
           }
         }
         else { // not NEGATIVES
@@ -631,7 +650,7 @@ public class CellHTS2Test extends AbstractSpringTest
     }
       // compare the values of the two newly added normalized replicates (type:
       // ResultValueType)
-      // check resultValueType cellhts2_norm_repq and cellhts2_norm_rep2 are
+      // check resultValueType cellhts2_norm_rep1 and cellhts2_norm_rep2 are
       // present, with values
       List<ResultValue> actualValuesRep1 = null;
       List<ResultValue> actualValuesRep2 = null;

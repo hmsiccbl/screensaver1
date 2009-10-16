@@ -8,7 +8,7 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
 public enum NormalizePlatesNegControls implements VocabularyTerm
 {
   NEG("N"),
-  NEG_SHARED("NS"); // used as negative control to normalize over plates with different conditions
+  NEG_SHARED("S"); // used as negative control to normalize over plates with different conditions
 
   /**
    * A Hibernate <code>UserType</code> to map the {@link NormalizePlatesMethod} vocabulary.

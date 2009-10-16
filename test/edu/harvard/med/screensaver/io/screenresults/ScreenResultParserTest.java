@@ -444,7 +444,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   
   public void testParseScreenResultWithChannels() throws Exception
   {
-    /* including test for use "NS" */
+    /* including test for use "S", "time point ordinal" and "zdepth_ordinal" */
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_117_TEST_WORKBOOK_FILE);
     ScreenResult screenResult = mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(117),
                                                              workbookFile);
@@ -673,6 +673,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt = expectedScreenResult.createResultValueType("r1c1");
     rvt.setReplicateOrdinal(1);
     rvt.setChannel(1);
+    rvt.setTimePointOrdinal(1);
+    rvt.setZdepthOrdinal(4);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
     rvt.setAssayPhenotype("Human"); //apparently some default at uploading in case not given
     rvt.setNumeric(true); //apparently some default at uploading in case not given
@@ -681,6 +683,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt = expectedScreenResult.createResultValueType("r1c2");
     rvt.setReplicateOrdinal(1);
     rvt.setChannel(2);
+    rvt.setTimePointOrdinal(2);
+    rvt.setZdepthOrdinal(3);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
     rvt.setAssayPhenotype("Human");
     rvt.setNumeric(true);
@@ -689,6 +693,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt = expectedScreenResult.createResultValueType("r2c1");
     rvt.setReplicateOrdinal(2);
     rvt.setChannel(1);
+    rvt.setTimePointOrdinal(3);
+    rvt.setZdepthOrdinal(2);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
     rvt.setAssayPhenotype("Human");
     rvt.setNumeric(true);
@@ -697,6 +703,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt = expectedScreenResult.createResultValueType("r2c2");
     rvt.setReplicateOrdinal(2);
     rvt.setChannel(2);
+    rvt.setTimePointOrdinal(4);
+    rvt.setZdepthOrdinal(1);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
     rvt.setAssayPhenotype("Human");
     rvt.setNumeric(true);

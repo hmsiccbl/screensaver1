@@ -225,7 +225,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
    */
   public ResultValueType createResultValueType(String name)
   {
-    return createResultValueType(name, null, false, false, false, null, null);
+    return createResultValueType(name, null, false, false, false, null, null,null,null);
   }
 
   /**
@@ -246,7 +246,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
     boolean isFollowupData,
     String assayPhenotype)
   {
-    return createResultValueType(name, replicateOrdinal, isDerived, isPositiveIndicator, isFollowupData, assayPhenotype,null);
+    return createResultValueType(name, replicateOrdinal, isDerived, isPositiveIndicator, isFollowupData, assayPhenotype,null,null,null);
   }
 
   
@@ -268,7 +268,9 @@ public class ScreenResult extends TimeStampedAbstractEntity
     boolean isPositiveIndicator,
     boolean isFollowupData,
     String assayPhenotype,
-    Integer channel)
+    Integer channel,
+    Integer timePointOrdinal,
+    Integer zdepthOrdinal)
   {
     verifyNameIsUnique(name);
     ResultValueType resultValueType = new ResultValueType(
@@ -279,7 +281,10 @@ public class ScreenResult extends TimeStampedAbstractEntity
       isPositiveIndicator,
       isFollowupData,
       assayPhenotype,
-      channel);
+      channel,
+      timePointOrdinal,
+      zdepthOrdinal
+      );
     _resultValueTypes.add(resultValueType);
     return resultValueType;
   }

@@ -404,8 +404,8 @@ public class CellHTS2 {
         contents[i] = "pos";
       } else if (rv.getAssayWellType().getAbbreviation().equals("N") ) {
         contents[i] = "N";
-      } else if (rv.getAssayWellType().getAbbreviation().equals("NS") ) {
-        contents[i] = "NS";
+      } else if (rv.getAssayWellType().getAbbreviation().equals("S") ) {
+        contents[i] = "S";
       } else if (rv.getAssayWellType().getAbbreviation().equals("X")) {
         contents[i] = "sample";
       }
@@ -680,7 +680,7 @@ public class CellHTS2 {
         // rvt.getName();
 
         ResultValueType rvtNew = screenResult.createResultValueType(rvtPrefix
-            + rvt.getName(), r, true, false, false, "phenotype",rvt.getChannel());
+            + rvt.getName(), r, true, false, false, "phenotype",rvt.getChannel(),null,null);
         rvtNew.setNumeric(true);
 
         for (int i = 0; i < wells.size(); ++i) {
@@ -693,7 +693,7 @@ public class CellHTS2 {
       result = rserveExtensions.tryEval(rConnection, rExpr2).asDoubles();
 
       ResultValueType rvtSumm = screenResult.createResultValueType(
-          "cellhts2_summarized", null, true, false, false, "phenotype",null);
+          "cellhts2_summarized", null, true, false, false, "phenotype",null,null,null);
       rvtSumm.setNumeric(true);
       for (int i = 0; i < wells.size(); ++i) {
         Well well = wells.get(i);
@@ -712,11 +712,6 @@ public class CellHTS2 {
     setLastRMethodToRun(RMethod.ANNOTATE);
   }
 
-  public void normalizePlatesInit(NormalizePlatesMethod normalizePlatesMethod, NormalizePlatesScale normalizePlatesScale){
-    normalizePlatesInit(normalizePlatesMethod,  normalizePlatesScale,NormalizePlatesNegControls.NEG);
-    
-  }
-  
   public void normalizePlatesInit(NormalizePlatesMethod normalizePlatesMethod, NormalizePlatesScale normalizePlatesScale,
           NormalizePlatesNegControls normalizePlatesNegControls)
   {

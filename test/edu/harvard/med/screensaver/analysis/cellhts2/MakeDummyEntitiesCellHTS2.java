@@ -21,22 +21,24 @@ package edu.harvard.med.screensaver.analysis.cellhts2;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.libraries.Gene;
+import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -46,6 +48,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 public class MakeDummyEntitiesCellHTS2
 {
   // static members
+  private static TestDataFactory dataFactory = new TestDataFactory();
 
   private static Logger log = Logger.getLogger(MakeDummyEntitiesCellHTS2.class);
 
@@ -89,6 +92,10 @@ public class MakeDummyEntitiesCellHTS2
                                   startPlate,
                                   endPlate);
 
+    dataFactory.newInstance(LibraryContentsVersion.class, library);
+    library.getLatestContentsVersion().release(new AdministrativeActivity(library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    
+    
     List<Well> wells = new ArrayList<Well>(nWells);
     for (int i = 0; i < nWells; ++i) {
       int plate = startPlate + (i / (nrPlateColumns * nrPlateRows));
@@ -137,7 +144,7 @@ public class MakeDummyEntitiesCellHTS2
                                              2,
                                              nrPlateColumns,
                                              inclNS);
-
+    
     ScreenResult screenResult = screen.createScreenResult();
 
     // create ResultValueTypes

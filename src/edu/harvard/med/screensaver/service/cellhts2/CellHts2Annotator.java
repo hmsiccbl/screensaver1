@@ -83,7 +83,7 @@ public class CellHts2Annotator
         
         //Initiate the parameters for all the methods to be run
         if (untilInclRmethod.getIndex() >= RMethod.NORMALIZE_PLATES.getIndex()){ 
-          _cellHts.normalizePlatesInit(normalizationMethod,normalizationScale);
+          _cellHts.normalizePlatesInit(normalizationMethod,normalizationScale,normalizePlatesNegControls);
         }
         if (untilInclRmethod.getIndex() >= RMethod.SCORE_REPLICATES.getIndex()){ 
           _cellHts.scoreReplicatesInit(scoreReplicatesMethod);

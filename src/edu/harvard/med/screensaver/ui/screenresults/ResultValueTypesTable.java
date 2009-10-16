@@ -31,6 +31,9 @@ public class ResultValueTypesTable extends MetaDataTable<ResultValueType>
      new MetaDataTableRowDefinition<ResultValueType>("description", "Description", "A description of the data header"),
      new MetaDataTableRowDefinition<ResultValueType>("replicateOrdinal", "Replicate Number", "To which replicate this data header refers"),
      new MetaDataTableRowDefinition<ResultValueType>("channel", "Channel", "The channel in which the readout was done"),
+     new MetaDataTableRowDefinition<ResultValueType>("timePointOrdinal", "Time Point Ordinal", "The ordinal of the time point the image was taken."),
+     new MetaDataTableRowDefinition<ResultValueType>("zdepthOrdinal", "Zdepth Ordinal", "The depth or z-value the image was taken "),
+     
      new MetaDataTableRowDefinition<ResultValueType>("assayReadoutType", "Assay Readout Type", "The type of readout used to calculate these values"),
      new MetaDataTableRowDefinition<ResultValueType>("timePoint", "Time Point", "The time point the readout was taken"),
      new MetaDataTableRowDefinition<ResultValueType>("derived", "Derived", "True when this column is derived from other data headers"),
