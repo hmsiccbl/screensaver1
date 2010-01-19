@@ -22,12 +22,15 @@ import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
 import edu.harvard.med.screensaver.ui.UIControllerMethod;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +53,8 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
   private LibraryViewer _libraryViewer;
 
   private Library _library;
+  
+  private UISelectOneEntityBean<ScreeningRoomUser> owner;
   
   
   /**
@@ -122,6 +127,7 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
   public String save()
   {
       if (_library.getEntityId() == null) {
+        updateLibraryProperties();
         try {
           _library = _libraryCreator.createLibrary(_library);
           showMessage("libraries.createdLibrary", "librariesBrowser");
@@ -133,12 +139,21 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
         }
       }
       else {
+        updateLibraryProperties();
         _dao.reattachEntity(_library);
       }
 
       _dao.flush();
       return _libraryViewer.viewLibrary(_library);
   }
+  
+  private void updateLibraryProperties()
+  {
+    ScreeningRoomUser owner = getOwner().getSelection() == null ? null : getOwner().getSelection();
+    this._library.setOwner(owner);
+  }
+  
+  
   
   public List<SelectItem> getLibraryScreeningStatusSelectItems()    
   {
@@ -147,7 +162,7 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
 
   public List<SelectItem> getScreenTypeSelectItems()
   {
-    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
+		return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
   }
   
   public List<SelectItem> getLibraryTypeSelectItems()
@@ -159,5 +174,20 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
   {
     setEditMode(true);
     return VIEW_LIBRARY_DETAIL;
+  }
+  
+  public UISelectOneBean<ScreeningRoomUser> getOwner()
+  {
+    if (owner == null) {
+      //TODO convert to sortedSet
+      List<ScreeningRoomUser> owners = _dao.findAllEntitiesOfType(ScreeningRoomUser.class);
+      owner = new UISelectOneEntityBean<ScreeningRoomUser>(owners, getLibrary().getOwner(), true, _dao) {
+        @Override
+        protected String makeLabel(ScreeningRoomUser o) { return o.getFullNameLastFirst(); }
+        @Override
+        protected String getEmptyLabel() { return "<empty>"; }
+      };
+    }
+    return owner;
   }
 }
