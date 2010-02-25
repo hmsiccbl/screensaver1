@@ -12,14 +12,16 @@ package edu.harvard.med.screensaver.model.users;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -30,7 +32,7 @@ import org.apache.log4j.Logger;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-public class LabAffiliation extends SemanticIDAbstractEntity implements Comparable<LabAffiliation>
+public class LabAffiliation extends AbstractEntity<Integer> implements Comparable<LabAffiliation>
 {
 
   // static fields
@@ -50,14 +52,14 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
 
 
   /**
-   * Construct an uninitialized <code>LabAffiliation</code>.
+   * Construct an uninitialized <code>labAffiliation</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    * @motivation for UI entity creation
    */
   public LabAffiliation() {}
 
   /**
-   * Construct an initialized <code>LabAffiliation</code>.
+   * Construct an initialized <code>labAffiliation</code>.
    * @param affiliationName the affiliation name
    * @param affiliationCategory the affiliation category
    */
@@ -67,37 +69,29 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
     _affiliationCategory = affiliationCategory;
   }
 
-
-  // public methods
-
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public String getEntityId()
-  {
-    return getLabAffiliationId();
-  }
-
-  /**
-   * Get the id for the lab affiliation.
-   * @return the id for the lab affiliation
-   */
   @Id
-  @org.hibernate.annotations.Type(type="text")
-  public String getLabAffiliationId()
+  @org.hibernate.annotations.GenericGenerator(
+    name="lab_affiliation_id_seq",
+    strategy="sequence",
+    parameters = { @Parameter(name="sequence", value="lab_affiliation_id_seq") }
+  )
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="lab_affiliation_id_seq")
+  public Integer getLabAffiliationId()
   {
-    return getAffiliationName();
+    return getEntityId();
   }
 
-  /**
-   * Get the affiliation name.
-   * @return the affiliation name
-   */
+  private void setLabAffiliationId(Integer labAffiliationId)
+  {
+    setEntityId(labAffiliationId);
+  }
+
   @Column(nullable=false, unique=true)
   @org.hibernate.annotations.Type(type="text")
   public String getAffiliationName()
@@ -105,19 +99,11 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
     return _affiliationName;
   }
 
-  /**
-   * Set the affiliation name.
-   * @param affiliationName the new affiliation name
-   */
   public void setAffiliationName(String affiliationName)
   {
     _affiliationName = affiliationName;
   }
 
-  /**
-   * Get the affiliation category.
-   * @return the affiliation category
-   */
   @Column(nullable=false)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.users.AffiliationCategory$UserType")
   public AffiliationCategory getAffiliationCategory()
@@ -125,32 +111,11 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
     return _affiliationCategory;
   }
 
-  /**
-   * Set the affiliation category.
-   * @param affiliationCategory the new affiliation category
-   */
   public void setAffiliationCategory(AffiliationCategory affiliationCategory)
   {
     _affiliationCategory = affiliationCategory;
   }
 
-
-  // private instance methods
-
-  /**
-   * Set the id for the lab affiliation.
-   * @param labAffiliationId the new id for the lab affiliation
-   * @motivation for hibernate
-   */
-  private void setLabAffiliationId(String labAffiliationId)
-  {
-  }
-
-  /**
-   * Get the version for the lab affiliation.
-   * @return the version for the lab affiliation
-   * @motivation for hibernate
-   */
   @Version
   @Column(nullable=false)
   private Integer getVersion()
@@ -158,11 +123,6 @@ public class LabAffiliation extends SemanticIDAbstractEntity implements Comparab
     return _version;
   }
 
-  /**
-   * Set the version for the lab affiliation.
-   * @param version the new version for the lab affiliation
-   * @motivation for hibernate
-   */
   private void setVersion(Integer version)
   {
     _version = version;

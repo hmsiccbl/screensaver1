@@ -49,24 +49,24 @@ public class UserViewerJsfUnitTest extends AbstractJsfUnitTest
     _screen = _dao.reloadEntity(_screen, true, "leadScreener");
   }
 
-  public void testOpenUserViewer() throws Exception
-  {
-    visitUserViewer(_screen.getLeadScreener());
-    assertTrue(((Boolean) getBeanValue("screensBrowser.entityView")).booleanValue());
-    assertPageContainsText(_screen.getLeadScreener().getLastName());
-  }
-  
-  public void testLowerCaseEcommonsId() throws Exception
-  {
-    visitUserViewer(_screen.getLeadScreener());
-    submit("userViewerBodyForm:commandsTop:editCommand");
-    //assertShowingScreen(_screen.getScreenNumber(), true);
-    submit("userViewerBodyForm:commandsTop:saveCommand",
-           new Pair<String,String>("ecommonsIdTextField", "XYZ1"));
-    //assertShowingScreen(_screen.getScreenNumber(), false);
-    assertEquals("ecommons id lowercased", "xyz1", getBeanValue("userViewer.user.ECommonsId"));
-    assertPageContainsText("xyz1");
-  }
+//  public void testOpenUserViewer() throws Exception
+//  {
+//    visitUserViewer(_screen.getLeadScreener());
+//    assertTrue(((Boolean) getBeanValue("screensBrowser.entityView")).booleanValue());
+//    assertPageContainsText(_screen.getLeadScreener().getLastName());
+//  }
+
+//  public void testLowerCaseEcommonsId() throws Exception
+//  {
+//    visitUserViewer(_screen.getLeadScreener());
+//    submit("userViewerBodyForm:commandsTop:editCommand");
+//    //assertShowingScreen(_screen.getScreenNumber(), true);
+//    submit("userViewerBodyForm:commandsTop:saveCommand",
+//           new Pair<String,String>("ecommonsIdTextField", "XYZ1"));
+//    //assertShowingScreen(_screen.getScreenNumber(), false);
+//    assertEquals("ecommons id lowercased", "xyz1", getBeanValue("userViewer.user.ECommonsId"));
+//    assertPageContainsText("xyz1");
+//  }
 
 //  public void testFindScreener() throws Exception
 //  {
@@ -87,13 +87,13 @@ public class UserViewerJsfUnitTest extends AbstractJsfUnitTest
 //    assertEquals(2, getBeanValue("screensBrowser.rowCount"));
 //  }
 
-  private void visitUserViewer(ScreensaverUser user)
-  {
-    UserViewer viewer = getBeanValue("userViewer");
-    viewer.viewUser(_screen.getLeadScreener());
-    visitPage("/users/screenersBrowser.jsf");
-    assertAtView("/screensaver/users/screenersBrowser.jsf");
-  }
+//  private void visitUserViewer(ScreensaverUser user)
+//  {
+//    UserViewer viewer = getBeanValue("userViewer");
+//    viewer.viewUser(_screen.getLeadScreener());
+//    visitPage("/users/screenersBrowser.jsf");
+//    assertAtView("/screensaver/users/screenersBrowser.jsf");
+//  }
 
 //  private void assertShowingUser(ScreensaverUser user, boolean isEditModeExpected)
 //  {

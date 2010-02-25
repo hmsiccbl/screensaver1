@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.table.column;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.faces.convert.BigDecimalConverter;
 import javax.faces.convert.BooleanConverter;
@@ -20,8 +21,11 @@ import javax.faces.convert.IntegerConverter;
 import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.util.DateTimeConverter;
 import edu.harvard.med.screensaver.ui.util.NoOpStringConverter;
 import edu.harvard.med.screensaver.ui.util.VolumeConverter;
+
+import com.google.common.collect.Sets;
 
 public enum ColumnType {
 
@@ -49,6 +53,10 @@ public enum ColumnType {
        new LocalDateConverter(),
        Operator.COMPARABLE_OPERATORS,
        Operator.EQUAL),
+  DATE_TIME(false,
+            new DateTimeConverter(),
+            Operator.COMPARABLE_OPERATORS,
+            Operator.EQUAL),
   BOOLEAN(false,
           new BooleanConverter(),
           Operator.COMPARABLE_OPERATORS,
@@ -57,27 +65,31 @@ public enum ColumnType {
              null,
              Operator.COMPARABLE_OPERATORS,
              Operator.EQUAL),
-  LIST(false,
+  TEXT_SET(false,
        new NoOpStringConverter(),
-       Operator.ALL_OPERATORS,
-       Operator.TEXT_CONTAINS);
+       Sets.difference(Operator.ALL_OPERATORS, Operator.NEGATED_OPERATORS),
+       Operator.TEXT_CONTAINS),
+  INTEGER_SET(false,
+              new IntegerConverter(),
+              Sets.difference(Operator.COMPARABLE_OPERATORS, Operator.NEGATED_OPERATORS),
+              Operator.EQUAL);
 
   private Converter _converter = NoOpStringConverter.getInstance();
   private boolean _isNumeric;
-  private List<Operator> _validOperators;
+  private Set<Operator> _validOperators;
   private List<SelectItem> _operatorSelections = new ArrayList<SelectItem>();
   private Operator _defaultOperator;
 
   private ColumnType(boolean isNumeric,
                      Converter converter,
-                     List<Operator> validOperators,
+                     Set<Operator> validOperators,
                      Operator defaultOperator)
   {
     _isNumeric = isNumeric;
     _converter = converter;
     _validOperators = validOperators;
     _defaultOperator = defaultOperator;
-    for (Operator operator : validOperators) {
+    for (Operator operator : Sets.newTreeSet(validOperators)) {
       _operatorSelections.add(new SelectItem(operator, operator.getSymbol()));
     }
   }
@@ -100,7 +112,7 @@ public enum ColumnType {
     return _converter;
   }
 
-  public List<Operator> getValidOperators()
+  public Set<Operator> getValidOperators()
   {
     return _validOperators;
   }

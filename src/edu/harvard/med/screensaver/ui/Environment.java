@@ -222,7 +222,7 @@ public class Environment extends AbstractBackingBean
     throw new Exception("You asked for it!");
   }
 
-  @UIControllerMethod
+  @UICommand
   public String throwAConcurrencyFailureException() throws Exception
   {
     throw new ConcurrencyFailureException("You asked for it!");

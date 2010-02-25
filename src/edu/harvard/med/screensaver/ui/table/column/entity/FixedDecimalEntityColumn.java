@@ -40,4 +40,9 @@ public abstract class FixedDecimalEntityColumn<E extends AbstractEntity> extends
   {
     return _fetchPaths.getRelationshipPaths();
   }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

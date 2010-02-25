@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 
 /**
  *
@@ -66,14 +66,14 @@ public class CherryPickRequestFinder extends AbstractBackingBean
     _cherryPickRequestNumber = screenNumber;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String findCherryPickRequest()
   {
     if (_cherryPickRequestNumber != null) {
       CherryPickRequest cherryPickRequest = _cherryPickRequestDao.findCherryPickRequestByNumber(_cherryPickRequestNumber);
       if (cherryPickRequest != null) {
         resetSearchFields();
-        return _cherryPickRequestViewer.viewCherryPickRequest(cherryPickRequest);
+        return _cherryPickRequestViewer.viewEntity(cherryPickRequest);
       }
       else {
         showMessage("noSuchEntity",

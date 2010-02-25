@@ -122,8 +122,6 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         AdministrativeActivity deprecationActivity =
           new AdministrativeActivity(admin,
                                      new LocalDate(),
-                                     admin,
-                                     new LocalDate(),
                                      AdministrativeActivityType.WELL_DEPRECATION);
         deprecationActivity.setComments("discontinued gene");
         well.setDeprecationActivity(deprecationActivity);

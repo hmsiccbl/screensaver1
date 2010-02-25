@@ -23,7 +23,7 @@
       <t:panelGrid columns="1">
         <t:commandButton value="Try again" action="#{menu.viewMain}"
           styleClass="command" />
-        <h:outputLink value="#{appInfo.feedbackUrl}" styleClass="label">
+        <h:outputLink value="#{appInfo.applicationProperties['screensaver.ui.feedback_url']}" target="_blank" styleClass="label">
           <h:outputText value="I am having trouble logging into Screensaver" />
         </h:outputLink>
       </t:panelGrid>

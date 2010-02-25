@@ -16,7 +16,7 @@
 		<ss:collapsiblePanel id="screenResultPanel"
 			isCollapsed="#{screenResultViewer.isPanelCollapsedMap['screenResultSummary']}"
 			label="Screen Result Summary"
-			rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
+			rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}">
 			<ui:define name="content">
 				<ui:include src="screenResultViewerBody.xhtml" />
 			</ui:define>

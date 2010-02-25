@@ -98,7 +98,8 @@
 	<property name="dev.loginmodule.config.file"
             location="cfg/tomcat/conf/${loginmodule.config.filename}"
   />
-	<property name="svnversion.cmd" value="svnversion" />
+  <property name="build.number" value="-1" />
+  <property name="release.notes.file" value="changelog.html" />
 	<!-- The servlet authentication method to use.  If set to BASIC, faciliates UI testing by not requiring re-login,
        as browser can cache user name and password and re-issue between web server restarts.  FORM is used for
        production deployment.  Defaults to BASIC if debug property is true. -->
@@ -203,7 +204,13 @@
 		</antcall>
 	</target>
 
-	<target name="set.servlet.authentication.method">
+  <copy file="${release.notes.file}"
+        todir="${deploy.dir}/main/"
+        verbose="${verbose}"
+        failonerror="false"
+  />
+
+  <target name="set.servlet.authentication.method">
 		<replace file="${exploded.war.dir}/WEB-INF/web.xml"
              token="FORM"
              value="${servlet.authentication.method}"
@@ -537,34 +544,46 @@
 		</javac>
 	</target>
 
-	<target name="jar-pilotcomponents" depends="compile-pilotcomponents" >
+  <target name="jar-pilotcomponents" depends="compile-pilotcomponents" >
     <property name="pilot.build.dir" value="${build.dir}/pilot" />
-		<property name="pipelinepilot.jar" value="${pilot.build.dir}/pilotcomponent.jar"/>
-		<delete file="${pipelinepilot.jar}" />
-		<description>
+    <property name="pipelinepilot.jar" value="${pilot.build.dir}/pilotcomponent.jar"/>
+    <delete file="${pipelinepilot.jar}" />
+    <description>
       Build the pipeline-component jar
     </description>
-<!--    <jar 
+    <jar  
       destfile="${pipelinepilot.jar}" 
-      basedir="${pilot.build.dir}/classes" excludes="**" >
-      <fileset dir="${pilot.build.dir}/classes">
-        <include name="edu/harvard/med/iccbl/screensaver/pipelinepilot/**/*" />
-        <include name="edu/harvard/med/screensaver/util/eutils/**/*" />
-        <include name="edu/mit/broad/chembank/shared/**/*" />
-        <include name="edu/mit/broad/chembank/shared/mda/webservices/service/**/*" />
+      basedir="${pilot.build.dir}/classes" >
+    </jar>
+  </target>
+ 	
+  <target name="jar-emailservice" depends="clean" >
+    <mkdir dir="${build.dir}/classes" />
+  	<delete file="edu/harvard/med/iccbl/screensaver/service/EmailService.java" />
+    <javac srcdir="${src.dir}"
+           destdir="${build.dir}/classes"
+           classpathref="build.library.path"
+           debug="true"
+           optimize="${javac.optimize}"
+           listfiles="${verbose}"
+           includes="edu/harvard/med/iccbl/screensaver/service/**"
+      target="1.5"
+      source="1.5"
+    >
+    </javac>
+  	<jar 
+      destfile="mailservice.jar" 
+      basedir="${build.dir}/classes" excludes="**" >
+      <fileset dir="${build.dir}/classes">
+        <include name="edu/harvard/med/iccbl/screensaver/service/EmailService*" />
+        <include name="edu/harvard/med/screensaver/CommandLineApplication*" />
       </fileset>
-    </jar> -->
-  <jar 
-    destfile="${pipelinepilot.jar}" 
-    basedir="${pilot.build.dir}/classes" >
-  </jar>
-	</target>
+  	</jar>
+  </target>	
 
 	<!-- 
 	 pipeline-pilot component task: build the chembank soap access classes 
-	 
 	 -->
-
 	<target name="chembank-wsimport">
 		<taskdef name="wsimport"
              classname="com.sun.tools.ws.ant.WsImport2"
@@ -613,19 +632,17 @@
           failonerror="true"
     />
 
-		<copy todir="${classes.dir}" verbose="${verbose}">
+    <replace file="${classes.dir}/screensaver.properties"
+             token="BUILD_NUMBER"
+             value="${build.number}"
+    />
+
+      <copy todir="${classes.dir}" verbose="${verbose}">
 			<fileset dir="resources">
 				<include name="**/*" />
 				<exclude name="README.txt" />
 			</fileset>
 		</copy>
-
-		<exec executable="${svnversion.cmd}"
-          output="${classes.dir}/build-number.txt"
-    >
-			<arg value="-n" />
-			<arg value="${basedir}" />
-		</exec>
 
 	</target>
 

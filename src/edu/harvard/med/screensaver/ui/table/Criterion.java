@@ -9,16 +9,16 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Observable;
+import java.util.Set;
 
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
-import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -57,19 +57,10 @@ public class Criterion<T> extends Observable
     EMPTY("blank", OperatorClass.EXTANT, 1),
     NOT_EMPTY("not blank", OperatorClass.EXTANT, 1);
 
-    public final static List<Operator> ALL_OPERATORS = new ArrayList<Operator>();
-    public final static List<Operator> COMPARABLE_OPERATORS = new ArrayList<Operator>();
-    public final static List<Operator> EQUALITY_OPERATORS = new ArrayList<Operator>();
-    static {
-      for (Operator operator : Operator.values()) {
-        ALL_OPERATORS.add(operator);
-        if (operator.getOperatorClass() != OperatorClass.TEXT) {
-          COMPARABLE_OPERATORS.add(operator);
-        }
-      }
-      EQUALITY_OPERATORS.add(Operator.EQUAL);
-      EQUALITY_OPERATORS.add(Operator.NOT_EQUAL);
-    }
+    public final static Set<Operator> ALL_OPERATORS = Sets.newHashSet(Operator.values());
+    public final static Set<Operator> TEXT_OPERATORS = Sets.newHashSet(TEXT_STARTS_WITH, TEXT_CONTAINS, TEXT_NOT_CONTAINS, TEXT_LIKE, TEXT_NOT_LIKE);
+    public final static Set<Operator> COMPARABLE_OPERATORS = Sets.difference(ALL_OPERATORS, TEXT_OPERATORS);
+    public final static Set<Operator> NEGATED_OPERATORS = Sets.newHashSet(NOT_EQUAL, TEXT_NOT_CONTAINS, TEXT_NOT_LIKE); 
 
     private String _symbol;
     private OperatorClass _opClass;
@@ -168,7 +159,7 @@ public class Criterion<T> extends Observable
     notifyObservers();
   }
 
-  @UIControllerMethod
+  @UICommand
   public void reset()
   {
    if (_operator.isUnary()) {
@@ -194,12 +185,20 @@ public class Criterion<T> extends Observable
     Object criterionValue = getValue();
     Operator operator = getOperator();
 
-    // handle collections as flattened string representations
-    if (criterionValue instanceof Collection) {
-      criterionValue = StringUtils.makeListString((Collection) criterionValue, " ");
-    }
+    // handle collections by matching on individual elements
     if (datum instanceof Collection) {
-      datum = StringUtils.makeListString((Collection) datum, " ");
+      assert !!!Operator.NEGATED_OPERATORS.contains(operator) : "operator " + operator.getSymbol() + " cannot be applied to collection-based values";
+      if (datum != null && ((Collection) datum).isEmpty()) {
+        return matches(null);
+      }
+      else {
+        for (Object elementDatum : (Collection) datum) {
+          if (matches(elementDatum)) {
+            return true;
+          }
+        }
+        return false;
+      }
     }
 
     boolean result;

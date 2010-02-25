@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -124,7 +125,7 @@ public class WellsSdfDataExporter implements DataExporter<Collection<String>>
                                         Collection<String> keys,
                                         EntityDataFetcher<Well,String> dataFetcher)
   {
-    Iterable<Iterable<String>> partitions = Iterables.partition(keys, MAX_FETCH_SIZE, false);
+    Iterable<List<String>> partitions = Iterables.partition(keys, MAX_FETCH_SIZE);
     for (Iterable<String> partition : partitions) {
       Map<String,Well> entities = dataFetcher.fetchData(Sets.newHashSet(partition));
       for (Well well : entities.values()) {

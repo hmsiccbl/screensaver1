@@ -29,10 +29,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 public class CellHTS2Test extends AbstractSpringTest
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(CellHTS2.class);
-
   public void testCalculateArrayDimensions()
     throws RserveException,
     REngineException,
@@ -52,9 +48,7 @@ public class CellHTS2Test extends AbstractSpringTest
     expected.setNrRowsPlate(2);
     expected.setNrWells(4);
 
-    cellHts2.getArrayDimensions()
-            .equals(expected);
-
+    assertEquals(expected, cellHts2.getArrayDimensions());
   }
 
   // Requires a running Rserve and a running database server as defined in
@@ -869,7 +863,7 @@ public class CellHTS2Test extends AbstractSpringTest
     }
 
     // 3. check equals
-    "/tmp/screensaver/output/index.html".equals(indexUrl);
+    assertEquals("/tmp/screensaver/output/index.html", indexUrl);
 
     // TODO check for presence of all the report files and a timeStamp after
     // starting the testWriteReport

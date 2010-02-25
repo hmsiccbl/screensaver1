@@ -10,6 +10,7 @@
 	
 <!-- Facelet parameters:
        - viewer: AbstractBackingBean implementing EditableViewer
+       - promptUpdateComments: boolean
 -->
 
 <ui:composition>
@@ -26,10 +27,14 @@
 		title="Discard your changes and leave edit mode" />
 	<h:commandButton id="deleteCommand" value="Delete"
 	  rendered="#{viewer.editable &amp;&amp; !viewer.editMode &amp;&amp; viewer.deleteSupported }"
-	  action="#{screenDetailViewer.delete}" 
+	  action="#{viewer.delete}" 
 	  styleClass="command"
 	  onclick="javascript: return confirm('Are you sure you want to delete this item?');"
 	  title="Delete" />
+
+  <ss:property id="updateComments" label="Update comments" type="Text" editWidth="60"
+    value="#{viewer.updateComments}"
+    rendered="#{promptUpdateComments &amp;&amp; userViewer.editMode}" editable="#{true}" />
 
 </ui:composition>
 

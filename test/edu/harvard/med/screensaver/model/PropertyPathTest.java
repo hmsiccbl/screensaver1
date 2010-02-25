@@ -19,26 +19,19 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath.RelationshipPathI
 
 public class PropertyPathTest extends TestCase
 {
-  private static class DummyEntity extends AbstractEntity {
+  private static class DummyEntity extends AbstractEntity<Integer> {
 
     private static final long serialVersionUID = 1L;
-    private Integer _id;
 
     public DummyEntity(int id)
     {
-      _id = id;
+      setEntityId(id);
     }
 
     @Override
     public Object acceptVisitor(AbstractEntityVisitor visitor)
     {
       return null;
-    }
-
-    @Override
-    public Serializable getEntityId()
-    {
-      return _id;
     }
   }
 

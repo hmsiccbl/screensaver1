@@ -30,7 +30,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 
 /**
  * Utility for manipulating schemas, via Spring+Hibernate.
@@ -192,7 +192,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
       }
 
       Statement statement = connection.createStatement();
-      String sql = "TRUNCATE TABLE " + Join.join(",", tables);
+      String sql = "TRUNCATE TABLE " + Joiner.on(",").join(tables);
       statement.execute(sql);
       statement.close();
 
@@ -230,7 +230,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
       if (getSchemaTableNames().isEmpty()) {
         return;
       }
-      String sql = "GRANT ALL ON " + Join.join(",", getSchemaTableNames()) + " TO ";
+      String sql = "GRANT ALL ON " + Joiner.on(",").join(getSchemaTableNames()) + " TO ";
       List<String> developerECommonsIds = _usersDao.findDeveloperECommonsIds();
       if (developerECommonsIds.size() == 0) {
         return;

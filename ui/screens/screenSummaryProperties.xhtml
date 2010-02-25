@@ -29,14 +29,14 @@
 		description="The number used to uniquely identify the screen"
 		value="#{screen.screenNumber}" editable="false">
 		<ui:define name="data">
-			<ss:entityLink entity="#{screen}"
-				property="screenNumber" bean="#{screenViewer}" action="viewScreen" />
-		</ui:define>
+      <ss:entityLink entity="#{screen}" property="screenNumber"
+        viewer="#{screenViewer}" />
+    </ui:define>
 	</ss:property>
 
 	<ss:property id="screenType" label="Screen Type"
 		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
-		editable="#{editable &amp;&amp; !screenDetailViewer.screen.dataLoaded}"
+		editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
 		converter="#{screenTypeConverter}">
 		<ui:define name="editableData">
 			<ui:insert name="editableScreenType">

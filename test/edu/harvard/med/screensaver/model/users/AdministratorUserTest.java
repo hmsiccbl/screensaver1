@@ -45,7 +45,7 @@ public class AdministratorUserTest extends AbstractEntityInstanceTest<Administra
 
     try {
       AdministratorUser user3 = genericEntityDao.findEntityById(AdministratorUser.class, user.getEntityId(), false, "screensaverUserRoles");
-      user3.addScreensaverUserRole(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+      user3.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
       fail("expected DataModelViolationException after adding screening room user role to administrator user ");
     }
     catch (Exception e) {

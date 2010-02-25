@@ -22,8 +22,8 @@ import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
-import edu.harvard.med.screensaver.io.libraries.ParseException;
 import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.Row;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;

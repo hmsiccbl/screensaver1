@@ -40,4 +40,9 @@ public abstract class TextEntityColumn<E extends AbstractEntity> extends TextCol
   {
     return _fetchPaths.getRelationshipPaths();
   }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

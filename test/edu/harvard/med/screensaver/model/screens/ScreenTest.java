@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
@@ -52,18 +53,20 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
   public void testGetLabActivities() throws Exception
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    LibraryScreening screening1 = screen.createLibraryScreening(
-      screen.getLeadScreener(),
-      new LocalDate(2007, 3, 7));
-    LibraryScreening screening2 = screen.createLibraryScreening(
-      screen.getLeadScreener(),
-      new LocalDate(2007, 3, 8));
-    /*CherryPickRequest cpr =*/ screen.createCherryPickRequest(
-      screen.getLeadScreener(),
-      new LocalDate(2007, 3, 9));
-    CherryPickLiquidTransfer cplt = screen.createCherryPickLiquidTransfer(
-      MakeDummyEntities.makeDummyUser(1, "Lab", "Guy"),
-      new LocalDate());
+    AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    LibraryScreening screening1 = screen.createLibraryScreening(admin,
+                                                                screen.getLeadScreener(),
+                                                                new LocalDate(2007, 3, 7));
+    LibraryScreening screening2 = screen.createLibraryScreening(admin,
+                                                                screen.getLeadScreener(),
+                                                                new LocalDate(2007, 3, 8));
+    /*CherryPickRequest cpr =*/ screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy(),
+                                                               screen.getLeadScreener(),
+                                                               new LocalDate(2007, 3, 9));
+    CherryPickLiquidTransfer cplt = screen.createCherryPickLiquidTransfer(admin,
+                                                                          MakeDummyEntities.makeDummyUser(1, "Lab", "Guy"),
+                                                                          new LocalDate(),
+                                                                          CherryPickLiquidTransferStatus.SUCCESSFUL);
 
     Set<LibraryScreening> libraryScreenings =
       screen.getLabActivitiesOfType(LibraryScreening.class);
@@ -217,7 +220,9 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
   {
     schemaUtil.truncateTablesOrCreateSchema();
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
-    screen.createAttachedFile("file1.txt", AttachedFileType.SCREENER_CORRESPONDENCE, "file1 contents");
+    ScreenAttachedFileType attachedFileType = new ScreenAttachedFileType("Screener Correspondence");
+    genericEntityDao.persistEntity(attachedFileType);
+    screen.createAttachedFile("file1.txt", attachedFileType, "file1 contents");
     genericEntityDao.persistEntity(screen);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
@@ -252,10 +257,10 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
                                   approverAdmin,
                                   new LocalDate(2009, 1, 1),
                                   "comments");
-    assertEquals("Recorder", screen.getPinTransferApprovalActivity().getPerformedBy().getFirstName());
-    assertEquals("Approver", screen.getPinTransferApprovalActivity().getApprovedBy().getFirstName());
-    assertEquals(new LocalDate(2009, 1, 1), screen.getPinTransferApprovalActivity().getDateApproved());
-    assertEquals(new LocalDate(), screen.getPinTransferApprovalActivity().getDateOfActivity());
+    assertEquals("Recorder", screen.getPinTransferApprovalActivity().getCreatedBy().getFirstName());
+    assertEquals("Approver", screen.getPinTransferApprovalActivity().getPerformedBy().getFirstName());
+    assertEquals(new LocalDate(2009, 1, 1), screen.getPinTransferApprovalActivity().getDateOfActivity());
+    assertEquals(new LocalDate(), screen.getPinTransferApprovalActivity().getDateCreated().toLocalDate());
     assertEquals("comments", screen.getPinTransferApprovalActivity().getComments());
   }
 

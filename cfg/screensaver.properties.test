@@ -9,6 +9,8 @@ test=true
 
 
 ### run-time properties
+screensaver.service.smtpemailservice.host=smtp.mailinator.com
+screensaver.service.smtpemailservice.username=
 
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost

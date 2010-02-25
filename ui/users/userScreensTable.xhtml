@@ -22,9 +22,9 @@
 				<f:facet name="header">
 					<t:outputText value="Screen #" />
 				</f:facet>
-				<ss:entityLink entity="#{element.screen}" property="screenNumber"
-					bean="#{screenViewer}" action="viewScreen" />
-			</t:column>
+        <ss:entityLink entity="#{element.screen}"
+          property="screenNumber" viewer="#{screenViewer}" />
+      </t:column>
 			<t:column>
 				<f:facet name="header">
 					<t:outputText

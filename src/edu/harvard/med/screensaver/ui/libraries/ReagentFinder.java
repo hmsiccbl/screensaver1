@@ -19,9 +19,8 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.ReagentVendorIdentifierListParser;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.Pair;
@@ -35,7 +34,6 @@ public class ReagentFinder extends AbstractBackingBean
 
   private static final Logger log = Logger.getLogger(ReagentFinder.class);
 
-  private static final ScreensaverUserRole ADMIN_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
   private static final String DEFAULT_VENDOR = "Dharmacon"; // TODO: hack, convenience for RNAi Global consortium users
 
 
@@ -98,15 +96,6 @@ public class ReagentFinder extends AbstractBackingBean
     _reagentVendorIdentifierList = reagentVendorIdentifierList;
   }
 
-  /**
-   * TODO: this method is _required_ by the UI code, but this dependency is not defined explicitly.
-   *  Should be define explicitly via an interface.
-   */
-  protected ScreensaverUserRole getEditableAdminRole()
-  {
-    return ADMIN_ROLE;
-  }
-
   public UISelectOneBean<String> getVendorSelector()
   {
     return _vendorSelector;
@@ -116,7 +105,7 @@ public class ReagentFinder extends AbstractBackingBean
    * Find the reagents specified in the reagent vendor identifier list, and view
    * results in the Reagents Browser.
    */
-  @UIControllerMethod
+  @UICommand
   public String findReagents()
   {
     final String[] result = new String[1];
@@ -150,7 +139,7 @@ public class ReagentFinder extends AbstractBackingBean
           }
           else {
             _wellsBrowser.searchReagents(foundReagentIds);
-            result[0] = VIEW_WELL_SEARCH_RESULTS;
+            result[0] = BROWSE_WELLS;
           }
         }
         catch (RuntimeException e) {

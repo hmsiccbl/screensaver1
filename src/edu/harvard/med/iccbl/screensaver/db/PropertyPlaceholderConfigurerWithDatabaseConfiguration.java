@@ -118,6 +118,9 @@ public class PropertyPlaceholderConfigurerWithDatabaseConfiguration extends Prop
       log.warn("no password found in .pgass file: using empty string for password");
       passwd = "";
     }
+    else {
+      log.info("password found in .pgass file");
+    }
     _properties.setProperty("SCREENSAVER_PGSQL_PASSWORD", passwd);
   }
 }

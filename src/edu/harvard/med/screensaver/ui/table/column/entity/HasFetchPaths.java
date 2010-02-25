@@ -32,4 +32,17 @@ public interface HasFetchPaths<E extends AbstractEntity>
    */
   void addRelationshipPath(RelationshipPath<E> path);
 
+  /**
+   * Whether HasFetchPaths specifies a property that can be directly fetched
+   * from the database. In general, this is true if there is only a single
+   * PropertyPath.
+   * 
+   * @motivation A non-fetchable property implies that sorting and filtering cannot
+   *             be performed on the column by the database, but rather needs to
+   *             be performed "client-side", in memory. The relationship paths
+   *             describe the entity properties (or just entities) that are
+   *             required to derive the value.
+   */
+  boolean isFetchableProperty();
+  
 }

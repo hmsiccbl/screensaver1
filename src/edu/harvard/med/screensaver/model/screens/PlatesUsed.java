@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=LibraryScreening.class)
-public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
+public class PlatesUsed extends AbstractEntity<Integer> implements Comparable<PlatesUsed>
 {
 
   // private static data
@@ -81,13 +81,6 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
     return result;
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getPlatesUsedId();
-  }
-
   /**
    * Get the id for the plates used.
    * @return the id for the plates used
@@ -101,7 +94,7 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="plates_used_id_seq")
   public Integer getPlatesUsedId()
   {
-    return _platesUsedId;
+    return getEntityId();
   }
 
   /**
@@ -223,7 +216,7 @@ public class PlatesUsed extends AbstractEntity implements Comparable<PlatesUsed>
    */
   private void setPlatesUsedId(Integer platesUsedId)
   {
-    _platesUsedId = platesUsedId;
+    setEntityId(platesUsedId);
   }
 
   /**

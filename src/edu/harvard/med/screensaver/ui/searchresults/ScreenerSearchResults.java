@@ -10,19 +10,14 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.List;
-import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
-import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn;
@@ -66,38 +61,12 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
     searchUsers(screener.getAssociatedUsers());
   }
 
-  public void searchScreeners()   
-  {
-    setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchScreeners"));
-    initialize(new AllEntitiesOfTypeDataFetcher<ScreeningRoomUser,Integer>
-               (ScreeningRoomUser.class,_dao) {
-      @Override
-      protected void addDomainRestrictions(HqlBuilder hql,
-                                           Map<RelationshipPath<ScreeningRoomUser>,String> path2Alias)
-      {
-        super.addDomainRestrictions(hql, path2Alias);
-        hql.from(getRootAlias(),"screensaverUserRoles", "roles" );
-        hql.where("roles",Operator.EQUAL, ScreensaverUserRole.SCREENER);
-      }
-    });
-    // default to descending sort order on user ID, to show last created first
-    getColumnManager().setSortAscending(false);
-  }  
-  
   @Override
   protected List<? extends TableColumn<ScreeningRoomUser,?>> buildColumns()
   {
     List<TableColumn<ScreeningRoomUser,?>> columns = (List<TableColumn<ScreeningRoomUser,?>>) super.buildColumns();
-    columns.add(3, new TextEntityColumn<ScreeningRoomUser>(
-      new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead"),
-      "Lab Name", "The name of the lab with which the user is associated", TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(ScreeningRoomUser user)
-      {
-        return user.getLab().getLabName();
-      }
-    });
-    columns.add(4, new VocabularyEntityColumn<ScreeningRoomUser,ScreeningRoomUserClassification>(
+
+    columns.add(3, new VocabularyEntityColumn<ScreeningRoomUser,ScreeningRoomUserClassification>(
       new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "userClassification"),
       "User Classification", "The user's classsification", TableColumn.UNGROUPED,
       new ScreeningRoomUserClassificationConverter(),
@@ -108,9 +77,21 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
         return user.getUserClassification();
       }
     });
-    TableColumn<ScreeningRoomUser,?> c = new VocabularyEntityColumn<ScreeningRoomUser,AffiliationCategory>(
+
+    
+    columns.add(4, new TextEntityColumn<ScreeningRoomUser>(
+      new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead"),
+      "Lab Name", "The name of the lab with which the user is associated", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(ScreeningRoomUser user)
+      {
+        return user.getLab().getLabName();
+      }
+    });
+
+    columns.add(5, new VocabularyEntityColumn<ScreeningRoomUser,AffiliationCategory>(
       new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "lab.labAffiliation"),
-      "User Lab Affiliation", "The user's lab affiliation", TableColumn.ADMIN_COLUMN_GROUP,
+      "Lab Affiliation Category", "The lab affiliation category", TableColumn.UNGROUPED,
       new AffiliationCategoryConverter(),
       AffiliationCategory.values()) {
       @Override
@@ -119,13 +100,13 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
         Lab lab = user.getLab();
         if(lab != null)
         {
-          return lab.getLabAffiliation()==null?null:lab.getLabAffiliation().getAffiliationCategory();
+          return lab.getLabAffiliation() == null ? null : lab.getLabAffiliation().getAffiliationCategory();
         }
         return null;
       }
-    };
-    c.setVisible(true);
-    columns.add(c);
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(5).setVisible(false);
 
     return columns;
   }

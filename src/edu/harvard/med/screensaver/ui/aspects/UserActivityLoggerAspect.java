@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -48,7 +49,7 @@ public class UserActivityLoggerAspect extends OrderedAspect
     if (target instanceof EntityViewer) {
       if (args.isEmpty() || !(args.get(0) instanceof AbstractEntity)) {
         EntityViewer entityViewer = (EntityViewer) target;
-        AbstractEntity entity = entityViewer.getEntity();
+        Entity entity = entityViewer.getEntity();
         s.append('[').append(entity == null ? "" : entity).append(']');
       }
     }

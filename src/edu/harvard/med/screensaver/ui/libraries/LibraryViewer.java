@@ -9,23 +9,19 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.util.Map;
-
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
-import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
@@ -35,35 +31,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibraryViewer extends AbstractEditableBackingBean
+public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Library>
 {
   private static Logger log = Logger.getLogger(LibraryViewer.class);
 
-
-  // private instance methods
-
-  private LibraryViewer _thisProxy;
-  private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private WellSearchResults _wellsBrowser;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
   private LibraryContentsVersionManager _libraryContentsVersionManager;
-
-  private Library _library;
   private LibraryContentsImporter _libraryContentsImporter;
   private LibraryDetailViewer _libraryDetailViewer;
-  private LibrarySearchResults _librariesBrowser;
 
-  private int _uploadStatus;
-  private Map<String,Boolean> _isPanelCollapsedMap;
   private DataModel _contentsVersionsDataModel;
-
 
 
   /**
@@ -74,171 +58,126 @@ public class LibraryViewer extends AbstractEditableBackingBean
   }
 
   public LibraryViewer(LibraryViewer thisProxy,
+                       LibrarySearchResults librarySearchResults,
                        GenericEntityDAO dao,
                        LibrariesDAO librariesDao,
                        WellSearchResults wellsBrowser,
                        WellCopyVolumeSearchResults wellCopyVolumesBrowser,
                        LibraryContentsImporter libraryContentsImporter,
                        LibraryDetailViewer libraryDetailViewer,
-                       LibrarySearchResults librarySearchResults,
                        LibraryContentsVersionManager libraryContentsVersionManager)
   {
-    super(ScreensaverUserRole.LIBRARIES_ADMIN);
-    _thisProxy = thisProxy;
-    _dao = dao;
+    super(thisProxy,
+          Library.class,
+          BROWSE_LIBRARIES,
+          VIEW_LIBRARY,
+          dao,
+          librarySearchResults);
     _librariesDao = librariesDao;
     _wellsBrowser = wellsBrowser;
     _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
     _libraryContentsImporter = libraryContentsImporter;
     _libraryDetailViewer = libraryDetailViewer;
-    _librariesBrowser = librarySearchResults;
     _libraryContentsVersionManager = libraryContentsVersionManager;
-    _isPanelCollapsedMap = Maps.newHashMap();
-    _isPanelCollapsedMap.put("contentsVersions", Boolean.TRUE);
+    getIsPanelCollapsedMap().put("contentsVersions", Boolean.TRUE);
   }
 
 
-  // public getters and setters
-
-  public AbstractEntity getEntity()
+  @Override
+  protected void initializeEntity(Library library)
   {
-    return getLibrary();
+    getDao().needReadOnly(library, 
+                          Library.contentsVersions.to(LibraryContentsVersion.loadingActivity).to(Activity.performedBy).getPath(),
+                          Library.contentsVersions.to(LibraryContentsVersion.releaseActivity).to(Activity.performedBy).getPath());
   }
-
-  public void setLibrary(Library library)
+  
+  @Override
+  protected void initializeViewer(Library library)
   {
-    _library = library;
-    _libraryDetailViewer.setLibrary(library);
-  }
-
-  public Library getLibrary()
-  {
-    return _library;
-  }
-
-  public Map getIsPanelCollapsedMap()
-  {
-    return _isPanelCollapsedMap;
-  }
-
-
-  @UIControllerMethod
-  public String viewLibrary()
-  {
-    String libraryIdAsString = (String) getRequestParameter("entityId");
-    Integer libraryId = Integer.parseInt(libraryIdAsString);
-    Library library = _dao.findEntityById(Library.class, libraryId);
-    return _thisProxy.viewLibrary(library);
-  }
-
-  @UIControllerMethod
-  @Transactional
-  public String viewLibrary(Library library)
-  {
-    setLibrary(_dao.reloadEntity(library));
-    _dao.needReadOnly(_library, 
-                      Library.contentsVersions.to(LibraryContentsVersion.loadingActivity).to(Activity.performedBy).getPath(),
-                      Library.contentsVersions.to(LibraryContentsVersion.releaseActivity).to(Activity.performedBy).getPath());
     _contentsVersionsDataModel = null;
-    return VIEW_LIBRARY;
+    _libraryDetailViewer.setEntity(library);
   }
 
   public DataModel getContentsVersionsDataModel()
   {
     if (_contentsVersionsDataModel == null) {
-      _contentsVersionsDataModel = new ListDataModel(Lists.newArrayList(Iterables.reverse(Lists.newArrayList(_library.getContentsVersions()))));
+      _contentsVersionsDataModel = new ListDataModel(Lists.newArrayList(Iterables.reverse(Lists.newArrayList(getEntity().getContentsVersions()))));
     }
     return _contentsVersionsDataModel;
   }
   
-  @UIControllerMethod
+  @UICommand
   public String browseLibraryContentsVersionWells()
   {
     LibraryContentsVersion lcv = (LibraryContentsVersion) getRequestMap().get("lcv");
     _wellsBrowser.searchWellsForLibraryContentsVersion(lcv);
-    return VIEW_WELL_SEARCH_RESULTS;
+    return BROWSE_WELLS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deleteLibraryContentsVersion()
   {
     LibraryContentsVersion lcv = (LibraryContentsVersion) getRequestMap().get("lcv");
     _librariesDao.deleteLibraryContentsVersion(lcv);
-    return _thisProxy.viewLibrary(_library);
+    return getThisProxy().reload();
   }
 
-  @UIControllerMethod
+  @UICommand
   public String releaseLibraryContentsVersion()
   {
     _libraryContentsVersionManager.releaseLibraryContentsVersion((LibraryContentsVersion) getRequestMap().get("lcv"),
                                                                   (AdministratorUser) getScreensaverUser());
-    return _thisProxy.viewLibrary(_library);
+    return getThisProxy().reload();
   }
 
-  @UIControllerMethod
-  @Transactional
+  @UICommand
   public String viewLibraryContents()
   {
-    _wellsBrowser.searchWellsForLibrary(_library);
-    return VIEW_WELL_SEARCH_RESULTS;
+    _wellsBrowser.searchWellsForLibrary(getEntity());
+    return BROWSE_WELLS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String viewLibraryWellCopyVolumes()
   {
-    _wellCopyVolumesBrowser.searchWellsForLibrary(_library);
-    return VIEW_WELL_VOLUME_SEARCH_RESULTS;
+    _wellCopyVolumesBrowser.searchWellsForLibrary(getEntity());
+    return BROWSE_WELL_VOLUMES;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String viewLibraryContentsImporter()
   {
-    if (_library != null) {
-      return _libraryContentsImporter.viewLibraryContentsImporter(_library);
+    if (getEntity() != null) {
+      return _libraryContentsImporter.viewLibraryContentsImporter(getEntity());
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deleteLibrary()
   {
     try {
-      _dao.doInTransaction(new DAOTransaction() {
+      getDao().doInTransaction(new DAOTransaction() {
         public void runTransaction() {
 
-          _dao.deleteEntity(_library);
-          _dao.flush();
+          getDao().deleteEntity(getEntity());
+          getDao().flush();
 
         }
       });
       showMessage("libraries.deletedLibrary", "libraryViewer");
       
-      _librariesBrowser.searchLibraryScreenType(null);
+      getContextualSearchResults().refetch();
       return BROWSE_LIBRARIES;
     } catch (Exception e) {
       if (e instanceof DataIntegrityViolationException) {
-        showMessage("libraries.libraryDeletionFailed", _library.getLibraryName(), "Please check that no screen results are associated with the library.");
+        showMessage("libraries.libraryDeletionFailed", getEntity().getLibraryName(), "Please check that no screen results are associated with the library.");
       }
       else {
         showMessage("libraries.libraryDeletionFailed", e.getClass().getName(), e.getMessage());
       }
-      log.warn("library deletion: " + _library.getLibraryName() + e.getMessage() );
+      log.warn("library deletion: " + getEntity().getLibraryName() + e.getMessage() );
       return VIEW_MAIN;
     }
-  }
-
-  public String cancel()
-  {
-    return null;
-  }
-
-  public String edit()
-  {
-    return null;
-  }
-
-  public String save()
-  {
-    return null;
   }
 }

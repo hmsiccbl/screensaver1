@@ -37,6 +37,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Function;
+
 
 /**
  * A set of plates representing a copy of a library's contents. The lab works
@@ -51,7 +53,7 @@ import org.apache.log4j.Logger;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "libraryId", "name" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Library.class)
-public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
+public class Copy extends SemanticIDAbstractEntity<String> implements Comparable<Copy>
 {
 
   // static fields
@@ -62,10 +64,11 @@ public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
   public static final RelationshipPath<Copy> copyInfos = new RelationshipPath<Copy>(Copy.class, "copyInfos");
   public static final RelationshipPath<Copy> library = new RelationshipPath<Copy>(Copy.class, "library");
 
+  public static final Function<Copy,String> ToName = new Function<Copy,String>() { public String apply(Copy c) { return c.getName(); } };
+
 
   // instance fields
 
-  private String _copyId;
   private Integer _version;
   private Library _library;
   private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
@@ -86,13 +89,6 @@ public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
     return this.getCopyId().compareTo(other.getCopyId()); 
   }
   
-  @Override
-  @Transient
-  public String getEntityId()
-  {
-    return getCopyId();
-  }
-
   /**
    * Get the id for the copy.
    * @return the id for the copy
@@ -101,7 +97,7 @@ public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
   @org.hibernate.annotations.Type(type="text")
   public String getCopyId()
   {
-    return _copyId;
+    return getEntityId();
   }
 
   /**
@@ -209,7 +205,7 @@ public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
    */
   public Copy(Library library, CopyUsageType usageType, String name)
   {
-    _copyId = library.getShortName() + ":" + name;
+    setEntityId(library.getShortName() + ":" + name);
     _library = library;
     _name = name;
     _usageType = usageType;
@@ -234,7 +230,7 @@ public class Copy extends SemanticIDAbstractEntity implements Comparable<Copy>
    */
   private void setCopyId(String copyId)
   {
-    _copyId = copyId;
+    setEntityId(copyId);
   }
 
   /**

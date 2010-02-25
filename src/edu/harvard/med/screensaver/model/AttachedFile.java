@@ -13,6 +13,7 @@ package edu.harvard.med.screensaver.model;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
+import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,22 +23,26 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
-import edu.harvard.med.screensaver.model.screens.Publication;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 
 
 /**
@@ -50,7 +55,7 @@ import org.hibernate.annotations.Immutable;
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "screenId", "screensaverUserId", "filename" }) })
 @org.hibernate.annotations.Proxy
-public class AttachedFile extends TimeStampedAbstractEntity
+public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comparable<AttachedFile>
 {
 
   // static fields
@@ -58,10 +63,13 @@ public class AttachedFile extends TimeStampedAbstractEntity
   private static final Logger log = Logger.getLogger(AttachedFile.class);
   private static final long serialVersionUID = 0L;
 
+  public static final RelationshipPath<AttachedFile> fileType = new RelationshipPath<AttachedFile>(AttachedFile.class, "fileType");
+  public static final RelationshipPath<AttachedFile> screen = new RelationshipPath<AttachedFile>(AttachedFile.class, "screen");
+  public static final RelationshipPath<AttachedFile> screeningRoomUser = new RelationshipPath<AttachedFile>(AttachedFile.class, "screeningRoomUser");
+
 
   // instance fields
 
-  private Integer _attachedFileId;
   private Integer _version;
   private Screen _screen;
   private ScreeningRoomUser _screeningRoomUser;
@@ -76,13 +84,6 @@ public class AttachedFile extends TimeStampedAbstractEntity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getAttachedFileId();
   }
 
   /**
@@ -100,7 +101,20 @@ public class AttachedFile extends TimeStampedAbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="attached_file_id_seq")
   public Integer getAttachedFileId()
   {
-    return _attachedFileId;
+    return getEntityId();
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="attachedFileUpdateActivity", 
+             joinColumns=@JoinColumn(name="attachedFileId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false, unique=true))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)            
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   @ManyToOne(fetch=FetchType.LAZY,
@@ -157,8 +171,12 @@ public class AttachedFile extends TimeStampedAbstractEntity
     _filename = filename;
   }
 
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.AttachedFileType$UserType")
+  @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.MERGE })
+  @JoinColumn(name="attachedFileTypeId", nullable=false)
+  @org.hibernate.annotations.ForeignKey(name="fk_attached_file_to_attached_file_type")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value={ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional=true)
   public AttachedFileType getFileType()
   {
     return _fileType;
@@ -206,6 +224,7 @@ public class AttachedFile extends TimeStampedAbstractEntity
    */
   public AttachedFile(Screen screen, String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
   {
+    super(null); /* TODO */
     if (screen == null) {
       throw new NullPointerException();
     }
@@ -228,6 +247,7 @@ public class AttachedFile extends TimeStampedAbstractEntity
    */
   public AttachedFile(ScreeningRoomUser screeningRoomUser, String filename, AttachedFileType fileType, InputStream fileContents) throws IOException
   {
+    super(null); /* TODO */
     if (screeningRoomUser == null) {
       throw new NullPointerException();
     }
@@ -256,7 +276,7 @@ public class AttachedFile extends TimeStampedAbstractEntity
    */
   private void setAttachedFileId(Integer attachedFileId)
   {
-    _attachedFileId = attachedFileId;
+    setEntityId(attachedFileId);
   }
 
   /**
@@ -284,5 +304,17 @@ public class AttachedFile extends TimeStampedAbstractEntity
   private void setScreeningroomUser(ScreeningRoomUser screeningRoomUser)
   {
     _screeningRoomUser = screeningRoomUser;
+  }
+
+  public int compareTo(AttachedFile other)
+  {
+    int result = getDateCreated().compareTo(other.getDateCreated());
+    if (result == 0) {
+      result = getFileType().compareTo(other.getFileType());
+      if (result == 0) {
+        result = getFilename().compareTo(other.getFilename());
+      }
+    }
+    return result;
   }
 }

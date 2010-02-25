@@ -15,7 +15,7 @@ import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
-public class LibraryContentsVersionTest extends AbstractEntityInstanceTest<Library>
+public class LibraryContentsVersionTest extends AbstractEntityInstanceTest<LibraryContentsVersion>
 {
   public static TestSuite suite()
   {
@@ -24,7 +24,7 @@ public class LibraryContentsVersionTest extends AbstractEntityInstanceTest<Libra
 
   public LibraryContentsVersionTest() throws IntrospectionException
   {
-    super(Library.class);
+    super(LibraryContentsVersion.class);
   }
 }
 

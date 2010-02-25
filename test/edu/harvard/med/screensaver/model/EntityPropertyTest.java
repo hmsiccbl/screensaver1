@@ -230,7 +230,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
     doTestBeanInTransaction(entity, new BeanTester() {
       public void testEntity(AbstractEntity bean) { 
         try {
-          setter.invoke(entity, finalTestValue); 
+          setter.invoke(bean, finalTestValue); 
         }
         catch (Exception e) {
           throw new DomainModelDefinitionException(e);
@@ -243,7 +243,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
       public void testEntity(AbstractEntity bean) {       
         Object actualValue;
         try {
-          actualValue = getter.invoke(entity);
+          actualValue = getter.invoke(bean);
         }
         catch (Exception e) {
           throw new DomainModelDefinitionException(e);
@@ -323,7 +323,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
           boolean addResult; 
           if (addMethod == null) {
             log.debug("calling collection.add(" + testElement + ") on bean " + bean);
-            Collection<Object> collection = (Collection<Object>) getterMethod.invoke(entity);
+            Collection<Object> collection = (Collection<Object>) getterMethod.invoke(bean);
             addResult = collection.add(testElement);
           }
           else {
@@ -351,7 +351,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
           boolean removeResult; 
           if (addMethod == null) {
             log.debug("calling collection.add(" + testElement + ") on bean " + bean);
-            Collection<Object> collection = (Collection<Object>) getterMethod.invoke(entity);
+            Collection<Object> collection = (Collection<Object>) getterMethod.invoke(bean);
             removeResult = collection.remove(testElement);
           }
           else {
@@ -532,7 +532,7 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
       relatedEntity = dataFactory.newInstance(relatedEntityType);
       persistEntityNetwork(relatedEntity);
       final Method addMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, addMethodName, ExistenceRequirement.REQUIRED);
-      final Method removeMethod = ModelIntrospectionUtil.findAndCheckMethod(beanClass, removeMethodName, 
+      /*final Method removeMethod = */ModelIntrospectionUtil.findAndCheckMethod(beanClass, removeMethodName, 
                                                                             addMethod == null ? ExistenceRequirement.NOT_ALLOWED : ExistenceRequirement.OPTIONAL);
       class ToManyAdder implements RelatedBeansTester
       {

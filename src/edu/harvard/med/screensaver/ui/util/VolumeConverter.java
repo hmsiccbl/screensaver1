@@ -17,10 +17,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
-import com.google.common.base.Join;
-
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
+
+import com.google.common.base.Joiner;
 
 
 public class VolumeConverter implements Converter
@@ -52,7 +52,7 @@ public class VolumeConverter implements Converter
           return units;
         }
       }
-      throw new ConverterException("unknown units (valid units: " + Join.join(", ", VolumeUnit.values()) + ")");
+      throw new ConverterException("unknown units (valid units: " + Joiner.on(", ").join(VolumeUnit.values()) + ")");
     }
     return VolumeUnit.MICROLITERS;
   }

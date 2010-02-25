@@ -16,7 +16,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 /**
@@ -81,8 +81,8 @@ class SDRecord
       "WELL    = " + _wellName         + "\n" +
       "VEND ID = " + _vendorIdentifier + "\n" +
       "FACY_ID = " + _facilityId       + "\n" +
-      "C NAMES  = " + Join.join(",", _compoundNames) + "\n" +
-      "PC IDS  = " + Join.join(",", _pubchemCids)+ "\n" +
-      "CB IDS  = " + Join.join(",", _chembankIds)+ "\n";
+      "C NAMES  = " + Joiner.on(",").join(_compoundNames) + "\n" +
+      "PC IDS  = " + Joiner.on(",").join(_pubchemCids)+ "\n" +
+      "CB IDS  = " + Joiner.on(",").join(_chembankIds)+ "\n";
   }
 }

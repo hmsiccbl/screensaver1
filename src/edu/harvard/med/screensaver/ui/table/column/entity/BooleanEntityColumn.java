@@ -40,4 +40,9 @@ public abstract class BooleanEntityColumn<E extends AbstractEntity> extends Bool
   {
     return _fetchPaths.getRelationshipPaths();
   }
+  
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

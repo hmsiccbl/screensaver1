@@ -32,7 +32,7 @@ public class PackageTestSuite extends TestSuite
     addTest(LibraryScreeningTest.suite());
     addTest(PlatesUsedTest.suite());
     addTest(PublicationTest.suite());
-    addTest(RNAiCherryPickScreeningTest.suite());
+    addTest(CherryPickScreeningTest.suite());
     addTest(ScreenTest.suite());
     addTest(StatusItemTest.suite());
   }

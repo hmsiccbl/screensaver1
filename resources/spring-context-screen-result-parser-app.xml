@@ -31,13 +31,15 @@
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     scope="prototype">
     <description>A ScreenResultParser that does not need access to a database.  Used for testing and for command-line ScreenResultParser (when --no-verify option is specified)</description>
-    <constructor-arg index="0" ref="librariesDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="screenResultsDao"/>
+    <constructor-arg ref="genericEntityDao"/>
   </bean>
-
+<!-- 
   <bean 
     id="screenResultExporter"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultExporter"
     scope="singleton">
   </bean>
-  
+ -->  
 </beans>

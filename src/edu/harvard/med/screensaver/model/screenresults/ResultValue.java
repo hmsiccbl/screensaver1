@@ -11,8 +11,6 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -59,7 +57,7 @@ import org.hibernate.annotations.Index;
                                  indexes={ @Index(name = "result_value_rvt_and_value_index", columnNames={ "resultValueTypeId", "value" }),
                                            @Index(name = "result_value_rvt_and_numeric_value_index", columnNames={ "resultValueTypeId", "numericValue" }),
                                            @Index(name = "result_value_rvt_and_positive_index", columnNames={ "resultValueTypeId", "isPositive" }) })
-public class ResultValue extends AbstractEntity
+public class ResultValue extends AbstractEntity<Integer>
 {
 
   // private static data
@@ -136,7 +134,6 @@ public class ResultValue extends AbstractEntity
 
   // private instance data
 
-  private Integer _resultValueId;
   private Well _well;
   private ResultValueType _resultValueType;
   private String _value;
@@ -163,10 +160,10 @@ public class ResultValue extends AbstractEntity
    * @param value the non-numerical value of the ResultValue
   */
   ResultValue(ResultValueType rvt,
-              Well well,
+              AssayWell assayWell,
               String value)
   {
-    this(rvt, well, AssayWellType.EXPERIMENTAL, value, null, -1, false, false);
+    this(rvt, assayWell, value, null, -1, false, false);
   }
 
   /**
@@ -179,11 +176,11 @@ public class ResultValue extends AbstractEntity
    *          point, when displayed
    */
   ResultValue(ResultValueType rvt,
-              Well well,
+              AssayWell assayWell,
               Double numericValue,
               int decimalPrecision)
   {
-    this(rvt, well, AssayWellType.EXPERIMENTAL, null, numericValue, decimalPrecision, false, false);
+    this(rvt, assayWell, null, numericValue, decimalPrecision, false, false);
   }
 
   /**
@@ -200,14 +197,13 @@ public class ResultValue extends AbstractEntity
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   public ResultValue(ResultValueType rvt,
-                     Well well,
-                     AssayWellType assayWellType,
+                     AssayWell assayWell,
                      Double numericalValue,
                      int decimalPrecision,
                      boolean exclude,
                      boolean isPositive)
   {
-    this(rvt, well, assayWellType, null, numericalValue, decimalPrecision, exclude, isPositive);
+    this(rvt, assayWell, null, numericalValue, decimalPrecision, exclude, isPositive);
   }
 
   /**
@@ -222,13 +218,12 @@ public class ResultValue extends AbstractEntity
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   public ResultValue(ResultValueType rvt,
-                     Well well,
-                     AssayWellType assayWellType,
+                     AssayWell assayWell,
                      String value,
                      boolean exclude,
                      boolean isPositive)
   {
-    this(rvt, well, assayWellType, value, null, 0, exclude, isPositive);
+    this(rvt, assayWell, value, null, 0, exclude, isPositive);
   }
 
 
@@ -238,13 +233,6 @@ public class ResultValue extends AbstractEntity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Serializable getEntityId()
-  {
-    return getResultValueId();
   }
 
   @Id
@@ -259,7 +247,7 @@ public class ResultValue extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="result_value_id_seq")
   public Integer getResultValueId()
   {
-    return _resultValueId;
+    return getEntityId();
   }
 
   /**
@@ -492,8 +480,7 @@ public class ResultValue extends AbstractEntity
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   ResultValue(ResultValueType rvt,
-              Well well,
-              AssayWellType assayWellType,
+              AssayWell assayWell,
               String value,
               Double numericalValue,
               int decimalPrecision,
@@ -503,11 +490,11 @@ public class ResultValue extends AbstractEntity
     if (rvt == null) {
       throw new DataModelViolationException("resultValueType is required for ResultValue");
     }
-    if (well == null) {
-      throw new DataModelViolationException("well is required for ResultValue");
+    if (assayWell == null) {
+      throw new DataModelViolationException("assay well is required for ResultValue");
     }
     _resultValueType = rvt;
-    _well = well;
+    _well = assayWell.getLibraryWell(); // TODO: remove
 
     // TODO: HACK: removing this update as it causes memory/performance
     // problems when loading ScreenResults; fortunately, when ScreenResult is
@@ -517,7 +504,7 @@ public class ResultValue extends AbstractEntity
     // ScreenResult
     // _well.getResultValues().put(rvt, this);
 
-    setAssayWellType(assayWellType);
+    setAssayWellType(assayWell.getAssayWellType()); // TODO: remove
     if (value != null) {
       setValue(value);
     }
@@ -564,7 +551,7 @@ public class ResultValue extends AbstractEntity
    */
   private void setResultValueId(Integer resultValueId)
   {
-    _resultValueId = resultValueId;
+    setEntityId(resultValueId);
   }
 
   /**
@@ -665,13 +652,16 @@ public class ResultValue extends AbstractEntity
       assayWellType == AssayWellType.ASSAY_POSITIVE_CONTROL ||
       assayWellType == AssayWellType.OTHER) {
       if (_well.getLibraryWellType() != LibraryWellType.EMPTY) {
-        log.warn(/*(
-        throw new DataModelViolationException(*/"result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
+        log.info(
+        /**throw new DataModelViolationException( **/
+                 "result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
       }
     }
     else if (!_well.getLibraryWellType().getValue().equals(assayWellType.getValue())) {
-      log.warn(/*
-      throw new DataModelViolationException(*/"result value assay well type does not match library well type of associated well");
+      log.info(
+               /**throw new DataModelViolationException( **/
+                 "result value assay well type: " + assayWellType.getValue()
+               + " does not match library well type of associated well: " + _well.getLibraryWellType().getValue());
     }
   }
 }

@@ -66,4 +66,9 @@ public abstract class VocabularyEntityColumn<E extends AbstractEntity,V> extends
   {
     return _fetchPaths.getRelationshipPaths();
   }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

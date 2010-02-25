@@ -67,6 +67,7 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
       {
         File workbookFile = new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, SCREEN_RESULT_FILE);
         final Screen screen = MakeDummyEntities.makeDummyScreen(115);
+        genericEntityDao.persistEntity(screen);
         try {
           screenResultParser.parse(screen, workbookFile);
         }
@@ -74,7 +75,6 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
           fail(e.getMessage());
         }
         assertFalse("screen result had no errors", screenResultParser.getHasErrors());
-        persistEntityNetwork(screen);
       }
     });
 

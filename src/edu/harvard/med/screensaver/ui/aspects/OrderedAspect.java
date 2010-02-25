@@ -9,7 +9,9 @@
 
 package edu.harvard.med.screensaver.ui.aspects;
 
-public abstract class OrderedAspect
+import org.springframework.core.Ordered;
+
+public abstract class OrderedAspect implements Ordered
 {
   // instance data members
 

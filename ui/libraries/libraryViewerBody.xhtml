@@ -29,7 +29,7 @@
 		</h:form>
 	</t:panelGroup>
 
-	<t:panelGroup rendered="#{libraryViewer.library.reagentType.class.simpleName == 'SmallMoleculeReagent'}">
+	<t:panelGroup rendered="#{libraryViewer.entity.reagentType.class.simpleName == 'SmallMoleculeReagent'}">
 		<h:form id="viewDownloadsForm" style="margin-top: 10px">
 			<t:outputText value="Visit the " />
 			<t:commandLink action="#{menu.viewDownloads}"
@@ -93,7 +93,7 @@
             <t:outputText
               value="#{lcv.released ? lcv.releaseActivity.performedBy.fullNameLastFirst : null}" />
           </t:column>
-          <t:column>
+          <t:column >
             <f:facet name="header">
               <t:outputText value="Actions" />
             </f:facet>
@@ -101,16 +101,15 @@
               action="#{libraryViewer.browseLibraryContentsVersionWells}"
               styleClass="command"
               title="Browse the wells and contents for this library contents version" />
-            <t:commandButton value="Delete"
-              rendered="#{libraryViewer.editable}"
-              disabled="#{lcv.released}"
+            <t:commandButton value="Delete" disabled="#{lcv.released}"
+              rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
               onclick="javascript: return confirm('Are you sure you want to DELETE this content versions from the library?');"
               action="#{libraryViewer.deleteLibraryContentsVersion}"
               styleClass="command"
               title="Delete this library contents version" />
             <t:commandButton value="Release"
-              rendered="#{libraryViewer.editable}"
-              disabled="#{!empty libraryViewer.library.latestReleasedContentsVersion &amp;&amp; lcv.versionNumber &lt;= libraryViewer.library.latestReleasedContentsVersion.versionNumber}"
+              rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
+              disabled="#{!empty libraryViewer.entity.latestReleasedContentsVersion &amp;&amp; lcv.versionNumber &lt;= libraryViewer.entity.latestReleasedContentsVersion.versionNumber}"
               onclick="javascript: return confirm('Are you sure you want to RELEASE this content versions of the library?');"
               action="#{libraryViewer.releaseLibraryContentsVersion}"
               styleClass="command"
@@ -120,7 +119,7 @@
 
         <h:commandButton value="Import New Contents Version..."
           action="#{libraryViewer.viewLibraryContentsImporter}"
-          rendered="#{libraryViewer.editable}"
+          rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['librariesAdmin']}"
           styleClass="command"
           title="Import a new library contents versions" />
 

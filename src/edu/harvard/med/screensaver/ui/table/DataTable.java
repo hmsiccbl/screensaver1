@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
@@ -177,7 +177,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
    * <code>getSortManager().getCurrentColumn().cellAction((E) getDataModel().getRowData())</code>.
    */
   @SuppressWarnings("unchecked")
-  @UIControllerMethod
+  @UICommand
   public String cellAction()
   {
     return (String) getColumnManager().getCurrentColumn().cellAction(getRowData());
@@ -296,7 +296,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
    * column, that can be edited by the user (without having to explicitly add a
    * criterion first).
    */
-  @UIControllerMethod
+  @UICommand
   public String resetFilter()
   {
     for (TableColumn<R,?> column : getColumnManager().getAllColumns()) {
@@ -311,7 +311,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
    * single criterion per column, that can be edited by the user (without having
    * to explicitly add a criterion first).
    */
-  @UIControllerMethod
+  @UICommand
   public String resetColumnFilter()
   {
     TableColumn<R,?> column = (TableColumn<R,?>) getRequestMap().get("column");
@@ -324,7 +324,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   /**
    * Delete all criteria from each column.
    */
-  @UIControllerMethod
+  @UICommand
   public String clearFilter()
   {
     for (TableColumn<R,?> column : getColumnManager().getAllColumns()) {

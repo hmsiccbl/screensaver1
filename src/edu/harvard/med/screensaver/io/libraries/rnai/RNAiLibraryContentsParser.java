@@ -15,7 +15,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
-import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.io.parseutil.CsvColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvIntegerColumn;
 import edu.harvard.med.screensaver.io.parseutil.CsvSetColumn;

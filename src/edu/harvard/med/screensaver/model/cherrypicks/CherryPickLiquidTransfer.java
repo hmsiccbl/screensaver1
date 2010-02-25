@@ -21,9 +21,11 @@ import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
@@ -73,12 +75,13 @@ public class CherryPickLiquidTransfer extends LabActivity
    */
   public CherryPickLiquidTransfer(
     Screen screen,
+    AdministratorUser recordedBy,
     ScreensaverUser performedBy,
     LocalDate dateOfActivity,
     CherryPickLiquidTransferStatus status)
   {
     // TODO: business logic to test that cherryPickRequest.getScreen().equals(screen)
-    super(screen, performedBy, dateOfActivity);
+    super(screen, recordedBy, performedBy, dateOfActivity);
     if (status == null) {
       throw new NullPointerException("status is required");
     }
@@ -165,7 +168,10 @@ public class CherryPickLiquidTransfer extends LabActivity
   public boolean addCherryPickAssayPlate(CherryPickAssayPlate assayPlate)
   {
     if (assayPlate.getCherryPickLiquidTransfer() != null && !assayPlate.getCherryPickLiquidTransfer().equals(this)) {
-      throw new BusinessRuleViolationException("cherry pick assay plate can only be associated with one cherry pick liquid transfer");
+      throw new DataModelViolationException("cherry pick assay plate can only be associated with one cherry pick liquid transfer");
+    }
+    if (getCherryPickRequest() != null && !assayPlate.getCherryPickRequest().equals(getCherryPickRequest())) {
+      throw new DataModelViolationException("all assay plates must be from the same cherry pick request");
     }
     boolean result = _cherryPickAssayPlates.add(assayPlate);
     assayPlate.setCherryPickLiquidTransfer(this);

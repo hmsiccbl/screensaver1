@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.ui.screens;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 
 import org.apache.log4j.Logger;
 
@@ -23,13 +23,7 @@ import org.apache.log4j.Logger;
  */
 public class ScreenFinder extends AbstractBackingBean
 {
-
-  // private static final fields
-
   private static final Logger log = Logger.getLogger(ScreenFinder.class);
-
-
-  // private instance fields
 
   private GenericEntityDAO _dao;
   private ScreenViewer _screenViewer;
@@ -37,8 +31,6 @@ public class ScreenFinder extends AbstractBackingBean
 
   private Integer _screenNumber;
 
-
-  // constructors
 
   /**
    * @motivation for CGLIB2
@@ -69,7 +61,7 @@ public class ScreenFinder extends AbstractBackingBean
     _screenNumber = screenNumber;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String findScreen()
   {
     if (_screenNumber != null) {
@@ -78,11 +70,10 @@ public class ScreenFinder extends AbstractBackingBean
                                                 _screenNumber);
       if (screen != null) {
         resetSearchFields();
-        return _screenViewer.viewScreen(screen);
+        return _screenViewer.viewEntity(screen);
       }
       else {
-        showMessage("noSuchEntity",
-                    "Screen " + _screenNumber);
+        showMessage("noSuchEntity", "Screen " + _screenNumber);
       }
     }
     else {

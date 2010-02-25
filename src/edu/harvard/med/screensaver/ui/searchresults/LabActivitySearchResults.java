@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
@@ -32,20 +32,29 @@ import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+
 public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
 {
   // static members
 
   private static final Set<String> ACTIVITY_TYPES = new HashSet<String>();
+  protected static final String SCREEEN_COLUMN_GROUP = "Screen";
+  
   static {
     ACTIVITY_TYPES.add(CherryPickLiquidTransfer.ACTIVITY_TYPE_NAME);
     ACTIVITY_TYPES.add(LibraryScreening.ACTIVITY_TYPE_NAME);
-    ACTIVITY_TYPES.add(RNAiCherryPickScreening.ACTIVITY_TYPE_NAME);;
+    ACTIVITY_TYPES.add(CherryPickScreening.ACTIVITY_TYPE_NAME);;
   }
 
   private static Logger log = Logger.getLogger(LabActivitySearchResults.class);
   private ScreenViewer _screenViewer;
   private CherryPickRequestViewer _cprViewer;
+  private ScreenSearchResults _screenSearchResults;
 
   /**
    * @motivation for CGLIB2
@@ -56,13 +65,14 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
 
   public LabActivitySearchResults(ActivityViewer activityViewer,
                                   ScreenViewer screenViewer,
-                                  UserViewer userViewer,
                                   CherryPickRequestViewer cprViewer,
+                                  UserViewer userViewer,
+                                  ScreenSearchResults screenSearchResults,
                                   GenericEntityDAO dao)
   {
-    super(activityViewer, userViewer, LabActivity.class, dao);
-    _screenViewer = screenViewer;
+    super(activityViewer, LabActivity.class, dao, userViewer);
     _cprViewer = cprViewer;
+    _screenSearchResults = screenSearchResults;
   }
 
   public void searchLabActivitiesForScreen(Screen screen)
@@ -79,20 +89,9 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   {
     List<TableColumn<LabActivity,?>> columns =
       (List<TableColumn<LabActivity,?>>) super.buildColumns();
-    columns.add(1, new IntegerEntityColumn<LabActivity>(
-      LabActivity.Screen.toProperty("screenNumber"),
-      "Screen Number", "The screen number", TableColumn.UNGROUPED) {
-      @Override
-      public Integer getCellValue(LabActivity activity) { return activity.getScreen().getScreenNumber(); }
-
-      @Override
-      public Object cellAction(LabActivity activity) { return _screenViewer.viewScreen(activity.getScreen()); }
-
-      @Override
-      public boolean isCommandLink() { return true; }
-    });
+    
     IntegerEntityColumn<LabActivity> column = new IntegerEntityColumn<LabActivity>(
-      (RelationshipPath) RNAiCherryPickScreening.rnaiCherryPickRequest,
+      (RelationshipPath) CherryPickScreening.cherryPickRequest,
       "Cherry Pick Request #", "The cherry pick request number, if applicable", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(LabActivity activity) 
@@ -106,14 +105,14 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
         if (activity instanceof CherryPickLiquidTransfer) {
           return ((CherryPickLiquidTransfer) activity).getCherryPickRequest();
         }
-        else if (activity instanceof RNAiCherryPickScreening) {
-          return ((RNAiCherryPickScreening) activity).getRnaiCherryPickRequest();
+        else if (activity instanceof CherryPickScreening) {
+          return ((CherryPickScreening) activity).getCherryPickRequest();
         }
         return null;
       }
 
       @Override
-      public Object cellAction(LabActivity activity) { return _cprViewer.viewCherryPickRequest(getCherryPickRequest(activity)); }
+      public Object cellAction(LabActivity activity) { return _cprViewer.viewEntity(getCherryPickRequest(activity)); }
 
       @Override
       public boolean isCommandLink() { return true; }
@@ -121,6 +120,27 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
     column.addRelationshipPath((RelationshipPath) CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest));
     column.setVisible(false);
     columns.add(2, column);
+    
+    Iterable<TableColumn<Screen,?>> screenColumns = Lists.newArrayList(Iterators.concat(_screenSearchResults.buildScreenSummaryColumns().iterator(),
+                                                                                        _screenSearchResults.buildScreenAdminColumns().iterator()));
+    
+    screenColumns = Iterables.filter(screenColumns,
+                                     new Predicate<TableColumn<Screen,?>>() { public boolean apply(TableColumn<Screen,?> c) { return !!!c.getName().equals("Date Of Last Activity"); } });
+    List<TableColumn<LabActivity,?>> labActivityScreenColumns = Lists.newArrayList(Iterables.transform(screenColumns,
+                        new Function<TableColumn<Screen,?>,TableColumn<LabActivity,?>>() { 
+      public TableColumn<LabActivity,?> apply(TableColumn<Screen,?> delegateColumn) 
+      { 
+        RelatedEntityColumn<LabActivity,Screen,Object> column = new RelatedEntityColumn<LabActivity,Screen,Object>(Screen.class, LabActivity.Screen, (TableColumn<Screen,Object>) delegateColumn, SCREEEN_COLUMN_GROUP) 
+        { 
+          public Screen getRelatedEntity(LabActivity a) { return a.getScreen(); } 
+        };
+        column.setVisible(false);
+        return column;
+      } 
+    }));
+    labActivityScreenColumns.get(0).setVisible(true);
+    columns.addAll(labActivityScreenColumns);
+
     return columns;
   }
 

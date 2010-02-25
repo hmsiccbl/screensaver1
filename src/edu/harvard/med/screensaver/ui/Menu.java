@@ -10,17 +10,17 @@
 package edu.harvard.med.screensaver.ui;
 
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.ui.libraries.LibraryDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
@@ -32,6 +32,8 @@ import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
+
+import org.apache.log4j.Logger;
 
 
 public class Menu extends AbstractBackingBean
@@ -55,7 +57,6 @@ public class Menu extends AbstractBackingBean
   private ScreenDetailViewer _screenDetailViewer;
   private UserViewer _userViewer;
   private WellSearchResults _wellsBrowser;
-
   private LibraryDetailViewer _libraryDetailViewer;
 
   // public methods
@@ -99,31 +100,31 @@ public class Menu extends AbstractBackingBean
 
   // JSF application methods
 
-  @UIControllerMethod
+  @UICommand
   public String viewMain()
   {
     return VIEW_MAIN;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String viewNews()
   {
     return VIEW_NEWS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String viewDownloads()
   {
     return VIEW_DOWNLOADS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String viewHelp()
   {
     return VIEW_HELP;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String logout()
   {
     log.info("logout for session "  + getHttpSession().getId());
@@ -131,152 +132,130 @@ public class Menu extends AbstractBackingBean
     return VIEW_GOODBYE;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String findReagents()
   {
     return FIND_REAGENTS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String findWells()
   {
     return FIND_WELLS;
   }
   
-  @UIControllerMethod
+  @UICommand
   public String browseWells()
   {
-    _wellsBrowser.searchAllWells();
-    return VIEW_WELL_SEARCH_RESULTS;
+    _wellsBrowser.searchAll();
+    return BROWSE_WELLS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseLibraries()
   {
-    _librariesBrowser.searchLibraryScreenType(null);
+    _librariesBrowser.searchAll();
     return BROWSE_LIBRARIES;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseRnaiLibraries()
   {
     _librariesBrowser.searchLibraryScreenType(ScreenType.RNAI);
     return BROWSE_LIBRARIES;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseSmallMoleculeLibraries()
   {
     _librariesBrowser.searchLibraryScreenType(ScreenType.SMALL_MOLECULE);
     return BROWSE_LIBRARIES;
   }
 
-  @UIControllerMethod
-  public String browseScreeners()
-  {
-    if (!(getScreensaverUser() instanceof AdministratorUser)) {
-      reportSystemError("invalid user type");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    _screenersBrowser.searchScreeners();
-    return BROWSE_SCREENERS;
-  }
-  
-  @UIControllerMethod
+  @UICommand
   public String browseUsers()
   {
     if (!(getScreensaverUser() instanceof AdministratorUser)) {
-      reportSystemError("invalid user type");
-      return REDISPLAY_PAGE_ACTION_RESULT;
+      throw new OperationRestrictedException("only administrators can browse users");
     }
-    _screenersBrowser.searchUsers();
+    _screenersBrowser.searchAll();
     return BROWSE_SCREENERS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseAssociates()
   {
     if (!(getScreensaverUser() instanceof ScreeningRoomUser)) {
-      reportSystemError("invalid user type");
-      return REDISPLAY_PAGE_ACTION_RESULT;
+      throw new OperationRestrictedException("only screening room users can browser associates");
     }
     _screenersBrowser.searchAssociatedUsers((ScreeningRoomUser) getScreensaverUser());
     _screenersBrowser.setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchScreenAssociates"));
     return BROWSE_SCREENERS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseStaff()
   {
-    _staffBrowser.searchUsers();
+    _staffBrowser.searchAll();
     _staffBrowser.setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchStaff"));
     return BROWSE_STAFF;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseStudies()
   {
-    _studiesBrowser.searchStudies();
+    _studiesBrowser.searchAll();
     return BROWSE_STUDIES;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseScreens()
   {
-    _screensBrowser.searchAllScreens();
+    _screensBrowser.searchAll();
     // default to descending sort order on screen number
     _screensBrowser.getColumnManager().setSortAscending(false);
     return BROWSE_SCREENS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseMyScreens()
   {
     if (!(getScreensaverUser() instanceof ScreeningRoomUser)) {
-      reportSystemError("invalid user type");
-      return REDISPLAY_PAGE_ACTION_RESULT;
+      throw new OperationRestrictedException("only screening room users can their own screens");
     }
     _screensBrowser.searchScreensForUser((ScreeningRoomUser) getScreensaverUser());
     return BROWSE_MY_SCREENS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseCherryPickRequests()
   {
-    if (getScreensaverUser() instanceof AdministratorUser &&
-      (getScreensaverUser().isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
-      getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN))) {
-      _cherryPickRequestsBrowser.searchAll();
-    }
-    else {
-      showMessage("restrictedEntity", "all cherry pick requests");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
+    _cherryPickRequestsBrowser.searchAll();
     return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseRnaiCherryPickRequests()
   {
     _cherryPickRequestsBrowser.searchScreenType(ScreenType.RNAI);
     return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseSmallMoleculeCherryPickRequests()
   {
     _cherryPickRequestsBrowser.searchScreenType(ScreenType.SMALL_MOLECULE);
     return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseLabActivities()
   {
     ScreensaverUser user = getScreensaverUser();
     if (user instanceof AdministratorUser &&
       (user.isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
       user.isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN))) {
-      _activitiesBrowser.searchAllActivities();
+      _activitiesBrowser.searchAll();
     }
     else {
       _activitiesBrowser.searchActivitiesForUser(user);
@@ -284,33 +263,27 @@ public class Menu extends AbstractBackingBean
     return BROWSE_ACTIVITIES;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String addLibrary()
   {
-    return _libraryDetailViewer.editNewLibrary();
+    return _libraryDetailViewer.editNewEntity(new Library((AdministratorUser) getScreensaverUser()));
   }
   
-  @UIControllerMethod
+  @UICommand
   public String addScreen()
   {
-    return _screenDetailViewer.editNewScreen(null, null);
+    return _screenDetailViewer.editNewEntity(new Screen((AdministratorUser) getScreensaverUser()));
   }
 
-  @UIControllerMethod
+  @UICommand
   public String addScreeningRoomUser()
   {
-    return _userViewer.editNewUser(new ScreeningRoomUser());
+    return _userViewer.editNewEntity(new ScreeningRoomUser((AdministratorUser) getScreensaverUser()));
   }
 
-  @UIControllerMethod
+  @UICommand
   public String addLabHead()
   {
-    return _userViewer.editNewUser(new LabHead());
-  }
-
-  @Override
-  public String reload()
-  {
-    return VIEW_MAIN;
+    return _userViewer.editNewEntity(new LabHead((AdministratorUser) getScreensaverUser()));
   }
 }

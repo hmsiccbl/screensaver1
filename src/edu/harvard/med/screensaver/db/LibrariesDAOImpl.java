@@ -154,7 +154,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     LibraryContentsVersion libraryContentsVersion = 
       _dao.reloadEntity(libraryContentsVersionIn, false, LibraryContentsVersion.library.getPath()); 
     Library library = libraryContentsVersion.getLibrary();
-    if (library.getScreenType() == ScreenType.SMALL_MOLECULE) {
+    if (library.getReagentType().equals(SilencingReagent.class)) {
       _dao.need(library, 
                 Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols).getPath(),
                 Library.wells.to(Well.reagents).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).getPath());
@@ -162,9 +162,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
                 Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.entrezgeneSymbols).getPath(),
                 Library.wells.to(Well.reagents).to(SilencingReagent.vendorGene).to(Gene.genbankAccessionNumbers).getPath());
     }
-    else {
+    else if (library.getReagentType().equals(SmallMoleculeReagent.class)) { 
       _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.compoundNames).getPath());
       _dao.need(library, Library.wells.to(Well.reagents).to(SmallMoleculeReagent.molfileList).getPath());
+    }
+    else {
+      _dao.need(library, Library.wells.to(Well.reagents).getPath());
     }
     
     library.getContentsVersions().remove(libraryContentsVersion); // will be deleted by Hibernate, thanks to delete-orphan cascade

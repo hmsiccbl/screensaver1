@@ -15,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
@@ -28,7 +29,7 @@ import com.google.common.collect.Sets;
  * A screening room activity representing a screener screening various assay
  * plates. These assay plates could be plated from a library, as with a
  * {@link LibraryScreening}, or from a set of cherry picks, as with a
- * {@link RNAiCherryPickScreening}).
+ * {@link CherryPickScreening}).
  * <p>
  * <small>Note that at ICCB-L, RNAi cherry pick plates are screened at the
  * ICCB-L facility, explaining why we have an explicit
@@ -67,7 +68,9 @@ public abstract class Screening extends LabActivity
     Set<ScreensaverUser> performedByCandidates = Sets.newTreeSet();
     performedByCandidates.addAll(getScreen().getAssociatedScreeningRoomUsers());
     // add the current performedBy user, even if it's no longer a valid candidate
-    performedByCandidates.add(getPerformedBy());
+    if (getPerformedBy() != null) {
+      performedByCandidates.add(getPerformedBy());
+    }
     return performedByCandidates;
   }
 
@@ -155,12 +158,12 @@ public abstract class Screening extends LabActivity
    * @param performedBy the user that performed the screening
    * @param dateOfActivity the date the screening took place
    */
-  protected Screening(
-    Screen screen,
-    ScreeningRoomUser performedBy,
-    LocalDate dateOfActivity)
+  protected Screening(Screen screen,
+                      AdministratorUser recordedBy,    
+                      ScreeningRoomUser performedBy,
+                      LocalDate dateOfActivity)
   {
-    super(screen, performedBy, dateOfActivity);
+    super(screen, recordedBy, performedBy, dateOfActivity);
   }
 
   /**

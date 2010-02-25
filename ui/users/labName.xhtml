@@ -14,7 +14,7 @@
 
 <ui:component>
   <t:commandLink id="#{id}LabName" value="#{user.lab.labName}"
-    action="#{userViewer.viewUser}"
+    action="#{userViewer.viewEntity}"
     rendered="#{!empty user.lab.labHead}"
     styleClass="entityLink #{styleClass}" style="margin-right: 4px">
     <f:param name="entityId" value="#{user.lab.labHead.entityId}" />

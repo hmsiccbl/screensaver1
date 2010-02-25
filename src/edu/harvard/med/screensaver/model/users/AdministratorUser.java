@@ -37,19 +37,7 @@ import edu.harvard.med.screensaver.model.AdministrativeActivity;
 @org.hibernate.annotations.Proxy
 public class AdministratorUser extends ScreensaverUser
 {
-
-  // static fields
-
-  static final Logger log = Logger.getLogger(AdministratorUser.class);
   private static final long serialVersionUID = 0L;
-
-
-  // instance fields
-
-  private Set<AdministrativeActivity> _activitiesApproved = new HashSet<AdministrativeActivity>();
-
-
-  // public constructor and instance methods
 
   /**
    * Constructs an initialized <code>ScreensaverUser</code> object.
@@ -90,39 +78,6 @@ public class AdministratorUser extends ScreensaverUser
   }
 
   /**
-   * Get the set of activities approved by this user.
-   * @return the activities approved
-   */
-  @OneToMany(
-    mappedBy="approvedBy",
-    fetch=FetchType.LAZY
-  )
-  @OrderBy("dateApproved")
-  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="activityApproved")
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true)
-  public Set<AdministrativeActivity> getActivitiesApproved()
-  {
-    return _activitiesApproved;
-  }
-
-  /**
-   * Add an activity that was approved by this user.
-   * @param activityApproved the new activity that was approved by this user
-   * @return true iff the user did not already approve the activity
-   */
-  public boolean addActivityApproved(AdministrativeActivity activityApproved)
-  {
-    if (_activitiesApproved.add(activityApproved)) {
-      activityApproved.setApprovedBy(this);
-      return true;
-    }
-    return false;
-  }
-
-
-  // protected constructor and instance methods
-
-  /**
    * Construct an uninitialized <code>AdministratorUser</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
@@ -132,19 +87,6 @@ public class AdministratorUser extends ScreensaverUser
   protected boolean validateRole(ScreensaverUserRole role)
   {
     return role.isAdministrative() || role == ScreensaverUserRole.SCREENSAVER_USER;
-  }
-
-
-  // private constructor and instance methods
-
-/**
-   * Get the set of activities approved by this user.
-   * @return the activities approved
-   * @motivation for hibernate
-   */
-  private void setActivitiesApproved(Set<AdministrativeActivity> activitiesApproved)
-  {
-    _activitiesApproved = activitiesApproved;
   }
 }
 

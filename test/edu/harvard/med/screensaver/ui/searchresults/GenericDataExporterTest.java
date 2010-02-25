@@ -46,7 +46,7 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
 
     WellSearchResults wellSearchResults = new WellSearchResults(genericEntityDao, new UnrestrictedDataAccessPolicy(), null, null, null, Collections.<DataExporter<?>>emptyList());
     GenericDataExporter<Well> exporter = (GenericDataExporter<Well>) wellSearchResults.getDataExporters().get(0);
-    wellSearchResults.searchAllWells();
+    wellSearchResults.searchAll();
     wellSearchResults.searchCommandListener(null); // invoke search now (necessary when using searchAllWells(), above
 
     TableColumn<Well,String> wellColumn = (TableColumn<Well,String>) wellSearchResults.getColumnManager().getColumn("Well");

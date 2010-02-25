@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.ParseError;
-import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.WellName;

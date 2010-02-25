@@ -53,7 +53,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
@@ -66,20 +66,20 @@ import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.IntegerSetEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.RealEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.util.Triple;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -108,7 +108,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     SET_OF_WELLS 
   };
 
-  private static Function<Well,String> silencingReagentToDuplexWells = new Function<Well,String>() { 
+  private static Function<Well,String> WellToDuplexWells = new Function<Well,String>() { 
     public String apply(Well well) {
       return well.getWellKey().toString();
     }
@@ -117,7 +117,6 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private GenericEntityDAO _dao;
   private DataAccessPolicy _dataAccessPolicy;
   private LibraryViewer _libraryViewer;
-  private WellViewer _wellViewer;
   private WellsSdfDataExporter _wellsSdfDataExporter;
 
   private WellSearchResultMode _mode;
@@ -145,12 +144,11 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
                            WellsSdfDataExporter wellsSdfDataExporter,
                            List<DataExporter<?>> dataExporters)
   {
-    super(Lists.newArrayList(Iterables.concat(Lists.newArrayList(wellsSdfDataExporter), dataExporters)));
+    super(Lists.newArrayList(Iterables.concat(Lists.newArrayList(wellsSdfDataExporter), dataExporters)), wellViewer);
     _wellsSdfDataExporter = wellsSdfDataExporter;
     _dao = dao;
     _dataAccessPolicy = dataAccessPolicy;
     _libraryViewer = libraryViewer;
-    _wellViewer = wellViewer;
   }
 
   /**
@@ -161,7 +159,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
    * 
    * @see WellSearchResults#searchCommandListener(javax.faces.event.ActionEvent)
    */
-  public void searchAllWells()
+  @Override
+  public void searchAll()
   {
     _mode = WellSearchResultMode.ALL_WELLS;
     _library = null;
@@ -299,25 +298,19 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     getColumnManager().getColumn("Vendor ID").setVisible(true);
   }
 
-  
-  // SearchResults abstract method implementations
-
+  public LibraryContentsVersion getLibraryContentsVersion()
+  {
+    return _libraryContentsVersion;
+  }
 
   @Override
-  protected DataTableModel<Well> doBuildDataModel(EntityDataFetcher<Well,String> dataFetcher,
-                                                  List<? extends TableColumn<Well,?>> columns)
+  protected DataTableModel<Well> buildDataTableModel(DataFetcher<Well,String,PropertyPath<Well>> dataFetcher,
+                                                     List<? extends TableColumn<Well,?>> columns)
   {
-    if (_library != null &&
-      ((_library.getEndPlate() - _library.getStartPlate()) + 1) * _library.getPlateSize().getWellCount() <= EntitySearchResults.ALL_IN_MEMORY_THRESHOLD) {
-      log.debug("using InMemoryDataModel due to domain size");
-      return new InMemoryEntityDataModel<Well>(dataFetcher);
+    if (dataFetcher instanceof EntityDataFetcher) {
+      return new VirtualPagingEntitySearchResultsDataModel((EntityDataFetcher<Well,String>) dataFetcher);
     }
-//    if (_screenResult != null &&
-//      _dao.relationshipSize(_screenResult, "plateNumbers") * (Well.PLATE_ROWS * Well.PLATE_COLUMNS) <= EntitySearchResults.ALL_IN_MEMORY_THRESHOLD) {
-//      log.debug("using InMemoryDataModel due to domain size");
-//      return new InMemoryEntityDataModel<Well>(dataFetcher);
-//    }
-    return super.doBuildDataModel(dataFetcher, columns);
+    return super.buildDataTableModel(dataFetcher, columns);
   }
 
   @Override
@@ -382,37 +375,36 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new WellReagentEntityColumn<SilencingReagent,List<String>>(
+    columns.add(new WellReagentEntityColumn<SilencingReagent,Set<String>>(
       SilencingReagent.class,
-      new ListEntityColumn<SilencingReagent>(
+      new TextSetEntityColumn<SilencingReagent>(
       SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols).toCollectionOfValues(),
       "Entrez Gene Symbol",
       "The Entrez gene symbol for the gene targeted by silencing reagent in the well",
       SILENCING_REAGENT_COLUMNS_GROUP) {
       @Override
-      public List<String> getCellValue(SilencingReagent reagent)
+      public Set<String> getCellValue(SilencingReagent reagent)
       {
         Gene gene = reagent.getFacilityGene();
         if (gene == null) { return null; }
-        return Lists.transform(Lists.newArrayList(reagent.getFacilityGene().getEntrezgeneSymbols()),
-                               Functions.TO_STRING);
+        return reagent.getFacilityGene().getEntrezgeneSymbols();
       }
     }));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new WellReagentEntityColumn<SilencingReagent,List<String>>(
+    columns.add(new WellReagentEntityColumn<SilencingReagent,Set<String>>(
       SilencingReagent.class,
-      new ListEntityColumn<SilencingReagent>(
+      new TextSetEntityColumn<SilencingReagent>(
       SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers).toCollectionOfValues(),
       "Genbank Accession Numbers",
       "The Genbank Accession Numbers for the gene targeted by silencing reagent in the well",
       SILENCING_REAGENT_COLUMNS_GROUP) {
       @Override
-      public List<String> getCellValue(SilencingReagent reagent)
+      public Set<String> getCellValue(SilencingReagent reagent)
       {
         Gene gene = reagent.getFacilityGene();
         if (gene == null) { return null; }
-        return new ArrayList<String>(reagent.getFacilityGene().getGenbankAccessionNumbers());
+        return reagent.getFacilityGene().getGenbankAccessionNumbers();
       }
     }));
     columns.get(columns.size() - 1).setVisible(false);
@@ -452,17 +444,17 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     }));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new WellReagentEntityColumn<SilencingReagent,List<String>>(
+    columns.add(new WellReagentEntityColumn<SilencingReagent,Set<String>>(
       SilencingReagent.class,
-      new ListEntityColumn<SilencingReagent>(
+      new TextSetEntityColumn<SilencingReagent>(
         SilencingReagent.duplexWells.toProperty("wellId"),
         "Duplex Wells",
         "The duplex wells to which this pool well deconvolutes",
         SILENCING_REAGENT_COLUMNS_GROUP) {
         @Override
-        public List<String> getCellValue(SilencingReagent reagent)
+        public Set<String> getCellValue(SilencingReagent reagent)
         {
-          return Lists.newArrayList(Iterables.transform(reagent.getDuplexWells(), silencingReagentToDuplexWells));
+          return Sets.newHashSet(Iterables.transform(reagent.getDuplexWells(), WellToDuplexWells));
         }
       }));
     columns.get(columns.size() - 1).setVisible(false);
@@ -499,50 +491,48 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     }));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,List<String>>(
+    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,Set<String>>(
       SmallMoleculeReagent.class,
-      new ListEntityColumn<SmallMoleculeReagent>(
+      new TextSetEntityColumn<SmallMoleculeReagent>(
         SmallMoleculeReagent.compoundNames.toCollectionOfValues(),
         "Compound Names",
         "The names of the compound in the well",
         COMPOUND_COLUMNS_GROUP) {
         @Override
-        public List<String> getCellValue(SmallMoleculeReagent reagent)
+        public Set<String> getCellValue(SmallMoleculeReagent reagent)
         {
-          return Lists.newArrayList(reagent.getCompoundNames());
+          return reagent.getCompoundNames();
         }
       }));
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(
-      new WellReagentEntityColumn<SmallMoleculeReagent,List<String>>(
+      new WellReagentEntityColumn<SmallMoleculeReagent,Set<Integer>>(
         SmallMoleculeReagent.class,
-        new ListEntityColumn<SmallMoleculeReagent>(
+        new IntegerSetEntityColumn<SmallMoleculeReagent>(
           SmallMoleculeReagent.pubchemCids.toCollectionOfValues(),
           "PubChem CIDs",
           "The PubChem CIDs of the compound in the well",
           COMPOUND_COLUMNS_GROUP) {
           @Override
-          public List<String> getCellValue(SmallMoleculeReagent reagent)
+          public Set<Integer> getCellValue(SmallMoleculeReagent reagent)
           {
-            return Lists.transform(Lists.newArrayList(reagent.getPubchemCids()),
-                                   Functions.TO_STRING);
+            return reagent.getPubchemCids();
           }
         }));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,List<String>>(
+    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,Set<Integer>>(
       SmallMoleculeReagent.class,
-      new ListEntityColumn<SmallMoleculeReagent>(
+      new IntegerSetEntityColumn<SmallMoleculeReagent>(
         SmallMoleculeReagent.chembankIds.toCollectionOfValues(),
         "ChemBank IDs",
         "The ChemBank IDs of the primary compound in the well",
         COMPOUND_COLUMNS_GROUP) {
         @Override
-        public List<String> getCellValue(SmallMoleculeReagent reagent)
+        public Set<Integer> getCellValue(SmallMoleculeReagent reagent)
         {
-          return Lists.transform(Lists.newArrayList(reagent.getChembankIds()),
-                                 Functions.TO_STRING);
+          return reagent.getChembankIds();
         }
       }));
     columns.get(columns.size() - 1).setVisible(false);
@@ -649,7 +639,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       @Override
       public Object cellAction(Well well)
       {
-        return _libraryViewer.viewLibrary(well.getLibrary());
+        return _libraryViewer.viewEntity(well.getLibrary());
       }
     });
 
@@ -679,6 +669,23 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
 
+    // TODO
+//    if (_mode = WellSearchResultMode.SCREEN_RESULT_WELLS) {
+//      columns.add(new EnumEntityColumn<Well,AssayWellType>(
+//        Well.assayWells.restrict(AssayWell.screenResult.getLeaf()), _screenResult).toProperty("assayWellType"),
+//        "Assay Well Type",
+//        "The type of assay well, e.g., 'Experimental', 'Empty', 'Library Control', " +
+//        "'Assay Positive Control', 'Assay Control', 'Buffer', etc.",
+//        WELL_COLUMNS_GROUP,
+//        AssayWellType.values()) {
+//        @Override
+//        public AssayWellType getCellValue(Well well)
+//        {
+//          return well.getAssayWells().get(_screenResult) == null ? null : well.getAssayWells().get(_screenResult).getAssayWellType();
+//        }
+//      });
+//    }
+    
     columns.add(new TextEntityColumn<Well>(
       new PropertyPath<Well>(Well.class, "facilityId"),
       "Facility ID",
@@ -719,8 +726,12 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   {
     List<TableColumn<Well,?>> otherColumns = Lists.newArrayList();
     boolean isAssayWellTypeColumnCreated = false; 
-    for (Triple<ResultValueType,Integer,String> rvtAndScreenNumberAndTitle : findValidResultValueTypes()) {
+    
+    for (Triple<ResultValueType,Integer,String> rvtAndScreenNumberAndTitle : findResultValueTypesForScreenResultsWithMutualPlates()) {
       final ResultValueType rvt = rvtAndScreenNumberAndTitle.getFirst();
+      if (rvt.isRestricted()) {
+        continue;
+      }
       Integer screenNumber = rvtAndScreenNumberAndTitle.getSecond();
       String screenTitle = rvtAndScreenNumberAndTitle.getThird();
 
@@ -798,7 +809,20 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           public Double getCellValue(Well well)
           {
             ResultValue rv = well.getResultValues().get(rvt);
-            return rv == null ? null : rv.getNumericValue();
+            if (rv == null || rv.isRestricted()) { 
+              return null;
+            }
+            return rv.getNumericValue();
+          }
+          
+          @Override
+          public boolean isSortableSearchable()
+          {
+            // if related screen result is restricted, this means that we're
+            // only allowed to share mutual positives; in this case we do not
+            // allow sorting or filtering on this column, since it would allow
+            // hidden values to be inferred by the user
+            return !!!rvt.getScreenResult().isRestricted(); 
           }
         };
       }
@@ -812,15 +836,28 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           public String getCellValue(Well well)
           {
             ResultValue rv = well.getResultValues().get(rvt);
-            return rv == null ? null : rv.getValue();
+            if (rv == null || rv.isRestricted()) { 
+              return null;
+            }
+            return rv.getValue();
+          }
+          
+          @Override
+          public boolean isSortableSearchable()
+          {
+            // if related screen result is restricted, this means that we're
+            // only allowed to share mutual positives; in this case we do not
+            // allow sorting or filtering on this column, since it would allow
+            // hidden values to be inferred by the user
+            return !!!rvt.getScreenResult().isRestricted(); 
           }
         };
       }
 
       // request eager fetching of resultValueType, since Hibernate will otherwise fetch these with individual SELECTs
-      ((HasFetchPaths<Well>) column).addRelationshipPath(Well.resultValues.to(ResultValue.ResultValueType));
+      // we also need to eager fetch all the way "up" to Screen, for data access policy checks
+      ((HasFetchPaths<Well>) column).addRelationshipPath(Well.resultValues.to(ResultValue.ResultValueType).to(ResultValueType.ScreenResult).to(ScreenResult.screen));
 
-      // BII start: (Siew Cheng) Add assay well type column 
       if (!isAssayWellTypeColumnCreated && column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
         columns.add(new EnumEntityColumn<Well,AssayWellType>(
           Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), rvt).toProperty("assayWellType"),
@@ -837,8 +874,6 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         });
         isAssayWellTypeColumnCreated = true;
       }
-      // BII end
-
       if (column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
         columns.add(column);
         column.setVisible(true);
@@ -876,16 +911,17 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   }
   
   /**
-   * @return a list of RVTs that have RVs for wells in common with the wells of this search result, ordered by screen number and RVT ordinal
+   * @return a list of RVTs that have RVs for plates in common with the wells of this search result, ordered by screen number and RVT ordinal
    */
-  private List<Triple<ResultValueType,Integer,String>> findValidResultValueTypes()
+  private List<Triple<ResultValueType,Integer,String>> findResultValueTypesForScreenResultsWithMutualPlates()
   {
     return _dao.runQuery(new Query() {
       public List<Triple<ResultValueType,Integer,String>> execute(Session session)
       {
         HqlBuilder hql = new HqlBuilder();
         hql.distinctProjectionValues();
-        hql.from(ResultValueType.class, "rvt").from("rvt", "screenResult", "sr", JoinType.INNER).from("sr", "screen", "s", JoinType.INNER);
+        // note: rvt->screenResult left fetch join eager fetches as a courtesy to caller, which needs it in impl of TableColumn.isSortableSearchable
+        hql.from(ResultValueType.class, "rvt").from("rvt", "screenResult", "sr", JoinType.LEFT_FETCH).from("sr", "screen", "s", JoinType.INNER);
         hql.select("rvt").select("s", "screenNumber").select("s", "title");
         hql.orderBy("s", "screenNumber").orderBy("rvt", "ordinal");
 
@@ -1036,9 +1072,9 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           Disjunction librariesWhere = hql.disjunction();
           for (Integer plateNumber : _plateNumbers) {
             Conjunction libraryWhere = hql.conjunction();
-            libraryWhere.add(hql.predicate("l.startPlate", Operator.LESS_THAN_EQUAL, plateNumber));
-            libraryWhere.add(hql.predicate("l.endPlate", Operator.GREATER_THAN_EQUAL, plateNumber));
-            libraryWhere.add(hql.predicate("l.screenType", "s.screenType", Operator.EQUAL));
+            libraryWhere.add(hql.simplePredicate("l.startPlate", Operator.LESS_THAN_EQUAL, plateNumber));
+            libraryWhere.add(hql.simplePredicate("l.endPlate", Operator.GREATER_THAN_EQUAL, plateNumber));
+            libraryWhere.add(hql.simplePredicate("l.screenType", "s.screenType", Operator.EQUAL));
             librariesWhere.add(libraryWhere);
           }
           hql.where(librariesWhere);
@@ -1055,12 +1091,6 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         return result;
       }
     });
-  }
-
-  @Override
-  protected void setEntityToView(Well well)
-  {
-    _wellViewer.viewWell(well.getWellKey(), _libraryContentsVersion);
   }
 
   /**
@@ -1108,7 +1138,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
    * Override resetFilter() in order to handle the "reset all" command in
    * "all wells" mode by resetting to an empty search result.
    */
-  @UIControllerMethod
+  @UICommand
   public String resetFilter()
   {
     if (_mode == WellSearchResultMode.ALL_WELLS) {
@@ -1141,7 +1171,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   }
 
   @Override
-  @UIControllerMethod
+  @UICommand
   public String downloadSearchResults()
   {
     DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
@@ -1174,7 +1204,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     return columnDescription.toString();
   }
   
-  class WellReagentEntityColumn<R extends Reagent,T> extends ReagentEntityColumn<Well,R,T> 
+  class WellReagentEntityColumn<R extends Reagent,T> extends RelatedEntityColumn<Well,R,T> 
   {
 
     private WellSearchResults _wellSearchResults;
@@ -1188,7 +1218,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     }
 
     @Override
-    protected R getReagent(Well well)
+    protected R getRelatedEntity(Well well)
     {
       if (accessSpecificLibraryContentsVersion()) {
         return (R) well.getReagents().get(_libraryContentsVersion);

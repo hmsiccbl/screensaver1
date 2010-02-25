@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -72,6 +73,7 @@ public class BoutrosAnnotationImporter
     }
 
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
     final String rnaiGlobalUserPassword = app.getCommandLineOptionValue("rp");
     final String studyUserAccountPassword = app.getCommandLineOptionValue("up");
 
@@ -123,7 +125,6 @@ public class BoutrosAnnotationImporter
                                      STUDY_TITLE);
           screen.setSummary(STUDY_SUMMARY);
           screen.setUrl(STUDY_URL);
-          screen.setShareable(true);
 
           ScreeningRoomUser rnaiGlobalMember = findOrCreateUser("RNAi Global",
                                                                 "Member",
@@ -136,7 +137,7 @@ public class BoutrosAnnotationImporter
           rnaiGlobalMember.setComments("RNAi Global group account");
           dao.saveOrUpdateEntity(rnaiGlobalMember);
 
-          importAnnotationData(screen, file, dao);
+          importAnnotationData(screen, file, librariesDao);
           dao.saveOrUpdateEntity(screen);
         }
         catch (Exception e) {
@@ -160,11 +161,12 @@ public class BoutrosAnnotationImporter
                                                       email);
     if (user == null) {
       if (isLabHead) {
-        user = new LabHead(firstName, lastName, email, labAffiliation);
+        user = new LabHead(firstName, lastName, labAffiliation);
       }
       else {
-        user = new ScreeningRoomUser(firstName, lastName, email);
+        user = new ScreeningRoomUser(firstName, lastName);
       }
+      user.setEmail(email);
       user.setLoginId(loginId);
       user.updateScreensaverPassword(password);
       user.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
@@ -191,13 +193,13 @@ public class BoutrosAnnotationImporter
 
   static private void importAnnotationData(Screen screen,
                                            File file,
-                                           GenericEntityDAO dao)
+                                           LibrariesDAO librariesDao)
   throws FileNotFoundException
   {
     Workbook workbook = new Workbook(file);
     Sheet sheet = workbook.getWorkbook().getSheet(0);
 
-    List<AnnotationValueBuilder> builders = getAnnotationValueBuilders(screen, dao);
+    List<AnnotationValueBuilder> builders = getAnnotationValueBuilders(screen, librariesDao);
     for (int iRow = 1; iRow < sheet.getRows(); iRow++) {
       Cell[] row = sheet.getRow(iRow);
       for (AnnotationValueBuilder builder : builders) {
@@ -211,14 +213,14 @@ public class BoutrosAnnotationImporter
   }
 
   private static List<AnnotationValueBuilder> getAnnotationValueBuilders(final Screen screen,
-                                                                         final GenericEntityDAO dao) {
+                                                                         final LibrariesDAO librariesDao) {
     final List<AnnotationValueBuilder> builders = new ArrayList<AnnotationValueBuilder>();
     int column = 1;
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 screen.createAnnotationType("siRNA IDs",
                                                                             "The Dharmacon/Thermofisher siRNA IDs of the individual duplexes that comprise the SMARTPool.",
                                                                             false),
-                                                                            dao) {
+                                                                            librariesDao) {
       public String transformValue(String value) {
         return value.replaceAll("&", ", ");
       }
@@ -227,7 +229,7 @@ public class BoutrosAnnotationImporter
                                                 screen.createAnnotationType("Intended Target Gene Symbol",
                                                                             "Entrez Gene symbol of targeted gene, as originally annotated by Dharmacon/Thermofisher.",
                                                                             false),
-                                                                            dao));
+                                                                            librariesDao));
 //  builders.add(new AnnotationValueBuilder() {
 
 //  private AnnotationType _annotationType =
@@ -257,12 +259,12 @@ public class BoutrosAnnotationImporter
                                                 screen.createAnnotationType("Intended RefSeq Targets",
                                                                             "The RefSeq transcript IDs that Dharmacon/Thermofisher intended to be targeted by the SMARTPool " +
                                                                             "and that was originally provided in the product documentation.",
-                                                                            false), dao));
+                                                                            false), librariesDao));
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 screen.createAnnotationType("ON-Target Modification",
                                                                             "Dharamcon's \"ON-Target\" flag, indicating whether chemical modification of the sense strand " +
                                                                             "siRNA has been performed to reduce off-target effects",
-                                                                            false), dao)
+                                                                            false), librariesDao)
     {
       @Override
       public String transformValue(String value)
@@ -275,13 +277,13 @@ public class BoutrosAnnotationImporter
                                                 screen.createAnnotationType("# Predicted Target Genes",
                                                                             "The number of genes that have been computationally predicted by this study to be targeted " +
                                                                             "by the SMARTPool.",
-                                                                            true), dao));
+                                                                            true), librariesDao));
 
     builders.add(new AnnotationValueBuilderImpl(column++ - 1,
                                                 screen.createAnnotationType("Gene IDs of Predicted Targets",
                                                                             "Entrez Gene IDs of genes that have been computationally predicted by this study to be targeted by at " +
                                                                             "least one siRNA duplex in the SMARTPool.",
-                                                                            false), dao) {
+                                                                            false), librariesDao) {
       public String transformValue(String value) {
         return value.replaceAll("GeneID:", "").replaceAll("&", ", ");
       }
@@ -293,7 +295,7 @@ public class BoutrosAnnotationImporter
                                                                             "by the SMARTPool.  Transcripts derived from the same gene are grouped with square brackets and " +
                                                                             "gene group order matches Gene ID order in \"" +
                                                                             builders.get(builders.size() - 1).getAnnotationType().getName() + "\".",
-                                                                            false), dao) {
+                                                                            false), librariesDao) {
       public String transformValue(String value) {
         return transformDelimiters(value);
       }
@@ -304,7 +306,7 @@ public class BoutrosAnnotationImporter
                                                                             "The number of duplex siRNAs from the SMARTPool that are predicted by this study to target each " +
                                                                             "RefSeq.  Duplex grouping and ordering matches RefSeq transcripts in \"" +
                                                                             builders.get(builders.size() - 1).getAnnotationType().getName() + "\".",
-                                                                            false), dao) {
+                                                                            false), librariesDao) {
       public String transformValue(String value) {
         return transformDelimiters(value);
       }
@@ -313,21 +315,21 @@ public class BoutrosAnnotationImporter
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 screen.createAnnotationType("# RefSeq Target Transcripts",
                                                                             "The total number of RefSeq transcripts predicted by this study to be targeted by the SMARTPool.",
-                                                                            true), dao));
+                                                                            true), librariesDao));
 
     // note: excluding "Avg SMARTPool Efficiency" annotation due to controversial nature of this algorithm (per request of Laura Selfors, 2007-09-13)
     column++;
 
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 screen.createAnnotationType("Is Annotation Changed",
-                                                                            "\"Yes\" if the predicted RefSeq target(s) differ from the intended RefSeq target, " +
+                                                                            "\"Yes\" if the predicted RefSeq target(s) differ from the originally intended RefSeq target, " +
                                                                             "otherwise \"No\".",
-                                                                            false), dao));
+                                                                            false), librariesDao));
 
     builders.add(new AnnotationValueBuilderImpl(column++,
                                                 screen.createAnnotationType("Comments",
                                                                             "Comments on the annotation change.",
-                                                                            false), dao));
+                                                                            false), librariesDao));
     return builders;
   }
 

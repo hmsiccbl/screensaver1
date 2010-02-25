@@ -108,7 +108,6 @@ public class MedicinalCompoundsStudyCreator
 
           study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO, TITLE);
           study.setSummary(SUMMARY);
-          study.setShareable(true);
 
           AnnotationType annotType = study.createAnnotationType("Notes on Suitability",
                                                                A_NO_SPECIFIC_CONCERNS + ". " +

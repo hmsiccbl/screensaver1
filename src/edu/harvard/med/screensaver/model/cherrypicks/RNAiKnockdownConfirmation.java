@@ -38,7 +38,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenerCherryPick.class)
-public class RNAiKnockdownConfirmation extends AbstractEntity
+public class RNAiKnockdownConfirmation extends AbstractEntity<Integer>
 {
 
   // private static data
@@ -49,7 +49,6 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
 
   // private instance data
 
-  private Integer _rnaiKnockdownConfirmationId;
   private Integer _version;
   private ScreenerCherryPick _screenerCherryPick;
   private Double _percentKnockdown;
@@ -66,13 +65,6 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getRNAiKnockdownConfirmationId();
-  }
-
   /**
    * Get the id for the RNAi Knockdown Confirmation.
    * @return the id for the RNAi Knockdown Confirmation
@@ -86,7 +78,7 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="rnai_knockdown_confirmation_id_seq")
   public Integer getRNAiKnockdownConfirmationId()
   {
-    return _rnaiKnockdownConfirmationId;
+    return getEntityId();
   }
 
   /**
@@ -232,7 +224,7 @@ public class RNAiKnockdownConfirmation extends AbstractEntity
    */
   private void setRNAiKnockdownConfirmationId(Integer rNAiKnockdownConfirmationId)
   {
-    _rnaiKnockdownConfirmationId = rNAiKnockdownConfirmationId;
+    setEntityId(rNAiKnockdownConfirmationId);
   }
 
   /**

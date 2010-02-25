@@ -15,18 +15,13 @@ import java.util.List;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.joda.time.LocalDate;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 public abstract class CherryPickRequestTest<CPR extends CherryPickRequest> extends AbstractEntityInstanceTest<CPR>
 {
@@ -47,7 +42,7 @@ public abstract class CherryPickRequestTest<CPR extends CherryPickRequest> exten
   {
     schemaUtil.truncateTablesOrCreateSchema();
     Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-    CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
+    CherryPickRequest cherryPickRequest = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
     for (int plateOrdinal = 0; plateOrdinal < 3; ++plateOrdinal) {
       for (int attempt = 0; attempt <= plateOrdinal; ++attempt) {
         cherryPickRequest.createCherryPickAssayPlate(plateOrdinal,
@@ -69,29 +64,5 @@ public abstract class CherryPickRequestTest<CPR extends CherryPickRequest> exten
 //  {
 //    fail("not implemented");
 //  }
-
-  public void testLegacyCherryPickNumber()
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-    class Txn implements DAOTransaction {
-      CherryPickRequest _cherryPickRequest;
-
-      public void runTransaction() {
-        Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-        genericEntityDao.persistEntity(screen.getLeadScreener());
-        genericEntityDao.persistEntity(screen.getLabHead());
-        genericEntityDao.persistEntity(screen);
-        _cherryPickRequest = screen.createCherryPickRequest(screen.getLeadScreener(), 
-                                                                             new LocalDate(),
-                                                                             4000);
-        genericEntityDao.persistEntity(_cherryPickRequest);
-      }
-    };
-    Txn txn = new Txn();
-    genericEntityDao.doInTransaction(txn);
-    CherryPickRequest cherryPickRequest2 = genericEntityDao.findEntityById(CherryPickRequest.class, txn._cherryPickRequest.getEntityId());
-    assertEquals("cherryPickRequestNumber", new Integer(4000), cherryPickRequest2.getCherryPickRequestNumber());
-  }
-
 }
 

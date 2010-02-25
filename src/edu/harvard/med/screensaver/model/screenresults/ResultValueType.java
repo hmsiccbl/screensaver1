@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,7 +34,6 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -61,7 +59,7 @@ import org.hibernate.annotations.OptimisticLock;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenResult.class)
-public class ResultValueType extends AbstractEntity implements MetaDataType, Comparable
+public class ResultValueType extends AbstractEntity<Integer> implements MetaDataType, Comparable
 {
 
   // TODO: perhaps we should split ResultValueType into subclasses, one for raw
@@ -75,7 +73,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
 
   // private instance data
 
-  private Integer _resultValueTypeId;
   private Integer _version;
   private ScreenResult _screenResult;
   private Collection<ResultValue> _resultValues = new ArrayList<ResultValue>();
@@ -141,13 +138,6 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getResultValueTypeId();
-  }
-
   /**
    * Defines natural ordering of <code>ResultValueType</code> objects, based
    * upon their ordinal field value. Note that natural ordering is only defined
@@ -174,7 +164,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="result_value_type_id_seq")
   public Integer getResultValueTypeId()
   {
-    return _resultValueTypeId;
+    return getEntityId();
   }
 
   /**
@@ -198,9 +188,9 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param value the value of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public ResultValue createResultValue(Well well, String value)
+  public ResultValue createResultValue(AssayWell assayWell, String value)
   {
-    return createResultValue(well, AssayWellType.EXPERIMENTAL, value, false);
+    return createResultValue(assayWell, value, false);
   }
 
   /**
@@ -211,12 +201,11 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public ResultValue createResultValue(Well well,
-                                       AssayWellType assayWellType,
+  public ResultValue createResultValue(AssayWell assayWell,
                                        String value,
                                        Boolean exclude)
   {
-    return createResultValue(well, assayWellType, value, null, 0, exclude);
+    return createResultValue(assayWell, value, null, 0, exclude);
   }
 
   /**
@@ -226,11 +215,11 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public ResultValue createResultValue(Well well,
+  public ResultValue createResultValue(AssayWell assayWell,
                                        Double numericValue,
                                        Integer decimalPrecision)
   {
-    return createResultValue(well, AssayWellType.EXPERIMENTAL, numericValue, decimalPrecision, false);
+    return createResultValue(assayWell, numericValue, decimalPrecision, false);
   }
 
   /**
@@ -242,13 +231,12 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
-  public ResultValue createResultValue(Well well,
-                                       AssayWellType assayWellType,
+  public ResultValue createResultValue(AssayWell assayWell,
                                        Double numericValue,
                                        Integer decimalPrecision,
                                        boolean exclude)
   {
-    return createResultValue(well, assayWellType, null, numericValue, decimalPrecision, exclude);
+    return createResultValue(assayWell, null, numericValue, decimalPrecision, exclude);
   }
 
   /**
@@ -796,14 +784,18 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @motivation for hibernate
    */
   @OneToMany(fetch=FetchType.LAZY,
-             cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
              mappedBy="resultValueType")
+  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.PERSIST })
   //@org.hibernate.annotations.MapKey(columns={ @Column(name="well_id") })
   @OptimisticLock(excluded=true)
-  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.DELETE})
   public Collection<ResultValue> getResultValues()
   {
     return _resultValues;
+  }
+  
+  public void clearResultValues()
+  {
+    _resultValues.clear();
   }
   
   /**
@@ -884,7 +876,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    */
   private void setResultValueTypeId(Integer resultValueTypeId)
   {
-    _resultValueTypeId = resultValueTypeId;
+    setEntityId(resultValueTypeId);
   }
 
   /**
@@ -952,8 +944,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type
    */
   private ResultValue createResultValue(
-    Well well,
-    AssayWellType assayWellType,
+    AssayWell assayWell,                                        
     String value,
     Double numericValue,
     Integer decimalPrecision,
@@ -967,8 +958,7 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     }
 
     ResultValue resultValue = new ResultValue(this,
-                                              well,
-                                              assayWellType,
+                                              assayWell,
                                               value,
                                               numericValue,
                                               decimalPrecision,
@@ -984,14 +974,16 @@ public class ResultValueType extends AbstractEntity implements MetaDataType, Com
     if (isPositive(resultValue)) {
       incrementPositivesCount();
       resultValue.setPositive(true);
+      assayWell.setPositive(true);
     }
     else {
       resultValue.setPositive(false);
     }
 
-    getScreenResult().addWell(well);
+    getScreenResult().addWell(assayWell.getLibraryWell());
 
     _resultValues.add(resultValue);
+    
     return resultValue;
   }
 

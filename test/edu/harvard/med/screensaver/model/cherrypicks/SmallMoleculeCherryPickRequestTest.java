@@ -28,6 +28,8 @@ import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -83,7 +85,7 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
                                             new MolecularFormula("C3"));
           }
         }
-        library.getLatestContentsVersion().release(new AdministrativeActivity(library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+        library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
         genericEntityDao.saveOrUpdateEntity(library);
         
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
@@ -91,10 +93,11 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
         ScreenResult screenResult = screen.createScreenResult();
         ResultValueType resultValueType = screenResult.createResultValueType("values");
         for (Well well : wells) {
-          resultValueType.createResultValue(well, "1.0");
+          AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
+          resultValueType.createResultValue(assayWell, "1.0");
         }
         
-        SmallMoleculeCherryPickRequest cherryPickRequest = (SmallMoleculeCherryPickRequest) screen.createCherryPickRequest();
+        SmallMoleculeCherryPickRequest cherryPickRequest = (SmallMoleculeCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
         for (int i = 0; i < 200; ++i) {
           cherryPickRequest.createScreenerCherryPick(wells.get(i));
         }

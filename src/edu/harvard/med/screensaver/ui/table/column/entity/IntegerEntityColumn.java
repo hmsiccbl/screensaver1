@@ -40,4 +40,9 @@ public abstract class IntegerEntityColumn<E extends AbstractEntity> extends Inte
   {
     return _fetchPaths.getRelationshipPaths();
   }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

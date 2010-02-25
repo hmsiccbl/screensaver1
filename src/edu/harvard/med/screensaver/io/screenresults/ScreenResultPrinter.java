@@ -68,6 +68,7 @@ public class ScreenResultPrinter
       int n = 0;
       boolean ellipsesOnce = false;
 
+      //TODO: reload the rvt's for the wells here because we are clearing them during parse now - sde4
       for (WellKey wellKey : new TreeSet<WellKey>(rvt.getWellKeyToResultValueMap().keySet())) {
         if (maxResultValuesToPrint != null) {
           if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
@@ -83,6 +84,6 @@ public class ScreenResultPrinter
         ++n;
       }
     }
-    printer.close();
+    //Note: don't do this as it closes the output stream for other services like log4j: printer.close();
   }
 }

@@ -64,7 +64,7 @@ import com.google.common.collect.Maps;
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={ "plateNumber", "wellName" })})
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Library.class)
-public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
+public class Well extends SemanticIDAbstractEntity<String> implements Comparable<Well>
 {
 
   // static fields
@@ -90,7 +90,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   // instance fields
 
-  private String _wellId;
   private transient WellKey _wellKey;
   private Integer _version;
   private Library _library;
@@ -120,7 +119,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 //                                            library.getEndPlate() + "]");
 //    }
     _library = library;
-    _wellKey = wellKey;
+    setWellId(wellKey.getKey());
     setLibraryWellType(wellType);
   }
 
@@ -133,13 +132,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public String getEntityId()
-  {
-    return getWellKey().toString();
   }
 
   public int compareTo(Well other)
@@ -155,7 +147,7 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
   @org.hibernate.annotations.Type(type="text")
   public String getWellId()
   {
-    return getWellKey().toString();
+    return getEntityId();
   }
 
   @ManyToOne
@@ -364,12 +356,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   private void setPlateNumber(Integer plateNumber)
   {
-    if (_wellKey == null) {
-      _wellKey = new WellKey(plateNumber, 0, 0);
-    }
-    else {
-      _wellKey.setPlateNumber(plateNumber);
-    }
   }
 
   @org.hibernate.annotations.Immutable
@@ -382,12 +368,6 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   private void setWellName(String wellName)
   {
-    if (_wellKey == null) {
-      _wellKey = new WellKey(0, wellName);
-    }
-    else {
-      _wellKey.setWellName(wellName);
-    }
   }
 
   @Transient
@@ -571,7 +551,8 @@ public class Well extends SemanticIDAbstractEntity implements Comparable<Well>
 
   private void setWellId(String wellId)
   {
-    _wellId = wellId;
+    setEntityId(wellId);
+    _wellKey = new WellKey(wellId);
   }
 
   /**

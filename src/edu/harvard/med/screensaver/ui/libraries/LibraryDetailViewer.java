@@ -16,24 +16,20 @@ import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
-import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.EditResult;
+import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
 import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -42,17 +38,15 @@ import com.google.common.collect.Lists;
  * 
  * @author <a mailto="voonkl@bii.a-star.edu.sg">Kian Loon Voon</a>
  */
-public class LibraryDetailViewer extends AbstractEditableBackingBean
+public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library>
 {
   // static members
 
   private static Logger log = Logger.getLogger(LibraryDetailViewer.class);
 
-  private GenericEntityDAO _dao;
   private LibraryCreator _libraryCreator;
   private LibraryViewer _libraryViewer;
 
-  private Library _library;
   
   private UISelectOneEntityBean<ScreeningRoomUser> owner;
   
@@ -64,96 +58,18 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
   {
   }
   
-  public LibraryDetailViewer(GenericEntityDAO dao,
+  public LibraryDetailViewer(LibraryDetailViewer thisProxy,
+                             GenericEntityDAO dao,
                              LibraryCreator libraryCreator,
                              LibraryViewer libraryViewer) 
   {
-    super(ScreensaverUserRole.LIBRARIES_ADMIN);
-    _dao = dao;
+    super(thisProxy,
+          Library.class,
+          EDIT_LIBRARY,
+          dao);
     _libraryCreator = libraryCreator;
     _libraryViewer = libraryViewer;
   }
-  
-  
-  public void setLibrary(Library library)
-  {
-    _library = library;
-    setEditMode(false);
-  }
-
-  public Library getLibrary()
-  {
-    return _library;
-  }
-
-
-  public AbstractEntity getEntity()
-  {
-    return getLibrary();
-  }
-  
-  @Override
-  public ScreensaverUserRole getEditableAdminRole()
-  {
-    return ScreensaverUserRole.LIBRARIES_ADMIN;
-  }
-  
-  @UIControllerMethod
-  @Transactional
-  public String editNewLibrary()
-  {
-    ScreensaverUser user = getScreensaverUser();
-    if (!(user instanceof AdministratorUser &&
-      ((AdministratorUser) user).isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN))) {
-      showMessage("restrictedOperation", "add a new library");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
-    _library = new Library();
-    _library.setScreeningStatus(LibraryScreeningStatus.ALLOWED);
-    _library.setPlateSize(ScreensaverConstants.DEFAULT_PLATE_SIZE);
-    
-    setEditMode(true);
-    return VIEW_LIBRARY_DETAIL;
-  }
-
-  @UIControllerMethod
-  public String cancel()
-  {
-    return VIEW_MAIN;
-  }
-
-  @UIControllerMethod
-  public String save()
-  {
-      if (_library.getEntityId() == null) {
-        updateLibraryProperties();
-        try {
-          _library = _libraryCreator.createLibrary(_library);
-          showMessage("libraries.createdLibrary", "librariesBrowser");
-        }
-        catch (Exception e) 
-        {
-          reportApplicationError(e);
-          return REDISPLAY_PAGE_ACTION_RESULT;
-        }
-      }
-      else {
-        updateLibraryProperties();
-        _dao.reattachEntity(_library);
-      }
-
-      _dao.flush();
-      return _libraryViewer.viewLibrary(_library);
-  }
-  
-  private void updateLibraryProperties()
-  {
-    ScreeningRoomUser owner = getOwner().getSelection() == null ? null : getOwner().getSelection();
-    this._library.setOwner(owner);
-  }
-  
-  
   
   public List<SelectItem> getLibraryScreeningStatusSelectItems()    
   {
@@ -162,26 +78,73 @@ public class LibraryDetailViewer extends AbstractEditableBackingBean
 
   public List<SelectItem> getScreenTypeSelectItems()
   {
-		return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
+    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
   }
-  
+
   public List<SelectItem> getLibraryTypeSelectItems()
   {
     return JSFUtils.createUISelectItems(Arrays.asList(LibraryType.values()));
   }
-
-  public String edit()
+  
+  @Override
+  protected void initializeEntity(Library entity)
   {
-    setEditMode(true);
-    return VIEW_LIBRARY_DETAIL;
+  }
+  
+  @Override
+  protected void initializeViewer(Library entity)
+  {
+    }
+
+  @Override
+  protected void initializeNewEntity(Library library)
+  {
+    library.setScreeningStatus(LibraryScreeningStatus.ALLOWED);
+    library.setPlateSize(ScreensaverConstants.DEFAULT_PLATE_SIZE);
+  }
+
+  @Override
+  protected boolean validateEntity(Library entity)
+  {
+    try {
+      if (entity.isTransient()) {
+        _libraryCreator.validateLibrary(entity);
+      }
+      return true;
+    }
+    catch (DataModelViolationException e) {
+      showMessage("libraries.libraryCreationFailed", e.getMessage());
+      return false;
+    }
+  }
+  
+  @Override
+  protected void updateEntityProperties(Library entity)
+  {
+    if (entity.getWells().size() == 0) {
+      _libraryCreator.createLibrary(entity);
+    }
+    entity.setOwner(getOwner().getSelection());
+  }
+
+  @Override
+  protected String postEditAction(EditResult editResult)
+  {
+    switch (editResult) {
+    case CANCEL_EDIT: return _libraryViewer.reload();
+    case SAVE_EDIT: return _libraryViewer.reload();
+    case CANCEL_NEW: return VIEW_MAIN;
+    case SAVE_NEW: return _libraryViewer.viewEntity(getEntity()); // note: can't call reload() since parent viewer is not yet configured with our new library    
+    default: return null;
+    }
   }
   
   public UISelectOneBean<ScreeningRoomUser> getOwner()
   {
     if (owner == null) {
       //TODO convert to sortedSet
-      List<ScreeningRoomUser> owners = _dao.findAllEntitiesOfType(ScreeningRoomUser.class);
-      owner = new UISelectOneEntityBean<ScreeningRoomUser>(owners, getLibrary().getOwner(), true, _dao) {
+      List<ScreeningRoomUser> owners = getDao().findAllEntitiesOfType(ScreeningRoomUser.class);
+      owner = new UISelectOneEntityBean<ScreeningRoomUser>(owners, getEntity().getOwner(), true, getDao()) {
         @Override
         protected String makeLabel(ScreeningRoomUser o) { return o.getFullNameLastFirst(); }
         @Override

@@ -50,42 +50,32 @@ public class LibraryCreator
    * @param newLibrary Library entity that has not been persisted to the database
    *        <br>-Library Name cannot be reused.
    *        <br>-Short Name cannot be reused.
-   * @return Library entity representing the database entry with associated Wells created.
    */
 //TODO: also create copies
 //TODO: we need serializable isolation, to ensure that plate range is not taken about another process (we need a table-level lock)
   @Transactional
-  public Library createLibrary(Library newLibrary)
+  public void createLibrary(Library newLibrary)
   {
-    //TODO: review the Exception types being returned for duplicate library checks - sde4
-    if (newLibrary.getLibraryId() != null) {
-      throw new IllegalArgumentException("library arg must be transient");
+    validateLibrary(newLibrary);
+    _librariesDao.loadOrCreateWellsForLibrary(newLibrary);
+    _dao.saveOrUpdateEntity(newLibrary);
+    _dao.flush();
+    log.info("added library definition for " + newLibrary.getLibraryName() + ", " + newLibrary);
+  }
+
+  public void validateLibrary(Library newLibrary) throws DataModelViolationException
+  {
+    Library dbLibrary = _dao.findEntityByProperty(Library.class, "libraryName", newLibrary.getLibraryName());
+    if (dbLibrary == null) {
+      dbLibrary = _dao.findEntityByProperty(Library.class, "shortName", newLibrary.getShortName()); 
     }
-    if (findLibrary(newLibrary) != null) {
+    if (dbLibrary != null) {
       throw new DataModelViolationException("library name already in use");
     }
+
     if (!_librariesDao.isPlateRangeAvailable(newLibrary.getStartPlate(), newLibrary.getEndPlate())) {
       throw new DataModelViolationException("plate range [" 
           + newLibrary.getStartPlate() + "," + newLibrary.getEndPlate() + "] is not available");
     }
-    _librariesDao.loadOrCreateWellsForLibrary(newLibrary);
-    _dao.saveOrUpdateEntity(newLibrary);
-    _dao.flush();
-    Library library = _dao.reloadEntity(newLibrary);
-    log.info("added library definition for " + library.getLibraryName() + ", " + library);
-    return library;
-  }
-  
-  private Library findLibrary(Library newLibrary)
-  {
-    Library dbLibrary = null;
-    if (newLibrary.getLibraryId() != null) {
-      return _dao.reloadEntity(newLibrary);
-    }
-    dbLibrary = _dao.findEntityByProperty(Library.class, "libraryName", newLibrary.getLibraryName());
-    if (dbLibrary == null) {
-      dbLibrary = _dao.findEntityByProperty(Library.class, "shortName", newLibrary.getShortName()); 
-    }
-    return dbLibrary;
   }
 }

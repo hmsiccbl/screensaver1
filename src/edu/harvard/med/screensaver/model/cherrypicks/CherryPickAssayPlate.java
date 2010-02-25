@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,8 +34,11 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
@@ -109,7 +111,7 @@ import org.hibernate.annotations.Parameter;
 }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=CherryPickRequest.class)
-public class CherryPickAssayPlate extends AbstractEntity implements Comparable<CherryPickAssayPlate>
+public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Comparable<CherryPickAssayPlate>
 {
 
   // private static data
@@ -123,7 +125,6 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
 
   // private instance data
 
-  private Integer _cherryPickAssayPlateId;
   private Integer _version;
   private CherryPickRequest _cherryPickRequest;
   private Set<LabCherryPick> _labCherryPicks = new HashSet<LabCherryPick>();
@@ -134,6 +135,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   // schema-level (this design is denormalized)
   private PlateType _plateType;
   private CherryPickLiquidTransfer _cherryPickLiquidTransfer;
+  private CherryPickScreening _cherryPickScreening;
   private transient int _logicalAssayPlateCount;
   private transient String _name;
 
@@ -144,13 +146,6 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Serializable getEntityId()
-  {
-    return _cherryPickAssayPlateId;
   }
 
   @Override
@@ -186,7 +181,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="cherry_pick_assay_plate_id_seq")
   public Integer getCherryPickAssayPlateId()
   {
-    return _cherryPickAssayPlateId;
+    return getEntityId();
   }
 
   /**
@@ -278,7 +273,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   @Transient
   public String getStatusLabel()
   {
-    return isPlated() ? "Plated" : isFailed() ? "Failed" : isCancelled() ? "Canceled" : "Not Plated";
+    return isPlatedAndScreened() ? "Screened" : isPlated() ? "Plated" : isFailed() ? "Failed" : isCancelled() ? "Canceled" : "Not Plated";
   }
 
   /**
@@ -311,6 +306,12 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   public boolean isFailed()
   {
     return _cherryPickLiquidTransfer != null && _cherryPickLiquidTransfer.isFailed();
+  }
+  
+  @Transient
+  public boolean isPlatedAndScreened()
+  {
+    return _cherryPickScreening != null;
   }
 
   /**
@@ -380,7 +381,36 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
   }
 
 
-  // package constructor
+  /**
+   * Get the cherry pick screening activity that recorded the screening of this assay plate.
+   */
+  @ManyToOne
+  @JoinColumn(name="cherryPickScreeningId", nullable=true)
+  @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_assay_plate_to_cherry_pick_screening")
+  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
+  @ToOne(inverseProperty="assayPlatesScreened", hasNonconventionalSetterMethod=true /* has constraint that isPlated()==true */ )
+  public CherryPickScreening getCherryPickScreening()
+  {
+    return _cherryPickScreening;
+  }
+
+  public void setCherryPickScreening(CherryPickScreening cherryPickScreening)
+  {
+    if (isHibernateCaller()) {
+      _cherryPickScreening = cherryPickScreening;
+      return;
+    }
+    if (_cherryPickScreening != null && cherryPickScreening == null) {
+      _cherryPickScreening.getAssayPlatesScreened().remove(this);
+    }
+    _cherryPickScreening = cherryPickScreening;
+    if (_cherryPickScreening != null) {
+      if (!isPlated()) {
+        throw new DataModelViolationException("cannot mark assay plate as \"screened\" unless it has been \"plated\"");
+      }
+      _cherryPickScreening.getAssayPlatesScreened().add(this);
+    }
+  }
 
   /**
    * Construct an initialized <code>CherryPickAssayPlate</code>. Intended only for use by {@link CherryPickRequest}.
@@ -419,7 +449,7 @@ public class CherryPickAssayPlate extends AbstractEntity implements Comparable<C
    */
   private void setCherryPickAssayPlateId(Integer cherryPickAssayPlateId)
   {
-    _cherryPickAssayPlateId = cherryPickAssayPlateId;
+    setEntityId(cherryPickAssayPlateId);
   }
 
   /**

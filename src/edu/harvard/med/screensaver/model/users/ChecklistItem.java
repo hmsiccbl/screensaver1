@@ -15,16 +15,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
-
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 
 /**
@@ -39,7 +38,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 @Entity
 @org.hibernate.annotations.Proxy
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={"checklistItemGroup", "orderStatistic"}) })
-public class ChecklistItem extends AbstractEntity implements Comparable<ChecklistItem>
+public class ChecklistItem extends AbstractEntity<Integer> implements Comparable<ChecklistItem>
 {
 
   // private static fields
@@ -50,7 +49,6 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
 
   // private instance fields
 
-  private Integer _checklistItemId;
   private Integer _version;
   private String _itemName;
   private boolean _isExpirable;
@@ -97,13 +95,6 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
     return result;
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getChecklistItemId();
-  }
-
   /**
    * Get the id for the checklist item.
    *
@@ -114,7 +105,7 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "checklist_item_id_seq")
   public Integer getChecklistItemId()
   {
-    return _checklistItemId;
+    return getEntityId();
   }
 
   /**
@@ -177,7 +168,7 @@ public class ChecklistItem extends AbstractEntity implements Comparable<Checklis
    */
   private void setChecklistItemId(Integer checklistItemId)
   {
-    _checklistItemId = checklistItemId;
+    setEntityId(checklistItemId);
   }
 
   /**

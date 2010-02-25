@@ -11,7 +11,9 @@ package edu.harvard.med.screensaver.db;
 
 import java.util.Map;
 
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -21,5 +23,9 @@ public interface ScreenResultsDAO
   public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt);
 
   public void deleteScreenResult(ScreenResult screenResult);
+  
+  public void populateScreenResultWellLinkTable(int screenResultId) throws DataModelViolationException;
+
+  public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey);
 }
 

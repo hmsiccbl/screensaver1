@@ -50,7 +50,7 @@ import org.joda.time.LocalDate;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "copyId", "plateNumber" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Copy.class)
-public class CopyInfo extends AbstractEntity
+public class CopyInfo extends AbstractEntity<Integer>
 {
 
   // static fields
@@ -61,7 +61,6 @@ public class CopyInfo extends AbstractEntity
 
   // private instance fields
 
-  private Integer _copyInfoId;
   private Integer _version;
   private Copy _copy;
   private Set<CopyAction> _copyActions = new HashSet<CopyAction>();
@@ -83,13 +82,6 @@ public class CopyInfo extends AbstractEntity
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getCopyInfoId();
-  }
-
   /**
    * Get the id for the copy info.
    * @return the id for the copy info
@@ -103,7 +95,7 @@ public class CopyInfo extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="copy_info_id_seq")
   public Integer getCopyInfoId()
   {
-    return _copyInfoId;
+    return getEntityId();
   }
 
   /**
@@ -330,7 +322,7 @@ public class CopyInfo extends AbstractEntity
    */
   private void setCopyInfoId(Integer copyInfoId)
   {
-    _copyInfoId = copyInfoId;
+    setEntityId(copyInfoId);
   }
 
   /**

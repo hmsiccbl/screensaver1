@@ -34,17 +34,20 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
+
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -67,7 +70,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class ScreenResult extends TimeStampedAbstractEntity
+public class ScreenResult extends AuditedAbstractEntity<Integer>
 {
 
   private static final long serialVersionUID = 0;
@@ -77,10 +80,10 @@ public class ScreenResult extends TimeStampedAbstractEntity
 
   // private instance data
 
-  private Integer _screenResultId;
   private Integer _version;
   private Screen _screen;
   private SortedSet<Well> _wells = new TreeSet<Well>();
+  private SortedSet<AssayWell> _assayWells = new TreeSet<AssayWell>();
   private boolean _isShareable;
   private Integer _replicateCount;
   private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
@@ -99,6 +102,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
   private String _comments;
 
 
+
   // public constructor
 
   /**
@@ -107,10 +111,10 @@ public class ScreenResult extends TimeStampedAbstractEntity
    * @param isShareable whether this screen result can be viewed by all users of the system
    * @param replicateCount
    */
-  public ScreenResult(Screen screen, boolean isShareable, Integer replicateCount)
+  public ScreenResult(Screen screen, Integer replicateCount)
   {
+    super(null); /* TODO */
     setScreen(screen);
-    setShareable(isShareable);
     setReplicateCount(replicateCount);
     _dateLastImported = new DateTime();
   }
@@ -122,13 +126,6 @@ public class ScreenResult extends TimeStampedAbstractEntity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getScreenResultId();
   }
 
   /**
@@ -146,7 +143,20 @@ public class ScreenResult extends TimeStampedAbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="screen_result_id_seq")
   public Integer getScreenResultId()
   {
-    return _screenResultId;
+    return getEntityId();
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="screenResultUpdateActivity", 
+             joinColumns=@JoinColumn(name="screenResultId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)            
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   /**
@@ -172,29 +182,6 @@ public class ScreenResult extends TimeStampedAbstractEntity
   public DateTime getDateLastImported()
   {
     return _dateLastImported;
-  }
-
-  /**
-   * Get whether this screen result can be viewed by all users of
-   * the system; that is, {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser
-   * ScreeningRoomUsers} other than those associated with the {@link Screen}.
-   * @return true iff this <code>ScreenResult</code> is shareable among all users
-   */
-  @Column(nullable=false, name="isShareable")
-  public boolean isShareable()
-  {
-    return _isShareable;
-  }
-
-  /**
-   * Set whether this <code>ScreenResult</code> can be viewed by all users of
-   * the system; that is, {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser
-   * ScreeningRoomUsers} other than those associated with the {@link Screen}.
-   * @param isShareable true iff this <code>ScreenResult</code> is shareable among all users
-   */
-  public void setShareable(boolean isShareable)
-  {
-    _isShareable = isShareable;
   }
 
   /**
@@ -248,8 +235,6 @@ public class ScreenResult extends TimeStampedAbstractEntity
   {
     return createResultValueType(name, replicateOrdinal, isDerived, isPositiveIndicator, isFollowupData, assayPhenotype,null,null,null);
   }
-
-  
   
   /**
    * Create and return a new result value type for the screen result.
@@ -410,6 +395,30 @@ public class ScreenResult extends TimeStampedAbstractEntity
     return _wells;
   }
 
+  @OneToMany(mappedBy="screenResult",
+             fetch=FetchType.LAZY)
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.PERSIST })
+  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
+  public SortedSet<AssayWell> getAssayWells()
+  {
+    return _assayWells;
+  }
+  
+  private void setAssayWells(SortedSet<AssayWell> assayWells)
+  {
+    _assayWells = assayWells;
+  }
+  
+  public AssayWell createAssayWell(Well libraryWell, AssayWellType assayWellType)
+  {
+    AssayWell assayWell = new AssayWell(this, libraryWell, assayWellType);
+    if (!_assayWells.add(assayWell)) {
+      throw new DuplicateEntityException(this, assayWell);
+    }
+    return assayWell;
+  }
+
   /**
    * Get the number of wells associated with this screen result.
    * @return the number of wells associated with this screen result
@@ -554,7 +563,7 @@ public class ScreenResult extends TimeStampedAbstractEntity
    */
   private void setScreenResultId(Integer screenResultId)
   {
-    _screenResultId = screenResultId;
+    setEntityId(screenResultId);
   }
 
   /**

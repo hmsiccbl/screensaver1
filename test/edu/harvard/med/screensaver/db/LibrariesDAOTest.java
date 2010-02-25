@@ -76,10 +76,10 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
    
     Library library = silencingReagent.getWell().getLibrary();
     LibraryContentsVersion lcv = library.getContentsVersions().first();
-    lcv.release(new AdministrativeActivity(lcv.getLoadingActivity().getPerformedBy(),
+    lcv.release(new AdministrativeActivity((AdministratorUser) lcv.getLoadingActivity().getPerformedBy(),
                                            new LocalDate(),
                                            AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
-    LibraryContentsVersion lcv2 = library.createContentsVersion(new AdministrativeActivity(lcv.getLoadingActivity().getPerformedBy(),
+    LibraryContentsVersion lcv2 = library.createContentsVersion(new AdministrativeActivity((AdministratorUser) lcv.getLoadingActivity().getPerformedBy(),
                                                                                            new LocalDate(),
                                                                                            AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
     silencingReagent.getWell().createSilencingReagent(silencingReagent.getVendorId(), SilencingReagentType.SIRNA, "AAAC");
@@ -172,7 +172,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
         Library library = dataFactory.newInstance(Library.class);
         library.setScreenType(ScreenType.RNAI);
         librariesDao.loadOrCreateWellsForLibrary(library);
-        LibraryContentsVersion lcv1 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+        /*LibraryContentsVersion lcv1 = */dataFactory.newInstance(LibraryContentsVersion.class, library);
         for (Well well : library.getWells()) {
           if (well.getWellKey().getColumn() == 0) {
             well.setLibraryWellType(LibraryWellType.EMPTY);
@@ -188,7 +188,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
           }
         }
 
-        LibraryContentsVersion lcv2 = dataFactory.newInstance(LibraryContentsVersion.class, library);
+        /*LibraryContentsVersion lcv2 = */dataFactory.newInstance(LibraryContentsVersion.class, library);
         for (Well well : library.getWells()) {
           if (well.getWellKey().getColumn() == 0) {
             well.setLibraryWellType(LibraryWellType.EMPTY);
@@ -275,7 +275,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
       {
         Library library = genericEntityDao.findAllEntitiesOfType(Library.class).get(0);
         LibraryContentsVersion lcv1 = dataFactory.newInstance(LibraryContentsVersion.class, library);
-        AdministrativeActivity releaseAdminActivity = new AdministrativeActivity(lcv1.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE);
+        AdministrativeActivity releaseAdminActivity = new AdministrativeActivity((AdministratorUser) lcv1.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE);
         lcv1.release(releaseAdminActivity);
       }
     });
@@ -301,9 +301,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
   public void testCreateRNaiLibraryContentsInclOwner()
   {
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 2);
-    ScreeningRoomUser owner = new ScreeningRoomUser("A",
-                                                   "B",
-                                                   "a.b@c");
+    ScreeningRoomUser owner = new ScreeningRoomUser("A", "B");
     genericEntityDao.saveOrUpdateEntity(owner);
        
     library.setOwner(owner);

@@ -9,12 +9,13 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -24,6 +25,9 @@ import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Lists;
 
 public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDAO
 {
@@ -68,26 +72,82 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     return result2;
   }
 
-  public void deleteScreenResult(final ScreenResult screenResult)
+  public void deleteScreenResult(final ScreenResult screenResultIn)
   {
-    // dissociate ScreenResult from Screen
-    screenResult.getScreen().clearScreenResult();
-
+    screenResultIn.getScreen().clearScreenResult();
     runQuery(new edu.harvard.med.screensaver.db.Query() 
     {
       public List execute(Session session)
       {
-        Query query = session.createQuery("delete ResultValue v where v.resultValueType.id = :rvt");
+        ScreenResult screenResult = (ScreenResult) getHibernateTemplate().get(ScreenResult.class, screenResultIn.getEntityId());
+
+        log.info("delete from screen_result_well_link");
+        Query query = session.createSQLQuery("delete from screen_result_well_link where screen_result_id = :screenResultId" );
+        query.setParameter("screenResultId", screenResult.getScreenResultId());
+        int rows = query.executeUpdate();
+        log.info("deleted " + rows + " rows from screen_result_well_link");
+        
+        log.info("delete Assay Wells");
+        query = session.createQuery("delete AssayWell a where a.screenResult.id = :screenResultId");
+        query.setParameter("screenResultId", screenResult.getScreenResultId());
+        rows = query.executeUpdate();
+        log.info("deleted " + rows + " AssayWells for " + screenResult);
+        screenResult.getAssayWells().clear();
+        
+        log.info("delete ResultValues");
+        int cumRows = 0;
+        query = session.createQuery("delete ResultValue v where v.resultValueType.id = :rvt");
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
           query.setParameter("rvt", rvt.getResultValueTypeId());
-          int rows = query.executeUpdate();
+          rows = query.executeUpdate();
+          cumRows += rows;
           log.debug("deleted " + rows + " result values for " + rvt);
           rvt.getResultValues().clear();
         }
+        log.info("deleted a total of " + cumRows + " result values");
+        //screenResult.getPlateNumbers().clear();
+        // dissociate ScreenResult from Screen
+        screenResult.getScreen().clearScreenResult();
+        getHibernateTemplate().delete(screenResult);
+        log.info("deleted " + screenResult);
         return null;
       }
     });
-    getHibernateTemplate().delete(screenResult);
-    log.debug("deleted " + screenResult);
+  }
+  
+  public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey)
+  {
+    // TODO 
+    return null;
+  }
+
+  public void populateScreenResultWellLinkTable(final int screenResultId)
+    throws DataModelViolationException
+  {
+    // TODO: hack to avoid memory problems when building this with HibernateTemplate
+    runQuery(new edu.harvard.med.screensaver.db.Query() 
+    {
+      public List execute(Session session)
+      {
+        String sql =  "insert into screen_result_well_link (screen_result_id, well_id) " +
+                                "select :screenResultId  as screen_result_id," +
+                      "well_id from (select distinct(well_id) from result_value " +
+                                    "join result_value_type using(result_value_type_id) " +
+                      "where screen_result_id = :screenResultId and well_id is not null) as well_id";
+        
+        
+        log.debug("sql: " + sql);
+        
+        Query query = session.createSQLQuery(sql);
+        query.setParameter("screenResultId", screenResultId );
+        int rows = query.executeUpdate();
+        if(rows == 0 )
+        {
+          throw new DataModelViolationException("No rows were updated: " + query.getQueryString() );
+        }
+        log.info("screen_result_well_link updated: " + rows );
+        return null;
+      }
+    });    
   }
 }

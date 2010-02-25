@@ -16,6 +16,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import edu.harvard.med.screensaver.ScreensaverProperties;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+
 import org.apache.log4j.Logger;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
@@ -25,13 +33,6 @@ import org.rosuda.REngine.Rserve.RserveException;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-
-import edu.harvard.med.screensaver.ScreensaverProperties;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 /**
  * This package contains an API for calls to a number of methods of CellHTS2
@@ -662,8 +663,8 @@ public class CellHTS2 {
     // result = rConnection.eval(strEval).asDoubleMatrix();
     // Add to the screenResult a derived ResultValueType for each of the raw
     // ResultValueTypes
-    List<Well> wells = new ArrayList<Well>(screenResult.getWells());
-    Collections.sort(wells);
+    List<AssayWell> assayWells = new ArrayList<AssayWell>(screenResult.getAssayWells());
+    Collections.sort(assayWells);
 
     RserveExtensions rserveExtensions = new RserveExtensions();
     if (rMethod.equals(RMethod.NORMALIZE_PLATES)
@@ -683,9 +684,9 @@ public class CellHTS2 {
             + rvt.getName(), r, true, false, false, "phenotype",rvt.getChannel(),null,null);
         rvtNew.setNumeric(true);
 
-        for (int i = 0; i < wells.size(); ++i) {
-          Well well = wells.get(i);
-          rvtNew.createResultValue(well, result[i][r - 1], 3);
+        for (int i = 0; i < assayWells.size(); ++i) {
+          AssayWell assayWell = assayWells.get(i);
+          rvtNew.createResultValue(assayWell, result[i][r - 1], 3);
         }
       }
     } else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
@@ -695,9 +696,9 @@ public class CellHTS2 {
       ResultValueType rvtSumm = screenResult.createResultValueType(
           "cellhts2_summarized", null, true, false, false, "phenotype",null,null,null);
       rvtSumm.setNumeric(true);
-      for (int i = 0; i < wells.size(); ++i) {
-        Well well = wells.get(i);
-        rvtSumm.createResultValue(well, result[i], 3);
+      for (int i = 0; i < assayWells.size(); ++i) {
+        AssayWell assayWell = assayWells.get(i);
+        rvtSumm.createResultValue(assayWell, result[i], 3);
       }
     }
   }
@@ -825,7 +826,7 @@ public class CellHTS2 {
 
   public BiMap<Integer, Integer> createPlateNumberSequenceMapping(
       ScreenResult screenResult) {
-    BiMap<Integer, Integer> plateNumber2SequenceNumber = new HashBiMap<Integer, Integer>();
+    BiMap<Integer, Integer> plateNumber2SequenceNumber = HashBiMap.create();
     int nextSequenceNumber = 1;
     for (Well well : screenResult.getWells()) {
       if (!plateNumber2SequenceNumber.containsKey(well.getPlateNumber())) {

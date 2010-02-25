@@ -13,7 +13,7 @@ package edu.harvard.med.screensaver.io.parseutil;
 
 
 import edu.harvard.med.screensaver.io.ParseError;
-import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.ParseException;
 
 
 public abstract class Column<R, T>

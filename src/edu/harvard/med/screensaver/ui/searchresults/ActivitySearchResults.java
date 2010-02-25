@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
@@ -47,20 +48,13 @@ import com.google.common.collect.Lists;
  */
 public abstract class ActivitySearchResults<A extends Activity> extends EntitySearchResults<A,Integer>
 {
-
-  // private static final fields
-
   private static final Logger log = Logger.getLogger(ActivitySearchResults.class);
 
-  // instance fields
+  private UserViewer _userViewer;
 
   protected GenericEntityDAO _dao;
-  protected ActivityViewer _activityViewer;
-  protected UserViewer _userViewer;
   private Class<A> _type;
 
-
-  // public constructor
 
   /**
    * @motivation for CGLIB2
@@ -70,17 +64,18 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   }
 
   public ActivitySearchResults(ActivityViewer activityViewer,
-                               UserViewer userViewer,
                                Class<A> type,
-                               GenericEntityDAO dao)
+                               GenericEntityDAO dao,
+                               UserViewer userViewer)
   {
-    _activityViewer = activityViewer;
-    _userViewer = userViewer;
+    super((EntityViewer<A>) activityViewer);
     _type = type;
     _dao = dao;
+    _userViewer = userViewer;
   }
 
-  public void searchAllActivities()
+  @Override
+  public void searchAll()
   {
     EntityDataFetcher<A,Integer> dataFetcher =
       (EntityDataFetcher<A,Integer>) new AllEntitiesOfTypeDataFetcher<A,Integer>(
@@ -156,11 +151,11 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
       }
     });
     columns.get(columns.size() - 1).setVisible(showAdminStatusFields());
-    columns.add(new UserNameColumn<A>(
+    columns.add(new UserNameColumn<A,ScreensaverUser>(
       new RelationshipPath<A>(_type, "performedBy"),
       "Performed By", "The person that performed the activity", TableColumn.UNGROUPED, _userViewer) {
       @Override
-      public ScreensaverUser getUser(A activity) { return activity.getPerformedBy(); }
+      public ScreensaverUser getUser(A activity) { return (ScreensaverUser) activity.getPerformedBy(); }
     });
     return columns;
   }
@@ -171,11 +166,5 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   {
     return isUserInRole(ScreensaverUserRole.SCREENS_ADMIN) ||
       isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-  }
-  
-  @Override
-  protected void setEntityToView(A activity)
-  {
-    _activityViewer.setActivity(activity);
   }
 }

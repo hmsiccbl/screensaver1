@@ -19,10 +19,9 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -51,19 +50,10 @@ import com.google.common.collect.Sets;
  */
 public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPickRequest,Integer>
 {
-
-  // private static final fields
-
-
-  // instance fields
-
-  private CherryPickRequestViewer _cprViewer;
   private ScreenViewer _screenViewer;
   private UserViewer _userViewer;
   private GenericEntityDAO _dao;
 
-
-  // public constructor
 
   /**
    * @motivation for CGLIB2
@@ -77,7 +67,7 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
                                         UserViewer userViewer,
                                         GenericEntityDAO dao)
   {
-    _cprViewer = cprViewer;
+    super(cprViewer);
     _screenViewer = screenViewer;
     _userViewer = userViewer;
     _dao = dao;
@@ -100,11 +90,6 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
     TableColumn<CherryPickRequest,ScreenType> column = (TableColumn<CherryPickRequest,ScreenType>) getColumnManager().getColumn("Screen Type");
     column.clearCriteria();
     column.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, screenType));
-  }
-
-  public void searchForUser(ScreensaverUser screensaverUser)
-  {
-
   }
 
   public void searchForScreen(Screen screen)
@@ -139,21 +124,6 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
     });
     
     columns.add(new IntegerEntityColumn<CherryPickRequest>(
-      new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickRequestId"),
-      "Visit #", 
-      "The legacy ScreenDB visit number (for legacy, imported cherry pick requests)", 
-      TableColumn.UNGROUPED) {
-      @Override
-      public Integer getCellValue(CherryPickRequest cpr) { return cpr.getLegacyCherryPickRequestNumber(); }
-
-      @Override
-      public Object cellAction(CherryPickRequest cpr) { return viewSelectedEntity(); }
-
-      @Override
-      public boolean isCommandLink() { return true; }
-    });
-    
-    columns.add(new IntegerEntityColumn<CherryPickRequest>(
       CherryPickRequest.screen.toProperty("screenNumber"),
       "Screen #", 
       "The screen number of the cherry pick request's screen", 
@@ -162,7 +132,9 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
       public Integer getCellValue(CherryPickRequest cpr) { return cpr.getScreen().getScreenNumber(); }
 
       @Override
-      public Object cellAction(CherryPickRequest cpr) { return _screenViewer.viewScreen(cpr.getScreen()); }
+      public Object cellAction(CherryPickRequest cpr) { 
+        return _screenViewer.viewEntity(cpr.getScreen()); 
+      }
 
       @Override
       public boolean isCommandLink() { return true; }
@@ -175,14 +147,14 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
       protected LocalDate getDate(CherryPickRequest cpr) { return cpr.getDateRequested(); }
     });
 
-    columns.add(new UserNameColumn<CherryPickRequest>(
+    columns.add(new UserNameColumn<CherryPickRequest,ScreeningRoomUser>(
       CherryPickRequest.requestedBy,
       "Requested By", 
       "The person that requested the cherry picks", 
       TableColumn.UNGROUPED, 
       _userViewer) {
       @Override
-      public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getRequestedBy(); }
+      public ScreeningRoomUser getUser(CherryPickRequest cpr) { return cpr.getRequestedBy(); }
     });
 
     columns.add(new BooleanEntityColumn<CherryPickRequest>(
@@ -225,7 +197,7 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
       CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer),
       "Plating Activity Date ", 
       "The date that the most recent cherry pick plating activity was performed.", 
-      TableColumn.ADMIN_COLUMN_GROUP) {
+      TableColumn.UNGROUPED) {
       @Override
       public LocalDate getDate(CherryPickRequest cpr) { 
         if (cpr.getCherryPickLiquidTransfers().isEmpty()) { 
@@ -236,43 +208,47 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
         }
       }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
     
     columns.add(new VolumeEntityColumn<CherryPickRequest>(
       new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "volumeApproved"),
       "Volume Approved", 
       "The approved volume of reagent to be used when creating the cherry pick plates",
-      TableColumn.ADMIN_COLUMN_GROUP) {
+      TableColumn.UNGROUPED) {
       @Override
       public Volume getCellValue(CherryPickRequest cpr) { return cpr.getTransferVolumePerWellApproved(); }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    
     columns.add(new VolumeEntityColumn<CherryPickRequest>(
       new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "volumeRequested"),
       "Volume Requested", 
       "The screener-requested volume of reagent to be used when creating the cherry pick plates",
-      TableColumn.ADMIN_COLUMN_GROUP) {
+      TableColumn.UNGROUPED) {
       @Override
       public Volume getCellValue(CherryPickRequest cpr) { return cpr.getTransferVolumePerWellRequested(); }
     });
-    columns.get(columns.size() -1 ).setVisible(false);
+    columns.get(columns.size() - 1).setVisible(false);
+    columns.get(columns.size() - 1).setAdministrative(true);
 
-    columns.add(new UserNameColumn<CherryPickRequest>(
+    columns.add(new UserNameColumn<CherryPickRequest,ScreeningRoomUser>(
       CherryPickRequest.screen.to(Screen.labHead),
       "Lab Head", 
       "The head of the lab performing the screen", 
       TableColumn.UNGROUPED, 
       _userViewer) {
       @Override
-      public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLabHead(); }
+      public ScreeningRoomUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLabHead(); }
     });
     
-    columns.add(new UserNameColumn<CherryPickRequest>(
+    columns.add(new UserNameColumn<CherryPickRequest,ScreeningRoomUser>(
       CherryPickRequest.screen.to(Screen.leadScreener),
       "Lead Screener", 
       "The scientist primarily responsible for running the screen", 
       TableColumn.UNGROUPED, 
       _userViewer) {
       @Override
-      public ScreensaverUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLeadScreener(); }
+      public ScreeningRoomUser getUser(CherryPickRequest cpr) { return cpr.getScreen().getLeadScreener(); }
     });
     
     columns.add(new EnumEntityColumn<CherryPickRequest, ScreenType>(
@@ -302,10 +278,4 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
 //compoundSorts.add(new Integer[] {9, 1, 0});
 //return compoundSorts;
 //}
-
-  @Override
-  protected void setEntityToView(CherryPickRequest cpr)
-  {
-    _cprViewer.viewCherryPickRequest(cpr);
-  }
 }

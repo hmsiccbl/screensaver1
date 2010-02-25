@@ -43,7 +43,7 @@ import com.google.common.collect.Sets;
 @Immutable
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=SilencingReagent.class)
-public class Gene extends AbstractEntity
+public class Gene extends AbstractEntity<Integer>
 {
   private static final long serialVersionUID = 0L;
 
@@ -52,7 +52,6 @@ public class Gene extends AbstractEntity
 
   public static final Gene NullGene = new Gene();
 
-  private Integer _geneId;
   private String _geneName;
   private Integer _entrezgeneId;
   private Set<String> _entrezgeneSymbols = Sets.newHashSet();
@@ -71,13 +70,6 @@ public class Gene extends AbstractEntity
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getGeneId();
-  }
-
   @Id
   @org.hibernate.annotations.GenericGenerator(name="gene_id_seq",
                                               strategy="sequence",
@@ -85,12 +77,12 @@ public class Gene extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="gene_id_seq")
   public Integer getGeneId()
   {
-    return _geneId;
+    return getEntityId();
   }
 
   private void setGeneId(Integer geneId)
   {
-    _geneId = geneId;
+    setEntityId(geneId);
   }
 
   @Column
@@ -112,7 +104,7 @@ public class Gene extends AbstractEntity
    */
   public Gene withEntrezgeneId(Integer entrezgeneId)
   {
-    if (_geneId != null) {
+    if (!!!isTransient()) {
       throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
     }
     setEntrezgeneId(entrezgeneId);
@@ -140,7 +132,7 @@ public class Gene extends AbstractEntity
    */
   public Gene withGeneName(String geneName)
   {
-    if (_geneId != null) {
+    if (!!!isTransient()) {
       throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
     }
     setGeneName(geneName);
@@ -222,7 +214,7 @@ public class Gene extends AbstractEntity
    */
   public Gene withSpeciesName(String speciesName)
   {
-    if (_geneId != null) {
+    if (!!!isTransient()) {
       throw new DataModelViolationException("immutable property cannot be changed after entity is persisted");
     }
     setSpeciesName(speciesName);

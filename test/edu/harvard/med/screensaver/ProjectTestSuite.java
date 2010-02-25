@@ -35,5 +35,6 @@ public class ProjectTestSuite extends TestSuite
     addTest(edu.harvard.med.screensaver.service.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.util.PackageTestSuite.suite());
+    addTest(edu.harvard.med.iccbl.screensaver.PackageTestSuite.suite());
   }
 }

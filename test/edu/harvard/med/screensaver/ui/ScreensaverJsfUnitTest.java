@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewerJsfUnitTest;
 import edu.harvard.med.screensaver.ui.searchresults.GenericDataExporter;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
@@ -231,7 +232,7 @@ public class ScreensaverJsfUnitTest extends AbstractJsfUnitTest
     LibraryScreening previousScreening = (LibraryScreening) _dao.runQuery(new Query() {
       public List execute(Session session) {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        LibraryScreening previousScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+        LibraryScreening previousScreening = screen.createLibraryScreening((AdministratorUser) screen.getCreatedBy(), screen.getLeadScreener(), new LocalDate());
         previousScreening.setAssayProtocol("assay protocol test value");
         _dao.persistEntity(screen.getLabHead());
         _dao.persistEntity(screen.getLeadScreener());

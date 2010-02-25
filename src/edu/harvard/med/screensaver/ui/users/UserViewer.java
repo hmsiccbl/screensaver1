@@ -25,15 +25,18 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
+import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
 import edu.harvard.med.screensaver.model.users.Lab;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -41,12 +44,14 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.model.users.UserAttachedFileType;
+import edu.harvard.med.screensaver.service.OperationRestrictedException;
+import edu.harvard.med.screensaver.ui.EditResult;
+import edu.harvard.med.screensaver.ui.SearchResultContextEditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
+import edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
@@ -56,16 +61,20 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 
 /**
@@ -73,7 +82,7 @@ import com.google.common.collect.Sets;
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class UserViewer extends AbstractEditableBackingBean
+public class UserViewer extends SearchResultContextEditableEntityViewerBackingBean<ScreeningRoomUser>
 {
   // static members
 
@@ -88,22 +97,17 @@ public class UserViewer extends AbstractEditableBackingBean
   /** checklist item groups to show in user interface, per requirements */
   private static final List<ChecklistItemGroup> CHECKLIST_ITEM_GROUPS = Lists.newArrayList(ChecklistItemGroup.values());
   static { CHECKLIST_ITEM_GROUPS.remove(ChecklistItemGroup.LEGACY); }
-  /** roles to hide in user interface, per requirements */
-  private static final Set<ScreensaverUserRole> HIDDEN_ROLES = ImmutableSortedSet.of(ScreensaverUserRole.SCREENER);
+                                                                                     
 
   // instance data members
 
-  private UserViewer _thisProxy;
   private ScreenDetailViewer _screenDetailViewer;
-  private GenericEntityDAO _dao;
   private UsersDAO _usersDao;
-  private ScreenerSearchResults _screenerSearchResults;
-  private StaffSearchResults _staffSearchResults;
   private ScreenSearchResults _screensBrowser;
+  private EntityUpdateSearchResults<ScreeningRoomUser,Integer> _userUpdateSearchResults; 
   private AttachedFiles _attachedFiles;
   private ChecklistItems _checklistItems;
 
-  private ScreensaverUser _user;
   private DataModel _userRolesDataModel;
   private UISelectOneBean<ScreensaverUserRole> _newUserRole;
   private UISelectOneEntityBean<LabHead> _labName;
@@ -112,11 +116,9 @@ public class UserViewer extends AbstractEditableBackingBean
   private HashMap<ScreenType,DataModel> _screensDataModel;
   private DataModel _labMembersDataModel;
   private DataModel _screenAssociatesDataModel;
-  private boolean _isLabMembersCollapsed = true;
-  private boolean _isScreenAssociatesCollapsed = true;
-  private boolean _isSmallMoleculeScreensCollapsed = false;
-  private boolean _isRnaiScreensCollapsed = false;
-  private boolean _isScreensCollapsed = false;
+  private Set<ScreensaverUserRole> _lastPrimaryRoles;
+  private DataModel _facilityUsageRolesDataModel;
+  private UISelectOneBean<FacilityUsageRole> _newFacilityUsageRole;
 
 
   // constructors
@@ -128,40 +130,33 @@ public class UserViewer extends AbstractEditableBackingBean
   {
   }
 
-  public UserViewer(UserViewer _userViewerProxy,
+  public UserViewer(UserViewer userViewerProxy,
                     ScreenDetailViewer screenDetailViewer,
                     GenericEntityDAO dao,
                     UsersDAO usersDao,
-                    ScreenerSearchResults screenerSearchResults,
-                    StaffSearchResults staffSearchResults,
+                    UserSearchResults userSearchResults,
                     ScreenSearchResults screensBrowser,
+                    EntityUpdateSearchResults<ScreeningRoomUser,Integer> userUpdateSearchResults,
                     AttachedFiles attachedFiles,
                     ChecklistItems checklistItems)
   {
-    super(ScreensaverUserRole.USERS_ADMIN);
-    _thisProxy = _userViewerProxy;
+    super(userViewerProxy,
+          ScreeningRoomUser.class,
+          BROWSE_SCREENERS,
+          VIEW_USER,
+          dao,
+          userSearchResults);
     _screenDetailViewer = screenDetailViewer;
-    _dao = dao;
     _usersDao = usersDao;
-    _screenerSearchResults = screenerSearchResults;
-    _staffSearchResults = staffSearchResults;
     _screensBrowser = screensBrowser;
+    _userUpdateSearchResults = userUpdateSearchResults;
     _attachedFiles = attachedFiles;
     _checklistItems = checklistItems;
-    _checklistItems.setParentViewer(_thisProxy);
-  }
-
-
-  // public methods
-
-  public AbstractEntity getEntity()
-  {
-    return getUser();
-  }
-
-  public ScreensaverUser getUser()
-  {
-    return _user;
+    getIsPanelCollapsedMap().put("labMembers", true);
+    getIsPanelCollapsedMap().put("screenAssociates", true);
+    getIsPanelCollapsedMap().put("smallMoleculeScreens", false);
+    getIsPanelCollapsedMap().put("rnaiScreens", false);
+    getIsPanelCollapsedMap().put("screens", false);
   }
 
   /**
@@ -170,7 +165,7 @@ public class UserViewer extends AbstractEditableBackingBean
    */
   public boolean isMe()
   {
-    return _user.equals(getScreensaverUser());
+    return getEntity().equals(getScreensaverUser());
   }
 
   public boolean isScreeningRoomUserViewMode()
@@ -178,194 +173,119 @@ public class UserViewer extends AbstractEditableBackingBean
     return getScreeningRoomUser() != null;
   }
 
-  public boolean islabHeadViewMode()
+  public boolean isLabHeadViewMode()
   {
     return getLabHead() != null;
   }
 
-  public boolean isAdministratorUserViewMode()
-  {
-    return getAdministratorUser() != null;
-  }
-
-  public boolean isLabMembersCollapsed()
-  {
-    return _isLabMembersCollapsed;
-  }
-
-  public void setLabMembersCollapsed(boolean isLabMembersCollapsed)
-  {
-    _isLabMembersCollapsed = isLabMembersCollapsed;
-  }
-
-  public boolean isScreenAssociatesCollapsed()
-  {
-    return _isScreenAssociatesCollapsed;
-  }
-
-  public void setScreenAssociatesCollapsed(boolean isScreenAssociatesCollapsed)
-  {
-    _isScreenAssociatesCollapsed = isScreenAssociatesCollapsed;
-  }
-
-  public boolean isSmallMoleculeScreensCollapsed()
-  {
-    return _isSmallMoleculeScreensCollapsed;
-  }
-
-  public void setSmallMoleculeScreensCollapsed(boolean isSmallMoleculeScreensCollapsed)
-  {
-    _isSmallMoleculeScreensCollapsed = isSmallMoleculeScreensCollapsed;
-  }
-
-  public boolean isRnaiScreensCollapsed()
-  {
-    return _isRnaiScreensCollapsed;
-  }
-
-  public void setRnaiScreensCollapsed(boolean isRnaiScreensCollapsed)
-  {
-    _isRnaiScreensCollapsed = isRnaiScreensCollapsed;
-  }
-
-  public boolean isScreensCollapsed()
-  {
-    return _isScreensCollapsed;
-  }
-
-  public void setScreensCollapsed(boolean isScreensCollapsed)
-  {
-    _isScreensCollapsed = isScreensCollapsed;
-  }
-
   public ScreeningRoomUser getScreeningRoomUser()
   {
-    if (_user instanceof ScreeningRoomUser) {
-      return (ScreeningRoomUser) _user;
+    if (getEntity() instanceof ScreeningRoomUser) {
+      return (ScreeningRoomUser) getEntity();
     }
     return null;
   }
 
   public LabHead getLabHead()
   {
-    if (_user instanceof LabHead) {
-      return (LabHead) _user;
+    if (getEntity() instanceof LabHead) {
+      return (LabHead) getEntity();
     }
     return null;
   }
 
-  public AdministratorUser getAdministratorUser()
+  @Override
+  protected void initializeEntity(ScreeningRoomUser user)
   {
-    if (_user instanceof AdministratorUser) {
-      return (AdministratorUser) _user;
-    }
-    return null;
-  }
-
-  @Transactional
-  public void setUser(ScreensaverUser user)
-  {
-    resetView();
-
-    if (user.getEntityId() != null) {
-      user = _dao.reloadEntity(user,
-                               true,
-                               "screensaverUserRoles");
-      if (user instanceof ScreeningRoomUser) {
-        // note: no cross-product problem with dual labMembers associations, since only one will have size > 0
-        _dao.need(user,
+    getDao().need(user, "screensaverUserRoles");
+    getDao().need(user, ScreensaverUser.updateActivities.getPath());
+    // note: no cross-product problem with dual labMembers associations, since only one will have size > 0
+    getDao().need(user,
                   "labHead.labAffiliation",
                   "labHead.labMembers",
                   "labAffiliation",
                   "labMembers");
-        _dao.need(user, "screensLed.statusItems");
-        _dao.need(user, "screensHeaded.statusItems");
-        _dao.need(user, "screensCollaborated.statusItems");
-        _dao.need(user,
+    // for UserAgreementUpdater
+    getDao().need(user,
+                  ScreeningRoomUser.LabHead.to(ScreensaverUser.roles).getPath());
+    getDao().need(user, "screensLed.statusItems");
+    getDao().need(user, "screensHeaded.statusItems");
+    getDao().need(user, "screensCollaborated.statusItems");
+    getDao().need(user,
                   "screensLed.collaborators",
                   "screensLed.labHead",
-                  "screensLed.leadScreener");
-        _dao.need(user,
+    "screensLed.leadScreener");
+    getDao().need(user,
                   "screensHeaded.collaborators",
                   "screensHeaded.labHead",
-                  "screensHeaded.leadScreener");
-        _dao.need(user,
+    "screensHeaded.leadScreener");
+    getDao().need(user,
                   "screensCollaborated.collaborators",
                   "screensCollaborated.labHead",
-                  "screensCollaborated.leadScreener");
-        _dao.need(user,
+    "screensCollaborated.leadScreener");
+    getDao().need(user,
                   "checklistItemEvents.checklistItem",
                   "checklistItemEvents.screeningRoomUser",
-                  "checklistItemEvents.entryActivity.performedBy");
-        _dao.need(user, 
-                  "attachedFiles");
-      }
-    }
-    _user = user;
-    _attachedFiles.setAttachedFilesEntity(getScreeningRoomUser());
-    _attachedFiles.setAttachedFileTypes(Sets.newHashSet(AttachedFileType.RNAI_USER_AGREEMENT, AttachedFileType.SMALL_MOLECULE_USER_AGREEMENT));
-    _checklistItems.setChecklistItemsEntity(getScreeningRoomUser());
-    _checklistItems.setChecklistItemGroups(CHECKLIST_ITEM_GROUPS);
+    "checklistItemEvents.createdBy");
+    getDao().need(user,
+                  ScreeningRoomUser.attachedFiles.to(AttachedFile.fileType).getPath());
+    getDao().need(user,
+                  ScreeningRoomUser.facilityUsageRoles.getPath());
   }
 
   @Override
-  public String reload()
+  protected void initializeViewer(ScreeningRoomUser user)
   {
-    if (_user == null || _user.getEntityId() == null) {
-      _user = null;
-      return REDISPLAY_PAGE_ACTION_RESULT;
+    if (!!!user.isTransient()) {
+      if (user instanceof ScreeningRoomUser) {
+        warnAdminOnMismatchedDataSharingLevel((ScreeningRoomUser) user);
+      }
     }
-    return _thisProxy.viewUser(_user);
-  }
 
-  @UIControllerMethod
-  public String edit()
-  {
-    setEditMode(true);
-    return VIEW_USER;
-  }
-
-  @UIControllerMethod
-  public String cancel()
-  {
-    setEditMode(false);
-    if (_user.getEntityId() == null) {
-      return VIEW_MAIN;
+    _userRolesDataModel = null;
+    _facilityUsageRolesDataModel = null;
+    _newFacilityUsageRole = null;
+    _newUserRole = null;
+    _labName = null;
+    _labAffiliation = null;
+    _newLabAffiliation = null;
+    _screensDataModel = null;
+    _labMembersDataModel = null;
+    _screenAssociatesDataModel = null;
+    if (_userUpdateSearchResults != null) {
+      _userUpdateSearchResults.searchForParentEntity(user);
     }
-    return _thisProxy.viewUser(_user);
+
+    _attachedFiles.setAttachedFilesEntity(user);
+    _attachedFiles.setAttachedFileTypes(Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(UserAttachedFileType.class)));
+    _checklistItems.setEntity(user);
+    _checklistItems.setChecklistItemGroups(CHECKLIST_ITEM_GROUPS);
+    _lastPrimaryRoles = user.getPrimaryScreensaverUserRoles();
   }
-
-  @UIControllerMethod
-  @Transactional
-  public String save()
+  
+  @Override
+  public void updateEntityProperties(ScreeningRoomUser user)
   {
-    setEditMode(false);
-
-    
-    if (_user.getEntityId() == null) {
-      updateUserProperties();
-      _dao.persistEntity(_user);
+    if (user.isHeadOfLab()) {
+      user.getLab().setLabAffiliation(getLabAffiliation().getSelection());
     }
     else {
-      _dao.reattachEntity(_user);
-      updateUserProperties();
+      Lab lab = getLabName().getSelection() == null ? null : getLabName().getSelection().getLab();
+      user.setLab(lab);
     }
-    _dao.flush();
-    return _thisProxy.viewUser(_user);
   }
 
-  private void updateUserProperties()
+  protected void recordUpdateActivity()
   {
-    if (isScreeningRoomUserViewMode()) {
-      ScreeningRoomUser user = getScreeningRoomUser();
-      if (user.isHeadOfLab()) {
-        user.getLab().setLabAffiliation(getLabAffiliation().getSelection());
-      }
-      else {
-        Lab lab = getLabName().getSelection() == null ? null : getLabName().getSelection().getLab();
-        user.setLab(lab);
-      }
+    Set<ScreensaverUserRole> rolesAdded = Sets.difference(getEntity().getPrimaryScreensaverUserRoles(), _lastPrimaryRoles);
+    if (!!!rolesAdded.isEmpty()) {
+      recordUpdateActivity("primary roles added: " + Joiner.on(", ").join(Iterables.transform(rolesAdded, ScreensaverUserRole.ToDisplayableRoleName)));
     }
+    Set<ScreensaverUserRole> rolesRemoved = Sets.difference(_lastPrimaryRoles, getEntity().getPrimaryScreensaverUserRoles());
+    if (!!!rolesRemoved.isEmpty()) {
+      recordUpdateActivity("primary roles removed: " + Joiner.on(", ").join(Iterables.transform(rolesRemoved, ScreensaverUserRole.ToDisplayableRoleName)));
+    }
+    super.recordUpdateActivity();
   }
 
   public List<SelectItem> getUserClassificationSelections()
@@ -374,14 +294,14 @@ public class UserViewer extends AbstractEditableBackingBean
     // handle the special Principal Investigator classification, since this
     // value must be selected at creation time only, as it affects lab
     // affiliation and lab members editable
-    if (((ScreeningRoomUser) getUser()).isHeadOfLab()) {
+    if (((ScreeningRoomUser) getEntity()).isHeadOfLab()) {
       userClassifications = Arrays.asList(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
     }
     else {
       userClassifications = new ArrayList<ScreeningRoomUserClassification>(Arrays.asList(ScreeningRoomUserClassification.values()));
       userClassifications.remove(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
     }
-    if (_user.getEntityId() == null) {
+    if (getEntity().getEntityId() == null) {
       return JSFUtils.createUISelectItemsWithEmptySelection(userClassifications, "<select>");
     }
     else {
@@ -391,14 +311,14 @@ public class UserViewer extends AbstractEditableBackingBean
 
   public UISelectOneEntityBean<LabHead> getLabName()
   {
-    assert isScreeningRoomUserViewMode() && !islabHeadViewMode();
+    assert isScreeningRoomUserViewMode() && !isLabHeadViewMode();
     if (_labName == null) {
       SortedSet<LabHead> labHeads = _usersDao.findAllLabHeads();
-      _labName = new UISelectOneEntityBean<LabHead>(labHeads, getScreeningRoomUser().getLab().getLabHead(), true, _dao) {
+      _labName = new UISelectOneEntityBean<LabHead>(labHeads, getScreeningRoomUser().getLab().getLabHead(), true, getDao()) {
         @Override
         protected String makeLabel(LabHead t) { return t.getLab().getLabName(); }
         @Override
-        protected String getEmptyLabel() { return "<lab head not yet in system>"; }
+        protected String getEmptyLabel() { return getEntity().getEntityId() == null ? "<select>" : super.getEmptyLabel(); }
       };
     }
     return _labName;
@@ -406,7 +326,7 @@ public class UserViewer extends AbstractEditableBackingBean
 
   public UISelectOneEntityBean<LabAffiliation> getLabAffiliation()
   {
-    assert islabHeadViewMode();
+    assert isLabHeadViewMode();
     if (_labAffiliation == null) {
       SortedSet<LabAffiliation> labAffiliations = new TreeSet<LabAffiliation>(new NullSafeComparator<LabAffiliation>() {
         @Override
@@ -415,8 +335,8 @@ public class UserViewer extends AbstractEditableBackingBean
           return o1.getAffiliationName().compareTo(o2.getAffiliationName());
         }
       });
-      labAffiliations.addAll(_dao.findAllEntitiesOfType(LabAffiliation.class));
-      _labAffiliation = new UISelectOneEntityBean<LabAffiliation>(labAffiliations, getScreeningRoomUser().getLab().getLabAffiliation(), true, _dao) {
+      labAffiliations.addAll(getDao().findAllEntitiesOfType(LabAffiliation.class));
+      _labAffiliation = new UISelectOneEntityBean<LabAffiliation>(labAffiliations, getScreeningRoomUser().getLab().getLabAffiliation(), true, getDao()) {
         @Override
         protected String makeLabel(LabAffiliation t) { return t.getAffiliationName() + " (" + t.getAffiliationCategory() + ")"; }
       };
@@ -438,12 +358,35 @@ public class UserViewer extends AbstractEditableBackingBean
     return JSFUtils.createUISelectItems(Arrays.asList(AffiliationCategory.values()));
   }
 
+  public DataModel getFacilityUsageRolesDataModel()
+  {
+    if (_facilityUsageRolesDataModel == null) {
+      SortedSet<FacilityUsageRole> facilityUsages = Sets.newTreeSet(getScreeningRoomUser().getFacilityUsageRoles());
+      _facilityUsageRolesDataModel = new ListDataModel(Lists.newArrayList(facilityUsages));
+    }
+    return _facilityUsageRolesDataModel;
+  }
+
+  public UISelectOneBean<FacilityUsageRole> getNewFacilityUsageRole()
+  {
+    if (_newFacilityUsageRole == null) {
+      Collection<FacilityUsageRole> candidateNewFacilityUsageRoles = 
+        Sets.difference(Sets.newHashSet(FacilityUsageRole.values()), 
+                        getScreeningRoomUser().getFacilityUsageRoles());
+      _newFacilityUsageRole = new UISelectOneBean<FacilityUsageRole>(candidateNewFacilityUsageRoles, null, true) {
+        @Override
+        protected String makeLabel(FacilityUsageRole fu) { return fu.getDisplayableName(); }
+        @Override
+        protected String getEmptyLabel() { return "<select>"; }
+      };
+    }
+    return _newFacilityUsageRole;
+  }
+  
   public DataModel getUserRolesDataModel()
   {
     if (_userRolesDataModel == null) {
-      List<ScreensaverUserRole> userRoles = new ArrayList<ScreensaverUserRole>();
-      userRoles.addAll(_user.getScreensaverUserRoles());
-      userRoles.removeAll(HIDDEN_ROLES);
+      List<ScreensaverUserRole> userRoles = Lists.newArrayList(getEntity().getPrimaryScreensaverUserRoles());
       Collections.sort(userRoles, USER_ROLE_COMPARATOR);
       _userRolesDataModel = new ListDataModel(userRoles);
     }
@@ -456,8 +399,10 @@ public class UserViewer extends AbstractEditableBackingBean
       Collection<ScreensaverUserRole> candidateNewUserRoles = new TreeSet<ScreensaverUserRole>();
       for (ScreensaverUserRole userRole : ScreensaverUserRole.values()) {
         if (!userRole.isAdministrative() &&
-          !_user.getScreensaverUserRoles().contains(userRole) &&
-          !HIDDEN_ROLES.contains(userRole)) {
+          // hide if a user already has this role (primary or implied)
+          !getEntity().getScreensaverUserRoles().contains(userRole) &&
+          // hide if this role implies an extant primary user role (forces admin to remove the lower role first, before adding the higher role)
+          Sets.intersection(userRole.getImpliedRoles(), getEntity().getPrimaryScreensaverUserRoles()).isEmpty()) {
           candidateNewUserRoles.add(userRole);
         }
       }
@@ -470,7 +415,7 @@ public class UserViewer extends AbstractEditableBackingBean
     }
     return _newUserRole;
   }
-
+  
   public DataModel getRnaiScreensDataModel()
   {
     initScreensDataModels();
@@ -498,7 +443,7 @@ public class UserViewer extends AbstractEditableBackingBean
           screensAndRoles.add(new ScreenAndRole(screen, role));
         }
       }
-      Multimap<ScreenType,ScreenAndRole> screenType2ScreenAndRole = new HashMultimap<ScreenType,ScreenAndRole>();
+      Multimap<ScreenType,ScreenAndRole> screenType2ScreenAndRole = HashMultimap.create();
       for (ScreenAndRole screenAndRole : screensAndRoles) {
         screenType2ScreenAndRole.put(screenAndRole.getScreen().getScreenType(),
                                      screenAndRole);
@@ -519,8 +464,7 @@ public class UserViewer extends AbstractEditableBackingBean
   {
     if (_labMembersDataModel == null && isScreeningRoomUserViewMode())
     {
-      _labMembersDataModel = new ListDataModel(Lists.sortedCopy(getScreeningRoomUser().getLab().getLabMembers(),
-                                               ScreensaverUserComparator.getInstance()));
+      _labMembersDataModel = new ListDataModel(Ordering.from(ScreensaverUserComparator.getInstance()).sortedCopy(getScreeningRoomUser().getLab().getLabMembers()));
     }
     return _labMembersDataModel;
   }
@@ -553,101 +497,103 @@ public class UserViewer extends AbstractEditableBackingBean
     return _checklistItems;
   }
 
-  
-  /* JSF Application methods */
-
-  @UIControllerMethod
-  public String viewUser()
+  @Override
+  public EntityUpdateSearchResults<ScreeningRoomUser,Integer> getEntityUpdateSearchResults()
   {
-    Integer entityId = Integer.parseInt(getRequestParameter("entityId").toString());
-    if (entityId == null) {
-      throw new IllegalArgumentException("missing 'entityId' request parameter");
-    }
-    ScreensaverUser user = _dao.findEntityById(ScreensaverUser.class, entityId);
-    if (user == null) {
-      throw new IllegalArgumentException(ScreensaverUser.class.getSimpleName() + " " + entityId + " does not exist");
-    }
-    return _thisProxy.viewUser(user);
+    return _userUpdateSearchResults;
   }
 
-  @UIControllerMethod
-  public String viewUser(ScreensaverUser user)
-  {
-    // TODO: implement as aspect
-    if (user.isRestricted()) {
-      showMessage("restrictedEntity", "user " + user.getFullNameFirstLast());
-      log.warn("user unauthorized to view " + user);
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
-    if (user instanceof AdministratorUser) {
-      reportSystemError("Sorry, viewing of administrator users (staff) is not yet implemented");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
-    setUser(user);
-
-    UserSearchResults<ScreensaverUser> searchResults =
-      (UserSearchResults<ScreensaverUser>) (isScreeningRoomUserViewMode() ? _screenerSearchResults : _staffSearchResults);
-    // calling viewUser() is a request to view the most up-to-date, persistent
-    // version of the user, which means the usersBrowser must also be
-    // updated to reflect the persistent version of the user
-    searchResults.refetch();
-
-    // all users are viewed within the context of a search results, providing
-    // the user with user search options at all times
-    // UserSearchResults will call our setUser() method
-    if (!searchResults.viewEntity(user)) {
-      searchResults.searchUsers();
-      // note: calling viewEntity(user) will only work as long as
-      // UserSearchResults continues to use InMemoryDataTableModel
-      searchResults.viewEntity(user);
-    }
-    return BROWSE_SCREENERS;
-  }
-
-  @UIControllerMethod
-  public String editNewUser(ScreensaverUser newUser)
+  @Override
+  protected void initializeNewEntity(ScreeningRoomUser newUser)
   {
     ScreensaverUser currentUser = getScreensaverUser();
     if (newUser instanceof LabHead &&
       !(currentUser instanceof AdministratorUser &&
       ((AdministratorUser) currentUser).isUserInRole(ScreensaverUserRole.LAB_HEADS_ADMIN))) {
-      showMessage("restrictedOperation", "add a new lab head");
-      return REDISPLAY_PAGE_ACTION_RESULT;
+      throw new OperationRestrictedException("add a new lab head");
     }
-    if (!(currentUser instanceof AdministratorUser &&
-      ((AdministratorUser) currentUser).isUserInRole(ScreensaverUserRole.USERS_ADMIN))) {
-      showMessage("restrictedOperation", "add a new user");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
-    setUser(newUser);
-    setEditMode(true);
-    return VIEW_USER;
   }
 
-  @UIControllerMethod
+  // TODO: move logic to edu.harvard.med.iccbl.screensaver.policy
+  private void warnAdminOnMismatchedDataSharingLevel(ScreeningRoomUser user)
+  {
+    if (isReadAdmin()) {
+      if (!!!user.isHeadOfLab()) {
+        user = getDao().reloadEntity(user, true, 
+                                     ScreeningRoomUser.LabHead.to(ScreeningRoomUser.roles).getPath(),
+                                     ScreeningRoomUser.roles.getPath());
+        if (user.getLab().getLabHead() != null) {
+          SortedSet<ScreensaverUserRole> labHeadSmDslRoles = Sets.newTreeSet(Sets.intersection(DataSharingLevelMapper.UserSmDslRoles, user.getLab().getLabHead().getScreensaverUserRoles()));
+          SortedSet<ScreensaverUserRole> userSmDslRoles = Sets.newTreeSet(Sets.intersection(DataSharingLevelMapper.UserSmDslRoles, user.getScreensaverUserRoles()));
+          if (!!!labHeadSmDslRoles.isEmpty() && !!!userSmDslRoles.isEmpty()) {
+            ScreensaverUserRole labHeadLeastRestrictiveRole = labHeadSmDslRoles.last();
+            ScreensaverUserRole userLeastRestrictiveRole = userSmDslRoles.last();
+            if (labHeadLeastRestrictiveRole.compareTo(userLeastRestrictiveRole) > 0) {
+              showMessage("users.dataSharingLevelTooRestrictive", userLeastRestrictiveRole.getDisplayableRoleName(), labHeadLeastRestrictiveRole.getDisplayableRoleName());
+            }
+            else if (labHeadLeastRestrictiveRole.compareTo(userLeastRestrictiveRole) < 0) {
+              showMessage("users.dataSharingLevelTooLoose", userLeastRestrictiveRole.getDisplayableRoleName(), labHeadLeastRestrictiveRole.getDisplayableRoleName());
+            }
+          }
+        }
+      }
+      else {
+        LabHead labHead = (LabHead) user;
+        for (Screen screen : labHead.getScreensHeaded()) {
+          if (screen.getScreenType() == ScreenType.SMALL_MOLECULE) {
+            if ((labHead.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_SCREENS) > 0) ||
+              (labHead.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_POSITIVES) > 0)) {
+              showMessage("users.labHeadScreenTooRestrictive", screen.getScreenNumber(), screen.getDataSharingLevel());
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @UICommand
+  public String addFacilityUsageRole()
+  {
+    if (getNewFacilityUsageRole().getSelection() != null) {
+      getScreeningRoomUser().getFacilityUsageRoles().add(getNewFacilityUsageRole().getSelection());
+      _newFacilityUsageRole = null;
+      _facilityUsageRolesDataModel = null;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UICommand
+  public String deleteFacilityUsageRole()
+  {
+    FacilityUsageRole facilityUsage = (FacilityUsageRole) getRequestMap().get("element");
+    getScreeningRoomUser().getFacilityUsageRoles().remove(facilityUsage);
+    _newFacilityUsageRole = null;
+    _facilityUsageRolesDataModel = null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
+  }
+
+  @UICommand
   public String addUserRole()
   {
     if (getNewUserRole().getSelection() != null) {
-      getUser().addScreensaverUserRole(getNewUserRole().getSelection());
+      getEntity().addScreensaverUserRole(getNewUserRole().getSelection());
       _newUserRole = null;
       _userRolesDataModel = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deleteUserRole()
   {
-    getUser().removeScreensaverUserRole((ScreensaverUserRole) getRequestMap().get("element"));
+    ScreensaverUserRole primaryRole = (ScreensaverUserRole) getRequestMap().get("element");
+    getEntity().removeScreensaverUserRole(primaryRole);
     _newUserRole = null;
     _userRolesDataModel = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   @Transactional
   public String addNewLabAffiliation()
   {
@@ -655,14 +601,14 @@ public class UserViewer extends AbstractEditableBackingBean
       reportApplicationError("new lab affiliation name is required");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    if (_dao.findEntityByProperty(LabAffiliation.class,
-                                  "affiliationName",
-                                  _newLabAffiliation.getAffiliationName()) != null) {
+    if (getDao().findEntityByProperty(LabAffiliation.class,
+                                      "affiliationName",
+                                      _newLabAffiliation.getAffiliationName()) != null) {
       showMessage("duplicateEntity", "lab affiliation");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    _dao.persistEntity(_newLabAffiliation);
-    _dao.flush();
+    getDao().persistEntity(_newLabAffiliation);
+    getDao().flush();
 
     // force reload of lab affiliation selections
     _labAffiliation = null;
@@ -674,35 +620,40 @@ public class UserViewer extends AbstractEditableBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
+  @Transactional(readOnly=true)
   public String addLabMember()
   {
-    if (!islabHeadViewMode()) {
-      reportApplicationError("cannot only create lab members for lab heads");
+    if (!isLabHeadViewMode()) {
+      reportApplicationError("can only create lab members for lab heads");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     if (isEditMode()) {
       reportApplicationError("cannot add lab members while editing lab head");
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    ScreeningRoomUser newLabMember = new ScreeningRoomUser();
-    newLabMember.setLab(((LabHead) _user).getLab());
-    return _thisProxy.editNewUser(newLabMember);
+    ScreeningRoomUser labHead = getDao().reloadEntity(getEntity());
+    ScreeningRoomUser newLabMember = new ScreeningRoomUser((AdministratorUser) getScreensaverUser());
+    newLabMember.setLab(labHead.getLab());
+    return getThisProxy().editNewEntity(newLabMember);
   }
 
-  @UIControllerMethod
+  @UICommand
+  @Transactional(readOnly=true)
   public String addScreen()
   {
     return doAddScreen(null);
   }
 
-  @UIControllerMethod
+  @UICommand
+  @Transactional(readOnly=true)
   public String addRnaiScreen()
   {
     return doAddScreen(ScreenType.RNAI);
   }
 
-  @UIControllerMethod
+  @UICommand
+  @Transactional(readOnly=true)
   public String addSmallMoleculeScreen()
   {
     return doAddScreen(ScreenType.SMALL_MOLECULE);
@@ -711,30 +662,37 @@ public class UserViewer extends AbstractEditableBackingBean
   private String doAddScreen(ScreenType screenType)
   {
     if (!isScreeningRoomUserViewMode()) {
-      reportApplicationError("cannot create screen for administrator user");
-      return REDISPLAY_PAGE_ACTION_RESULT;
+      throw new DevelopmentException("cannot create screen for administrator user");
     }
     if (isEditMode()) {
-      reportApplicationError("cannot create screen while editing user");
-      return REDISPLAY_PAGE_ACTION_RESULT;
+      throw new DevelopmentException("cannot create screen while editing user");
     }
-    return _screenDetailViewer.editNewScreen(getScreeningRoomUser(),
-                                             screenType);
+    Screen screen = new Screen((AdministratorUser) getScreensaverUser());
+    ScreeningRoomUser leadScreener = getDao().reloadEntity(getScreeningRoomUser());
+    screen.setLeadScreener(leadScreener);
+    screen.setLabHead(leadScreener.getLab().getLabHead());
+    // infer appropriate screen type from user roles
+    if (screenType == null) {
+      screenType = leadScreener.isRnaiUser() && !leadScreener.isSmallMoleculeUser() ? ScreenType.RNAI : !leadScreener.isRnaiUser() && leadScreener.isSmallMoleculeUser() ? ScreenType.SMALL_MOLECULE : null;
+    }
+    screen.setScreenType(screenType);
+    
+    return _screenDetailViewer.editNewEntity(screen);
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseScreens()
   {
     return doBrowseScreens(null);
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseRnaiScreens()
   {
     return doBrowseScreens(ScreenType.RNAI);
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseSmallMoleculeScreens()
   {
     return doBrowseScreens(ScreenType.SMALL_MOLECULE);
@@ -750,43 +708,37 @@ public class UserViewer extends AbstractEditableBackingBean
   }
 
   @SuppressWarnings("unchecked")
-  @UIControllerMethod
+  @UICommand
   public String browseLabMembers()
   {
     HashSet<ScreeningRoomUser> labMembers = Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData());
-    _screenerSearchResults.searchUsers(labMembers);
-    _screenerSearchResults.
+    ((UserSearchResults) getContextualSearchResults()).searchUsers(labMembers);
+    ((UserSearchResults) getContextualSearchResults()).
             setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchLabMembers"));
     return BROWSE_SCREENERS;
   }
 
   @SuppressWarnings("unchecked")
-  @UIControllerMethod
+  @UICommand
   public String browseScreenAssociates()
   {
     HashSet<ScreeningRoomUser> associates = Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData());
-    _screenerSearchResults.searchUsers(associates);
-    _screenerSearchResults.
+    ((UserSearchResults) getContextualSearchResults()).searchUsers(associates);
+    ((UserSearchResults) getContextualSearchResults()).
     setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchScreenAssociates"));
     return BROWSE_SCREENERS;
   }
 
-  
-  // private methods
-
-  private void resetView()
+  @Override
+  protected String postEditAction(EditResult editResult)
   {
-    setEditMode(false);
-    _userRolesDataModel = null;
-    _newUserRole = null;
-    _labName = null;
-    _labAffiliation = null;
-    _newLabAffiliation = null;
-    _screensDataModel = null;
-    _labMembersDataModel = null;
-    _screenAssociatesDataModel = null;
-    _attachedFiles.reset();
-    _checklistItems.reset();
+    switch (editResult) {
+    case CANCEL_EDIT: return getThisProxy().reload();
+    case SAVE_EDIT: return getThisProxy().reload();
+    case CANCEL_NEW: return VIEW_MAIN;
+    case SAVE_NEW: return getThisProxy().reload();
+    default: return null;
+    }
   }
 }
 

@@ -9,11 +9,19 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.LabHead;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
@@ -21,9 +29,8 @@ import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
-public class ScreenViewer extends StudyViewer
+public class ScreenViewer extends StudyViewer<Screen>
 {
   // static members
 
@@ -32,20 +39,12 @@ public class ScreenViewer extends StudyViewer
 
   // instance data members
 
-  private ScreenViewer _thisProxy;
-  private ScreenSearchResults _screensBrowser;
-  private GenericEntityDAO _dao;
-  private ScreenResultsDAO _screenResultsDao;
-  private ScreenDetailViewer _screenDetailViewer;
   private ScreenResultViewer _screenResultViewer;
   private HeatMapViewer _heatMapViewer;
   private ScreenResultImporter _screenResultImporter;
+  private ScreenDetailViewer _screenDetailViewer;
 
-  private Screen _screen;
-
-
-
-
+  
   // constructors
 
   /**
@@ -55,131 +54,95 @@ public class ScreenViewer extends StudyViewer
   {
   }
 
-  public ScreenViewer(ScreenViewer screenViewer,
-                      GenericEntityDAO dao,
-                      ScreenResultsDAO screenResultsDao,
-                      ScreenDetailViewer screenDetailViewer,
+  public ScreenViewer(ScreenViewer thisProxy,
                       ScreenSearchResults screensBrowser,
-                      WellSearchResults wellSearchResults,
+                      GenericEntityDAO dao,
+                      ScreenDetailViewer screenDetailViewer,
+                      WellSearchResults wellsBrowser,
                       ScreenResultViewer screenResultViewer,
                       HeatMapViewer heatMapViewer,
                       ScreenResultImporter screenResultImporter)
   {
-    super(screenViewer, dao, screenDetailViewer, null, wellSearchResults);
-    _thisProxy = screenViewer;
-    _dao = dao;
-    _screenResultsDao = screenResultsDao;
+    super(Screen.class,
+          thisProxy,
+          screensBrowser,
+          ScreensaverConstants.BROWSE_SCREENS,
+          ScreensaverConstants.VIEW_SCREEN,
+          dao,
+          null,
+          wellsBrowser);
     _screenDetailViewer = screenDetailViewer;
     _screenResultViewer = screenResultViewer;
     _heatMapViewer = heatMapViewer;
     _screenResultImporter = screenResultImporter;
-    _screensBrowser = screensBrowser;
   }
 
-
-  // public methods
-
-  @Override
-  public String reload()
+  public void initializeViewer(Screen screen)
   {
-    if (_screen == null || _screen.getEntityId() == null) {
-      _screen = null;
-      return REDISPLAY_PAGE_ACTION_RESULT;
+    super.initializeViewer(screen);
+
+    _screenDetailViewer.setEntity(screen);
+    ScreenResult screenResult = screen.getScreenResult();
+    if (screenResult != null && screenResult.isRestricted()) {
+      screenResult = null;
     }
-    return viewScreen(getScreen());
+    _screenResultViewer.setEntity(screenResult);
+    _heatMapViewer.setScreenResult(screenResult);
+    
+    warnAdminOnMismatchedDataSharingLevel(screen);
   }
-
-  public Screen getScreen()
+  
+  @Override
+  protected void initializeEntity(Screen screen)
   {
-    return _screen;
-  }
-
-  @Transactional
-  public void setScreen(Screen screen)
-  {
-    log.debug("setScreen(): loading data for " + screen);
-    screen = _dao.reloadEntity(screen,
-                               true,
-                               "labHead.labAffiliation",
-                               "labHead.labMembers",
-                               "leadScreener");
-    _dao.needReadOnly(screen, /*"billingInformation.*/"billingItems");
-    _dao.needReadOnly(screen, "collaborators.labHead");
-    _dao.needReadOnly(screen, "labActivities.performedBy");
-    _dao.needReadOnly(screen,
-                      "attachedFiles",
-                      "fundingSupports",
-                      "keywords",
-                      "publications");
-    _dao.needReadOnly(screen, "statusItems");
-    _dao.needReadOnly(screen, "cherryPickRequests.requestedBy");
-    _dao.needReadOnly(screen, "annotationTypes.annotationValues");
-    _dao.needReadOnly(screen.getScreenResult(), "plateNumbers");
-    _dao.needReadOnly(screen.getScreenResult(),
+    super.initializeEntity(screen);
+    getDao().needReadOnly(screen,
+                          Screen.labHead.to(LabHead.labAffiliation).getPath(),
+                          Screen.labHead.to(LabHead.labMembers).getPath(),
+                          Screen.leadScreener.getPath());
+    getDao().needReadOnly(screen, Screen.collaborators.to(ScreeningRoomUser.LabHead).getPath());
+    getDao().needReadOnly(screen, Screen.billingItems.getPath());
+    getDao().needReadOnly(screen, Screen.labActivities.to(Activity.performedBy).getPath());
+    getDao().needReadOnly(screen, Screen.attachedFiles.to(AttachedFile.fileType).getPath());
+    getDao().needReadOnly(screen, Screen.fundingSupports.getPath());
+    getDao().needReadOnly(screen, Screen.publications.getPath());
+    getDao().needReadOnly(screen, Screen.keywords.getPath());
+    getDao().needReadOnly(screen, Screen.statusItems.getPath());
+    getDao().needReadOnly(screen, Screen.cherryPickRequests.to(CherryPickRequest.requestedBy).getPath());
+    getDao().needReadOnly(screen, "annotationTypes.annotationValues");
+    getDao().needReadOnly(screen.getScreenResult(), "plateNumbers");
+    getDao().needReadOnly(screen.getScreenResult(),
                       "resultValueTypes.derivedTypes",
                       "resultValueTypes.typesDerivedFrom");
-    _dao.needReadOnly(screen, 
-                      "pinTransferApprovalActivity.approvedBy",
-                      "pinTransferApprovalActivity.performedBy");
-    _screen = screen;
-
-    setStudy(screen);
-    _screenDetailViewer.setScreen(screen);
-    _screenResultImporter.setScreen(screen);
-    ScreenResult screenResult = screen.getScreenResult();
-    _heatMapViewer.setScreenResult(screenResult);
-    _screenResultViewer.setScreenResult(screenResult);
-    resetView();
+    getDao().needReadOnly(screen, 
+                      Screen.pinTransferApprovalActivity.to(Activity.createdBy).getPath(),
+                      Screen.pinTransferApprovalActivity.to(Activity.performedBy).getPath());
+    getDao().needReadOnly(screen, AuditedAbstractEntity.updateActivities.getPath());    
   }
 
 
-  /* JSF Application methods */
-
-  @UIControllerMethod
-  public String viewScreen()
+  // TODO: move logic to edu.harvard.med.iccbl.screensaver.policy
+  private void warnAdminOnMismatchedDataSharingLevel(Screen screen)
   {
-    Integer entityId = Integer.parseInt(getRequestParameter("entityId").toString());
-    if (entityId == null) {
-      throw new IllegalArgumentException("missing 'entityId' request parameter");
+    if (screen.getScreenType() == ScreenType.SMALL_MOLECULE) {
+      if (isReadAdmin()) {
+        if (screen.getLabHead() != null) {
+          boolean dslTooRestrictive = false;
+          ScreensaverUserRole labHeadDsl = null;
+          if (screen.getLabHead().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_SCREENS) > 0) {
+            labHeadDsl = ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS;
+            dslTooRestrictive = true;
+          }
+          else if (screen.getLabHead().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_POSITIVES) > 0) {
+            labHeadDsl = ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES;
+            dslTooRestrictive = true;
+          }
+          if (dslTooRestrictive) {
+            showMessage("screens.dataSharingLevelTooRestrictive", screen.getDataSharingLevel().toString(), labHeadDsl.getDisplayableRoleName());
+          }
+        }
+      }
     }
-    Screen screen = _dao.findEntityById(Screen.class, entityId);
-    if (screen == null) {
-      throw new IllegalArgumentException(Screen.class.getSimpleName() + " " + entityId + " does not exist");
-    }
-    return _thisProxy.viewScreen(screen);
-  }
-
-  @UIControllerMethod
-  @Transactional
-  public String viewScreen(Screen screen)
-  {
-    // TODO: implement as aspect
-    if (screen.isRestricted()) {
-      showMessage("restrictedEntity", "Screen " + screen.getScreenNumber());
-      log.warn("user unauthorized to view " + screen);
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
-    // calling viewScreen() is a request to view the most up-to-date, persistent
-    // version of the screen, which means the screensBrowser must also be
-    // updated to reflect the persistent version of the screen
-    _screensBrowser.refetch();
-
-    // all screens are viewed within the context of a search results, providing the user with screen search options at all times
-    // screensBrowser will call our setScreen() method
-    if (!_screensBrowser.viewEntity(screen)) {
-      _screensBrowser.searchAllScreens();
-      // note: calling viewEntity(screen) will only work as long as
-      // ScreenSearchResults continues to use InMemoryDataTableModel
-      _screensBrowser.viewEntity(screen);
-    }
-    return BROWSE_SCREENS;
-  }
-
-  // private methods
-
-  private void resetView()
-  {
   }
 }
 

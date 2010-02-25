@@ -203,7 +203,7 @@ public class CherryPickRequestAllocator
 
   private Multimap<Integer,LabCherryPick> getLabCherryPicksBySourcePlate(CherryPickRequest cherryPickRequest)
   {
-    Multimap<Integer,LabCherryPick> plate2Wells = new HashMultimap<Integer,LabCherryPick>();
+    Multimap<Integer,LabCherryPick> plate2Wells = HashMultimap.create();
     for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
       plate2Wells.put(labCherryPick.getSourceWell().getPlateNumber(), labCherryPick);
     }
@@ -309,16 +309,15 @@ public class CherryPickRequestAllocator
     if (assayPlates.isEmpty()) {
       return;
     }
-    CherryPickRequest cherryPickRequest = (CherryPickRequest) _dao.reattachEntity(assayPlates.iterator().next().getCherryPickRequest());
-    // note: we iterator through all of CPR's labCherryPicks, since
-    // cpr.labCherryPicks has an 'update' cascade, while
-    // assayPlate.labCherryPicks does not
-    for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
-      if (labCherryPick.isMapped() && assayPlates.contains(labCherryPick.getAssayPlate())) {
-        // note: it is okay to cancel a plate that has some (or all) lab cherry
-        // picks that are unallocated
-        if (labCherryPick.isAllocated()) {
-          labCherryPick.setAllocated(null);
+    for (CherryPickAssayPlate plate : assayPlates) {
+      for (LabCherryPick labCherryPick : plate.getLabCherryPicks()) {
+        if (labCherryPick.isMapped() && assayPlates.contains(labCherryPick.getAssayPlate())) {
+          // note: it is okay to cancel a plate that has some (or all) lab cherry
+          // picks that are unallocated
+          if (labCherryPick.isAllocated()) {
+            labCherryPick.setAllocated(null);
+            _dao.saveOrUpdateEntity(labCherryPick);
+          }
         }
       }
     }
@@ -347,9 +346,10 @@ public class CherryPickRequestAllocator
           log.warn("cannot create new lab cherry pick because original does not have a reagent");
         }
         else {
+          _dao.reattachEntity(labCherryPick.getScreenerCherryPick());
           LabCherryPick newLabCherryPick =
             labCherryPick.getScreenerCherryPick().createLabCherryPick(labCherryPick.getSourceWell());
-          _dao.saveOrUpdateEntity(newLabCherryPick);
+          //_dao.saveOrUpdateEntity(newLabCherryPick);
           newLabCherryPicks.put(newLabCherryPick, labCherryPick);
         }
       }

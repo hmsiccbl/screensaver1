@@ -15,7 +15,7 @@
 	 -->
 
 <ui:component>
-  <ss:entityLink entity="#{user}" property="fullNameLastFirst" bean="#{userViewer}" action="viewUser" />
+  <ss:entityLink entity="#{user}" property="fullNameLastFirst" viewer="#{userViewer}" />
   <t:outputText rendered="#{(empty showEmail || showEmail) &amp;&amp; !empty user.email}"
 		value="&#160;&lt;#{user.email}&gt;" />
 </ui:component>

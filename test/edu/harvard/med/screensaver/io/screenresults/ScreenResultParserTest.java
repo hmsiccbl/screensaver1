@@ -27,11 +27,9 @@ import java.util.TreeSet;
 
 import jxl.BooleanFormulaCell;
 import jxl.CellType;
-import jxl.NumberCell;
 import jxl.NumberFormulaCell;
 import jxl.Sheet;
 import jxl.read.biff.BiffException;
-import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
@@ -362,13 +360,15 @@ public class ScreenResultParserTest extends AbstractSpringTest
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
     ScreenResult screenResult = mockScreenResultParser.parse(screen,
                                  workbookFile,
-                                 new IntRange(1, 2));
+                                 new IntRange(1, 2), 
+                                 false);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
     DateTime firstParseTime = screenResult.getDateLastImported();
 
     screenResult = mockScreenResultParser.parse(screen,
                                  workbookFile,
-                                 new IntRange(3, 3));
+                                 new IntRange(3, 3),
+                                 false);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
     
     doTestScreenResult115ParseResult(screen.getScreenResult());

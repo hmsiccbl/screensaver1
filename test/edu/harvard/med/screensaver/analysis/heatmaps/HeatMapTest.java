@@ -48,8 +48,8 @@ public class HeatMapTest extends AbstractSpringTest
   protected void onSetUp() throws Exception
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(107);
-    MockDaoForScreenResultImporter librarieDao = new MockDaoForScreenResultImporter();
-    _parser = new ScreenResultParser(librarieDao);
+    MockDaoForScreenResultImporter mockDao = new MockDaoForScreenResultImporter();
+    _parser = new ScreenResultParser(mockDao, mockDao, mockDao);
     _screenResult = _parser.parse(screen,
                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "ScreenResultHeatmapTest107.xls"));
     ResultValueType rvt = _screenResult.getResultValueTypes().first();

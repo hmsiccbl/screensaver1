@@ -26,10 +26,11 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -42,22 +43,26 @@ import org.hibernate.annotations.Parameter;
  * information about a library's reagents may change due to 1) corrections of
  * identified errors in metadata provided by vendors (which has proven to not be
  * as rare as one would hope!), 2) updated information that becomes available as
- * scientific knowledge progresses (e.g. gene information can change frequently).
- * A LibraryContentsVersion thus maintains a snapshot of the information that
- * describes the reagents at a given point in time. The most current version of
- * a well's reagent is obtained via {@link Well#getReagent()}, which defaults to
- * that latest "released" library contents version (see
+ * scientific knowledge progresses (e.g. gene information can change
+ * frequently). A LibraryContentsVersion thus maintains a snapshot of the
+ * information that describes the reagents at a given point in time. The most
+ * current version of a well's reagent is obtained via {@link Well#getReagent()}
+ * , which defaults to that latest "released" library contents version (see
  * {@link Library#setLatestReleasedContentsVersion(LibraryContentsVersion)}). A
  * given, historical version of a well's reagent is obtained via
  * {@link Well#getReagents()}, using a {@link LibraryContentsVersion} as the
  * lookup key into the returned map.
+ * <p/>
+ * Note that this entity is NOT an {@link AuditedAbstractEntity}, since the
+ * entity creation information is duplicated by {@link #getLoadingActivity()}
+ * (and the loading activity additionally provides comments).
  * 
  * @author atolopko
  */
 @Entity
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"libraryId", "versionNumber"})})
 @ContainedEntity(containingEntityClass = Library.class)
-public class LibraryContentsVersion extends TimeStampedAbstractEntity implements Comparable<LibraryContentsVersion>
+public class LibraryContentsVersion extends AbstractEntity<Integer> implements Comparable<LibraryContentsVersion>
 {
   private static final long serialVersionUID = 1;
 
@@ -67,7 +72,6 @@ public class LibraryContentsVersion extends TimeStampedAbstractEntity implements
   public static final RelationshipPath<LibraryContentsVersion> loadingActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "loadingActivity");
   public static final RelationshipPath<LibraryContentsVersion> releaseActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "releaseActivity");
 
-  private Integer _id;
   private Integer _version; /* for Hibernate optimistic locking */ 
   private Integer _versionNumber; /* for domain model */
   private Library _library;
@@ -86,13 +90,6 @@ public class LibraryContentsVersion extends TimeStampedAbstractEntity implements
     _loadingActivity = loadingActivity;
   }
 
-  @Override
-  @Transient
-  public Serializable getEntityId()
-  {
-    return getLibraryContentsVersionId();
-  }
-
   @Id
   @org.hibernate.annotations.GenericGenerator(name = "library_contents_version_id_seq", 
                                               strategy = "sequence", 
@@ -102,12 +99,12 @@ public class LibraryContentsVersion extends TimeStampedAbstractEntity implements
                   generator = "library_contents_version_id_seq")
   public Integer getLibraryContentsVersionId()
   {
-    return _id;
+    return getEntityId();
   }
 
-  public void setLibraryContentsVersionId(Integer id)
+  private void setLibraryContentsVersionId(Integer id)
   {
-    _id = id;
+    setEntityId(id);
   }
 
   /**
@@ -127,6 +124,7 @@ public class LibraryContentsVersion extends TimeStampedAbstractEntity implements
   {
     _version = version;
   }
+
 
   @Column(nullable = false, updatable=false)
   @Immutable

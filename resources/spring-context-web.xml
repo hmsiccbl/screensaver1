@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-    "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <!--
    $HeadURL:$
@@ -17,15 +15,32 @@
   Screensaver web application.  Allows a full Spring configuration to be referenced via a 
   single file. -->
 
-<beans>
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
   <!--  Policy & Service configuration section for web application-->
 
   <import resource="spring-context-config.xml"/>
 
-  <bean id="dataAccessPolicy"
-   class="edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy">
-   <constructor-arg ref="currentScreensaverUser" />
+  <bean
+  id="dataAccessPolicy"
+  class="edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy"
+  scope="session">
+    <constructor-arg ref="currentScreensaverUser" />
+    <constructor-arg ref="genericEntityDao" />
+    <aop:scoped-proxy />
+  </bean>
+  
+  <bean
+  id="entityEditPolicy"
+  class="edu.harvard.med.iccbl.screensaver.policy.IccblEntityEditPolicy"
+  scope="session">
+    <constructor-arg ref="currentScreensaverUser" />
+    <aop:scoped-proxy />
   </bean>
   
   <bean id="smallMoleculeCherryPickRequestAllowancePolicy"

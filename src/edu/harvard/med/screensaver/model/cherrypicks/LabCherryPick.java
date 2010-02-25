@@ -142,7 +142,7 @@ import org.hibernate.annotations.Parameter;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenerCherryPick.class)
-public class LabCherryPick extends AbstractEntity
+public class LabCherryPick extends AbstractEntity<Integer>
 {
 
   // private static data
@@ -158,7 +158,6 @@ public class LabCherryPick extends AbstractEntity
   
   // private instance data
 
-  private Integer _labCherryPickId;
   private Integer _version;
   private CherryPickRequest _cherryPickRequest;
   private ScreenerCherryPick _screenerCherryPick;
@@ -185,13 +184,6 @@ public class LabCherryPick extends AbstractEntity
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getLabCherryPickId();
-  }
-
   /**
    * Get the id for the lab cherry pick.
    * @return the id for the lab cherry pick
@@ -205,7 +197,7 @@ public class LabCherryPick extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="lab_cherry_pick_id_seq")
   public Integer getLabCherryPickId()
   {
-    return _labCherryPickId;
+    return getEntityId();
   }
 
   @Transient
@@ -589,7 +581,7 @@ public class LabCherryPick extends AbstractEntity
    */
   private void setLabCherryPickId(Integer labCherryPickId)
   {
-    _labCherryPickId = labCherryPickId;
+    setEntityId(labCherryPickId);
   }
 
   /**

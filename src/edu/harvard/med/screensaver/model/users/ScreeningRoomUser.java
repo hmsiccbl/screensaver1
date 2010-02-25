@@ -22,6 +22,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -32,16 +33,18 @@ import javax.persistence.Transient;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.joda.time.LocalDate;
@@ -67,15 +70,20 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   private static final Logger log = Logger.getLogger(ScreeningRoomUser.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<ScreeningRoomUser> LabHead = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead"); 
+  public static final RelationshipPath<ScreeningRoomUser> LabHead = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead");
+  public static final RelationshipPath<ScreeningRoomUser> attachedFiles = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "attachedFiles");
+  public static final RelationshipPath<ScreeningRoomUser> screensLed = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "screensLed");
+  public static final RelationshipPath<ScreeningRoomUser> screensCollaborated = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "screensCollaborated");
+  public static final RelationshipPath<ScreeningRoomUser> facilityUsageRoles = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "facilityUsageRoles");
 
   // private instance data
 
-  private SortedSet<ChecklistItemEvent> _checklistItemEvents = new TreeSet<ChecklistItemEvent>();
-  private Set<Screen> _screensLed = new HashSet<Screen>();
-  private Set<Screen> _screensCollaborated = new HashSet<Screen>();
-  private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
+  private SortedSet<ChecklistItemEvent> _checklistItemEvents = Sets.newTreeSet();
+  private Set<Screen> _screensLed = Sets.newHashSet();
+  private Set<Screen> _screensCollaborated = Sets.newHashSet();
+  private Set<AttachedFile> _attachedFiles = Sets.newHashSet();
   protected ScreeningRoomUserClassification _userClassification;
+  private Set<FacilityUsageRole> _facilityUsageRoles = Sets.newHashSet();
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
 
@@ -88,11 +96,18 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   /**
    * Construct an uninitialized <code>ScreeningRoomUser</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
-
-   * @motivation for new ScreeningRoomUser creation via user interface, where even required
-   *             fields are allowed to be uninitialized, initially
    */
-   public ScreeningRoomUser() {}
+   protected ScreeningRoomUser() {}
+   
+   /**
+    * Construct an uninitialized <code>ScreeningRoomUser</code>.
+    * @motivation for new ScreeningRoomUser creation via user interface, where even required
+    *             fields are allowed to be uninitialized, initially
+    */
+   public ScreeningRoomUser(AdministratorUser createdBy) 
+   {
+     super(createdBy);
+   }
 
   /**
    * Construct an initialized <code>ScreeningRoomUser</code>.
@@ -109,41 +124,24 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   public ScreeningRoomUser(
     String firstName,
     String lastName,
-    String email,
-    String phone,
-    String mailingAddress,
-    String comments,
-    String eCommonsId,
-    String harvardId,
     ScreeningRoomUserClassification userClassification)
   {
     super(firstName,
           lastName,
-          email,
-          phone,
-          mailingAddress,
-          comments);
-    setECommonsId(eCommonsId);
-    setHarvardId(harvardId);
+          "",
+          "",
+          "",
+          "");
     setUserClassification(userClassification);
   }
 
   public ScreeningRoomUser(String firstName,
-                           String lastName,
-                           String email)
+                           String lastName)
   {
     this(firstName,
          lastName,
-         email,
-         "",
-         "",
-         "",
-         "",
-         "",
          ScreeningRoomUserClassification.UNASSIGNED);
   }
-
-  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -187,13 +185,12 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
    * Create a new checklist item activation/completed event for the user.
    * @param checklistItem the checklist item
    * @param datePerformed the date the checklist item was performed by the user or otherwise enacted
-   * @param entryActivity the administrative activity that tracks the who/when/why of this checklist item information
    * @return the new checklist item for the user
    * @see ChecklistItemEvent#createChecklistItemExpirationEvent(LocalDate, AdministrativeActivity)
    */
   public ChecklistItemEvent createChecklistItemActivationEvent(ChecklistItem checklistItem,
                                                                LocalDate datePerformed,
-                                                               AdministrativeActivity entryActivity)
+                                                               AdministratorUser recordedBy)
   {
     SortedSet<ChecklistItemEvent> checklistItemEvents = getChecklistItemEvents(checklistItem);
     if (checklistItemEvents.size() > 0) {
@@ -208,7 +205,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
       new ChecklistItemEvent(checklistItem,
                              this,
                              datePerformed,
-                             entryActivity);
+                             recordedBy);
     _checklistItemEvents.add(checklistItemEvent);
     return checklistItemEvent;
   }
@@ -221,13 +218,11 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
    * @param checklistItem the checklist item
    * @param datePerformed the date the checklist item was marked as
    *          "not applicable"
-   * @param entryActivity the administrative activity that tracks the
-   *          who/when/why of this checklist item information
    * @return the new checklist item for the user
    */
   public ChecklistItemEvent createChecklistItemNotApplicableEvent(ChecklistItem checklistItem,
                                                                   LocalDate datePerformed,
-                                                                  AdministrativeActivity entryActivity)
+                                                                  AdministratorUser recordedBy)
   {
     SortedSet<ChecklistItemEvent> checklistItemEvents = getChecklistItemEvents(checklistItem);
     if (checklistItemEvents.size() > 0) {
@@ -237,7 +232,8 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
       new ChecklistItemEvent(checklistItem,
                              this,
                              datePerformed,
-                             entryActivity, true);
+                             recordedBy,
+                             true);
     _checklistItemEvents.add(checklistItemEvent);
     return checklistItemEvent;
   }
@@ -257,20 +253,6 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   {
     return _screensLed;
   }
-
-//  /**
-//   * Add the screen for which this user was the lead screener.
-//   * @param screenLed the screen for which this user was the lead screener
-//   * @return true iff the screening room user was not already lead screener for this screen
-//   */
-//  public boolean addScreenLed(Screen screenLed)
-//  {
-//    if (_screensLed.add(screenLed)) {
-//      screenLed.setLeadScreener(this);
-//      return true;
-//    }
-//    return false;
-//  }
 
   /**
    * Get the set of screens for which this user was a collaborator.
@@ -370,6 +352,20 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
     _userClassification = userClassification;
   }
 
+  @org.hibernate.annotations.CollectionOfElements
+  @Column(name="facilityUsageRole", nullable=false)
+  @JoinTable(name="screening_room_user_facility_usage_role", joinColumns=@JoinColumn(name="screening_room_user_id"))
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.users.FacilityUsageRole$UserType")
+  public Set<FacilityUsageRole> getFacilityUsageRoles()
+  {
+    return _facilityUsageRoles;
+  }
+
+  public void setFacilityUsageRoles(Set<FacilityUsageRole> facilityUsages)
+  {
+    _facilityUsageRoles = facilityUsages;
+  }
+
   /**
    * Get the COMS-CRHBA permit number.
    * @return the COMS-CRHBA permit number
@@ -457,7 +453,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   @Transient
   public boolean isRnaiUser()
   {
-    return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENER);
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS);
   }
 
   /**
@@ -467,7 +463,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   @Transient
   public boolean isSmallMoleculeUser()
   {
-    return getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENER);
+    return getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
   }
 
 
@@ -611,5 +607,24 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   protected void setLabHead(LabHead labHead)
   {
     _labHead = labHead;
+  }
+  
+  /**
+   * Adds the appropriate {@link FacilityUsageRole} for the screen type of the
+   * screen with which the user is being associated with.
+   * 
+   * @param screen
+   */
+  public void updateFacilityUsageRoleForAssociatedScreens()
+  {
+    _facilityUsageRoles.clear();
+    for (Screen screen : getAllAssociatedScreens()) {
+      if (screen.getScreenType() == ScreenType.SMALL_MOLECULE) {
+        getFacilityUsageRoles().add(FacilityUsageRole.SMALL_MOLECULE_SCREENER);
+      }
+      else if (screen.getScreenType() == ScreenType.RNAI) {
+        getFacilityUsageRoles().add(FacilityUsageRole.RNAI_SCREENER);
+      }
+    }
   }
 }

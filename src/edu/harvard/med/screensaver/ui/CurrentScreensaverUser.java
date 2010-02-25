@@ -38,6 +38,9 @@ public class CurrentScreensaverUser
   
   public void setScreensaverUser(ScreensaverUser user)
   {
+    if (_user != null) {
+      throw new IllegalStateException("cannot change screensaver user after it has been set");
+    }
     _user = user;
   }
 

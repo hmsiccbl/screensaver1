@@ -27,16 +27,15 @@ import javax.faces.event.ActionEvent;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.EntityViewer;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
@@ -66,32 +65,60 @@ import org.apache.myfaces.custom.datascroller.ScrollerActionEvent;
  */
 public abstract class EntitySearchResults<E extends AbstractEntity, K> extends SearchResults<E,K,PropertyPath<E>>
 {
-  // static members
-
-  /**
-   * The maximum number of entities that can be loaded as a single batch search
-   * result, using InMemoryDataModel. If more than this number is to be loaded,
-   * VirtualPagingDataModel will be used instead.
-   */
-  public static final int ALL_IN_MEMORY_THRESHOLD = 1024;
-
   private static Logger log = Logger.getLogger(EntitySearchResults.class);
-
   private static final String[] CAPABILITIES = { "viewEntity", "exportData", "filter" };
-
-  // instance data members
 
   private List<DataExporter<?>> _dataExporters = new ArrayList<DataExporter<?>>();
   private UISelectOneBean<DataExporter<?>> _dataExporterSelector;
 
   private Observer _rowsPerPageSelectorObserver;
+  private EntityViewer<E> _entityViewer;
 
+  protected final class InMemoryEntitySearchResultsDataModel extends InMemoryEntityDataModel<E>
+  {
+    public InMemoryEntitySearchResultsDataModel(EntityDataFetcher<E,?> dataFetcher)
+    {
+      super(dataFetcher);
+    }
 
-  // abstract methods
+    @Override
+    public void filter(List<? extends TableColumn<E,?>> columns)
+    {
+      super.filter(columns);
+      updateEntityView();
+    }
 
-  abstract protected void setEntityToView(E entity);
+    @Override
+    public void sort(List<? extends TableColumn<E,?>> sortColumns,
+                     SortDirection sortDirection)
+    {
+      super.sort(sortColumns, sortDirection);
+      updateEntityView();
+    }
+  }
 
-  // protected methods
+  protected final class VirtualPagingEntitySearchResultsDataModel extends VirtualPagingEntityDataModel<K,E>
+  {
+    public VirtualPagingEntitySearchResultsDataModel(EntityDataFetcher<E,K> dataFetcher)
+    {
+      super(dataFetcher, new ValueReference<Integer>() { public Integer value() { return getRowsPerPage(); } });
+    }
+    
+    @Override
+    public void filter(List<? extends TableColumn<E,?>> columns)
+    {
+      super.filter(columns);
+      updateEntityView();
+    }
+    
+    @Override
+    public void sort(List<? extends TableColumn<E,?>> sortColumns,
+                     SortDirection sortDirection)
+    {
+      super.sort(sortColumns, sortDirection);
+      updateEntityView();
+    }
+  }
 
   @Override
   public void initialize(DataFetcher<E,K,PropertyPath<E>> dataFetcher)
@@ -114,6 +141,11 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
   }
   
+  public EntityViewer getEntityViewer()
+  {
+    return _entityViewer;
+  }
+
   /**
    * View the entity currently selected in the DataTableModel in entity view
    * mode.
@@ -124,7 +156,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    * @motivation To be called by a DataTableModel listener in response to
    *             rowSelected() events.
    */
-  @UIControllerMethod
+  @UICommand
   final protected String viewSelectedEntity()
   {
     if (getDataTableModel().getRowCount() > 0 &&
@@ -183,18 +215,29 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    */
   public EntitySearchResults()
   {
-    this(Collections.<DataExporter<?>>emptyList());
+    this(null);
   }
 
   /**
-   * Constructs a EntitySearchResults object.
+   * 
    *
+   */
+  public EntitySearchResults(EntityViewer<E> entityViewer)
+  {
+    this(Collections.<DataExporter<?>>emptyList(), entityViewer);
+  }
+
+  /**
    * @param dataExporters a List of DataExporters that must be one of the reified
    *          types DataExporter<DataTableModel<E>> or DataExporter<E>
    */
-  public EntitySearchResults(List<DataExporter<?>> dataExporters)
+  public EntitySearchResults(List<DataExporter<?>> dataExporters, EntityViewer<E> entityViewer)
   {
     super(CAPABILITIES);
+    _entityViewer = entityViewer;
+    if (_entityViewer == null) {
+      getCapabilities().remove("viewEntity");
+    }
     _dataExporters.add(new GenericDataExporter<E>("searchResult"));
     _dataExporters.addAll(dataExporters);
   }
@@ -214,13 +257,16 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     return getRowsPerPage() == 1 && getRowCount() > 0;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String returnToSummaryList()
   {
     getRowsPerPageSelector().setSelection(getRowsPerPageSelector().getDefaultSelection());
     scrollToPageContainingRow(getDataTableUIComponent().getFirst());
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
+
+ 
+  abstract public void searchAll();
 
   /**
    * Switch to entity view mode and show the specified entity, automatically
@@ -229,29 +275,28 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    * @param entity
    * @return true if the entity exists in the search result, otherwise false
    */
-  public boolean viewEntity(E entity)
+  public boolean findEntity(E entity)
   {
-//    // first test whether the current row is already the one with the requested entity
-//    E currentEntityInSearchResults = null;
-//    if (getDataTableUIComponent() != null) {
-//      int currentRow = getDataTableUIComponent().getFirst();
-//      getDataTableModel().setRowIndex(currentRow);
-//      if (getDataTableModel().isRowAvailable()) {
-//        currentEntityInSearchResults = (E) getDataTableModel().getRowData();
-//        if (entity.equals(currentEntityInSearchResults)) {
-//          return true;
-//        }
-//      }
-//    }
-
-    // else, do linear search to find the entity (but only works for InMemoryDataModel)
-    log.debug("viewEntity(): entity " + entity);
-    int rowIndex = findRowOfEntity(entity);
-    if (rowIndex < 0) {
-      log.debug("entity " + entity + " not found in entity search results");
-      return false;
+    int rowIndex;
+    // first test whether the current row is already the one with the requested entity
+    if (getDataTableModel().isRowAvailable() && getRowData().equals(entity)) {
+      rowIndex = getDataTableModel().getRowIndex();
+      log.debug("entity " + entity + " found at current row in entity search results");
     }
-    log.debug("entity " + entity + " found in entity search results at row " + rowIndex);
+    else {
+      // do linear search to find the entity (but only works for InMemoryDataModel)
+      rowIndex = findRowOfEntity(entity);
+      if (rowIndex < 0) {
+        log.debug("entity " + entity + " not found in current entity search results");
+        searchAll();
+        rowIndex = findRowOfEntity(entity);
+        if (rowIndex < 0) {
+          log.debug("entity " + entity + " not found in full entity search results");
+          return false;
+        }
+      }
+      log.debug("entity " + entity + " found in entity search results at row " + rowIndex);
+    }
     viewEntityAtRow(rowIndex);
     return true;
   }
@@ -263,7 +308,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       E entity = (E) getRowData();
       log.debug("viewEntityAtRow(): setting entity to view: " + entity + " at row " + rowIndex);
       scrollToRow(rowIndex);
-      setEntityToView(entity);
+      _entityViewer.setEntity(entity);
       switchToEntityViewMode();
     }
   }
@@ -341,7 +386,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   }
 
   @SuppressWarnings("unchecked")
-  @UIControllerMethod
+  @UICommand
   /* final (CGLIB2 restriction) */
   public String downloadSearchResults()
   {
@@ -371,11 +416,11 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   // private methods
 
   @Override
-  final protected DataTableModel<E> buildDataTableModel(DataFetcher<E,K,PropertyPath<E>> dataFetcher,
-                                                        List<? extends TableColumn<E,?>> columns)
+  protected DataTableModel<E> buildDataTableModel(DataFetcher<E,K,PropertyPath<E>> dataFetcher,
+                                                  List<? extends TableColumn<E,?>> columns)
   {
     if (dataFetcher instanceof EntityDataFetcher) {
-      return doBuildDataModel((EntityDataFetcher<E,K>) dataFetcher, columns);
+      return new InMemoryEntitySearchResultsDataModel((EntityDataFetcher<E,K>) dataFetcher);
     }
     // for no-op (empty data model)
     return new InMemoryDataModel<E>(dataFetcher);
@@ -441,78 +486,6 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
   }
 
-  /**
-   * Factory method to build the data model, allowing subclasses to determine
-   * customize decision to use in-memory or virtual paging data model (or some
-   * other data access strategy altogether).
-   *
-   * @param dataFetcher the DataFetcher associated with this SearchResults
-   *          object.
-   * @return a DataTableModel
-   */
-  protected DataTableModel<E> doBuildDataModel(EntityDataFetcher<E,K> dataFetcher,
-                                               List<? extends TableColumn<E,?>> columns)
-  {
-    boolean allColumnsHavePropertyPaths = true;
-    for (TableColumn<E,?> column : columns) {
-      HasFetchPaths entityColumn = (HasFetchPaths) column;
-      if (entityColumn.getPropertyPath() == null) {
-        allColumnsHavePropertyPaths = false;
-        break;
-      }
-    }
-
-    DataTableModel<E> model;
-    if (!allColumnsHavePropertyPaths ||
-        (dataFetcher instanceof EntitySetDataFetcher &&
-          ((EntitySetDataFetcher) dataFetcher).getDomain().size() <= ALL_IN_MEMORY_THRESHOLD)) {
-      if (!allColumnsHavePropertyPaths) {
-        log.debug("using InMemoryDataModel due to having some columns that do not map directly to database fields");
-      }
-      else {
-        log.debug("using InMemoryDataModel due to domain size");
-      }
-      model = new InMemoryEntityDataModel<E>(dataFetcher) {
-        @Override
-        public void filter(List<? extends TableColumn<E,?>> columns)
-        {
-          super.filter(columns);
-          updateEntityView();
-        }
-        
-        @Override
-        public void sort(List<? extends TableColumn<E,?>> sortColumns,
-                         SortDirection sortDirection)
-        {
-          super.sort(sortColumns, sortDirection);
-          updateEntityView();
-        }
-      };
-    }
-    else {
-      log.debug("using VirtualPagingDataModel (sweet!)");
-      model = new VirtualPagingEntityDataModel<K,E>(dataFetcher,
-        new ValueReference<Integer>() { public Integer value() { return getRowsPerPage(); }
-      }) {
-        @Override
-        public void filter(List<? extends TableColumn<E,?>> columns)
-        {
-          super.filter(columns);
-          updateEntityView();
-        }
-        
-        @Override
-        public void sort(List<? extends TableColumn<E,?>> sortColumns,
-                         SortDirection sortDirection)
-        {
-          super.sort(sortColumns, sortDirection);
-          updateEntityView();
-        }
-      };
-    }
-    return model;
-  }
-  
   private void updateEntityView()
   {
     if (isEntityView()) {

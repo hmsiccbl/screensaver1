@@ -11,16 +11,22 @@ package edu.harvard.med.screensaver.db.hibernate;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class HqlBuilder
 {
@@ -37,8 +43,10 @@ public class HqlBuilder
   private boolean _isDistinctRootEntities = false;
   private StringBuilder _select = new StringBuilder();
   private StringBuilder _from = new StringBuilder();
-  private CompositeClause _where = new Conjunction();
-  private StringBuilder _orderBy = new StringBuilder();
+  private CompositePredicate _where = new Conjunction();
+  private CompositePredicate _having = new Conjunction();
+  private List<String> _orderBy = Lists.newArrayList();
+  private List<String> _groupBy = Lists.newArrayList();
   private Map<String,Object> _args = new HashMap<String,Object>();
   private Set<String> _aliases = new HashSet<String>();
   private Set<String> _selectAliases = new HashSet<String>();
@@ -69,6 +77,15 @@ public class HqlBuilder
   public HqlBuilder select(String alias)
   {
     return select(alias, null);
+  }
+  
+  public HqlBuilder selectExpression(String expression)
+  {
+    if (_select.length() > 0) {
+      _select.append(", ");
+    }
+    _select.append(expression);
+    return this;
   }
 
   public HqlBuilder select(String alias, String property)
@@ -127,14 +144,14 @@ public class HqlBuilder
   public HqlBuilder restrictFrom(String alias, String property, Operator operator, Object value)
   {
     checkAliasExists(alias);
-    _from.append(" with ").append(new Predicate(this, makeRef(alias, property), operator, value).toHql());
+    _from.append(" with ").append(new SimplePredicate(this, makeRef(alias, property), operator, value).toHql());
     return this;
   }
 
   public HqlBuilder where(String alias, String property, Operator operator, Object value)
   {
     checkAliasExists(alias);
-    _where.add(predicate(makeRef(alias, property), operator, value));
+    _where.add(simplePredicate(makeRef(alias, property), operator, value));
     return this;
   }
 
@@ -151,7 +168,7 @@ public class HqlBuilder
   {
     checkAliasExists(alias1);
     checkAliasExists(alias2);
-    _where.add(predicate(makeRef(alias1, property1), makeRef(alias2, property2), operator));
+    _where.add(simplePredicate(makeRef(alias1, property1), makeRef(alias2, property2), operator));
     return this;
   }
 
@@ -171,7 +188,7 @@ public class HqlBuilder
   public HqlBuilder where(String alias, edu.harvard.med.screensaver.model.AbstractEntity entity)
   {
     checkAliasExists(alias);
-    _where.add(predicate(alias, Operator.EQUAL, entity));
+    _where.add(simplePredicate(alias, Operator.EQUAL, entity));
     return this;
   }
 
@@ -179,10 +196,10 @@ public class HqlBuilder
   {
     checkAliasExists(alias);
     if (values.size() == 0) {
-      _where.add(Predicate.FALSE);
+      _where.add(SimplePredicate.FALSE);
     }
     else {
-      _where.add(new Predicate(this, makeRef(alias, property), values));
+      _where.add(new SimplePredicate(this, makeRef(alias, property), values));
     }
     return this;
   }
@@ -196,9 +213,9 @@ public class HqlBuilder
     return whereIn(alias, null, values);
   }
 
-  public HqlBuilder where(Clause clause)
+  public HqlBuilder where(Predicate predicate)
   {
-    _where.add(clause);
+    _where.add(predicate);
     return this;
   }
 
@@ -212,16 +229,16 @@ public class HqlBuilder
     return new Conjunction();
   }
 
-  public Predicate predicate(String lhs, Operator operator, Object value)
+  public SimplePredicate simplePredicate(String lhs, Operator operator, Object value)
   {
-    Predicate predicate = new Predicate(this, lhs, operator, value);
-    return predicate;
+    SimplePredicate simplePredicate = new SimplePredicate(this, lhs, operator, value);
+    return simplePredicate;
   }
 
-  public Predicate predicate(String lhs, String rhs, Operator operator)
+  public SimplePredicate simplePredicate(String lhs, String rhs, Operator operator)
   {
-    Predicate predicate = new Predicate(this, lhs, rhs, operator);
-    return predicate;
+    SimplePredicate simplePredicate = new SimplePredicate(this, lhs, rhs, operator);
+    return simplePredicate;
   }
 
   public HqlBuilder orderBy(String alias, String property)
@@ -241,16 +258,14 @@ public class HqlBuilder
   public HqlBuilder orderBy(String alias, String property, SortDirection sortDirection)
   {
     checkAliasExists(alias);
-    if (_orderBy.length() > 0) {
-      _orderBy.append(", ");
-    }
-    _orderBy.append(alias);
-    if (isDefined(property)) {
-      _orderBy.append('.').append(property);
+    StringBuilder orderBy = new StringBuilder(alias);
+    if (!!!StringUtils.isEmpty(property)) {
+      orderBy.append('.').append(property);
     }
     if (sortDirection == SortDirection.DESCENDING) {
-      _orderBy.append(" desc");
+      orderBy.append(" desc");
     }
+    _orderBy.add(orderBy.toString());
     return this;
   }
 
@@ -278,8 +293,20 @@ public class HqlBuilder
       _hql.append(" where ").append(_where.toHql());
     }
 
-    if (_orderBy.length() > 0) {
-      _hql.append(" order by ").append(_orderBy);
+    if (!!!_groupBy.isEmpty()) {
+      // note: if we're using "group by", we also need to explicitly group by
+      // any fields that we're ordering on, and these need to be first if
+      // we're going to respect the requested ordering
+      // TODO: as convenience, we could also group on any select fields that are non-aggregate expressions 
+      List<String> nonRedundantGroupBy = Lists.newArrayList(_groupBy);
+      nonRedundantGroupBy.removeAll(_orderBy);
+      _hql.append(" group by ").append(Joiner.on(", ").join(Iterables.concat(_orderBy, nonRedundantGroupBy)));
+    }
+    if (_having.size() > 0) {
+      _hql.append(" having ").append(_having.toHql());
+    }
+    if (!!!_orderBy.isEmpty()) {
+      _hql.append(" order by ").append(Joiner.on(", ").join(_orderBy));
     }
     return _hql.toString();
   }
@@ -342,18 +369,33 @@ public class HqlBuilder
     }
   }
   
-  private boolean isDefined(String property)
-  {
-    return property != null && property.length() > 0;
-  }
-  
   private String makeRef(String alias, String property)
   {
-    if (isDefined(property)) {
+    if (!!!StringUtils.isEmpty(property)) {
       return alias + "." + property;
     }
     return alias;
   }
 
+  public HqlBuilder groupBy(String alias)
+  {
+    return groupBy(alias, null);
+  }
+
+  public HqlBuilder groupBy(String alias, String property)
+  {
+    checkAliasExists(alias);
+    StringBuilder groupBy = new StringBuilder(alias);
+    if (!!!StringUtils.isEmpty(property)) {
+      groupBy.append('.').append(property);
+    }
+    _groupBy.add(groupBy.toString());
+    return this;
+  }
   
+  public HqlBuilder having(Predicate havingPredicate) 
+  {
+    _having.add(havingPredicate);
+    return this;
+  }
 }

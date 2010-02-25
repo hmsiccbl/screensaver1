@@ -40,4 +40,9 @@ public abstract class DateEntityColumn<E extends AbstractEntity> extends DateCol
   {
     return _fetchPaths.getRelationshipPaths();
   }
+  
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

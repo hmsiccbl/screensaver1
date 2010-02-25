@@ -22,7 +22,7 @@
           styleClass="menuItem"
           title="The current version of Screensaver" />
         <t:outputText id="buildNumber"
-          value="&#160;(#{menu.applicationBuildNumber})"
+          value="&#160;(#{menu.applicationProperties['screensaver.ui.build_number']})"
           styleClass="menuItem" visibleOnUserRole="developer"
           title="The build number" />
       </h:form>
@@ -31,7 +31,7 @@
 
       <t:panelGroup rendered="#{menu.authenticatedUser}">
         <h:form id="userForm">
-          <t:commandLink id="viewSelfCommand" action="#{userViewer.viewUser}" styleClass="menuItem userName">
+          <t:commandLink id="viewSelfCommand" action="#{userViewer.viewEntity}" styleClass="menuItem userName">
             <f:param name="entityId" value="#{menu.screensaverUser.entityId}" />
             <t:outputText id="userName"
               value="#{menu.screensaverUser.fullNameFirstLast}"
@@ -93,7 +93,7 @@
             action="#{menu.browseCherryPickRequests}"
             styleClass="menuItem" value="Browse CPRs" accesskey="C"
             title="Browse the cherry pick requests currently available and accessible to you"
-            rendered="#{menu.readAdmin}" />
+            rendered="#{menu.authenticatedUser &amp;&amp; (menu.screener || menu.readAdmin)}" />
           <t:panelNavigation2 id="cprNavMenu" layout="table"
             itemClass="submenuItem" openItemClass="submenuItem"
             activeItemClass="menuItemActive"
@@ -115,10 +115,6 @@
           <t:commandNavigation2 action="#{menu.browseUsers}"
             styleClass="menuItem" rendered="#{menu.readAdmin}"
             value="Browse Users" title="Browse the users"
-            accesskey="U" />
-          <t:commandNavigation2 action="#{menu.browseScreeners}"
-            styleClass="menuItem" rendered="#{menu.readAdmin}"
-            value="Browse Screeners" title="Browse the screeners"
             accesskey="U" />
           <t:commandNavigation2 action="#{menu.browseAssociates}"
             styleClass="menuItem"

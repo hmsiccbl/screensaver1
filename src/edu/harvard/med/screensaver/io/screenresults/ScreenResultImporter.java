@@ -13,26 +13,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Iterator;
 
-import jxl.write.WritableWorkbook;
-
 import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.ParseErrorsException;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.util.FileUtils;
+import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
+import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader.MODE;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
 
-public class ScreenResultImporter
+public class ScreenResultImporter extends CommandLineApplication
 {
-  // static members
+  public ScreenResultImporter(String[] cmdLineArgs)
+  {
+    super(cmdLineArgs);
+  }
 
   private static Logger log = Logger.getLogger(ScreenResultImporter.class);
 
@@ -46,6 +45,9 @@ public class ScreenResultImporter
   static final String[] APPEND_OPTION = { "a", "append" };
   static final String[] PLATE_NUMBER_START_OPTION = { "sp", "start-plate" };
   static final String[] PLATE_NUMBER_END_OPTION = { "ep", "end-plate" };
+//  static final String[] IGNORE_WELLTYPE_ERRORS_OPTION = { "ignore", "ignore-well-type-errors" };
+  static final String[] IGNORE_DUPLICATE_ERRORS_OPTION = { "ignoreDuplicates", "ignore-duplicate-well-errors" };
+  static final String[] INCREMENTAL_FLUSH_OPTION = { "incrementalFlush", "incremental-flush" };
 
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
@@ -55,7 +57,7 @@ public class ScreenResultImporter
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws FileNotFoundException
   {
-    CommandLineApplication app = new CommandLineApplication(args);
+    ScreenResultImporter app = new ScreenResultImporter(args);
     app.addCommandLineOption(OptionBuilder.hasArg()
                                           .withArgName("#")
                                           .isRequired()
@@ -91,6 +93,22 @@ public class ScreenResultImporter
                                                            + "(By default, the parser only validates the input and then exits.)")
                                           .withLongOpt(IMPORT_OPTION[LONG_OPTION])
                                           .create(IMPORT_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder.withDescription("Ignore any subsequent duplicates of a well")
+                             .isRequired(false)
+                             .withLongOpt(IGNORE_DUPLICATE_ERRORS_OPTION[LONG_OPTION])
+                             .create(IGNORE_DUPLICATE_ERRORS_OPTION[SHORT_OPTION]));
+
+    app.addCommandLineOption(OptionBuilder.withDescription("Set the incremental flushing option; this is necessary for conserving memory in large imports (default=\"true\")")
+                             .isRequired(false)
+                             .withArgName("value")
+                             .withLongOpt(INCREMENTAL_FLUSH_OPTION[LONG_OPTION])
+                             .create(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION]));
+
+//    app.addCommandLineOption(OptionBuilder.withDescription("Ignore errors caused by mismatches between the Library Well Type and the Assay Well Type")
+//                                           .isRequired(false)
+//                                           .withLongOpt(IGNORE_WELLTYPE_ERRORS_OPTION[LONG_OPTION])
+//                                           .create(IGNORE_WELLTYPE_ERRORS_OPTION[SHORT_OPTION]));
+    File inputFile = null;
     try {
       if (!app.processOptions(/* acceptDatabaseOptions= */true,
                               /* showHelpOnError= */true)) {
@@ -101,17 +119,8 @@ public class ScreenResultImporter
         app.setSpringConfigurationResource(SCREEN_RESULT_IMPORTER_SPRING_CONFIGURATION);
       }
 
-      final File inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
+      inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
                                                            File.class);
-      cleanOutputDirectory(inputFile.getAbsoluteFile().getParentFile());
-
-      Screen screen = findScreenOrExit(app);
-      ScreenResultParser screenResultParser = null;
-      screenResultParser = (ScreenResultParser) app.getSpringBean("screenResultParser");
-
-      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-      final ScreenResultsDAO screenResultsDao = (ScreenResultsDAO) app.getSpringBean("screenResultsDao");
-
       final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION[SHORT_OPTION],
                                                                  Integer.class);
 
@@ -126,83 +135,80 @@ public class ScreenResultImporter
       final IntRange finalPlateNumberRange = plateNumberRange;
       final boolean append = app.isCommandLineFlagSet(APPEND_OPTION[SHORT_OPTION]); 
 
-      final Screen finalScreen = screen;
-      final ScreenResultParser finalScreenResultParser = screenResultParser;
-      dao.doInTransaction(new DAOTransaction() {
-        public void runTransaction()
-        {
-          dao.reattachEntity(finalScreen);
+      int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
+      
+      Workbook workbook = new Workbook(inputFile);
 
-          if (finalScreen.getScreenResult() != null) {
-            if (append) {
-              log.info("appending existing screen result (loading existing screen result data)");
-              dao.need(finalScreen.getScreenResult(), "resultValueTypes");//.resultValues");
-            }
-            else {
-              log.info("deleting existing screen result for " + finalScreen);
-              screenResultsDao.deleteScreenResult(finalScreen.getScreenResult());
-            }
-          }
+      try{
+        ScreenResultLoader screenResultLoader = (ScreenResultLoader) app.getSpringBean("screenResultLoader");
+        
+        screenResultLoader.setIgnoreDuplicateErrors(app.isCommandLineFlagSet(IGNORE_DUPLICATE_ERRORS_OPTION[SHORT_OPTION]));
+        
+        ScreenResultLoader.MODE mode = MODE.DELETE_IF_EXISTS;
+        if(append) mode = MODE.APPEND_IF_EXISTS;
 
-          ScreenResult screenResult;
-          try {
-            screenResult = finalScreenResultParser.parse(finalScreen,
-                                                                      inputFile,
-                                                                      finalPlateNumberRange);
-          }
-          catch (FileNotFoundException e) {
-            String msg = "Screen result file not found: " + inputFile;
-            log.error(msg);
-            throw new DAOTransactionRollbackException(msg);
-          }
-          if (finalScreenResultParser.getHasErrors()) {
-            log.error("Errors encountered during parse:");
-            for (WorkbookParseError error : finalScreenResultParser.getErrors()) {
-              log.error(error.toString());
-            }
-            throw new DAOTransactionRollbackException("screen result errors");
-          }
-
-          if (wellsToPrint != null) {
-            new ScreenResultPrinter(screenResult).print(wellsToPrint);
-          }
-          else {
-            new ScreenResultPrinter(screenResult).print();
-          }
-          dao.saveOrUpdateEntity(screenResult);
-          log.info("Done parsing input file.");
+        boolean incrementalFlush = true;
+        if(app.isCommandLineFlagSet(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION])){
+          log.info("get incrementalFlush value");
+          incrementalFlush = app.getCommandLineOptionValue(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION],Boolean.class);
         }
-      });
-      log.info("Import completed successfully!");
+        
+        log.info("incrementalFlush: " + incrementalFlush);
+        
+        ScreenResult screenResult = screenResultLoader.parseAndLoad(
+                                        workbook,
+                                        finalPlateNumberRange,
+                                        mode,
+                                        screenNumber,
+                                        incrementalFlush);
+        if (wellsToPrint != null) {
+          new ScreenResultPrinter(screenResult).print(wellsToPrint);
+        }
+        else {
+          new ScreenResultPrinter(screenResult).print();
+        }
+        System.exit(0);
+      }
+      catch (ParseErrorsException e) 
+      {
+        if(e.getErrors().size() > 100 ) 
+        {
+          for(ParseError pe: e.getErrors())
+          {
+            log.warn("" + pe);
+          }
+          log.warn("" + e.getErrors().size() + " errors found.");
+        }
+        
+        // Remove the error annotated workbook for now - sde4
+        //        if(e.getErrors().size() > 100)
+        //        { //NOTE: this is due to memory constraints
+        //          log.warn("Too many errors to write out the error annotated workbook.  See console output (above) for errors");
+        //        }else{
+        //          File errorsFile = FileUtils.modifyFileDirectoryAndExtension(inputFile, (File) null, "error.xls");
+        //          log.warn("Errors found in the input file, see ErrorAnnotatedWorkbook: " + errorsFile ); 
+        //          cleanErrorAnnotatedWorkbooks(inputFile.getAbsoluteFile().getParentFile());
+        //          workbook.writeErrorAnnotatedWorkbook(errorsFile);
+        //        }
+      }    
+      catch (Exception e) {
+        log.error("application error: " + e.getMessage());
+        e.printStackTrace();
+      }
+    }
+    catch (FileNotFoundException e) {
+      String msg = "Screen result file not found: " + inputFile;
+      log.error(msg);
     }
     catch (ParseException e) {
       log.error("error parsing command line options: " + e.getMessage());
     }
-    catch (DAOTransactionRollbackException e) {
-      // already handled
-      log.error("aborted import due to error: " + e.getMessage());
-    }
-    catch (Exception e) {
-      log.error("application error: " + e.getMessage());
-      e.printStackTrace();
-    }
-    log.info("Exiting.");
-  }
-
-  private static Screen findScreenOrExit(CommandLineApplication app) throws ParseException
-  {
-    int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
-    GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    Screen screen = dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
-    if (screen == null) {
-      log.error("screen " + screenNumber + " does not exist");
-      System.exit(1);
-    }
-    return screen;
+    // If here then error;
+    System.exit(1);
   }
 
   @SuppressWarnings("unchecked")
-  private static void cleanOutputDirectory(File dir)
+  private static void cleanErrorAnnotatedWorkbooks(File dir)
   {
     if (!dir.isDirectory()) {
       log.warn("cannot clean the directory '" + dir + "' since it is not a directory");

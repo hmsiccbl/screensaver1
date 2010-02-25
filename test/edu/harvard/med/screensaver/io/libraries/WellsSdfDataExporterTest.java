@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
@@ -70,7 +71,7 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
                                         null,
                                         null);
       }
-      library.getLatestContentsVersion().release(new AdministrativeActivity(library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+      library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
       
       LibraryContentsVersion lcv2 = dataFactory.newInstance(LibraryContentsVersion.class, library);
       for (Well well : wellSet) {

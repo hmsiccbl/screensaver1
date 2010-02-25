@@ -17,13 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -36,18 +41,15 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.ui.libraries.WellCopy;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * A DAO implementation that can be used in a database-free environment.
@@ -121,12 +123,12 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
   }
 
-  public <E extends AbstractEntity> E defineEntity(Class<E> entityClass, Object... constructorArguments)
+  public <E extends Entity> E defineEntity(Class<E> entityClass, Object... constructorArguments)
   {
     return null;
   }
 
-  public void deleteEntity(AbstractEntity entity)
+  public void deleteEntity(Entity entity)
   {
   }
 
@@ -135,57 +137,58 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     daoTransaction.runTransaction();
   }
 
-  public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass)
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass, boolean readOnly, String... relationships)
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass, boolean readOnly, String... relationships)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> List<E> findEntitiesByHql(Class<E> entityClass, String hql, Object... hqlParameters)
+  public <E extends Entity> List<E> findEntitiesByHql(Class<E> entityClass, String hql, Object... hqlParameters)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id)
+  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass, K id)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id, boolean readOnly, String... relationships)
+  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass, K id, boolean readOnly, String... relationships)
   {
     return null;
   }
 
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
   {
     if (entityClass.equals(Screen.class) && propertyName.equals("screenNumber")) {
-      LabHead user = new LabHead("First", "Last", "email", null);
+      LabHead user = new LabHead("First", "Last", null);
       Screen screen = new Screen(user,
                                  user,
                                  (Integer) propertyValue,
                                  ScreenType.SMALL_MOLECULE,
+                                 StudyType.IN_VITRO,
                                  "title");
       return (E) screen;
     }
     return null;
   }
 
-  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue, boolean readOnly, String... relationships)
   {
     return null;
   }
@@ -194,23 +197,23 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
   }
 
-  public void need(AbstractEntity entity, String... relationships)
+  public void need(Entity entity, String... relationships)
   {
   }
 
-  public void needReadOnly(AbstractEntity entity, String... relationships)
+  public void needReadOnly(Entity entity, String... relationships)
   {
   }
 
-  public void saveOrUpdateEntity(AbstractEntity entity)
+  public void saveOrUpdateEntity(Entity entity)
   {
   }
 
-  public void persistEntity(AbstractEntity entity)
+  public void persistEntity(Entity entity)
   {
   }
 
-  public <E extends AbstractEntity> E reattachEntity(E entity)
+  public <E extends Entity> E reattachEntity(E entity)
   {
     return null;
   }
@@ -220,22 +223,22 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return 0;
   }
 
-  public int relationshipSize(AbstractEntity entity, String relationship)
+  public int relationshipSize(Entity entity, String relationship)
   {
     return 0;
   }
 
-  public int relationshipSize(AbstractEntity entity, String relationship, String relationshipProperty, String relationshipPropertyValue)
+  public int relationshipSize(Entity entity, String relationship, String relationshipProperty, String relationshipPropertyValue)
   {
     return 0;
   }
 
-  public <E extends AbstractEntity> E reloadEntity(E entity)
+  public <E extends Entity> E reloadEntity(E entity)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> E reloadEntity(E entity, boolean readOnly, String... relationships)
+  public <E extends Entity> E reloadEntity(E entity, boolean readOnly, String... relationships)
   {
     return null;
   }
@@ -270,22 +273,22 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return Maps.newHashMap();
   }
 
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationshipsIn)
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationshipsIn)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value)
   {
     return null;
   }
 
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass, Map<String,Object> name2Value, boolean readOnly, String... relationships)
   {
     return null;
   }
@@ -324,7 +327,6 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public List<Library> findLibrariesOfType(LibraryType[] libraryTypes,
                                            ScreenType[] screenTypes)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -340,4 +342,19 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
+  public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey)
+  {
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  public Entity mergeEntity(Entity entity)
+  {
+    return null;
+  }
+
+  public void populateScreenResultWellLinkTable(int screenResultId)
+  {
+    log.info("method not implemented: saveScreenResultWellLinkTable");
+  }
 }

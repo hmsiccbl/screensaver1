@@ -13,8 +13,16 @@ log4j.properties.file=cfg/log4j.properties.web
 
 screensaver.ui.application_name=Screensaver
 screensaver.ui.version=2009.09.16
+# build number placeholder value, below, will be replaced by Ant "build" target at build/deploy time, using the build.number property
+screensaver.ui.build_number=BUILD_NUMBER
+screensaver.ui.facility_name=ICCB-Longwood/NSRB
+screensaver.ui.facility_url=http://iccb.med.harvard.edu/
 screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
 screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/images/structure-images/
+screensaver.ui.release_notes_url=/screensaver/main/changelog.html
+
+screensaver.service.smtpemailservice.host=smtp.cl.med.harvard.edu
+screensaver.service.smtpemailservice.username=
 
 datatable.use_column_reorder_list_widget=false
 screens.allow_delete=false

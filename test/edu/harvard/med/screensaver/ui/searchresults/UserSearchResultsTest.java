@@ -25,7 +25,6 @@ import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 
 public class UserSearchResultsTest extends AbstractSpringPersistenceTest
 {
@@ -50,7 +49,7 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
 
     _screenerSearchResults = new ScreenerSearchResults(genericEntityDao, null);
     _screenerSearchResults.setMessages(messages);
-    _screenerSearchResults.searchUsers();
+    _screenerSearchResults.searchAll();
     TableColumnManager<ScreeningRoomUser> columnManager = _screenerSearchResults.getColumnManager();
     _screenerSearchResults.getColumnManager().addCompoundSortColumns(columnManager.getColumn("User"),
                                                                      columnManager.getColumn("Date Created"));
@@ -58,11 +57,8 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     _screenerSearchResults.getColumnManager().setSortDirection(SortDirection.DESCENDING);
 
     _admin1 = MakeDummyEntities.makeDummyUser(1, "Al", "Capone");
-    _admin1.setDateCreated(new DateTime(2007, 1, 1, 0, 0, 0, 0));
     _admin2 = MakeDummyEntities.makeDummyUser(1, "Bugsy", "Malone");
-    _admin2.setDateCreated(new DateTime(2007, 3, 3, 0, 0, 0, 0));
     _admin3 = MakeDummyEntities.makeDummyUser(1, "Jesse", "James");
-    _admin3.setDateCreated(new DateTime(2007, 9, 9, 0, 0, 0, 0));
     genericEntityDao.persistEntity(_admin1);
     genericEntityDao.persistEntity(_admin2);
     genericEntityDao.persistEntity(_admin3);
@@ -91,7 +87,7 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
   {
     //_screenerSearchResults.searchUsers();
     Criterion<String> criterion = new Criterion<String>(Operator.TEXT_STARTS_WITH, "Mal");
-    ((UserNameColumn<ScreeningRoomUser>) _screenerSearchResults.getColumnManager().getColumn("Name"))
+    ((UserNameColumn<ScreeningRoomUser,ScreeningRoomUser>) _screenerSearchResults.getColumnManager().getColumn("Name"))
     .clearCriteria().addCriterion(criterion);
     DataTableModel<ScreeningRoomUser> dataTableModel = _screenerSearchResults.getDataTableModel();
 

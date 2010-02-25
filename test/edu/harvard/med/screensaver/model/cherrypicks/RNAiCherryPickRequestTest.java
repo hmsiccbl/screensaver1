@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 
 import org.apache.log4j.Logger;
@@ -60,7 +61,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-        CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
+        CherryPickRequest cherryPickRequest = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
         cherryPickRequest.addEmptyWellsOnAssayPlate(cherryPickRequest.getAssayPlateType().getPlateSize().getEdgeWellNames(2));
         cherryPickRequest.addEmptyWellsOnAssayPlate(requestedEmptyWells);
         genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
@@ -91,7 +92,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-        RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
+        RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
         Library duplexLibrary = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
         genericEntityDao.saveOrUpdateEntity(duplexLibrary);
 
@@ -119,7 +120,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
     schemaUtil.truncateTablesOrCreateSchema();
     try {
       Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-      RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest();
+      RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
       Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("Duplexes Library", 50001, 50007, PlateSize.WELLS_384);
       Well well = library.getWells().iterator().next();
       cherryPickRequest.createScreenerCherryPick(well);

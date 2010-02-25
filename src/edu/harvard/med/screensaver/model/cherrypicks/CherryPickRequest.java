@@ -31,22 +31,26 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -55,10 +59,10 @@ import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorO
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 
 /**
@@ -78,11 +82,8 @@ import com.google.common.collect.Sets;
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public abstract class CherryPickRequest extends AbstractEntity
+public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
 {
-
-  // private static data
-
   private static final Logger log = Logger.getLogger(CherryPickRequest.class);
   private static final long serialVersionUID = 0L;
   
@@ -93,11 +94,8 @@ public abstract class CherryPickRequest extends AbstractEntity
   public static final RelationshipPath<CherryPickRequest> screenerCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screenerCherryPicks");
   public static final RelationshipPath<CherryPickRequest> labCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class,"labCherryPicks");
   public static final RelationshipPath<CherryPickRequest> cherryPickAssayPlates = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickAssayPlates");
+  public static final RelationshipPath<CherryPickRequest> cherryPickScreenings = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickScreenings");
 
-
-  // private instance data
-
-  private Integer _cherryPickRequestId;
   private Integer _version;
   private Screen _screen;
   private Integer _legacyCherryPickRequestNumber; // ScreenDB visits.id
@@ -119,21 +117,13 @@ public abstract class CherryPickRequest extends AbstractEntity
   private transient HashSet<CherryPickAssayPlate> _pendingAssayPlates;
   private transient HashSet<CherryPickAssayPlate> _completedAssayPlates;
   private transient SortedSet<WellKey> _labCherryPickWellKeys;
+  private Set<CherryPickScreening> _cherryPickScreenings = new HashSet<CherryPickScreening>();
 
   // assay protocol-related fields
   private CherryPickAssayProtocolsFollowed _cherryPickAssayProtocolsFollowed;
   private String _cherryPickAssayProtocolComments;
   private CherryPickFollowupResultsStatus _cherryPickFollowupResultsStatus;
 
-
-  // public instance methods
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getCherryPickRequestId();
-  }
 
   /**
    * Get the default assay plate type.  This value will be used when creating anew CherryPickRequest
@@ -162,7 +152,7 @@ public abstract class CherryPickRequest extends AbstractEntity
     if (_legacyCherryPickRequestNumber != null) {
       return _legacyCherryPickRequestNumber;
     }
-    return _cherryPickRequestId;
+    return getEntityId();
   }
 
   /**
@@ -193,7 +183,20 @@ public abstract class CherryPickRequest extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="cherry_pick_request_id_seq")
   public Integer getCherryPickRequestId()
   {
-    return _cherryPickRequestId;
+    return getEntityId();
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="cherryPickRequestUpdateActivity", 
+             joinColumns=@JoinColumn(name="cherryPickRequestId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false, unique=true))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)            
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   /**
@@ -775,26 +778,6 @@ public abstract class CherryPickRequest extends AbstractEntity
     return platesRequiringReload;
   }
 
-  /**
-   * @return the set of ScreeningRoomUsers that may be used as an argument to
-   *         {@link #setRequestedBy(ScreeningRoomUser)}, which includes the
-   *         users associated with the CPR's parent screen (see
-   *         {@link Screen#getAssociatedScreeningRoomUsers()}), as well as the
-   *         currently set 'requestedBy' user (see {@link #getRequestedBy()),
-   *         even if he's no longer associated with the screen.
-   */
-  @Transient
-  public Set<ScreeningRoomUser> getRequestedByCandidates()
-  {
-    SortedSet<ScreeningRoomUser> requestedByCandidates = Sets.newTreeSet();
-    requestedByCandidates.addAll(getScreen().getAssociatedScreeningRoomUsers());
-    // add the current requestedBy user, even if it's no longer a valid candidate, to avoid inadvertently changing it   
-    requestedByCandidates.add(getRequestedBy());
-    return requestedByCandidates;
-  }
-
-  // package methods
-
   void incUnfulfilledLabCherryPicks()
   {
     ++_numberUnfulfilledLabCherryPicks;
@@ -806,24 +789,51 @@ public abstract class CherryPickRequest extends AbstractEntity
   }
 
 
-  // protected constructors
+  /**
+   * Get the RNAiCherryPickScreenings for this RNAiCherryPickRequest.
+   * <p>
+   * Note: This is a non-cascading relationship; RNAiCherryPickScreenings are
+   * cascaded from {@link Screen#getLabActivities()} instead.
+   */
+  @OneToMany(mappedBy="cherryPickRequest",
+             cascade={},
+             fetch=FetchType.LAZY)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="cherryPickScreening")
+  public Set<CherryPickScreening> getCherryPickScreenings()
+  {
+    return _cherryPickScreenings;
+  }
+  
+  /**
+   * Get if this CherryPickRequest has been screened (has at least one
+   * associated CherryPickScreening activity).
+   */
+  @Transient
+  public boolean isScreened()
+  {
+    return _cherryPickScreenings.size() > 0;
+  }
 
+  private void setCherryPickScreenings(Set<CherryPickScreening> cherryPickScreenings)
+  {
+    _cherryPickScreenings = cherryPickScreenings;
+  }
+
+  
   /**
    * Construct an initialized <code>CherryPickRequest</code>. Intended only for use by {@link
    * Screen}.
    * @param screen the screen
    * @param requestedBy the user that made the request
    * @param dateRequested the date created
-   * @param legacyId the legacy id from ScreenDB
    * @motivation for creating CherryPickRequests from legacy ScreenDB cherry pick visits
    */
-  protected CherryPickRequest(
-    Screen screen,
-    ScreeningRoomUser requestedBy,
-    LocalDate dateRequested,
-    Integer legacyId)
+  protected CherryPickRequest(AdministratorUser createdBy,
+                              Screen screen,
+                              ScreeningRoomUser requestedBy,
+                              LocalDate dateRequested)
   {
-    setLegacyCherryPickRequestNumber(legacyId);
+    super(createdBy);
     _screen = screen;
     _requestedBy = requestedBy;
     _dateRequested = dateRequested;
@@ -843,15 +853,13 @@ public abstract class CherryPickRequest extends AbstractEntity
   protected CherryPickRequest() {}
 
 
-  // private instance methods
-
   /**
    * Set the unique identifier for the <code>ScreenResult</code>.
    * @param screenResultId a unique identifier for the <code>ScreenResult</code>
    */
   private void setCherryPickRequestId(Integer cherryPickRequestId)
   {
-    _cherryPickRequestId = cherryPickRequestId;
+    setEntityId(cherryPickRequestId);
   }
 
   /**

@@ -11,14 +11,14 @@
 <ui:composition>
 
 	<t:panelGrid columns="1" width="100%"
-		rendered="#{!empty screenViewer.screen}">
+		rendered="#{!empty screenViewer.entity}">
 		<h:form id="screenDetailPanelForm">
 			<ss:collapsiblePanel id="screenDetail"
-				isCollapsed="#{screenDetailViewer.panelCollapsed}" label="Screen">
+				isCollapsed="#{screenDetailViewer.isPanelCollapsedMap['studyDetail']}" label="Screen">
 				<ui:define name="closedContent">
 					<f:subview id="screenSummary">
 						<t:panelGrid columns="4" columnClasses="column,fixedColumn300,column,column">
-							<ss:screenSummaryProperties screen="#{screenDetailViewer.screen}" />
+							<ss:screenSummaryProperties screen="#{screenDetailViewer.entity}" />
 						</t:panelGrid>
 					</f:subview>
 				</ui:define>

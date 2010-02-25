@@ -30,22 +30,22 @@ public class ReagentVendorIdentifierTest extends TestCase
     assertEquals(rvi.getVendorIdentifier(), "id");
 
     try {
-      rvi = new ReagentVendorIdentifier("vendor", "");
+      new ReagentVendorIdentifier("vendor", "");
       fail("empty vendor identifier: expected DataModelViolationException");
     }
     catch (DataModelViolationException e) {}
     try {
-      rvi = new ReagentVendorIdentifier("vendor", null);
+      new ReagentVendorIdentifier("vendor", null);
       fail("null vendor identifier: expected DataModelViolationException");
     }
     catch (DataModelViolationException e) {}
     try {
-      rvi = new ReagentVendorIdentifier(null, "id");
+      new ReagentVendorIdentifier(null, "id");
       fail("null vendor name: expected DataModelViolationException");
     }
     catch (DataModelViolationException e) {}
     try {
-      rvi = new ReagentVendorIdentifier("", "id");
+      new ReagentVendorIdentifier("", "id");
       fail("empty vendor name: expected DataModelViolationException");
     }
     catch (DataModelViolationException e) {}

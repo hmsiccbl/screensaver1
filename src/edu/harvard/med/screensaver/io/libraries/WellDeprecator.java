@@ -71,7 +71,6 @@ public class WellDeprecator
 
       final AdministrativeActivity activity =
         new AdministrativeActivity(performedBy,
-                                   new LocalDate(),
                                    approvedBy,
                                    dateApproved,
                                    AdministrativeActivityType.WELL_DEPRECATION);

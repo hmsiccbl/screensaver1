@@ -26,7 +26,7 @@ public class AbstractEntityTest extends TestCase
 {
   private static Logger log = Logger.getLogger(AbstractEntityTest.class);
 
-  private static class LessAbstractEntity extends AbstractEntity
+  private static class LessAbstractEntity extends AbstractEntity<Integer>
   {
     private static int nextUniqueRelative = 1;
     private static final long serialVersionUID = 1L;
@@ -39,19 +39,12 @@ public class AbstractEntityTest extends TestCase
     {
       _name = name;
       _great = isGreat;
+      setEntityId(-1);
     }
 
     public Object acceptVisitor(AbstractEntityVisitor visitor)
     {
       return null;
-    }
-
-    /* (non-Javadoc)
-     * @see edu.harvard.med.screensaver.model.AbstractEntity#getEntityId()
-     */
-    public Integer getEntityId()
-    {
-      return -1;
     }
 
     public String getName()

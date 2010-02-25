@@ -26,7 +26,6 @@ import javax.faces.convert.ConverterException;
 import javax.faces.validator.ValidatorException;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 

@@ -25,23 +25,23 @@ import java.util.Set;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.table.ColumnVisibilityChangedEvent;
+import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
+import edu.harvard.med.screensaver.ui.table.SortDirectionSelector;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.tree2.TreeModel;
 import org.apache.myfaces.custom.tree2.TreeModelBase;
 import org.apache.myfaces.custom.tree2.TreeNode;
 import org.apache.myfaces.custom.tree2.TreeNodeBase;
-
-import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.table.ColumnVisibilityChangedEvent;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
-import edu.harvard.med.screensaver.ui.table.SortDirectionSelector;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 /**
  * Notifies observers when set of available columns are changed, either from
@@ -64,6 +64,7 @@ public class TableColumnManager<R> extends Observable implements Observer
   private CurrentScreensaverUser _currentScreensaverUser;
   private List<TableColumn<R,?>> _columns = new ArrayList<TableColumn<R,?>>();
   private List<TableColumn<R,?>> _visibleColumns = new ArrayList<TableColumn<R,?>>();
+  private List<TableColumn<R,?>> _sortableSearchableColumns = new ArrayList<TableColumn<R,?>>();
   private ListDataModel _columnModel; // contains visible columns only
   private TreeModel _columnsSelectionTree;
   private UISelectOneBean<SortDirection> _sortDirectionSelector;
@@ -353,6 +354,11 @@ public class TableColumnManager<R> extends Observable implements Observer
     return _visibleColumns;
   }
 
+  public List<TableColumn<R,?>> getSortableSearchableColumns()
+  {
+    return _sortableSearchableColumns;
+  }
+
   public void setVisibilityOfColumnsInGroup(String columnGroupName, boolean isVisible)
   {
     for (TableColumn<R,?> column : getAllColumns()) {
@@ -365,7 +371,7 @@ public class TableColumnManager<R> extends Observable implements Observer
   public UISelectOneBean<TableColumn<R,?>> getSortColumnSelector()
   {
     if (_sortColumnSelector == null) {
-      _sortColumnSelector = new UISelectOneBean<TableColumn<R,?>>(getVisibleColumns()) {
+      _sortColumnSelector = new UISelectOneBean<TableColumn<R,?>>(getSortableSearchableColumns()) {
         @Override
         protected String makeLabel(TableColumn<R,?> t)
         {
@@ -389,7 +395,7 @@ public class TableColumnManager<R> extends Observable implements Observer
 
   // JSF application methods
 
-  @UIControllerMethod
+  @UICommand
   public String updateColumnSelections()
   {
     getColumnsTreeModel().getTreeState().collapsePath(new String[] { "0" });
@@ -433,14 +439,14 @@ public class TableColumnManager<R> extends Observable implements Observer
     return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String selectAllColumns()
   {
     // TODO
     return ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String unselectAllColumns()
   {
     // TODO
@@ -490,13 +496,17 @@ public class TableColumnManager<R> extends Observable implements Observer
       // rebuild _visibleColumns, maintaining the fixed order of the columns
       // we ignore the event's take on added & removed columns, since we can determine this reliably by inspecting each column
       _visibleColumns.clear();
+      _sortableSearchableColumns.clear();
       for (TableColumn<R,?> column : getAllColumns()) {
         if (column.isVisible() && !isColumnRestricted(column)) {
           _visibleColumns.add(column);
+          if (column.isSortableSearchable()) {
+            _sortableSearchableColumns.add(column);
+          }
         }
       }
 
-      getSortColumnSelector().setDomain(_visibleColumns);
+      getSortColumnSelector().setDomain(_sortableSearchableColumns);
       _columnModel = new ListDataModel(_visibleColumns);
       setChanged();
       notifyObservers(event);

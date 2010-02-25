@@ -9,9 +9,11 @@
 
 package edu.harvard.med.iccbl.screensaver.io.rnaiglobal;
 
+import java.util.Set;
+
 import jxl.Cell;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
@@ -21,15 +23,15 @@ class AnnotationValueBuilderImpl implements AnnotationValueBuilder
 {
   private int _sourceColumnIndex;
   private AnnotationType _annotationType;
-  private GenericEntityDAO _dao;
+  private LibrariesDAO _librariesDao;
 
   public AnnotationValueBuilderImpl(int sourceColumnIndex,
                                     AnnotationType annotationType,
-                                    GenericEntityDAO dao)
+                                    LibrariesDAO librariesDao)
   {
     _sourceColumnIndex = sourceColumnIndex;
     _annotationType = annotationType;
-    _dao = dao;
+    _librariesDao = librariesDao;
   }
 
   public void addAnnotationValue(Cell[] row)
@@ -37,11 +39,13 @@ class AnnotationValueBuilderImpl implements AnnotationValueBuilder
     String value = transformValue(row[_sourceColumnIndex].getContents());
     ReagentVendorIdentifier reagentVendorIdentifier = new ReagentVendorIdentifier(DHARMACON_VENDOR_NAME,
                                                                                   row[0].getContents());
-    Reagent reagent = _dao.findEntityById(Reagent.class, reagentVendorIdentifier);
-    if (reagent == null) {
+    Set<Reagent> reagents = _librariesDao.findReagents(reagentVendorIdentifier, true);
+    if (reagents.isEmpty()) {
       throw new DataModelViolationException("no such reagent " + reagentVendorIdentifier);
     }
-    _annotationType.createAnnotationValue(reagent, value);
+    for (Reagent reagent : reagents) {
+      _annotationType.createAnnotationValue(reagent, value);
+    }
   }
 
   public AnnotationType getAnnotationType()

@@ -15,49 +15,57 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy;
+import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
+import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.EditResult;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
-import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
+import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestDetailViewer;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.util.AttachedFiles;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
+import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
 
 import org.apache.log4j.Logger;
@@ -66,39 +74,35 @@ import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class ScreenDetailViewer extends StudyDetailViewer
+public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 {
   private static final int CHILD_ENTITY_TABLE_MAX_ROWS = 10;
 
   private static Logger log = Logger.getLogger(ScreenDetailViewer.class);
 
-
-  // instance data
-
-  private ScreenDetailViewer _thisProxy;
-  private GenericEntityDAO _dao;
   private ScreenDAO _screenDao;
   private DataAccessPolicy _dataAccessPolicy;
   private ScreenViewer _screenViewer;
-  private ScreenSearchResults _screensBrowser;
   private ActivityViewer _activityViewer;
-  private CherryPickRequestViewer _cherryPickRequestViewer;
+  private CherryPickRequestDetailViewer _cherryPickRequestDetailViewer;
   private PublicationInfoProvider _publicationInfoProvider;
   private LabActivitySearchResults _labActivitySearchResults;
   private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
   private ScreeningDuplicator _screeningDuplicator;
   private AttachedFiles _attachedFiles;
+  private EntityUpdateSearchResults<Screen,Integer> _screenUpdateSearchResults; 
 
-  private Screen _screen;
   private boolean _isAdminViewMode = false;
   private boolean _isPublishableProtocolDetailsCollapsed = true;
   private boolean _isBillingInformationCollapsed = true;
   private UISelectOneBean<FundingSupport> _newFundingSupport;
   private UISelectOneBean<StatusValue> _newStatusItemValue;
   private LocalDate _newStatusItemDate;
-  //private UISelectOneBean<AssayReadoutType> _newAssayReadoutType;
 
   private Publication _newPublication;
   private UploadedFile _uploadedPublicationAttachedFileContents;
@@ -108,7 +112,11 @@ public class ScreenDetailViewer extends StudyDetailViewer
   private LocalDate _pinTransferApprovalDate;
   private String _pinTransferApprovalComments;
 
-  // constructors
+  private UISelectOneBean<ScreenDataSharingLevel> _dataSharingLevel;
+  private ScreenDataSharingLevel _lastDataSharingLevel;
+  private LabHead _lastLabHead;
+  private ScreeningRoomUser _lastLeadScreener;
+
 
   /**
    * @motivation for CGLIB2
@@ -118,79 +126,94 @@ public class ScreenDetailViewer extends StudyDetailViewer
   }
 
   public ScreenDetailViewer(ScreenDetailViewer thisProxy,
+                            ScreenViewer screenViewer,
                             GenericEntityDAO dao,
                             ScreenDAO screenDao,
                             UsersDAO usersDao,
                             DataAccessPolicy dataAccessPolicy,
-                            ScreenViewer screenViewer,
-                            ScreenSearchResults screensBrowser,
                             ActivityViewer activityViewer,
-                            CherryPickRequestViewer cherryPickRequestViewer,
+                            CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                             PublicationInfoProvider publicationInfoProvider,
-                            LabActivitySearchResults labActivitySearchResults,
-                            CherryPickRequestSearchResults cherryPickRequestSearchResults,
+                            LabActivitySearchResults labActivitiesBrowser,
+                            CherryPickRequestSearchResults cprsBrowser,
                             ScreeningDuplicator screeningDuplicator,
-                            AttachedFiles attachedFiles)
+                            AttachedFiles attachedFiles,
+                            EntityUpdateSearchResults<Screen,Integer> screenUpdateSearchResults)
   {
-    super(dao, usersDao, ScreensaverUserRole.SCREENS_ADMIN);
-    _thisProxy = thisProxy;
-    _dao = dao;
+    super(thisProxy,
+          dao,
+          EDIT_SCREEN,
+          usersDao);
     _screenDao = screenDao;
     _dataAccessPolicy = dataAccessPolicy;
     _screenViewer = screenViewer;
-    _screensBrowser = screensBrowser;
     _activityViewer = activityViewer;
-    _cherryPickRequestViewer = cherryPickRequestViewer;
+    _cherryPickRequestDetailViewer = cherryPickRequestDetailViewer;
     _publicationInfoProvider = publicationInfoProvider;
-    _labActivitySearchResults = labActivitySearchResults;
-    _cherryPickRequestSearchResults = cherryPickRequestSearchResults;
+    _labActivitySearchResults = labActivitiesBrowser;
+    _cherryPickRequestSearchResults = cprsBrowser;
     _screeningDuplicator = screeningDuplicator;
     _attachedFiles = attachedFiles;
+    _screenUpdateSearchResults = screenUpdateSearchResults;
+    getIsPanelCollapsedMap().put("screenDetail", false);
   }
 
-
-  // public methods
-
-  public void setScreen(Screen screen)
+  @Override
+  protected void initializeEntity(Screen screen)
   {
-    setStudy(screen);
-    _screen = screen;
-    resetView();
-
+    super.initializeEntity(screen);
+  }
+  
+  @Override
+  protected void initializeViewer(Screen screen)
+  {
+    super.initializeViewer(screen);
+    //_isAdminViewMode = false; // maintain this setting when viewing a new screen
+    //_isPublishableProtocolDetailsCollapsed = true; // maintain this setting when viewing a new screen
+    //_isBillingInformationCollapsed = true; // maintain this setting when viewing a new screen
+    _newFundingSupport = null;
+    _newStatusItemValue = null;
+    _newStatusItemDate = null;
+    _newPublication = null;
+    _uploadedPublicationAttachedFileContents = null;
+    _newBillingItem = null;
+    _pinTransferApprovalDate = null;
+    _pinTransferApprovedBy = null;
+    _pinTransferApprovalComments = null;
+    _dataSharingLevel = null;
+    _lastDataSharingLevel = screen.getDataSharingLevel();
+    _lastLabHead = screen.getLabHead();
+    _lastLeadScreener = screen.getLeadScreener();
     initalizeAttachedFiles(screen);
+    _screenUpdateSearchResults.searchForParentEntity(screen);
+    _labActivitySearchResults.searchLabActivitiesForScreen(screen);
+    _cherryPickRequestSearchResults.searchForScreen(screen);
   }
 
   private void initalizeAttachedFiles(Screen screen)
   {
-    Set<AttachedFileType> types = Sets.newHashSet(AttachedFileType.values());
-    types.remove(AttachedFileType.PUBLICATION);
-    types.remove(AttachedFileType.RNAI_USER_AGREEMENT);
-    types.remove(AttachedFileType.SMALL_MOLECULE_USER_AGREEMENT);
-    _attachedFiles.setAttachedFileTypes(types);
+    SortedSet<AttachedFileType> attachedFileTypes = 
+      Sets.<AttachedFileType>newTreeSet(Iterables.filter(getDao().findAllEntitiesOfType(ScreenAttachedFileType.class, true),
+                                                         new Predicate<AttachedFileType>() { 
+        public boolean apply(AttachedFileType aft) { return !!!aft.getValue().equals(Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE); }
+      }));
+    _attachedFiles.reset();
+    _attachedFiles.setAttachedFileTypes(attachedFileTypes);
     _attachedFiles.setAttachedFilesFilter(new Predicate<AttachedFile>() { 
-      public boolean apply(AttachedFile af) { return af.getFileType() != AttachedFileType.PUBLICATION; } 
+      public boolean apply(AttachedFile af) { return !!!af.getFileType().getValue().equals(Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE); }
     });
     _attachedFiles.setAttachedFilesEntity(screen);
   }
-
-  public Screen getScreen()
-  {
-    return _screen;
-  }
-
-  @Override
-  public String reload()
-  {
-    if (_screen == null || _screen.getEntityId() == null) {
-      _screen = null;
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return _screenViewer.reload();
-  }
-
+  
   public boolean isAdminViewMode()
   {
     return _isAdminViewMode;
+  }
+
+  @Override
+  public EntityUpdateSearchResults<Screen,Integer> getEntityUpdateSearchResults()
+  {
+    return _screenUpdateSearchResults;
   }
 
   public boolean isPublishableProtocolDetailsCollapsed()
@@ -218,26 +241,26 @@ public class ScreenDetailViewer extends StudyDetailViewer
    */
   public boolean isAllowedAccessToScreenDetails()
   {
-    return isReadAdmin() ||
-           _dataAccessPolicy.isScreenerAllowedAccessToScreenDetails(getScreen());
+    return _dataAccessPolicy.isAllowedAccessToScreenDetails(getEntity());
   }
 
-//  public UISelectOneBean<AssayReadoutType> getNewAssayReadoutType()
-//  {
-//    if (_newAssayReadoutType == null) {
-//      Set<AssayReadoutType> candidateAssayReadoutTypes = new HashSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
-//      candidateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
-//      _newAssayReadoutType = new UISelectOneBean<AssayReadoutType>(candidateAssayReadoutTypes, AssayReadoutType.UNSPECIFIED); // the default (as specified in reqs));
-//    }
-//    return _newAssayReadoutType;
-//  }
+  /**
+   * Determine whether the current user can see the Status Items, Lab
+   * Activities, and Cherry Pick Requests tables. These are considered more
+   * private than the screen details (see
+   * {@link #isAllowedAccessToScreenDetails()}).
+   */
+  public boolean isAllowedAccessToScreenActivity()
+  {
+    return _dataAccessPolicy.isAllowedAccessToScreenActivity(getEntity());
+  }
 
   public UISelectOneBean<FundingSupport> getNewFundingSupport()
   {
     if (_newFundingSupport == null) {
-      Set<FundingSupport> candidateFundingSupports = Sets.newTreeSet(_dao.findAllEntitiesOfType(FundingSupport.class));
-      candidateFundingSupports.removeAll(getScreen().getFundingSupports());
-      _newFundingSupport = new UISelectOneEntityBean<FundingSupport>(candidateFundingSupports, null, true, _dao) {
+      Set<FundingSupport> candidateFundingSupports = Sets.newTreeSet(getDao().findAllEntitiesOfType(FundingSupport.class));
+      candidateFundingSupports.removeAll(getEntity().getFundingSupports());
+      _newFundingSupport = new UISelectOneEntityBean<FundingSupport>(candidateFundingSupports, null, true, getDao()) {
           @Override
           protected String getEmptyLabel() { return "<select>"; }
       };
@@ -248,7 +271,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public UISelectOneBean<StatusValue> getNewStatusItemValue()
   {
     if (_newStatusItemValue == null) {
-      _newStatusItemValue = new UISelectOneBean<StatusValue>(_screen.getCandidateStatusValues());
+      _newStatusItemValue = new UISelectOneBean<StatusValue>(getEntity().getCandidateStatusValues());
     }
     return _newStatusItemValue;
   }
@@ -265,19 +288,19 @@ public class ScreenDetailViewer extends StudyDetailViewer
 
   public DataModel getStatusItemsDataModel()
   {
-    return new ListDataModel(new ArrayList<StatusItem>(getScreen().getStatusItems()));
+    return new ListDataModel(new ArrayList<StatusItem>(getEntity().getStatusItems()));
   }
 
   public DataModel getLabActivitiesDataModel()
   {
-    ArrayList<LabActivity> labActivities = new ArrayList<LabActivity>(getScreen().getLabActivities());
+    ArrayList<LabActivity> labActivities = new ArrayList<LabActivity>(getEntity().getLabActivities());
     Collections.reverse(labActivities);
-    return new ListDataModel(labActivities.subList(0, Math.min(CHILD_ENTITY_TABLE_MAX_ROWS, getScreen().getLabActivities().size())));
+    return new ListDataModel(labActivities.subList(0, Math.min(CHILD_ENTITY_TABLE_MAX_ROWS, getEntity().getLabActivities().size())));
   }
 
   public DataModel getCherryPickRequestsDataModel()
   {
-    ArrayList<CherryPickRequest> cherryPickRequests = new ArrayList<CherryPickRequest>(getScreen().getCherryPickRequests());
+    ArrayList<CherryPickRequest> cherryPickRequests = new ArrayList<CherryPickRequest>(getEntity().getCherryPickRequests());
     Collections.sort(cherryPickRequests,
                      new Comparator<CherryPickRequest>() {
       public int compare(CherryPickRequest cpr1, CherryPickRequest cpr2)
@@ -290,7 +313,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
 
   public DataModel getPublicationsDataModel()
   {
-    ArrayList<Publication> publications = new ArrayList<Publication>(getScreen().getPublications());
+    ArrayList<Publication> publications = new ArrayList<Publication>(getEntity().getPublications());
     Collections.sort(publications,
                      new Comparator<Publication>() {
       public int compare(Publication p1, Publication p2)
@@ -322,46 +345,22 @@ public class ScreenDetailViewer extends StudyDetailViewer
   public AttachedFiles getAttachedFiles()
   {
     return _attachedFiles;
-      }
+  }
 
   public DataModel getFundingSupportsDataModel()
   {
-    return new ListDataModel(new ArrayList<FundingSupport>(getScreen().getFundingSupports()));
+    return new ListDataModel(new ArrayList<FundingSupport>(getEntity().getFundingSupports()));
   }
-
-//  public UISelectOneBean<AssayReadoutType> getNewAssayReadoutType()
-//  {
-//    if (_newAssayReadoutType == null) {
-//      Set<AssayReadoutType> candidateAssayReadoutTypes = new TreeSet<AssayReadoutType>(Arrays.asList(AssayReadoutType.values()));
-//      candidateAssayReadoutTypes.removeAll(getScreen().getAssayReadoutTypes());
-//      AssayReadoutType defaultSelection = AssayReadoutType.UNSPECIFIED; // the default (as specified in reqs));
-//      if (!candidateAssayReadoutTypes.contains(defaultSelection)) {
-//        defaultSelection = null;
-//      }
-//      _newAssayReadoutType = new UISelectOneBean<AssayReadoutType>(candidateAssayReadoutTypes, defaultSelection);
-//    }
-//    return _newAssayReadoutType;
-//  }
 
   public DataModel getAssayReadoutTypesDataModel()
   {
-    return new ListDataModel(new ArrayList<AssayReadoutType>(getScreen().getAssayReadoutTypes()));
+    return new ListDataModel(new ArrayList<AssayReadoutType>(getEntity().getAssayReadoutTypes()));
   }
-
-//  @UIControllerMethod
-//  public String addAssayReadoutType()
-//  {
-//    if (_newAssayReadoutType != null) {
-//      getScreen().addAssayReadoutType(_newAssayReadoutType.getSelection());
-//      _newAssayReadoutType = null;
-//    }
-//    return REDISPLAY_PAGE_ACTION_RESULT;
-//  }
 
   public DataModel getBillingItemsDataModel()
   {
     ArrayList<BillingItem> billingItems = new ArrayList<BillingItem>();
-    billingItems.addAll(getScreen().getBillingItems());
+    billingItems.addAll(getEntity().getBillingItems());
     Collections.sort(billingItems,
                      new Comparator<BillingItem>() {
       public int compare(BillingItem bi1, BillingItem bi2)
@@ -401,12 +400,14 @@ public class ScreenDetailViewer extends StudyDetailViewer
   {
     if (_pinTransferApprovedBy == null) {
       Set<AdministratorUser> candidateApprovers = 
-        Sets.filter(Sets.newTreeSet(ScreensaverUserComparator.getInstance(), _dao.findAllEntitiesOfType(AdministratorUser.class, true, "screensaverUserRoles")),
+        Sets.filter(ImmutableSortedSet.orderedBy(ScreensaverUserComparator.<AdministratorUser>getInstance()).addAll(getDao().findAllEntitiesOfType(AdministratorUser.class, true, "screensaverUserRoles")).build(),
                     new Predicate<AdministratorUser>() { public boolean apply(AdministratorUser u) { return u.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENS_ADMIN); } } );
+      // note: we must reload 'performedBy', since it can otherwise be a proxy, which will not allow us to cast it to AdministratorUser
+      AdministratorUser defaultSelection = getEntity().getPinTransferApprovalActivity() == null ? null : (AdministratorUser) getDao().reloadEntity(getEntity().getPinTransferApprovalActivity().getPerformedBy());
       _pinTransferApprovedBy = new UISelectOneEntityBean<AdministratorUser>(candidateApprovers,
-        _screen.getPinTransferApprovalActivity() == null ? null : _screen.getPinTransferApprovalActivity().getApprovedBy(),
+        defaultSelection,
         true,
-        _dao) { @Override public String makeLabel(AdministratorUser a) { return a.getFullNameLastFirst(); }
+        getDao()) { @Override public String makeLabel(AdministratorUser a) { return a.getFullNameLastFirst(); }
       };
     }
     return _pinTransferApprovedBy;
@@ -419,8 +420,8 @@ public class ScreenDetailViewer extends StudyDetailViewer
 
   public LocalDate getPinTransferApprovalDate()
   {
-    if (_pinTransferApprovalDate == null && _screen.getPinTransferApprovalActivity() != null) {
-      _pinTransferApprovalDate = _screen.getPinTransferApprovalActivity().getDateApproved();
+    if (_pinTransferApprovalDate == null && getEntity().getPinTransferApprovalActivity() != null) {
+      _pinTransferApprovalDate = getEntity().getPinTransferApprovalActivity().getDateOfActivity();
     }
     return _pinTransferApprovalDate;
   }
@@ -434,8 +435,8 @@ public class ScreenDetailViewer extends StudyDetailViewer
 
   public String getPinTransferApprovalComments()
   {
-    if (_pinTransferApprovalComments == null && _screen.getPinTransferApprovalActivity() != null) {
-      _pinTransferApprovalComments = _screen.getPinTransferApprovalActivity().getComments();
+    if (_pinTransferApprovalComments == null && getEntity().getPinTransferApprovalActivity() != null) {
+      _pinTransferApprovalComments = getEntity().getPinTransferApprovalActivity().getComments();
     }
     return _pinTransferApprovalComments;
   }
@@ -445,7 +446,21 @@ public class ScreenDetailViewer extends StudyDetailViewer
     _pinTransferApprovalComments = pinTransferApprovalComments;
   }
 
-  @UIControllerMethod
+  public UISelectOneBean<ScreenDataSharingLevel> getDataSharingLevel()
+  {
+    if (_dataSharingLevel == null) {
+      _dataSharingLevel = new UISelectOneBean<ScreenDataSharingLevel>(Lists.newArrayList(ScreenDataSharingLevel.values()), getEntity().getDataSharingLevel(), false);
+      _dataSharingLevel.addObserver(new Observer() {
+        public void update(Observable arg0, Object dataSharingLevel)
+        {
+          getEntity().setDataSharingLevel((ScreenDataSharingLevel) dataSharingLevel);
+        }
+      });
+    }
+    return _dataSharingLevel;
+  }
+  
+  @UICommand
   public String toggleAdminViewMode()
   {
     setEditMode(false);
@@ -453,96 +468,62 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
-  @Transactional
-  public String editNewScreen(ScreeningRoomUser leadScreener, ScreenType screenType)
+  @Override
+  protected void initializeNewEntity(Screen screen)
   {
-    ScreensaverUser user = getScreensaverUser();
-    if (!(user instanceof AdministratorUser &&
-      ((AdministratorUser) user).isUserInRole(ScreensaverUserRole.SCREENS_ADMIN))) {
-      showMessage("restrictedOperation", "add a new screen");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
-    Screen screen = new Screen();
     screen.setScreenNumber(_screenDao.findNextScreenNumber());
     screen.setStudyType(StudyType.IN_VITRO);
-    setScreen(screen);
-    if (leadScreener != null) {
-      leadScreener = _dao.reloadEntity(leadScreener,
-                                       false,
-                                       "labHead",
-                                       "screensaverUserRoles");
-      // note: we cannot set these values directly on the screen object, as it
-      // causes Hibernate exceptions (the 'managed' instances returned by the
-      // UISelectOneEntityBeans will not replace the instances in the screen
-      // object (being equal), thus causing detached entity exceptions)
-      getLabName().setSelection(leadScreener.getLab().getLabHead());
-      getLeadScreener().setSelection(leadScreener);
-      // infer appropriate screen type from user roles
-      if (screenType == null) {
-        screenType = leadScreener.isRnaiUser() && !leadScreener.isSmallMoleculeUser() ? ScreenType.RNAI : !leadScreener.isRnaiUser() && leadScreener.isSmallMoleculeUser() ? ScreenType.SMALL_MOLECULE : null;
-      }
-      screen.setScreenType(screenType);
-    }
-    setEditMode(true);
-    return VIEW_SCREEN_DETAIL;
-  }
-
-  @UIControllerMethod
-  public String edit()
-  {
-    setEditMode(true);
-    return VIEW_SCREEN_DETAIL;
-  }
-
-  @UIControllerMethod
-  public String cancel()
-  {
-    setEditMode(false);
-    if (_screen.getEntityId() == null) {
-      return VIEW_MAIN;
-    }
-    return _screenViewer.viewScreen(_screen);
-  }
-
-  @UIControllerMethod
-  @Transactional
-  public String save()
-  {
-    setEditMode(false);
-    // TODO: would like to use this code, since it handles both new and extant
-    // Screens, but I think UISelectOneEntityBean's auto-loading of entities is
-    // actually getting in the way, since it causes NonUniqueObjectException
-    // updateScreenProperties();
-    // _dao.saveOrUpdateEntity(getScreen());
-    // instead, we handle each case separately:
-    if (getScreen().getEntityId() == null) {
-      updateScreenProperties();
-      _dao.persistEntity(getScreen());
+    if (screen.getLabHead() != null) {
+      screen.setDataSharingLevel(DataSharingLevelMapper.getScreenDataSharingLevelForUser(screen.getScreenType(), screen.getLabHead()));
     }
     else {
-      _dao.reattachEntity(getScreen());
-      updateScreenProperties();
+      screen.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
     }
-
-    _dao.flush();
-    return _screenViewer.viewScreen(_screen);
   }
 
-  private void updateScreenProperties()
+  @Override
+  protected void recordUpdateActivity()
   {
-    getScreen().setLabHead(getLabName().getSelection());
-    getScreen().setLeadScreener(getLeadScreener().getSelection());
-    if (_pinTransferApprovedBy.getSelection() != null && _screen.getPinTransferApprovalActivity() == null) {
-      _screen.setPinTransferApproved((AdministratorUser) _dao.reloadEntity(getScreensaverUser(), false, "activitiesPerformed"),
-                                     _pinTransferApprovedBy.getSelection(),
-                                     _pinTransferApprovalDate,
-                                     _pinTransferApprovalComments);
+    if (_lastDataSharingLevel != getDataSharingLevel().getSelection()) {
+      recordUpdateActivity("updated screen data sharing level from '" + NullSafeUtils.toString(_lastDataSharingLevel) + 
+                           "' to '" + NullSafeUtils.toString(getDataSharingLevel().getSelection()) + "'");
+    }
+    if (!!!NullSafeUtils.nullSafeEquals(_lastLabHead, getEntity().getLabHead())) {
+      String lastLabHead = NullSafeUtils.toString(_lastLabHead, ScreensaverUser.ToDisplayStringFunction);
+      String newLabHead = NullSafeUtils.toString(getEntity().getLabHead(), ScreensaverUser.ToDisplayStringFunction);
+      recordUpdateActivity("changed lab from '" + lastLabHead + "' to '" + newLabHead + "'");
+    }
+    if (!!!NullSafeUtils.nullSafeEquals(_lastLeadScreener, getEntity().getLeadScreener())) {
+      String lastLeadScreener = NullSafeUtils.toString(_lastLeadScreener, ScreensaverUser.ToDisplayStringFunction);
+      String newLeadScreener = NullSafeUtils.toString(getEntity().getLeadScreener(), ScreensaverUser.ToDisplayStringFunction);
+      recordUpdateActivity("changed lead screener from '" + lastLeadScreener + "' to '" + newLeadScreener + "'");
+    }
+    super.recordUpdateActivity();
+  }
+
+  @Override
+  protected void updateEntityProperties(Screen screen)
+  {
+    super.updateEntityProperties(screen);
+    screen.setLabHead(getLabName().getSelection());
+    screen.setLeadScreener(getLeadScreener().getSelection());
+    Set<ScreeningRoomUser> extantCollaborators = Sets.newHashSet(screen.getCollaborators());
+    for (ScreeningRoomUser collaborator : Sets.difference(_collaborators, extantCollaborators)) {
+      screen.addCollaborator(getDao().reloadEntity(collaborator));
+    }
+    for (ScreeningRoomUser collaborator : Sets.difference(extantCollaborators, _collaborators)) {
+      screen.removeCollaborator(getDao().reloadEntity(collaborator));
+    }
+    
+    if (_pinTransferApprovedBy.getSelection() != null && screen.getPinTransferApprovalActivity() == null) {
+      screen.setPinTransferApproved((AdministratorUser) getDao().reloadEntity(getScreensaverUser(), false, "activitiesPerformed"),
+                                    _pinTransferApprovedBy.getSelection(),
+                                    _pinTransferApprovalDate,
+                                    _pinTransferApprovalComments);
     }
   }
 
-  @UIControllerMethod
+  @UICommand
   public String addStatusItem()
   {
     if (getNewStatusItemValue().getSelection() == null) {
@@ -554,7 +535,7 @@ public class ScreenDetailViewer extends StudyDetailViewer
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     try {
-      getScreen().createStatusItem(getNewStatusItemDate(),
+      getEntity().createStatusItem(getNewStatusItemDate(),
                                    getNewStatusItemValue().getSelection());
     }
     catch (BusinessRuleViolationException e) {
@@ -565,21 +546,21 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deleteStatusItem()
   {
-    getScreen().getStatusItems().remove(getRequestMap().get("element"));
+    getEntity().getStatusItems().remove(getRequestMap().get("element"));
     _newStatusItemValue = null; // reset
     _newStatusItemDate = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String addPublication()
   {
 
     try {
-      Publication publication = getScreen().addCopyOfPublication(_newPublication);
+      Publication publication = getEntity().addCopyOfPublication(_newPublication);
 
       if (_uploadedPublicationAttachedFileContents != null) {
         String filename;
@@ -593,7 +574,12 @@ public class ScreenDetailViewer extends StudyDetailViewer
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
         _uploadedPublicationAttachedFileContents = null;
-        publication.createAttachedFile(filename, contentsInputStream);
+        AttachedFileType publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+        if (publicationAttachedFileType == null) {
+          reportApplicationError("'publication' attached file type does not exist");
+          return REDISPLAY_PAGE_ACTION_RESULT;
+        }
+        publication.createAttachedFile(filename, contentsInputStream, publicationAttachedFileType);
       }
     }
     catch (IOException e) {
@@ -605,35 +591,29 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String lookupPublicationByPubMedId()
+  public String lookupPublicationByPubMedId() throws EutilsException
   {
-    try {
-      Integer pubmedId = _newPublication.getPubmedId();
-      _newPublication =
-        _publicationInfoProvider.getPublicationForPubmedId(pubmedId);
-      if (_newPublication == null) {
-        reportApplicationError("Publication for PubMed ID " + pubmedId + " was not found");
-      }
+    Integer pubmedId = _newPublication.getPubmedId();
+    _newPublication =
+      _publicationInfoProvider.getPublicationForPubmedId(pubmedId);
+    if (_newPublication == null) {
+      reportApplicationError("Publication for PubMed ID " + pubmedId + " was not found");
     }
-    catch (Exception e) {
-      reportSystemError(e.getMessage());
-    }
-
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deletePublication()
   {
     Publication publication = (Publication) getRequestMap().get("element");
     if (publication != null) {
-      getScreen().getPublications().remove(publication);
+      getEntity().getPublications().remove(publication);
       _newPublication = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   @Transactional
   public String downloadPublicationAttachedFile() throws IOException, SQLException
   {
@@ -644,175 +624,101 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String addFundingSupport()
   {
     if (_newFundingSupport != null && _newFundingSupport.getSelection() != null) {
-      getScreen().addFundingSupport(_newFundingSupport.getSelection());
+      getEntity().addFundingSupport(_newFundingSupport.getSelection());
       _newFundingSupport = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deleteFundingSupport()
   {
-    getScreen().getFundingSupports().remove(getRequestMap().get("element"));
+    getEntity().getFundingSupports().remove(getRequestMap().get("element"));
     _newFundingSupport = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
   public String addLibraryScreening()
   {
-    Screen screen = _dao.reloadEntity(_screen);
-    Screening screening = _screeningDuplicator.addLibraryScreening(screen);
-
-    _dao.needReadOnly(screen, "leadScreener", "labHead");
-    _dao.needReadOnly(screen, "collaborators");
-    return _activityViewer.editNewActivity(screening, this);
-  }
-
-  @UIControllerMethod
-  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
-  public String addRNAiCherryPickScreening()
-  {
-    RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) getCherryPickRequestsDataModel().getRowData();
-    if (cpr == null) {
-      reportSystemError("missing CherryPickRequest argument");
-      return REDISPLAY_PAGE_ACTION_RESULT;
+    if (!!!getScreensaverUser().isUserInRole(ScreensaverUserRole.SCREENS_ADMIN)) {
+      throw new OperationRestrictedException("add Library Screening");
     }
-    Screen screen = _dao.reloadEntity(_screen);
-    cpr = _dao.reloadEntity(cpr);
-    Screening screening = _screeningDuplicator.addRnaiCherryPickScreening(screen, cpr);
-
-    _dao.needReadOnly(screen, "leadScreener", "labHead");
-    _dao.needReadOnly(screen, "collaborators");
-    return _activityViewer.editNewActivity(screening, this);
+    Screening screening = _screeningDuplicator.addLibraryScreening(getEntity(),
+                                                                   (AdministratorUser) getScreensaverUser());
+    return _activityViewer.editNewEntity(screening);
   }
 
-  @UIControllerMethod
+  @UICommand
   public String copyLabActivity()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String copyCherryPickRequest()
   {
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
-  @Transactional
+  @UICommand
+  @Transactional(readOnly=true) // readOnly to prevent saving the new screening before the user clicks Save
   public String addCherryPickRequest()
   {
-    Screen screen = _dao.reloadEntity(getScreen());
-    CherryPickRequest cpr = screen.createCherryPickRequest();
-    cpr.addEmptyWellsOnAssayPlate(cpr.getAssayPlateType().getPlateSize().getEdgeWellNames(2));
-    _dao.persistEntity(cpr);
-    _dao.flush();
-    reload();
-    return _cherryPickRequestViewer.viewCherryPickRequest(cpr);
+    if (!!!getScreensaverUser().isUserInRole(ScreensaverUserRole.CHERRY_PICK_REQUESTS_ADMIN)) {
+      throw new OperationRestrictedException("add Cherry Pick Request");
+    }
+    Screen screen = getDao().reloadEntity(getEntity(), 
+                                          true, 
+                                          Screen.cherryPickRequests.getPath(),
+                                          Screen.labActivities.getPath());
+    getDao().needReadOnly(screen, Screen.labHead.getPath());
+    getDao().needReadOnly(screen, Screen.leadScreener.getPath());
+    getDao().needReadOnly(screen, Screen.collaborators.getPath());
+    CherryPickRequest cpr = screen.createCherryPickRequest((AdministratorUser) getScreensaverUser());
+    return _cherryPickRequestDetailViewer.editNewEntity(cpr);
   }
 
-  @UIControllerMethod
-  public String viewCherryPickRequest()
-  {
-    return _cherryPickRequestViewer.viewCherryPickRequest((CherryPickRequest) getRequestMap().get("cherryPickRequest"));
-  }
-
-  @UIControllerMethod
-  public String viewCollaborator()
-  {
-    // TODO: implement
-    return VIEW_SCREENING_ROOM_USER_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String viewCollaboratorLabHead()
-  {
-    // TODO: implement
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String viewLabHead()
-  {
-    // TODO: implement
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String viewLeadScreener()
-  {
-    // TODO: implement
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
+  @UICommand
   public String addBillingItem()
   {
     if (_newBillingItem != null) {
       try {
-        getScreen().addCopyOfBillingItem(_newBillingItem);
+        getEntity().addCopyOfBillingItem(_newBillingItem);
       }
       catch (RequiredPropertyException e) {
-        showMessage("invalidUserInput", e.getMessage());
+        showFieldInputError("", e.getMessage());
       }
       _newBillingItem = null; // reset
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deleteBillingItem()
   {
-    getScreen().getBillingItems().remove(getRequestMap().get("element"));
+    getEntity().getBillingItems().remove(getRequestMap().get("element"));
     _newBillingItem = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseLabActivities()
   {
-    _labActivitySearchResults.searchLabActivitiesForScreen(_screen);
+    _labActivitySearchResults.searchLabActivitiesForScreen(getEntity());
     return BROWSE_ACTIVITIES;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String browseCherryPickRequests()
   {
-    _cherryPickRequestSearchResults.searchForScreen(_screen);
+    _cherryPickRequestSearchResults.searchForScreen(getEntity());
     return BROWSE_CHERRY_PICK_REQUESTS;
-  }
-
-  @UIControllerMethod
-  public String viewActivityWithinScreen()
-  {
-    _labActivitySearchResults.searchLabActivitiesForScreen(_screen);
-    return _activityViewer.viewActivity();
-  }
-
-  protected void resetView()
-  {
-    super.resetView();
-    setEditMode(false);
-    //_isAdminViewMode = false; // maintain this setting when viewing a new screen
-    //_isPublishableProtocolDetailsCollapsed = true; // maintain this setting when viewing a new screen
-    //_isBillingInformationCollapsed = true; // maintain this setting when viewing a new screen
-    _newFundingSupport = null;
-    _newStatusItemValue = null;
-    _newStatusItemDate = null;
-    _attachedFiles.reset();
-    //_newAssayReadoutType = null;
-    _newPublication = null;
-    _uploadedPublicationAttachedFileContents = null;
-    _newBillingItem = null;
-    _pinTransferApprovalDate = null;
-    _pinTransferApprovedBy = null;
-    _pinTransferApprovalComments = null;
   }
 
   @Override
@@ -821,19 +727,29 @@ public class ScreenDetailViewer extends StudyDetailViewer
     return ScreensaverProperties.allowScreenDeletion();
   }
   
-  @UIControllerMethod
+  @UICommand
   @Transactional
   public String delete()
   {
-    if( _screen.isDataLoaded() ) 
-    {
-      showMessage("screens.screenDeletionFailed.containsData", _screen.getScreenNumber());
-    }else {
-      _screenDao.deleteStudy(_screen);
+    if (getEntity().isDataLoaded()) {
+      showMessage("screens.screenDeletionFailed.containsData", getEntity().getScreenNumber());
+    }
+    else {
+      _screenDao.deleteStudy(getEntity());
       showMessage("screens.deletedScreen", "screenDetailViewer");
     }
-    _screensBrowser.searchAllScreens();
-    return BROWSE_SCREENS;
+    return VIEW_MAIN;
   }
-  
+
+  @Override
+  protected String postEditAction(EditResult editResult)
+  {
+    switch (editResult) {
+    case CANCEL_EDIT: return _screenViewer.reload();
+    case SAVE_EDIT: return _screenViewer.reload();
+    case CANCEL_NEW: return VIEW_MAIN;
+    case SAVE_NEW: return _screenViewer.viewEntity(getEntity()); // note: can't call reload() since parent viewer is not yet configured with our new screen
+    default: return null;
+    }
+  }
 }

@@ -48,28 +48,23 @@ public class UsersDAOTest extends AbstractSpringPersistenceTest
         ScreeningRoomUser user1 = new LabHead(
           "first1",
           "last1",
-          "email1@hms.harvard.edu",
           new LabAffiliation("organization1", AffiliationCategory.HMS));
         genericEntityDao.saveOrUpdateEntity(user1);
         ScreeningRoomUser user2 = new ScreeningRoomUser(
           "first2",
-          "last2",
-          "email2@hms.harvard.edu");
+          "last2");
         genericEntityDao.saveOrUpdateEntity(user2);
         ScreeningRoomUser user3 = new ScreeningRoomUser(
           "first3",
-          "last3",
-          "email3@hms.harvard.edu");
+          "last3");
         genericEntityDao.saveOrUpdateEntity(user3);
         ScreeningRoomUser user4 = new ScreeningRoomUser(
           "first4",
-          "last4",
-          "email4@hms.harvard.edu");
+          "last4");
         genericEntityDao.saveOrUpdateEntity(user4);
         ScreeningRoomUser user5 = new LabHead(
           "first5",
           "last5",
-          "email5@hms.harvard.edu",
           new LabAffiliation("organization3", AffiliationCategory.HMS));
         genericEntityDao.saveOrUpdateEntity(user5);
         user2.setLab(user1.getLab());

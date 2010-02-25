@@ -13,6 +13,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,9 +28,12 @@ import edu.harvard.med.screensaver.model.entitytesters.IdentifierMetadataTester;
 import edu.harvard.med.screensaver.model.entitytesters.IsVersionedTester;
 import edu.harvard.med.screensaver.model.entitytesters.ModelIntrospectionUtil;
 import edu.harvard.med.screensaver.model.entitytesters.VersionAccessorsTester;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.SessionFactory;
+import org.joda.time.DateTime;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
@@ -160,6 +164,44 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
   public void testVersionAccessors()
   {
     new VersionAccessorsTester<E>(_entityClass, hibernateSessionFactory).testEntity();
+  }
+
+  // this serves as the general test for AuditedAbstractEntity.createdBy, since
+  // we must test it from a concrete instance, if we're going to verify
+  // peristence is working
+  public void testAuditProperties() throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
+  {
+    if (!!!AuditedAbstractEntity.class.isAssignableFrom(_entityClass)) {
+      log.info("not an \"audited\" entity type: skipping testing 'createdBy' property");
+      return;
+    }
+      
+    schemaUtil.truncateTablesOrCreateSchema();
+    AuditedAbstractEntity auditedEntity = (AuditedAbstractEntity) dataFactory.newInstance(_entityClass);
+    ScreensaverUser dataEntryAdmin = auditedEntity.getCreatedBy();
+    DateTime expectedDateCreated = auditedEntity.getDateCreated();
+    AdministratorUser dataEntryUpdateAdmin = dataFactory.newInstance(AdministratorUser.class);
+    AdministrativeActivity updateActivity = auditedEntity.createUpdateActivity(dataEntryUpdateAdmin, "updated!");
+    new EntityNetworkPersister(genericEntityDao, auditedEntity).persistEntityNetwork();
+    
+    auditedEntity = (AuditedAbstractEntity) genericEntityDao.findEntityById(_entityClass, 
+                                                                            auditedEntity.getEntityId(), 
+                                                                            true, 
+                                                                            AuditedAbstractEntity.createdBy.getPath(),
+                                                                            AuditedAbstractEntity.updateActivities.to(Activity.performedBy).getPath());
+    assertEquals("dateCreated", expectedDateCreated, auditedEntity.getDateCreated());
+    if (dataEntryAdmin == null) {
+      // TODO: we still need to add 'createdBy' params to all of our AuditedAbstractEntity concrete class constructors; until then the createdBy property will be null
+      log.warn("audited entity does not yet support 'createdBy' property; skipping test of this property");
+    } 
+    else {
+      assertEquals("data entry admin", dataEntryAdmin.getEntityId(), auditedEntity.getCreatedBy().getEntityId());
+    }
+    AdministrativeActivity actualUpdateActivity = (AdministrativeActivity) auditedEntity.getUpdateActivities().first();
+    assertEquals("update activity type", AdministrativeActivityType.ENTITY_UPDATE, actualUpdateActivity.getType());
+    assertEquals("update activity admin", dataEntryUpdateAdmin.getEntityId(), actualUpdateActivity.getPerformedBy().getEntityId());
+    assertEquals("update activity date", updateActivity.getDateOfActivity(), actualUpdateActivity.getDateOfActivity());
+    assertEquals("update activity comment", "updated!", actualUpdateActivity.getComments());
   }
 
   /**

@@ -15,7 +15,7 @@
   <h:form id="screenResultDataPanelsForm" enctype="multipart/form-data">
     <ss:collapsiblePanel id="dataHeadersPanel" label="Data Headers"
       isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataHeadersTable']}"
-      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
+      rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}">
       <ui:define name="content">
         <t:dataTable id="dataHeadersTable"
           value="#{screenResultViewer.dataHeadersTable.dataModel}"
@@ -45,13 +45,13 @@
     <ss:collapsiblePanel id="dataTablePanel"
       isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
       title="Data"
-      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}" />
+      rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}" />
   </h:form>
 
 
 	<!-- Warning: wellSearchResultsBody.xhtml must be included outside of h:form elements -->
 	<t:div
-		rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
+		rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
 		<ui:include src="/libraries/wellSearchResultsBody.xhtml">
 			<ui:param name="wellsBrowser"
 				value="#{screenResultViewer.resultValueTable}" />
@@ -62,7 +62,7 @@
     <ss:collapsiblePanel id="heatMapsPanel"
       isCollapsed="#{screenResultViewer.isPanelCollapsedMap['heatMaps']}"
       label="Heat Maps"
-      rendered="#{!empty screenResultViewer.screenResult &amp;&amp; !screenResultViewer.screenResult.restricted}">
+      rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}">
       <ui:define name="content">
         <ui:include src="heatMapViewer.xhtml" />
       </ui:define>
@@ -70,12 +70,12 @@
   </h:form>
 
 	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
-	<ss:roundedDiv rendered="#{empty screenResultViewer.screenResult}">
+	<ss:roundedDiv rendered="#{empty screenResultViewer.entity}">
 		<t:outputText value="Screen result not available"
 			styleClass="transparentSectionHeader" />
 	</ss:roundedDiv>
 	<t:panelGroup
-		rendered="#{!screenResultViewer.readOnly &amp;&amp; empty screenResultViewer.screenResult}">
+		rendered="#{screenResultViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin'] &amp;&amp; empty screenResultViewer.entity}">
 		<ui:include src="admin/screenResultUploader.xhtml" />
 	</t:panelGroup>
 

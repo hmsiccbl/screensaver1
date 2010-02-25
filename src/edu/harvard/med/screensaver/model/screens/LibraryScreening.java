@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -35,7 +36,7 @@ import org.joda.time.LocalDate;
  * that is performed against <i>full copies</i> of the plates of one or more
  * libraries. (Consider that a screening could also be performed against a
  * selected subset of the wells from a library, as is the case with
- * {@link RNAiCherryPickScreening}.
+ * {@link CherryPickScreening}.
  *
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -164,12 +165,12 @@ public class LibraryScreening extends Screening
    * @param performedBy the user that performed the library assay
    * @param dateOfActivity
    */
-  LibraryScreening(
-    Screen screen,
-    ScreeningRoomUser performedBy,
-    LocalDate dateOfActivity)
+  LibraryScreening(Screen screen,
+                   AdministratorUser recordedBy,
+                   ScreeningRoomUser performedBy,
+                   LocalDate dateOfActivity)
   {
-    super(screen, performedBy, dateOfActivity);
+    super(screen, recordedBy, performedBy, dateOfActivity);
   }
 
 

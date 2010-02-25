@@ -36,7 +36,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=LabActivity.class)
-public class EquipmentUsed extends AbstractEntity
+public class EquipmentUsed extends AbstractEntity<Integer>
 {
 
   // private static date
@@ -47,7 +47,6 @@ public class EquipmentUsed extends AbstractEntity
 
   // private instance data
 
-  private Integer _equipmentUsedId;
   private Integer _version;
   private LabActivity _labActivity;
   private String _equipment;
@@ -63,13 +62,6 @@ public class EquipmentUsed extends AbstractEntity
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getEquipmentUsedId();
-  }
-
   /**
    * Get the id for the equipment used.
    * @return the id for the equipment used
@@ -83,7 +75,7 @@ public class EquipmentUsed extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="equipment_used_id_seq")
   public Integer getEquipmentUsedId()
   {
-    return _equipmentUsedId;
+    return getEntityId();
   }
 
   @ManyToOne(fetch=FetchType.LAZY)
@@ -180,7 +172,7 @@ public class EquipmentUsed extends AbstractEntity
    */
   private void setEquipmentUsedId(Integer equipmentUsedId)
   {
-    _equipmentUsedId = equipmentUsedId;
+    setEntityId(equipmentUsedId);
   }
 
   /**

@@ -9,10 +9,6 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -23,12 +19,4 @@ import org.apache.log4j.Logger;
  */
 public class HelpViewer extends AbstractBackingBean
 {
-  private static Logger log = Logger.getLogger(HelpViewer.class);
-
-  private Map<String,Boolean> _isPanelCollapsedMap = new HashMap<String,Boolean>();
-
-  public Map getIsPanelCollapsedMap()
-  {
-    return _isPanelCollapsedMap;
-  }
 }

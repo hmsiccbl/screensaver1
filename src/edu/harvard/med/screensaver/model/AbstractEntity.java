@@ -22,7 +22,6 @@ import javax.persistence.Transient;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener;
 import edu.harvard.med.screensaver.model.annotations.Column;
-import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
@@ -56,30 +55,30 @@ import sun.reflect.Reflection;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class AbstractEntity implements Serializable
+public abstract class AbstractEntity<K extends Serializable> implements Entity, Serializable
 {
-
-  // static fields
-
   private static Logger log = Logger.getLogger(AbstractEntity.class);
 
-  // instance fields
-
   private DataAccessPolicy _dataAccessPolicy;
+  private K _entityId;
   private Integer _hashCode;
 
-  // protected methods
+  @Transient
+  public K getEntityId()
+  {
+    return _entityId;
+  }
 
-  /**
-   * Get the entity id. This is the identifier used by Hibernate, and is
-   * generally implemented as a separate property in the entity classes. The
-   * property is generally named by postfixing the entity name with "Id". For
-   * instance, for {@link SmallMoleculeReagent}, this method delegates to the property read
-   * method {@link SmallMoleculeReagent#getSmallMoleculeId()}.
-   * 
-   * @return the entity id
-   */
-  abstract public Serializable getEntityId();
+  protected void setEntityId(K entityId)
+  {
+    _entityId = entityId;
+  }
+
+  @Transient
+  public boolean isTransient()
+  {
+    return getEntityId() == null;
+  }
 
   /**
    * Equality is determined by the entity IDs, <i>if</i> the entity object has
@@ -183,17 +182,6 @@ public abstract class AbstractEntity implements Serializable
   }
 
   /**
-   * To enable visitor to visit a particular subclass, override this method and
-   * insert <code>visitor.acceptVisitor(this);</code>
-   * 
-   * @param visitor
-   * @motivation to keep most of our AbstractEntity subclasses clean, as we
-   *             currently only have the DataAccessPolicy visitor, which does
-   *             not actually need to visit every subclass.
-   */
-  abstract public Object acceptVisitor(AbstractEntityVisitor visitor);
-
-  /**
    * Get whether this entity is restricted, based upon the data access policy
    * that was provided (if any). This is a passive data access policy
    * enforcement mechanism, in that it is up to the service and/or UI layers to
@@ -202,12 +190,13 @@ public abstract class AbstractEntity implements Serializable
    * user.
    * 
    * @see DataAccessPolicyInjectorPostLoadEventListener
+   * @throws UnsupportedOperationException if dataAccessPolicy not set
    */
   @Transient
   public boolean isRestricted()
   {
     if (_dataAccessPolicy == null) {
-      return false;
+      throw new UnsupportedOperationException("dataAccessPolicy not set");
     }
     Boolean isAllowed = (Boolean) acceptVisitor(_dataAccessPolicy);
     return isAllowed == null ? true : !isAllowed;

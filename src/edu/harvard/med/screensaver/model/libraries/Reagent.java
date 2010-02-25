@@ -59,7 +59,7 @@ import org.hibernate.annotations.Type;
 @org.hibernate.annotations.Proxy(lazy=false) // proxying causes problems with casts of getLatestReleasedReagent() return value
 @Inheritance(strategy=InheritanceType.JOINED)
 @ContainedEntity(containingEntityClass=Well.class)
-public abstract class Reagent extends AbstractEntity implements Comparable<Reagent>
+public abstract class Reagent extends AbstractEntity<Integer> implements Comparable<Reagent>
 {
   private static final long serialVersionUID = 1;
 
@@ -70,7 +70,6 @@ public abstract class Reagent extends AbstractEntity implements Comparable<Reage
   public static final PropertyPath<Reagent> vendorName = new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorName");
   public static final PropertyPath<Reagent> vendorIdentifier = new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorIdentifier");
 
-  private Integer _reagentId;
   private LibraryContentsVersion _libraryContentsVersion;
   private Well _well;
   private ReagentVendorIdentifier _vendorId;
@@ -98,13 +97,6 @@ public abstract class Reagent extends AbstractEntity implements Comparable<Reage
     return _vendorId.compareTo(o._vendorId);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getReagentId();
-  }
-
   @Id
   @org.hibernate.annotations.GenericGenerator(
     name="reagent_id_seq",
@@ -114,12 +106,12 @@ public abstract class Reagent extends AbstractEntity implements Comparable<Reage
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="reagent_id_seq")
   public Integer getReagentId()
   {
-    return _reagentId;
+    return getEntityId();
   }
 
   private void setReagentId(Integer reagentId)
   {
-    _reagentId = reagentId;
+    setEntityId(reagentId);
   }
 
   @Column

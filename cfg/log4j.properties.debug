@@ -41,6 +41,11 @@ log4j.logger.edu.harvard.med.screensaver=info
 #log4j.logger.edu.harvard.med.screensaver.model.AbstractEntityInstanceTester=info
 #log4j.logger.edu.harvard.med.screensaver.model.EntityNetworkPersister=debug
 #log4j.logger.edu.harvard.med.screensaver.util.eutils=debug
+#log4j.logger.edu.harvard.med.iccbl.screensaver.policy=debug
+
+# for resolution of database connection properties
+#log4j.logger.edu.harvard.med.iccbl.screensaver.db.PropertyPlaceholderConfigurerWithDatabaseConfiguration=debug
+
 
 #log4j.logger.org.apache.commons.dbcp=debug
 #log4j.logger.springframework.jdbc=debug
@@ -53,9 +58,6 @@ log4j.logger.edu.harvard.med.screensaver.db.RestrictedAccessEntityDaoMethodInter
 log4j.logger.edu.harvard.med.screensaver.db.SchemaUtil=info
 log4j.logger.edu.harvard.med.screensaver.db.GenericEntityDAOImpl.EntityInflator=warn
 log4j.logger.edu.harvard.med.screensaver.io.ScreenResultParser=info
-
-# avoid writing database passwords to the log!
-log4j.logger.edu.harvard.med.screensaver.db.OrchestraPropertyPlaceholderConfigurer=info
 
 
 ### Tomcat
@@ -148,8 +150,8 @@ log4j.logger.org.hibernate.impl.SessionImpl=warn
 
 
 ### log JDBC bind parameters ###
-#log4j.logger.org.hibernate.type=trace
 
+#log4j.logger.org.hibernate.type=trace
 ### log schema export/update ###
 #log4j.logger.org.hibernate.tool.hbm2ddl=debug
 

@@ -40,4 +40,9 @@ public abstract class VolumeEntityColumn<E extends AbstractEntity> extends Volum
   {
     return _fetchPaths.getRelationshipPaths();
   }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

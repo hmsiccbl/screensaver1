@@ -19,7 +19,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 
 /**
  * Converts between a String representation of a collection (delimited by
@@ -70,6 +70,6 @@ public abstract class CollectionConverter<C extends Collection<T>,T> implements 
         elements.add(_elementConverter.getAsString(context, component, element));
       }
     }
-    return Join.join(DELIMITER_WITH_WHITESPACE, elements);
+    return Joiner.on(DELIMITER_WITH_WHITESPACE).join(elements);
   }
 }

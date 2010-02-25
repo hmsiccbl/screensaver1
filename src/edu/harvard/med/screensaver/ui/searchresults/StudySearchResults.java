@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
@@ -49,7 +49,6 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
 
   // instance fields
 
-  private StudyViewer _studyViewer;
   private UserViewer _userViewer;
   private GenericEntityDAO _dao;
 
@@ -67,12 +66,13 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
                             UserViewer userViewer, 
                             GenericEntityDAO dao)
   {
-    _studyViewer = studyViewer;
+    super(studyViewer);
     _userViewer = userViewer;
     _dao = dao;
   }
 
-  public void searchStudies()
+  @Override
+  public void searchAll()
   {
     initialize(new AllEntitiesOfTypeDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
@@ -111,17 +111,17 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
       @Override
       public String getCellValue(Screen study) { return study.getTitle(); }
     });
-    columns.add(new UserNameColumn<Screen>(
+    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(
       new RelationshipPath(Screen.class, "labHead"),
       "Lab Head", "The head of the lab performing the study", TableColumn.UNGROUPED, _userViewer) {
       @Override
-      public ScreensaverUser getUser(Screen study) { return study.getLabHead(); }
+      public ScreeningRoomUser getUser(Screen study) { return study.getLabHead(); }
     });
-    columns.add(new UserNameColumn<Screen>(
+    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(
       new RelationshipPath(Screen.class, "leadScreener"),
       "Study Head", "The scientist primarily responsible for running the study", TableColumn.UNGROUPED, _userViewer) {
       @Override
-      public ScreensaverUser getUser(Screen study) { return study.getLeadScreener(); }
+      public ScreeningRoomUser getUser(Screen study) { return study.getLeadScreener(); }
     });
     columns.add(new EnumEntityColumn<Screen,StudyType>(
       new PropertyPath(Screen.class, "studyType"),
@@ -152,11 +152,5 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
   {
     return isUserInRole(ScreensaverUserRole.SCREENS_ADMIN/*TODO: need STUDY_ADMIN, perhaps*/) ||
       isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-  }
-
-  @Override
-  protected void setEntityToView(Screen study)
-  {
-    _studyViewer.viewStudy(study);
   }
 }

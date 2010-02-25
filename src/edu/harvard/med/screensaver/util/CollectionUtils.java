@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.Transformer;
@@ -87,10 +87,10 @@ public class CollectionUtils
   }
   
   @SuppressWarnings("unchecked")
-  public static <I> Set<I> entityIds(Collection<? extends AbstractEntity> entities)
+  public static <I> Set<I> entityIds(Collection<? extends Entity> entities)
   {
     Set<I> ids = new HashSet<I>(entities.size());
-    for (AbstractEntity entity : entities) {
+    for (Entity entity : entities) {
       ids.add((I) entity.getEntityId());
     }
     return ids;

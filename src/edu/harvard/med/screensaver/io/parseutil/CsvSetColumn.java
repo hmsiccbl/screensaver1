@@ -13,7 +13,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.ParseError;
-import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.ParseException;
 
 import com.google.common.collect.Sets;
 

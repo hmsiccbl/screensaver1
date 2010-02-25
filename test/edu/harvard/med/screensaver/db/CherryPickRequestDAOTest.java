@@ -60,11 +60,10 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   {
     schemaUtil.truncateTablesOrCreateSchema();
     final Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI);
-    CherryPickRequest cherryPickRequest1 = screen.createCherryPickRequest(
-      screen.getLeadScreener(), 
-      new LocalDate(),
-      4000);
-    CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
+    CherryPickRequest cherryPickRequest1 = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy(),
+                                                                          screen.getLeadScreener(), 
+                                                                          new LocalDate());
+    CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
     
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
@@ -77,7 +76,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     });
 
     CherryPickRequest foundCherryPickRequest1 = 
-      cherryPickRequestDao.findCherryPickRequestByNumber(4000);
+      cherryPickRequestDao.findCherryPickRequestByNumber(cherryPickRequest1.getCherryPickRequestNumber());
     assertEquals("found legacy cherryPickRequest", 
                  cherryPickRequest1.getCherryPickRequestNumber(), 
                  foundCherryPickRequest1.getCherryPickRequestNumber());
@@ -94,7 +93,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     CherryPickRequest cherryPickRequest1 = makeCherryPickRequest(1);
     Screen screen = cherryPickRequest1.getScreen();
 
-    CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest();
+    CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
     Iterator<ScreenerCherryPick> scpIter = cherryPickRequest1.getScreenerCherryPicks().iterator();
     ScreenerCherryPick duplicateScreenerCherryPick1 = scpIter.next();
     cherryPickRequest2.createScreenerCherryPick(duplicateScreenerCherryPick1.getScreenedWell())
@@ -106,7 +105,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
                  new HashSet<WellKey>(Arrays.asList(duplicateScreenerCherryPick1.getScreenedWell().getWellKey())),
                  duplicateCherryPickWells.keySet());
 
-    CherryPickRequest cherryPickRequest3 = screen.createCherryPickRequest();
+    CherryPickRequest cherryPickRequest3 = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
     ScreenerCherryPick duplicateScreenerCherryPick2 = scpIter.next();
     cherryPickRequest3.createScreenerCherryPick(duplicateScreenerCherryPick2.getScreenedWell())
     .createLabCherryPick(duplicateScreenerCherryPick2.getLabCherryPicks().iterator().next().getSourceWell());
@@ -244,7 +243,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
       well.createSilencingReagent(new ReagentVendorIdentifier("vendor", "d" + i), 
                                   SilencingReagentType.SIRNA, "ATCG");
     }
-    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity(duplexLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) duplexLibrary.getLatestContentsVersion().getLoadingActivity().getCreatedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.saveOrUpdateEntity(duplexLibrary);
     duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, Library.wells.to(Well.reagents).getPath(), Library.wells.to(Well.latestReleasedReagent).getPath());
 
@@ -260,11 +259,11 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     poolWell1.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
     Well poolWell2 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 2, new WellName("P24"));
     poolWell2.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
-    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity(poolLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) poolLibrary.getLatestContentsVersion().getLoadingActivity().getCreatedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.saveOrUpdateEntity(poolLibrary);
 
     Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
-    CherryPickRequest cherryPickRequest = screen.createCherryPickRequest();
+    CherryPickRequest cherryPickRequest = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
     cherryPickRequest.createScreenerCherryPick(poolWell1).createLabCherryPick(poolWell1.<SilencingReagent>getLatestReleasedReagent().getDuplexWells().iterator().next());
     cherryPickRequest.createScreenerCherryPick(poolWell2).createLabCherryPick(poolWell2.<SilencingReagent>getLatestReleasedReagent().getDuplexWells().iterator().next());
 

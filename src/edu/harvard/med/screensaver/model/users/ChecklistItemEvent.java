@@ -19,19 +19,21 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 
-import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
@@ -47,42 +49,24 @@ import org.joda.time.LocalDate;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
+@Immutable
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass = ScreeningRoomUser.class)
-public class ChecklistItemEvent extends AbstractEntity implements Comparable<ChecklistItemEvent>
+public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implements Comparable<ChecklistItemEvent>
 {
-
-  // static fields
-
-  private static final Logger log = Logger.getLogger(ChecklistItemEvent.class);
   private static final long serialVersionUID = 0L;
 
-
-  // instance fields
-
-  private Integer _checklistItemId;
-  private Integer _version;
   private ChecklistItem _checklistItem;
   private ScreeningRoomUser _screeningRoomUser;
   private boolean _isExpiration;
   private boolean _isNotApplicable;
   private LocalDate _datePerformed;
-  private AdministrativeActivity _entryActivity;
 
-
-  // public instance methods
-
+  
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getChecklistItemEventId();
   }
 
   /**
@@ -95,7 +79,7 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "checklist_item_event_id_seq")
   public Integer getChecklistItemEventId()
   {
-    return _checklistItemId;
+    return getEntityId();
   }
 
   /**
@@ -113,6 +97,20 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   public ChecklistItem getChecklistItem()
   {
     return _checklistItem;
+  }
+
+  // TODO: we never intend to use this, but need it to allow unit tests to pass
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="checklistItemEventUpdateActivity", 
+             joinColumns=@JoinColumn(name="checklistItemEventId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false, unique=true))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)            
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   /**
@@ -175,21 +173,6 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
     _datePerformed = datePerformed;
   }
 
-  @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
-  @JoinColumn(nullable = false, updatable = false, name = "entry_admin_activity_id")
-  @org.hibernate.annotations.ForeignKey(name = "fk_well_to_entry_admin_activity")
-  @org.hibernate.annotations.LazyToOne(org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.SAVE_UPDATE })
-  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
-  @Immutable
-  public AdministrativeActivity getEntryActivity()
-  {
-    return _entryActivity;
-  }
-
-
-  // package constructor
-
   /**
    * Construct an initialized "activation" or "completed" <code>ChecklistItemEvent</code> 
    * <p>
@@ -200,16 +183,15 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
    *          item event applies
    * @param datePerformed the date the checklist item event was performed by the user
    *          or otherwise enacted
-   * @param entryActivity the administrative activity that tracks the
-   *          who/when/why of this checklist item event information
    */
   ChecklistItemEvent(ChecklistItem checklistItem,
                      ScreeningRoomUser screeningRoomUser,
                      LocalDate datePerformed,
-                     AdministrativeActivity entryActivity)
+                     AdministratorUser recordedBy)
   {
+    super(recordedBy);
     if (checklistItem == null || screeningRoomUser == null ||
-        datePerformed == null || entryActivity == null) {
+        datePerformed == null || recordedBy == null) {
       throw new NullPointerException();
     }
     _checklistItem = checklistItem;
@@ -217,7 +199,6 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
     _isExpiration = false;
     _isNotApplicable = false;
     _datePerformed = datePerformed;
-    _entryActivity = entryActivity;
   }
   
   /**
@@ -232,15 +213,14 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   ChecklistItemEvent(ChecklistItem checklistItem,
                      ScreeningRoomUser screeningRoomUser,
                      LocalDate datePerformed,
-                     AdministrativeActivity entryActivity,
-                     boolean isNotApplicable )
+                     AdministratorUser recordedBy,
+                     boolean isNotApplicable)
   {
-    this(checklistItem, screeningRoomUser, datePerformed, entryActivity);
+    this(checklistItem, screeningRoomUser, datePerformed, recordedBy);
     _isNotApplicable = isNotApplicable;
   }
 
-  public ChecklistItemEvent createChecklistItemExpirationEvent(LocalDate datePerformed,
-                                                               AdministrativeActivity entryActivity)
+  public ChecklistItemEvent createChecklistItemExpirationEvent(LocalDate datePerformed, AdministratorUser recordedBy)
   {
     if (!getChecklistItem().isExpirable()) {
       throw new DataModelViolationException("cannot expire checklist item " + getChecklistItem().getItemName());
@@ -265,7 +245,7 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
     ChecklistItemEvent checklistItemExpiration = new ChecklistItemEvent(this.getChecklistItem(),
                                                                         this.getScreeningRoomUser(),
                                                                         datePerformed,
-                                                                        entryActivity);
+                                                                        recordedBy);
     checklistItemExpiration._isExpiration = true;
     this.getScreeningRoomUser().getChecklistItemEvents().add(checklistItemExpiration);
     return checklistItemExpiration;
@@ -288,25 +268,7 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
    */
   private void setChecklistItemEventId(Integer checklistItemEventId)
   {
-    _checklistItemId = checklistItemEventId;
-  }
-
-  /**
-   * @motivation for hibernate
-   */
-  @Version
-  @Column(nullable = false)
-  private Integer getVersion()
-  {
-    return _version;
-  }
-
-  /**
-   * @motivation for hibernate
-   */
-  private void setVersion(Integer version)
-  {
-    _version = version;
+    setEntityId(checklistItemEventId);
   }
 
   /**
@@ -323,18 +285,6 @@ public class ChecklistItemEvent extends AbstractEntity implements Comparable<Che
   private void setScreeningRoomUser(ScreeningRoomUser screeningRoomUser)
   {
     _screeningRoomUser = screeningRoomUser;
-  }
-
-  private void setEntryActivity(AdministrativeActivity entryActivity)
-  {
-    if (!isHibernateCaller()) {
-      if (entryActivity != null &&
-          entryActivity.getType() != AdministrativeActivityType.CHECKLIST_ITEM_EVENT) {
-        throw new DataModelViolationException("can only add AdministrativeActivity of type " +
-                                              AdministrativeActivityType.CHECKLIST_ITEM_EVENT);
-      }
-    }
-    _entryActivity = entryActivity;
   }
 
   private void setExpiration(boolean isExpiration)

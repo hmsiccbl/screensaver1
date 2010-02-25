@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -24,9 +23,8 @@ import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
-import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
@@ -41,17 +39,19 @@ import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
-import org.apache.commons.collections.Transformer;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -62,16 +62,10 @@ import com.google.common.collect.Lists;
  */
 public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
 {
+  private GenericEntityDAO _dao;
 
-  // instance fields
-
-  private ScreenViewer _screenViewer;
   private UserViewer _userViewer;
-  protected GenericEntityDAO _dao;
-
-
-  // public constructor
-
+    
   /**
    * @motivation for CGLIB2
    */
@@ -83,7 +77,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
                              UserViewer userViewer,
                              GenericEntityDAO dao)
   {
-    _screenViewer = screenViewer;
+    super(screenViewer);
     _userViewer = userViewer;
     _dao = dao;
   }
@@ -102,7 +96,8 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     }
   }
 
-  public void searchAllScreens()
+  @Override
+  public void searchAll()
   {
     initialize(new AllEntitiesOfTypeDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
@@ -132,45 +127,29 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
   @SuppressWarnings("unchecked")
   protected List<? extends TableColumn<Screen,?>> buildColumns()
   {
-    ArrayList<TableColumn<Screen,?>> columns = Lists.newArrayList();
-    columns.add(new IntegerEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "screenNumber"),
-      "Screen Number", "The screen number", TableColumn.UNGROUPED) {
-      @Override
-      public Integer getCellValue(Screen screen) { return screen.getScreenNumber(); }
+    
+    List<TableColumn<Screen,?>> columns = Lists.newArrayList();
+    columns.addAll(buildScreenSummaryColumns());
+    columns.addAll(buildScreenAdminColumns());
+    columns.addAll(buildScreenResultColumns());
 
-      @Override
-      public Object cellAction(Screen screen) { return viewSelectedEntity(); }
 
-      @Override
-      public boolean isCommandLink() { return true; }
-    });
-    columns.add(new TextEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "title"),
-      "Title", "The title of the screen", TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(Screen screen) { return screen.getTitle(); }
-    });
-    columns.add(new UserNameColumn<Screen>(
-      Screen.labHead,
-      "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED, _userViewer) {
-      @Override
-      public ScreensaverUser getUser(Screen screen) { return screen.getLabHead(); }
-    });
-    ((HasFetchPaths<Screen>) columns.get(columns.size() - 1)).addRelationshipPath(Screen.labHead.to(LabHead.LabAffiliation));
-    columns.add(new TextEntityColumn<Screen>(
-      Screen.labHead.to(ScreensaverUser.LabAffiliation).toProperty("affiliationName"),
-      "Lab Affiliation", "The affiliation of the lab performing the screen", TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(Screen screen) { return screen.getLabHead().getLab().getLabAffiliationName(); }
-    });
-    columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new UserNameColumn<Screen>(
-      Screen.leadScreener,
-      "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED, _userViewer) {
-      @Override
-      public ScreensaverUser getUser(Screen screen) { return screen.getLeadScreener(); }
-    });
+//    TableColumnManager<Screen> columnManager = getColumnManager();
+//    columnManager.addCompoundSortColumns(columnManager.getColumn("Lab Head"),
+//                                         columnManager.getColumn("Lead Screener"),
+//                                         columnManager.getColumn("Screen Number"));
+//    columnManager.addCompoundSortColumns(columnManager.getColumn("Lead Screener"),
+//                                         columnManager.getColumn("Lab Head"),
+//                                         columnManager.getColumn("Screen Number"));
+
+    return columns;
+  }
+
+  private List<TableColumn<Screen,?>> buildScreenResultColumns()
+  {
+    List<TableColumn<Screen,?>> columns = Lists.newArrayList();
+
+    // TODO: should make this a vocab list, but need support for list-of-vocab column type
     columns.add(new EnumEntityColumn<Screen,ScreenResultAvailability>(
       Screen.screenResult,
       "Screen Result",
@@ -218,31 +197,73 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
         };
       }
     });
-    columns.add(new EnumEntityColumn<Screen, ScreenType>(
-      new PropertyPath(Screen.class, "screenType"),
-      "Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
+
+    columns.add(new TextSetEntityColumn<Screen>(
+      Screen.screenResult.to(ScreenResult.resultValueTypes),
+      "Assay Readout Type", "The assay readout type for the screen",
+      TableColumn.UNGROUPED) {
       @Override
-      public ScreenType getCellValue(Screen screen) { return screen.getScreenType(); }
+      public Set<String> getCellValue(Screen screen)
+      {
+        return Sets.newHashSet(Iterables.transform(screen.getAssayReadoutTypes(), Functions.toStringFunction())); 
+      }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    return columns;
+  }
+
+  List<TableColumn<Screen,?>> buildScreenAdminColumns()
+  {
+    List<TableColumn<Screen,?>> columns = Lists.newArrayList();
+    
     columns.add(new DateEntityColumn<Screen>(
       new PropertyPath(Screen.class, "dateCreated"),
       "Date Created", "The date the screen was added to the database",
-      TableColumn.ADMIN_COLUMN_GROUP) {
+      TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(Screen screen) { return screen.getDateCreated().toLocalDate(); }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new EnumEntityColumn<Screen,ScreenDataSharingLevel>(
+      new PropertyPath<Screen>(Screen.class, "dataSharingLevel"),
+      "Data Sharing Level", 
+      "The data sharing level", 
+      TableColumn.UNGROUPED,
+      ScreenDataSharingLevel.values()) {
+      @Override
+      public ScreenDataSharingLevel getCellValue(Screen screen) { return screen.getDataSharingLevel(); }
+    });
+    columns.get(columns.size() - 1).setAdministrative(false);
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new DateEntityColumn<Screen>(
+      new PropertyPath<Screen>(Screen.class, "dataPrivacyExpirationDate"),
+      "Data Privacy Expiration Date", 
+      "The date on which the screen will become visible to level 1 users", 
+      TableColumn.UNGROUPED) {
+      @Override
+      public LocalDate getDate(Screen screen) { return screen.getDataPrivacyExpirationDate(); }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(columns.size() - 1).setVisible(false);
+    
     columns.add(new DateEntityColumn<Screen>(
       Screen.labActivities.toProperty("dateOfActivity"),
       "Date Of Last Activity", "The date of the last lab activity performed for this screen",
-      TableColumn.ADMIN_COLUMN_GROUP) {
+      TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(Screen screen) { return screen.getLabActivities().isEmpty() ? null : screen.getLabActivities().last().getDateOfActivity(); }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
+
     columns.add(new EnumEntityColumn<Screen,StatusValue>(Screen.statusItems.toProperty("statusValue"),
       "Status", "The current status of the screen, e.g., 'Completed', 'Ongoing', 'Pending', etc.",
-      TableColumn.ADMIN_COLUMN_GROUP,
+      TableColumn.UNGROUPED,
       StatusValue.values()) {
       @Override
       public StatusValue getCellValue(Screen screen)
@@ -251,63 +272,92 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
         return statusItems.isEmpty() ? null : statusItems.last().getStatusValue();
       }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
+
     columns.add(new DateEntityColumn<Screen>(
       Screen.statusItems.toProperty("statusDate"),
       "Status Date", "The date of the most recent change of status for the screen",
-      TableColumn.ADMIN_COLUMN_GROUP) {
+      TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(Screen screen) {
         SortedSet<StatusItem> statusItems = screen.getStatusItems();
         return statusItems.isEmpty() ? null : statusItems.last().getStatusDate();
       }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
+
     // TODO: should make this a vocab list, but need support for list-of-vocab column type
-    columns.add(new ListEntityColumn<Screen>(
+    columns.add(new TextSetEntityColumn<Screen>(
       Screen.fundingSupports.toProperty("value"),
       "Funding Supports", "The list of funding supports for the screen",
-      TableColumn.ADMIN_COLUMN_GROUP) {
+      TableColumn.UNGROUPED) {
       @Override
-      public List<String> getCellValue(Screen screen)
+      public Set<String> getCellValue(Screen screen)
       {
-        return new ArrayList<String>(
-          org.apache.commons.collections.CollectionUtils.collect(screen.getFundingSupports(), new Transformer() {
-            public Object transform(Object e) { return ((FundingSupport) e).getValue(); }
-          }));
+        return Sets.newHashSet(Iterables.transform(screen.getFundingSupports(), Functions.toStringFunction())); 
       }
     });
+    columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
-
-    // TODO: should make this a vocab list, but need support for list-of-vocab column type
-    columns.add(new ListEntityColumn<Screen>(
-      Screen.screenResult.to(ScreenResult.resultValueTypes),
-      "Assay Readout Type", "The assay readout type for the screen",
-      TableColumn.ADMIN_COLUMN_GROUP) {
-      @Override
-      public List<String> getCellValue(Screen screen)
-      {
-        return new ArrayList<String>(
-          org.apache.commons.collections.CollectionUtils.collect(screen.getAssayReadoutTypes(), new Transformer() {
-            public Object transform(Object e) { return ((AssayReadoutType) e).getValue(); }
-          }));
-      }
-    });
-    columns.get(columns.size() - 1).setVisible(false);
-
-
-//    TableColumnManager<Screen> columnManager = getColumnManager();
-//    columnManager.addCompoundSortColumns(columnManager.getColumn("Lab Head"),
-//                                         columnManager.getColumn("Lead Screener"),
-//                                         columnManager.getColumn("Screen Number"));
-//    columnManager.addCompoundSortColumns(columnManager.getColumn("Lead Screener"),
-//                                         columnManager.getColumn("Lab Head"),
-//                                         columnManager.getColumn("Screen Number"));
 
     return columns;
   }
 
-  @Override
-  protected void setEntityToView(Screen screen)
+  List<TableColumn<Screen,?>> buildScreenSummaryColumns()
   {
-    _screenViewer.setScreen(screen);
+    List<TableColumn<Screen,?>> columns = Lists.newArrayList();
+    columns.add(new IntegerEntityColumn<Screen>(
+      new PropertyPath<Screen>(Screen.class, "screenNumber"),
+      "Screen Number", "The screen number", TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Screen screen) { return screen.getScreenNumber(); }
+
+      @Override
+      public Object cellAction(Screen screen) {
+        // note: we explicitly call getEntityViewer(), since this column may be used in other search result types
+        return getEntityViewer().viewEntity(screen);
+      }
+
+      @Override
+      public boolean isCommandLink() { return true; }
+    });
+    columns.add(new EnumEntityColumn<Screen, ScreenType>(
+      new PropertyPath<Screen>(Screen.class, "screenType"),
+      "Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
+      @Override
+      public ScreenType getCellValue(Screen screen) { return screen.getScreenType(); }
+    });
+    columns.add(new TextEntityColumn<Screen>(
+      new PropertyPath<Screen>(Screen.class, "title"),
+      "Title", "The title of the screen", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen screen) { return screen.getTitle(); }
+    });
+    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(
+      Screen.labHead,
+      "Lab Head", "The head of the lab performing the screen", TableColumn.UNGROUPED, _userViewer) {
+      @Override
+      public ScreeningRoomUser getUser(Screen screen) { return screen.getLabHead(); }
+    });
+    ((HasFetchPaths<Screen>) columns.get(columns.size() - 1)).addRelationshipPath(Screen.labHead.to(LabHead.labAffiliation));
+    columns.add(new TextEntityColumn<Screen>(
+      Screen.labHead.to(ScreensaverUser.labAffiliation).toProperty("affiliationName"),
+      "Lab Affiliation", "The affiliation of the lab performing the screen", TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Screen screen) {
+        if (screen.getLabHead() != null) {
+          return screen.getLabHead().getLab().getLabAffiliationName(); 
+        }
+        return null;
+      }
+    });
+    columns.get(columns.size() - 1).setVisible(false);
+    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(
+      Screen.leadScreener,
+      "Lead Screener", "The scientist primarily responsible for running the screen", TableColumn.UNGROUPED, _userViewer) {
+      @Override
+      public ScreeningRoomUser getUser(Screen screen) { return screen.getLeadScreener(); }
+    });
+    return columns;
   }
 }

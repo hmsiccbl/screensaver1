@@ -16,12 +16,13 @@ import java.util.List;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
-public abstract class UserNameColumn<E extends AbstractEntity> extends TextEntityColumn<E>/*MultiPropertyColumn<T,String>*/
+public abstract class UserNameColumn<E extends AbstractEntity,U extends ScreensaverUser> extends TextEntityColumn<E>/*MultiPropertyColumn<T,String>*/
 {
   private UserViewer _userViewer;
 
@@ -51,7 +52,7 @@ public abstract class UserNameColumn<E extends AbstractEntity> extends TextEntit
     return propertyPaths;
   }
 
-  protected abstract ScreensaverUser getUser(E t);
+  protected abstract U getUser(E t);
 
   @Override
   public String/*List<String>*/ getCellValue(E t)
@@ -65,13 +66,16 @@ public abstract class UserNameColumn<E extends AbstractEntity> extends TextEntit
   @Override
   public boolean isCommandLink() 
   { 
-    return _userViewer != null; 
+    return _userViewer != null;
   }
   
   @Override
   public Object cellAction(E t) 
   { 
-    return _userViewer != null ? _userViewer.viewUser(getUser(t)) : null; 
+    if (_userViewer != null) {
+      return _userViewer.viewEntity((ScreeningRoomUser) getUser(t));
+    }
+    return null;
   }
 
   @Override

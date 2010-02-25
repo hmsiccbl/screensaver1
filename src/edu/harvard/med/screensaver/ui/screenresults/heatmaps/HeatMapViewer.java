@@ -31,7 +31,6 @@ import edu.harvard.med.screensaver.analysis.heatmaps.HeatMap;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -39,7 +38,6 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
@@ -48,7 +46,7 @@ import edu.harvard.med.screensaver.util.Pair;
 import org.apache.log4j.Logger;
 
 @SuppressWarnings("serial")
-public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
+public class HeatMapViewer extends AbstractBackingBean
 {
 
   // static data members
@@ -130,14 +128,6 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
     _librariesDao = librariesDao;
     _wellViewer = wellViewer;
     resetView(); // basically, initialize collections
-  }
-
-
-  // bean property methods
-
-  public AbstractEntity getEntity()
-  {
-    return getScreenResult();
   }
 
   public void setScreenResult(ScreenResult screenResult)
@@ -417,7 +407,7 @@ public class HeatMapViewer extends AbstractBackingBean implements EntityViewer
   {
     HeatMapCell heatMapCell = getHeatMapCell();
     Well well = _librariesDao.findWell(heatMapCell.getWellKey());
-    return _wellViewer.viewWell(well);
+    return _wellViewer.viewEntity(well);
   }
 
   public String nextPlate()

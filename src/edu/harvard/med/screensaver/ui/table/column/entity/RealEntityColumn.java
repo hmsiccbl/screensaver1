@@ -40,4 +40,9 @@ public abstract class RealEntityColumn<E extends AbstractEntity> extends RealCol
   {
     return _fetchPaths.getRelationshipPaths();
   }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

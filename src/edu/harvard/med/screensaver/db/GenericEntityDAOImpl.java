@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.db.hibernate.HqlUtils;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -40,7 +40,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 
 /**
  * GenericEntityDAO that provides basic data access methods that are applicable
- * to all AbstractEntity types.
+ * to all Entity types.
  * <p>
  * Each of the find* methods has two overloaded versions: a simple version that
  * takes only the basic arguments needed to find the entity (or entities), and
@@ -93,7 +93,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   private static Logger log = Logger.getLogger(GenericEntityDAOImpl.class);
   private static final Logger entityInflatorLog = Logger.getLogger(GenericEntityDAOImpl.class.getName() + ".EntityInflator");
 
-  public static String makeQueryIdList(List<? extends AbstractEntity> entities)
+  public static String makeQueryIdList(List<? extends Entity> entities)
   {
     return StringUtils.makeListString(CollectionUtils.entityIds(entities), ", ");
   }
@@ -113,9 +113,9 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   /**
    * @deprecated Use this method prevents compile-time checking of constructor
    *             signature. Instantiate the entity via its constructor and use
-   *             {@link #saveOrUpdateEntity(AbstractEntity)} instead.
+   *             {@link #saveOrUpdateEntity(Entity)} instead.
    */
-  public <E extends AbstractEntity> E defineEntity(
+  public <E extends Entity> E defineEntity(
     Class<E> entityClass,
     Object... constructorArguments)
   {
@@ -130,12 +130,12 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * upon return. This method calls the underlying Hibernate Session.saveOrUpdate, which
    * does not have JPA semantics. We have encountered situations in which the save-or-update
    * cascades were not followed when this method was called, but only after the session
-   * was flushed. If this seems like a problem to you, try {@link #persistEntity(AbstractEntity)}
+   * was flushed. If this seems like a problem to you, try {@link #persistEntity(Entity)}
    * instead.
    *
    * @param entity
    */
-  public void saveOrUpdateEntity(AbstractEntity entity)
+  public void saveOrUpdateEntity(Entity entity)
   {
     getHibernateTemplate().saveOrUpdate(entity);
   }
@@ -147,7 +147,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *
    * @param entity
    */
-  public void persistEntity(final AbstractEntity entity)
+  public void persistEntity(final Entity entity)
   {
     getHibernateTemplate().execute(new HibernateCallback()
     {
@@ -177,11 +177,17 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @param entity the entity to be reattached
    * @return the same entity instance passed in
    */
-  public <E extends AbstractEntity> E reattachEntity(E entity)
+  public <E extends Entity> E reattachEntity(E entity)
   {
     getHibernateTemplate().update(entity);
     return entity;
   }
+  
+  public <E extends Entity> E mergeEntity(E entity)
+  {
+    return (E) getHibernateTemplate().merge(entity);
+  }
+  
 
   /**
    * For a given detached entity, return a <i>new, Hibernate-managed instance</i>.
@@ -198,16 +204,16 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * fetched) in the new, returned entity instance, so consider carefully the
    * potential performance impact of accessing relationships on this entity
    * instance. If you need to eagerly fetch relationships on this entity
-   * instance, use {@link #reloadEntity(AbstractEntity, boolean, String...)}
-   * and/or {@link #need(AbstractEntity, String...)} and/or
-   * {@link #needReadOnly(AbstractEntity, String...)}.
+   * instance, use {@link #reloadEntity(Entity, boolean, String...)}
+   * and/or {@link #need(Entity, String...)} and/or
+   * {@link #needReadOnly(Entity, String...)}.
    * </p>
    *
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E reloadEntity(E entity)
+  public <E extends Entity> E reloadEntity(E entity)
   {
     // TODO: throw exception if entity already exists in the session
     return reloadEntity(entity, false);
@@ -231,8 +237,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager fetch additional
    * collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem.
    * </p>
@@ -246,7 +252,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @return a new Hibernate-managed instance of the specified entity
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E reloadEntity(E entity, boolean readOnly, String... relationships)
+  public <E extends Entity> E reloadEntity(E entity, boolean readOnly, String... relationships)
   {
     // TODO: throw exception if entity already exists in the session
     if (entity != null) {
@@ -264,8 +270,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * eager fetching cross-product problem (see Hibernate docs), you should only
    * eager fetch a single <i>collection</i> (to-many) relationship in this
    * method call; eager fetch additional collection relationships by making
-   * subsequent calls to {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * subsequent calls to {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem.
    *
@@ -274,7 +280,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public void need(AbstractEntity entity,
+  public void need(Entity entity,
                    String... relationships)
   {
     if (entity == null) {
@@ -293,8 +299,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager
    * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem.
    *
@@ -303,7 +309,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public void needReadOnly(AbstractEntity entity,
+  public void needReadOnly(Entity entity,
                            String... relationships)
   {
     if (entity == null) {
@@ -337,7 +343,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @param entity
    * @param relationship
    */
-  public int relationshipSize(final AbstractEntity entity, final String relationship)
+  public int relationshipSize(final Entity entity, final String relationship)
   {
     return (Integer)
     runQuery(new edu.harvard.med.screensaver.db.Query() {
@@ -352,7 +358,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   public int relationshipSize(
-    final AbstractEntity entity,
+    final Entity entity,
     final String relationship,
     final String relationshipProperty,
     final String relationshipPropertyValue)
@@ -390,7 +396,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     return size.intValue();
   }
 
-  public void deleteEntity(AbstractEntity entity)
+  public void deleteEntity(Entity entity)
   {
     getHibernateTemplate().delete(entity);
   }
@@ -403,7 +409,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @return a list of the entities of the specified type
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass)
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass)
   {
     return (List<E>) getHibernateTemplate().loadAll(entityClass);
   }
@@ -414,8 +420,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager
    * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem. *
    *
@@ -426,7 +432,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass,
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass,
                                                                   boolean readOnly,
                                                                   String... relationships)
   {
@@ -446,8 +452,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *         Return null if there is no such entity.
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
-                                                     Serializable id)
+  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass,
+                                                                     K id)
   {
     return (E) getHibernateTemplate().get(entityClass, id);
   }
@@ -458,8 +464,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager
    * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem. * See @{@link #findEntityById(Class, Serializable)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -468,10 +474,10 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
-                                                     Serializable id,
-                                                     boolean readOnly,
-                                                     String... relationships)
+  public <E extends Entity, K extends Serializable> E findEntityById(Class<E> entityClass,
+                                                                     K id,
+                                                                     boolean readOnly,
+                                                                     String... relationships)
   {
     return findEntityByProperty(entityClass, "id", id, readOnly, relationships);
   }
@@ -488,7 +494,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @return the entity that has the specified values for the specified
    *         set of properties
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value)
   {
     return findEntitiesByProperties(entityClass, name2Value, false);
@@ -500,8 +506,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager
    * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem. * See @{@link #findEntitiesByProperties(Class, Map)}.
    * @param name2Value a <code>Map</code> containing entries for each
@@ -512,7 +518,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value,
                                                                      final boolean readOnly,
                                                                      String... relationshipsIn)
@@ -599,7 +605,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
                                                              Map<String,Object> name2Value)
   {
     return findEntityByProperties(entityClass,
@@ -613,8 +619,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager
    * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem. * See @{@link #findEntityByProperties(Class, Map)}.
    * @param name2Value a <code>Map</code> containing entries for each
@@ -624,7 +630,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
                                                              Map<String,Object> name2Value,
                                                              boolean readOnly,
                                                              String... relationships)
@@ -655,7 +661,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @param propertyValue the value of the property to query for
    * @return the entity that has the specified value for the specified property
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
                                                                    String propertyName,
                                                                    Object propertyValue)
   {
@@ -668,8 +674,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager
    * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem. * See @{@link #findEntitiesByProperty(Class, String, Object)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -678,7 +684,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
                                                                    String propertyName,
                                                                    Object propertyValue,
                                                                    boolean readOnly,
@@ -703,7 +709,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */
-  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
                                                            String propertyName,
                                                            Object propertyValue)
   {
@@ -719,8 +725,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * cross-product problem (see Hibernate docs), you should only eager fetch a
    * single <i>collection</i> (to-many) relationship in this method call; eager
    * fetch additional collection relationships by making subsequent calls to
-   * {@link #need(AbstractEntity, String...)} or
-   * {@link #needReadOnly(AbstractEntity, String...)}. You may, however, eager
+   * {@link #need(Entity, String...)} or
+   * {@link #needReadOnly(Entity, String...)}. You may, however, eager
    * fetch as many to-one relationships as needed in a single call to this
    * method, without creating a performance problem. * See @{@link #findEntityByProperty(Class, String, Object)}.
    * @param readOnly see class-level documentation of {@link GenericEntityDAO}
@@ -728,7 +734,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
                                                            String propertyName,
                                                            Object propertyValue,
                                                            boolean readOnly,
@@ -751,7 +757,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
 //  @SuppressWarnings("unchecked")
-//  public <E extends AbstractEntity> List<E> findEntitiesByPropertyPattern(
+//  public <E extends Entity> List<E> findEntitiesByPropertyPattern(
 //    Class<E> entityClass,
 //    String propertyName,
 //    String propertyPattern)
@@ -763,7 +769,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
 //  }
 
   @SuppressWarnings("unchecked")
-  public <E extends AbstractEntity> List<E> findEntitiesByHql(
+  public <E extends Entity> List<E> findEntitiesByHql(
     Class<E> entityClass,
     String hql,
     Object... hqlParameters)
@@ -783,7 +789,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * @exception IllegalArgumentException whenever the implied constructor
    * does not exist or is not public
    */
-  private <E extends AbstractEntity> Constructor<E> getConstructor(
+  private <E extends Entity> Constructor<E> getConstructor(
     Class<E> entityClass,
     Object... arguments)
   {
@@ -810,8 +816,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     Class [] argumentTypes = new Class [arguments.length];
     for (int i = 0; i < arguments.length; i++) {
       Class argumentType;
-      if (arguments[i] instanceof AbstractEntity) {
-        argumentType = ((AbstractEntity) arguments[i]).getEntityClass();
+      if (arguments[i] instanceof Entity) {
+        argumentType = ((Entity) arguments[i]).getEntityClass();
       }
       else {
         argumentType = arguments[i].getClass();
@@ -833,7 +839,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    * pass to the constructor
    * @return the newly constructed entity object
    */
-  private <E extends AbstractEntity> E newInstance(
+  private <E extends Entity> E newInstance(
     Constructor<E> constructor,
     Object... constructorArguments)
   {
@@ -885,7 +891,7 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
   }
 
   @SuppressWarnings("unchecked")
-  private <T> void inflate(final AbstractEntity entity,
+  private <T> void inflate(final Entity entity,
                            boolean readOnly,
                            final String... relationships)
   {

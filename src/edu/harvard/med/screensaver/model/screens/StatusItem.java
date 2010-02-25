@@ -47,7 +47,7 @@ import org.joda.time.LocalDate;
 }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
+public class StatusItem extends AbstractEntity<Integer> implements Comparable<StatusItem>
 {
 
   // static fields
@@ -58,7 +58,6 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
 
   // instance fields
 
-  private Integer _statusItemId;
   private Integer _version;
   private Screen _screen;
   private LocalDate _statusDate;
@@ -71,13 +70,6 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getStatusItemId();
   }
 
   /**
@@ -95,7 +87,7 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="status_item_id_seq")
   public Integer getStatusItemId()
   {
-    return _statusItemId;
+    return getEntityId();
   }
 
   /**
@@ -195,7 +187,7 @@ public class StatusItem extends AbstractEntity implements Comparable<StatusItem>
    */
   private void setStatusItemId(Integer statusItemId)
   {
-    _statusItemId = statusItemId;
+    setEntityId(statusItemId);
   }
 
   /**

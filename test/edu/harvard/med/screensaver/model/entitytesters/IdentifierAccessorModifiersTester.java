@@ -55,9 +55,9 @@ extends AbstractEntityTester<E>
     String identifierPropertyName = classMetadata.getIdentifierPropertyName();
     
     Method identifierGetter = ModelIntrospectionUtil.getGetterMethodForPropertyName(_entityClass, identifierPropertyName);
-    assertTrue("private getId for " + _entityClass,
+    assertTrue("public entity ID getter for " + _entityClass,
       Modifier.isPublic(identifierGetter.getModifiers()));
-    assertFalse("instance getId for " + _entityClass,
+    assertFalse("instance entity ID getter for " + _entityClass,
       Modifier.isStatic(identifierGetter.getModifiers()));
 
     Type identifierType = identifierGetter.getGenericReturnType();
@@ -65,9 +65,9 @@ extends AbstractEntityTester<E>
     
     Method identifierSetter =
       ModelIntrospectionUtil.getSetterMethodForPropertyName(_entityClass, identifierPropertyName, (Class) identifierType);
-    assertTrue("private getId for " + _entityClass,
+    assertTrue("private entity ID setter for " + _entityClass,
       Modifier.isPrivate(identifierSetter.getModifiers()));
-    assertFalse("instance getId for " + _entityClass,
+    assertFalse("instance entity ID setter for " + _entityClass,
       Modifier.isStatic(identifierSetter.getModifiers()));
   }
 }

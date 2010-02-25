@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
@@ -76,7 +77,7 @@ public class CherryPickRequestCherryPicksAdderTest extends AbstractSpringPersist
                                   SilencingReagentType.SIRNA,
                                   "ATCGGCTA");
     }
-    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity(duplexLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) duplexLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.persistEntity(duplexLibrary);
     duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, 
                                                   Library.wells.to(Well.reagents).getPath(), 
@@ -98,7 +99,7 @@ public class CherryPickRequestCherryPicksAdderTest extends AbstractSpringPersist
     duplexWellIter = poolWell2Reagent.getDuplexWells().iterator();
     redundantDuplexesPoolWell.createSilencingReagent(new ReagentVendorIdentifier("v", "4"), SilencingReagentType.SIRNA, null)
     .withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next()).withDuplexWell(duplexWellIter.next());
-    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity(poolLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) poolLibrary.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.persistEntity(poolLibrary);
     poolLibrary = genericEntityDao.reloadEntity(poolLibrary, true, Library.wells.to(Well.reagents).to(SilencingReagent.duplexWells).getPath());
 
@@ -138,7 +139,7 @@ public class CherryPickRequestCherryPicksAdderTest extends AbstractSpringPersist
   public void testAddCherryPicksIncrementally()
   {
     Set<WellKey> cpWells1 = Sets.newHashSet(new WellKey(poolLibrary.getStartPlate(), "A02"));
-    CherryPickRequest cpr2 = cherryPickRequestCherryPicksAdder.addCherryPicksForWells(cpr, cpWells1, false);
+    /*CherryPickRequest cpr2 = */cherryPickRequestCherryPicksAdder.addCherryPicksForWells(cpr, cpWells1, false);
     Set<WellKey> cpWells2 = Sets.newHashSet(new WellKey(poolLibrary.getStartPlate(), "A03"));
     CherryPickRequest cpr3 = cherryPickRequestCherryPicksAdder.addCherryPicksForWells(cpr, cpWells2, false);
     Set<WellKey> cpWells = Sets.union(cpWells1, cpWells2);

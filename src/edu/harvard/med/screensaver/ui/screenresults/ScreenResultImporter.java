@@ -9,30 +9,24 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import jxl.write.WritableWorkbook;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.ParseErrorsException;
+import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
+import edu.harvard.med.screensaver.ui.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.springframework.dao.DataAccessException;
-
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.workbook2.Workbook;
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
-import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 /**
  * The JSF backing bean for both the screenResultImporter subview and
@@ -54,11 +48,10 @@ public class ScreenResultImporter extends AbstractBackingBean
 
   private GenericEntityDAO _dao;
   private ScreenViewer _screenViewer;
-  private ScreenSearchResults _screensBrowser;
-  private ScreenResultParser _screenResultParser;
+  private ScreenResultLoader _screenResultLoader;
 
-  private Screen _screen;
   private UploadedFile _uploadedFile;
+  private List<? extends ParseError> _lastParseErrors;
 
 
   // constructors
@@ -72,25 +65,16 @@ public class ScreenResultImporter extends AbstractBackingBean
 
   public ScreenResultImporter(GenericEntityDAO dao,
                               ScreenViewer screenViewer,
-                              ScreenSearchResults screensBrowser,
-                              ScreenResultParser screenResultParser)
+                              ScreenResultLoader screenResultLoader)
   {
     _dao = dao;
     _screenViewer = screenViewer;
-    _screensBrowser = screensBrowser;
-    _screenResultParser = screenResultParser;
-  }
-
-  // backing bean property getter and setter methods
-
-  public void setScreen(Screen screen)
-  {
-    _screen = screen;
+    _screenResultLoader = screenResultLoader;
   }
 
   public Screen getScreen()
   {
-    return _screen;
+    return _screenViewer.getEntity();
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)
@@ -105,67 +89,43 @@ public class ScreenResultImporter extends AbstractBackingBean
 
   public boolean getHasErrors()
   {
-    return _screenResultParser.getHasErrors();
+    return _lastParseErrors != null && ! _lastParseErrors.isEmpty();
   }
 
   public DataModel getImportErrors()
   {
-    return new ListDataModel(_screenResultParser.getErrors());
+    return new ListDataModel(_lastParseErrors);
   }
 
 
   // JSF application methods
 
-  @UIControllerMethod
+  @UICommand
   public String cancel()
   {
-    return _screenViewer.viewScreen(_screen);
+    return _screenViewer.reload();
   }
 
-  @UIControllerMethod
-  public String doImport()
+  @UICommand
+  public String doImport() throws IOException
   {
+    Screen screen = _screenViewer.getEntity();
     try {
-      _dao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Screen screen = _dao.reloadEntity(_screen); // TODO: this should be reattachEntity, since we're editing it
-          log.info("starting import of ScreenResult for Screen " + screen);
-
-          try {
-            if (_uploadedFile.getInputStream().available() > 0) {
-//              _screenResultParser.parse(screen,
-//                                        "screen_result_" + screen.getScreenNumber(),
-//                                        _uploadedFile.getInputStream());
-              _screenResultParser.parse(screen,_uploadedFile.getInputStream());              
-              if (_screenResultParser.getErrors().size() > 0) {
-                // these are data-related "user" errors, so we log at "info" level
-                log.info("parse errors encountered during import of ScreenResult for Screen " + _screen);
-                throw new ScreenResultParseErrorsException("parse errors encountered");
-              }
-              else {
-                log.info("successfully parsed ScreenResult for Screen " + _screen);
-              }
-            }
-          }
-          catch (IOException e) {
-            showMessage("systemError", e.getMessage());
-            throw new DAOTransactionRollbackException("could not access uploaded file", e);
-          }
-        }
-      });
+      _screenResultLoader.parseAndLoad(new Workbook("Input Stream for screen: " + screen, _uploadedFile.getInputStream()),
+                                       null, 
+                                       screen, 
+                                       true);
     }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-    }
-    catch (ScreenResultParseErrorsException e) {
+    catch (ParseErrorsException e)
+    {
+      log.info("parse errors encountered during import of ScreenResult for Screen " + screen);
+      _lastParseErrors = e.getErrors();
       return viewScreenResultImportErrors();
     }
-    return _screenViewer.viewScreen(_screen);
+    return _screenViewer.viewEntity(screen);
   }
 
-  @UIControllerMethod
+  @UICommand
   public String viewScreenResultImportErrors()
   {
     return VIEW_SCREEN_RESULT_IMPORT_ERRORS;

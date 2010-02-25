@@ -10,7 +10,7 @@
 <ui:composition>
 
 	<h:form id="uploadScreenResultFileForm" enctype="multipart/form-data"
-		rendered="#{!screenResultViewer.readOnly}">
+		rendered="#{screenResultViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin']}">
 		<t:outputLabel for="uploadScreenResultFile"
 			value="Import Screen Result file:" styleClass="label" />
 		<t:inputFileUpload id="uploadScreenResultFile"
@@ -18,7 +18,7 @@
 			accept="application/vnd.ms-excel" required="true"
 			styleClass="inputText" />
 		<t:commandButton
-			value="#{empty screenResultViewer.screenResult ? &quot;Load&quot; : &quot;Reload&quot;}"
+			value="#{empty screenResultViewer.entity ? &quot;Load&quot; : &quot;Reload&quot;}"
 			action="#{screenResultImporter.doImport}" styleClass="command" />
 	</h:form>
 

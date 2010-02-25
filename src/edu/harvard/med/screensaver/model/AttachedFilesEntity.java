@@ -13,9 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 
-public interface AttachedFilesEntity
+public interface AttachedFilesEntity extends Entity
 {
 
   Set<AttachedFile> getAttachedFiles();

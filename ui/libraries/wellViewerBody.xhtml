@@ -14,7 +14,7 @@
 
   <t:panelGrid style="margin-top: 10px;">
     <t:panelGroup
-      rendered="#{wellViewer.well.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; !empty wellViewer.versionedReagent &amp;&amp; !empty wellViewer.versionedReagent.molfile}">
+      rendered="#{wellViewer.entity.library.reagentType.simpleName == 'SmallMoleculeReagent' &amp;&amp; !empty wellViewer.versionedReagent &amp;&amp; !empty wellViewer.versionedReagent.molfile}">
       <h:form id="wellContentsDownloadForm">
         <h:commandButton value="Download SD File"
           action="#{wellViewer.downloadSDFile}" styleClass="command"
@@ -42,15 +42,14 @@
               <t:outputText value="Well" />
             </f:facet>
             <ss:entityLink id="wellEntity" entity="#{well}"
-              bean="#{wellViewer}" action="viewWell" />
+              viewer="#{wellViewer}" />
           </t:column>
           <t:column>
             <f:facet name="header">
               <t:outputText value="Library Name" />
             </f:facet>
-            <ss:entityLink id="libraryEntity"
-              entity="#{well.library}" bean="#{libraryViewer}"
-              property="libraryName" action="viewLibrary" />
+            <ss:entityLink id="libraryEntity" entity="#{well.library}"
+              viewer="#{libraryViewer}" property="libraryName" />
           </t:column>
           <t:column>
             <f:facet name="header">
@@ -88,15 +87,16 @@
             <f:facet name="header">
               <t:outputText value="Well" />
             </f:facet>
-            <ss:entityLink id="wellEntity" entity="#{reagent.well}" bean="#{wellViewer}"
-              action="viewWell" />
+            <ss:entityLink id="wellEntity" entity="#{reagent.well}"
+              viewer="#{wellViewer}" />
           </t:column>
           <t:column>
             <f:facet name="header">
               <t:outputText value="Library Name" />
             </f:facet>
-            <ss:entityLink id="libraryEntity" entity="#{reagent.well.library}"
-              bean="#{libraryViewer}" property="libraryName" action="viewLibrary" />
+            <ss:entityLink id="libraryEntity"
+              entity="#{reagent.well.library}" viewer="#{libraryViewer}"
+              property="libraryName" />
           </t:column>
         </t:dataTable>
         <!--h:commandButton value="Browse..."

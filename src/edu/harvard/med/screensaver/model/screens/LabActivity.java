@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.model.Concentration;
 import edu.harvard.med.screensaver.model.ConcentrationUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
@@ -190,10 +191,11 @@ public abstract class LabActivity extends Activity
    */
   protected LabActivity(
     Screen screen,
+    AdministratorUser recordedBy,
     ScreensaverUser performedBy,
     LocalDate dateOfActivity)
   {
-    super(performedBy, dateOfActivity);
+    super(recordedBy, performedBy, dateOfActivity);
     if (screen == null) {
       throw new NullPointerException();
     }

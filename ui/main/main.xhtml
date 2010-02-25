@@ -42,7 +42,7 @@
 				"My Screens" to view your own screens and result
 				data, and "Browse Screens" to view basic information about other screens 
         performed at ICCB-L. For your own screens, you can browse, filter, sort, 
-        and export your result data, and compare it to other public screen results 
+        and export your result data, and compare it to other shared screen results 
         and studies.  You can also view each screening data plate with a heat map 
         viewer and export the screen result data as a spreadsheet.
         <ul>
@@ -78,7 +78,7 @@
 
       <p style="font-weight: bold; font-style: italic">Questions?
       Suggestions? Problems?<f:verbatim>&amp;nbsp;</f:verbatim><h:outputLink
-        value="#{appInfo.feedbackUrl}" title="Contact us!">Contact us!</h:outputLink>
+        value="#{appInfo.applicationProperties['screensaver.ui.feedback_url']}" target="_blank" title="Contact us!">Contact us!</h:outputLink>
       </p>
       </t:div>
   </ui:define>

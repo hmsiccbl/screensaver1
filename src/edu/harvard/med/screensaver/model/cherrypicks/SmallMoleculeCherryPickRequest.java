@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 /**
@@ -35,16 +36,9 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 @org.hibernate.annotations.Proxy
 public class SmallMoleculeCherryPickRequest extends CherryPickRequest
 {
-
-  // private static data
-
   private static final long serialVersionUID = 1L;
-  private static Logger log = Logger.getLogger(SmallMoleculeCherryPickRequest.class);
   private static final PlateType SMALL_MOLECULE_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.ABGENE;
   private static final Volume DEFAULT_TRANSFER_VOLUME = new Volume("1.20", VolumeUnit.MICROLITERS);
-
-
-  // public constructor
 
   /**
    * Construct an initialized <code>SmallMoleculeCherryPickRequest</code>. Intended only for use
@@ -52,20 +46,16 @@ public class SmallMoleculeCherryPickRequest extends CherryPickRequest
    * @param screen the screen
    * @param requestedBy the user that made the request
    * @param dateRequested the date created
-   * @param legacyCherryPickRequestNumber the legacy ID from ScreenDB
    * @motivation for creating CherryPickRequests from legacy ScreenDB cherry pick visits
    */
   public SmallMoleculeCherryPickRequest(
+    AdministratorUser createdBy,
     Screen screen,
     ScreeningRoomUser requestedBy,
-    LocalDate dateRequested,
-    Integer legacyCherryPickRequestNumber)
+    LocalDate dateRequested)
   {
-    super(screen, requestedBy, dateRequested, legacyCherryPickRequestNumber);
+    super(createdBy, screen, requestedBy, dateRequested);
   }
-
-
-  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -86,9 +76,6 @@ public class SmallMoleculeCherryPickRequest extends CherryPickRequest
   {
     return DEFAULT_TRANSFER_VOLUME;
   }
-
-
-  // protected constructor
 
   /**
    * Construct an uninitialized <code>SmallMoleculeCherryPickRequest</code>.

@@ -21,10 +21,11 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
@@ -44,6 +45,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
 {
   private static final Logger log = Logger.getLogger(ScreenViewerJsfUnitTest.class);
   private Screen _screen;
+  private AttachedFileType _attachedFileType;
 
   public static Test suite()
   {
@@ -57,8 +59,13 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     super.setUp();
     _screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
     _dao.persistEntity(_screen);
+
+    _attachedFileType = new ScreenAttachedFileType("Application");
+    _dao.saveOrUpdateEntity(_attachedFileType);
+    
     // ensure _screen entity has an ID-based hashCode
     _screen = _dao.reloadEntity(_screen, true, "labHead", "leadScreener", "collaborators");
+    _attachedFileType = _dao.reloadEntity(_attachedFileType, true);
   }
 
   public void testOpenScreenViewer() throws Exception
@@ -185,7 +192,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
 
   public void testAddAndDeleteCollaborators() throws Exception
   {
-    ScreeningRoomUser collaborator = new ScreeningRoomUser("Col", "Laborator", "col_laborator@hms.harvard.edu");
+    ScreeningRoomUser collaborator = new ScreeningRoomUser("Col", "Laborator");
     _dao.persistEntity(collaborator);
     collaborator = _dao.reloadEntity(collaborator);
 
@@ -214,7 +221,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
     submit("screenDetailPanelForm:editCommand");
     assertShowingScreen(_screen.getScreenNumber(), true);
     submit("attachedFilesTableAddCommand",
-           new Pair<String,String>("newAttachedFileType", Integer.toString(AttachedFileType.APPLICATION.hashCode())),
+           new Pair<String,String>("newAttachedFileType", Integer.toString(_attachedFileType.getEntityId())),
            new Pair<String,String>("newAttachedFilenameTextField", "test file name"),
            new Pair<String,String>("newAttachedFileContentsTextareaField1", "test file contents"));
     assertEquals(1, ((Set<AttachedFile>) getBeanValue("screenDetailViewer.screen.attachedFiles")).size());
@@ -319,7 +326,7 @@ public class ScreenViewerJsfUnitTest extends AbstractJsfUnitTest
   private void visitScreenViewer(Screen screen)
   {
     ScreenViewer viewer = getBeanValue("screenViewer");
-    viewer.viewScreen(screen);
+    viewer.viewEntity(screen);
     visitPage("/screens/screensBrowser.jsf");
     assertAtView("/screensaver/screens/screensBrowser.jsf");
   }

@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model;
 
+import java.io.Serializable;
+
 import org.apache.log4j.Logger;
 
 
@@ -28,7 +30,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public abstract class SemanticIDAbstractEntity extends AbstractEntity
+public abstract class SemanticIDAbstractEntity<K extends Serializable> extends AbstractEntity<K>
 {
   private static Logger log = Logger.getLogger(SemanticIDAbstractEntity.class);
 

@@ -51,7 +51,7 @@ import org.hibernate.annotations.OptimisticLock;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "studyId", "name" }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class AnnotationType extends AbstractEntity implements MetaDataType, Comparable<AnnotationType>
+public class AnnotationType extends AbstractEntity<Integer> implements MetaDataType, Comparable<AnnotationType>
 {
 
   // private static data
@@ -65,7 +65,6 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
 
   // private instance data
 
-  private Integer _annotationTypeId;
   private Integer _version;
   private Screen _study;
   private String _name;
@@ -110,13 +109,6 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Serializable getEntityId()
-  {
-    return getAnnotationTypeId();
-  }
-
   /**
    * Defines natural ordering of <code>AnnotationType</code> objects, based
    * upon their ordinal field value. Note that natural ordering is only defined
@@ -149,7 +141,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="annotation_type_id_seq")
   public Integer getAnnotationTypeId()
   {
-    return _annotationTypeId;
+    return getEntityId();
   }
 
   /**
@@ -293,7 +285,7 @@ public class AnnotationType extends AbstractEntity implements MetaDataType, Comp
    */
   private void setAnnotationTypeId(Integer annotationTypeId)
   {
-    _annotationTypeId = annotationTypeId;
+    setEntityId(annotationTypeId);
   }
 
   /**

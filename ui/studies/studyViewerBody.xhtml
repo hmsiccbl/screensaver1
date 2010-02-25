@@ -73,9 +73,9 @@
 		</h:form>
 
 		<t:div
-			rendered="#{! empty studyViewer.study &amp;&amp; ! studyViewer.isPanelCollapsedMap['reagentsData']}">
+			rendered="#{! empty studyViewer.entity &amp;&amp; ! studyViewer.isPanelCollapsedMap['reagentsData']}">
             <ui:include src="../libraries/wellSearchResultsBody.xhtml">
-                <ui:param name="wellsBrowser" value="#{studyViewer.wellSearchResults}" />
+                <ui:param name="wellsBrowser" value="#{studyViewer.wellsBrowser}" />
             </ui:include>
 		</t:div>
 		

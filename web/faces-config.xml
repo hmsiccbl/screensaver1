@@ -78,11 +78,6 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewNews</from-outcome>
-      <to-view-id>/main/newsViewer.jsf</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
       <from-outcome>viewDownloads</from-outcome>
       <to-view-id>/main/downloadsViewer.jsf</to-view-id>
       <redirect/>
@@ -120,22 +115,22 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewLibraryDetail</from-outcome>
+      <from-outcome>editLibrary</from-outcome>
       <to-view-id>/libraries/libraryDetailViewer</to-view-id>
       <redirect/>
     </navigation-case>    
     <navigation-case>
-      <from-outcome>viewWellSearchResults</from-outcome>
+      <from-outcome>browseWells</from-outcome>
       <to-view-id>/libraries/wellSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewWellVolumeSearchResults</from-outcome>
+      <from-outcome>browseWellVolumes</from-outcome>
       <to-view-id>/libraries/admin/wellVolumeSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewWellCopyVolumeSearchResults</from-outcome>
+      <from-outcome>browseWellCopyVolumes</from-outcome>
       <to-view-id>/libraries/admin/wellCopyVolumeSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
@@ -174,7 +169,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewScreenDetail</from-outcome>
+      <from-outcome>editScreen</from-outcome>
       <to-view-id>/screens/screenDetailViewer</to-view-id>
       <redirect/>
     </navigation-case>
@@ -191,6 +186,11 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/cherryPickRequests/cherryPickRequestViewer</to-view-id>
       <redirect/>
     </navigation-case>
+    <navigation-case>
+      <from-outcome>editCherryPickRequest</from-outcome>
+      <to-view-id>/cherryPickRequests/cherryPickRequestEditor</to-view-id>
+      <redirect/>
+    </navigation-case>
 
     <!-- === screenresults navigation rules === -->
 
@@ -201,7 +201,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     </navigation-case>
     
     <navigation-case>
-      <from-outcome>viewScreenResultEditor</from-outcome>
+      <from-outcome>editScreenResult</from-outcome>
       <to-view-id>/screens/screenresults/screenResultEditor</to-view-id>
       <redirect/>
     </navigation-case>
@@ -255,6 +255,11 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     <navigation-case>
       <from-outcome>viewUser</from-outcome>
       <to-view-id>/users/userViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>updateUserAgreement</from-outcome>
+      <to-view-id>/users/admin/userAgreementUpdater</to-view-id>
       <redirect/>
     </navigation-case>
 

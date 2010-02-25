@@ -62,8 +62,6 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
 {
   // static members
 
-  private static final ScreensaverUserRole EDITING_ROLE = ScreensaverUserRole.LIBRARIES_ADMIN;
-
   private static Logger log = Logger.getLogger(WellCopyVolumeSearchResults.class);
 
 
@@ -93,15 +91,13 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
   public WellCopyVolumeSearchResults(GenericEntityDAO dao,
                                      LibraryViewer libraryViewer,
                                      WellViewer wellViewer,
-                                     WellVolumeSearchResults wellVolumeSearchResults,
-                                     WellVolumeAdjustmentSearchResults rowDetail)
+                                     WellVolumeSearchResults wellVolumeSearchResults)
   {
     this();
     _dao = dao;
     _wellVolumeSearchResults = wellVolumeSearchResults;
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
-    //setRowDetail(rowDetail);
   }
 
   // public methods
@@ -200,15 +196,6 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
 //    return _wellVolumeSearchResults;
 //  }
 
-  /**
-   * TODO: this method is _required_ by the UI code, but this dependency is not defined explicitly.
-   *  Should be define explicitly via an interface.
-   */
-  protected ScreensaverUserRole getEditableAdminRole()
-  {
-    return EDITING_ROLE;
-  }
-
   @Override
   protected DataTableModel<WellCopy> buildDataTableModel(DataFetcher<WellCopy,Pair<WellKey,String>,Object> dataFetcher,
                                                          List<? extends TableColumn<WellCopy,?>> columns)
@@ -230,7 +217,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
       public boolean isCommandLink() { return true; }
 
       @Override
-      public Object cellAction(WellCopy wellCopy) { return _libraryViewer.viewLibrary(wellCopy.getWell().getLibrary()); }
+      public Object cellAction(WellCopy wellCopy) { return _libraryViewer.viewEntity(wellCopy.getWell().getLibrary()); }
     });
     columns.add(new IntegerColumn<WellCopy>(
       "Plate", "The number of the plate the well is located on", TableColumn.UNGROUPED) {
@@ -246,7 +233,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
       public boolean isCommandLink() { return true; }
 
       @Override
-      public Object cellAction(WellCopy wellCopy) { return _wellViewer.viewWell(wellCopy.getWell()); }
+      public Object cellAction(WellCopy wellCopy) { return _wellViewer.viewEntity(wellCopy.getWell()); }
     });
     columns.add(new TextColumn<WellCopy>(
       "Copy", "The name of the library plate copy", TableColumn.UNGROUPED) {

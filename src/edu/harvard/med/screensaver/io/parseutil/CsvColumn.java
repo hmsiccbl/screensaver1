@@ -10,7 +10,7 @@
 package edu.harvard.med.screensaver.io.parseutil;
 
 import edu.harvard.med.screensaver.io.ParseError;
-import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public abstract class CsvColumn<T> extends Column<String[],T>

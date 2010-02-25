@@ -21,6 +21,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -32,8 +34,9 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -46,6 +49,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
@@ -88,7 +93,7 @@ import com.google.common.collect.Sets;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-public class Library extends TimeStampedAbstractEntity
+public class Library extends AuditedAbstractEntity<Integer>
 {
 
   // static data
@@ -106,7 +111,6 @@ public class Library extends TimeStampedAbstractEntity
 
   // private instance data
 
-  private Integer _libraryId;
   private Integer _version;
   private Set<Well> _wells = new HashSet<Well>();
   private Set<Copy> _copies = new HashSet<Copy>();
@@ -134,13 +138,21 @@ public class Library extends TimeStampedAbstractEntity
   // public constructor
 
   /**
-   * Construct an uninitialized <code>Library</code>.
-   *
-   * @motivation for new Library creation via user interface, where even required
-   *             fields are allowed to be uninitialized, initially
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  public Library() {}
+  protected Library() {}
+
+  /**
+   * 
+   * Construct a new, unitialized Library
+   * @motivation for new Library creation via user interface, where even required
+   *             fields are allowed to be uninitialized, initially
+   * @param createdBy
+   */
+  public Library(AdministratorUser createdBy)
+  {
+    super(createdBy);
+  }
 
   /**
    * Construct an initialized <code>Library</code> object.
@@ -160,6 +172,7 @@ public class Library extends TimeStampedAbstractEntity
                  Integer endPlate,
                  PlateSize plateSize)
   {
+    super(null); /* TODO */
     _libraryName = libraryName;
     _shortName = shortName;
     _screenType = screenType;
@@ -180,19 +193,10 @@ public class Library extends TimeStampedAbstractEntity
     this(libraryName, shortName, screenType, libraryType, startPlate, endPlate, ScreensaverConstants.DEFAULT_PLATE_SIZE);
   }
 
-  // public instance methods
-
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getLibraryId();
   }
 
   /**
@@ -205,7 +209,20 @@ public class Library extends TimeStampedAbstractEntity
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "library_id_seq")
   public Integer getLibraryId()
   {
-    return _libraryId;
+    return getEntityId();
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="libraryUpdateActivity", 
+             joinColumns=@JoinColumn(name="libraryId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   /**
@@ -617,7 +634,7 @@ public class Library extends TimeStampedAbstractEntity
    */
   private void setLibraryId(Integer libraryId)
   {
-    _libraryId = libraryId;
+    setEntityId(libraryId);
   }
 
   /**

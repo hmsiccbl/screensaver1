@@ -25,9 +25,12 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
+import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
@@ -37,6 +40,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -55,15 +59,13 @@ public class MakeDummyEntities
   public static ScreeningRoomUser makeDummyUser(int screenNumber, String first, String last)
   {
     return new ScreeningRoomUser(first,
-                                 last + "_" + screenNumber,
-                                 first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu");
+                                 last + "_" + screenNumber);
   }
 
   public static LabHead makeDummyLabHead(int screenNumber, String first, String last)
   {
     return new LabHead(first,
                        last + "_" + screenNumber,
-                       first.toLowerCase() + "_" + last.toLowerCase() + "_" + screenNumber + "@hms.harvard.edu",
                        new LabAffiliation("affiliation " + screenNumber, AffiliationCategory.HMS));
   }
 
@@ -136,24 +138,25 @@ public class MakeDummyEntities
     Collections.sort(wells);
     for (int i = 0; i < wells.size(); ++i) {
       Well well = wells.get(i);
+      AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
       for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
         if (rvt.isNumeric()) {
-          rvt.createResultValue(well, Math.random() * 200.0 - 100.0, 3);
+          rvt.createResultValue(assayWell, Math.random() * 200.0 - 100.0, 3);
         }
         else if (rvt.isPositiveIndicator() && rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
-          rvt.createResultValue(well, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
+          rvt.createResultValue(assayWell, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
         }
         else if (rvt.equals(commentsRvt)) {
           PartitionedValue pv = PartitionedValue.values()[i % PartitionedValue.values().length];
           if (pv != PartitionedValue.NONE) { // else, a null test value, by virtue of not creating a RV for this well/rvt
-            rvt.createResultValue(well, pv == PartitionedValue.STRONG ? "what a positive!" :
+            rvt.createResultValue(assayWell, pv == PartitionedValue.STRONG ? "what a positive!" :
               pv == PartitionedValue.MEDIUM ? "so so" :
                 // a "empty string" test value
                 "");
           }
         }
         else if (!rvt.isNumeric()) {
-          rvt.createResultValue(well, String.format("text%05d", i));
+          rvt.createResultValue(assayWell, String.format("text%05d", i));
         }
         else {
           throw new RuntimeException("unhandled rvt type" + rvt);
@@ -218,7 +221,7 @@ public class MakeDummyEntities
         .withGeneName("geneName" + wellKey);
       }
       else {
-        /*SmallMoleculeReagent smallMolecule =*/ 
+        SmallMoleculeReagent smallMolecule = 
           well.createSmallMoleculeReagent(new ReagentVendorIdentifier("Vendor" + id, "" + i),
                                           "molfileContents",
                                           "smiles" + wellKey, 
@@ -226,10 +229,12 @@ public class MakeDummyEntities
                                           new BigDecimal("1.011"), 
                                           new BigDecimal("1.011"), 
                                           new MolecularFormula("C3"));
+          smallMolecule.getPubchemCids().add(10000 + i);
+          smallMolecule.getCompoundNames().add("compound" + i);
       }
       wells.add(well);
     }
-    library.getLatestContentsVersion().release(new AdministrativeActivity(library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     return library;
   }
 

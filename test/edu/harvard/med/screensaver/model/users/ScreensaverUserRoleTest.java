@@ -9,12 +9,13 @@
 
 package edu.harvard.med.screensaver.model.users;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Sets;
 
 public class ScreensaverUserRoleTest extends TestCase
 {
@@ -24,20 +25,18 @@ public class ScreensaverUserRoleTest extends TestCase
 
   public void testImpliedRoles()
   {
-    assertEquals(Arrays.asList(ScreensaverUserRole.SCREENS_ADMIN,
-                               ScreensaverUserRole.READ_EVERYTHING_ADMIN),
-                 ScreensaverUserRole.BILLING_ADMIN.getImpliedRoles());
-    assertEquals(Arrays.asList(ScreensaverUserRole.USERS_ADMIN,
-                               ScreensaverUserRole.USER_CHECKLIST_ITEMS_ADMIN,
-                               ScreensaverUserRole.READ_EVERYTHING_ADMIN),
-                 ScreensaverUserRole.LAB_HEADS_ADMIN.getImpliedRoles());
-    assertEquals(Arrays.asList(ScreensaverUserRole.READ_EVERYTHING_ADMIN),
+    assertEquals(Sets.newHashSet(ScreensaverUserRole.SCREENS_ADMIN,
+                                 ScreensaverUserRole.READ_EVERYTHING_ADMIN),
+                                 ScreensaverUserRole.BILLING_ADMIN.getImpliedRoles());
+    assertEquals(Sets.newHashSet(ScreensaverUserRole.USERS_ADMIN,
+                                 ScreensaverUserRole.USER_CHECKLIST_ITEMS_ADMIN,
+                                 ScreensaverUserRole.READ_EVERYTHING_ADMIN),
+                                 ScreensaverUserRole.LAB_HEADS_ADMIN.getImpliedRoles());
+    assertEquals(Sets.newHashSet(ScreensaverUserRole.READ_EVERYTHING_ADMIN),
                  ScreensaverUserRole.DEVELOPER.getImpliedRoles());
-    assertEquals(Arrays.asList(ScreensaverUserRole.SCREENER),
-                 ScreensaverUserRole.RNAI_SCREENER.getImpliedRoles());
-    assertEquals(Arrays.asList(ScreensaverUserRole.SCREENER),
-                 ScreensaverUserRole.SMALL_MOLECULE_SCREENER.getImpliedRoles());
-    assertEquals(Collections.emptyList(),
+    assertEquals(Sets.newHashSet(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS, ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES),
+                 ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS.getImpliedRoles());
+    assertEquals(Collections.emptySet(),
                  ScreensaverUserRole.SCREENSAVER_USER.getImpliedRoles());
   }
   
@@ -48,14 +47,12 @@ public class ScreensaverUserRoleTest extends TestCase
     assertTrue(ScreensaverUserRole.READ_EVERYTHING_ADMIN.isAdministrative());
     assertTrue(ScreensaverUserRole.SCREENS_ADMIN.isAdministrative());
     assertTrue(ScreensaverUserRole.BILLING_ADMIN.isAdministrative());
-    assertFalse(ScreensaverUserRole.SCREENER.isAdministrative());
-    assertFalse(ScreensaverUserRole.SMALL_MOLECULE_SCREENER.isAdministrative());
+    assertFalse(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS.isAdministrative());
   }
   
   public void testDisplayableRoleName()
   {
-    assertEquals("Small Molecule Screener", ScreensaverUserRole.SMALL_MOLECULE_SCREENER.getDisplayableRoleName());
-    assertEquals("RNAi Screener", ScreensaverUserRole.RNAI_SCREENER.getDisplayableRoleName());
+    assertEquals("Screensaver User Login", ScreensaverUserRole.SCREENSAVER_USER.getDisplayableRoleName());
   }
 
 }

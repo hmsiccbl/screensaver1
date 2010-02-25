@@ -45,7 +45,7 @@ public class WellNameValueTable extends ComboNameValueTable
       if (!!!reagent.isRestricted()) {
         if (reagent instanceof SilencingReagent) {
           SilencingReagent silencingReagent = (SilencingReagent) reagent;
-          if (wellViewer.isAllowedAccessToSilencingReagentSequence()) {
+          if (wellViewer.isAllowedAccessToSilencingReagentSequence(well)) {
             comboNameValueTables.add(new SilencingReagentNameValueTable(silencingReagent));
           }
           comboNameValueTables.add(new GeneNameValueTable(silencingReagent.getFacilityGene()));

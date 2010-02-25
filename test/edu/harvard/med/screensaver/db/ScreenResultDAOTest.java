@@ -19,14 +19,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
-import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
@@ -90,13 +90,12 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
             WellKey wellKey = new WellKey(( iWell / 2 ) + 1,
                                           (iWell / library.getPlateSize().getRows()),
                                           (iWell % library.getPlateSize().getColumns()));
-
             wells[iWell] = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
+            AssayWell assayWell = screenResult.createAssayWell(wells[iWell], AssayWellType.EXPERIMENTAL);
             for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
-              rvt[iResultValue].createResultValue(wells[iWell],
-                                               AssayWellType.EXPERIMENTAL,
-                                               "value " + iWell + "," + iResultValue,
-                                               iWell % 2 == 1);
+              rvt[iResultValue].createResultValue(assayWell,
+                                                  "value " + iWell + "," + iResultValue,
+                                                  iWell % 2 == 1);
             }
           }
           genericEntityDao.saveOrUpdateEntity(library);
@@ -244,8 +243,6 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
 
   public void testDeleteScreenResult()
   {
-    final int[] screenResultIds = new int[1];
-
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -254,35 +251,20 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
         genericEntityDao.saveOrUpdateEntity(library);
         Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
         MakeDummyEntities.makeDummyScreenResult(screen1, library);
-        genericEntityDao.saveOrUpdateEntity(screen1.getLeadScreener());
-        genericEntityDao.saveOrUpdateEntity(screen1.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen1);
       }
     });
 
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-        assertNotNull("screen1 has screen result initially", screen1.getScreenResult());
-        screenResultIds[0] = screen1.getScreenResult().getEntityId();
-        screenResultsDao.deleteScreenResult(screen1.getScreenResult());
-        assertNull("screen1 has no screen result after delete from screen, but before commit", screen1.getScreenResult());
-      }
-    });
+    Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    assertNotNull("screen1 has screen result initially", screen1.getScreenResult());
+    final Integer screenResultId = screen1.getScreenResult().getEntityId();
+    screenResultsDao.deleteScreenResult(screen1.getScreenResult());
+    assertNull("in-memory screen has no screen result after delete from screen, ", screen1.getScreenResult());
 
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-        assertNull("screen1 has no screen result after delete and commit", screen1.getScreenResult());
-
-        ScreenResult screenResult1 = genericEntityDao.findEntityById(ScreenResult.class, screenResultIds[0]);
-        assertNull("screenResult1 was deleted from database", screenResult1);
-      }
-    });
+    screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    assertNull("screen1 has no screen result after delete and commit", screen1.getScreenResult());
+    ScreenResult screenResult1 = genericEntityDao.findEntityById(ScreenResult.class, screenResultId);
+    assertNull("screenResult1 was deleted from database", screenResult1);
   }
 
   /**
@@ -323,10 +305,11 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           Well well = library.createWell(new WellKey(plateNumber, "A01"), LibraryWellType.EXPERIMENTAL);
           expectedWells.add(well);
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
+          AssayWell assayWell = screenResult.createAssayWell(well, assayWellType);
           boolean exclude = i % 4 == 0;
           double rvt1Value = (double) i;
-          rvt1.createResultValue(well, assayWellType, rvt1Value, 3, exclude);
-          rvt2.createResultValue(well, assayWellType, "false", false);
+          rvt1.createResultValue(assayWell, rvt1Value, 3, exclude);
+          rvt2.createResultValue(assayWell, "false", false);
           if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
             expectedExperimentalWellCount[0]++;
             if (!exclude && rvt1Value >= indicatorCutoff) {
@@ -375,8 +358,9 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {
         Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), LibraryWellType.EXPERIMENTAL);
-        rvt1.createResultValue(well, (double) iWell, 3);
-        rvt2.createResultValue(well, iWell + 10.0, 3);
+        AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
+        rvt1.createResultValue(assayWell, (double) iWell, 3);
+        rvt2.createResultValue(assayWell, iWell + 10.0, 3);
       }
     }
     genericEntityDao.saveOrUpdateEntity(library);

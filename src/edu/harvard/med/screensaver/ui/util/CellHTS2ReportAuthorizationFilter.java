@@ -44,7 +44,7 @@ public class CellHTS2ReportAuthorizationFilter extends OncePerRequestFilter {
     ScreenViewer bean = ((ScreenViewer) httpSession.getAttribute("scopedTarget.screenViewer"));
     try {
       if (bean != null) {
-        Screen screen = bean.getScreen();
+        Screen screen = bean.getEntity();
         if (screen != null) {
           ScreenResult screenResult = screen.getScreenResult();
           if (screenResult != null && !screenResult.isRestricted()) {

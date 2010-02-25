@@ -13,8 +13,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
@@ -22,13 +21,18 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
+import edu.harvard.med.screensaver.ui.table.column.ColumnType;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
-import edu.harvard.med.screensaver.ui.table.column.ListColumn;
+import edu.harvard.med.screensaver.ui.table.column.SetColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
 import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
+
+import org.apache.log4j.Logger;
+
+import com.google.common.collect.Sets;
 
 /**
  * Aggregates WellVolumeAdjustments into WellVolumes, and provides these
@@ -64,14 +68,12 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
   public WellVolumeSearchResults(GenericEntityDAO dao,
                                  LibraryViewer libraryViewer,
                                  WellViewer wellViewer,
-                                 CherryPickRequestViewer cherryPickRequestViewer,
-                                 WellVolumeAdjustmentSearchResults rowDetail)
+                                 CherryPickRequestViewer cherryPickRequestViewer)
   {
     _dao = dao;
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
-    // setRowDetail(rowDetail);
   }
 
   // public methods
@@ -104,7 +106,7 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public Object cellAction(WellVolume wellVolume)
       {
-        return _libraryViewer.viewLibrary(wellVolume.getWell().getLibrary());
+        return _libraryViewer.viewEntity(wellVolume.getWell().getLibrary());
       }
     });
     columns.add(new IntegerColumn<WellVolume>("Plate",
@@ -132,15 +134,15 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
       @Override
       public Object cellAction(WellVolume wellVolume)
       {
-        return _wellViewer.viewWell(wellVolume.getWell());
+        return _wellViewer.viewEntity(wellVolume.getWell());
       }
     });
-    columns.add(new ListColumn<WellVolume>("Copies",
-      "The copies of this well", TableColumn.UNGROUPED) {
+    columns.add(new SetColumn<WellVolume,String>("Copies",
+      "The copies of this well", TableColumn.UNGROUPED, ColumnType.TEXT_SET) {
       @Override
-      public List<String> getCellValue(WellVolume wellVolume)
+      public Set<String> getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getActiveWellInfo().getCopiesList();
+        return Sets.newTreeSet(wellVolume.getActiveWellInfo().getCopiesList());
       }
     });
     columns.add(new VolumeColumn<WellVolume>("Total Initial Copy Volume",
@@ -195,12 +197,12 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
 
     // Retired column info (hidden by default) //
     
-    TableColumn<WellVolume,?> c = new ListColumn<WellVolume>("Copies (Retired)",
-      "The retired copies of this well", TableColumn.UNGROUPED) {
+    TableColumn<WellVolume,?> c = new SetColumn<WellVolume,String>("Copies (Retired)",
+      "The retired copies of this well", TableColumn.UNGROUPED, ColumnType.TEXT_SET) {
       @Override
-      public List<String> getCellValue(WellVolume wellVolume)
+      public Set<String> getCellValue(WellVolume wellVolume)
       {
-        return wellVolume.getRetiredWellInfo().getCopiesList();
+        return Sets.newTreeSet(wellVolume.getRetiredWellInfo().getCopiesList());
       }
     };
     c.setVisible(false);

@@ -95,7 +95,7 @@ public class WellDetailsNameValueTable extends NameValueTable
   {
     String name = getName(index);
     if (name.equals(LIBRARY)) {
-      return _libraryViewer.viewLibrary(_well.getLibrary());
+      return _libraryViewer.viewEntity(_well.getLibrary());
     }
     return null;
   }

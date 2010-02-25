@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.model;
 
 import java.math.BigDecimal;
 
+import edu.harvard.med.screensaver.util.StringUtils;
+
 /**
  * A volume, in either liter, milliliter, microliter or nanoliter units, with
  * 1-nanoliter resolution (maximum).
@@ -63,4 +65,12 @@ public class Volume extends Quantity<Volume,VolumeUnit>
     return new Volume(value, unit);
   }
   
+  public static Volume makeVolume(String value, VolumeUnit unit)
+  {
+    Volume v = null;
+    if (!StringUtils.isEmpty(value)) {
+      v = new Volume(value, unit).convertToReasonableUnits();
+    }
+    return v;
+  }
 }

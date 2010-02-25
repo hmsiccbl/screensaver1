@@ -166,10 +166,10 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
         // restrict to a domain
         addDomainRestrictions(hql, path2Alias);
 
-        // we apply a 'distinct' filter in case the Relationships provided by
+        // we add a group by clause in case the Relationships provided by
         // client code does not restrict each relationship to single entity
-        // TODO: use distinctProjectionValues(), for server-side efficiency gains (requires adding order by fields to select list)
-        hql.distinctRootEntities();
+        // (note: we can't use 'distinct', w/o also adding the order by fields to the select clause, which would be inefficient)
+        hql.groupBy(getRootAlias(), "id");
 
         if (log.isDebugEnabled()) {
           log.debug("fetch keys query: " + hql);

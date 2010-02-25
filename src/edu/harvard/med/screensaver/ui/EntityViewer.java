@@ -1,5 +1,5 @@
-// $HeadURL: $
-// $Id: $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //
@@ -9,10 +9,26 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 
-public interface EntityViewer
+public interface EntityViewer<E extends Entity>
 {
-  public AbstractEntity getEntity();
+  /** Get the current entity */
+  E getEntity();
+  
+  /** Set the current entity */
+  void setEntity(E entity);
+
+  /** Set the entity, then view */
+  String viewEntity(E entity);
+  
+  /** View the current entity */
+  String view();
+
+  /**
+   * Initialize the viewer with the same entity it is currently showing, but
+   * reloaded from the database.
+   */
+  String reload();
 }
 

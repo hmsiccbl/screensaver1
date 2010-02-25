@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -41,7 +43,8 @@ public class HeatMapCellTest extends AbstractSpringTest
     ResultValueType rvt = screenResult.createResultValueType("rvt1");
     Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
     Well well = library.createWell(new WellKey(1, "A01"), LibraryWellType.EMPTY);
-    rvt.createResultValue(well, "1.0");
+    AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
+    rvt.createResultValue(assayWell, "1.0");
 
     HeatMapCell cell = new HeatMapCell(rvt.getWellKeyToResultValueMap().get(well.getWellKey()),
                                        well.getWellKey(),

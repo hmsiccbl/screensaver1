@@ -54,10 +54,10 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -269,7 +269,7 @@ public class TestDataFactory
       {
         Screen screen = newInstance(Screen.class);
         screen.setScreenType(ScreenType.SMALL_MOLECULE);
-        CherryPickRequest cpr = screen.createCherryPickRequest();
+        CherryPickRequest cpr = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
         cpr.setTransferVolumePerWellApproved(new Volume("2.0", VolumeUnit.MICROLITERS));
         return cpr;
       }
@@ -281,7 +281,7 @@ public class TestDataFactory
       {
         Screen screen = newInstance(Screen.class);
         screen.setScreenType(ScreenType.RNAI);
-        CherryPickRequest cpr = screen.createCherryPickRequest();
+        CherryPickRequest cpr = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
         cpr.setTransferVolumePerWellApproved(new Volume("2.0", VolumeUnit.MICROLITERS));
         return cpr;
       }
@@ -406,6 +406,14 @@ public class TestDataFactory
       }
     });
     
+    _entityFactoryMap.put(AttachedFileType.class, new EntityFactory() 
+    {
+      public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
+      {
+        return newInstance(ScreenAttachedFileType.class);
+      }
+    });
+
     _entityFactoryMap.put(AttachedFile.class, new EntityFactory() 
     {
       public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
@@ -413,7 +421,7 @@ public class TestDataFactory
         Screen screen = newInstance(Screen.class);
         try {
           return screen.createAttachedFile("filename_" + getTestValueForType(String.class),
-                                           AttachedFileType.APPLICATION,
+                                           new ScreenAttachedFileType(getStringTestValue()),
                                            "filecontents_" + getTestValueForType(String.class));
         }
         catch (IOException e) {
@@ -572,7 +580,6 @@ public class TestDataFactory
       LabCherryPick lcp = newInstance(LabCherryPick.class);
       return new Object[] {lcp.getSourceWell()};
     }
-
     Object[] arguments = getArgumentsForParameterTypes(parameterTypes, relatedEntity);
     return arguments;
   }

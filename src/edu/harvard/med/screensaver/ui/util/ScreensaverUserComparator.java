@@ -12,19 +12,17 @@ package edu.harvard.med.screensaver.ui.util;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
-public class ScreensaverUserComparator extends NullSafeComparator<ScreensaverUser>
+public class ScreensaverUserComparator<U extends ScreensaverUser> extends NullSafeComparator<U>
 {
-  private static ScreensaverUserComparator _instance = new ScreensaverUserComparator();
-  
-  public static ScreensaverUserComparator getInstance()
+  public static <U extends ScreensaverUser> ScreensaverUserComparator<U> getInstance()
   {
-    return _instance;
+    return new ScreensaverUserComparator<U>();
   }
   
   @Override
-  protected int doCompare(ScreensaverUser o1, ScreensaverUser o2)
+  protected int doCompare(U u1, U u2)
   {
-    return o1.getFullNameLastFirst().compareTo(o2.getFullNameLastFirst());
+    return u1.getFullNameLastFirst().compareTo(u2.getFullNameLastFirst());
   }
 }
 

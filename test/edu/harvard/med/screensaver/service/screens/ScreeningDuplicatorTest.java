@@ -19,9 +19,10 @@ import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
@@ -48,7 +49,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         genericEntityDao.reattachEntity(_screen);
-        final LibraryScreening libraryScreening1 = screeningDuplicator.addLibraryScreening(_screen);
+        final LibraryScreening libraryScreening1 = screeningDuplicator.addLibraryScreening(_screen, (AdministratorUser) _screen.getCreatedBy());
         _screen = libraryScreening1.getScreen();
         assertEquals(1, _screen.getLabActivities().size());
         assertNull(libraryScreening1.getAssayProtocol()); 
@@ -74,7 +75,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         genericEntityDao.reattachEntity(_screen);
-        LibraryScreening libraryScreening2 = screeningDuplicator.addLibraryScreening(_screen);
+        LibraryScreening libraryScreening2 = screeningDuplicator.addLibraryScreening(_screen, (AdministratorUser) _screen.getCreatedBy());
         assertEquals(2, _screen.getLabActivities().size());
         assertEquals("assay protocol", libraryScreening2.getAssayProtocol()); 
         assertEquals(new LocalDate(2009, 1, 1), libraryScreening2.getAssayProtocolLastModifiedDate()); 
@@ -92,11 +93,17 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         genericEntityDao.reattachEntity(_screen);
-        RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) _screen.createCherryPickRequest();
-        genericEntityDao.persistEntity(cpr);
+        /*RNAiCherryPickRequest cpr = (RNAiCherryPickRequest)*/ _screen.createCherryPickRequest((AdministratorUser) _screen.getCreatedBy());
+      }
+    });
     
-        RNAiCherryPickScreening rnaiCpScreening1 = 
-          screeningDuplicator.addRnaiCherryPickScreening(_screen, cpr);
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction() {
+        genericEntityDao.reattachEntity(_screen);
+        RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) _screen.getCherryPickRequests().iterator().next();
+    
+        CherryPickScreening rnaiCpScreening1 = 
+          screeningDuplicator.addCherryPickScreening(_screen, cpr, (AdministratorUser) _screen.getCreatedBy());
         assertEquals(1, _screen.getLabActivities().size());
         assertNull(rnaiCpScreening1.getAssayProtocol()); 
         assertNull(rnaiCpScreening1.getAssayProtocolLastModifiedDate()); 
@@ -122,8 +129,8 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
       public void runTransaction() {
         genericEntityDao.reattachEntity(_screen);
         RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) _screen.getCherryPickRequests().iterator().next();
-        RNAiCherryPickScreening rnaiCpScreening2 = 
-          screeningDuplicator.addRnaiCherryPickScreening(_screen, cpr);
+        CherryPickScreening rnaiCpScreening2 = 
+          screeningDuplicator.addCherryPickScreening(_screen, cpr, (AdministratorUser) _screen.getCreatedBy());
         assertEquals(2, _screen.getLabActivities().size());
         assertEquals("assay protocol", rnaiCpScreening2.getAssayProtocol()); 
         assertEquals(new LocalDate(2009, 1, 1), rnaiCpScreening2.getAssayProtocolLastModifiedDate()); 

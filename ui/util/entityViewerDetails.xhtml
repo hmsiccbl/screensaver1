@@ -11,6 +11,7 @@
 <!-- facelet params:
 	        - viewer
 	        - entity
+          - editable
           - hideId: boolean (useful if entity has a semantic ID in addition to the database ID)
           - entityCommands: UI fragment for additional commands
 	        - propertiesContent: UI fragment
@@ -54,6 +55,41 @@
     </t:panelGrid>
 
     <ui:insert name="footerContent" />
+
+    <ss:collapsiblePanel id="updateHistory" label="Update History"
+      rendered="#{viewer.readAdmin &amp;&amp; !viewer.editMode &amp;&amp; !empty viewer.entityUpdateSearchResults}"
+      isCollapsed="#{viewer.isPanelCollapsedMap['updateHistory']}">
+      <ui:define name="closedContent" />
+      <ui:define name="content">
+        <ss:collectionTable id="updateHistoryTable"
+          dataModel="#{viewer.entityUpdateSearchResults.dataTableModel}">
+          <ui:define name="columns">
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Date" />
+              </f:facet>
+              <t:outputText value="#{element.dateCreated}"
+                styleClass="dataText" converter="#{dateTimeConverter}" />
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Updated By" />
+              </f:facet>
+              <t:outputText
+                value="#{element.performedBy.fullNameLastFirst}"
+                styleClass="dataText" />
+            </t:column>
+            <t:column>
+              <f:facet name="header">
+                <t:outputText value="Description" />
+              </f:facet>
+              <t:outputText value="#{element.comments}"
+                styleClass="dataText" />
+            </t:column>
+          </ui:define>
+        </ss:collectionTable>
+      </ui:define>
+    </ss:collapsiblePanel>
 
     <f:subview id="commandsBottom">
       <t:panelGroup id="commandPanelBottom"

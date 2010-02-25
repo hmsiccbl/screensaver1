@@ -78,7 +78,7 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
     List<PropertyPath<WellVolumeAdjustment>> performedByPropertyPaths = new ArrayList<PropertyPath<WellVolumeAdjustment>>();
     performedByPropertyPaths.add(WellVolumeAdjustment.wellVolumeorrectionActivity.to(Activity.performedBy).toProperty("lastName"));
     performedByPropertyPaths.add(WellVolumeAdjustment.wellVolumeorrectionActivity.to(Activity.performedBy).toProperty("firstName"));
-    columns.add(new UserNameColumn<WellVolumeAdjustment>(
+    columns.add(new UserNameColumn<WellVolumeAdjustment,ScreensaverUser>(
       WellVolumeAdjustment.wellVolumeorrectionActivity.to(Activity.performedBy),
       "Performed By", "The person that performed the volume adjustment", TableColumn.UNGROUPED, _userViewer) {
       @Override
@@ -113,7 +113,7 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
       public boolean isCommandLink() { return true; }
 
       @Override
-      public Object cellAction(WellVolumeAdjustment entity) { return _cherryPickRequestViewer.viewCherryPickRequest(entity.getLabCherryPick().getCherryPickRequest()); }
+      public Object cellAction(WellVolumeAdjustment entity) { return _cherryPickRequestViewer.viewEntity(entity.getLabCherryPick().getCherryPickRequest()); }
     });
     columns.add(new IntegerEntityColumn<WellVolumeAdjustment>(
       WellVolumeAdjustment.wellVolumeorrectionActivity.toProperty("activityId"),
@@ -125,8 +125,8 @@ public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellV
   }
 
   @Override
-  protected void setEntityToView(WellVolumeAdjustment entity)
+  public void searchAll()
   {
-    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("not implemented");
   }
 }

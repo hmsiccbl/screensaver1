@@ -32,11 +32,10 @@ import org.hibernate.annotations.Type;
 @Entity
 @Immutable
 @org.hibernate.annotations.Proxy
-public class FundingSupport extends AbstractEntity implements Comparable<FundingSupport>
+public class FundingSupport extends AbstractEntity<Integer> implements Comparable<FundingSupport>
 {
   private static final long serialVersionUID = 1L;
   
-  private Integer _fundingSupportId;
   private String _value;
 
   private FundingSupport()
@@ -48,13 +47,6 @@ public class FundingSupport extends AbstractEntity implements Comparable<Funding
     _value = value;
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getFundingSupportId();
-  }
-
   @Id
   @org.hibernate.annotations.GenericGenerator(
     name="funding_support_id_seq",
@@ -64,12 +56,12 @@ public class FundingSupport extends AbstractEntity implements Comparable<Funding
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="funding_support_id_seq")
   public Integer getFundingSupportId()
   {
-    return _fundingSupportId;
+    return getEntityId();
   }
   
   private void setFundingSupportId(Integer fundingSupportId)
   {
-    _fundingSupportId = fundingSupportId;
+    setEntityId(fundingSupportId);
   }
 
   @Column(unique=true)

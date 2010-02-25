@@ -39,9 +39,10 @@ public class ResultValueTest extends AbstractEntityInstanceTest<ResultValue>
       MakeDummyEntities.makeDummyScreen(1).createScreenResult();
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     Well well = library.createWell(new WellKey("00001:A01"), LibraryWellType.EXPERIMENTAL);
+    AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
     ResultValueType rvt = screenResult.createResultValueType("rvt");
     rvt.setNumeric(true);
-    ResultValue rv = rvt.createResultValue(well, AssayWellType.EXPERIMENTAL, 5.0123, 3, true);
+    ResultValue rv = rvt.createResultValue(assayWell, 5.0123, 3, true);
     assertEquals("default decimal precision formatted string", "5.012", rv.getValue());
     assertEquals("default decimal precision formatted string", "5.0123", rv.formatNumericValue(4));
     assertEquals("default decimal precision formatted string", "5", rv.formatNumericValue(0));

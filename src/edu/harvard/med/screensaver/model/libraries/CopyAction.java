@@ -39,7 +39,7 @@ import org.joda.time.LocalDate;
 @Entity
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=CopyInfo.class)
-public class CopyAction extends AbstractEntity
+public class CopyAction extends AbstractEntity<Integer>
 {
 
   // static fields
@@ -50,7 +50,6 @@ public class CopyAction extends AbstractEntity
 
   // instance fields
 
-  private Integer _copyActionId;
   private Integer _version;
   private CopyInfo _copyInfo;
   private String _description;
@@ -63,13 +62,6 @@ public class CopyAction extends AbstractEntity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getCopyActionId();
   }
 
   /**
@@ -85,7 +77,7 @@ public class CopyAction extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="copy_action_id_seq")
   public Integer getCopyActionId()
   {
-    return _copyActionId;
+    return getEntityId();
   }
 
   /**
@@ -180,7 +172,7 @@ public class CopyAction extends AbstractEntity
    */
   private void setCopyActionId(Integer copyActionId)
   {
-    _copyActionId = copyActionId;
+    setEntityId(copyActionId);
   }
 
   /**

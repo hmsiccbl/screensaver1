@@ -84,9 +84,10 @@
 	<classpathentry kind="lib" path="lib/web/.dev/servlet-api-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/REngine.jar"/>
 	<classpathentry kind="lib" path="lib/Rserve.jar"/>
-	<classpathentry kind="lib" path="lib/util/google-collect-snapshot-20080820.jar"/>
 	<classpathentry kind="lib" path="lib/util/findbugs/annotations.jar"/>
 	<classpathentry kind="lib" path="lib/pipelinepilot/pilot.jar"/>
 	<classpathentry kind="lib" path="lib/persistence/postgresql-8.4-701.jdbc3.jar"/>
+	<classpathentry kind="lib" path="lib/util/mail-1.4.3.jar"/>
+	<classpathentry kind="lib" path="lib/util/google-collect-1.0.jar" sourcepath="/usr/local/dev/google-collect-1.0/src-1.0.zip"/>
 	<classpathentry kind="output" path=".eclipse.classes"/>
 </classpath>

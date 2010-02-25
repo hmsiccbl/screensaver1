@@ -20,11 +20,12 @@ import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -115,17 +116,17 @@ public class WellFinder extends AbstractBackingBean
    * page depending on the result.
    * @return the control code for the appropriate next page
    */
-  @UIControllerMethod
+  @UICommand
   public String findWell()
   {
     Well well = _plateWellListParser.lookupWell(_plateNumber, _wellName);
-    if(well != null) {
+    if (well != null) {
       resetSearchFields();
-      return _wellViewer.viewWell(well);
-    }else {
+      return _wellViewer.viewEntity(well);
+    } else {
       showMessage("wells.plateWellNotFound", _plateNumber, _wellName);
     }
-    return null;
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   /**
@@ -133,48 +134,39 @@ public class WellFinder extends AbstractBackingBean
    * page.
    * @return the controller code for the next appropriate page
    */
-  @UIControllerMethod
+  @UICommand
+  @Transactional
   public String findWells()
   {
-    final String[] result = new String[1];
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        PlateWellListParserResult parseResult = _plateWellListParser.parseWellsFromPlateWellList(_plateWellList);
-        // display parse errors before proceeding with successfully parsed wells
-        for (Pair<Integer,String> error : parseResult.getErrors()) {
-          showMessage("libraries.plateWellListParseError", error.getSecond());
-        }
+    String result = null;
+    PlateWellListParserResult parseResult = _plateWellListParser.parseWellsFromPlateWellList(_plateWellList);
+    // display parse errors before proceeding with successfully parsed wells
+    for (Pair<Integer,String> error : parseResult.getErrors()) {
+      showMessage("libraries.plateWellListParseError", error.getSecond());
+    }
 
-        Set<WellKey> foundWells = new HashSet<WellKey>();
-        for (WellKey wellKey : parseResult.getParsedWellKeys()) {
-          // TODO: eliminate this dao call here; it's wasteful; make this check when loading the data later on
-          Well well = _dao.findEntityById(Well.class,
-                                          wellKey.toString(),
-                                          true);
-          if (well == null) {
-            showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
-          }
-          else {
-            foundWells.add(well.getWellKey());
-          }
-        }
-
-        if (foundWells.size() == 0) {
-          result[0] = REDISPLAY_PAGE_ACTION_RESULT;
-        }
-        // show in well viewer, iff the user entered exactly 1 well (counting erroneous wells)
-        else if (parseResult.getParsedWellKeys().size() == 1 && parseResult.getErrors().size() == 0) {
-          result[0] = _wellViewer.viewWell(parseResult.getParsedWellKeys().first());
-        }
-        else {
-          _wellsBrowser.searchWells(foundWells);
-          result[0] = VIEW_WELL_SEARCH_RESULTS;
-        }
+    Set<WellKey> foundWells = new HashSet<WellKey>();
+    for (WellKey wellKey : parseResult.getParsedWellKeys()) {
+      // TODO: eliminate this dao call here; it's wasteful; make this check when loading the data later on
+      Well well = _dao.findEntityById(Well.class,
+                                      wellKey.toString(),
+                                      true);
+      if (well == null) {
+        showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
       }
-    });
-    return result[0];
+      else {
+        foundWells.add(well.getWellKey());
+      }
+    }
+
+    if (foundWells.size() > 0) {
+      _wellsBrowser.searchWells(foundWells);
+      if (foundWells.size() == 1) {
+        _wellsBrowser.getRowsPerPageSelector().setSelection(1);
+      }
+      return BROWSE_WELLS;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   /**
@@ -183,7 +175,7 @@ public class WellFinder extends AbstractBackingBean
    *
    * @return the controller code for the next appropriate page
    */
-  @UIControllerMethod
+  @UICommand
   public String findWellVolumes()
   {
     final String[] result = new String[1];
@@ -199,7 +191,7 @@ public class WellFinder extends AbstractBackingBean
         }
 
         _wellCopyVolumesBrowser .searchWells(parseResult.getParsedWellKeys());
-        result[0] = VIEW_WELL_VOLUME_SEARCH_RESULTS;
+        result[0] = BROWSE_WELL_VOLUMES;
       }
     });
     return result[0];

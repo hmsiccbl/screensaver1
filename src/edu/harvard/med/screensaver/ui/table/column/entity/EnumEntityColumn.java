@@ -50,4 +50,9 @@ public abstract class EnumEntityColumn<E extends AbstractEntity, ENUM extends En
   {
     return _fetchPaths.getRelationshipPaths();
   }
+
+  public boolean isFetchableProperty()
+  {
+    return _fetchPaths.isFetchableProperty();
+  }
 }

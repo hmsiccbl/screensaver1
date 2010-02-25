@@ -18,7 +18,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -38,7 +37,7 @@ import org.joda.time.LocalDate;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class AbaseTestset extends AbstractEntity
+public class AbaseTestset extends AbstractEntity<Integer>
 {
 
   // static fields
@@ -49,7 +48,6 @@ public class AbaseTestset extends AbstractEntity
 
   // instance fields
 
-  private Integer _abaseTestsetId;
   private Integer _version;
   private Screen _screen;
   private LocalDate _testsetDate;
@@ -62,13 +60,6 @@ public class AbaseTestset extends AbstractEntity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getAbaseTestsetId();
   }
 
   /**
@@ -86,7 +77,7 @@ public class AbaseTestset extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="abase_testset_id_seq")
   public Integer getAbaseTestsetId()
   {
-    return _abaseTestsetId;
+    return getEntityId();
   }
 
   /**
@@ -213,7 +204,7 @@ public class AbaseTestset extends AbstractEntity
    */
   private void setAbaseTestsetId(Integer abaseTestsetId)
   {
-    _abaseTestsetId = abaseTestsetId;
+    setEntityId(abaseTestsetId);
   }
 
   /**

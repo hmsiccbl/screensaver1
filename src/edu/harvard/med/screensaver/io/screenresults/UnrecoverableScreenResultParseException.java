@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
-import edu.harvard.med.screensaver.io.workbook2.Cell;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 
 /**
@@ -23,34 +22,15 @@ public class UnrecoverableScreenResultParseException extends Exception
 {
 
   private Workbook _workbook;
-  private Cell _cell;
   
   /**
    * 
    */
   private static final long serialVersionUID = 5285861320482270566L;
   
-  public UnrecoverableScreenResultParseException(String message, Workbook workbook)
+  public UnrecoverableScreenResultParseException(String message)
   {
-    super(message + " in " + workbook);
-    _workbook = workbook;
-  }
-
-  public UnrecoverableScreenResultParseException(String message, Cell cell)
-  {
-    super(message + " @ " + cell);
-    _cell = (Cell) cell.clone();
-  }
-  
-  public Workbook getWorkbook()
-  {
-    if (_workbook != null) {
-      return _workbook;
-    }
-    if (_cell != null) {
-      return _cell.getWorkbook();
-    }
-    return null;
+    super(message);
   }
 
 }

@@ -9,9 +9,17 @@
 
 package edu.harvard.med.iccbl.screensaver.policy;
 
+import java.util.List;
+import java.util.Set;
+
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
+import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
+import edu.harvard.med.screensaver.db.hibernate.JoinType;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -33,20 +41,22 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -59,34 +69,64 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
-import com.google.common.base.Predicate;
+import com.google.common.base.Joiner;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 /**
- * A DataAccessPolicy implementation that is used by the web
- * application.  It is parameterized with a {@link
- * WebCurrentScreensaverUser} when instantiated, allowing a single
- * instance of this class (per web application instance) to determine
- * entity usage authorizations for the current web user.
+ * A DataAccessPolicy implementation that is used by the web application.
  */
 public class WebDataAccessPolicy implements DataAccessPolicy
 {
   private static final String CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
-  private static final String MARCUS_LIBRARY_PREFIX = "Marcus";
   public static final String MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Marcus Library Screen";
+  public static final String GRAY_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Gray Library Screen";
 
   private static Logger log = Logger.getLogger(WebDataAccessPolicy.class);
 
   private CurrentScreensaverUser _currentScreensaverUser;
-
+  private ScreensaverUser _screensaverUser;
+  private GenericEntityDAO _dao;
+  private Set<Screen> _myScreens;
+  private Set<Screen> _publicScreens;
+  private HashMultimap<String,Screen> _screensForFundingSupport = HashMultimap.create();
+  private Set<Screen> _othersVisibleSmallMoleculeScreens;
+  private Set<Screen> _smallMoleculeScreensWithMutualPositives;
+  private Set<Screen> _mutualSmallMoleculeScreens;
+  private Set<Well> _smallMoleculeMutualPositiveWells;
+  private Set<Integer> _restrictedReagentLibraryPlates;
   
-  public WebDataAccessPolicy(CurrentScreensaverUser user)
+  protected WebDataAccessPolicy() {}
+
+  public WebDataAccessPolicy(CurrentScreensaverUser user,
+                             GenericEntityDAO dao) 
   {
     _currentScreensaverUser = user;
+    _dao = dao;
+  }
+  
+  /**
+   * @motivation for unit tests
+   */
+  public WebDataAccessPolicy(ScreensaverUser user,
+                             GenericEntityDAO dao) 
+  {
+    _screensaverUser = user;
+    _dao = dao;
+  }
+  
+  public ScreensaverUser getScreensaverUser() 
+  {
+    if (_screensaverUser == null) {
+      _screensaverUser = _currentScreensaverUser.getScreensaverUser();
+    }
+    return _screensaverUser;
   }
 
   public boolean visit(AbaseTestset entity)
@@ -96,7 +136,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(AdministrativeActivity administrativeActivity)
   {
-    return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+    return getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
   public boolean visit(AnnotationType annotation)
@@ -109,7 +149,17 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return visit(annotationValue.getAnnotationType());
   }
 
+  public boolean visit(AssayWell assayWell)
+  {
+    return true;
+  }
+
   public boolean visit(AttachedFile entity)
+  {
+    return true;
+  }
+
+  public boolean visit(AttachedFileType entity)
   {
     return true;
   }
@@ -156,17 +206,16 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(SmallMoleculeReagent entity)
   {
-    if (entity.getWell().getLibrary().getLibraryName().equals(CHEMDIV6_LIBRARY_NAME)) {
-      return isReadEverythingAdmin();
+    if (findRestrictedReagentLibraryPlates().contains(entity.getWell().getPlateNumber())) {
+      return false;
     }
     return true;
   }
 
   public boolean visit(NaturalProductReagent entity)
   {
-    if (entity.getWell().getLibrary().getLibraryName().startsWith(MARCUS_LIBRARY_PREFIX)) {
-      return isReadEverythingAdmin() || 
-      _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.MARCUS_ADMIN);
+    if (findRestrictedReagentLibraryPlates().contains(entity.getWell().getPlateNumber())) {
+      return false;
     }
     return true;
   }
@@ -237,17 +286,37 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(Publication entity)
   {
-
     return true;
   }
 
   public boolean visit(ResultValue entity)
   {
-    return true;
+    // exceptions for SM positive RVs, allowing a subset of RVs to be visible, even if screen result is not visible
+    if (entity.isPositive()) {
+      Screen screen = entity.getResultValueType().getScreenResult().getScreen();
+      if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+        if (findOthersVisibleSmallMoleculeScreens().contains(screen)) {
+          if (findSmallMoleculeMutualPositiveWells().contains(entity.getWell())) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return visit(entity.getResultValueType().getScreenResult());
   }
 
   public boolean visit(ResultValueType entity)
   {
+    // exceptions for SM positives RVTS, allowing a subset of RVTs to be visible, even if screen result is not visible
+    // TODO: we could make this even more strict by restricting RVTs that have
+    // no mutual positive RVs with "my screens"; currently we show all positives
+    // RVTs if any positives RVT has a mutual positive
+    if (entity.isPositiveIndicator() && entity.getScreenResult().getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+      if (findOthersVisibleSmallMoleculeScreens().contains(entity.getScreenResult().getScreen())) {
+        return true;
+      }
+    }
     return visit(entity.getScreenResult());
   }
 
@@ -258,68 +327,268 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(Study study)
   {
-    if (study.isShareable()) {
-      return true;
-    }
-    return isReadEverythingAdmin() || isScreenerAssociatedWithScreen((Screen) study);
+    return visit((Screen) study);
   }
 
   public boolean visit(Screen screen)
   {
-    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
+    ScreensaverUser user = getScreensaverUser();
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.MARCUS_ADMIN)) {
-      if (_currentScreensaverUser instanceof WebCurrentScreensaverUser) {
-        // TODO: HACK: Screen.fundingSupports is not always initialized in a web
-        // context, so we need to explicitly load from the database
-        WebCurrentScreensaverUser webUser = (WebCurrentScreensaverUser) _currentScreensaverUser;
-        screen = webUser.getDao().reloadEntity(screen, true, Screen.fundingSupports.getPath());
-      }
-      // note: marcusAdmins are NOT allowed access to non-Marcus screens, even though they are also readEverythingAdmins
-      return Iterables.any(screen.getFundingSupports(), 
-                           new Predicate<FundingSupport>() { 
-        public boolean apply(FundingSupport fs) { return fs.toString().equals(MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME); } });
+      return findScreensForFundingSupport(MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME).contains(screen);
+    }
+    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.GRAY_ADMIN)) {
+      return findScreensForFundingSupport(GRAY_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME).contains(screen);
     }
     if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREENS_ADMIN)) {
       return true;
     }
-    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE) &&
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.SMALL_MOLECULE_SCREENER)) {
+    if (findMyScreens().contains(screen)) {
+      log.debug("screen " + screen.getScreenNumber() + " is visible: \"my screen\"");
       return true;
     }
+    if (findPublicScreens().contains(screen)) {
+      log.debug("screen " + screen.getScreenNumber() + " is visible: \"public\"");
+      return true;
+    }
+    if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+      // TODO: handle expired SM DSL screen (treat as level 1)
+      boolean isOthersVisibleScreen = findOthersVisibleSmallMoleculeScreens().contains(screen);
+      if (isOthersVisibleScreen) {
+        log.debug("screen is " + screen.getScreenNumber() + " visible: \"small molecule screen shared by others\"");
+      }
+      return isOthersVisibleScreen;
+    }
     if (screen.getScreenType().equals(ScreenType.RNAI) &&
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENER)) {
+      user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS)) {
+      log.debug("screen " + screen.getScreenNumber() + " is visible: \"rnai screen for rnai screener\"");
       return true;
     }
     return false;
   }
 
+  private Set<Screen> findOthersVisibleSmallMoleculeScreens()
+  {
+    if (_othersVisibleSmallMoleculeScreens == null) {
+      _othersVisibleSmallMoleculeScreens = Sets.newHashSet();
+      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS)) {
+        if (userHasQualifiedDepositedSmallMoleculeData()) {
+          _othersVisibleSmallMoleculeScreens.addAll(findMutualSmallMoleculeScreens());
+          _othersVisibleSmallMoleculeScreens.addAll(findSmallMoleculeScreensWithMutualPositives());
+        }
+      }
+      else if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES)) {
+        _othersVisibleSmallMoleculeScreens.addAll(findSmallMoleculeScreensWithMutualPositives());
+      }
+    }
+    return _othersVisibleSmallMoleculeScreens;
+  }
+
+  private boolean userHasQualifiedDepositedSmallMoleculeData()
+  {
+    for (Screen myScreen : findMyScreens()) {
+      if (myScreen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_SCREENS) <= 0) { // verify it's "qualified" by virtue of being a level 0 or 1 screen
+        if (myScreen.getScreenResult() != null) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private Set<Well> findSmallMoleculeMutualPositiveWells()
+  {
+    if (_smallMoleculeMutualPositiveWells == null) {
+      _smallMoleculeMutualPositiveWells = Sets.newHashSet();
+      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES)) {
+        _smallMoleculeMutualPositiveWells.addAll(_dao.<Well>runQuery(new Query() { 
+          public List execute(Session session)
+          {
+            // TODO: can probably optimize by using ANY operator to determine if at least one mutual positive hit occurs in another screen
+            return
+            new HqlBuilder().
+            select("lw2").distinctProjectionValues().
+            from(AssayWell.class, "aw1").from("aw1", AssayWell.screenResult.getPath(), "sr1", JoinType.INNER).from("sr1", ScreenResult.screen.getPath(), "s1", JoinType.INNER).
+            from(AssayWell.class, "aw2").from("aw2", AssayWell.screenResult.getPath(), "sr2", JoinType.INNER).from("sr2", ScreenResult.screen.getPath(), "s2", JoinType.INNER).from("aw2", AssayWell.libraryWell.getPath(), "lw2", JoinType.INNER).
+            where("aw1", "libraryWell", Operator.EQUAL, "aw2", "libraryWell").
+            where("aw1", "positive", Operator.EQUAL, Boolean.TRUE).
+            where("aw2", "positive", Operator.EQUAL, Boolean.TRUE).
+            where("s1", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
+            where("s2", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
+            where("s1", Operator.NOT_EQUAL, "s2"). // don't consider my screens as "others" screens
+            whereIn("s1", findMyScreens()).
+            whereIn("s1", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.SHARED, ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
+            whereIn("s2", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
+            toQuery(session, true).list();
+          }
+        }));
+      }
+    }
+    return _smallMoleculeMutualPositiveWells;
+  }
+
+  private Set<Screen> findSmallMoleculeScreensWithMutualPositives()
+  {
+    if (_smallMoleculeScreensWithMutualPositives == null) { 
+      _smallMoleculeScreensWithMutualPositives = Sets.newHashSet();
+////      _mutualPositivesSmallMoleculeScreens.addAll(
+////                                                  _dao.findEntitiesByHql(Screen.class,
+////                                                                         "select distinct s2 " +
+////                                                                         "from AssayWell aw1 join aw1.screenResult sr1 join sr1.screen s1, " +
+////                                                                         "AssayWell aw2 join aw2.screenResult sr2 join sr2.screen s2 " + 
+////                                                                         "where aw2.libraryWell.id = aw1.libraryWell.id and aw2.positive = true and aw1.positive = true and " +
+////                                                                         "s1 in (?) and " +
+////                                                                         "s2.screenType = ? and s1.screenType = ?",
+////                                                                         findMyScreens(),
+////                                                                         /*Iterables.transform(findMyScreens(), 
+////                                                                                             new Function<Screen,Integer>() { public Integer apply(Screen screen) { return screen.getScreenId(); } }),*/
+////                                                                         ScreenType.SMALL_MOLECULE,
+////                                                                         ScreenType.SMALL_MOLECULE));
+      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES)) {
+        _smallMoleculeScreensWithMutualPositives.addAll(_dao.<Screen>runQuery(new Query() { 
+          public List execute(Session session)
+          {
+            // TODO: can probably optimize by using ANY operator to determine if at least one mutual positive hit occurs in another screen
+            return
+            new HqlBuilder().
+            select("s2").distinctProjectionValues().
+            from(AssayWell.class, "aw1").from("aw1", AssayWell.screenResult.getPath(), "sr1", JoinType.INNER).from("sr1", ScreenResult.screen.getPath(), "s1", JoinType.INNER).
+            from(AssayWell.class, "aw2").from("aw2", AssayWell.screenResult.getPath(), "sr2", JoinType.INNER).from("sr2", ScreenResult.screen.getPath(), "s2", JoinType.INNER).
+            where("aw1", "libraryWell", Operator.EQUAL, "aw2", "libraryWell").
+            where("aw1", "positive", Operator.EQUAL, Boolean.TRUE).
+            where("aw2", "positive", Operator.EQUAL, Boolean.TRUE).
+            where("s1", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
+            where("s2", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
+            where("s1", Operator.NOT_EQUAL, "s2"). // don't consider my screens as "others" screens
+            whereIn("s1", findMyScreens()).
+            whereIn("s1", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.SHARED, ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
+            whereIn("s2", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
+            toQuery(session, true).list();
+          }
+        }));
+        if (log.isDebugEnabled()) {
+          log.debug("others' small molecule screens with mutual positives: " + 
+                    Joiner.on(", ").join(Iterables.transform(_smallMoleculeScreensWithMutualPositives, Screen.ToScreenNumberFunction)));
+        }
+      }
+    }
+    return _smallMoleculeScreensWithMutualPositives;
+  }
+
+  private Set<Screen> findMutualSmallMoleculeScreens()
+  {
+    if (_mutualSmallMoleculeScreens == null) { 
+      _mutualSmallMoleculeScreens = Sets.newHashSet();
+      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS)) {
+        _mutualSmallMoleculeScreens.addAll(_dao.<Screen>runQuery(new Query() { 
+          public List execute(Session session)
+          {
+            return new HqlBuilder().
+            from(Screen.class, "s").
+            where("s", "dataSharingLevel", Operator.EQUAL, ScreenDataSharingLevel.MUTUAL_SCREENS).
+            where("s", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).toQuery(session, true).list();
+          }
+        }));
+      }
+      if (log.isDebugEnabled()) {
+        log.debug("other's mutually shared small molecule screens: " + 
+                  Joiner.on(", ").join(Iterables.transform(_mutualSmallMoleculeScreens, Screen.ToScreenNumberFunction)));
+      }
+    }
+    return _mutualSmallMoleculeScreens;
+  }
+
+  private Set<Screen> findMyScreens()
+  {
+    if (_myScreens == null) {
+      if (getScreensaverUser() instanceof ScreeningRoomUser) {
+        _myScreens = ((ScreeningRoomUser) getScreensaverUser()).getAllAssociatedScreens();
+      } 
+      else {
+        _myScreens = Sets.newHashSet();
+      }
+    }
+    return _myScreens;
+  }
+
+  private Set<Screen> findPublicScreens()
+  {
+    if (_publicScreens == null) {
+      _publicScreens = Sets.newHashSet();
+      _publicScreens.addAll(_dao.<Screen>runQuery(new Query() { 
+        public List execute(Session session)
+        {
+          Set<ScreenType> screenTypes = Sets.newHashSet();
+          if (getScreensaverUser().isUserInRole(ScreensaverUserRole.RNAI_SCREENS)) {
+            screenTypes.add(ScreenType.RNAI);
+          }
+          if (getScreensaverUser().isUserInRole(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS)) {
+            screenTypes.add(ScreenType.SMALL_MOLECULE);
+          }
+          return new HqlBuilder().
+          from(Screen.class, "s").
+          where("s", "dataSharingLevel", Operator.EQUAL, ScreenDataSharingLevel.SHARED).
+          whereIn("s", "screenType", screenTypes).
+          toQuery(session, true).list();
+        }
+      }));
+    }
+    return _publicScreens;
+  }
+
+  private Set<Screen> findScreensForFundingSupport(final String fundingSupportName)
+  {
+    if (!!!_screensForFundingSupport.containsKey(fundingSupportName)) {
+      _screensForFundingSupport.putAll(fundingSupportName,
+                                       _dao.<Screen>runQuery(new Query() { 
+        public List execute(Session session)
+        {
+          return new HqlBuilder().
+          select("s").
+          from(Screen.class, "s").from("s", Screen.fundingSupports.getLeaf(), "fs").
+          where("fs", "value", Operator.EQUAL, fundingSupportName).
+          toQuery(session, true).list();
+        }
+      }));
+    }
+    return _screensForFundingSupport.get(fundingSupportName);
+  }
+
+  private Set<Integer> findRestrictedReagentLibraryPlates()
+  {
+    if (_restrictedReagentLibraryPlates == null) {
+      _restrictedReagentLibraryPlates = Sets.newHashSet();
+      if (!!!isReadEverythingAdmin()) {
+        Library chemDiv6Library = _dao.findEntityByProperty(Library.class, "libraryName", CHEMDIV6_LIBRARY_NAME);
+        if (chemDiv6Library != null) {
+          for (int p = chemDiv6Library.getStartPlate(); p <= chemDiv6Library.getEndPlate(); ++p) {
+            _restrictedReagentLibraryPlates.add(p);
+          }
+        }
+      }
+    }
+    return _restrictedReagentLibraryPlates;
+  }
+
   public boolean visit(ScreenResult screenResult)
   {
-    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    // if user is restricted from parent Screen, they are restricted from the Screen Result
-    if (screenResult.getScreen().isRestricted()) {
+    Screen screen = screenResult.getScreen();
+    if (!!!visit(screen)) {
       return false;
     }
-    if (user.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
-      user.getScreensaverUserRoles().contains(ScreensaverUserRole.SCREEN_RESULTS_ADMIN)) {
+    if (isReadEverythingAdmin() || findMyScreens().contains(screen)) {
       return true;
     }
-    if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      if (isScreenerAllowedAccessToScreenDetails(screenResult.getScreen())) {
-        return true;
-      }
-      if (screenResult.isShareable() && screenerHasScreenResult(screener)) {
-        return true;
-      }
+    if (findPublicScreens().contains(screen) || 
+      findMutualSmallMoleculeScreens().contains(screen)) {
+      return true;
     }
     return false;
   }
 
   public boolean visit(ScreeningRoomUser screeningRoomUser)
   {
-    ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
+    ScreensaverUser loggedInUser = getScreensaverUser();
     if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -339,7 +608,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(AdministratorUser administratorUser)
   {
-    ScreensaverUser loggedInUser = _currentScreensaverUser.getScreensaverUser();
+    ScreensaverUser loggedInUser = getScreensaverUser();
     if (loggedInUser.getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN)) {
       return true;
     }
@@ -356,7 +625,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(StatusItem entity)
   {
-    return true;
+    return isAllowedAccessToScreenActivity(entity.getScreen());
   }
 
   public boolean visit(Well entity)
@@ -379,7 +648,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return visit((LabActivity) entity);
   }
 
-  public boolean visit(RNAiCherryPickScreening entity)
+  public boolean visit(CherryPickScreening entity)
   {
     return visit((LabActivity) entity);
   }
@@ -389,75 +658,67 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return true;
   }
 
-  public boolean isScreenerAllowedAccessToScreenDetails(Screen screen)
+  public boolean isAllowedAccessToScreenDetails(Screen screen)
   {
-    if (isScreenerAssociatedWithScreen(screen) &&
-      // not strictly necessary to check screen.restricted w/current policy, but safer in case policy changes
-      !screen.isRestricted()) {
-      return true;
+    if (!!!visit(screen)) {
+      return false;
     }
-    return false;
+    return isReadEverythingAdmin() ||
+    findMyScreens().contains(screen) || 
+    findPublicScreens().contains(screen) || 
+    findMutualSmallMoleculeScreens().contains(screen);
   }
   
+  /**
+   * Determine whether the current user can see the Status Items, Lab
+   * Activities, and Cherry Pick Requests tables. These are considered more
+   * private than the screen details (see
+   * {@link #isAllowedAccessToScreenDetails()}).
+   */
+  public boolean isAllowedAccessToScreenActivity(Screen screen)
+  {
+    if (!!!visit(screen)) {
+      return false;
+    }
+    return isReadEverythingAdmin() || 
+    findMyScreens().contains(screen);
+  }
+
   public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent)
   {
-    if (reagent.isRestricted()) {
+    if (!!!visit(reagent)) {
       return false;
     }
     return isReadEverythingAdmin();
   }
 
   private boolean visit(CherryPickRequest entity) {
-    // if user is restricted from parent Screen, they are restricted from the CherryPickRequest
-    if (entity.getScreen().isRestricted()) {
-      return false;
-    }
-    return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
+    return isAllowedAccessToScreenActivity(entity.getScreen());
   }
 
   private boolean visit(LabActivity entity)
   {
-    // if user is restricted from parent Screen, they are restricted from the CherryPickRequest
-    if (entity.getScreen().isRestricted()) {
-      return false;
-    }
-    return isReadEverythingAdmin() || isScreenerAllowedAccessToScreenDetails(entity.getScreen());
+    return isAllowedAccessToScreenActivity(entity.getScreen());
   }
 
   private boolean isReadEverythingAdmin()
   {
-    return _currentScreensaverUser.getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
+    return getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
   }
 
-  private boolean isScreenerAssociatedWithScreen(Screen screen)
+  /**
+   * Causes access permissions for the user to be recomputed.  Should be called when the user's associations with entities have changed.  
+   */
+  public void update()
   {
-    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
-    if (user instanceof ScreeningRoomUser) {
-      ScreeningRoomUser screener = (ScreeningRoomUser) user;
-      return screener.getAllAssociatedScreens().contains(screen);
-    }
-    return false;
-  }
-
-  private boolean screenerHasScreenResult(ScreeningRoomUser screener) {
-    for (Screen screen : screener.getScreensLed()) {
-      if (screen.getScreenResult() != null) {
-        return true;
-      }
-    }
-    if (screener instanceof LabHead) {
-      for (Screen screen : ((LabHead) screener).getScreensHeaded()) {
-        if (screen.getScreenResult() != null) {
-          return true;
-        }
-      }
-    }
-    for (Screen screen : screener.getScreensCollaborated()) {
-      if (screen.getScreenResult() != null) {
-        return true;
-      }
-    }
-    return false;
+    _screensForFundingSupport = HashMultimap.create();
+    _smallMoleculeScreensWithMutualPositives = null;
+    _smallMoleculeMutualPositiveWells = null;
+    _mutualSmallMoleculeScreens = null;
+    _myScreens = null;
+    _othersVisibleSmallMoleculeScreens = null;
+    _publicScreens = null;
+    _restrictedReagentLibraryPlates = null;
   }
 
   

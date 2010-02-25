@@ -47,13 +47,12 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
     library.setDescription("test library");
 
     try {
-      Library library2 = libraryCreator.createLibrary(library);
+      libraryCreator.createLibrary(library);
 
-      assertSame(library, library2);
-      assertNotNull("library was assigned ID", library2.getLibraryId());
+      assertNotNull("library was assigned ID", library.getLibraryId());
 
-      Library library3 = genericEntityDao.findEntityById(Library.class, library2.getEntityId(), true, Library.wells.getPath());
-      assertNotNull("library was persisted", library3);
+      Library library2 = genericEntityDao.findEntityById(Library.class, library.getEntityId(), true, Library.wells.getPath());
+      assertNotNull("library was persisted", library2);
       Well firstWell = librariesDao.findWell(new WellKey(50439, "A1"));
       Well lastWell = librariesDao.findWell(new WellKey(50439, "P24"));
       assertNotNull("library wells created (check first empty well)", firstWell);

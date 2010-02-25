@@ -91,6 +91,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
           _rnaiLibrary = MakeDummyEntities.makeDummyLibrary(_rnaiScreen.getScreenNumber(),
                                                             _rnaiScreen.getScreenType(),
                                                             _plates);
+          genericEntityDao.saveOrUpdateEntity(_rnaiLibrary.getContentsVersions().first().getLoadingActivity().getCreatedBy());
           genericEntityDao.saveOrUpdateEntity(_rnaiLibrary);
           _screenResult = MakeDummyEntities.makeDummyScreenResult(_rnaiScreen,
                                                                   _rnaiLibrary);
@@ -221,7 +222,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     assertEquals("size", expectedWellKeys.size(), data.size());
     for (String expectedWellKey : expectedWellKeys) {
       assertTrue(data.containsKey(expectedWellKey));
-      assertEquals(expectedWellKey, data.get(expectedWellKey.toString()).getWellKey().toString());
+      assertEquals(expectedWellKey, data.get(expectedWellKey).getWellKey().toString());
     }
   }
 
@@ -268,7 +269,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     for (String expectedWellKey : expectedWellKeys) {
       assertTrue(data.containsKey(expectedWellKey));
       assertEquals(expectedWellKey,
-                   data.get(expectedWellKey.toString()).getWellKey().toString());
+                   data.get(expectedWellKey).getWellKey().toString());
     }
   }
 
@@ -602,18 +603,6 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     _allWellsFetcher.setFilteringCriteria(criteria);
     Set<String> actualKeys = new HashSet<String>(_allWellsFetcher.findAllKeys());
     assertEquals(expectedKeys, actualKeys);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> void isSorted(List<T> data, Comparator<T> comparator)
-  {
-    T last = null;
-    for (T item : data) {
-      if (last != null) {
-        assertTrue("sorted values", comparator.compare(last, item) <= 0);
-      }
-      last = item;
-    }
   }
 
   @SuppressWarnings("unchecked")

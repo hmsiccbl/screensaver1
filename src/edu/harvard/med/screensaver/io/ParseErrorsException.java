@@ -21,7 +21,7 @@ public class ParseErrorsException extends Exception
   {
     _errors = errors;
   }
-
+  
   public List<? extends ParseError> getErrors()
   {
     return _errors;

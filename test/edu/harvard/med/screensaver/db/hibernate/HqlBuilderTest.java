@@ -27,10 +27,10 @@ public class HqlBuilderTest extends TestCase
     from(Screen.class, "s").
     from("s", "screenResult", "sr", JoinType.INNER).
     from("sr", "resultValueTypes", "rvt", JoinType.INNER).
-    where("sr", "shareable", Operator.EQUAL, true).
+    where("rvt", "numeric", Operator.EQUAL, true).
     where("rvt", "name", Operator.EQUAL, "Positive").
     orderBy("s", "screenNumber");
-    assertEquals("hql text", "select s.screenNumber from Screen s join s.screenResult sr join sr.resultValueTypes rvt where sr.shareable=:arg0 and rvt.name=:arg1 order by s.screenNumber",
+    assertEquals("hql text", "select s.screenNumber from Screen s join s.screenResult sr join sr.resultValueTypes rvt where rvt.numeric=:arg0 and rvt.name=:arg1 order by s.screenNumber",
                  hb.toHql());
     Map<String,Object> expectedArgs = new HashMap<String,Object>();
     expectedArgs.put("arg0", Boolean.TRUE);
@@ -48,10 +48,10 @@ public class HqlBuilderTest extends TestCase
     Disjunction orClause = hb.disjunction();
     Conjunction and1 = hb.conjunction();
     Conjunction and2 = hb.conjunction();
-    and1.add(hb.predicate("rvt", Operator.EQUAL, null)).
-         add(hb.predicate("rv.value", Operator.GREATER_THAN, new Double(1.0)));
-    and2.add(hb.predicate("rvt", Operator.EQUAL, null)).
-         add(hb.predicate("rv.value", Operator.LESS_THAN, new Double(-1.0)));
+    and1.add(hb.simplePredicate("rvt", Operator.EQUAL, null)).
+         add(hb.simplePredicate("rv.value", Operator.GREATER_THAN, new Double(1.0)));
+    and2.add(hb.simplePredicate("rvt", Operator.EQUAL, null)).
+         add(hb.simplePredicate("rv.value", Operator.LESS_THAN, new Double(-1.0)));
     orClause.add(and1).add(and2);
     hb.where(orClause);
     assertEquals("select w.id, rvt.id, rv.value " +
@@ -85,8 +85,24 @@ public class HqlBuilderTest extends TestCase
     hb.from(Well.class, "w");
     hb.from("w", "resultValues", "rv", JoinType.LEFT);
     hb.restrictFrom("rv", "resultValueType.id", Operator.EQUAL, 1);
-    hb.where(hb.predicate("rv.value", Operator.GREATER_THAN, 5.0));
+    hb.where(hb.simplePredicate("rv.value", Operator.GREATER_THAN, 5.0));
     assertEquals("from Well w left join w.resultValues rv with rv.resultValueType.id=:arg0 where rv.value>:arg1",
+                 hb.toHql());
+  }
+  
+  public void testGroupBy()
+  {
+    HqlBuilder hb = new HqlBuilder();
+    hb.from(Well.class, "w").select("w", "id").select("w", "wellName").select("w", "plateNumber").groupBy("w", "id").orderBy("w", "plateNumber");
+    assertEquals("select w.id, w.wellName, w.plateNumber from Well w group by w.plateNumber, w.id order by w.plateNumber",
+                 hb.toHql());
+  }
+  
+  public void testHaving()
+  {
+    HqlBuilder hb = new HqlBuilder();
+    hb.from(Well.class, "w").select("w", "plateNumber").selectExpression("count(*)").groupBy("w", "plateNumber").having(hb.simplePredicate("count(*)", Operator.EQUAL, 384));
+    assertEquals("select w.plateNumber, count(*) from Well w group by w.plateNumber having count(*)=:arg0",
                  hb.toHql());
   }
 }

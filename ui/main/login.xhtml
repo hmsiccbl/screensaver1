@@ -45,7 +45,7 @@
       </t:div>
       <t:panelGrid columns="1">
 				<t:commandButton id="loginCommand" value="Login" styleClass="command" />
-        <h:outputLink value="#{appInfo.feedbackUrl}" styleClass="smallLabel">
+        <h:outputLink value="#{appInfo.applicationProperties['screensaver.ui.feedback_url']}" target="_blank" styleClass="smallLabel">
           <h:outputText value="Request account or login help" />
         </h:outputLink>
 			</t:panelGrid>

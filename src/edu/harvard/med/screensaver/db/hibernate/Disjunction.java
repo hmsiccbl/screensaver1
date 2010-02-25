@@ -13,11 +13,11 @@ import java.util.LinkedHashSet;
 
 import edu.harvard.med.screensaver.util.StringUtils;
 
-public class Disjunction extends CompositeClause
+public class Disjunction extends CompositePredicate
 {
   public String toHql()
   {
-    LinkedHashSet<Clause> uniqueOrderedClauses = getUniqueOrderedClauses();
+    LinkedHashSet<Predicate> uniqueOrderedClauses = getUniqueOrderedClauses();
     if (uniqueOrderedClauses.size() == 0) {
       return "";
     }

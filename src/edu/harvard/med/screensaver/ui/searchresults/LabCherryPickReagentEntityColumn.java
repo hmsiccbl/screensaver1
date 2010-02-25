@@ -14,7 +14,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
-public class LabCherryPickReagentEntityColumn<R extends Reagent,T> extends ReagentEntityColumn<LabCherryPick,R,T> 
+public class LabCherryPickReagentEntityColumn<R extends Reagent,T> extends RelatedEntityColumn<LabCherryPick,R,T> 
 {
   
   public LabCherryPickReagentEntityColumn(Class<R> reagentClass,
@@ -24,7 +24,7 @@ public class LabCherryPickReagentEntityColumn<R extends Reagent,T> extends Reage
   }
 
   @Override
-  protected R getReagent(LabCherryPick lcp)
+  protected R getRelatedEntity(LabCherryPick lcp)
   {
     return lcp.getSourceWell().<R>getLatestReleasedReagent();
   }

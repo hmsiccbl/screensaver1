@@ -12,6 +12,8 @@ package edu.harvard.med.screensaver.model.screens;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -29,6 +31,7 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -44,18 +47,21 @@ import org.apache.log4j.Logger;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
-public class Publication extends AbstractEntity
+public class Publication extends AbstractEntity<Integer>
 {
 
   // static fields
 
   private static final Logger log = Logger.getLogger(Publication.class);
   private static final long serialVersionUID = 0L;
+  public static final String PUBLICATION_ATTACHED_FILE_TYPE_VALUE = "Publication";
+  static private Pattern CleanTitlePattern = Pattern.compile("(.+)\\. *");
 
 
   // instance fields
 
   private Integer _publicationId;
+  private Integer _pubmedCentralId;
   private Integer _version;
   private Screen _screen;
   private Integer _pubmedId;
@@ -76,13 +82,6 @@ public class Publication extends AbstractEntity
     return visitor.visit(this);
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getPublicationId();
-  }
-
   /**
    * Get the id for the publication.
    * @return the id for the publication
@@ -98,7 +97,7 @@ public class Publication extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="publication_id_seq")
   public Integer getPublicationId()
   {
-    return _publicationId;
+    return getEntityId();
   }
 
   /**
@@ -210,13 +209,13 @@ public class Publication extends AbstractEntity
   }
 
   // note: attached file persistence is managed by Screen, and should be created via Screen.createAttachedFile
-  public void createAttachedFile(String filename, InputStream fileContents) 
+  public void createAttachedFile(String filename, InputStream fileContents, AttachedFileType publicationAttachedFileType) 
     throws IOException
   {
     if (_attachedFile != null) {
       throw new DataModelViolationException("publication already has an attached file");
     }
-    _attachedFile = getScreen().createAttachedFile(filename, AttachedFileType.PUBLICATION, fileContents);
+    _attachedFile = getScreen().createAttachedFile(filename, publicationAttachedFileType, fileContents);
   }
 
   /**
@@ -234,7 +233,12 @@ public class Publication extends AbstractEntity
       citation.append('(').append(_yearPublished).append("). ");
     }
     if (!StringUtils.isEmpty(_title)) {
-      citation.append(_title).append(". ");
+      String title = _title;
+      Matcher matcher = CleanTitlePattern.matcher(_title);
+      if (matcher.matches()) {
+        title = matcher.group(1);
+      }
+      citation.append(title).append(". ");
     }
     if (!StringUtils.isEmpty(_journal)) {
       citation.append(_journal).append(' ');
@@ -326,7 +330,7 @@ public class Publication extends AbstractEntity
    */
   private void setPublicationId(Integer publicationId)
   {
-    _publicationId = publicationId;
+    setEntityId(publicationId);
   }
 
   /**
@@ -349,5 +353,15 @@ public class Publication extends AbstractEntity
   private void setVersion(Integer version)
   {
     _version = version;
+  }
+
+  public Integer getPubmedCentralId()
+  {
+    return _pubmedCentralId;
+  }
+
+  public void setPubmedCentralId(Integer pubmedCentralId)
+  {
+    _pubmedCentralId = pubmedCentralId;
   }
 }

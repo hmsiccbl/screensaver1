@@ -17,13 +17,26 @@ public interface DataAccessPolicy extends AbstractEntityVisitor
 {
   /**
    * @deprecated This is a hack, but helps to keep data access logic in single,
-   *             central location. . Should separate out properties that need
+   *             central location. Should separate out properties that need
    *             additional protection into a related entity, in order to use
    *             the AbstractEntityVisitor to control access to these properties
    *             in a manner consistent with the rest of our DataAccessPolicy.
    */
   @Deprecated()
-  public boolean isScreenerAllowedAccessToScreenDetails(Screen screen);
+  public boolean isAllowedAccessToScreenDetails(Screen screen);
+
+  /**
+   * Determine whether the current user can see the Status Items, Lab
+   * Activities, and Cherry Pick Requests tables. These are considered more
+   * private than the screen details (see
+   * {@link #isAllowedAccessToScreenDetails()}).
+   * @deprecated This is a hack, but helps to keep data access logic in single,
+   *             central location. Should separate out properties that need
+   *             additional protection into a related entity, in order to use
+   *             the AbstractEntityVisitor to control access to these properties
+   *             in a manner consistent with the rest of our DataAccessPolicy.
+   */
+  boolean isAllowedAccessToScreenActivity(Screen screen);
 
   /**
    * @deprecated This is a hack, but helps to keep data access logic in single,
@@ -34,4 +47,5 @@ public interface DataAccessPolicy extends AbstractEntityVisitor
    */
   @Deprecated()
   public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent);
+
 }

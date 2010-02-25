@@ -15,16 +15,18 @@
 	     - columns: UI fragment
 	     - editable: boolean
 	     - rendered: boolean
+       - emptyLabel : String, label shown when no elements exist in the collection ("<none>", if not specified)
        - columnClasses
 	     - actionBean: backing bean containing methods with names provided by addAction and deleteAction attributes (below)
 	     - addAction
 	     - deleteAction
 	     - addProperties: UI fragment (optional) containing UI to be used by addAction
+       - confirmDelete: boolean
 	 -->
 
 <ui:composition>
 
-	<t:outputText value="&lt;none&gt;" styleClass="dataText"
+	<t:outputText value="&lt;#{empty emptyLabel ? 'none' : emptyLabel}&gt;" styleClass="dataText"
 		rendered="#{(empty rendered || rendered) &amp;&amp; dataModel.rowCount == 0}" />
 	<t:dataTable id="#{id}CollectionTable" var="element" rowIndexVar="rowIndex"
 		value="#{dataModel}" preserveDataModel="false"
@@ -42,6 +44,7 @@
 		<t:column rendered="#{editable}">
 			<t:commandButton id="#{id}DeleteCommand" value="Delete"
 				image="/images/delete.png" action="#{actionBean[deleteAction]}"
+        onclick="#{confirmDelete ? &quot;javascript: return confirm('Are you sure you want to delete this item?');&quot; : ''}"
 				styleClass="command" />
 		</t:column>
 	</t:dataTable>

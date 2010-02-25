@@ -15,9 +15,10 @@ import java.io.StringReader;
 
 import junit.framework.TestSuite;
 
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.UserAttachedFileType;
 
 import org.hibernate.lob.ReaderInputStream;
 
@@ -37,8 +38,10 @@ public class AttachedFileTest extends AbstractEntityInstanceTest<AttachedFile>
   {
     schemaUtil.truncateTablesOrCreateSchema();
     Screen screen = dataFactory.newInstance(Screen.class);
-    AttachedFile attachedFile1 = screen.createAttachedFile("filename1", AttachedFileType.APPLICATION, new ReaderInputStream(new StringReader("file contents 1")));
-    AttachedFile attachedFile2 = screen.createAttachedFile("filename2", AttachedFileType.APPLICATION, "file contents 2");
+    AttachedFileType attachedFileType = new ScreenAttachedFileType("Application");
+    genericEntityDao.saveOrUpdateEntity(attachedFileType);
+    AttachedFile attachedFile1 = screen.createAttachedFile("filename1", attachedFileType, new ReaderInputStream(new StringReader("file contents 1")));
+    AttachedFile attachedFile2 = screen.createAttachedFile("filename2", attachedFileType, "file contents 2");
     genericEntityDao.saveOrUpdateEntity(screen);
 
     screen = genericEntityDao.reloadEntity(screen);
@@ -52,8 +55,10 @@ public class AttachedFileTest extends AbstractEntityInstanceTest<AttachedFile>
   {
     schemaUtil.truncateTablesOrCreateSchema();
     ScreeningRoomUser user = dataFactory.newInstance(ScreeningRoomUser.class);
-    AttachedFile attachedFile1 = user.createAttachedFile("filename1", AttachedFileType.APPLICATION, new ReaderInputStream(new StringReader("file contents 1")));
-    AttachedFile attachedFile2 = user.createAttachedFile("filename2", AttachedFileType.APPLICATION, "file contents 2");
+    AttachedFileType attachedFileType = new UserAttachedFileType("Application");
+    genericEntityDao.saveOrUpdateEntity(attachedFileType);
+    AttachedFile attachedFile1 = user.createAttachedFile("filename1", attachedFileType, new ReaderInputStream(new StringReader("file contents 1")));
+    AttachedFile attachedFile2 = user.createAttachedFile("filename2", attachedFileType, "file contents 2");
     genericEntityDao.persistEntity(user);
 
     user = genericEntityDao.reloadEntity(user);

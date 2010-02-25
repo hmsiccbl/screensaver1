@@ -57,7 +57,7 @@ import org.apache.log4j.Logger;
   "wellVolumeCorrectionActivityId"
 }) })
 @org.hibernate.annotations.Proxy
-public class WellVolumeAdjustment extends AbstractEntity
+public class WellVolumeAdjustment extends AbstractEntity<Integer>
 {
 
   // private static data
@@ -73,7 +73,6 @@ public class WellVolumeAdjustment extends AbstractEntity
 
   // private instance data
 
-  private Integer _wellVolumeAdjustmentId;
   private Integer _version;
   private Copy _copy;
   private Well _well;
@@ -108,13 +107,6 @@ public class WellVolumeAdjustment extends AbstractEntity
     return null;
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getWellVolumeAdjustmentId();
-  }
-
   /**
    * Get the id for the activity.
    * @return the id for the activity
@@ -128,7 +120,8 @@ public class WellVolumeAdjustment extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="well_volume_adjustment_id_seq")
   public Integer getWellVolumeAdjustmentId()
   {
-    return _wellVolumeAdjustmentId;
+    
+    return (Integer) getEntityId();
   }
 
   /**
@@ -291,7 +284,7 @@ public class WellVolumeAdjustment extends AbstractEntity
    */
   private void setWellVolumeAdjustmentId(Integer wellVolumeAdjustmentId)
   {
-    _wellVolumeAdjustmentId = wellVolumeAdjustmentId;
+    setEntityId(wellVolumeAdjustmentId);
   }
 
   /**

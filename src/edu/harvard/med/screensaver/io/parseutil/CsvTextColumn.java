@@ -9,7 +9,7 @@
 
 package edu.harvard.med.screensaver.io.parseutil;
 
-import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.ParseException;
 
 public class CsvTextColumn extends CsvColumn<String>
 {

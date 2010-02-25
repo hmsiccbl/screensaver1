@@ -17,7 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,15 +30,18 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.CryptoUtils;
@@ -44,10 +49,15 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Join;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -68,7 +78,7 @@ import com.google.common.base.Join;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-abstract public class ScreensaverUser extends TimeStampedAbstractEntity implements Principal, Comparable<ScreensaverUser>
+abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> implements Principal, Comparable<ScreensaverUser>
 {
 
   // static fields
@@ -76,14 +86,15 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   private static final Logger log = Logger.getLogger(ScreensaverUser.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<ScreensaverUser> LabAffiliation = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "labAffiliation"); 
+  public static final RelationshipPath<ScreensaverUser> labAffiliation = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "labAffiliation"); 
   public static final RelationshipPath<ScreensaverUser> activitiesPerformed = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "activitiesPerformed"); 
-  public static final RelationshipPath<ScreensaverUser> Roles = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "roles");
+  public static final RelationshipPath<ScreensaverUser> roles = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "screensaverUserRoles");
+
+  public static final Function<ScreensaverUser,String> ToDisplayStringFunction = new Function<ScreensaverUser,String>() { public String apply(ScreensaverUser u) { return u.getFullNameFirstLast() + " (" + u.getEntityId() + ")"; } };
 
 
   // instance fields
 
-  private Integer _screensaverUserId;
   private Integer _version;
   private transient HashMap<String,Boolean> _rolesMap;
   private Set<Activity> _activitiesPerformed = new HashSet<Activity>();
@@ -94,6 +105,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   private String _mailingAddress;
   private String _comments;
   private Set<ScreensaverUserRole> _roles = new HashSet<ScreensaverUserRole>();
+  private Set<ScreensaverUserRole> _primaryRoles;
   private String _loginId;
   private String _digestedPassword;
   private String _eCommonsId;
@@ -102,18 +114,17 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   private LocalDate _harvardIdRequestedExpirationDate;
 
   // public constructors
-
-  public ScreensaverUser(
-    String firstName,
-    String lastName,
-    String email)
+  
+  /**
+   * @motivation for new ScreensaverUser creation via user interface, where even required
+   *             fields are allowed to be uninitialized, initially
+   */
+  protected ScreensaverUser(AdministratorUser createdBy)
   {
-    setFirstName(firstName);
-    setLastName(lastName);
-    setEmail(email);
+    super(createdBy);
   }
 
-  public ScreensaverUser(
+  protected ScreensaverUser(
     String firstName,
     String lastName,
     String email,
@@ -121,6 +132,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
     String mailingAddress,
     String comments)
   {
+    super(null); /* TODO */
     setFirstName(firstName);
     setLastName(lastName);
     setEmail(email);
@@ -131,13 +143,6 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
 
   
   // public instance methods
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getScreensaverUserId();
-  }
 
   /**
    * Get the id for the Screensaver user.
@@ -152,12 +157,28 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="screensaver_user_id_seq")
   public Integer getScreensaverUserId()
   {
-    return _screensaverUserId;
+    return getEntityId();
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="screensaverUserUpdateActivity", 
+             joinColumns=@JoinColumn(name="screensaverUserId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)            
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   /**
-   * Get the set of user roles that this user belongs to.
-   *
+   * Get the set of user roles that this user belongs to. Do not modify the
+   * contents of the returned collection: use
+   * {@link #addScreensaverUserRole(ScreensaverUserRole)} or
+   * {@link #removeScreensaverUserRole(ScreensaverUserRole)} instead.
+   * 
    * @return the set of user roles that this user belongs to
    */
   @org.hibernate.annotations.CollectionOfElements
@@ -169,6 +190,26 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   public Set<ScreensaverUserRole> getScreensaverUserRoles()
   {
     return _roles;
+  }
+  
+  /**
+   * @return the subset of this user's roles that are not implied by one of the extant roles
+   */
+  @Transient
+  public Set<ScreensaverUserRole> getPrimaryScreensaverUserRoles()
+  {
+    _primaryRoles = Sets.difference(getScreensaverUserRoles(), getImpliedRoles());
+    return ImmutableSet.copyOf(_primaryRoles);
+  }
+
+  @Transient
+  public Set<ScreensaverUserRole> getImpliedRoles()
+  {
+    Set<ScreensaverUserRole> impliedRoles = Sets.newHashSet();
+    for (ScreensaverUserRole role : getScreensaverUserRoles()) {
+      impliedRoles.addAll(role.getImpliedRoles());
+    }
+    return impliedRoles;
   }
 
   /**
@@ -188,20 +229,26 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
   }
 
   /**
-   * Remove this user from a role.
+   * Remove the specified role from the user, including all roles implied by this role. 
    * @param role the role to remove this user from
    * @return true iff the user previously belonged to the role
+   * @throws DataModelViolationException if another of the user's roles implies this role 
    */
   public boolean removeScreensaverUserRole(ScreensaverUserRole role)
   {
-    boolean result = _roles.remove(role);
-    
-    for (ScreensaverUserRole otherRole : _roles) {
-      if (otherRole.getImpliedRoles().contains(role)) {
-        _roles.remove(otherRole);
-      }
+    if (!!!_roles.contains(role)) {
+      return false;
     }
-    return result;
+    Set<ScreensaverUserRole> primaryRoles = Sets.newHashSet(getPrimaryScreensaverUserRoles());
+    if (!!!primaryRoles.contains(role)) {
+      throw new DataModelViolationException("cannot remove an implied role: " + role + " (remove the primary role instead)");
+    }
+    primaryRoles.remove(role);
+    _roles.clear();
+    for (ScreensaverUserRole primaryRole : primaryRoles) {
+      addScreensaverUserRole(primaryRole);
+    }
+    return true;
   }
 
   /**
@@ -340,7 +387,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
     if (lastFirst) {
       Collections.reverse(nameParts);
     }
-    return Join.join(lastFirst ? ", " : " ", nameParts);
+    return Joiner.on(lastFirst ? ", " : " ").join(nameParts);
   }
 
   /**
@@ -596,7 +643,7 @@ abstract public class ScreensaverUser extends TimeStampedAbstractEntity implemen
    */
   private void setScreensaverUserId(Integer screensaverUserId)
   {
-    _screensaverUserId = screensaverUserId;
+    setEntityId(screensaverUserId);
   }
 
   /**

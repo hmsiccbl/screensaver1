@@ -19,9 +19,9 @@ import java.io.InputStreamReader;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
+import edu.harvard.med.screensaver.io.ParseException;
 import edu.harvard.med.screensaver.io.libraries.InvalidWellException;
 import edu.harvard.med.screensaver.io.libraries.LibraryContentsParser;
-import edu.harvard.med.screensaver.io.libraries.ParseException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;

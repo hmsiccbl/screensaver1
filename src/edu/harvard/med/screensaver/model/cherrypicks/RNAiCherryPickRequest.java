@@ -9,21 +9,15 @@
 
 package edu.harvard.med.screensaver.model.cherrypicks;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
@@ -41,26 +35,13 @@ import org.joda.time.LocalDate;
 @org.hibernate.annotations.Proxy
 public class RNAiCherryPickRequest extends CherryPickRequest
 {
-
-  // private static data
-
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(RNAiCherryPickRequest.class);
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
   public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
   private static final Volume DEFAULT_TRANSFER_VOLUME = null;
   
-  public static final RelationshipPath<RNAiCherryPickRequest> rnaiCherryPickScreenings = new RelationshipPath<RNAiCherryPickRequest>(RNAiCherryPickRequest.class, "RNAiCherryPickScreenings");
   
-
-  // private instance datum
-
-  private String _assayProtocol;
-  private Set<RNAiCherryPickScreening> _rnaiCherryPickScreenings = new HashSet<RNAiCherryPickScreening>();
-
-
-  // public constructor
-
   /**
    * Construct an initialized <code>RNAiCherryPickRequest</code>. Intended only for use
    * by {@link Screen}.
@@ -70,17 +51,13 @@ public class RNAiCherryPickRequest extends CherryPickRequest
    * @param legacyCherryPickRequestNumber the legacy ID from ScreenDB
    * @motivation for creating CherryPickRequests from legacy ScreenDB cherry pick visits
    */
-  public RNAiCherryPickRequest(
-    Screen screen,
-    ScreeningRoomUser requestedBy,
-    LocalDate dateRequested,
-    Integer legacyCherryPickRequestNumber)
+  public RNAiCherryPickRequest(AdministratorUser createdBy,
+                               Screen screen,
+                               ScreeningRoomUser requestedBy,
+                               LocalDate dateRequested)
   {
-    super(screen, requestedBy, dateRequested, legacyCherryPickRequestNumber);
+    super(createdBy, screen, requestedBy, dateRequested);
   }
-
-
-  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -102,68 +79,10 @@ public class RNAiCherryPickRequest extends CherryPickRequest
     return DEFAULT_TRANSFER_VOLUME;
   }
 
-
-  /**
-   * Get the RNAiCherryPickScreenings for this RNAiCherryPickRequest.
-   * <p>
-   * Note: This is a non-cascading relationship; RNAiCherryPickScreenings are
-   * cascaded from {@link Screen#getLabActivities()} instead.
-   */
-  @OneToMany(mappedBy="rnaiCherryPickRequest",
-             cascade={},
-             fetch=FetchType.LAZY)
-  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="rnaiCherryPickScreening")
-  public Set<RNAiCherryPickScreening> getRNAiCherryPickScreenings()
-  {
-    return _rnaiCherryPickScreenings;
-  }
-  
-  /**
-   * Get if this RNAiCherryPickRequest has been screened (has at least one
-   * associated RNAiCherryPickScreening activity).
-   */
-  @Transient
-  public boolean isScreened()
-  {
-    return _rnaiCherryPickScreenings.size() > 0;
-  }
-
-  /**
-   * Get the assay protocol.
-   * @return the assay protocol
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getAssayProtocol()
-  {
-    // TODO: is assayProtocol needed here any more? i think the only assay protocol for cherry
-    // pick requests would end up in the RNAiCherryPickScreening
-    return _assayProtocol;
-  }
-
-  /**
-   * Set the assay protocol.
-   * @param assayProtocol the new assay protocol
-   */
-  public void setAssayProtocol(String assayProtocol)
-  {
-    _assayProtocol = assayProtocol;
-  }
-
-
-  // protected constructor
-
   /**
    * Construct an uninitialized <code>RNAiCherryPickRequest</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected RNAiCherryPickRequest() {}
-  
-
-  // private methods
-  
-  private void setRNAiCherryPickScreenings(Set<RNAiCherryPickScreening> rnaiCherryPickScreenings)
-  {
-    _rnaiCherryPickScreenings = rnaiCherryPickScreenings;
-  }
 }
 

@@ -1,6 +1,211 @@
 <html>
 <body>
-<h1>Screensaver Change Log</h1>
+<h1>Screensaver Release Notes</h1>
+
+<h2>v1.9.1, 2010.02.05</h2>
+
+<ul>
+<li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2230'>[#2230]</a> user viewer "add small molecule screen" command is broken</li>
+<li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2226'>[#2226]</a> remove CherryPickRequest.assayProtocol</li>
+<li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2225'>[#2225]</a> upgrade to Java 1.6</li>
+<li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2188'>[#2188]</a> small molecule cherry pick screening</li>
+<!--li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2175'>[#2175]</a> expiration services to become notification services only</li-->
+<li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1606'>[#1606]</a> cpr screening activity tracks cp assay plates screened</li>
+<li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1429'>[#1429]</a> configurable news contents</li>
+<li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2020'>[#2020]</a> remove build-time dependency on subversion client</li>
+</ul>
+
+
+
+<h2>v1.9.0, 2010.01.13</h2>
+
+    <h4>Small Molecule Data Sharing Levels ("DSL") <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1296'>[#1296]</a></h4>
+
+    <i>Note: Currently, only "Small Molecule" data sharing levels are defined
+    for users, meaning that screen data sharing only applies to small molecule
+    screeners and screens, and not RNAi screeners or screens.  RNAi screens,
+    regardless of their specified DSL, are therefore always "private". A
+    future release will extend the data sharing capabilities to RNAi
+    screens.</i>
+
+    <ul>
+      <li>Screen Data Sharing Levels
+        <ul>
+          <li>Screens can be assigned one of four data sharing levels, which
+            affects what users can view the screen and what portions of the screen
+            data is accessible.  A screen can have one of the following
+            levels:
+            <dl>
+              <dt>Shared (Level 0)</dt><dd>All users can view the screen</dd>
+              <dt>Mutual Screens (Level 1)</dt><dd>All users with the "Small
+                Molecule Screens Level 1" role can view the screen in its
+                entirety.  Users with the "Small
+                Molecule Screens Level 2" role can view the screen's positives data and screen
+                summary information.</dd>
+              <dt>Mutual Positives (Level 2)</dt><dd>All users with "Small
+                Molecule Screens Level 1" or "Small
+                Molecule Screens Level 2" can view the positives data and screen
+                summary information.</dd>
+              <dt>Private (Level 3)</dt><dd>Only the lab head, lead screener, and
+                collaborators can view the screen</dd>
+            </dl>
+          </li> 
+          <li>In Screen Viewer, warning is issued to administrators when
+          viewing a small molecule screens that have a data sharing level that
+          is too restrictive w.r.t. to lab head's data sharing level</li>
+          <li>Well Search Results respects user data sharing levels by making Data Headers
+            from other screen results visible, as determined by the data
+            access policy.  When appropriate only values that represent
+            positives are made visible.</li>
+          <li>Users can view Lab Activities, CPRs, and Status Items of their
+            own screens, but not those of others' screens</li>
+          <li>Screen Data Sharing Privacy Expiration service, a command-line
+            application that, when invoked, will update screens whose data
+            sharing privacy expiration date has passed, changing the screens
+            DSL to "Mutual Screens" (Level 1)</li>
+          <li>A screen's data sharing privacy expiration date is updated after
+            importing a screen result, setting the date to 2 years in the future.</li>
+          <li>Screen Result "shareable" flag has been removed.</li>
+      </ul>
+      </li>
+
+      <li>User Data Sharing Levels 
+        <ul>
+          <li>Split user roles into "Facility Usage Roles" and "Data Access Roles".
+            The former are for administrative/reporting purposes, while the latter
+            affect the types of data that a user can view.</li>
+          <li>Split "Small Molecule User" into the following roles:
+            <ul>
+              <li>Small Molecule User Level 1</li>
+              <li>Small Molecule User Level 2</li>
+              <li>Small Molecule User Level 3</li>
+            </ul>
+          </li>
+          <li>The User Viewer has a new command "Update User Agreement", allowing
+            user administrators to update a user's DSL, while simultaneously activating
+            the 2009 Small Molecule User Agreement checklist item, and attaching
+            the Small Molecule User Agreement file to the screen. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2041'>[#2041]</a></li>
+          <li>In User Viewer, warning is issued to administrators when viewing a
+            user that has a Small Molecule DSL that is different than
+            their lab head's DSL.</li>
+          <li>In User Viewer, warning is issued to administrators when
+          viewing a lab head that has screens with data sharing levels
+          that are too restrictive, compared to the lab head's data
+          sharing level.</li>
+          <li>Added "userRolesAdmin" role, to limit which adminstrators can edit user roles. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2042'>[#2042]</a></li>
+          <li>User  Agreement Expiration service, a command-line application
+            that, when invoked, will remove the Screensaver User Login role (login
+            privileges) from all users whose small molecule user agreement has
+            expired.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h4>Miscellaneous Changes</h4>
+
+    <ul>
+      <li>User session inactivity timeout period has been increased to 120 minutes</li>
+      <li>Screen Result Importer optimizations, allowing the importer to operate in
+        constant memory space.  Screen Result import file sizes are no longer 
+        limited by available memory. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2119'>[#2119]</a></li>
+
+      <li>Automatically update a screener's "Small Molecule Screener" and "RNAi Screener" facility usage roles when the user is associated with or dissociated
+        from a screen. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2040'>[#2040]</a></li>
+      
+      <li>Added "Update History" sections to Screen Viewer and User Viewer.  Currently,
+        only used to track edit/save events, changes to data sharing
+        levels for user and screens, changes to data access roles for users, and changes to lead screener and lab head for screens.
+         <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1300'>[#1300]</a></li>
+    </ul>
+    
+
+    <h4>Major Domain Model Changes (for developers)</h4>
+
+    <ul>
+      <li>Added AssayWell entity, to group ResultValues for a single well within a
+        ScreenResult. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1344'>[#1344]</a>, <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2067'>[#2067]</a></li>
+      
+      <li>Added AuditedAbstractEntity superclass, which provides an audit log
+      (change history) capability to entity subclasses (Study, Screen,
+        ScreensaverUser, Activity, Library, CherryPickRequest). <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1300'>[#1300]</a></li>
+        
+      <li>Screen and Screen Result "shareable" flags have been removed (note that only the Screen Result flag was exposed in the UI previously).</li>
+    </ul>
+
+    <h4>User Interface Infrastructure (for developers)</h4>
+
+     User interface infrastructure rework for viewer/editor backing beans.
+     The updated backing bean abstract class hierarchy now
+     implements viewer/editor lifecycle methods in a consistent, well-thought
+     out fashion, replacing similar, but custom, varying implementations in
+     viewer classes.  The varying implementations caused difficulty during
+     maintanence and debugging, as the developer could not easily reason about
+     the behavior without studying each entity viewer variation.  In
+     particular, many Hibernate-related problems have been addressed by
+     standardizing the session/transactional design and ensuring that entity
+     instances are all re-attached to the session at a single point in time
+     (for edit/save operations).  See <a href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2Fbranches%2F&amp;view=log&amp;pathrev=3676">rev 3676</a>
+     
+     <h4>Bug Fixes</h4>
+     <ul>
+     <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1350'>[#1350]</a> data table "blank" search operators fail on non-text columns</li>
+     <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2179'>[#2179]</a> search for PubChem CIDs error</li>
+     <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1238'>[#1238]</a> filter criteria operators broken</li>
+     </ul>
+
+
+<h2>v1.8.1, 2009.10.14</h2>
+<p/>
+      <table>
+        <thead>
+          <tr>
+            <th>Tracker Item ID</th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a 
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2098'>2098</a></td>
+            <td>Add screen summary columns to lab activities browser</td>
+          </tr>
+          <tr>
+            <td><a
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2070'>2070</a></td>
+            <td>New Attached File Type values</td>
+          </tr>
+          <tr>
+            <td><a
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2078'>2078</a></td>
+            <td>Attached File Type values configurable in database</td>
+          </tr>
+          <tr>
+            <td><a
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2032'>2032</a></td>
+            <td>Add "Roles" column to UserSearchResults</td>
+          </tr>
+          <tr>
+            <td><a
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2024'>2024</a></td>
+            <td>Add PMCID field to publications</td>
+          </tr>
+          <tr>
+            <td><a
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2043'>2043</a></td>
+            <td>Do not allow a new screener to be entered w/o a lab head</td>
+          </tr>
+          <tr>
+            <td><a
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1674'>1674</a></td>
+            <td>Link in users browser broken for user name containing apostrophe</td>
+          </tr>
+          <tr>
+            <td><a
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2057'>2057</a></td>
+            <td>Add an "About Screensaver" link</td>
+          </tr>
+        </tbody>
+      </table>
 
 <h2>2009.09.16 Public Open Source Release</h2>
 
@@ -14,7 +219,7 @@
     </ul>
 
 
-<h2>1.8.0</h2>
+<h2>1.8.0, 2009.09.03</h2>
       The following is a <i>summary</i> of the changes
       introduced by Screensaver version 1.8.0.&nbsp; It is not
       comprehensive.&nbsp; For more details:
@@ -360,7 +565,7 @@
         high-priority warnings, and many others).</li>
       </ul>
 
-<h2>1.7.5</h2>
+<h2>v1.7.5, 2009.07.09</h2>
 <p></p>
 <table>
 <thead>
@@ -375,7 +580,7 @@
 <tr><td><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1890'>1890</a></td><td>userActivity log session ID is no longer useful</td></tr></tbody>
 </table>
 
-<h2>1.7.4</h2>
+<h2>v1.7.4, 2009.05.15</h2>
 <p></p>
 <table>
 <thead>
@@ -409,7 +614,7 @@
 </tbody>
 </table>
 
-<h2>1.7.3</h2>
+<h2>v1.7.3, 2009.01.26</h2>
 <p></p>
 <table>
 <thead>
@@ -445,7 +650,7 @@
 </tbody>
 </table>
 
-<h2>1.7.2</h2>
+<h2>v1.7.2, 2008.11.07</h2>
 <p></p>
 <table>
 <thead>
@@ -473,7 +678,7 @@
 </tbody>
 </table>
 
-<h2>1.7.1</h2>
+<h2>v1.7.1, 2008.10.08</h2>
 <p>Maintenance release: bug fixes, usability and performance improvements</p>
 <table>
 <thead>
@@ -510,5 +715,228 @@
 <tr><td><a href="http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1451">1451</a></td><td>library reload fails if partial wells exist</td><td><a href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2F&amp;view=rev&amp;revision=2786">2786</a></td></tr>
 </tbody>
 </table>
+
+<h2>v1.7.1, 2008.10.08</h2>
+
+
+<h2>v1.7.0, 2008.07.21</h2>
+      <p>Screensaver production release that fully replaces the
+      legacy ScreenDB application at ICCB-Longwood.</p>
+    
+
+    <h2>v1.6.3, 2008.07.21</h2>
+      <p>New screeners can now be added to Screensaver via the web
+      user interface!</p>
+      <p>A screener name search feature has been added to the menu
+      panel.</p>
+      <p>Improvements to domain model for lab heads and labs, for
+      better conceptual separation of lab members from labs/lab heads.
+      Lab Head is now a first-class entity type. Assigning a lab to a
+      screener or screen is now optional. Only lab heads can have lab
+      members and lab affiliations, and only lab members can have lab
+      heads.</p>
+      <p>New lab affiliations can be added via the web user
+      interface (in Screen Viewer).</p>
+      <p>Improvements to the role mechanism, which now supports a
+      hierarchy of "implied" roles. Added ScreensaverUser role, which is
+      necessary for account login rights (allowing accounts to be
+      enabled/disabled). Added LabHeadAdmin and NonScreener roles, and
+      renamed some existing roles for clarity.</p>
+      <p>Most entity viewers now exclusively exist within the
+      context of a search result, allowing the user to quickly search
+      for and browse through other entities of the same type being
+      viewed.</p>
+      <p>Wells can be flagged as 'deprecated', allowing Screensaver
+      to warn (and potentially prevents) users from screening or cherry
+      picking arbitrary sets of wells.</p>
+    
+
+    <h2>v1.6.2, 2008.06.17</h2>
+      <p>New screens can now be added to Screensaver via the web
+      user interface (about time, eh?)</p>
+      <p>Screen Viewer enhancements for viewing, creating, and
+      updating screens:
+      <ul>
+        <li>New publications can be added by specifying only a
+        PubMed ID.</li>
+        <li>Attached Files can be added via browser file upload, or
+        via cut &amp; paste.</li>
+        <li>Additional Publishable Protocol fields added (in
+        collapsible panel).</li>
+        <li>Billing Information can now be added, viewed, and
+        edited (in collapsible panel).</li>
+        <li>Collaborators can be added and deleted similarly to
+        other screen child entity types, with add and delete commands.</li>
+        <li>Lab Activities and Cherry Pick Requests data tables are
+        limited to 10 rows, with commands added to view all in a
+        separate search result page, allowing searching, filtering, and
+        reporting to be performed on these screen child entity types.</li>
+        <li>Screens are now always viewed with the context of a
+        screen search result, allowing user to scroll between screens at
+        all times.</li>
+        <li>Screen editing is performed in a simplified view,
+        outside of the search result data table, and with screen result
+        panel, lab activities table, and cherry pick request table
+        removed from view.</li>
+      </ul>
+      </p>
+    
+
+    <h2>v1.6.0, 2008.05.20</h2>
+      <p>Activity Viewer has been added, allowing administrators to
+      create, edit, and view Library Screening and RNAi Cherry Pick
+      Screening activities. New activities can be created from the
+      Screen Viewer page or the main menu. The Activities Browser now
+      links each activity to the Activity Viewer page.</p>
+      <p>Volume fields now display and accept unit suffixes (e.g.,
+      uL and nL).</p>
+      <p>Date fields no longer store time of day (avoids time zone
+      and date comparison issues).</p>
+      <p>Usability and cosmetic improvements to the data table
+      navigation panel.</p>
+      <p>Cherry Pick Request "# unfulfilled lab cherry picks" value
+      is now updated correctly if cherry picks are deleted.</p>
+      <p>Library Viewer's "Unload Library Contents" command has
+      improved performance and reduced memory usage.</p>
+      <p>User activity log output improved, now includes date
+      stamps, page names, and entity IDs. Improved coverage of
+      activities.</p>
+      <p><span style="background-color: #336699; color: white">New
+      aqua color theme!</span></p>
+    
+
+    <h2>v1.5.3, 2008.04.01</h2>
+
+      <p>Cherry Pick Request Viewer now supports Small Molecule
+      Cherry Pick Requests. Additionally, the Lab Cherry Pick and
+      Screener Cherry Pick data tables now provide search,
+      column-selection, and export features.</p>
+      <p><a href="http://en.wikipedia.org/wiki/April_Fools'_Day">WAP
+      2.0</a> support added to web user interface for mobile browser access
+      to Screensaver.</p>
+    
+
+
+    <h2>v1.5.2, 2008.03.31</h2>
+
+      <p>All search results pages now support a data export command
+      that allows the contents of the data table to be downloaded as an
+      Excel workbook. For Well Search Results, the SDF download option
+      remains, but now respects any user-specified filtering criteria.</p>
+      <p>ChemBank IDs have been added to Compounds. Well Viewer and
+      Compound Viewer now contain this ID, and act as a link to the
+      ChemBank application.</p>
+      <p>New column selections have been added to the Well Search
+      Results page: ICCB Number, Compound Names, ChemBank IDs, PubChem
+      CIDs, CAS Numbers, NSC Numbers, and Genbank Accession Numbers.</p>
+      <p>28 compound structures have been fixed in the ICCBBio1
+      library, allowing their compound structures to be viewed.</p>
+    
+
+
+    <h2>v1.5.1, 2008.03.07</h2>
+
+      <p>Developers: Facelets view technology has replaced the use
+      of JSP and Tiles.</p>
+      <p>Screensaver now sports rounded corners on assorted panel
+      areas.</p>
+    
+
+
+    <h2>v1.5.0, 2008.02.11</h2>
+
+      <p>The implementation of Search Result data tables has been
+      entirely re-designed, providing the following benefits:
+      <ul>
+        <li>Improved performance and scalability for large data
+        sets. In particular, sorting and filtering of large data sets is
+        performed by the database, not by Screensaver. Near minimal sets
+        of database operations are performed in response to user actions
+        (open, scroll, sort, add/remove columns, etc.).</li>
+        <li>Supports search results composed of columns across
+        related entity types (e.g., Library, Well, Gene, Silencing
+        Reagent), with user-configurable column selections, via a
+        hierarchical column selection interface.</li>
+        <li>For developers, simplified definition of Search Result
+        pages, with nearly-declarative implementation (simply provide a
+        name and an entity property binding for each column).
+        Dynamically configurable data access strategy ("load all" or
+        "virtual scrolling/paging"). No data access code required (i.e.,
+        no Hibernate queries).</li>
+      </ul>
+      </p>
+      <p>Users should note:
+      <ul>
+        <li>Screen Viewer's "Data" panel now has a full search
+        interface, replacing the old "Show All, Show Plate, Show
+        Positives" interface.</li>
+        <li>Screen Viewer's "Data" panel now supports combining
+        data columns from multiple screen results (data headers) and
+        studies (annotations).</li>
+        <li>Well Search Results pages should load faster for large
+        data sets. For example, when viewing all wells for a library
+        (accessed from the Library Viewer page).</li>
+        <li>Creative use of the Search and Column selection
+        features provide a basic level of custom reporting throughout
+        Screensaver.</li>
+      </ul>
+      </p>
+    
+
+    <h2>v1.4.2, 2007.12.07</h2>
+      <p>Cherry Pick Requests now allow an arbitrary set of
+      screener-requested empty wells to be specified (rather than entire
+      columns and rows).</p>
+    
+
+    <h2>v1.4.1, 2007.12.06</h2>
+      <p>Added Cherry Pick Requests Browser for administrators,
+      allowing them to view that status of all cherry pick requests.
+      Added additional status fields to the Cherry Pick Request Viewer
+      to indicate whether the request has been completed.</p>
+    
+
+    <h2>v1.4.0, 2007.12.03</h2>
+      <p>Updated PubChem CIDs have been assigned to Screensaver's
+      compounds, allowing the user to directly navigate to the latest
+      PubChem entries for each compound. PubChem provides information on
+      the biological activities of small molecules.</p>
+      <p>Search results can be filtered by specifying criterion for
+      each column in the search result data table.</p>
+      <p>Screeners can now browse (and filter) all of their
+      screening room activities in a search result page. Administrators
+      can now browse (and filter) screening room users and staff in a
+      search result page.</p>
+    
+
+    <h2>v1.3.1, 2007.10.12</h2>
+      <p>Administrator can now specify the set of rows to be left
+      empty when Screensaver generates cherry pick plate mappings.</p>
+
+
+    <h2>v1.3.0, 2007.10.11</h2>
+      <p>Upgraded the Screensaver object model to use Hibernate
+      annotations instead of XDoclet annotations. Other various
+      across-the-board model updates that should improve understanding,
+      ease-of-use, and ease-of-maintenance of object model code for
+      developers. This upgrade should have little to no impact on
+      Screensaver users.</p>
+      <p>Users will be pleased that all data tables in Screensaver
+      now present a consistent and improved navigation panel for
+      interacting with the table. Developers will be pleased that all
+      data tables are now implemented in terms of the same DataTable
+      class.</p>
+    
+
+    <h2>v1.2.0, 2007.09.13</h2>
+      <p>Added "Study" and "Annotations" data types to Screensaver,
+      allowing the system to incorporate and present 3rd-party library
+      annotation data, as well as providing a means for sharing and
+      presenting biologically relevant results from in-house screens.</p>
+    
+
+    <h2>v1.1.0, 2007.08.24</h2>
+      <p>Screensaver released as open source project.</p>
+
 </body>
 </html>

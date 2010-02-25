@@ -60,6 +60,7 @@ public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
 {
   private PropertyPath<E> _propertyPath;
   private Set<RelationshipPath<E>> _relationshipPaths = new HashSet<RelationshipPath<E>>(1);
+  private boolean _isSingleProperty;
 
   /**
    * Constructs an EntityColumn with a RelationshipPath, thus specifying how to
@@ -72,6 +73,7 @@ public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
       PropertyPath<E> propertyPath = (PropertyPath<E>) relationshipPath;
       _relationshipPaths.add(propertyPath.getRelationshipPath());
       _propertyPath = propertyPath;
+      _isSingleProperty = true;
     }
     else {
       _relationshipPaths.add(relationshipPath);
@@ -91,6 +93,12 @@ public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
   public void addRelationshipPath(RelationshipPath<E> path) 
   {
     _relationshipPaths.add(path);
+    _isSingleProperty = false;
+  }
+
+  public boolean isFetchableProperty()
+  {
+    return _isSingleProperty;
   }
 
   public static <E extends AbstractEntity> List<PropertyPath<E>> getPropertyPaths(List<? extends TableColumn<E,?>> columns)

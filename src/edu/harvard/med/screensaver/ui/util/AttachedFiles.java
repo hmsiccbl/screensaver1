@@ -13,8 +13,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 import java.util.SortedSet;
 
 import javax.faces.model.DataModel;
@@ -22,23 +22,23 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
-import edu.harvard.med.screensaver.model.screens.AttachedFileType;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class AttachedFiles extends AbstractBackingBean
 {
   private GenericEntityDAO _dao;
-  private Set<AttachedFileType> _attachedFileTypes;
+  private SortedSet<AttachedFileType> _attachedFileTypes;
 
   private AttachedFilesEntity _entity;
   private String _newAttachedFileName;
@@ -59,7 +59,7 @@ public class AttachedFiles extends AbstractBackingBean
     _entity = entity;
   }
 
-  public void setAttachedFileTypes(Set<AttachedFileType> attachedFileTypes)
+  public void setAttachedFileTypes(SortedSet<AttachedFileType> attachedFileTypes)
   {
     _attachedFileTypes = attachedFileTypes; 
   }
@@ -120,19 +120,12 @@ public class AttachedFiles extends AbstractBackingBean
 
   public DataModel getAttachedFilesDataModel()
   {
-    SortedSet<AttachedFile> attachedFiles = Sets.newTreeSet(new Comparator<AttachedFile>() {
-      public int compare(AttachedFile af1, AttachedFile af2)
-      {
-        return af1.getFilename().compareTo(af2.getFilename());
-      }
-    });
-    
-    attachedFiles.addAll(Sets.filter(_entity.getAttachedFiles(), _attachedFileFilter));
-    return new ListDataModel(Lists.newArrayList(attachedFiles));
+    List<AttachedFile> attachedFiles = Lists.newArrayList(Iterables.filter(_entity.getAttachedFiles(), _attachedFileFilter));
+    Collections.sort(attachedFiles);
+    return new ListDataModel(attachedFiles);
   }
 
-
-  @UIControllerMethod
+  @UICommand
   public String addAttachedFile()
   {
     String filename;
@@ -174,7 +167,7 @@ public class AttachedFiles extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String deleteAttachedFile()
   {
     AttachedFile attachedFile = (AttachedFile) getRequestMap().get("element");
@@ -184,7 +177,7 @@ public class AttachedFiles extends AbstractBackingBean
   }
 
 
-  @UIControllerMethod
+  @UICommand
   @Transactional
   public String downloadAttachedFile() throws IOException, SQLException
   {

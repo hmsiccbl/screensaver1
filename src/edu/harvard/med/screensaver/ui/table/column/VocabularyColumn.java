@@ -19,7 +19,7 @@ import java.util.TreeSet;
 import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
 
-public abstract class VocabularyColumn<R,V> extends TableColumn<R,V>
+public abstract class VocabularyColumn<R,V> extends TableColumn<R,V> implements HasVocabulary<V>
 {
   private Set<V> _items;
   private ArrayList<SelectItem> _selectItems;

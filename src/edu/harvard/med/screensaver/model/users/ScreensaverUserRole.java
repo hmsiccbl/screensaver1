@@ -10,12 +10,14 @@
 package edu.harvard.med.screensaver.model.users;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -23,7 +25,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
  * privileges granted to that user. Also acts as JAAS
  * {@link java.security.Principal}.
  * <p>
- * Roles can form a hierarchy, in that granting a given role can imply the
+ * roles can form a hierarchy, in that granting a given role can imply the
  * granting of more fundamental roles. ScreensaverUserRole merely provides
  * information about this hierarchy via {@link #getImpliedRole()} and
  * {@link #getImpliedRole()}, but does not otherwise enforce that implied roles
@@ -40,7 +42,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   // note: having the root 'screensaverUser' role allows:
   // 1) accounts to be activated and deactivated
   // 2) guest accounts to be created (i.e., with no other roles) 
-  SCREENSAVER_USER("screensaverUser", "Screensaver User", "Basic role for users, admins, and guests that have login privileges to Screensaver.  The person may or may not be a user of the screening facility."),
+  SCREENSAVER_USER("screensaverUser", "Screensaver User Login", "Basic role for users, admins, and guests that have login privileges to Screensaver.  The person may or may not be a user of the screening facility."),
 
   READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", "Administrators that can view and search over data of all categories, except screen billing information."),
   
@@ -48,20 +50,20 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   USER_CHECKLIST_ITEMS_ADMIN("userChecklistItemsAdmin", "User Checklist Items Administrator", READ_EVERYTHING_ADMIN, "Administrators that can edit the checklist items for a user, even if they are not a Users Adminstrator."),
   USERS_ADMIN("usersAdmin", "Users Administrator", USER_CHECKLIST_ITEMS_ADMIN, "Administrators that can create and modify user accounts that are not lab heads."),
   LAB_HEADS_ADMIN("labHeadsAdmin", "Lab Heads Administrator", USERS_ADMIN, "Administrators that can create and modify user accounts that are lab heads."),
+  USER_ROLES_ADMIN("userRolesAdmin", "User Roles Admin", USERS_ADMIN , "Administrators that can modify data access roles on user accounts."),
   SCREENS_ADMIN("screensAdmin", "Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screens."),
   SCREEN_RESULTS_ADMIN("screenResultsAdmin", "Screen Results Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify screen results."),
   CHERRY_PICK_REQUESTS_ADMIN("cherryPickRequestsAdmin", "Cherry Pick Requests Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify cherry pick requests, including the generation of cherry pick plate mapping files, and the recording of cherry pick liquid transfers."),
   BILLING_ADMIN("billingAdmin", "Billing Information Administrator", SCREENS_ADMIN, "Administrators that can view, create, and modify billing information for a screen."),
 
   MARCUS_ADMIN("marcusAdmin", "Marcus Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that have access to Marcus library-related screens (only)."),
+  GRAY_ADMIN("grayAdmin", "Gray Screens Administrator", READ_EVERYTHING_ADMIN, "Administrators that have access to Gray library-related screens (only)."),
 
-  SCREENER("screener", "Screener", "Generic role for  users that are performing screens."),
-  SMALL_MOLECULE_SCREENER("smallMoleculeScreener", "Small Molecule Screener", SCREENER, "Users that are conducting small molecule screens at the facility.'."),
-  RNAI_SCREENER("rnaiScreener", "RNAi Screener", SCREENER, "Users that are conducting RNAi screens at the facility."),
-  // note: nonScreeningUser is *not* mutually exclusive with screener roles; user may have been a nonScreeningUser initially, then became screener later on
-  NON_SCREENER("nonScreeningUser", "Non-screening User", "Users that are using the facility for purposes other than conducting a screen."),
-  MEDICINAL_CHEMIST_USER("medicinalChemistUser", "Medicinal Chemist User", "Users that are medicinal chemists."),
-  QPCR_USER("qpcrUser", "QPRC User", "Users that are performing Quantitative PCR analyses at the facility."),
+  SM_DSL_LEVEL3_SHARED_SCREENS("smDsl3SharedScreens", "Small Molecule Screens Level 3", "Small molecule screeners that can view shared small molecule screens."),
+  SM_DSL_LEVEL2_MUTUAL_POSITIVES("smDsl2MutualPositives", "Small Molecule Screens Level 2", SM_DSL_LEVEL3_SHARED_SCREENS, "Small molecule screeners that can view each others' screen result \"positives\" data, with associated screen summary information."),
+  SM_DSL_LEVEL1_MUTUAL_SCREENS("smDsl1MutualScreens", "Small Molecule Screens Level 1", SM_DSL_LEVEL2_MUTUAL_POSITIVES, "Small molecule screeners that can view each others' screen information and screen result data."),
+  
+  RNAI_SCREENS("rnaiScreens", "RNAi Screens", "RNAi screeners that view RNAi screens."),
 
   // note: developers do not automatically get admin roles (other than readEverythingAdmin), allowing developers to restrict themselves from mutating data in production environments
   DEVELOPER("developer", "Developer", READ_EVERYTHING_ADMIN, "Special users that have permission to invoke development-related functionality and view low-level system information.")
@@ -79,6 +81,14 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
       super(ScreensaverUserRole.values());
     }
   }
+  
+  public static Function<ScreensaverUserRole,String> ToDisplayableRoleName = new Function<ScreensaverUserRole,String>() {
+    public String apply(ScreensaverUserRole role)
+    {
+      return role.getDisplayableRoleName();
+    }
+  }; 
+    
 
 
   // private instance field and constructor
@@ -87,7 +97,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   private String _displayableRoleName;
   private String _comment;
   private ScreensaverUserRole _impliedRole;
-  private List<ScreensaverUserRole> _impliedRoles;
+  private Set<ScreensaverUserRole> _impliedRoles;
 
 
   private ScreensaverUserRole(String roleName,
@@ -109,9 +119,9 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
     this(roleName, displayableRoleName, null, comment);
   }
 
-  private List<ScreensaverUserRole> calcImpliedRoles()
+  private Set<ScreensaverUserRole> calcImpliedRoles()
   {
-    List<ScreensaverUserRole> impliedRoles = new ArrayList<ScreensaverUserRole>();
+    Set<ScreensaverUserRole> impliedRoles = Sets.newHashSet();
     ScreensaverUserRole impliedRole = getImpliedRole();
     while (impliedRole != null && !impliedRoles.contains(impliedRole)) {
       impliedRoles.add(impliedRole);
@@ -151,7 +161,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
     return _impliedRole;
   }
 
-  public List<ScreensaverUserRole> getImpliedRoles()
+  public Set<ScreensaverUserRole> getImpliedRoles()
   {
     return _impliedRoles;
   }

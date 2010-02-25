@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -41,8 +42,6 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import org.apache.log4j.Logger;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
-import org.hibernate.stat.SessionStatistics;
-import org.hibernate.stat.Statistics;
 import org.joda.time.LocalDate;
 
 
@@ -77,10 +76,10 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.saveOrUpdateEntity(_anEntity);
     Serializable id = _anEntity.getEntityId();
 
-    AbstractEntity e = genericEntityDao.findEntityById(_anEntity.getEntityClass(), id);
+    Entity e = genericEntityDao.findEntityById(_anEntity.getEntityClass(), id);
     assertEquals(_anEntity, e);
 
-    AbstractEntity e2 = genericEntityDao.findEntityById(_anEntity.getEntityClass(), new Integer(-1));
+    Entity e2 = genericEntityDao.findEntityById(_anEntity.getEntityClass(), new Integer(-1));
     assertEquals(null, e2);
   }
 
@@ -242,7 +241,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
         withSpeciesName("Human").
         withGenbankAccessionNumber("GBAN3");
 
-        expectedLibrary[0].getLatestContentsVersion().release(new AdministrativeActivity(expectedLibrary[0].getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+        expectedLibrary[0].getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) expectedLibrary[0].getLatestContentsVersion().getLoadingActivity().getCreatedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
 
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy1");
         expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy2");
@@ -301,8 +300,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         ScreeningRoomUser labMember = new ScreeningRoomUser("Lab",
-                                                            "Member",
-                                                            "lab_member@hms.harvard.edu");
+                                                            "Member");
         labMember.setLab(screen.getLabHead().getLab());
         screen.addKeyword("keyword1");
         screen.addKeyword("keyword2");
@@ -375,7 +373,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       public void runTransaction()
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
-        screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+        screen.createLibraryScreening((AdministratorUser) screen.getCreatedBy(), screen.getLeadScreener(), new LocalDate());
         genericEntityDao.persistEntity(screen.getLabHead());
         genericEntityDao.persistEntity(screen.getLeadScreener());
         genericEntityDao.persistEntity(screen);
@@ -414,12 +412,8 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         screen.createPublication();
         screen.createPublication();
-        ScreeningRoomUser collab1 = new ScreeningRoomUser("Col",
-                                                          "Laborator1",
-                                                          "collab1@hms.harvard.edu");
-        ScreeningRoomUser collab2 = new ScreeningRoomUser("Col",
-                                                          "Laborator2",
-                                                          "collab2@hms.harvard.edu");
+        ScreeningRoomUser collab1 = new ScreeningRoomUser("Col", "Laborator1");
+        ScreeningRoomUser collab2 = new ScreeningRoomUser("Col", "Laborator2");
         genericEntityDao.saveOrUpdateEntity(collab1);
         genericEntityDao.saveOrUpdateEntity(collab2);
         screen.addCollaborator(collab1);

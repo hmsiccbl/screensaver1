@@ -18,13 +18,11 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
@@ -37,7 +35,7 @@ import com.google.common.collect.Lists;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibraryContentsImporter extends AbstractBackingBean implements EntityViewer
+public class LibraryContentsImporter extends AbstractBackingBean
 {
 
   private static Logger log = Logger.getLogger(LibraryContentsImporter.class);
@@ -68,11 +66,6 @@ public class LibraryContentsImporter extends AbstractBackingBean implements Enti
     _dao = dao;
     _libraryViewer = libraryViewer;
     _libraryContentsLoader = libraryContentsLoader;
-  }
-
-  public AbstractEntity getEntity()
-  {
-    return getLibrary();
   }
 
   public void setUploadedFile(UploadedFile uploadedFile)
@@ -120,10 +113,10 @@ public class LibraryContentsImporter extends AbstractBackingBean implements Enti
 
   public String viewLibrary()
   {
-    return _libraryViewer.viewLibrary(_library);
+    return _libraryViewer.viewEntity(_library);
   }
 
-  @UIControllerMethod
+  @UICommand
   public String viewLibraryContentsImporter(Library library)
   {
     setLibrary(library);
@@ -135,7 +128,7 @@ public class LibraryContentsImporter extends AbstractBackingBean implements Enti
    * depending on the result.
    * @return the control code for the appropriate next page
    */
-  @UIControllerMethod
+  @UICommand
   public String importLibraryContents() throws IOException
   {
     _errors = null;
@@ -152,7 +145,7 @@ public class LibraryContentsImporter extends AbstractBackingBean implements Enti
       
       showMessage("libraries.importedLibraryContents", "libraryViewer");
       // TODO: to be correct, we should regen the search results, though I don't think anything in the results would actually be different after this import
-      return _libraryViewer.viewLibrary(_library);
+      return _libraryViewer.viewEntity(_library);
     } 
     catch (ParseErrorsException e) {
       _errors = e.getErrors();

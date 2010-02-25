@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
@@ -92,7 +93,6 @@ public class StudyCreator
     screenType = app.getCommandLineOptionEnumValue("y", ScreenType.class);
     studyType = app.getCommandLineOptionEnumValue("yy", StudyType.class);
     summary = app.isCommandLineFlagSet("s") ? app.getCommandLineOptionValue("s") : null;
-    dateCreated = app.isCommandLineFlagSet("d") ? app.getCommandLineOptionValue("d", dateFormat) : new DateTime();
 
     labHeadFirstName = app.getCommandLineOptionValue("hf");
     labHeadLastName = app.getCommandLineOptionValue("hl");
@@ -198,7 +198,7 @@ public class StudyCreator
     }
 
     Screen study = new Screen(leadScreener, labHead, studyNumber, screenType, studyType, title);
-    study.setDateCreated(dateCreated);
+    study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);
     return study;
   }
@@ -230,10 +230,10 @@ public class StudyCreator
     }
     ScreeningRoomUser newUser;
     if (isLabHead) {
-      newUser = new LabHead(firstName, lastName, email, labAffiliation);
+      newUser = new LabHead(firstName, lastName, labAffiliation);
     }
     else {
-      newUser = new ScreeningRoomUser(firstName, lastName, email);
+      newUser = new ScreeningRoomUser(firstName, lastName);
     }
     log.info("created new user " + newUser + " for " + firstName + " " + lastName + " (" + email + ")");
     return newUser;

@@ -34,6 +34,8 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.accesspolicy.UnrestrictedDataAccessPolicy;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.Getter;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -45,6 +47,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
@@ -54,9 +57,9 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
@@ -81,7 +84,8 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   protected LibrariesDAO librariesDao;
 
-  private WellSearchResults _wellSearchResults;
+  private WellSearchResults _inMemoryWellSearchResults;
+  private WellSearchResults _virtualPagingWellSearchResults;
   private WellViewer _wellViewer;
 
   private static boolean oneTimeDataSetup = false;
@@ -147,20 +151,38 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       });
     }
 
-    _wellViewer = new WellViewer(null, genericEntityDao, librariesDao, new UnrestrictedDataAccessPolicy(), null, null, null, null, null);
-    _wellSearchResults = new WellSearchResults(genericEntityDao,
-                                               new UnrestrictedDataAccessPolicy(),
-                                                null,
-                                               _wellViewer,
-                                               null,
-                                               Collections.<DataExporter<?>> emptyList());
-    _wellSearchResults.setDataTableUIComponent(new UIData());
+    _wellViewer = new WellViewer(null, null, genericEntityDao, librariesDao, new UnrestrictedDataAccessPolicy(), null, null, null, null);
+    _inMemoryWellSearchResults = new WellSearchResults(genericEntityDao,
+                                                       new UnrestrictedDataAccessPolicy(),
+                                                       null,
+                                                       _wellViewer,
+                                                       null,
+                                                       Collections.<DataExporter<?>> emptyList()) {
+    };
+    _inMemoryWellSearchResults.setDataTableUIComponent(new UIData());
+
+    _virtualPagingWellSearchResults = new WellSearchResults(genericEntityDao,
+                                                            new UnrestrictedDataAccessPolicy(),
+                                                            null,
+                                                            _wellViewer,
+                                                            null,
+                                                            Collections.<DataExporter<?>> emptyList()) {
+      @Override
+      protected DataTableModel<Well> buildDataTableModel(DataFetcher<Well,String,PropertyPath<Well>> dataFetcher,
+                                                         List<? extends TableColumn<Well,?>> columns) {
+        if (dataFetcher instanceof EntityDataFetcher) {
+          return new InMemoryEntitySearchResultsDataModel((EntityDataFetcher<Well,String>) dataFetcher);
+        }
+        return super.buildDataTableModel(dataFetcher, columns);
+      }
+    };
+    _virtualPagingWellSearchResults.setDataTableUIComponent(new UIData());
   }
 
   /** for testing that multiple contents versions are handled in a disjoint manner */
   private void addUnreleasedContentsVersion(Library library)
   {
-    library.createContentsVersion(new AdministrativeActivity(library.getLatestReleasedContentsVersion().getLoadingActivity().getPerformedBy(), 
+    library.createContentsVersion(new AdministrativeActivity((AdministratorUser) library.getLatestReleasedContentsVersion().getLoadingActivity().getPerformedBy(), 
                                                              new LocalDate(), 
                                                              AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
     for (Well well : library.getWells()) {
@@ -181,87 +203,81 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     }
   }
 
-  private void setOrderBy()
+  private void setOrderBy(WellSearchResults wsr)
   {
-    TableColumnManager<Well> columnManager = _wellSearchResults.getColumnManager();
+    TableColumnManager<Well> columnManager = wsr.getColumnManager();
     columnManager.addCompoundSortColumns(columnManager.getColumn("Plate"),
                                          columnManager.getColumn("Well"));
     columnManager.setSortColumnName("Plate");
-    _wellSearchResults.resort(); // necessary, since primary sort column may not have actually changed, although the compound sort columns have
+    wsr.resort(); // necessary, since primary sort column may not have actually changed, although the compound sort columns have
   }
   
   public void testSearchAllWellsIsInitiallyEmpty()
   {
-    _wellSearchResults.searchAllWells();
-    assertEquals("search result is initially empty", 0, _wellSearchResults.getRowCount());
-    ((Criterion<String>) _wellSearchResults.getColumnManager().getColumn("Well").getCriterion()).setOperatorAndValue(Operator.TEXT_STARTS_WITH, "B");
-    _wellSearchResults.searchCommandListener(null);
-    assertTrue("search result is non-empty after explicit search command listener is invoked", 0 != _wellSearchResults.getRowCount());
+    doTestSearchAllWellsIsInitiallyEmpty(_inMemoryWellSearchResults);
+    doTestSearchAllWellsIsInitiallyEmpty(_virtualPagingWellSearchResults);
+  }
+
+  public void doTestSearchAllWellsIsInitiallyEmpty(WellSearchResults wsr)
+  {
+    wsr.searchAll();
+    assertEquals("search result is initially empty", 0, wsr.getRowCount());
+    ((Criterion<String>) wsr.getColumnManager().getColumn("Well").getCriterion()).setOperatorAndValue(Operator.TEXT_STARTS_WITH, "B");
+    wsr.searchCommandListener(null);
+    assertTrue("search result is non-empty after explicit search command listener is invoked", 0 != wsr.getRowCount());
   }
 
   /**
    * Tests WellSearchResult of all wells from all libraries.
    */
-  // note: in "all entities" mode, InMemoryDataModel will never be used
   public void testAllEntitiesOfType()
   {
-    _wellSearchResults.searchAllWells();
-    _wellSearchResults.searchCommandListener(null); // invoke search now (necessary when using searchAllWells(), above
-    setOrderBy();
-    _wellSearchResults.clearFilter();
-    DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertTrue("VirtualPagingDataModel used",
-               model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
-    doTestSearchResult(model, _allWellKeys);
+    doTestAllEntitiesOfType(_inMemoryWellSearchResults);
+    doTestAllEntitiesOfType(_virtualPagingWellSearchResults);
   }
 
-  public void testEntitySetInMemory()
+  private void doTestAllEntitiesOfType(WellSearchResults wsr)
   {
-    _wellSearchResults.searchWells(_smallWellKeys);
-    setOrderBy();
-    DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertTrue("InMemoryDataModel used",
-               model.getModelType() == DataTableModelType.IN_MEMORY);
-    doTestSearchResult(model, _smallWellKeys);
+    wsr.searchAll();
+    wsr.searchCommandListener(null); // invoke search now (necessary when using searchAll(), above
+    setOrderBy(wsr);
+    wsr.clearFilter();
+    DataTableModel model = wsr.getDataTableModel();
+    verifySearchResult(wsr, model, _allWellKeys);
   }
 
-  public void testEntitySetVirtualPaging()
+  public void testEntitySet()
   {
-    _wellSearchResults.searchWells(_bigWellKeys);
-    setOrderBy();
-    DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertTrue("VirtualPagingDataModel used",
-               model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
-    doTestSearchResult(model, _bigWellKeys);
+    doTestAllEntitiesOfType(_inMemoryWellSearchResults);
+    doTestAllEntitiesOfType(_virtualPagingWellSearchResults);
+  }
+  
+  public void doTestEntitySet(WellSearchResults wsr)
+  {
+    wsr.searchWells(_bigWellKeys);
+    setOrderBy(wsr);
+    DataTableModel model = wsr.getDataTableModel();
+    verifySearchResult(wsr, model, _bigWellKeys);
   }
 
-  public void testParentedEntityInMemory()
+  public void testParentedEntity()
+  {
+    doTestParentedEntity(_inMemoryWellSearchResults);
+    doTestParentedEntity(_virtualPagingWellSearchResults);
+  }
+
+  public void doTestParentedEntity(WellSearchResults wsr)
   {
     // reload library to ensure LCV.equals() works in Well.getReagent() 
     Library smallSmallMoleculeLibrary = 
-      genericEntityDao.reloadEntity(_smallSmallMoleculeLibrary, true, Library.wells.to(Well.latestReleasedReagent).getPath());
-    _wellSearchResults.searchWellsForLibrary(smallSmallMoleculeLibrary);
-    setOrderBy();
-    DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertTrue("InMemoryDataModel used",
-               model.getModelType() == DataTableModelType.IN_MEMORY);
-    doTestSearchResult(model, _smallWellKeys);
-  }
-
-  public void testParentedEntityVirtualPaging()
-  {
-    // reload library to ensure LCV.equals() works in Well.getReagent() 
-    Library bigSmallMoleculeLibrary = 
       genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary, true, Library.wells.to(Well.latestReleasedReagent).getPath());
-    _wellSearchResults.searchWellsForLibrary(bigSmallMoleculeLibrary);
-    setOrderBy();
-    DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertTrue("VirtualPagingDataModel used",
-               model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
-    doTestSearchResult(model, _bigWellKeys);
+    wsr.searchWellsForLibrary(smallSmallMoleculeLibrary);
+    setOrderBy(wsr);
+    DataTableModel model = wsr.getDataTableModel();
+    verifySearchResult(wsr, model, _bigWellKeys);
   }
 
-  /**
+    /**
    * Tests that WellSearchResults handles columns for ResultValueTypes and
    * AnnotationTypes. And so, transitively, tests the
    * SearchResults/EntityDataFetcher "feature" of specifying columns for a
@@ -274,6 +290,12 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
    */
   public void testScreenResultWithResultValuesAndAnnotations()
   {
+    doTestScreenResultWithResultValuesAndAnnotations(_inMemoryWellSearchResults);
+    doTestScreenResultWithResultValuesAndAnnotations(_virtualPagingWellSearchResults);
+  }
+  
+  public void doTestScreenResultWithResultValuesAndAnnotations(WellSearchResults wsr)
+  {
     final ResultValueType rvt1 = _screenResult.getResultValueTypesList().get(0);
     final ResultValueType rvt2 = _screenResult.getResultValueTypesList().get(2);
     final ResultValueType rvt3 = _screenResult.getResultValueTypesList().get(7); // comment, has sparse values
@@ -281,78 +303,74 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     final AnnotationType annotType1 = annotTypeIter.next();
     final AnnotationType annotType2 = annotTypeIter.next();
 
-    // test with VirtualPagingDataModel
-    _wellSearchResults.searchWellsForScreenResult(_screenResult);
+    wsr.searchWellsForScreenResult(_screenResult);
     Map<TableColumn<?,?>,Getter<Well,?>> columnsAndValueGetters = new HashMap<TableColumn<?,?>,Getter<Well,?>>();
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric repl1 [1]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt1.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text repl1 [1]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt2.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("comments [1]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt3.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text annot [100000]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType2.getAnnotationValues().get(well.<Reagent>getLatestReleasedReagent());
                                  return av == null ? null : av.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric annot [100000]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("numeric annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType1.getAnnotationValues().get(well.<Reagent>getLatestReleasedReagent());
                                  return av == null ? av : new BigDecimal(av.getNumericValue()).setScale(3, RoundingMode.HALF_UP); }; });
 
-    // test with InMemoryDataModel
-    doTestScreenResult(_bigWellKeys,
-                       DataTableModelType.VIRTUAL_PAGING,
-                       columnsAndValueGetters);
-
+    veriyfScreenResultData(wsr, 
+                           _bigWellKeys,
+                           columnsAndValueGetters);
+    
     SortedSet<WellKey> expectedWellKeys = _bigWellKeys.headSet(new WellKey("01001:A01"));
-    _wellSearchResults.searchWells(expectedWellKeys);
+    wsr.searchWells(expectedWellKeys);
     columnsAndValueGetters.clear();
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric repl1 [1]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt1.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text repl1 [1]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt2.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("comments [1]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  ResultValue rv = rvt3.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("text annot [100000]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType2.getAnnotationValues().get(well.<Reagent>getLatestReleasedReagent());
                                  return av == null ? null : av.getValue(); } } );
-    columnsAndValueGetters.put(_wellSearchResults.getColumnManager().getColumn("numeric annot [100000]"),
+    columnsAndValueGetters.put(wsr.getColumnManager().getColumn("numeric annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
                                  AnnotationValue av = annotType1.getAnnotationValues().get(well.<Reagent>getLatestReleasedReagent());
                                  return av == null ? av : new BigDecimal(av.getNumericValue()).setScale(3, RoundingMode.HALF_UP); }; });
-    doTestScreenResult(expectedWellKeys,
-                       DataTableModelType.IN_MEMORY,
-                       columnsAndValueGetters);
+    veriyfScreenResultData(wsr,
+                           expectedWellKeys,
+                           columnsAndValueGetters);
   }
 
-  public void doTestScreenResult(SortedSet<WellKey> expectedKeys,
-                                 DataTableModelType expectedDataTableModelType,
-                                 Map<TableColumn<?,?>,Getter<Well,?>> addColumns)
+  private void veriyfScreenResultData(WellSearchResults wsr,
+                                      SortedSet<WellKey> expectedKeys,
+                                      Map<TableColumn<?,?>,Getter<Well,?>> addColumns)
   {
-    setOrderBy();
-    DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertEquals("DataTableModel in use", expectedDataTableModelType,
-                 model.getModelType());
-    doTestSearchResult(model, expectedKeys);
+    setOrderBy(wsr);
+    DataTableModel model = wsr.getDataTableModel();
+    verifySearchResult(wsr, model, expectedKeys);
 
     // now add the extra columns and test them
     for (TableColumn<?,?> column : addColumns.keySet()) {
       column.setVisible(true);
     }
-    doTestSearchResult(model, expectedKeys);
+    verifySearchResult(wsr, model, expectedKeys);
     // test the extra columns
     int j = 0;
     for (WellKey expectedWellKey : expectedKeys) {
@@ -361,7 +379,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                    expectedWellKey,
                    ((Well) model.getRowData()).getWellKey());
       int columnsTested = 0;
-      for (TableColumn<Well,?> column : _wellSearchResults.getColumnManager().getVisibleColumns()) {
+      for (TableColumn<Well,?> column : wsr.getColumnManager().getVisibleColumns()) {
         Well well = (Well) model.getRowData();
         Object cellValue = column.getCellValue(well);
         if (addColumns.containsKey(column)) {
@@ -386,8 +404,14 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   public void testFilterScreenResultResultValues()
   {
-    _wellSearchResults.searchWellsForScreenResult(_screenResult);
-    setOrderBy();
+    doTestFilterScreenResultResultValues(_inMemoryWellSearchResults);
+    doTestFilterScreenResultResultValues(_virtualPagingWellSearchResults);
+  }
+  
+  public void doTestFilterScreenResultResultValues(WellSearchResults wsr)
+  {
+    wsr.searchWellsForScreenResult(_screenResult);
+    setOrderBy(wsr);
 
     // initialize search result filter to select only the first well
     Well well1 = genericEntityDao.findEntityById(Well.class, "01000:A01");
@@ -397,31 +421,30 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     _expectedKeys.add(well2.getWellKey());
 
     TableColumn<Well,String> filterColumn1 =
-      (TableColumn<Well,String>) _wellSearchResults.getColumnManager().getColumn("text repl1 [1]");
+      (TableColumn<Well,String>) wsr.getColumnManager().getColumn("text repl1 [1]");
     filterColumn1.clearCriteria().addCriterion(new Criterion<String>(Operator.LESS_THAN, "text00008"));
     TableColumn<Well,String> filterColumn2 =
-      (TableColumn<Well,String>) _wellSearchResults.getColumnManager().getColumn("positive [1]");
+      (TableColumn<Well,String>) wsr.getColumnManager().getColumn("positive [1]");
     filterColumn2.clearCriteria().addCriterion(new Criterion<String>(Operator.EQUAL, PartitionedValue.STRONG.getValue()));
     // TODO: also test a numeric ResultValueType column
 
-    DataTableModel model = _wellSearchResults.getDataTableModel();
-    assertTrue("VirtualPagingDataModel used", model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
-    doTestSearchResult(model, _expectedKeys);
+    DataTableModel model = wsr.getDataTableModel();
+    verifySearchResult(wsr, model, _expectedKeys);
   }
 
   // TODO: must test via a JSFUnit test, since entity viewer updates only occur from UI data table scrolling events, not model.setRowIndex()
 //  public void testEntityModeScrolling()
 //  {
-//    _wellSearchResults.searchAllWells();
+//    wsr.searchAll();
 //    setOrderBy();
-//    _wellSearchResults.getRowsPerPageSelector().setSelection(_wellSearchResults.getRowsPerPageSelector().getDefaultSelection());
-//    assertFalse("summary view mode", _wellSearchResults.isEntityView());
-//    _wellSearchResults.getRowsPerPageSelector().setSelection(1);
-//    assertTrue("entity view mode", _wellSearchResults.isEntityView());
+//    wsr.getRowsPerPageSelector().setSelection(wsr.getRowsPerPageSelector().getDefaultSelection());
+//    assertFalse("summary view mode", wsr.isEntityView());
+//    wsr.getRowsPerPageSelector().setSelection(1);
+//    assertTrue("entity view mode", wsr.isEntityView());
 //
-//    DataTableModel model = _wellSearchResults.getDataTableModel();
+//    DataTableModel model = wsr.getDataTableModel();
 //    assertTrue("VirtualPagingDataModel used",
-//               _wellSearchResults.getBaseDataTableModel() == DataTableModelType.VIRTUAL_PAGING);
+//               wsr.getBaseDataTableModel() == DataTableModelType.VIRTUAL_PAGING);
 //    List<WellKey> expectedWellKeys = new ArrayList<WellKey>(_allWellKeys).subList(0, 3);
 //    model.setRowIndex(0);
 //    assertEquals("entity 0", expectedWellKeys.get(0), _wellViewer.getWell().getWellKey());
@@ -430,16 +453,22 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 //    model.setRowIndex(2);
 //    assertEquals("entity 2", expectedWellKeys.get(2), _wellViewer.getWell().getWellKey());
 //
-//    _wellSearchResults.getRowsPerPageSelector().setSelection(_wellSearchResults.getRowsPerPageSelector().getDefaultSelection());
+//    wsr.getRowsPerPageSelector().setSelection(wsr.getRowsPerPageSelector().getDefaultSelection());
 //    assertEquals("returning to summary mode, with last-viewed entity shown as first row",
 //                 2,
-//                 _wellSearchResults.getDataTableUIComponent().getFirst());
+//                 wsr.getDataTableUIComponent().getFirst());
 //    assertEquals("last-viewed entity shown as first row",
 //                 expectedWellKeys.get(2),
-//                 ((Well) _wellSearchResults.getDataTableModel().getRowData()).getWellKey());
+//                 ((Well) wsr.getDataTableModel().getRowData()).getWellKey());
 //  }
 
   public void testValidColumnSelections()
+  {
+    doTestValidColumnSelections(_inMemoryWellSearchResults);
+    doTestValidColumnSelections(_virtualPagingWellSearchResults);
+  }
+
+  public void doTestValidColumnSelections(WellSearchResults wsr)
   {
     Library rnaiLibrary = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library 3", true, Library.wells.getPath(), Library.contentsVersions.getPath());
     ScreenResult rnaiScreenResult = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 3, true, "screenResult.resultValueTypes").getScreenResult();
@@ -458,20 +487,20 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       smallMolColumnNames.add(WellSearchResults.makeColumnName(at, _study.getStudyNumber()));
     }
 
-    _wellSearchResults.searchWellsForScreenResult(smallMolScreenResult);
-    setOrderBy();
-    doTestColumnsCreated("small molecule screen result", _wellSearchResults, smallMolColumnNames, true);
-    doTestColumnsCreated("small molecule screen result", _wellSearchResults, rnaiColumnNames, false);
-    _wellSearchResults.searchWellsForScreenResult(rnaiScreenResult);
-    doTestColumnsCreated("rnai screen result", _wellSearchResults, smallMolColumnNames, false);
-    doTestColumnsCreated("rnai screen result", _wellSearchResults, rnaiColumnNames, true);
+    wsr.searchWellsForScreenResult(smallMolScreenResult);
+    setOrderBy(wsr);
+    doTestColumnsCreated("small molecule screen result", wsr, smallMolColumnNames, true);
+    doTestColumnsCreated("small molecule screen result", wsr, rnaiColumnNames, false);
+    wsr.searchWellsForScreenResult(rnaiScreenResult);
+    doTestColumnsCreated("rnai screen result", wsr, smallMolColumnNames, false);
+    doTestColumnsCreated("rnai screen result", wsr, rnaiColumnNames, true);
 
-    _wellSearchResults.searchWellsForLibrary(smallMolLibrary);
-    doTestColumnsCreated("small molecule library", _wellSearchResults, smallMolColumnNames, true);
-    doTestColumnsCreated("small molecule library", _wellSearchResults, rnaiColumnNames, false);
-    _wellSearchResults.searchWellsForLibrary(rnaiLibrary);
-    doTestColumnsCreated("rnai library", _wellSearchResults, smallMolColumnNames, false);
-    doTestColumnsCreated("rnai library", _wellSearchResults, rnaiColumnNames, true);
+    wsr.searchWellsForLibrary(smallMolLibrary);
+    doTestColumnsCreated("small molecule library", wsr, smallMolColumnNames, true);
+    doTestColumnsCreated("small molecule library", wsr, rnaiColumnNames, false);
+    wsr.searchWellsForLibrary(rnaiLibrary);
+    doTestColumnsCreated("rnai library", wsr, smallMolColumnNames, false);
+    doTestColumnsCreated("rnai library", wsr, rnaiColumnNames, true);
 
     Set<WellKey> rnaiWellKeys = new HashSet<WellKey>();
     for (Well well : rnaiLibrary.getWells()) {
@@ -490,56 +519,79 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     Set<WellKey> bothWellKeys = new HashSet<WellKey>();
     bothWellKeys.addAll(rnaiWellKeys);
     bothWellKeys.addAll(smallMoleculeWellKeys);
-    _wellSearchResults.searchWells(rnaiWellKeys);
-    doTestColumnsCreated("rnai wells", _wellSearchResults, smallMolColumnNames, false);
-    doTestColumnsCreated("rnai wells", _wellSearchResults, rnaiColumnNames, true);
-    _wellSearchResults.searchWells(smallMoleculeWellKeys);
-    doTestColumnsCreated("small molecule wells", _wellSearchResults, smallMolColumnNames, true);
-    doTestColumnsCreated("small molecule wells", _wellSearchResults, rnaiColumnNames, false);
-    _wellSearchResults.searchWells(bothWellKeys);
-    doTestColumnsCreated("both wells", _wellSearchResults, smallMolColumnNames, true);
-    doTestColumnsCreated("both wells", _wellSearchResults, rnaiColumnNames, true);
+    wsr.searchWells(rnaiWellKeys);
+    doTestColumnsCreated("rnai wells", wsr, smallMolColumnNames, false);
+    doTestColumnsCreated("rnai wells", wsr, rnaiColumnNames, true);
+    wsr.searchWells(smallMoleculeWellKeys);
+    doTestColumnsCreated("small molecule wells", wsr, smallMolColumnNames, true);
+    doTestColumnsCreated("small molecule wells", wsr, rnaiColumnNames, false);
+    wsr.searchWells(bothWellKeys);
+    doTestColumnsCreated("both wells", wsr, smallMolColumnNames, true);
+    doTestColumnsCreated("both wells", wsr, rnaiColumnNames, true);
   }
 
   public void testFilterOnColumns()
   {
-    _wellSearchResults.searchAllWells();
-    _wellSearchResults.searchCommandListener(null); // invoke search now (necessary when using searchAllWells(), above
+    doTestFilterOnColumns(_inMemoryWellSearchResults);
+    doTestFilterOnColumns(_virtualPagingWellSearchResults);
+  }
+  
+  public void doTestFilterOnColumns(WellSearchResults wsr)
+  {
+    wsr.searchAll();
+    wsr.searchCommandListener(null); // invoke search now (necessary when using searchAll(), above
 
     Map<String,Object> columnNameToExpectedValue = new HashMap<String,Object>();
+    
+    // test 2 filter columns
     columnNameToExpectedValue.put("Plate", Integer.valueOf(1000));
     columnNameToExpectedValue.put("Well", "H01");
-    doTestFilterOnColumns(_wellSearchResults, columnNameToExpectedValue, 1);
+    doTestFilterOnColumns(wsr, columnNameToExpectedValue, 1);
 
+    // test list of text
+    columnNameToExpectedValue.clear();
+    columnNameToExpectedValue.put("Compound Names", "compound" + 2);
+    wsr.getColumnManager().getColumn("Compound Names").setVisible(true);
+    doTestFilterOnColumns(wsr, columnNameToExpectedValue, 2);
+
+    // test list of integers
+    columnNameToExpectedValue.clear();
+    columnNameToExpectedValue.put("PubChem CIDs", 10002);
+    wsr.getColumnManager().getColumn("PubChem CIDs").setVisible(true);
+    doTestFilterOnColumns(wsr, columnNameToExpectedValue, 2);
+    
     // tests the well-to-reagent relationship
     columnNameToExpectedValue.clear();
     columnNameToExpectedValue.put("Vendor ID", "179");
-    doTestFilterOnColumns(_wellSearchResults, columnNameToExpectedValue, 3);
+    doTestFilterOnColumns(wsr, columnNameToExpectedValue, 3);
 
     // tests the well-to-reagent-to-annotationValue relationship
     columnNameToExpectedValue.clear();
     columnNameToExpectedValue.put("text annot [100000]", "bbb");
-    _wellSearchResults.getColumnManager().getColumn("text annot [100000]").setVisible(true);
-    doTestFilterOnColumns(_wellSearchResults, columnNameToExpectedValue, 1);
+    wsr.getColumnManager().getColumn("text annot [100000]").setVisible(true);
+    doTestFilterOnColumns(wsr, columnNameToExpectedValue, 1);
+    
   }
   
-  public void testSortColumns()
+  public void testSortColumns(WellSearchResults wsr)
   {
-    _wellSearchResults.searchWellsForLibrary(_bigSmallMoleculeLibrary);
-    assertTrue("using VirtualPagingDataModel", _wellSearchResults.getDataTableModel().getModelType() == DataTableModelType.VIRTUAL_PAGING);
-    doTestSortForAllColumnsAndDirections(_wellSearchResults, _bigSmallMoleculeLibrary.getWells().size());
+    doTestSortColumns(_inMemoryWellSearchResults);
+    doTestSortColumns(_virtualPagingWellSearchResults);
+  }
+  
+  public void doTestSortColumns(WellSearchResults wsr)
+  {
+    wsr.searchWellsForLibrary(_bigSmallMoleculeLibrary);
+    doTestSortForAllColumnsAndDirections(wsr, _bigSmallMoleculeLibrary.getWells().size());
 
-    _wellSearchResults.searchWellsForLibrary(_smallSmallMoleculeLibrary);
-    assertTrue("using InMemoryModel", _wellSearchResults.getDataTableModel().getModelType() == DataTableModelType.IN_MEMORY);
-    doTestSortForAllColumnsAndDirections(_wellSearchResults, _smallSmallMoleculeLibrary.getWells().size());
+    wsr.searchWellsForLibrary(_smallSmallMoleculeLibrary);
+    doTestSortForAllColumnsAndDirections(wsr, _smallSmallMoleculeLibrary.getWells().size());
 
-    _wellSearchResults.searchWellsForLibraryContentsVersion(_bigSmallMoleculeLibrary.getLatestContentsVersion());
-    assertTrue("using VirtualPagingDataModel", _wellSearchResults.getDataTableModel().getModelType() == DataTableModelType.VIRTUAL_PAGING);
-    doTestSortForAllColumnsAndDirections(_wellSearchResults, _bigSmallMoleculeLibrary.getWells().size());
+    wsr.searchWellsForLibraryContentsVersion(_bigSmallMoleculeLibrary.getLatestContentsVersion());
+    doTestSortForAllColumnsAndDirections(wsr, _bigSmallMoleculeLibrary.getWells().size());
 
-    _wellSearchResults.searchWellsForLibraryContentsVersion(_smallSmallMoleculeLibrary.getLatestContentsVersion());
-    assertTrue("using InMemoryModel", _wellSearchResults.getDataTableModel().getModelType() == DataTableModelType.IN_MEMORY);
-    doTestSortForAllColumnsAndDirections(_wellSearchResults, _smallSmallMoleculeLibrary.getWells().size());
+    wsr.searchWellsForLibraryContentsVersion(_smallSmallMoleculeLibrary.getLatestContentsVersion());
+    doTestSortForAllColumnsAndDirections(wsr, _smallSmallMoleculeLibrary.getWells().size());
   }
 
   /**
@@ -556,7 +608,6 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                          int expectedRowCount)
   {
     DataTableModel<R> model = searchResults.getDataTableModel();
-    assertTrue("using VirtualPagingDataModel", model.getModelType() == DataTableModelType.VIRTUAL_PAGING);
     TableColumnManager<R> columnManager = searchResults.getColumnManager();
     searchResults.clearFilter();
     for (String columnName : columnNameToExpectedValue.keySet()) {
@@ -574,9 +625,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       columnManager.getVisibleColumnModel().setRowIndex(columnIndex);
       for (int i = 0; i < model.getRowCount(); ++i) {
         model.setRowIndex(i);
-        assertEquals("filtered on column " + columnName + "=" +  expectedValue + ", row " + i, 
-                     expectedValue, 
-                     searchResults.getCellValue());
+        if (columnManager.getColumn(columnIndex).isMultiValued()) {
+          assertTrue("filtered on column " + columnName + "=" +  expectedValue + ", row " + i, 
+                     ((Set<?>) searchResults.getCellValue()).contains(expectedValue)); 
+        }
+        else {
+          assertEquals("filtered on column " + columnName + "=" +  expectedValue + ", row " + i, 
+                       expectedValue, 
+                       searchResults.getCellValue());
+        }
       }
     }
   }
@@ -689,11 +746,12 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     }).get(0);
   }
 
-  private void doTestSearchResult(DataModel model,
+  private void verifySearchResult(WellSearchResults wsr,
+                                  DataModel model,
                                   SortedSet<WellKey> expectedWellKeys)
   {
-    _wellSearchResults.getColumnManager().getColumn("Compound SMILES").setVisible(true);
-    _wellSearchResults.getColumnManager().getColumn("Gene Name").setVisible(true);
+    wsr.getColumnManager().getColumn("Compound SMILES").setVisible(true);
+    wsr.getColumnManager().getColumn("Gene Name").setVisible(true);
     assertEquals("row count", expectedWellKeys.size(), model.getRowCount());
     int j = 0;
     for (WellKey expectedWellKey : expectedWellKeys) {
@@ -701,7 +759,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       Well well = (Well) model.getRowData();
       assertEquals("row data " + j, expectedWellKey, well.getWellKey());
       List<TableColumn<Well,?>> columnsTested = new ArrayList<TableColumn<Well,?>>();
-      for (TableColumn<Well,?> column : _wellSearchResults.getColumnManager().getVisibleColumns()) {
+      for (TableColumn<Well,?> column : wsr.getColumnManager().getVisibleColumns()) {
         Well rowData = (Well) model.getRowData();
         Object cellValue = column.getCellValue(rowData);
         if (column.getName().equals("Library")) {

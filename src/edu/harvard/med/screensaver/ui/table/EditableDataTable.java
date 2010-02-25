@@ -13,7 +13,7 @@ package edu.harvard.med.screensaver.ui.table;
 
 import java.util.List;
 
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 import org.apache.log4j.Logger;
@@ -72,7 +72,7 @@ public abstract class EditableDataTable<R> extends DataTable<R>
     return _hasEditableColumns;
   }
 
-  @UIControllerMethod
+  @UICommand
   /* final (CGLIB2 restriction) */public String edit()
   {
     setEditMode(true);
@@ -86,7 +86,7 @@ public abstract class EditableDataTable<R> extends DataTable<R>
   protected void doEdit()
   {}
 
-  @UIControllerMethod
+  @UICommand
   /* final (CGLIB2 restriction) */public String save()
   {
     setEditMode(false);

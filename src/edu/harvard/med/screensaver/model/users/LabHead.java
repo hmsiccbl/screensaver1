@@ -26,6 +26,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.Column;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 import org.apache.log4j.Logger;
@@ -46,6 +47,10 @@ public class LabHead extends ScreeningRoomUser
 
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(LabHead.class);
+  
+  public static final RelationshipPath<LabHead> screensHeaded = new RelationshipPath<LabHead>(LabHead.class, "screensHeaded");
+  public static final RelationshipPath<LabHead> labMembers = new RelationshipPath<LabHead>(LabHead.class, "labMembers");
+  public static final RelationshipPath<LabHead> labAffiliation = new RelationshipPath<LabHead>(LabHead.class, "labAffiliation");
 
 
   // instance data members
@@ -56,31 +61,12 @@ public class LabHead extends ScreeningRoomUser
 
   // public constructors and methods
 
-  public LabHead()
+  protected LabHead() {}
+  
+  public LabHead(AdministratorUser createdBy)
   {
+    super(createdBy);
     setUserClassification(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
-  }
-
-  public LabHead(String firstName,
-                 String lastName,
-                 String email,
-                 String phone,
-                 String mailingAddress,
-                 String comments,
-                 String commonsId,
-                 String harvardId,
-                 LabAffiliation labAffilliation)
-  {
-    super(firstName,
-          lastName,
-          email,
-          phone,
-          mailingAddress,
-          comments,
-          commonsId,
-          harvardId,
-          ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
-    _labAffiliation = labAffilliation;
   }
 
   @Override
@@ -91,18 +77,12 @@ public class LabHead extends ScreeningRoomUser
 
   public LabHead(String firstName,
                  String lastName,
-                 String email,
                  LabAffiliation labAffilliation)
   {
-    this(firstName,
-         lastName,
-         email,
-         "",
-         "",
-         "",
-         "",
-         "",
-         labAffilliation);
+    super(firstName,
+          lastName,
+          ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
+    _labAffiliation = labAffilliation;
   }
 
   @Transient

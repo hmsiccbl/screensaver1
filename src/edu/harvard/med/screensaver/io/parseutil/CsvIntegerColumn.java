@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.io.parseutil;
 
 import java.math.BigDecimal;
 
-import edu.harvard.med.screensaver.io.libraries.ParseException;
+import edu.harvard.med.screensaver.io.ParseException;
 
 public class CsvIntegerColumn extends CsvColumn<Integer>
 {

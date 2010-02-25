@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -43,8 +44,8 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        final Library library = new Library("Small Molecule Library", "smLib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 2, PlateSize.WELLS_384);
-        final AdministratorUser adminUser = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        Library library = new Library("Small Molecule Library", "smLib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 2, PlateSize.WELLS_384);
+        AdministratorUser adminUser = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
         library.createContentsVersion(new AdministrativeActivity(adminUser, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
         PlateSize plateSize = library.getPlateSize();
         for (int plate = library.getStartPlate(); plate <= library.getEndPlate(); ++plate) {
@@ -96,7 +97,8 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
         
         // setup for next block of tests
         LibraryContentsVersion lcv = library.getContentsVersions().first();
-        lcv.release(new AdministrativeActivity(lcv.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+        AdministratorUser adminUser = genericEntityDao.findAllEntitiesOfType(AdministratorUser.class).get(0);
+        lcv.release(new AdministrativeActivity(adminUser, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
       }
     });
 
@@ -128,7 +130,7 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
       public void runTransaction()
       {
         Library library = genericEntityDao.findEntityByProperty(Library.class, "shortName", "smLib");
-        ScreensaverUser admin = library.getLatestReleasedContentsVersion().getLoadingActivity().getPerformedBy();
+        AdministratorUser admin = genericEntityDao.findAllEntitiesOfType(AdministratorUser.class).get(0);
         library.createContentsVersion(new AdministrativeActivity(admin, 
                                                                  new LocalDate(), 
                                                                  AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
@@ -143,7 +145,7 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
                                           new MolecularFormula("M2F2"));
         }
         LibraryContentsVersion lcv = library.getLatestContentsVersion();
-        lcv.release(new AdministrativeActivity(lcv.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+        lcv.release(new AdministrativeActivity((AdministratorUser) lcv.getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
       }
     });
 

@@ -19,6 +19,7 @@ import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.AbstractJsfUnitTest;
 
 import org.apache.log4j.Logger;
@@ -44,7 +45,7 @@ public class CherryPickRequestViewerJsfUnitTest extends AbstractJsfUnitTest
   {
     super.setUp();
     _screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
-    _cpr = _screen.createCherryPickRequest();
+    _cpr = _screen.createCherryPickRequest((AdministratorUser) _screen.getCreatedBy());
     _dao.persistEntity(_screen);
     // ensure _screen entity and its children have ID-based hashCodes
     _screen = _dao.reloadEntity(_screen, true, "labHead", "leadScreener", "collaborators", "cherryPickRequests");
@@ -72,7 +73,7 @@ public class CherryPickRequestViewerJsfUnitTest extends AbstractJsfUnitTest
   private void visitCherryPickRequestViewer(CherryPickRequest cpr)
   {
     CherryPickRequestViewer viewer = getBeanValue("cherryPickRequestViewer");
-    viewer.viewCherryPickRequest(cpr);
+    viewer.viewEntity(cpr);
     visitPage("/cherryPickRequests/cherryPickRequestsBrowser.jsf");
     assertAtView("/screensaver/cherryPickRequests/screensBrowser.jsf");
   }

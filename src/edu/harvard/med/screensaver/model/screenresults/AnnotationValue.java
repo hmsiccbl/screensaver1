@@ -43,7 +43,7 @@ import org.hibernate.annotations.Immutable;
 @org.hibernate.annotations.Proxy
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "annotationTypeId", "reagentId" }) })
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=AnnotationType.class)
-public class AnnotationValue extends AbstractEntity
+public class AnnotationValue extends AbstractEntity<Integer>
 {
 
   // private static data
@@ -55,7 +55,6 @@ public class AnnotationValue extends AbstractEntity
 
   // private instance data
 
-  private Integer _annotationValueId;
   private AnnotationType _annotationType;
   private Reagent _reagent;
   private String _value;
@@ -68,13 +67,6 @@ public class AnnotationValue extends AbstractEntity
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Serializable getEntityId()
-  {
-    return getAnnotationValueId();
   }
 
   /**
@@ -92,7 +84,7 @@ public class AnnotationValue extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="annotation_value_id_seq")
   public Integer getAnnotationValueId()
   {
-    return _annotationValueId;
+    return getEntityId();
   }
 
   /**
@@ -205,7 +197,7 @@ public class AnnotationValue extends AbstractEntity
    */
   private void setAnnotationValueId(Integer annotationValueId)
   {
-    _annotationValueId = annotationValueId;
+    setEntityId(annotationValueId);
   }
 
   /**

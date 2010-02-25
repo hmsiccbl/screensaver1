@@ -10,44 +10,29 @@
 package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable;
+import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
 
 
-public class StudyViewer extends AbstractBackingBean implements EntityViewer
+public class StudyViewer<E extends Study> extends SearchResultContextEntityViewerBackingBean<E>
 {
-  // static members
-
   private static Logger log = Logger.getLogger(StudyViewer.class);
 
-
-  // instance data members
-
-  private StudyViewer _thisProxy;
-  private GenericEntityDAO _dao;
   private StudyDetailViewer _studyDetailViewer;
   private AnnotationTypesTable _annotationTypesTable;
-  private WellSearchResults _wellSearchResults;
+  private WellSearchResults _wellsBrowser;
 
-  private Study _study;
-  private Map<String,Boolean> _isPanelCollapsedMap;
-
-  // constructors
 
   /**
    * @motivation for CGLIB2
@@ -56,38 +41,50 @@ public class StudyViewer extends AbstractBackingBean implements EntityViewer
   {
   }
 
-  public StudyViewer(StudyViewer thisProxy, 
-                     GenericEntityDAO dao,
+  public StudyViewer(StudyViewer thisProxy,
                      StudyDetailViewer studyDetailViewer,
+                     StudySearchResults studiesBrowser,
+                     GenericEntityDAO dao,
                      AnnotationTypesTable annotationTypesTable,
-                     WellSearchResults wellSearchResults)
+                     WellSearchResults wellsBrowser)
   {
-    _thisProxy = thisProxy;
-    _dao = dao;
-    _annotationTypesTable = annotationTypesTable;
+    super(thisProxy,
+          (Class<E>) Study.class,
+          ScreensaverConstants.BROWSE_STUDIES,
+          ScreensaverConstants.VIEW_STUDY,
+          dao,
+          (EntitySearchResults<E,?>) studiesBrowser);
     _studyDetailViewer = studyDetailViewer;
-    _wellSearchResults = wellSearchResults;
+    _annotationTypesTable = annotationTypesTable;
+    _wellsBrowser = wellsBrowser;
 
-    _isPanelCollapsedMap = new HashMap<String,Boolean>();
-    _isPanelCollapsedMap.put("reagentsData", false);
+    getIsPanelCollapsedMap().put("reagentsData", false);
   }
 
-
-  // public methods
-
-  public AbstractEntity getEntity()
+  protected StudyViewer(Class<E> entityClass,
+                        StudyViewer thisProxy,
+                        EntitySearchResults<E,?> studiesBrowser,
+                        String browserActionResult,
+                        String viewerActionResult,
+                        GenericEntityDAO dao,
+                        AnnotationTypesTable annotationTypesTable,
+                        WellSearchResults wellSearchResults)
   {
-    return getStudy();
+    super(thisProxy,
+          entityClass,
+          browserActionResult,
+          viewerActionResult,
+          dao,
+          (EntitySearchResults<E,?>) studiesBrowser);
+    _annotationTypesTable = annotationTypesTable;
+    _wellsBrowser = wellSearchResults;
+
+    getIsPanelCollapsedMap().put("reagentsData", false);
   }
 
-  public Study getStudy()
+  public WellSearchResults getWellsBrowser()
   {
-    return _study;
-  }
-
-  public WellSearchResults getWellSearchResults()
-  {
-    return _wellSearchResults;
+    return _wellsBrowser;
   }
 
   public AnnotationTypesTable getAnnotationTypesTable()
@@ -95,56 +92,22 @@ public class StudyViewer extends AbstractBackingBean implements EntityViewer
     return _annotationTypesTable;
   }
 
-  public Map<?,?> getIsPanelCollapsedMap()
+  @Override
+  protected void initializeEntity(E study)
   {
-    return _isPanelCollapsedMap;
+    getDao().needReadOnly(study, "labHead.labMembers", "leadScreener");
+    getDao().needReadOnly((Screen) study, "collaborators"); 
+    getDao().needReadOnly((Screen) study, "publications");
+    getDao().needReadOnly((Screen) study, "annotationTypes");
   }
 
-  /* JSF Application methods */
-
-  @UIControllerMethod
-  public String viewStudy(final Study studyIn)
+  @Override
+  protected void initializeViewer(E study)
   {
-    // TODO: implement as aspect
-    if (studyIn.isRestricted()) {
-      showMessage("restrictedEntity", "Study " + ((Screen) studyIn).getScreenNumber());
-      log.warn("user unauthorized to view " + studyIn);
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-
-    try {
-      _dao.doInTransaction(new DAOTransaction()
-      {
-        public void runTransaction()
-        {
-          Study study = _dao.reloadEntity(studyIn,
-                                          true,
-                                          "labHead.labMembers",
-                                          "leadScreener");
-          _dao.needReadOnly((Screen) study, "collaborators");
-          _dao.needReadOnly((Screen) study, "publications");
-          _dao.needReadOnly((Screen) study, "annotationTypes");
-          setStudy(study);
-        }
-      });
-    }
-    catch (DataAccessException e) {
-      showMessage("databaseOperationFailed", e.getMessage());
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return VIEW_STUDY;
-  }
-
-
-  // protected methods
-
-  protected void setStudy(Study study)
-  {
-    _study = study;
-    _studyDetailViewer.setStudy(study);
-    if (_study.isStudyOnly()) {
+    if (study.isStudyOnly()) {
       _annotationTypesTable.initialize(new ArrayList<AnnotationType>(study.getAnnotationTypes()));
-      _wellSearchResults.searchReagentsForStudy(study);
+      _wellsBrowser.searchReagentsForStudy(study);
+      _studyDetailViewer.setEntity(study);
     }
   }
 }

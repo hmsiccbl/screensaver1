@@ -15,7 +15,7 @@ import java.util.List;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
@@ -23,27 +23,19 @@ import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
 
-import com.google.common.base.Join;
+import com.google.common.base.Joiner;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 public class ScreenerFinder extends AbstractBackingBean
 {
-
-  // private static final fields
-
   private static final Logger log = Logger.getLogger(ScreenerFinder.class);
-
-
-  // private instance fields
 
   private String _lastNamePattern;
   private String _firstNamePattern;
   private ScreenerSearchResults _screenerSearchResults;
 
-
-  // constructors
 
   /**
    * @motivation for CGLIB2
@@ -55,7 +47,7 @@ public class ScreenerFinder extends AbstractBackingBean
   public ScreenerFinder(ScreenerSearchResults screenerSearchResults)
   {
     _screenerSearchResults = screenerSearchResults;
-    _screenerSearchResults.searchUsers();
+    _screenerSearchResults.searchAll();
   }
 
 
@@ -94,16 +86,16 @@ public class ScreenerFinder extends AbstractBackingBean
     if (!StringUtils.isEmpty(_firstNamePattern)) {
       nameParts.add(_firstNamePattern + "*");
     }
-    return Join.join(", ", nameParts);
+    return Joiner.on(", ").join(nameParts);
   }
 
   @SuppressWarnings("unchecked")
-  @UIControllerMethod
+  @UICommand
   public String findScreenerByNamePattern()
   {
     String pattern = getFullNamePattern();
     if (!StringUtils.isEmpty(pattern)) {
-      _screenerSearchResults.searchUsers(); // potentially poor performance, but "correct", as it always searches lastest additions and changes to users
+      _screenerSearchResults.searchAll(); // potentially poor performance, but "correct", as it always searches lastest additions and changes to users
       TableColumn<ScreeningRoomUser,String> column = (TableColumn<ScreeningRoomUser,String>) _screenerSearchResults.getColumnManager().getColumn("Name");
       //Note: the assumption is that alphabetic sort when searching on name is desired
       _screenerSearchResults.getColumnManager().setSortColumn(column);

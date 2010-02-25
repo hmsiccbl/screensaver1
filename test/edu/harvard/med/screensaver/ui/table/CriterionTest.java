@@ -49,9 +49,9 @@ public class CriterionTest extends TestCase
       assertMatches(operator, Boolean.TRUE, Boolean.FALSE, !expectedMatch);
       assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 1), expectedMatch);
       assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 2), !expectedMatch);
-      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedMatch); 
-      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(0), new Integer(2)), !expectedMatch);
     }
+    assertMatches(Operator.EQUAL, new Integer(1), Arrays.asList(new Integer(1), new Integer(2)), true); 
+    assertMatches(Operator.EQUAL, new Integer(1), Arrays.asList(new Integer(0), new Integer(2)), false);
   }
 
   public void testRankingOperators()
@@ -78,9 +78,9 @@ public class CriterionTest extends TestCase
       assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 1), expectedEqualityMatches);
       assertMatches(operator, new LocalDate(2000, 1, 2), new LocalDate(2000, 1, 1), expectedLessThanMatches);
       assertMatches(operator, new LocalDate(2000, 1, 1), new LocalDate(2000, 1, 2), expectedGreaterThanMatches);
-      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedEqualityMatches); 
-      assertMatches(operator, Arrays.asList(new Integer(1), new Integer(2)), Arrays.asList(new Integer(0), new Integer(2)), expectedLessThanMatches);
-      assertMatches(operator, Arrays.asList(new Integer(0), new Integer(2)), Arrays.asList(new Integer(1), new Integer(2)), expectedGreaterThanMatches);
+      assertMatches(operator, new Integer(1), Arrays.asList(new Integer(1), new Integer(1)), expectedEqualityMatches); 
+      assertMatches(operator, new Integer(2), Arrays.asList(new Integer(0), new Integer(1)), expectedLessThanMatches);
+      assertMatches(operator, new Integer(0), Arrays.asList(new Integer(1), new Integer(2)), expectedGreaterThanMatches);
     }
   }
 
@@ -214,14 +214,7 @@ public class CriterionTest extends TestCase
   {
     Operator operator = Operator.TEXT_CONTAINS;
     assertMatches(operator, null, Arrays.asList("x", "y", "z"));
-    assertMatches(operator, Collections.emptyList(), Arrays.asList("x", "y", "z"));
     assertMatches(operator, "x", Arrays.asList("x", "y", "z"));
-    assertNotMatches(operator, Arrays.asList("x", "y", "z"), null);
-    assertNotMatches(operator, Arrays.asList("x", "y", "z"), Collections.emptyList());
-    assertMatches(operator, Arrays.asList("x", "y", "z"), Arrays.asList("x", "y", "z"));
-    assertNotMatches(operator, Arrays.asList("x", "y", "z"), Arrays.asList("x", "y"));
-    assertMatches(operator, Arrays.asList("x", "y"), Arrays.asList("x", "y", "z"));
-    assertNotMatches(operator, Arrays.asList("x", "z"), Arrays.asList("x", "y", "z"));
   }
 
   private void doTestEmptyAndNullCasesWithOperator(Operator operator)

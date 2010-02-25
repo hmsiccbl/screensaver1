@@ -39,5 +39,20 @@ public class PublicationTest extends AbstractEntityInstanceTest<Publication>
     assertEquals("Tolopko, A., Sullivan, J., Lieftink, C. (2019). Screensaver: LIMS for HTS Facilities. Bioinformatics 218, 101-103.",
                  publication.getCitation());
   }
+  
+  public void testCleanTitle()
+  {
+    Publication publication = new Publication();
+    publication.setTitle("Screensaver: LIMS for HTS Facilities.  ");
+    assertEquals("Screensaver: LIMS for HTS Facilities. ", publication.getCitation());
+    publication.setTitle("Screensaver: LIMS for HTS Facilities. ");
+    assertEquals("Screensaver: LIMS for HTS Facilities. ", publication.getCitation());
+    publication.setTitle("Screensaver: LIMS for HTS Facilities.");
+    assertEquals("Screensaver: LIMS for HTS Facilities. ", publication.getCitation());
+    publication.setTitle("Screensaver: LIMS for HTS Facilities");
+    assertEquals("Screensaver: LIMS for HTS Facilities. ", publication.getCitation());
+    publication.setTitle(null);
+    assertEquals("", publication.getCitation());
+  }
 }
 

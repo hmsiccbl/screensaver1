@@ -40,8 +40,6 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   private static Logger log = Logger.getLogger(TableColumn.class);
 
   public static final String UNGROUPED = "";
-  /** The Administrative group of columns is available only to readAdmin role.  Enforced by {@link TableColumnManager#updateVisibleColumns}. */
-  public static final String ADMIN_COLUMN_GROUP = "Administrative";
 
 
   // instance data members
@@ -51,10 +49,13 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   private String _name;
   private String _description;
   private String _group;
+  private boolean _isAdministrative;
   private boolean _isVisible;
   private boolean _isNumeric;
+  private boolean _isMultiValued;
   private List<Criterion<T>> _criteria = new ArrayList<Criterion<T>>();
   private Converter _converter = NoOpStringConverter.getInstance();
+
 
 
   // public constructors and methods
@@ -64,6 +65,15 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
                      ColumnType columnType,
                      String group)
   {
+    this(name, description, columnType, group, false);
+  }
+
+  public TableColumn(String name,
+                     String description,
+                     ColumnType columnType,
+                     String group,
+                     boolean isMultiValued)
+  {
     _name = name;
     _description = description;
     _columnType = columnType;
@@ -71,6 +81,7 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
     _isNumeric = columnType.isNumeric();
     _converter = columnType.getConverter();
     _isVisible = true;
+    _isMultiValued = isMultiValued;
     addCriterion(new Criterion<T>(_columnType.getDefaultOperator(), null));
   }
 
@@ -104,7 +115,7 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
     return _converter;
   }
 
-  public void setConverter(Converter converter)
+  protected void setConverter(Converter converter)
   {
     _converter = converter;
   }
@@ -299,7 +310,7 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   {
     return _isVisible;
   }
-
+  
   /**
    * Return true whenever the cell values for the column with the specified name
    * should be a hyperlink.
@@ -361,6 +372,16 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
 //    return getName().hashCode();
 //  }
 
+  public boolean isMultiValued()
+  {
+    return _isMultiValued;
+  }
+
+  protected void setMultiValued(boolean multiValued)
+  {
+    _isMultiValued = multiValued;
+  }
+
   @Override
   public String toString()
   {
@@ -374,9 +395,16 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
 
   public boolean isAdministrative()
   {
-    return getGroup().equals(ADMIN_COLUMN_GROUP);
+    return _isAdministrative;
   }
 
-  // private methods
+  public void setAdministrative(boolean isAdministrative)
+  {
+    _isAdministrative = isAdministrative;
+  }
 
+  public boolean isSortableSearchable()
+  {
+    return true;
+  }
 }

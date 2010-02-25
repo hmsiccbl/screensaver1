@@ -12,15 +12,19 @@ package edu.harvard.med.screensaver.service.screens;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -56,48 +60,83 @@ public class ScreeningDuplicator
     _dao = dao;
   }
   
-  @Transactional(propagation=Propagation.MANDATORY)
-  public LibraryScreening addLibraryScreening(Screen screen)
+  @Transactional
+  public LibraryScreening addLibraryScreening(Screen screen, AdministratorUser recordedBy)
   {
+    screen = _dao.reloadEntity(screen);
     SortedSet<LibraryScreening> activities = screen.getLabActivitiesOfType(LibraryScreening.class);
     Screening lastScreening = null;
     if (!activities.isEmpty()) {
       lastScreening = activities.last();
     }
-    LibraryScreening newScreening = screen.createLibraryScreening(screen.getLeadScreener(), new LocalDate());
+    LibraryScreening newScreening = screen.createLibraryScreening(recordedBy, screen.getLeadScreener(), new LocalDate());
     if (lastScreening != null) { 
-      copyScreeningProperties(lastScreening, newScreening);
+      copyActivityProperties(lastScreening, newScreening);
     }
     return newScreening;
   }
   
-  @Transactional(propagation=Propagation.MANDATORY)
-  public RNAiCherryPickScreening addRnaiCherryPickScreening(Screen screen, RNAiCherryPickRequest cpr)
+  @Transactional
+  // TODO: can we only pass in cpr
+  public CherryPickScreening addCherryPickScreening(Screen screen, CherryPickRequest cpr, AdministratorUser recordedBy)
   {
-    SortedSet<RNAiCherryPickScreening> activities = screen.getLabActivitiesOfType(RNAiCherryPickScreening.class);
-    RNAiCherryPickScreening lastScreening = null;
+    screen = _dao.reloadEntity(screen);
+    cpr = _dao.reloadEntity(cpr, true, CherryPickRequest.requestedBy.getPath());
+    SortedSet<CherryPickScreening> activities = screen.getLabActivitiesOfType(CherryPickScreening.class);
+    CherryPickScreening lastScreening = null;
     if (!activities.isEmpty()) {
       lastScreening = activities.last();
     }
-    RNAiCherryPickScreening newScreening = screen.createRNAiCherryPickScreening(cpr.getRequestedBy(),
-                                                                                new LocalDate(),
-                                                                                cpr);
+    CherryPickScreening newScreening = screen.createCherryPickScreening(recordedBy,
+                                                                        cpr.getRequestedBy(),
+                                                                        new LocalDate(),
+                                                                        cpr);
     
     if (lastScreening != null) {
-      copyScreeningProperties(lastScreening, newScreening);
+      copyActivityProperties(lastScreening, newScreening);
     }
     return newScreening;
   }
   
-  private void copyScreeningProperties(Screening fromScreening, Screening toScreening)
+  @Transactional
+  // TODO: can we only pass in cpr
+  public CherryPickLiquidTransfer addCherryPickLiquidTransfer(Screen screen, 
+                                                              CherryPickRequest cpr, 
+                                                              AdministratorUser recordedBy, 
+                                                              CherryPickLiquidTransferStatus status)
   {
+    screen = _dao.reloadEntity(screen);
+    cpr = _dao.reloadEntity(cpr, true, CherryPickRequest.requestedBy.getPath());
+    SortedSet<CherryPickLiquidTransfer> activities = screen.getLabActivitiesOfType(CherryPickLiquidTransfer.class);
+    CherryPickLiquidTransfer lastCplt = null;
+    if (!activities.isEmpty()) {
+      lastCplt = activities.last();
+    }
+    CherryPickLiquidTransfer newCplt = screen.createCherryPickLiquidTransfer(recordedBy,
+                                                                             cpr.getRequestedBy(),
+                                                                             new LocalDate(),
+                                                                             status);
+    
+    if (lastCplt != null) {
+      copyActivityProperties(lastCplt, newCplt);
+    }
+    return newCplt;
+  }
+  
+  private void copyActivityProperties(Screening fromScreening, Screening toScreening)
+  {
+    copyActivityProperties((LabActivity) fromScreening, (LabActivity) toScreening);
     toScreening.setAssayProtocol(fromScreening.getAssayProtocol());
     toScreening.setAssayProtocolLastModifiedDate(fromScreening.getAssayProtocolLastModifiedDate());
     toScreening.setAssayProtocolType(fromScreening.getAssayProtocolType());
     toScreening.setNumberOfReplicates(fromScreening.getNumberOfReplicates());
-    toScreening.setVolumeTransferredPerWell(fromScreening.getVolumeTransferredPerWell());
-    toScreening.setConcentration(fromScreening.getConcentration());
-    toScreening.setPerformedBy(fromScreening.getPerformedBy());
+  }
+
+  private void copyActivityProperties(LabActivity fromActivity, LabActivity toActivity)
+  {
+    toActivity.setVolumeTransferredPerWell(fromActivity.getVolumeTransferredPerWell());
+    toActivity.setConcentration(fromActivity.getConcentration());
+    toActivity.setPerformedBy(fromActivity.getPerformedBy());
   }
 
 }

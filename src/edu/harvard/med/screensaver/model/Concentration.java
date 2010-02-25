@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.model;
 
 import java.math.BigDecimal;
 
+import edu.harvard.med.screensaver.util.StringUtils;
+
 /**
  * A Concentration, in either millimolar, micromolar or nanomolar units, with
  * 1-nanoliter resolution (maximum).
@@ -61,5 +63,18 @@ public class Concentration extends Quantity<Concentration,ConcentrationUnit>
   {
     return new Concentration(value, unit);
   }
+  
+  /**
+   * @motivation for UI
+   */
+  public static Concentration makeConcentration(String value, ConcentrationUnit unit)
+  {
+    Concentration c = null;
+    if (!StringUtils.isEmpty(value)) {
+      c = new Concentration(value, unit).convertToReasonableUnits();
+    }
+    return c;
+  }
+  
 
 }

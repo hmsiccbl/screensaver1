@@ -39,11 +39,13 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 public class MakeDummyEntitiesCellHTS2
 {
@@ -93,7 +95,7 @@ public class MakeDummyEntitiesCellHTS2
                                   endPlate);
 
     dataFactory.newInstance(LibraryContentsVersion.class, library);
-    library.getLatestContentsVersion().release(new AdministrativeActivity(library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     
     
     List<Well> wells = new ArrayList<Well>(nWells);
@@ -259,8 +261,9 @@ public class MakeDummyEntitiesCellHTS2
       
       if (withoutA01ResultValue && wellName.equals("A01")) { } 
       else {
-        normRep1.createResultValue(well, assayWellType, rep1Values.get(i), 3, exclude);
-        normRep2.createResultValue(well, assayWellType, rep2Values.get(i), 3, exclude);
+        AssayWell assayWell = screenResult.createAssayWell(well, assayWellType);
+        normRep1.createResultValue(assayWell, rep1Values.get(i), 3, exclude);
+        normRep2.createResultValue(assayWell, rep2Values.get(i), 3, exclude);
       }
       
 

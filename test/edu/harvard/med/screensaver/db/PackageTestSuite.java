@@ -34,6 +34,7 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(LibrariesDAOTest.class);
     addTestSuite(ScreenDAOTest.class);
     addTestSuite(ScreenResultDAOTest.class);
+    addTestSuite(ScreenResultParserDAOTest.class);
     addTestSuite(UsersDAOTest.class);
     addTestSuite(WebDataAccessPolicyTest.class);
   }

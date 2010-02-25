@@ -54,7 +54,7 @@ import org.hibernate.annotations.Parameter;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "cherryPickRequestId", "screenedWellId" }) })
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=CherryPickRequest.class)
-public class ScreenerCherryPick extends AbstractEntity
+public class ScreenerCherryPick extends AbstractEntity<Integer>
 {
 
   // private static data
@@ -69,7 +69,6 @@ public class ScreenerCherryPick extends AbstractEntity
 
   // private instance data
 
-  private Integer _screenerCherryPickId;
   private Integer _version;
   private CherryPickRequest _cherryPickRequest;
   private Well _screenedWell;
@@ -106,13 +105,6 @@ public class ScreenerCherryPick extends AbstractEntity
     return getClass().getSimpleName() + "(" + _cherryPickRequest.toString() + ":" + _screenedWell.toString() + ")";
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getScreenerCherryPickId();
-  }
-
   /**
    * Get the id for the screener cherry pick.
    * @return the id for the screener cherry pick
@@ -126,7 +118,7 @@ public class ScreenerCherryPick extends AbstractEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="screener_cherry_pick_id_seq")
   public Integer getScreenerCherryPickId()
   {
-    return _screenerCherryPickId;
+    return getEntityId();
   }
 
   /**
@@ -297,7 +289,7 @@ public class ScreenerCherryPick extends AbstractEntity
    */
   private void setScreenerCherryPickId(Integer screenerCherryPickId)
   {
-    _screenerCherryPickId = screenerCherryPickId;
+    setEntityId(screenerCherryPickId);
   }
 
   /**

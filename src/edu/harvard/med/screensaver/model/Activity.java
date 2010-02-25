@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,15 +22,21 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
@@ -43,11 +50,8 @@ import org.joda.time.LocalDate;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 @org.hibernate.annotations.Proxy
-public abstract class Activity extends TimeStampedAbstractEntity implements Comparable
+public abstract class Activity extends AuditedAbstractEntity<Integer> implements Comparable
 {
-
-  // static fields
-
   private static final Logger log = Logger.getLogger(Activity.class);
   private static final long serialVersionUID = 0L;
   
@@ -56,7 +60,6 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
 
   // instance fields
 
-  private Integer _activityId;
   private Integer _version;
   private ScreensaverUser _performedBy;
   private LocalDate _dateOfActivity;
@@ -83,13 +86,6 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
     return hashCode() > other.hashCode() ? 1 : -1;
   }
 
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getActivityId();
-  }
-
   /**
    * Get the id for the activity.
    * @return the id for the activity
@@ -103,7 +99,20 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="activity_id_seq")
   public Integer getActivityId()
   {
-    return _activityId;
+    return getEntityId(); 
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="activityUpdateActivity", 
+             joinColumns=@JoinColumn(name="activityId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)           
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   @Transient
@@ -152,9 +161,9 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
     if (performedBy.equals(_performedBy)) {
       return;
     }
-    _performedBy.getActivitiesPerformed().remove(this);
+    //_performedBy.getActivitiesPerformed().remove(this);
     _performedBy = performedBy;
-    _performedBy.getActivitiesPerformed().add(this);
+    //_performedBy.getActivitiesPerformed().add(this);
   }
 
   /**
@@ -201,11 +210,13 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
 
   /**
    * Construct an initialized <code>Activity</code>.
-   * @param performedBy the user that performed the activity
+   * @param recordedBy the administrator using Screensaver when this activity was created
+   * @param performedBy the user that performed the activity (not necessarily the user using Screensaver)
    * @param dateOfActivity the date the activity took place
    */
-  protected Activity(ScreensaverUser performedBy, LocalDate dateOfActivity)
+  protected Activity(AdministratorUser recordedBy, ScreensaverUser performedBy, LocalDate dateOfActivity)
   {
+    super(recordedBy);
     if (performedBy == null) {
       throw new NullPointerException();
     }
@@ -224,12 +235,12 @@ public abstract class Activity extends TimeStampedAbstractEntity implements Comp
 
   /**
    * Set the id for the activity.
-   * @param screeninRoomActivityId the new id for the activity
+   * @param activityId the new id for the activity
    * @motivation for hibernate
    */
-  private void setActivityId(Integer screeninRoomActivityId)
+  private void setActivityId(Integer activityId)
   {
-    _activityId = screeninRoomActivityId;
+    setEntityId(activityId);
   }
 
   /**

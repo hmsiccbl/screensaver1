@@ -34,14 +34,14 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.ListEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextSetEntityColumn;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 /**
@@ -52,9 +52,6 @@ import com.google.common.collect.Lists;
  */
 public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
 {
-
-  // private static final fields
-
   private static final Logger log = Logger.getLogger(LibrarySearchResults.class);
   public static final Set<LibraryType> LIBRARY_TYPES_TO_DISPLAY =
     new HashSet<LibraryType>(Arrays.asList(LibraryType.COMMERCIAL,
@@ -66,14 +63,9 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
                                            LibraryType.OTHER));
 
 
-  // instance fields
-
   private GenericEntityDAO _dao;
-  private LibraryViewer _libraryViewer;
 
-
-  // constructors
-
+  
   /**
    * @motivation for CGLIB2
    */
@@ -84,12 +76,15 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
   public LibrarySearchResults(GenericEntityDAO dao,
                               LibraryViewer libraryViewer)
   {
+    super(libraryViewer);
     _dao = dao;
-    _libraryViewer = libraryViewer;
   }
 
-
-  // implementations of the SearchResults abstract methods
+  @Override
+  public void searchAll()
+  {
+    searchLibraryScreenType(null);
+  }
 
   @SuppressWarnings("unchecked")
   public void searchLibraryScreenType(ScreenType screenType)
@@ -168,32 +163,35 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
       getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN)) {
       columns.add(new TextEntityColumn<Library>(new PropertyPath(Library.class, "vendor"),
         "Vendor/Source", "The vendor or source that produced the library",
-        TableColumn.ADMIN_COLUMN_GROUP) {
+        TableColumn.UNGROUPED) {
         @Override
         public String getCellValue(Library library) { return library==null? null : library.getVendor(); }
       });
-      columns.add(new ListEntityColumn<Library>(
+      columns.get(columns.size() - 1).setAdministrative(true);
+      columns.add(new TextSetEntityColumn<Library>(
         Library.copies.toProperty("name"),
         "Copies",
         "The copies that have been made of this library",
-        TableColumn.ADMIN_COLUMN_GROUP) {
+        TableColumn.UNGROUPED) {
         @Override
-        public List<String> getCellValue(Library library)
+        public Set<String> getCellValue(Library library)
         {
-          return library==null? null : new ArrayList<String>(
-            CollectionUtils.collect(library.getCopies(), new Transformer() {
-              public Object transform(Object e) { return ((Copy) e).getName(); }
-            }));
+          if (library == null) {
+            return null;
+          }
+          return Sets.newHashSet(Iterables.transform(library.getCopies(), Copy.ToName));
         }
       });
+      columns.get(columns.size() - 1).setAdministrative(true);
       columns.add(new EnumEntityColumn<Library,LibraryScreeningStatus>(new PropertyPath(Library.class, "screeningStatus"),
         "Screening Status", "Screening status for the library, e.g., 'Allowed','Not Allowed', 'Not Yet Plated', etc.",
-        TableColumn.ADMIN_COLUMN_GROUP
+        TableColumn.UNGROUPED
         , LibraryScreeningStatus.values()) {
         @Override
         public LibraryScreeningStatus getCellValue(Library library) 
         { return library==null? null : library.getScreeningStatus(); }
       });
+      columns.get(columns.size() - 1).setAdministrative(true);
     }
 
 //    TableColumnManager<Library> columnManager = getColumnManager();
@@ -204,11 +202,5 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
 //                                         columnManager.getColumn("Short HName"));
 
     return columns;
-  }
-
-  @Override
-  protected void setEntityToView(Library library)
-  {
-    _libraryViewer.viewLibrary(library);
   }
 }

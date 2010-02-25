@@ -96,7 +96,7 @@ public class ScreenCreator extends StudyCreator
     if (screenResultFile != null) {
       ScreenResultParser parser = (ScreenResultParser) app.getSpringBean("screenResultParser");
       try {
-        parser.parse((Screen) screen, screenResultFile);
+        parser.parse((Screen) screen, screenResultFile, true);
       }
       catch (FileNotFoundException e) {
         String msg = "Screen result file not found: " + screenResultFile;

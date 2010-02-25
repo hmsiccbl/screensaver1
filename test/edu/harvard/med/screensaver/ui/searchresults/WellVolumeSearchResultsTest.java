@@ -48,6 +48,8 @@ import edu.harvard.med.screensaver.util.Pair.PairComparator;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.collect.ImmutableSortedSet;
+
 public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 {
   // static members
@@ -74,8 +76,8 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     super.onSetUp();
 
     initializeWellCopyVolumes();
-    _wellVolumeSearchResults = new WellVolumeSearchResults(genericEntityDao, null, null, null, null);
-    _wellCopyVolumeSearchResults = new WellCopyVolumeSearchResults(genericEntityDao, null, null, _wellVolumeSearchResults, null);
+    _wellVolumeSearchResults = new WellVolumeSearchResults(genericEntityDao, null, null, null);
+    _wellCopyVolumeSearchResults = new WellCopyVolumeSearchResults(genericEntityDao, null, null, _wellVolumeSearchResults);
   }
 
   public void testWellVolumeSearchResults()
@@ -196,8 +198,8 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
           else if (column.getName().equals("Copies")) {
             // this tests aggregation of WVAs
             assertEquals("row " + j + ", " + expectedKey  + ":Copies",
-                         (List<String>) Arrays.asList("C", "D"),
-                         (List<String>) cellValue);
+                         ImmutableSortedSet.of("C", "D"),
+                         cellValue);
             ++columnsTested;
           }
 

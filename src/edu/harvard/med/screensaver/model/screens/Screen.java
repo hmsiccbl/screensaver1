@@ -44,6 +44,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
@@ -57,7 +58,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -74,6 +74,9 @@ import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import com.google.common.base.Function;
+
 
 
 /**
@@ -102,13 +105,17 @@ public class Screen extends Study implements AttachedFilesEntity
   public static final RelationshipPath<Screen> statusItems = new RelationshipPath<Screen>(Screen.class, "statusItems");
   public static final RelationshipPath<Screen> fundingSupports = new RelationshipPath<Screen>(Screen.class, "fundingSupports");
   public static final RelationshipPath<Screen> billingItems = new RelationshipPath<Screen>(Screen.class, "billingItems");
+  public static final RelationshipPath<Screen> attachedFiles = new RelationshipPath<Screen>(Screen.class, "attachedFiles");
+  public static final RelationshipPath<Screen> publications = new RelationshipPath<Screen>(Screen.class, "publications");
+  public static final RelationshipPath<Screen> keywords = new RelationshipPath<Screen>(Screen.class, "keywords");
+  public static final RelationshipPath<Screen> pinTransferApprovalActivity = new RelationshipPath<Screen>(Screen.class, "pinTransferApprovalActivity");
+
+  public static final Function<Screen,Integer> ToScreenNumberFunction = new Function<Screen,Integer>() { public Integer apply(Screen s) { return s.getScreenNumber(); } };
 
   // private instance data
 
   // study (provides annotation of library contents)
 
-  //private Integer _studyId;
-  private Integer _screenId;
   private Integer _version;
   private String _title;
   private ScreeningRoomUser _leadScreener; // should rename
@@ -121,7 +128,6 @@ public class Screen extends Study implements AttachedFilesEntity
   private SortedSet<AnnotationType> _annotationTypes = new TreeSet<AnnotationType>();
   private Set<Reagent> _reagents = new HashSet<Reagent>();
   private StudyType _studyType;
-  private boolean _isShareable = true;
   private boolean _isDownloadable = true;
 
   // generic screen
@@ -153,6 +159,8 @@ public class Screen extends Study implements AttachedFilesEntity
   private String _publishableProtocolEnteredBy;
   private AdministrativeActivity _pinTransferApprovalActivity;
   private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
+  private ScreenDataSharingLevel _dataSharingLevel;
+  private LocalDate _dataPrivacyExpirationDate;
 
 
   // public constructors
@@ -165,36 +173,11 @@ public class Screen extends Study implements AttachedFilesEntity
    *             fields are allowed to be uninitialized, initially
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
-  public Screen() {}
-
-  /**
-   * Construct an initialized <code>Screen</code>.
-   * @param leadScreener the lead screener
-   * @param labHead the lab head
-   * @param screenNumber the screen number
-   * @param screenType the screen type
-   * @param title the title
-   */
-  public Screen(
-    ScreeningRoomUser leadScreener,
-    LabHead labHead,
-    Integer screenNumber,
-    ScreenType screenType,
-    String title)
+  protected Screen() {}
+  
+  public Screen(AdministratorUser createdBy) 
   {
-    this(
-      leadScreener,
-      labHead,
-      screenNumber,
-      screenType,
-      StudyType.IN_VITRO,
-      title,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null);
+    super(createdBy);
   }
 
   /**
@@ -206,77 +189,21 @@ public class Screen extends Study implements AttachedFilesEntity
    * @param studyType the study type
    * @param title the title
    */
-  public Screen(
-    ScreeningRoomUser leadScreener,
-    LabHead labHead,
-    Integer screenNumber,
-    ScreenType screenType,
-    StudyType studyType,
-    String title)
+  public Screen(ScreeningRoomUser leadScreener,
+                LabHead labHead,
+                Integer screenNumber,
+                ScreenType screenType,
+                StudyType studyType,
+                String title)
   {
-    this(
-      leadScreener,
-      labHead,
-      screenNumber,
-      screenType,
-      studyType,
-      title,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null);
-  }
-
-  /**
-   * Construct an initialized <code>Screen</code>.
-   * @param leadScreener the lead screener
-   * @param labHead the lab head
-   * @param screenNumber the screen number
-   * @param screenType the screen type
-   * @param studyType the study type
-   * @param title the title
-   * @param dataMeetingScheduled the date the data meeting was scheduled for
-   * @param dataMeetingComplete the date the data meeting took place
-   * @param summary the summary
-   * @param comments the comments
-   * @param abaseStudyId the abase study id
-   * @param abaseProtocolId the abase protocol id
-   */
-  public Screen(
-    ScreeningRoomUser leadScreener,
-    LabHead labHead,
-    Integer screenNumber,
-    ScreenType screenType,
-    StudyType studyType,
-    String title,
-    LocalDate dataMeetingScheduled,
-    LocalDate dataMeetingComplete,
-    String summary,
-    String comments,
-    String abaseStudyId,
-    String abaseProtocolId)
-  {
-    if (leadScreener == null) {
-      throw new NullPointerException();
-    }
-    _leadScreener = leadScreener;
-    _labHead = labHead;
+    super(null);
     _screenNumber = screenNumber;
-    _screenType = screenType;
+    _screenType = screenType; // note: must be set before updateFacilityUsageRoleForAssociatedScreens() is called
+    setLeadScreener(leadScreener);
+    setLabHead(labHead);
     _title = title;
-    _leadScreener.getScreensLed().add(this);
-    if (_labHead != null) {
-      _labHead.getScreensHeaded().add(this);
-    }
     _studyType = studyType;
-    _dataMeetingScheduled = dataMeetingScheduled;
-    _dataMeetingComplete = dataMeetingComplete;
-    _summary = summary;
-    _comments = comments;
-    _abaseStudyId = abaseStudyId;
-    _abaseProtocolId = abaseProtocolId;
+    _dataSharingLevel = ScreenDataSharingLevel.PRIVATE;
   }
 
 
@@ -289,13 +216,6 @@ public class Screen extends Study implements AttachedFilesEntity
       return visitor.visit((Study) this);
     }
     return visitor.visit(this);
-  }
-
-  @Override
-  @Transient
-  public Integer getEntityId()
-  {
-    return getScreenId();
   }
 
   /**
@@ -311,7 +231,20 @@ public class Screen extends Study implements AttachedFilesEntity
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="screen_id_seq")
   public Integer getScreenId()
   {
-    return _screenId;
+    return getEntityId();
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name="screenUpdateActivity", 
+             joinColumns=@JoinColumn(name="screenId", nullable=false, updatable=false),
+             inverseJoinColumns=@JoinColumn(name="updateActivityId", nullable=false, updatable=false, unique=true))
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+  @Sort(type=SortType.NATURAL)            
+  @ToMany(singularPropertyName="updateActivity", hasNonconventionalMutation=true /* model testing framework doesn't understand this is a containment relationship, and so requires addUpdateActivity() method*/)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 
   /**
@@ -319,7 +252,7 @@ public class Screen extends Study implements AttachedFilesEntity
    * @return the lead screener
    */
   @ManyToOne(fetch=FetchType.LAZY, cascade={ CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinColumn(name="leadScreenerId", nullable=false)
+  @JoinColumn(name="leadScreenerId"/*, nullable=false*/)
   @org.hibernate.annotations.ForeignKey(name="fk_screen_to_lead_screener")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value={
@@ -346,9 +279,11 @@ public class Screen extends Study implements AttachedFilesEntity
     }
     if (_leadScreener != null) {
       _leadScreener.getScreensLed().remove(this);
+      _leadScreener.updateFacilityUsageRoleForAssociatedScreens();
     }
     _leadScreener = leadScreener;
     _leadScreener.getScreensLed().add(this);
+    _leadScreener.updateFacilityUsageRoleForAssociatedScreens();
   }
 
   /**
@@ -382,10 +317,12 @@ public class Screen extends Study implements AttachedFilesEntity
     }
     if (_labHead != null) {
       _labHead.getScreensHeaded().remove(this);
+      _labHead.updateFacilityUsageRoleForAssociatedScreens();
     }
     _labHead = labHead;
     if (_labHead != null) {
       _labHead.getScreensHeaded().add(this);
+      _labHead.updateFacilityUsageRoleForAssociatedScreens();
     }
   }
 
@@ -468,7 +405,9 @@ public class Screen extends Study implements AttachedFilesEntity
   public boolean addCollaborator(ScreeningRoomUser collaborator)
   {
     if (_collaborators.add(collaborator)) {
-      return collaborator.getScreensCollaborated().add(this);
+      collaborator.getScreensCollaborated().add(this);
+      collaborator.updateFacilityUsageRoleForAssociatedScreens();
+      return true;
     }
     return false;
   }
@@ -481,7 +420,9 @@ public class Screen extends Study implements AttachedFilesEntity
   public boolean removeCollaborator(ScreeningRoomUser collaborator)
   {
     if (_collaborators.remove(collaborator)) {
-      return collaborator.getScreensCollaborated().remove(this);
+      collaborator.getScreensCollaborated().remove(this);
+      collaborator.updateFacilityUsageRoleForAssociatedScreens();
+      return true;
     }
     return false;
   }
@@ -523,7 +464,7 @@ public class Screen extends Study implements AttachedFilesEntity
    */
   public ScreenResult createScreenResult()
   {
-    _screenResult = new ScreenResult(this, false, null);
+    _screenResult = new ScreenResult(this, null);
     return _screenResult;
   }
 
@@ -642,30 +583,14 @@ public class Screen extends Study implements AttachedFilesEntity
    * @param dateOfActivity the date the lab activity took place
    * @return the new library screening
    */
-  public LibraryScreening createLibraryScreening(
-    ScreeningRoomUser performedBy,
-    LocalDate dateOfActivity)
+  public LibraryScreening createLibraryScreening(AdministratorUser recordedBy,
+                                                 ScreeningRoomUser performedBy,
+                                                 LocalDate dateOfActivity)
   {
     LibraryScreening libraryScreening =
-      new LibraryScreening(this, performedBy, dateOfActivity);
+      new LibraryScreening(this, recordedBy, performedBy, dateOfActivity);
     _labActivities.add(libraryScreening);
     return libraryScreening;
-  }
-
-  /**
-   * Create and return a new cherry pick liquid transfer for the screen.
-   * @param performedBy the user that performed the activity
-   * @param dateOfActivity the date the lab activity took place
-   * @return the new cherry pick liquid transfer
-   */
-  public CherryPickLiquidTransfer createCherryPickLiquidTransfer(
-    ScreensaverUser performedBy,
-    LocalDate dateOfActivity)
-  {
-    return createCherryPickLiquidTransfer(
-      performedBy,
-      dateOfActivity,
-      CherryPickLiquidTransferStatus.SUCCESSFUL);
   }
 
   /**
@@ -675,37 +600,38 @@ public class Screen extends Study implements AttachedFilesEntity
    * @param status the status of the cherry pick liquid transfer
    * @return the new cherry pick liquid transfer
    */
-  public CherryPickLiquidTransfer createCherryPickLiquidTransfer(
-    ScreensaverUser performedBy,
-    LocalDate dateOfActivity,
-    CherryPickLiquidTransferStatus status)
+  public CherryPickLiquidTransfer createCherryPickLiquidTransfer(AdministratorUser recordedBy,
+                                                                 ScreensaverUser performedBy,
+                                                                 LocalDate dateOfActivity,
+                                                                 CherryPickLiquidTransferStatus status)
   {
-    CherryPickLiquidTransfer cherryPickLiquidTransfer = new CherryPickLiquidTransfer(
-      this,
-      performedBy,
-      dateOfActivity,
-      status);
+    CherryPickLiquidTransfer cherryPickLiquidTransfer = new CherryPickLiquidTransfer(this,
+                                                                                     recordedBy,
+                                                                                     performedBy,
+                                                                                     dateOfActivity,
+                                                                                     status);
     _labActivities.add(cherryPickLiquidTransfer);
     return cherryPickLiquidTransfer;
   }
 
   /**
-   * Create and return a new rnai cherry pick screening for the screen.
+   * Create and return a new cherry pick screening for the screen.
    * @param performedBy the user that performed the screening
    * @param dateOfActivity the date the screening took place
-   * @param rnaiCherryPickRequest the RNAi cherry pick request
-   * @return the newly created rnai cherry pick screening
+   * @param cherryPickRequest the cherry pick request
+   * @return the newly created cherry pick screening
    */
-  public RNAiCherryPickScreening createRNAiCherryPickScreening(
-    ScreeningRoomUser performedBy,
-    LocalDate dateOfActivity,
-    RNAiCherryPickRequest rnaiCherryPickRequest)
+  public CherryPickScreening createCherryPickScreening(AdministratorUser recordedBy,
+                                                       ScreeningRoomUser performedBy,
+                                                       LocalDate dateOfActivity,
+                                                       CherryPickRequest cherryPickRequest)
   {
-    RNAiCherryPickScreening screening = new RNAiCherryPickScreening(
+    CherryPickScreening screening = new CherryPickScreening(
       this,
+      recordedBy,
       performedBy,
       dateOfActivity,
-      rnaiCherryPickRequest);
+      cherryPickRequest);
     _labActivities.add(screening);
     return screening;
   }
@@ -739,9 +665,9 @@ public class Screen extends Study implements AttachedFilesEntity
    * cherry pick.
    * @return the new cherry pick request
    */
-  public CherryPickRequest createCherryPickRequest()
+  public CherryPickRequest createCherryPickRequest(AdministratorUser createdBy)
   {
-    return createCherryPickRequest(getLeadScreener(), new LocalDate(), null);
+    return createCherryPickRequest(createdBy, getLeadScreener(), new LocalDate());
   }
 
   /**
@@ -752,32 +678,16 @@ public class Screen extends Study implements AttachedFilesEntity
    * @param dateRequested the date requested
    * @return the new cherry pick request
    */
-  public CherryPickRequest createCherryPickRequest(
-    ScreeningRoomUser requestedBy,
-    LocalDate dateRequested)
-  {
-    return createCherryPickRequest(requestedBy, dateRequested, null);
-  }
-
-  /**
-   * Create and return a new cherry pick request for the screen of the appropriate type ({@link
-   * SmallMoleculeCherryPickRequest} or {@link RNAiCherryPickRequest}.
-   * @param requestedBy the requestor
-   * @param dateRequested the date requested
-   * @param legacyId the ScreenDB legacy id
-   * @return the new cherry pick request
-   */
-  public CherryPickRequest createCherryPickRequest(
-    ScreeningRoomUser requestedBy,
-    LocalDate dateRequested,
-    Integer legacyId)
+  public CherryPickRequest createCherryPickRequest(AdministratorUser createdBy,
+                                                   ScreeningRoomUser requestedBy,
+                                                   LocalDate dateRequested)
   {
     CherryPickRequest cherryPickRequest;
     if (getScreenType().equals(ScreenType.RNAI)) {
-      cherryPickRequest = new RNAiCherryPickRequest(this, requestedBy, dateRequested, legacyId);
+      cherryPickRequest = new RNAiCherryPickRequest(createdBy, this, requestedBy, dateRequested);
     }
     else if(getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-      cherryPickRequest = new SmallMoleculeCherryPickRequest(this, requestedBy, dateRequested, legacyId);
+      cherryPickRequest = new SmallMoleculeCherryPickRequest(createdBy, this, requestedBy, dateRequested);
     }
     else {
       throw new UnsupportedOperationException(
@@ -855,8 +765,9 @@ public class Screen extends Study implements AttachedFilesEntity
   public Publication addCopyOfPublication(Publication publicationDTO)
   {
     Publication publication = createPublication();
-    publication.setTitle(publicationDTO.getTitle());
     publication.setPubmedId(publicationDTO.getPubmedId());
+    publication.setPubmedCentralId(publicationDTO.getPubmedCentralId());
+    publication.setTitle(publicationDTO.getTitle());
     publication.setYearPublished(publicationDTO.getYearPublished());
     publication.setAuthors(publicationDTO.getAuthors());
     publication.setJournal(publicationDTO.getJournal());
@@ -1008,33 +919,6 @@ public class Screen extends Study implements AttachedFilesEntity
   public Integer getStudyNumber()
   {
     return getScreenNumber();
-  }
-
-  /**
-   * Get whether this <code>Screen</code> can be viewed by all users of
-   * the system; that is,
-   * {@link edu.harvard.med.screensaver.model.users.ScreeningRoomUser}s other
-   * than those associated with the Screen.
-   *
-   * @return <code>true</code> iff this <code>ScreenResult</code> is
-   *         shareable among all users
-   */
-  @Column(nullable=false, name="isShareable")
-  public boolean isShareable()
-  {
-    return _isShareable;
-  }
-
-  /**
-   * Set whether this <code>Screen</code> can be viewed by all users of
-   * the system.
-   * @param isShareable the new value of whether this screen can be viewed by all users of
-   * the system
-   * @see #isShareable()
-   */
-  public void setShareable(boolean isShareable)
-  {
-    _isShareable = isShareable;
   }
 
   /**
@@ -1490,7 +1374,6 @@ public class Screen extends Study implements AttachedFilesEntity
       throw new BusinessRuleViolationException("pin transfer approval already recorded");
     }
     _pinTransferApprovalActivity = new AdministrativeActivity(recordedBy,
-                                                              new LocalDate(),
                                                               approvedBy,
                                                               dateApproved,
                                                               AdministrativeActivityType.PIN_TRANSFER_APPROVAL);
@@ -1636,7 +1519,7 @@ public class Screen extends Study implements AttachedFilesEntity
    */
   private void setScreenId(Integer screenId)
   {
-    _screenId = screenId;
+    setEntityId(screenId);
   }
 
   /**
@@ -1797,4 +1680,34 @@ public class Screen extends Study implements AttachedFilesEntity
   {
     return Collections.emptySet();
   }
+
+  @Column(nullable=false)
+  //@org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel$UserType")
+  public ScreenDataSharingLevel getDataSharingLevel()
+  {
+    return _dataSharingLevel;
+  }
+
+  public void setDataSharingLevel(ScreenDataSharingLevel dataSharingLevel)
+  {
+    _dataSharingLevel = dataSharingLevel;
+  }
+
+  /**
+   * The date on which a level 2 or 3 screen is to become level 1.
+   */
+  @Column
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  public LocalDate getDataPrivacyExpirationDate()
+  {
+    return _dataPrivacyExpirationDate;
+  }
+
+  public void setDataPrivacyExpirationDate(LocalDate dataPrivacyExpirationDate)
+  {
+    _dataPrivacyExpirationDate = dataPrivacyExpirationDate;
+  }
+  
+  
+
 }

@@ -26,6 +26,7 @@
   </bean>
 
   <import resource="spring-context-persistence.xml"/>
+  <import resource="spring-context-config.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-logging.xml"/>
   

@@ -19,7 +19,18 @@
     id="screenResultParser"
     class="edu.harvard.med.screensaver.io.screenresults.ScreenResultParser"
     scope="prototype">
-    <constructor-arg index="0" ref="librariesDao"/>
+    <constructor-arg ref="librariesDao"/>
+    <constructor-arg ref="screenResultsDao"/>
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean
+    id="screenResultLoader"
+    class="edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="screenResultsDao"/>
+    <lookup-method name="createScreenResultParser" bean="screenResultParser"/>
   </bean>
 
   <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->
@@ -29,6 +40,12 @@
     scope="prototype">
     <description>A ScreenResultParser that does not need access to a database.  Used for testing.</description>
     <constructor-arg index="0" >
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
+    </constructor-arg>
+    <constructor-arg index="1" >
+      <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
+    </constructor-arg>
+    <constructor-arg index="2" >
       <bean class="edu.harvard.med.screensaver.io.screenresults.MockDaoForScreenResultImporter"/>
     </constructor-arg>
   </bean>
@@ -116,13 +133,6 @@
   </bean>
 
   <bean
-    id="cherryPickRequestPlateStatusUpdater"
-    class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateStatusUpdater"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-  </bean>
-
-  <bean
     id="cherryPickRequestCherryPicksAdder"
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder"
     scope="singleton">
@@ -154,6 +164,20 @@
     id="cellHts2Annotator"
     class="edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator"
     scope="prototype">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+  
+  <bean id="userAgreementUpdater" class="edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater" scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
+
+  <bean id="emailService"
+        class="edu.harvard.med.iccbl.screensaver.service.SmtpEmailService" scope="singleton">
+    <constructor-arg value="${screensaver.service.smtpemailservice.host}" />
+    <constructor-arg value="${screensaver.service.smtpemailservice.username}" />
+  </bean>
+
+  <bean id="screenDataSharingLevelUpdater" class="edu.harvard.med.iccbl.screensaver.service.screens.ScreenDataSharingLevelUpdater" scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
   </bean>
 

@@ -12,6 +12,7 @@
     <mapping class="edu.harvard.med.screensaver.model.Activity" />
     <mapping class="edu.harvard.med.screensaver.model.AdministrativeActivity" />
     <mapping class="edu.harvard.med.screensaver.model.AttachedFile" />
+    <mapping class="edu.harvard.med.screensaver.model.AttachedFileType" />
 
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate" />
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer" />
@@ -42,17 +43,19 @@
     <mapping class="edu.harvard.med.screensaver.model.screens.BillingItem" />
     <mapping class="edu.harvard.med.screensaver.model.screens.EquipmentUsed" />
     <mapping class="edu.harvard.med.screensaver.model.screens.FundingSupport" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.LabActivity" />
     <mapping class="edu.harvard.med.screensaver.model.screens.LibraryScreening" />
     <mapping class="edu.harvard.med.screensaver.model.screens.PlatesUsed" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Publication" />
-    <mapping class="edu.harvard.med.screensaver.model.screens.RNAiCherryPickScreening" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.CherryPickScreening" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Screen" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Screening" />
-    <mapping class="edu.harvard.med.screensaver.model.screens.LabActivity" />
+    <mapping class="edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType" />
     <mapping class="edu.harvard.med.screensaver.model.screens.StatusItem" />
 
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationType" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationValue" />
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.AssayWell" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.ResultValue" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.ResultValueType" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.ScreenResult" />
@@ -62,6 +65,7 @@
     <mapping class="edu.harvard.med.screensaver.model.users.ChecklistItemEvent" />
     <mapping class="edu.harvard.med.screensaver.model.users.LabAffiliation" />
     <mapping class="edu.harvard.med.screensaver.model.users.LabHead" />
+    <mapping class="edu.harvard.med.screensaver.model.users.UserAttachedFileType" />
     <mapping class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser" />
     <mapping class="edu.harvard.med.screensaver.model.users.ScreensaverUser" />
 	</session-factory>

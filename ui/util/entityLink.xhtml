@@ -11,13 +11,12 @@
 	<!-- facelet params:
          - entity: AbstractEntity
          - property: property to be displayed as the link text (optional, defaults to entityId)
-	       - bean: backing bean
-	       - action: action method in bean
+	       - viewer: EntityViewer
 	 -->
 
 <ui:composition>
 
-  <t:commandLink id="#{id}Link" action="#{bean[action]}"
+  <t:commandLink id="#{id}Link" action="#{viewer.viewEntity}"
     styleClass="entityLink #{styleClass}">
     <f:param name="entityId" value="#{entity.entityId}" />
     <t:outputText id="#{id}LinkValue"

@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,9 +47,9 @@ public interface GenericEntityDAO
   /**
    * @deprecated Use this method prevents compile-time checking of constructor
    *             signature. Instantiate the entity via its constructor and use
-   *             {@link #saveOrUpdateEntity(AbstractEntity)} instead.
+   *             {@link #saveOrUpdateEntity(Entity)} instead.
    */
-  public <E extends AbstractEntity> E defineEntity(Class<E> entityClass,
+  public <E extends Entity> E defineEntity(Class<E> entityClass,
                                                    Object... constructorArguments);
 
   public <E> List<E> runQuery(edu.harvard.med.screensaver.db.Query query);
@@ -59,12 +59,12 @@ public interface GenericEntityDAO
    * upon return. This method calls the underlying Hibernate Session.saveOrUpdate, which
    * does not have JPA semantics. We have encountered situations in which the save-or-update
    * cascades were not followed when this method was called, but only after the session
-   * was flushed. If this seems like a problem to you, try {@link #persistEntity(AbstractEntity)}
+   * was flushed. If this seems like a problem to you, try {@link #persistEntity(Entity)}
    * instead.
    *
    * @param entity
    */
-  public void saveOrUpdateEntity(AbstractEntity entity);
+  public void saveOrUpdateEntity(Entity entity);
 
   /**
    * Make the specified entity persistent. The entity's ID property will be set
@@ -76,7 +76,7 @@ public interface GenericEntityDAO
    *
    * @param entity
    */
-  public void persistEntity(AbstractEntity entity);
+  public void persistEntity(Entity entity);
 
   /**
    * Reattach the entity to the current Hibernate session, allowing
@@ -97,8 +97,20 @@ public interface GenericEntityDAO
    * @param entity the entity to be reattached
    * @return the same entity instance passed in
    */
-  public <E extends AbstractEntity> E reattachEntity(E entity);
+  public <E extends Entity> E reattachEntity(E entity);
 
+  /**
+   * Reattach the entity network to the current Hibernate session, similarly to
+   * {@link #reattachEntity(Entity)}, but also 1) persists any transient
+   * entities and 2) handles the cases where some entities in the object network
+   * are different instances of the same entity in the database (which can occur
+   * when the same entity is referenced in two places within the entity network
+   * and those entities were loaded in different sessions)
+   * 
+   * @return a <i>new</i> managed entity instance, if the specified entity is
+   *         not already managed
+   */
+  public <E extends Entity> E mergeEntity(E entity);
 
   /**
    * For a given detached entity, return a <i>new, Hibernate-managed instance</i>.
@@ -119,7 +131,7 @@ public interface GenericEntityDAO
    * @param entity the entity to be reloaded
    * @return a new Hibernate-managed instance of the specified entity
    */
-  public <E extends AbstractEntity> E reloadEntity(E entity);
+  public <E extends Entity> E reloadEntity(E entity);
 
 
   /**
@@ -147,7 +159,7 @@ public interface GenericEntityDAO
    *          names; see class-level documentation of {@link GenericEntityDAO}
    * @return a new Hibernate-managed instance of the specified entity
    */
-  public <E extends AbstractEntity> E reloadEntity(E entity, boolean readOnly, String... relationships);
+  public <E extends Entity> E reloadEntity(E entity, boolean readOnly, String... relationships);
 
 
   /**
@@ -160,7 +172,7 @@ public interface GenericEntityDAO
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public void need(AbstractEntity entity,
+  public void need(Entity entity,
                    String ... relationships);
 
   /**
@@ -174,7 +186,7 @@ public interface GenericEntityDAO
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public void needReadOnly(AbstractEntity entity,
+  public void needReadOnly(Entity entity,
                            String... relationships);
 
   /**
@@ -188,16 +200,16 @@ public interface GenericEntityDAO
    * Returns the size of a to-many relationship collection, and does so
    * efficiently, without loading the entities in the relationship.
    */
-  public int relationshipSize(final AbstractEntity entity, final String relationship);
+  public int relationshipSize(final Entity entity, final String relationship);
 
 
-  public int relationshipSize(final AbstractEntity entity,
+  public int relationshipSize(final Entity entity,
                               final String relationship,
                               final String relationshipProperty,
                               final String relationshipPropertyValue);
 
 
-  public void deleteEntity(AbstractEntity entity);
+  public void deleteEntity(Entity entity);
 
 
   /**
@@ -207,7 +219,7 @@ public interface GenericEntityDAO
    * @param entityClass the class of the entity to retrieve
    * @return a list of the entities of the specified type
    */
-  public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass);
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass);
 
 
   /**
@@ -219,7 +231,7 @@ public interface GenericEntityDAO
    *          names; see class-level documentation of {@link GenericEntityDAO}
    * @return a list of the entities of the specified type
    */
-  public <E extends AbstractEntity> List<E> findAllEntitiesOfType(Class<E> entityClass,
+  public <E extends Entity> List<E> findAllEntitiesOfType(Class<E> entityClass,
                                                                   boolean readOnly,
                                                                   String... relationships);
 
@@ -236,7 +248,7 @@ public interface GenericEntityDAO
    * @return the entity of the specified type, with the specified identifier.
    *         Return null if there is no such entity.
    */
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass, Serializable id);
+  public <E extends Entity,K extends Serializable> E findEntityById(Class<E> entityClass, K id);
 
 
   /**
@@ -246,10 +258,10 @@ public interface GenericEntityDAO
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public <E extends AbstractEntity> E findEntityById(Class<E> entityClass,
-                                                     Serializable id,
-                                                     boolean readOnly,
-                                                     String... relationships);
+  public <E extends Entity,K extends Serializable> E findEntityById(Class<E> entityClass,
+                                                                       K id,
+                                                                       boolean readOnly,
+                                                                       String... relationships);
 
 
   /**
@@ -264,7 +276,7 @@ public interface GenericEntityDAO
    * @return the entity that has the specified values for the specified
    *         set of properties
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value);
 
 
@@ -277,7 +289,7 @@ public interface GenericEntityDAO
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperties(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperties(Class<E> entityClass,
                                                                      Map<String,Object> name2Value,
                                                                      final boolean readOnly,
                                                                      String... relationshipsIn);
@@ -296,7 +308,7 @@ public interface GenericEntityDAO
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
                                                              Map<String,Object> name2Value);
 
 
@@ -309,7 +321,7 @@ public interface GenericEntityDAO
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public <E extends AbstractEntity> E findEntityByProperties(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperties(Class<E> entityClass,
                                                              Map<String,Object> name2Value,
                                                              boolean readOnly,
                                                              String... relationships);
@@ -326,7 +338,7 @@ public interface GenericEntityDAO
    * @param propertyValue the value of the property to query for
    * @return the entity that has the specified value for the specified property
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
                                                                    String propertyName,
                                                                    Object propertyValue);
 
@@ -338,7 +350,7 @@ public interface GenericEntityDAO
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public <E extends AbstractEntity> List<E> findEntitiesByProperty(Class<E> entityClass,
+  public <E extends Entity> List<E> findEntitiesByProperty(Class<E> entityClass,
                                                                    String propertyName,
                                                                    Object propertyValue,
                                                                    boolean readOnly,
@@ -358,7 +370,7 @@ public interface GenericEntityDAO
    * @exception InvalidArgumentException when there is more
    *    than one entity with the specified value for the property
    */
-  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
                                                            String propertyName,
                                                            Object propertyValue);
 
@@ -369,15 +381,14 @@ public interface GenericEntityDAO
    *          entity, specified as a dot-separated path of relationship property
    *          names; see class-level documentation of {@link GenericEntityDAO}
    */
-  public <E extends AbstractEntity> E findEntityByProperty(Class<E> entityClass,
+  public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
                                                            String propertyName,
                                                            Object propertyValue,
                                                            boolean readOnly,
                                                            String... relationships);
 
-  public <E extends AbstractEntity> List<E> findEntitiesByHql(
-                                                              Class<E> entityClass,
-                                                              String hql,
-                                                              Object... hqlParameters);
+  public <E extends Entity> List<E> findEntitiesByHql(Class<E> entityClass,
+                                                      String hql,
+                                                      Object... hqlParameters);
 }
 

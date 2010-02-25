@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -21,30 +22,27 @@ import java.util.Set;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
 import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
@@ -55,15 +53,12 @@ import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class WellViewer extends AbstractBackingBean implements EntityViewer
+public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well> 
 {
   
   private static final Logger log = Logger.getLogger(WellViewer.class);
@@ -71,24 +66,18 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
   // HACK: for special case message
   private static final String SPECIAL_CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
 
-  private WellViewer _thisProxy;
   private LibraryViewer _libraryViewer;
-  private Well _well;
-  private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private DataAccessPolicy _dataAccessPolicy;
   private StructureImageProvider _structureImageProvider;
   private NameValueTable _nameValueTable;
   private NameValueTable _annotationNameValueTable;
   private StudyViewer _studyViewer;
-  private WellSearchResults _wellSearchResults;
   private WellsSdfDataExporter _wellsSdfDataExporter;
 
   private DataModel _otherWellsDataModel;
   private DataModel _duplexWellsDataModel;
-  private Map<String,Boolean> _isPanelCollapsedMap;
   private Reagent _versionedReagent;
-
 
   
   /**
@@ -97,48 +86,35 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
   protected WellViewer() {}
 
   public WellViewer(WellViewer thisProxy,
+                    WellSearchResults wellSearchResults,
                     GenericEntityDAO dao,
                     LibrariesDAO librariesDAO,
                     DataAccessPolicy dataAccessPolicy,
                     LibraryViewer libraryViewer,
                     StructureImageProvider structureImageProvider,
                     StudyViewer studyViewer,
-                    WellSearchResults wellSearchResult,
                     WellsSdfDataExporter wellsSdfDataExporter)
   {
-    _thisProxy = thisProxy;
-    _dao = dao;
+    super(thisProxy,
+          Well.class,
+          ScreensaverConstants.BROWSE_WELLS,
+          ScreensaverConstants.VIEW_WELL,
+          dao,
+          wellSearchResults);
     _librariesDao = librariesDAO;
     _dataAccessPolicy = dataAccessPolicy;
     _libraryViewer = libraryViewer;
     _structureImageProvider = structureImageProvider;
     _studyViewer = studyViewer;
-    _wellSearchResults = wellSearchResult;
     _wellsSdfDataExporter = wellsSdfDataExporter;
-    _isPanelCollapsedMap = Maps.newHashMap();
-    _isPanelCollapsedMap.put("otherWells", Boolean.TRUE);
-    _isPanelCollapsedMap.put("duplexWells", Boolean.TRUE);
-    _isPanelCollapsedMap.put("annotations", Boolean.TRUE);
-  }
-
-  public AbstractEntity getEntity()
-  {
-    return getWell();
-  }
-
-  public Well getWell()
-  {
-    return _well;
+    getIsPanelCollapsedMap().put("otherWells", Boolean.TRUE);
+    getIsPanelCollapsedMap().put("duplexWells", Boolean.TRUE);
+    getIsPanelCollapsedMap().put("annotations", Boolean.TRUE);
   }
 
   public Reagent getVersionedReagent()
   {
     return _versionedReagent;
-  }
-
-  public Map getIsPanelCollapsedMap()
-  {
-    return _isPanelCollapsedMap;
   }
 
   /**
@@ -148,13 +124,13 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
    */
   public String getSpecialMessage()
   {
-    if (_well == null) {
+    if (getEntity() == null) {
       return null;
     }
-    if (! _well.getLibraryWellType().equals(LibraryWellType.EXPERIMENTAL)) {
+    if (! getEntity().getLibraryWellType().equals(LibraryWellType.EXPERIMENTAL)) {
       return null;
     }
-    Library library = _well.getLibrary();
+    Library library = getEntity().getLibrary();
     // HACK: special case messages
     if (library.getLibraryType().equals(LibraryType.NATURAL_PRODUCTS)) {
       return "Structure information is unavailable for compounds in natural products libraries.";
@@ -166,77 +142,17 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
     return null;
   }
 
-  @UIControllerMethod
-  public String viewWell()
-  {
-    WellKey wellKey = new WellKey((String) getRequestParameter("entityId"));
-    return _thisProxy.viewWell(wellKey);
-  }
-
-  @UIControllerMethod
-  public String viewWell(Well well)
-  {
-    if (well == null) {
-      reportApplicationError("attempted to view an unknown well (not in database)");
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    return _thisProxy.viewWell(well.getWellKey(), null );
-  }
-
-  @UIControllerMethod
-  public String viewWell(WellKey wellKey)
-  {
-    return _thisProxy.viewWell(wellKey, null);
-  }
-
-  @UIControllerMethod
-  @Transactional
-  public String viewWell(final WellKey wellKey, LibraryContentsVersion lcv)
-  {
-    _well = _dao.findEntityById(Well.class,
-                                wellKey.toString(),
-                                true,
-                                Well.library.getPath());
-    if (_well == null) {
-      showMessage("libraries.noSuchWell", wellKey.getPlateNumber(), wellKey.getWellName());
-      return REDISPLAY_PAGE_ACTION_RESULT;
-    }
-    _versionedReagent = lcv == null ? _well.getLatestReleasedReagent() : _well.getReagents().get(lcv);
-    if (_well.getLibrary().getScreenType() == ScreenType.RNAI) {
-      _dao.needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers).getPath());
-      _dao.needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols).getPath());
-      _dao.needReadOnly(_versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers).getPath());
-      _dao.needReadOnly(_versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols).getPath());
-      _dao.needReadOnly(_versionedReagent, SilencingReagent.duplexWells.to(Well.library).getPath());
-    }
-    else {
-      _dao.needReadOnly(_versionedReagent, SmallMoleculeReagent.compoundNames.getPath());
-      _dao.needReadOnly(_versionedReagent, SmallMoleculeReagent.pubchemCids.getPath());
-      _dao.needReadOnly(_versionedReagent, SmallMoleculeReagent.chembankIds.getPath());
-      _dao.needReadOnly(_versionedReagent, SmallMoleculeReagent.molfileList.getPath());
-    }
-    initializeAnnotationValuesTable(_well);
-    setNameValueTable(new WellNameValueTable(_well,
-                                             _versionedReagent,
-                                             _thisProxy,
-                                             _libraryViewer,
-                                             _structureImageProvider));
-    _otherWellsDataModel = null;
-    _duplexWellsDataModel = null;
-    return VIEW_WELL;
-  }
-  
   public String viewLibrary()
   {
-    return _libraryViewer.viewLibrary(_well.getLibrary());
+    return _libraryViewer.viewEntity(getEntity().getLibrary());
   }
 
-  @UIControllerMethod
+  @UICommand
   public String downloadSDFile()
   {
     try {
       _wellsSdfDataExporter.setLibraryContentsVersion(_versionedReagent == null ? null : _versionedReagent.getLibraryContentsVersion());
-      InputStream inputStream = _wellsSdfDataExporter.export(Sets.newHashSet(_well.getWellKey().toString()));
+      InputStream inputStream = _wellsSdfDataExporter.export(Sets.newHashSet(getEntity().getWellKey().toString()));
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          _wellsSdfDataExporter.getFileName(),
@@ -263,15 +179,15 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
     return _otherWellsDataModel;
   }
   
-  @UIControllerMethod
-  public String browseOtherWells()
-  {
-    Iterable<ReagentVendorIdentifier> rvis = 
-      Iterables.transform((List<Reagent>) getOtherWellsDataModel().getWrappedData(),
-                          new Function<Reagent,ReagentVendorIdentifier>() { public ReagentVendorIdentifier apply(Reagent r) { return r.getVendorId(); } });
-    _wellSearchResults.searchReagents(Sets.newHashSet(rvis));
-    return VIEW_WELL_SEARCH_RESULTS;
-  }
+//  @UICommand
+//  public String browseOtherWells()
+//  {
+//    Iterable<ReagentVendorIdentifier> rvis = 
+//      Iterables.transform((List<Reagent>) getOtherWellsDataModel().getWrappedData(),
+//                          new Function<Reagent,ReagentVendorIdentifier>() { public ReagentVendorIdentifier apply(Reagent r) { return r.getVendorId(); } });
+//    _wellSearchResults.searchReagents(Sets.newHashSet(rvis));
+//    return BROWSE_WELLS;
+//  }
 
   public DataModel getDuplexWellsDataModel()
   {
@@ -287,15 +203,15 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
     return _duplexWellsDataModel;
   }
   
-  @UIControllerMethod
-  public String browseDuplexWells()
-  {
-    Iterable<WellKey> wellKeys =
-      Iterables.transform((List<Well>) getDuplexWellsDataModel().getWrappedData(),
-                          new Function<Well,WellKey>() { public WellKey apply(Well w) { return w.getWellKey(); } });
-    _wellSearchResults.searchWells(Sets.newHashSet(wellKeys));
-    return VIEW_WELL_SEARCH_RESULTS;
-  }
+//  @UICommand
+//  public String browseDuplexWells()
+//  {
+//    Iterable<WellKey> wellKeys =
+//      Iterables.transform((List<Well>) getDuplexWellsDataModel().getWrappedData(),
+//                          new Function<Well,WellKey>() { public WellKey apply(Well w) { return w.getWellKey(); } });
+//    _wellSearchResults.searchWells(Sets.newHashSet(wellKeys));
+//    return BROWSE_WELLS;
+//  }
 
   public NameValueTable getNameValueTable()
   {
@@ -322,7 +238,7 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
     List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
     Map<Integer,List<SimpleCell>> studyNumberToStudyInfoMap = Maps.newHashMap();
     if (_versionedReagent != null) {
-      _dao.needReadOnly(_versionedReagent, Reagent.annotationValues.getPath());
+      getDao().needReadOnly(_versionedReagent, Reagent.annotationValues.getPath());
       annotationValues.addAll(_versionedReagent.getAnnotationValues().values());
       for (Iterator iterator = annotationValues.iterator(); iterator.hasNext(); ) {
         AnnotationValue annotationValue = (AnnotationValue) iterator.next();
@@ -366,7 +282,7 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
                                  @Override
                                  public Object cellAction() 
                                  { 
-                                   return _studyViewer.viewStudy(study); 
+                                   return _studyViewer.viewEntity(study); 
                                  }
                                });
               } 
@@ -384,11 +300,56 @@ public class WellViewer extends AbstractBackingBean implements EntityViewer
     setAnnotationNameValueTable(new AnnotationNameValueTable(annotationValues, studyNumberToStudyInfoMap, null));
   }
 
+  @Override
+  protected void initializeEntity(Well well)
+  {
+    getDao().needReadOnly(well, Well.library.getPath());
+    LibraryContentsVersion lcv = ((WellSearchResults) getContextualSearchResults()).getLibraryContentsVersion();
+    _versionedReagent = lcv == null ? well.getLatestReleasedReagent() : well.getReagents().get(lcv);
+    if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
+      getDao().needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers).getPath());
+      getDao().needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols).getPath());
+      getDao().needReadOnly(_versionedReagent, SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers).getPath());
+      getDao().needReadOnly(_versionedReagent, SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols).getPath());
+      getDao().needReadOnly(_versionedReagent, SilencingReagent.duplexWells.to(Well.library).getPath());
+    }
+    if (well.getLibrary().getReagentType().equals(SmallMoleculeReagent.class)) {
+      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.compoundNames.getPath());
+      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.pubchemCids.getPath());
+      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.chembankIds.getPath());
+      getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.molfileList.getPath());
+    }
+  }
+
+  @Override
+  protected void initializeViewer(Well well)
+  {
+    initializeAnnotationValuesTable(well);
+    setNameValueTable(new WellNameValueTable(well,
+                                             _versionedReagent,
+                                             this,
+                                             _libraryViewer,
+                                             _structureImageProvider));
+    _otherWellsDataModel = null;
+    _duplexWellsDataModel = null;
+  }
+
   public boolean isAllowedAccessToSilencingReagentSequence() 
   {
-    if (_well.getLatestReleasedReagent() != null && _well.<Reagent>getLatestReleasedReagent() instanceof SilencingReagent) {
-      return _dataAccessPolicy.isAllowedAccessToSilencingReagentSequence((SilencingReagent) _well.getLatestReleasedReagent());
+    return isAllowedAccessToSilencingReagentSequence(getEntity());
+  }
+
+  public boolean isAllowedAccessToSilencingReagentSequence(Well well)
+  {
+    if (well.getLatestReleasedReagent() != null && well.<Reagent>getLatestReleasedReagent() instanceof SilencingReagent) {
+      return _dataAccessPolicy.isAllowedAccessToSilencingReagentSequence((SilencingReagent) well.getLatestReleasedReagent());
     }
     return false;
+  }
+  
+  @Override
+  protected Serializable convertEntityId(String entityIdAsString)
+  {
+    return entityIdAsString;
   }
 }

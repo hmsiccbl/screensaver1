@@ -40,17 +40,10 @@ import org.apache.log4j.Logger;
  */
 public class WebCurrentScreensaverUser extends CurrentScreensaverUser
 {
-  // static members
-
   private static Logger log = Logger.getLogger(WebCurrentScreensaverUser.class);
 
 
-  // instance data members
-
   private GenericEntityDAO _dao;
-
-
-  // public constructors and methods
 
   public void setDao(GenericEntityDAO dao)
   {
@@ -131,8 +124,6 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
     return builder.toString();
   }
 
-  // private methods
-
   // TODO: make this into a service, and use in ScreensaverLoginModule
   /**
    * Returns a ScreensaverUser object for the specified Principal.
@@ -177,10 +168,5 @@ public class WebCurrentScreensaverUser extends CurrentScreensaverUser
       log.warn("could not find a user for username " + username);
     }
     return user;
-  }
-
-  public GenericEntityDAO getDao()
-  {
-    return _dao;
   }
 }

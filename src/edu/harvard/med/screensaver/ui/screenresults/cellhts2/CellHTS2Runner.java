@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesNegControls;
@@ -14,19 +12,18 @@ import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesScale;
 import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.ScoreReplicatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EntityViewer;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
+
+import org.apache.log4j.Logger;
 
 /**
  * @author Siew Cheng Aw
  */
- 
-public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
+public class CellHTS2Runner extends AbstractBackingBean
 {
 
 	private static Logger log = Logger.getLogger(CellHTS2Runner.class);
@@ -58,11 +55,6 @@ public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 	}
 
 	
-	public AbstractEntity getEntity()
-	{
-		return getScreenResult();
-	}
-
 	public void setScreenResult(ScreenResult screenResult)
 	{
 		_screenResult = screenResult;
@@ -126,7 +118,7 @@ public class CellHTS2Runner extends AbstractBackingBean implements EntityViewer
 		_addNewCellHtsResultValueTypes = addNewCellHtsResultValueTypes;
 	}
 
-	@UIControllerMethod
+	@UICommand
 	public String runCellHTS2()
 	{
 		_cellHts2Annotator.runCellhts2( RMethod.WRITE_REPORT,

@@ -15,17 +15,25 @@ import java.util.SortedSet;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.TimeStampedAbstractEntity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
-public abstract class Study extends TimeStampedAbstractEntity
+public abstract class Study extends AuditedAbstractEntity<Integer>
 {
   private static final long serialVersionUID = 1L;
   
   public static final Integer MIN_STUDY_NUMBER = 100000;
+  
+  protected Study() {}
+  
+  public Study(AdministratorUser createdBy)
+  {
+    super(createdBy);
+  }
 
   abstract public SortedSet<ScreeningRoomUser> getCollaborators();
 
@@ -46,8 +54,6 @@ public abstract class Study extends TimeStampedAbstractEntity
   abstract public Set<Reagent> getReagents();
 
   abstract public ScreenType getScreenType();
-
-  abstract public boolean isShareable();
 
   @Transient
   public boolean isStudyOnly()

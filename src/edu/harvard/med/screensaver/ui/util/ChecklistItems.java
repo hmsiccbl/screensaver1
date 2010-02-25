@@ -19,22 +19,19 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.AbstractEditableBackingBean;
-import edu.harvard.med.screensaver.ui.UIControllerMethod;
+import edu.harvard.med.screensaver.ui.EditResult;
+import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
+import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -43,50 +40,55 @@ import com.google.common.collect.Lists;
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ChecklistItems extends AbstractEditableBackingBean
+public class ChecklistItems extends EditableEntityViewerBackingBean<ChecklistItemsEntity>
 {
   private static Logger log = Logger.getLogger(ChecklistItems.class);
   
-  private GenericEntityDAO _dao;
-  private AbstractBackingBean _parentViewer;
+  private UserViewer _userViewer;
 
-  private ChecklistItemsEntity _entity; 
-  private boolean _isChecklistItemsCollapsed = true;
   private Map<ChecklistItemGroup,DataModel> _checklistItemDataModelMap;
-  private AdministratorUser _checklistItemEventEnteredBy;
   private Map<ChecklistItem,LocalDate> _newChecklistItemDatePerformed;
-
   private List<ChecklistItemGroup> _checklistItemGroups;
 
   
-  ChecklistItems()
-  {
-  }
+  protected ChecklistItems() {}
   
-  public ChecklistItems(GenericEntityDAO dao)
+  public ChecklistItems(ChecklistItems thisProxy, 
+                        UserViewer userViewer,
+                        GenericEntityDAO dao)
   {
-    super(ScreensaverUserRole.USER_CHECKLIST_ITEMS_ADMIN);
-    _dao = dao;
-  }
-  
-  public void setParentViewer(AbstractBackingBean parentViewer)
-  {
-    _parentViewer = parentViewer;
+    super(thisProxy, ChecklistItemsEntity.class, VIEW_USER, dao);
+    _userViewer = userViewer;
+    getIsPanelCollapsedMap().put("checklistItems", true);
   }
 
-  public void setChecklistItemsEntity(ChecklistItemsEntity entity)
+  /**
+   * We override {@link EditableEntityViewer#isReadOnly()} since that method
+   * will determines read-only status using ScreensaverUser entity, which is not
+   * correct
+   */
+  @Override
+  public boolean isReadOnly()
   {
-    _entity = entity;
-
-    // HACK: must find the logged in admin user now, so we can re-use same instance, if multiple activations/expirations are entered before save()
-    if (getScreensaverUser() instanceof AdministratorUser) {
-      _checklistItemEventEnteredBy = _dao.reloadEntity((AdministratorUser) getScreensaverUser(), false, "activitiesPerformed");
-    }
+    return !!!getScreensaverUser().isUserInRole(ScreensaverUserRole.USER_CHECKLIST_ITEMS_ADMIN);
   }
   
-  public AbstractEntity getEntity()
+  @Override
+  protected void initializeEntity(ChecklistItemsEntity entity)
   {
-    return (AbstractEntity) _entity;
+  }
+  
+  @Override
+  protected void initializeViewer(ChecklistItemsEntity entity)
+  {
+    _checklistItemDataModelMap = null;
+    _newChecklistItemDatePerformed = null;
+  }
+  
+  @Override
+  protected String postEditAction(EditResult editResult)
+  {
+    return _userViewer.reload();
   }
 
   public void setChecklistItemGroups(List<ChecklistItemGroup> checklistItemGroups)
@@ -94,50 +96,6 @@ public class ChecklistItems extends AbstractEditableBackingBean
     _checklistItemGroups = checklistItemGroups;
   }
   
-  public void reset()
-  {
-    _entity = null;
-    setEditMode(false);
-    _checklistItemDataModelMap = null;
-    _newChecklistItemDatePerformed = null;
-  }
-
-  public boolean isChecklistItemsCollapsed()
-  {
-    return _isChecklistItemsCollapsed;
-  }
-
-  public void setChecklistItemsCollapsed(boolean isChecklistItemsCollapsed)
-  {
-    _isChecklistItemsCollapsed = isChecklistItemsCollapsed;
-  }
-
-  @UIControllerMethod
-  public String edit()
-  {
-    setEditMode(true);
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UIControllerMethod
-  public String cancel()
-  {
-    setEditMode(false);
-    return _parentViewer.reload();
-  }
-
-  @UIControllerMethod
-  @Transactional
-  public String save()
-  {
-    setEditMode(false);
-
-    assert getEntity().getEntityId() != null : "parent entity must be persisted";
-    _dao.reattachEntity(getEntity());
-    _dao.flush();
-    return _parentViewer.reload();
-  }
-
   public List<ChecklistItemGroup> getChecklistItemGroups()
   {
     return _checklistItemGroups;
@@ -149,12 +107,12 @@ public class ChecklistItems extends AbstractEditableBackingBean
       _checklistItemDataModelMap = new HashMap<ChecklistItemGroup,DataModel>();
       for (ChecklistItemGroup group : getChecklistItemGroups()) {
         Map<ChecklistItem,ChecklistItemEvent> checklistItemsMap = new LinkedHashMap<ChecklistItem,ChecklistItemEvent>();
-        List<ChecklistItem> checklistItems = _dao.findEntitiesByProperty(ChecklistItem.class, "checklistItemGroup", group);
+        List<ChecklistItem> checklistItems = getDao().findEntitiesByProperty(ChecklistItem.class, "checklistItemGroup", group);
         Collections.sort(checklistItems);
         for (ChecklistItem type : checklistItems) {
           checklistItemsMap.put(type, null);
         }
-        for (ChecklistItemEvent checklistItemEvent : _entity.getChecklistItemEvents()) {
+        for (ChecklistItemEvent checklistItemEvent : getEntity().getChecklistItemEvents()) {
           if (checklistItemEvent.getChecklistItem().getChecklistItemGroup() == group) {
             checklistItemsMap.put(checklistItemEvent.getChecklistItem(), checklistItemEvent);
           }
@@ -180,48 +138,42 @@ public class ChecklistItems extends AbstractEditableBackingBean
     return _newChecklistItemDatePerformed;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String checklistItemActivated()
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
     assert entry.getKey().isExpirable() && (entry.getValue() == null || entry.getValue().isExpiration());
-    _entity.createChecklistItemActivationEvent(entry.getKey(),
+    getEntity().createChecklistItemActivationEvent(entry.getKey(),
                                                getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                               new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                          new LocalDate(),
-                                                                          AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+                                               (AdministratorUser) getScreensaverUser());
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String checklistItemDeactivated()
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
     assert entry.getKey().isExpirable() && entry.getValue() != null && !entry.getValue().isExpiration();
     entry.getValue().createChecklistItemExpirationEvent(getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                                        new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                                   new LocalDate(),
-                                                                                   AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+                                                        (AdministratorUser) getScreensaverUser());
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   public String checklistItemCompleted()
   {
     Map.Entry<ChecklistItem,ChecklistItemEvent> entry = (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
     assert !entry.getKey().isExpirable() && entry.getValue() == null;
-    _entity.createChecklistItemActivationEvent(entry.getKey(),
-                                               getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                               new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                          new LocalDate(),
-                                                                          AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+    getEntity().createChecklistItemActivationEvent(entry.getKey(),
+                                                   getNewChecklistItemDatePerformed().get(entry.getKey()),
+                                                   (AdministratorUser) getScreensaverUser());
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  @UIControllerMethod
+  @UICommand
   @SuppressWarnings("unchecked")
   public String checklistItemNotApplicable()
   {
@@ -229,13 +181,10 @@ public class ChecklistItems extends AbstractEditableBackingBean
       (Map.Entry<ChecklistItem,ChecklistItemEvent>) getRequestMap().get("element");
 
     assert entry.getValue() == null || entry.getKey().isExpirable() || entry.getValue().isExpiration();
-    _entity.createChecklistItemNotApplicableEvent(entry.getKey(),
+    getEntity().createChecklistItemNotApplicableEvent(entry.getKey(),
                                                   getNewChecklistItemDatePerformed().get(entry.getKey()),
-                                                  new AdministrativeActivity(_checklistItemEventEnteredBy,
-                                                                             new LocalDate(),
-                                                                             AdministrativeActivityType.CHECKLIST_ITEM_EVENT));
+                                                  (AdministratorUser) getScreensaverUser());
     _checklistItemDataModelMap = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-
 }

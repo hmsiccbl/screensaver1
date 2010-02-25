@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 /**
  * The vocabulary of values for AdministrativeActivity types.
@@ -22,12 +23,13 @@ public enum AdministrativeActivityType implements VocabularyTerm
 
   // the vocabulary
 
-  WELL_VOLUME_CORRECTION("Well Volume Correction"),
-  WELL_DEPRECATION("Well Deprecation"), 
-  CHECKLIST_ITEM_EVENT("Checklist Item Event"),
-  PIN_TRANSFER_APPROVAL("Pin Transfer Approval"),
-  LIBRARY_CONTENTS_LOADING("Library Contents Loading"),
-  LIBRARY_CONTENTS_VERSION_RELEASE("Library Contents Version Release");
+  WELL_VOLUME_CORRECTION("Well Volume Correction", ScreensaverUserRole.LIBRARIES_ADMIN),
+  WELL_DEPRECATION("Well Deprecation", ScreensaverUserRole.LIBRARIES_ADMIN), 
+  PIN_TRANSFER_APPROVAL("Pin Transfer Approval", ScreensaverUserRole.SCREENS_ADMIN),
+  LIBRARY_CONTENTS_LOADING("Library Contents Loading", ScreensaverUserRole.LAB_HEADS_ADMIN),
+  LIBRARY_CONTENTS_VERSION_RELEASE("Library Contents Version Release", ScreensaverUserRole.LAB_HEADS_ADMIN),
+  /** For general recording of changes made to the data in an entity (audit log) */
+  ENTITY_UPDATE("Entity Update", ScreensaverUserRole.READ_EVERYTHING_ADMIN),
   ;
 
 
@@ -48,10 +50,12 @@ public enum AdministrativeActivityType implements VocabularyTerm
   // private instance field and constructor
 
   private String _value;
+  private ScreensaverUserRole _editableByAdminRole;
 
-  private AdministrativeActivityType(String value)
+  private AdministrativeActivityType(String value, ScreensaverUserRole editableByAdminRole)
   {
     _value = value;
+    _editableByAdminRole = editableByAdminRole;
   }
 
 
@@ -66,5 +70,11 @@ public enum AdministrativeActivityType implements VocabularyTerm
   public String toString()
   {
     return getValue();
+  }
+
+
+  public ScreensaverUserRole getEditableByRole()
+  {
+    return _editableByAdminRole;
   }
 }

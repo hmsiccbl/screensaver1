@@ -11,13 +11,14 @@ package edu.harvard.med.screensaver.ui.users;
 
 import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 
 import org.joda.time.LocalDate;
 
-public interface ChecklistItemsEntity
+public interface ChecklistItemsEntity extends Entity
 {
 
   SortedSet<ChecklistItemEvent> getChecklistItemEvents();
@@ -26,10 +27,10 @@ public interface ChecklistItemsEntity
 
   ChecklistItemEvent createChecklistItemActivationEvent(ChecklistItem checklistItem,
                                                         LocalDate datePerformed,
-                                                        AdministrativeActivity entryActivity);
-
+                                                        AdministratorUser recordedBy);
+                                                        
   ChecklistItemEvent createChecklistItemNotApplicableEvent(ChecklistItem checklistItem,
                                                            LocalDate datePerformed,
-                                                           AdministrativeActivity entryActivity);
+                                                           AdministratorUser recordedBy);
 
 }

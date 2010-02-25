@@ -26,14 +26,18 @@
     class="edu.harvard.med.screensaver.ui.CurrentScreensaverUser">
   </bean>
   
-  <bean id="dataAccessPolicy"
-   class="edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy">
-   <constructor-arg ref="currentScreensaverUser" />
+  <bean
+    id="dataAccessPolicy"
+    class="edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy"
+    scope="prototype">
+    <constructor-arg ref="currentScreensaverUser" />
+    <constructor-arg ref="genericEntityDao" />
   </bean>
-  
+
   <import resource="spring-context-authentication.xml"/>
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-logging.xml"/>
   
+
 </beans>

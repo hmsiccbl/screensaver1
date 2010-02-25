@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.db.hibernate;
 
 import edu.harvard.med.screensaver.util.StringUtils;
 
-public class Conjunction extends CompositeClause
+public class Conjunction extends CompositePredicate
 {
   public String toHql()
   {

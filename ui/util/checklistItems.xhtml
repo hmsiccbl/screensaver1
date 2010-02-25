@@ -14,7 +14,7 @@
 
 <ui:composition>
   <ss:collapsiblePanel id="checklistItemsPanel" label="Checklist Items"
-    isCollapsed="#{checklistItems.checklistItemsCollapsed}"
+    isCollapsed="#{checklistItems.isPanelCollapsedMap['checklistItems']}"
     rendered="#{checklistItems.readAdmin}">
     <ui:define name="content">
       <t:panelGrid columns="1">
@@ -51,7 +51,7 @@
                   </ss:popup>
                 </f:facet>
                 <ss:user showEmail="false"
-                  user="#{empty element.value ? null : element.value.entryActivity.performedBy}" />
+                  user="#{empty element.value ? null : element.value.createdBy}" />
               </t:column>
               <t:column columnName="Action"
                 description="Actions to update the checklist item"
