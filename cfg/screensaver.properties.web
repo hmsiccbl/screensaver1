@@ -3,25 +3,54 @@
 
 ### build-time properties
 
-# authentication can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog)
+# authentication can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog).  
+# BASIC mode is useful during development, to avoid repeating the login step between Tomcat restarts.
 servlet.authentication.method=FORM
+
+# TODO: set your Tomcat installation directory here.  
 appserver.dir=/usr/local/tomcat
-log4j.properties.file=cfg/log4j.properties.web
+
+
+# specify the log4j properties file that will be used to control the logging output
+# hint: during development, you can specify cfg/log4j.properties.debug, allowing you to maintain debug-related 
+# logging options separately from your production/deployment log output settings
+log4j.properties.file=cfg/log4j.properties
+
+# controls whether deployment is debug-enabled, which includes having debug-information 
+# in compiled into deployed class files and enabling assertions (see build.xml) 
+debug=false
 
 
 ### run-time properties
 
 screensaver.ui.application_name=Screensaver
-screensaver.ui.version=2009.09.16
+
+screensaver.ui.version=2009-02-26
+
 # build number placeholder value, below, will be replaced by Ant "build" target at build/deploy time, using the build.number property
 screensaver.ui.build_number=BUILD_NUMBER
-screensaver.ui.facility_name=ICCB-Longwood/NSRB
-screensaver.ui.facility_url=http://iccb.med.harvard.edu/
+
+# TODO: set the name of your screening facility here
+screensaver.ui.facility_name=My HTS Screening Facility
+
+# TODO: set the URL of your screening facility's home page here
+screensaver.ui.facility_url=http://en.wikipedia.org/wiki/High-throughput_screening
+
+# TODO: set the email address for user feedback here (made available by the web application)
 screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
-screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/images/structure-images/
+
+# TODO: if you have small molecule libraries and have generated compound structure images, configure the URL location here.  
+# See edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider.  
+# If you have configured Screensaver to use a different StructureImageProvider (in spring-context-web.xml), you can ignore this setting.
+screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/
+
+# The location of the change log file that will made available to web application users.  
+# Note that this is a general URL that can be external to the Screensaver web application URL.
 screensaver.ui.release_notes_url=/screensaver/main/changelog.html
 
-screensaver.service.smtpemailservice.host=smtp.cl.med.harvard.edu
+# Email server settings used by edu.harvard.med.iccbl.screensaver.service.SmtpEmailService
+# TODO: configure email server settings if your deployment uses the SmtpEmailService
+screensaver.service.smtpemailservice.host=
 screensaver.service.smtpemailservice.username=
 
 datatable.use_column_reorder_list_widget=false
