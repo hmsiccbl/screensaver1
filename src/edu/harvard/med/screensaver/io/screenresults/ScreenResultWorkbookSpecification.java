@@ -88,7 +88,7 @@ public interface ScreenResultWorkbookSpecification
    * significant, as we use the ordinal() method.
    */
   public enum DataColumn {
-    STOCK_PLATE_ID("Stock Plate ID"),
+    PLATE("Plate"),
     WELL_NAME("Well"),
     ASSAY_WELL_TYPE("Type"),
     EXCLUDE("Exclude");

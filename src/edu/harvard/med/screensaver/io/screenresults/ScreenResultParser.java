@@ -594,7 +594,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           && !row.getCell(0).isEmpty()            
           && row.getCell(0).getAsString().trim().length() > 0 ) 
         {
-          Integer plateNumber = row.getCell(DataColumn.STOCK_PLATE_ID.ordinal(), true).getInteger();
+          Integer plateNumber = row.getCell(DataColumn.PLATE.ordinal(), true).getInteger();
           Cell wellNameCell = row.getCell(DataColumn.WELL_NAME.ordinal()); 
           String wellName = _wellNameParser.parse(wellNameCell);
           if (!wellName.equals(""))
