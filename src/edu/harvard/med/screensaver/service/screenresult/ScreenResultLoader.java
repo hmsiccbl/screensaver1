@@ -160,7 +160,6 @@ public abstract class ScreenResultLoader
       _screenResultsDao.populateScreenResultWellLinkTable(screenResult.getScreenResultId());
     }
     
-    screen.setDataPrivacyExpirationDate(new LocalDate().plusYears(2));
     _dao.saveOrUpdateEntity(screen);
     
     log.info("Import completed successfully!");
