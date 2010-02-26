@@ -23,7 +23,6 @@
 <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2226'>[#2226]</a> remove CherryPickRequest.assayProtocol</li>
 <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2225'>[#2225]</a> upgrade to Java 1.6</li>
 <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2188'>[#2188]</a> small molecule cherry pick screening</li>
-<!--li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2175'>[#2175]</a> expiration services to become notification services only</li-->
 <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1606'>[#1606]</a> cpr screening activity tracks cp assay plates screened</li>
 <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1429'>[#1429]</a> configurable news contents</li>
 <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2020'>[#2020]</a> remove build-time dependency on subversion client</li>
@@ -34,83 +33,56 @@
 <h2 id="v190">v1.9.0, 2010.01.13</h2>
 
     <h4>Small Molecule Data Sharing Levels ("DSL") <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1296'>[#1296]</a></h4>
-
-    <i>Note: Currently, only "Small Molecule" data sharing levels are defined
-    for users, meaning that screen data sharing only applies to small molecule
-    screeners and screens, and not RNAi screeners or screens.  RNAi screens,
-    regardless of their specified DSL, are therefore always "private". A
-    future release will extend the data sharing capabilities to RNAi
-    screens.</i>
-
+    
     <ul>
       <li>Screen Data Sharing Levels
         <ul>
-          <li>Screens can be assigned one of four data sharing levels, which
+          <li>Screens can be assigned one of the following four data sharing levels, which
             affects what users can view the screen and what portions of the screen
-            data is accessible.  A screen can have one of the following
-            levels:
+            data are accessible to those users.  
             <dl>
               <dt>Shared (Level 0)</dt><dd>All users can view the screen</dd>
-              <dt>Mutual Screens (Level 1)</dt><dd>All users with the "Small
-                Molecule Screens Level 1" role can view the screen in its
-                entirety.  Users with the "Small
-                Molecule Screens Level 2" role can view the screen's positives data and screen
-                summary information.</dd>
-              <dt>Mutual Positives (Level 2)</dt><dd>All users with "Small
-                Molecule Screens Level 1" or "Small
-                Molecule Screens Level 2" can view the positives data and screen
-                summary information.</dd>
-              <dt>Private (Level 3)</dt><dd>Only the lab head, lead screener, and
+              <dt>Mutual Screens (Level 1)</dt>
+              <dd>If the screen is a Small Molecule screen, all users with the "Small
+                Molecule Screens Level 1" data sharing role can view the screen in its
+                entirety; users with the "Small
+                Molecule Screens Level 2" data sharing role can view the "mutual positives" data and screen summary information for screens that have overlapping positives with the user's own screens.   If the screen is an RNAi screen, it is treated as Private (Level 3), below. [Note: Level 1 data sharing not yet implemented for RNAi screens].</dd>
+              <dt>Mutual Positives (Level 2)</dt>
+              <dd>If the screen is a Small Molecule screen, all users with
+      the "Small Molecule Screens Level 1" or "Small Molecule Screens
+      Level 2" data sharing role can view the "mutual positives" data
+      and screen summary information for screens that have overlapping positives with the user's own screens. If the screen is an RNAi screen,
+      it is treated as Private (Level 3), below. [Note: Level 2 data sharing
+      not yet implemented for RNAi screens].</dd>
+      <dt>Private (Level 3)</dt><dd>Only the lab head, lead screener, and
                 collaborators can view the screen</dd>
             </dl>
           </li> 
-          <li>In Screen Viewer, warning is issued to administrators when
-          viewing a small molecule screens that have a data sharing level that
-          is too restrictive w.r.t. to lab head's data sharing level</li>
-          <li>Well Search Results respects user data sharing levels by making Data Headers
-            from other screen results visible, as determined by the data
-            access policy.  When appropriate only values that represent
-            positives are made visible.</li>
+          <li>In Screen Viewer, a warning is issued to administrators when
+          viewing a small molecule screen with a data sharing level that
+          is too restrictive w.r.t. to the lab head's data sharing level</li>
+          <li>Well Search Results respects screen data sharing levels by controlling which Data Headers
+            from other screen results are visible, as determined by the data
+            access policy.  When appropriate, only "positives" screen result data are made visible.</li>
           <li>Users can view Lab Activities, CPRs, and Status Items of their
             own screens, but not those of others' screens</li>
-          <li>Screen Data Sharing Privacy Expiration service, a command-line
-            application that, when invoked, will update screens whose data
-            sharing privacy expiration date has passed, changing the screens
-            DSL to "Mutual Screens" (Level 1)</li>
-          <li>A screen's data sharing privacy expiration date is updated after
-            importing a screen result, setting the date to 2 years in the future.</li>
-          <li>Screen Result "shareable" flag has been removed.</li>
+          <li>Screen Result "shareable" flag has been removed, having been functionally replaced by the new Screen data sharing level property.</li>
       </ul>
       </li>
 
-      <li>User Data Sharing Levels 
+      <li>User Data Access Roles
         <ul>
-          <li>Split user roles into "Facility Usage Roles" and "Data Access Roles".
+          <li>User roles have been partitioned into "Facility Usage Roles" and "Data Access Roles".
             The former are for administrative/reporting purposes, while the latter
             affect the types of data that a user can view.</li>
-          <li>Split "Small Molecule User" into the following roles:
+          <li>The "Small Molecule User" data access role has been split into the following 3 roles (see above for how these are used):
             <ul>
               <li>Small Molecule User Level 1</li>
               <li>Small Molecule User Level 2</li>
               <li>Small Molecule User Level 3</li>
             </ul>
           </li>
-          <li>The User Viewer has a new command "Update User Agreement", allowing
-            user administrators to update a user's DSL, while simultaneously activating
-            the 2009 Small Molecule User Agreement checklist item, and attaching
-            the Small Molecule User Agreement file to the screen. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2041'>[#2041]</a></li>
-          <li>In User Viewer, warning is issued to administrators when viewing a
-            user that has a Small Molecule DSL that is different than
-            their lab head's DSL.</li>
-          <li>In User Viewer, warning is issued to administrators when
-          viewing a lab head that has screens with data sharing levels
-          that are too restrictive, compared to the lab head's data
-          sharing level.</li>
-          <li>Added "userRolesAdmin" role, to limit which adminstrators can edit user roles. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2042'>[#2042]</a></li>
-          <li>User  Agreement Expiration service, a command-line application
-            that, when invoked, will remove the Screensaver User Login role (login
-            privileges) from all users whose small molecule user agreement has
-            expired.</li>
+          <li>Added "userRolesAdmin" role, to limit which administrators can edit users' data access roles. <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2042'>[#2042]</a></li>
         </ul>
       </li>
     </ul>
@@ -149,12 +121,12 @@
     <h4>User Interface Infrastructure (for developers)</h4>
 
      User interface infrastructure rework for viewer/editor backing beans.
-     The updated backing bean abstract class hierarchy now
-     implements viewer/editor lifecycle methods in a consistent, well-thought
-     out fashion, replacing similar, but custom, varying implementations in
-     viewer classes.  The varying implementations caused difficulty during
-     maintanence and debugging, as the developer could not easily reason about
-     the behavior without studying each entity viewer variation.  In
+     The updated backing bean abstract class hierarchy (EntityViewer, et.al.) now
+     implements viewer/editor lifecycle methods (edit, validate, save, cancel, and other internal hooks) in a consistent, well-thought
+     out fashion, replacing the numerous varying implementations in
+     viewer backing bean classes.  The varying implementations caused difficulty during
+     maintenance and debugging, as the developer could not easily reason about
+     the transactional behavior without studying each entity viewer's custom implemenetation.  In
      particular, many Hibernate-related problems have been addressed by
      standardizing the session/transactional design and ensuring that entity
      instances are all re-attached to the session at a single point in time
