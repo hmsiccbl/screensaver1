@@ -41,7 +41,8 @@
             affects what users can view the screen and what portions of the screen
             data are accessible to those users.  
             <dl>
-              <dt>Shared (Level 0)</dt><dd>All users can view the screen</dd>
+              <dt>Shared (Level 0)</dt><dd>If the screen is a Small Molecule screen, any user with a "Small
+                Molecule Screens" data sharing role (level 1, 2, or 3) can view the screen in its entirety.  If the screen is an RNAi screen, any user with the "RNAi Screens" data sharing role can view the screen.</dd>
               <dt>Mutual Screens (Level 1)</dt>
               <dd>If the screen is a Small Molecule screen, all users with the "Small
                 Molecule Screens Level 1" data sharing role can view the screen in its
@@ -115,19 +116,19 @@
       (change history) capability to entity subclasses (Study, Screen,
         ScreensaverUser, Activity, Library, CherryPickRequest). <a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1300'>[#1300]</a></li>
         
-      <li>Screen and Screen Result "shareable" flags have been removed (note that only the Screen Result flag was exposed in the UI previously).</li>
+      <li>Screen and Screen Result "shareable" flags have been removed (note that only the Screen Result flag was exposed in the UI previously).  Replaced by the new Screen "data sharing level" property.</li>
     </ul>
 
     <h4>User Interface Infrastructure (for developers)</h4>
 
      User interface infrastructure rework for viewer/editor backing beans.
      The updated backing bean abstract class hierarchy (EntityViewer, et.al.) now
-     implements viewer/editor lifecycle methods (edit, validate, save, cancel, and other internal hooks) in a consistent, well-thought
-     out fashion, replacing the numerous varying implementations in
+     implements viewer/editor lifecycle methods (edit, validate, save, cancel, and other internal hooks) 
+     in a consistent fashion, replacing the numerous varying implementations in
      viewer backing bean classes.  The varying implementations caused difficulty during
      maintenance and debugging, as the developer could not easily reason about
-     the transactional behavior without studying each entity viewer's custom implemenetation.  In
-     particular, many Hibernate-related problems have been addressed by
+     the session/transactional behavior without studying each entity viewer's custom implementation.  
+     In particular, many Hibernate-related problems have been addressed by
      standardizing the session/transactional design and ensuring that entity
      instances are all re-attached to the session at a single point in time
      (for edit/save operations).  See <a href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&amp;path=%2Fbranches%2F&amp;view=log&amp;pathrev=3676">rev 3676</a>
@@ -152,42 +153,42 @@
         <tbody>
           <tr>
             <td><a 
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2098'>2098</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2098'>[#2098]</a></td>
             <td>Add screen summary columns to lab activities browser</td>
           </tr>
           <tr>
             <td><a
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2070'>2070</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2070'>[#2070]</a></td>
             <td>New Attached File Type values</td>
           </tr>
           <tr>
             <td><a
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2078'>2078</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2078'>[#2078]</a></td>
             <td>Attached File Type values configurable in database</td>
           </tr>
           <tr>
             <td><a
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2032'>2032</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2032'>[#2032]</a></td>
             <td>Add "Roles" column to UserSearchResults</td>
           </tr>
           <tr>
             <td><a
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2024'>2024</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2024'>[#2024]</a></td>
             <td>Add PMCID field to publications</td>
           </tr>
           <tr>
             <td><a
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2043'>2043</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2043'>[#2043]</a></td>
             <td>Do not allow a new screener to be entered w/o a lab head</td>
           </tr>
           <tr>
             <td><a
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1674'>1674</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1674'>[#1674]</a></td>
             <td>Link in users browser broken for user name containing apostrophe</td>
           </tr>
           <tr>
             <td><a
-              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2057'>2057</a></td>
+              href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2057'>[#2057]</a></td>
             <td>Add an "About Screensaver" link</td>
           </tr>
         </tbody>
