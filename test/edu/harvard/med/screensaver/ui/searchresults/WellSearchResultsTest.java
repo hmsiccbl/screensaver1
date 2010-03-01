@@ -432,7 +432,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     verifySearchResult(wsr, model, _expectedKeys);
   }
 
-  // TODO: must test via a JSFUnit test, since entity viewer updates only occur from UI data table scrolling events, not model.setRowIndex()
+  // TODO: must test via a manual UI test, since entity viewer updates only occur from UI data table scrolling events, not model.setRowIndex()
 //  public void testEntityModeScrolling()
 //  {
 //    wsr.searchAll();

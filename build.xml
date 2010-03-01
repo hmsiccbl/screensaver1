@@ -100,7 +100,7 @@
   />
   <property name="build.number" value="-1" />
   <property name="release.notes.file" value="changelog.html" />
-	<!-- The servlet authentication method to use.  If set to BASIC, faciliates UI testing by not requiring re-login,
+	<!-- The servlet authentication method to use.  If set to BASIC, facilitates UI testing by not requiring re-login,
        as browser can cache user name and password and re-issue between web server restarts.  FORM is used for
        production deployment.  Defaults to BASIC if debug property is true. -->
 	<condition property="servlet.authentication.method" value="FORM" else="BASIC">
@@ -644,23 +644,6 @@
 			</fileset>
 		</copy>
 
-	</target>
-
-	<target name="build-ui-test" depends="build">
-		<description>Build the unit test classes for testing the web user interface via JSFUnit.
-    </description>
-		<property name="classes.dir" value="${build.dir}/classes" />
-		<!-- 'sourcepath=""' required to selectively compile only *JsfTest.java files. See http://ant.apache.org/manual/CoreTasks/javac.html#srcdirnote -->
-		<javac srcdir="${test.src.dir}"
-           sourcepath=""
-           destdir="${classes.dir}"
-           classpathref="build.library.path"
-           debug="${javac.debug}"
-           optimize="${javac.optimize}"
-           listfiles="${verbose}"
-    >
-			<include name="**/*JsfUnitTest.java"/>
-		</javac>
 	</target>
 
 	<target name="install"

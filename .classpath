@@ -25,11 +25,6 @@
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/aspectjrt.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/aspectjweaver.jar"/>
 	<classpathentry kind="lib" path="lib/springframework-2.5.4/spring.jar"/>
-	<classpathentry kind="lib" path="lib/testing/jsfunit/cactus-13-1.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/testing/jsfunit/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="lib/testing/jsfunit/httpunit-1.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/testing/jsfunit/jboss-jsfunit-core-1.0.0.Beta2.jar"/>
-	<classpathentry kind="lib" path="lib/testing/jsfunit/jtidy-4aug2000r7-dev.jar"/>
 	<classpathentry kind="lib" path="lib/testing/junit-3.8.1.jar" sourcepath="/usr/local/dev/junit3.8.2/src.jar"/>
 	<classpathentry kind="lib" path="lib/util/jakarta-commons/commons-cli-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/util/jakarta-commons/commons-collections-3.2.jar"/>

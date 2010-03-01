@@ -88,47 +88,6 @@
   </listener>
 
 
-  <!-- TODO: build system should add this JSF Unit Testing section conditionally on 'test-ui' build-time property -->
-  <!-- JSF Unit Testing -->
-
-  <!-- Note: this filter must appear first! -->
-  <!-- 
-   <filter>
-     <filter-name>JSFUnitFilter</filter-name>
-     <filter-class>org.jboss.jsfunit.framework.JSFUnitFilter</filter-class>
-   </filter>
-
-   <filter-mapping>
-     <filter-name>JSFUnitFilter</filter-name>
-     <servlet-name>ServletTestRunner</servlet-name>
-   </filter-mapping>  
-   
-   <filter-mapping>
-     <filter-name>JSFUnitFilter</filter-name>
-     <servlet-name>ServletRedirector</servlet-name>
-   </filter-mapping>
-
-   <servlet>
-     <servlet-name>ServletRedirector</servlet-name>
-     <servlet-class>org.apache.cactus.server.ServletTestRedirector</servlet-class>
-   </servlet>
-   
-   <servlet>
-      <servlet-name>ServletTestRunner</servlet-name>
-      <servlet-class>org.apache.cactus.server.runner.ServletTestRunner</servlet-class>
-   </servlet> 
-
-   <servlet-mapping>
-     <servlet-name>ServletRedirector</servlet-name>
-     <url-pattern>/ServletRedirector</url-pattern>
-   </servlet-mapping> 
-   
-   <servlet-mapping>
-      <servlet-name>ServletTestRunner</servlet-name>
-      <url-pattern>/ServletTestRunner</url-pattern>
-   </servlet-mapping> 
- -->
-
   <!-- Screensaver filter -->
 
   <filter>
@@ -590,20 +549,6 @@
     <auth-constraint>
       <role-name>developer</role-name>
     </auth-constraint>
-  </security-constraint>
-
-  <!-- TODO: build system should add this security constraint conditionally on 'test-ui' build-time property -->
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>test</web-resource-name>
-      <url-pattern>/ServletRedirector</url-pattern>
-      <url-pattern>/ServletTestRunner</url-pattern>
-      <url-pattern>/dev/jsfunit-test.xsl</url-pattern>
-      <http-method>GET</http-method>
-    </web-resource-collection>
-
-    <!-- Note: we do not define the <auth-constraint> element, providing public access to this URL. -->
-
   </security-constraint>
 
 </web-app>
