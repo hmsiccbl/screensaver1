@@ -51,15 +51,5 @@ public class ScreensaverProperties
     String temp = _screensaverProperties.getProperty(name, "false").toLowerCase();
     return temp.equals("true") || temp.equals("t");
   }
-  
-  public static boolean useColumnReorderListWidgetInDataTable()
-  {
-    return getBooleanProperty(ScreensaverConstants.DATATABLE_USE_COLUMN_REORDER_LIST_WIDGET);
-  }
-  
-  public static boolean allowScreenDeletion()
-  {
-    return getBooleanProperty(ScreensaverConstants.SCREENS_ALLOW_DELETE);
-  }
 }
 

@@ -25,7 +25,7 @@
 			styleClass="command" />
     <t:commandButton action="updateUserAgreement"
       id="updateUserAgreement" value="Update User Agreement..."
-      rendered="#{userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
+      rendered="#{appInfo.featuresEnabled['user_agreement_updater'] &amp;&amp; userViewer.editable &amp;&amp; !userViewer.editMode &amp;&amp; userViewer.screeningRoomUserViewMode}"
       styleClass="command" />
 	</ui:define>
 

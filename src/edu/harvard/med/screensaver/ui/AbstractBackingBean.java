@@ -65,6 +65,12 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   private Map<String,Boolean> _isPanelCollapsedMap = Maps.newHashMap();
 
+  /*
+   * TODO: it's wasteful to compute and store the enabled features in every
+   * backing bean, since this is global to the application
+   */
+  private Map<String,Boolean> _featuresEnabled;
+
   /**
    * Get the application name (without version number).
    */
@@ -424,5 +430,31 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   public Map<String,Boolean> getIsPanelCollapsedMap()
   {
     return _isPanelCollapsedMap;
+  }
+
+  /**
+   * @return a Map of the UI features in Screensaver that can be enabled or
+   *         disable. Map key is the feature name, as determined by the property
+   *         name without the
+   *         {@link ScreensaverConstants#SCREENSAVER_UI_FEATURE_PREFIX} prefix
+   *         (e.g., the property key "screensaver.ui.feature.someFeature" would
+   *         be identified by the key "someFeature" in the returned map). Map value is a
+   *         Boolean, where <code>true</code> indicates the feature is enabled,
+   *         otherwise it is disabled.
+   */
+  public Map<String,Boolean> getFeaturesEnabled()
+  {
+    if (_featuresEnabled == null) {
+      _featuresEnabled = Maps.newHashMap();
+      for (Map.Entry<Object,Object> featureEntry : getApplicationProperties().entrySet()) {
+        if (featureEntry.getKey().toString().startsWith(SCREENSAVER_UI_FEATURE_PREFIX)) {
+          String featureKey = featureEntry.getKey().toString().substring(SCREENSAVER_UI_FEATURE_PREFIX.length());
+          Boolean featureEnabled = Boolean.valueOf(featureEntry.getValue().toString());
+          _featuresEnabled.put(featureKey, featureEnabled);
+          log.info("screensaver feature " + featureKey + " is " + (featureEnabled ? "enabled" : "disabled"));
+        }
+      }
+    }
+    return _featuresEnabled;
   }
 }

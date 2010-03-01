@@ -24,10 +24,10 @@ public interface ScreensaverConstants
   public static final String FACILITY_NAME = "screensaver.ui.facility_name";
   public static final String FACILITY_URL = "screensaver.ui.facility_url";
   public static final String STRUCTURE_IMAGES_BASE_URL = "screensaver.ui.structure_images_base_url";
+  /** Prefix for properties that define whether a particular UI feature should be enabled or disabled.  Property value must TRUE or FALSE. */
+  public static final String SCREENSAVER_UI_FEATURE_PREFIX = "screensaver.ui.feature.";
 
-  public static final String DATATABLE_USE_COLUMN_REORDER_LIST_WIDGET = "datatable.use_column_reorder_list_widget";
-  public static final String SCREENS_ALLOW_DELETE = "screens.allow_delete";
-  
+
   public static Color SCREENSAVER_THEME_COLOR = new Color(0x33, 0x66, 0x99);
   public static Color HEADER_COLOR = new Color(0x0, 0x94, 0xC4);
 
@@ -74,8 +74,6 @@ public interface ScreensaverConstants
   public static final String RUN_CELLHTS2 = "runCellHTS2";
   
   public static final String WEBAPP_ROOT = System.getProperty("webapp.root");
-
-  public static final String CELLHTS_ENABLED_PROPERTY = "cellHTS2.enabled";
 
   /**
    * Note: If you configure a larger default PlateSize, be sure to update

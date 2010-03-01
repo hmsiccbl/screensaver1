@@ -12,13 +12,11 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.io.File;
 import java.util.Collections;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
 import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
@@ -161,11 +159,6 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
       return cancel();
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  public boolean isCellHTS2Enabled()
-  {
-     return Boolean.parseBoolean(getApplicationProperties().get(ScreensaverConstants.CELLHTS_ENABLED_PROPERTY).toString());
   }
 
   public boolean isCellHTS2ReportFileExists() 

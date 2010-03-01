@@ -22,7 +22,7 @@
       onclick="javascript: return confirm('Delete this screen result permanently?');"
       styleClass="command" rendered="#{screenResultViewer.editable}"
       title="Delete the screen results for this screen" />
-    <t:panelGroup rendered="#{screenResultViewer.cellHTS2Enabled}">
+    <t:panelGroup rendered="#{appInfo.featuresEnabled['cellHTS2']}">
       <t:commandButton action="#{screenResultViewer.viewCellHTS2Runner}"
         value="Click here to enter CellHTS2 parameters"
         styleClass="command"

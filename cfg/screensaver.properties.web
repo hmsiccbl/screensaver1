@@ -48,16 +48,19 @@ screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/
 # Note that this is a general URL that can be external to the Screensaver web application URL.
 screensaver.ui.release_notes_url=/screensaver/main/changelog.html
 
+# Screensaver features that can be enabled or disabled
+screensaver.ui.feature.delete_screen=true
+screensaver.ui.feature.user_agreement_updater=false
+screensaver.ui.feature.cellHTS2=false
+# if false, use a list-based column selector, allowing for user-specified column ordering 
+screensaver.ui.feature.data_table_tree_column_selector=true
+
 # Email server settings used by edu.harvard.med.iccbl.screensaver.service.SmtpEmailService
 # TODO: configure email server settings if your deployment uses the SmtpEmailService
 screensaver.service.smtpemailservice.host=
 screensaver.service.smtpemailservice.username=
 
-datatable.use_column_reorder_list_widget=false
-screens.allow_delete=false
-
 ### cellHTS2 properties
-cellHTS2.enabled=false
 # The cellHTS2 report directory
 # is <appserver.dir>/webapps/screensaver/<cellHTS2report.filepath.prefix><screen result Id>
 cellHTS2report.filepath.prefix=cellHTS2/output/cellHts2_output_screenResultId_
