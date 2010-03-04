@@ -49,6 +49,8 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Sets;
+
 public class MakeDummyEntities
 {
   // static members
@@ -105,28 +107,23 @@ public class MakeDummyEntities
     screenResult.createResultValueType("text_repl1", 1, false, false, false, "phenotype").setNumeric(false);
     screenResult.createResultValueType("text_repl2", 2, false, false, false, "phenotype").setNumeric(false);
 
-    ResultValueType positive1Rvt = screenResult.createResultValueType("positive1", 1, true, true, false, "phenotype");
-    positive1Rvt.setHowDerived("from replicate 1");
-    positive1Rvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(0));
-    positive1Rvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(2));
-    positive1Rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
-    positive1Rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
-    positive1Rvt.setPositiveIndicatorCutoff(10.0);
+    ResultValueType positive1Rvt = screenResult.createResultValueType("positive1");
+    positive1Rvt.setReplicateOrdinal(1);
+    positive1Rvt.makeDerived("from replicate 1", Sets.newHashSet(screenResult.getResultValueTypesList().get(0), screenResult.getResultValueTypesList().get(2)));
+    positive1Rvt.setAssayPhenotype("phenotype");
+    positive1Rvt.makeNumericalPositivesIndicator(PositiveIndicatorDirection.HIGH_VALUES_INDICATE, 10.0);
 
-    ResultValueType positive2Rvt = screenResult.createResultValueType("positive2", 2, true, true, false, "phenotype");
-    positive2Rvt.setHowDerived("from replicate 2");
-    positive2Rvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(1));
-    positive2Rvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(3));
-    positive2Rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
-    positive2Rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
-    positive2Rvt.setPositiveIndicatorCutoff(10.0);
+    ResultValueType positive2Rvt = screenResult.createResultValueType("positive2");
+    positive2Rvt.setReplicateOrdinal(2);
+    positive2Rvt.makeDerived("from replicate 2", Sets.newHashSet(screenResult.getResultValueTypesList().get(1), screenResult.getResultValueTypesList().get(3)));
+    positive2Rvt.setAssayPhenotype("phenotype");
+    positive2Rvt.makeNumericalPositivesIndicator(PositiveIndicatorDirection.HIGH_VALUES_INDICATE, 10.0);
+    
 
     ResultValueType positiveRvt = screenResult.createResultValueType("positive", null, true, true, false, "phenotype");
-    positiveRvt.setHowDerived("from both replicates");
-    positiveRvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(4));
-    positiveRvt.addTypeDerivedFrom(screenResult.getResultValueTypesList().get(5));
+    positiveRvt.makeDerived("from both replicates", Sets.newHashSet(screenResult.getResultValueTypesList().get(4), screenResult.getResultValueTypesList().get(5)));
     positiveRvt.setNumeric(false);
-    positiveRvt.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
+    positiveRvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
 
     ResultValueType commentsRvt = screenResult.createResultValueType("comments");
     commentsRvt.setNumeric(false);

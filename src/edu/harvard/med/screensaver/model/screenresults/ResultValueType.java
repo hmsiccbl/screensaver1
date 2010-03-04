@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -306,6 +307,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @return an {@link PositiveIndicatorType} enum
    */
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType$UserType")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makePositivesIndicator() instead */) 
   public PositiveIndicatorType getPositiveIndicatorType()
   {
     return _positiveIndicatorType;
@@ -315,7 +317,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * Set the Positive Indicator Type.
    * @param positiveIndicatorType the Activity Indicator Type to set
    */
-  public void setPositiveIndicatorType(PositiveIndicatorType positiveIndicatorType)
+  private void setPositiveIndicatorType(PositiveIndicatorType positiveIndicatorType)
   {
     _positiveIndicatorType = positiveIndicatorType;
   }
@@ -488,7 +490,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @see #isDerived
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
-   * @see #setDerived(boolean)
+   * @see #makeDerived(String, Set)
    * @see #removeDerivedType(ResultValueType)
    * @see #addTypeDerivedFrom(ResultValueType)
    * @see #removeTypeDerivedFrom(ResultValueType)
@@ -557,6 +559,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    *         <code>ResultValueType</code>s
    */
   @org.hibernate.annotations.Type(type="text")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makeDerived() instead */) 
   public String getHowDerived()
   {
     return _howDerived;
@@ -568,7 +571,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @param howDerived a description of how this <code>ResultValueType</code>
    *          was derived from other <code>ResultValueType</code>s
    */
-  public void setHowDerived(String howDerived)
+  private void setHowDerived(String howDerived)
   {
     _howDerived = howDerived;
   }
@@ -578,6 +581,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @return the indicator cutoff
    */
   @org.hibernate.annotations.Type(type="double")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makePositivesIndicator() instead */) 
   public Double getPositiveIndicatorCutoff()
   {
     return _positiveIndicatorCutoff;
@@ -587,7 +591,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * Set the indicator cutoff
    * @param indicatorCutoff the indicator cutoff
    */
-  public void setPositiveIndicatorCutoff(Double indicatorCutoff)
+  private void setPositiveIndicatorCutoff(Double indicatorCutoff)
   {
     _positiveIndicatorCutoff = indicatorCutoff;
   }
@@ -599,6 +603,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @return an {@link PositiveIndicatorDirection} enum
    */
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection$UserType")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makePositivesIndicator() instead */) 
   public PositiveIndicatorDirection getPositiveIndicatorDirection()
   {
     return _positiveIndicatorDirection;
@@ -610,7 +615,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * cutoff.
    * @param indicatorDirection the indicator direction
    */
-  public void setPositiveIndicatorDirection(PositiveIndicatorDirection indicatorDirection)
+  private void setPositiveIndicatorDirection(PositiveIndicatorDirection indicatorDirection)
   {
     _positiveIndicatorDirection = indicatorDirection;
   }
@@ -712,6 +717,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @see #removeTypeDerivedFrom(ResultValueType)
    */
   @Column(nullable=false, name="isDerived")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makeDerived() instead */) 
   public boolean isDerived()
   {
     return _isDerived;
@@ -733,7 +739,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @see #addTypeDerivedFrom(ResultValueType)
    * @see #removeTypeDerivedFrom(ResultValueType)
    */
-  public void setDerived(boolean isDerived)
+  private void setDerived(boolean isDerived)
   {
     _isDerived = isDerived;
   }
@@ -1091,5 +1097,32 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
     else {
       ++_positivesCount;
     }
+  }
+
+  public void makeDerived(String howDerived, Set<ResultValueType> derivedFrom)
+  {
+    setDerived(true);
+    setHowDerived(howDerived);
+    for (ResultValueType rvt : derivedFrom) {
+      addTypeDerivedFrom(rvt);;
+    }
+  }
+
+  public void makePositivesIndicator(PositiveIndicatorType type)
+  {
+    assert type != PositiveIndicatorType.NUMERICAL : "use makeNumericalPositivesIndicator() instead";
+    _isPositiveIndicator = true;
+    setNumeric(false);
+    _positiveIndicatorType = type;
+  }
+
+  public void makeNumericalPositivesIndicator(PositiveIndicatorDirection direction,
+                                              Double cutoff)
+  {
+    _isPositiveIndicator = true;
+    setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
+    _positiveIndicatorDirection = direction;
+    _positiveIndicatorCutoff = cutoff;
+    setNumeric(true);
   }
 }

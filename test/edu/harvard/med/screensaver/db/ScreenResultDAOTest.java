@@ -74,8 +74,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
               false,
               "human");
             rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLUORESCENCE_INTENSITY);
-            rvt[i].setPositiveIndicatorType(i % 2 == 0 ? PositiveIndicatorType.BOOLEAN: PositiveIndicatorType.PARTITION);
-            rvt[i].setPositiveIndicatorDirection(i % 2 == 0 ? PositiveIndicatorDirection.LOW_VALUES_INDICATE : PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
+            rvt[i].makePositivesIndicator(i % 2 == 0 ? PositiveIndicatorType.BOOLEAN: PositiveIndicatorType.PARTITION);
           }
 
           Library library = new Library(
@@ -145,9 +144,6 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
             assertEquals(
               iResultValue % 2 == 0 ? PositiveIndicatorType.BOOLEAN: PositiveIndicatorType.PARTITION,
               rvt.getPositiveIndicatorType());
-            assertEquals(
-              iResultValue % 2 == 0 ? PositiveIndicatorDirection.LOW_VALUES_INDICATE : PositiveIndicatorDirection.HIGH_VALUES_INDICATE,
-              rvt.getPositiveIndicatorDirection());
             assertEquals(
               "human",
               rvt.getAssayPhenotype());
@@ -286,12 +282,9 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         ScreenResult screenResult = screen.createScreenResult();
         ResultValueType rvt1 = screenResult.createResultValueType("RVT1", null, false, true, false, "");
-        rvt1.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
-        rvt1.setPositiveIndicatorCutoff(indicatorCutoff);
-        rvt1.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
-        rvt1.setNumeric(true);
+        rvt1.makeNumericalPositivesIndicator(PositiveIndicatorDirection.HIGH_VALUES_INDICATE, indicatorCutoff);
         ResultValueType rvt2 = screenResult.createResultValueType("RVT2", null, false, true, false, "");
-        rvt2.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
+        rvt2.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
         Library library = new Library(
           "library 1",
           "lib1",

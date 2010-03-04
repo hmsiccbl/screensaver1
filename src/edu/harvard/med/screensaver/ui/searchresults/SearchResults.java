@@ -98,7 +98,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     initialize(buildDataTableModel(dataFetcher, columns),
                columns,
                buildRowsPerPageSelector(),
-               !getFeaturesEnabled().get("data_table_tree_column_selector"));               
+               !isFeatureEnabled("data_table_tree_column_selector"));               
   }
 
   // abstract methods

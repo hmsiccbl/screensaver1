@@ -9,12 +9,10 @@
 
 package edu.harvard.med.screensaver.io.screenresults;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
 
 
 public interface ScreenResultWorkbookSpecification
 {
-  public static final String SCREEN_INFO_SHEET_NAME = "Screen Info";
   public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";
   public static final int FIRST_DATA_SHEET_INDEX = 2;
 
@@ -36,51 +34,51 @@ public interface ScreenResultWorkbookSpecification
    * The data rows of the "Data Headers" worksheet. Order of enum values is
    * significant, as we use the ordinal() method.
    */
-  public enum DataHeaderRow {
-    COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column", 0),
-    NAME("Name", 1),
-    DESCRIPTION("Description", 2),
-    REPLICATE("Replicate Number", 3),
-    TIME_POINT("Time point", 4),
-    ASSAY_READOUT_TYPE("Assay readout type", 5),
-    RAW_OR_DERIVED("Raw or Derived?", 6),
-    HOW_DERIVED("If derived, how?", 7),
-    COLUMNS_DERIVED_FROM("If derived, from which columns?", 8),
-    IS_ASSAY_ACTIVITY_INDICATOR("Is it an Screening Positive Indicator? (yes/no)", 9),
-    ACTIVITY_INDICATOR_TYPE("Screening Positive Indicator Type (numerical, partitioned (S/M/W), boolean)", 10),
-    NUMERICAL_INDICATOR_DIRECTION("Numerical Screening Positive Indicator Cutoff Direction (< or >)", 11),
-    NUMERICAL_INDICATOR_CUTOFF("Numerical Screening Positive Indicator Cutoff Value", 12),
-    PRIMARY_OR_FOLLOWUP("Primary or Follow Up?", 13),
-    ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?", 14),
-    COMMENTS("Comments", 15),
-    CHANNEL("Channel",16),
-    TIME_POINT_ORDINAL("Time point ordinal",17),
-    ZDEPTH_ORDINAL("Zdepth ordinal",18)
-    ;
-
+  public enum DataHeaderProperty {
+    COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column"),
+    NAME("Name"),
+    DESCRIPTION("Description"),
+    REPLICATE("Replicate Number"),
+    TIME_POINT("Time point"),
+    ASSAY_READOUT_TYPE("Assay readout type"),
+    RAW_OR_DERIVED("Raw or Derived?"),
+    HOW_DERIVED("If derived, how?"),
+    COLUMNS_DERIVED_FROM("If derived, from which columns?"),
+    IS_POSITIVE_INDICATOR("Is it a Screening Positive Indicator? (yes/no)"),
+    POSITIVE_INDICATOR_TYPE("Screening Positive Indicator Type (numerical, partitioned (S/M/W), boolean)"),
+    NUMERICAL_POSITIVE_INDICATOR_DIRECTION("Numerical Screening Positive Indicator Cutoff Direction (< or >)"),
+    NUMERICAL_POSITIVE_INDICATOR_CUTOFF("Numerical Screening Positive Indicator Cutoff Value"),
+    PRIMARY_OR_FOLLOWUP("Primary or Follow Up?"),
+    ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?"),
+    COMMENTS("Comments"),
+    CHANNEL("Channel"),
+    TIME_POINT_ORDINAL("Time point ordinal"),
+    ZDEPTH_ORDINAL("Zdepth ordinal");
 
     private String _displayText;
-    private Integer _rowIndex;
 
-    private DataHeaderRow(String displayText,
-                        Integer rowIndex)
+    private DataHeaderProperty(String displayText)
     {
       _displayText = displayText;
-      _rowIndex = rowIndex;
     }
 
     public String getDisplayText()
     {
       return _displayText;
     }
-
-    public Integer getRowIndex()
+    
+    public static DataHeaderProperty fromDisplayText(String displayText)
     {
-      return _rowIndex;
+      for (DataHeaderProperty e : values()) {
+        if (e.getDisplayText().equalsIgnoreCase(displayText)) {
+          return e;
+        }
+      }
+      return null;
     }
   };
 
-  public static final int METADATA_ROW_COUNT = DataHeaderRow.values().length;
+  public static final int METADATA_ROW_COUNT = DataHeaderProperty.values().length;
   public static final String FILENAMES_LIST_DELIMITER = "\\s*,\\s*";
 
   /**

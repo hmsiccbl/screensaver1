@@ -23,7 +23,6 @@ import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
-import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -671,7 +670,7 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     myScreen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     ScreenResult myScreenResult = myScreen.createScreenResult();
     ResultValueType myRvt = myScreenResult.createResultValueType("myRvt", 1, false, true, false, "");
-    myRvt.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
+    myRvt.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
     AssayWell myAssayWell1 = myScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
     ResultValue myResultValue1 = myRvt.createResultValue(myAssayWell1, "true");
     assert myResultValue1.isPositive();
@@ -683,7 +682,7 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     othersNonMutualPositivesScreen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     ScreenResult othersNonMutualPositivesScreenResult = othersNonMutualPositivesScreen.createScreenResult();
     ResultValueType othersNonMutualPositivesRvt = othersNonMutualPositivesScreenResult.createResultValueType("othersNonMutualPositivesRvt", 1, false, true, false, "");
-    othersNonMutualPositivesRvt.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
+    othersNonMutualPositivesRvt.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
     AssayWell othersNonMutualPositivesAssayWell1 = othersNonMutualPositivesScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
     ResultValue othersNonMutualPositivesResultValue1 = othersNonMutualPositivesRvt.createResultValue(othersNonMutualPositivesAssayWell1, "false");
     assert !othersNonMutualPositivesResultValue1.isPositive();
@@ -696,7 +695,7 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     othersMutualPositivesScreen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     ScreenResult othersMutualPositivesScreenResult = othersMutualPositivesScreen.createScreenResult();
     ResultValueType othersMutualPositivesRvt = othersMutualPositivesScreenResult.createResultValueType("othersMutualPositivesRvt", 1, false, true, false, "");
-    othersMutualPositivesRvt.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
+    othersMutualPositivesRvt.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
     AssayWell othersMutualPositivesAssayWell1 = othersMutualPositivesScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
     ResultValue othersMutualPositivesResultValue1 = othersMutualPositivesRvt.createResultValue(othersMutualPositivesAssayWell1, "true");
     assert othersMutualPositivesResultValue1.isPositive();
@@ -852,59 +851,48 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
   
   public void testLibraryPermissions() 
   {
-    final ScreeningRoomUser[] users = new ScreeningRoomUser[3];
-    final AdministratorUser[] admUsers = new AdministratorUser[1];
+    ScreeningRoomUser[] users = new ScreeningRoomUser[3];
+    AdministratorUser[] admUsers = new AdministratorUser[1];
     
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        users[0] = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENS); 
+    users[0] = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENS); 
+    users[1] = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS); 
+    users[2] = makeUserWithRoles(true, ScreensaverUserRole.RNAI_SCREENS); 
+    Lab lab = new Lab((LabHead) users[2]);
+    users[0].setLab(lab);
+    genericEntityDao.saveOrUpdateEntity(users[0]);
 
-        users[1] = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS); 
+    //user with library_admin has to be an Administrator user otherwise error on validation. 
+    admUsers[0] = new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "", "");
+    genericEntityDao.saveOrUpdateEntity(admUsers[0]);
+    admUsers[0].addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
 
-        users[2] = makeUserWithRoles(true, ScreensaverUserRole.RNAI_SCREENS); 
-        Lab lab = new Lab((LabHead) users[2]);
-        users[0].setLab(lab);
-        genericEntityDao.saveOrUpdateEntity(users[0]);
-        
-        //user with library_admin has to be an Administrator user otherwise error on validation. 
-         admUsers[0] = new AdministratorUser("Joe", "Admin", "joe_admin@hms.harvard.edu", "", "", "", "", "");
-         genericEntityDao.saveOrUpdateEntity(admUsers[0]);
-         admUsers[0].addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
-        
-        Library library = new Library(
-          "library 1",
-          "lib1",
-          ScreenType.RNAI,
-          LibraryType.COMMERCIAL,
-          100001,
-          100002);
-        library.setOwner(users[0]);
-        librariesDao.loadOrCreateWellsForLibrary(library);
-        genericEntityDao.saveOrUpdateEntity(library);
-        genericEntityDao.flush();
+    Library library = new Library("library 1",
+                                  "lib1",
+                                  ScreenType.RNAI,
+                                  LibraryType.COMMERCIAL,
+                                  100001,
+                                  100002);
+    library.setOwner(users[0]);
+    librariesDao.loadOrCreateWellsForLibrary(library);
+    genericEntityDao.saveOrUpdateEntity(library);
+    //genericEntityDao.flush();
 
-      }
-    });
-    
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
+    setComplete();
+    endTransaction();
+    startNewTransaction();
 
-        Library library = genericEntityDao.findEntityByProperty(Library.class, "shortName","lib1" );
-        setCurrentUser(genericEntityDao.findEntityById(ScreensaverUser.class, users[0].getEntityId()));
-        assertTrue("Owner can view (validation) library", dataAccessPolicy.visit(library));
-        
-        setCurrentUser(genericEntityDao.findEntityById(ScreensaverUser.class, users[1].getEntityId()));
-        assertFalse("Non-owner cannot view Validation Library", dataAccessPolicy.visit(library));
-        
+    //library = genericEntityDao.findEntityByProperty(Library.class, "shortName","lib1" );
+    setCurrentUser(users[0]);//genericEntityDao.findEntityById(ScreensaverUser.class, users[0].getEntityId()));
+    assertTrue("Owner can view (validation) library", dataAccessPolicy.visit(library));
+
+    setCurrentUser(users[1]);//genericEntityDao.findEntityById(ScreensaverUser.class, users[1].getEntityId()));
+    assertFalse("Non-owner cannot view Validation Library", dataAccessPolicy.visit(library));
+
 /*  TODO ADD CHECK WHEN "NO SESSION" error is solved 
         setCurrentUser(genericEntityDao.findEntityById(ScreensaverUser.class, users[2].getEntityId()));
         assertTrue("Library head of owner can view (validation) library", dataAccessPolicy.visit(library);*/
-        
-        setCurrentUser(genericEntityDao.findEntityById(ScreensaverUser.class, admUsers[0].getEntityId()));
-        assertTrue("LibrarieAdmin can view (validation) library", dataAccessPolicy.visit(library));
-      }
-    });
-  }  
+
+    setCurrentUser(genericEntityDao.findEntityById(ScreensaverUser.class, admUsers[0].getEntityId()));
+    assertTrue("LibrarieAdmin can view (validation) library", dataAccessPolicy.visit(library));
+  }
 }

@@ -103,13 +103,6 @@ import org.apache.log4j.Logger;
       WritableWorkbook errorAnnotatedWorkbook = jxl.Workbook.createWorkbook(dummyOutputStream);
       if (_workbook != null) {
         errorAnnotatedWorkbook = jxl.Workbook.createWorkbook(dummyOutputStream);
-        
-        // TODO: this sheet is being created, but the data itself is not always
-        // being imported (see RT #50154). Not going to fix unless a user runs
-        // across this problem!
-        errorAnnotatedWorkbook.importSheet(ScreenResultWorkbookSpecification.SCREEN_INFO_SHEET_NAME,
-                                           0,
-                                           _workbook.getWorkbook().getSheet(ScreenResultWorkbookSpecification.SCREEN_INFO_SHEET_NAME));
         errorAnnotatedWorkbook.importSheet(ScreenResultWorkbookSpecification.DATA_HEADERS_SHEET_NAME,
                                            1,
                                            _workbook.getWorkbook().getSheet(ScreenResultWorkbookSpecification.DATA_HEADERS_SHEET_NAME));

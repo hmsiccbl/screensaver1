@@ -56,6 +56,8 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 
+import com.google.common.collect.Sets;
+
 /**
  */
 public class ScreenResultParserTest extends AbstractSpringTest
@@ -105,9 +107,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
       "Luminescence",
       "FI_A",
       "FI_B",
-      "AssayIndicator1",
-      "AssayIndicator2",
-      "AssayIndicator3" };
+      "PositiveIndicator1",
+      "PositiveIndicator2",
+      "PositiveIndicator3" };
 
     InputStream xlsInStream = ScreenResultParserTest.class.getResourceAsStream(SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     jxl.Workbook wb = jxl.Workbook.getWorkbook(xlsInStream);
@@ -206,7 +208,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       log.debug("parse errors:\n" + StringUtils.makeListString(mockScreenResultParser.getErrors(), "\n"));
     }
     assertFalse("screen result had errors: " + mockScreenResultParser.getErrors(),
-        mockScreenResultParser.getHasErrors());
+                mockScreenResultParser.getHasErrors());
     assertEquals("well count", 4, (int) mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
   }
 
@@ -410,16 +412,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
   }
 
-  public void testIllegalScreenNumber() throws FileNotFoundException
-  {
-    Screen screen = MakeDummyEntities.makeDummyScreen(999);
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-    mockScreenResultParser.parse(screen,
-                                 workbookFile);
-    assertEquals("screen result data file is for screen number 115, expected 999",
-                 mockScreenResultParser.getErrors().get(0).getErrorMessage());
-  }
-
   public void testMultiCharColumnLabels() throws FileNotFoundException
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
@@ -465,7 +457,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
       rvt.setDescription("");
     }
     if (rvt.getHowDerived() == null) {
-      rvt.setHowDerived("");
+      rvt.makeDerived("", Sets.<ResultValueType>newHashSet());
     }
     if (rvt.getName() == null) {
       rvt.setName("");
@@ -529,9 +521,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt = expectedScreenResult.createResultValueType("FI1");
     rvt.setDescription("Fold Induction");
     rvt.setReplicateOrdinal(1);
-    rvt.setDerived(true);
-    rvt.setHowDerived("Divide compound well by plate median");
-    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(0));
+    rvt.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedResultValueTypes.get(0)));
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setNumeric(true);
     expectedResultValueTypes.put(2, rvt);
@@ -539,36 +529,25 @@ public class ScreenResultParserTest extends AbstractSpringTest
     rvt = expectedScreenResult.createResultValueType("FI2");
     rvt.setDescription("Fold Induction");
     rvt.setReplicateOrdinal(2);
-    rvt.setDerived(true);
-    rvt.setHowDerived("Divide compound well by plate median");
-    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(1));
+    rvt.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedResultValueTypes.get(1)));
     rvt.setAssayPhenotype("Phenotype1");
     rvt.setFollowUpData(true);
     rvt.setNumeric(true);
     expectedResultValueTypes.put(3, rvt);
 
-    rvt = expectedScreenResult.createResultValueType("AssayIndicator1", null, true, true, false, "Phenotype1");
-    rvt.setHowDerived("Average");
-    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(2));
-    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(3));
-    rvt.setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
-    rvt.setPositiveIndicatorDirection(PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
-    rvt.setPositiveIndicatorCutoff(1.5);
-    rvt.setNumeric(true);
+    rvt = expectedScreenResult.createResultValueType("PositiveIndicator1", null, true, true, false, "Phenotype1");
+    rvt.makeDerived("Average", Sets.newHashSet(expectedResultValueTypes.get(2), expectedResultValueTypes.get(3)));
+    rvt.makeNumericalPositivesIndicator(PositiveIndicatorDirection.HIGH_VALUES_INDICATE, 1.5);
     expectedResultValueTypes.put(4, rvt);
 
-    rvt = expectedScreenResult.createResultValueType("AssayIndicator2", null, true, true, false, "Phenotype1");
-    rvt.setHowDerived("W<=1.6, M<=1.7, S<=1.8");
-    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(4));
-    rvt.setPositiveIndicatorType(PositiveIndicatorType.PARTITION);
-    rvt.setNumeric(false);
+    rvt = expectedScreenResult.createResultValueType("PositiveIndicator2", null, true, true, false, "Phenotype1");
+    rvt.makeDerived("W<=1.6, M<=1.7, S<=1.8", Sets.newHashSet(expectedResultValueTypes.get(4)));
+    rvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
     expectedResultValueTypes.put(5, rvt);
 
-    rvt = expectedScreenResult.createResultValueType("AssayIndicator3", null, true, true, false, "Phenotype1");
-    rvt.setHowDerived("AssayIndicator2 is S");
-    rvt.addTypeDerivedFrom(expectedResultValueTypes.get(5));
-    rvt.setPositiveIndicatorType(PositiveIndicatorType.BOOLEAN);
-    rvt.setNumeric(false);
+    rvt = expectedScreenResult.createResultValueType("PositiveIndicator3", null, true, true, false, "Phenotype1");
+    rvt.makeDerived("PositiveIndicator2 is S", Sets.newHashSet(expectedResultValueTypes.get(5)));
+    rvt.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
     expectedResultValueTypes.put(6, rvt);
 
 

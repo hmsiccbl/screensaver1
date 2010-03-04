@@ -16,8 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +58,11 @@ import edu.harvard.med.screensaver.util.AlphabeticCounter;
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -183,7 +188,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private ExcludeParser _excludeParser;
   private CellVocabularyParser<AssayReadoutType> _assayReadoutTypeParser;
   private CellVocabularyParser<PositiveIndicatorDirection> _indicatorDirectionParser;
-  private CellVocabularyParser<PositiveIndicatorType> _activityIndicatorTypeParser;
+  private CellVocabularyParser<PositiveIndicatorType> _positiveIndicatorTypeParser;
   private CellVocabularyParser<Boolean> _rawOrDerivedParser;
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
@@ -197,7 +202,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @motivation runtime detection of duplicate wells in the input stream
    */
   private Set<String> parsedWellKeys = new HashSet<String>();
-  private Map<Integer,Short> _dataHeaderIndex2DataHeaderColumn;
+  private Map<Integer,Integer> _dataHeaderIndex2DataHeaderColumn;
   private boolean _ignoreDuplicateErrors = false;
   /**
    * The library that was associated with the plate that was last accessed.
@@ -283,7 +288,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _columnsDerivedFromParser = new DerivedFromParser(_dataTableColumnLabel2RvtMap);
     _excludeParser = new ExcludeParser(_dataTableColumnLabel2RvtMap);
     _indicatorDirectionParser = new CellVocabularyParser<PositiveIndicatorDirection>(indicatorDirectionMap);
-    _activityIndicatorTypeParser = new CellVocabularyParser<PositiveIndicatorType>(activityIndicatorTypeMap, PositiveIndicatorType.NUMERICAL);
+    _positiveIndicatorTypeParser = new CellVocabularyParser<PositiveIndicatorType>(activityIndicatorTypeMap, PositiveIndicatorType.NUMERICAL);
     _rawOrDerivedParser = new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE);
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
@@ -293,32 +298,25 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
     try {
       log.info("parsing " + _workbook.getName());
-      if (screen.getScreenResult() == null) 
-      {
-        DataHeadersParseResult dataHeadersParseResult = buildResultValueTypeMapFromDataHeaderSheet(screen, _workbook);
-        if (_workbook.getHasErrors()) {
+      if (screen.getScreenResult() == null) {
+        _screenResult = screen.createScreenResult();
+        if (!parseDataHeaders(_screenResult, _workbook)) {
           log.info("errors found in data headers, will not attempt to parse data sheets");
-        }else{
-          parseScreenInfo(_workbook, screen);
-          if (_workbook.getHasErrors()) {
-            log.info("errors found in data headers, will not attempt to parse data sheets");
-          }else {
-            _screenResult = dataHeadersParseResult.getScreenResult();
-          }
+          return _screenResult;
         }
-      }else{
+      }
+      else {
+        // incremental parsing of new data
         _screenResult = screen.getScreenResult();
       }
 
-      if (_screenResult != null) {
-        initializeDataHeadersForIncrementalParsing(_screenResult, _workbook);
-        log.info("parsing data sheets");
-        parseData(_workbook,
-                  _screenResult,
-                  plateNumberRange,
-                  incrementalFlush);
-        _screenResult.setDateLastImported(new DateTime());
-      }
+      initializeDataHeaders(_screenResult, _workbook);
+      log.info("parsing data sheets");
+      parseData(_workbook,
+                _screenResult,
+                plateNumberRange,
+                incrementalFlush);
+      _screenResult.setDateLastImported(new DateTime());
     }
     catch (UnrecoverableScreenResultParseException e) {
       _workbook.addError("serious parse error encountered (could not continue further parsing): " + e.getMessage());
@@ -365,14 +363,15 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    */
   private int findDataHeaderColumnCount(Worksheet dataHeadersSheet) 
   {
+    dataHeadersSheet.getColumns();
     int rows = dataHeadersSheet.getRows();
-    if (DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex() >= rows) {
+    
+    if (rows == 0) {
       return 0;
     }
     
     int n = 0;
-    for(Cell cell : dataHeadersSheet.getRow(DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex()))
-    {
+    for (Cell cell : dataHeadersSheet.getRow(0)) {
       if(cell.isEmpty()) break;
       n++;
     }
@@ -384,158 +383,145 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return _dataHeaderIndex2DataHeaderColumn.get(dataHeaderColumn);
   }
 
-  private static class DataHeadersParseResult
-  {
-    private ScreenResult _screenResult;
-    private ArrayList<Workbook> _rawDataWorkbooks;
-
-    public ArrayList<Workbook> getRawDataWorkbooks()
-    {
-      return _rawDataWorkbooks;
-    }
-
-    public void setRawDataWorkbooks(ArrayList<Workbook> rawDataWorkbooks)
-    {
-      _rawDataWorkbooks = rawDataWorkbooks;
-    }
-
-    public ScreenResult getScreenResult()
-    {
-      return _screenResult;
-    }
-
-    public void setScreenResult(ScreenResult screenResult)
-    {
-      _screenResult = screenResult;
-    }
-  }
-
   /**
-   * Parse the worksheet containing the ScreenResult data headers
-   * This method returns error results by setting them to the workbook, 
-   * therefore check the workbook after running for errors.
+   * Parse the worksheet containing the ScreenResult data headers.
+   * This method returns error results by add them to the {@link Workbook}. 
+   * Therefore check the workbook after running for errors.
    * @param workbook
    * 
    */
-  private DataHeadersParseResult buildResultValueTypeMapFromDataHeaderSheet(Screen screen,
-                                                  Workbook workbook)
+  private boolean parseDataHeaders(ScreenResult screenResult, Workbook workbook)
   {
     log.info("parse data headers sheet");
-    DataHeadersParseResult dataHeadersParseResult = new DataHeadersParseResult();
     
     Worksheet dataHeadersSheet = 
-      _workbook.getWorksheet(DATA_HEADERS_SHEET_NAME)
-          .forOrigin(DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX, 0);
-    if(dataHeadersSheet == null )
-    {
-      _workbook.addError(DATA_HEADER_SHEET_NOT_FOUND_ERROR);  // TODO: this can result in a null SR, need better feedback - sde4
-    }else {
-      ScreenResult screenResult = screen.createScreenResult();
-      dataHeadersParseResult.setScreenResult(screenResult);
-      int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
-      for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) 
-      {
-        ResultValueType rvt = screenResult
-            .createResultValueType(dataHeadersSheet
-                                 .getCell(iDataHeader,DataHeaderRow.NAME.getRowIndex(), true).getString(),
-                                 dataHeadersSheet
-                                 .getCell(iDataHeader,DataHeaderRow.REPLICATE.getRowIndex()).getInteger(),
-                                 _rawOrDerivedParser
-                                     .parse(dataHeadersSheet
-                                            .getCell(iDataHeader,DataHeaderRow.RAW_OR_DERIVED.getRowIndex())),
-                                 _booleanParser.parse(dataHeadersSheet
-                                                      .getCell(iDataHeader,
-                                                               DataHeaderRow.IS_ASSAY_ACTIVITY_INDICATOR.getRowIndex())),
-                                 _primaryOrFollowUpParser.parse(dataHeadersSheet
-                                                                .getCell(iDataHeader,
-                                                                         DataHeaderRow.PRIMARY_OR_FOLLOWUP.getRowIndex())),
-                                 dataHeadersSheet
-                                     .getCell(iDataHeader,DataHeaderRow.ASSAY_PHENOTYPE.getRowIndex()).getString(),
-                                 dataHeadersSheet
-                                     .getCell(iDataHeader, DataHeaderRow.CHANNEL.getRowIndex()).getInteger(),
-                                 dataHeadersSheet
-                                     .getCell(iDataHeader, DataHeaderRow.TIME_POINT_ORDINAL.getRowIndex()).getInteger(),
-                                 dataHeadersSheet
-                                     .getCell(iDataHeader, DataHeaderRow.ZDEPTH_ORDINAL.getRowIndex()).getInteger());
-        rvt.setDescription(dataHeadersSheet
-                           .getCell(iDataHeader,DataHeaderRow.DESCRIPTION.getRowIndex()).getString());
-        rvt.setTimePoint(dataHeadersSheet
-                         .getCell(iDataHeader, DataHeaderRow.TIME_POINT.getRowIndex()).getString());
-        
-        if (rvt.isDerived()) 
+      _workbook.getWorksheet(DATA_HEADERS_SHEET_NAME).forOrigin(DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX, 0);
+    if (dataHeadersSheet == null) {
+      _workbook.addError(DATA_HEADER_SHEET_NOT_FOUND_ERROR);
+      return false;
+    } 
+    Map<DataHeaderProperty,Row> dataHeaderPropertyRows = parseDataHeaderProperties(dataHeadersSheet);
+    int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
+    for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
+      ResultValueType rvt = 
+        screenResult.createResultValueType(dataHeaderPropertyRows.get(DataHeaderProperty.NAME).getCell(iDataHeader, true).getString());
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.REPLICATE)) {
+        rvt.setReplicateOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.REPLICATE).getCell(iDataHeader).getInteger());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.RAW_OR_DERIVED)) {
+        boolean isDerived = _rawOrDerivedParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.RAW_OR_DERIVED).getCell(iDataHeader));
+        if (isDerived) {
+          if (validateRequiredDataPropertyDefined(DataHeaderProperty.COLUMNS_DERIVED_FROM, DataHeaderProperty.RAW_OR_DERIVED, dataHeaderPropertyRows, iDataHeader) &&
+            validateRequiredDataPropertyDefined(DataHeaderProperty.HOW_DERIVED, DataHeaderProperty.RAW_OR_DERIVED, dataHeaderPropertyRows, iDataHeader)) {
+            rvt.makeDerived(dataHeaderPropertyRows.get(DataHeaderProperty.HOW_DERIVED).getCell(iDataHeader, true).getString(),
+                            Sets.newHashSet(Iterables.filter(_columnsDerivedFromParser.parseList(dataHeaderPropertyRows.get(DataHeaderProperty.COLUMNS_DERIVED_FROM).getCell(iDataHeader, true)),
+                                                             Predicates.notNull())));
+          }
+        }
+        else {
+          rvt.setAssayReadoutType(_assayReadoutTypeParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.ASSAY_READOUT_TYPE).getCell(iDataHeader, true)));
+        }
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.PRIMARY_OR_FOLLOWUP)) {
+        rvt.setFollowUpData(_primaryOrFollowUpParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.PRIMARY_OR_FOLLOWUP).getCell(iDataHeader)));
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.ASSAY_PHENOTYPE)) {
+        rvt.setAssayPhenotype(dataHeaderPropertyRows.get(DataHeaderProperty.ASSAY_PHENOTYPE).getCell(iDataHeader).getString());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.DESCRIPTION)) {
+        rvt.setDescription(dataHeaderPropertyRows.get(DataHeaderProperty.DESCRIPTION).getCell(iDataHeader).getString());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.COMMENTS)) {
+        rvt.setComments(dataHeaderPropertyRows.get(DataHeaderProperty.COMMENTS).getCell(iDataHeader).getString());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.TIME_POINT)) {
+        rvt.setTimePoint(dataHeaderPropertyRows.get(DataHeaderProperty.TIME_POINT).getCell(iDataHeader).getString());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.CHANNEL)) {
+        rvt.setChannel(dataHeaderPropertyRows.get(DataHeaderProperty.CHANNEL).getCell(iDataHeader).getInteger());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.TIME_POINT_ORDINAL)) {
+        rvt.setTimePointOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.TIME_POINT_ORDINAL).getCell(iDataHeader).getInteger());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.ZDEPTH_ORDINAL)) {
+        rvt.setZdepthOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.ZDEPTH_ORDINAL).getCell(iDataHeader).getInteger());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.IS_POSITIVE_INDICATOR)) {
+        Boolean isPositivesIndicator = _booleanParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.IS_POSITIVE_INDICATOR).getCell(iDataHeader));
+        if (isPositivesIndicator) 
         {
-          for( ResultValueType resultValueType :
-                _columnsDerivedFromParser.parseList(dataHeadersSheet
-                                                    .getCell(iDataHeader,
-                                                             DataHeaderRow.COLUMNS_DERIVED_FROM.getRowIndex(),
-                                                             true))) 
-          {
-            if (resultValueType != null) { 
-              // can be null if values is "missing" (which is valid) or unparsable value is encountered in list (which will generate an error)
-              rvt.addTypeDerivedFrom(resultValueType);
+          if (validateRequiredDataPropertyDefined(DataHeaderProperty.POSITIVE_INDICATOR_TYPE, DataHeaderProperty.IS_POSITIVE_INDICATOR, dataHeaderPropertyRows, iDataHeader)) {
+            PositiveIndicatorType positiveIndicatorType = _positiveIndicatorTypeParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.POSITIVE_INDICATOR_TYPE).getCell(iDataHeader, true));
+            if (positiveIndicatorType == PositiveIndicatorType.NUMERICAL) {
+              rvt.makeNumericalPositivesIndicator(_indicatorDirectionParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.NUMERICAL_POSITIVE_INDICATOR_DIRECTION).getCell(iDataHeader, true)),
+                                                  dataHeaderPropertyRows.get(DataHeaderProperty.NUMERICAL_POSITIVE_INDICATOR_CUTOFF).getCell(iDataHeader, true).getDouble());
+            }
+            else {
+              rvt.makePositivesIndicator(positiveIndicatorType);
             }
           }
-          // TODO: should warn if these values *are* defined and !isDerivedFrom()
-          rvt.setHowDerived(dataHeadersSheet
-                            .getCell(iDataHeader,
-                                     DataHeaderRow.HOW_DERIVED.getRowIndex(),true).getString());
-        }else{
-          rvt.setAssayReadoutType(_assayReadoutTypeParser
-                                  .parse(dataHeadersSheet
-                                         .getCell(iDataHeader,
-                                                  DataHeaderRow.ASSAY_READOUT_TYPE.getRowIndex(), 
-                                                  true)));
         }
-        if (rvt.isPositiveIndicator()) 
-        {
-          rvt.setPositiveIndicatorType(_activityIndicatorTypeParser
-                                       .parse(dataHeadersSheet
-                                              .getCell(iDataHeader,
-                                                       DataHeaderRow.ACTIVITY_INDICATOR_TYPE.getRowIndex(),true)));
-          if (rvt.getPositiveIndicatorType().equals(PositiveIndicatorType.NUMERICAL)) 
-          {
-            rvt.setPositiveIndicatorDirection(_indicatorDirectionParser
-                                              .parse(dataHeadersSheet
-                                                     .getCell(iDataHeader,
-                                                              DataHeaderRow.NUMERICAL_INDICATOR_DIRECTION.getRowIndex(), 
-                                                              true)));
-            rvt.setPositiveIndicatorCutoff(dataHeadersSheet
-                                           .getCell(iDataHeader,
-                                                    DataHeaderRow.NUMERICAL_INDICATOR_CUTOFF.getRowIndex(),true)
-                                                    .getDouble());
-          }
-          // TODO: should warn if these values *are* defined and !isActivityIndicator()
-        }
-        rvt.setComments(dataHeadersSheet
-                        .getCell(iDataHeader,DataHeaderRow.COMMENTS.getRowIndex()).getString());
-        _dataTableColumnLabel2RvtMap.put(dataHeadersSheet
-                                         .getCell(iDataHeader,
-                                                  DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex(), true)
-                                                  .getAsString(), rvt);
       }
-    }      
-    return dataHeadersParseResult;
+      // note: we do this last so that _columnsDerivedFromParser does not allow the current column to be considered a valid "derived from" value
+      _dataTableColumnLabel2RvtMap.put(dataHeaderPropertyRows.get(DataHeaderProperty.COLUMN_IN_DATA_WORKSHEET).getCell(iDataHeader, true).getAsString(), rvt);
+    }
+    return !!!_workbook.getHasErrors();
   }
 
-  private void initializeDataHeadersForIncrementalParsing(ScreenResult screenResult,
+  private boolean validateRequiredDataPropertyDefined(DataHeaderProperty requiredDataHeaderProperty,
+                                                      DataHeaderProperty parentDataHeaderProperty,
+                                                      Map<DataHeaderProperty,Row> dataHeaderPropertyRows,
+                                                      int iDataHeader)
+  {
+    if (!!!dataHeaderPropertyRows.containsKey(requiredDataHeaderProperty)) {
+      dataHeaderPropertyRows.get(parentDataHeaderProperty).getCell(iDataHeader).addError(requiredDataHeaderProperty + " data header property row must be defined when " + parentDataHeaderProperty + " data header property row is defined");
+      return false;
+    }
+    return true;
+  }
+
+  private Map<DataHeaderProperty,Row> parseDataHeaderProperties(Worksheet dataHeadersSheet)
+  {
+    Map<DataHeaderProperty,Row> result = Maps.newHashMap();
+    Iterator<Row> dataRows = dataHeadersSheet.forOrigin(1, 0).iterator(); 
+    for (Row row : dataHeadersSheet.forOrigin(0, 0)) {
+      if (row.isEmpty()) {
+        break;
+      }
+      
+      String dataHeaderPropertyLabel = row.getCell(0).getString().trim();
+      DataHeaderProperty dataHeaderProperty = DataHeaderProperty.fromDisplayText(dataHeaderPropertyLabel);
+      Row dataOnlyRow = dataRows.next();
+      if (dataHeaderProperty != null) {
+        result.put(dataHeaderProperty, dataOnlyRow);
+      }
+      else {
+        row.getCell(0).addError("unknown data header property: " + dataHeaderPropertyLabel);
+      }
+    }
+    return result;
+  }
+
+  private void initializeDataHeaders(ScreenResult screenResult,
                                      Workbook workbook)
     throws UnrecoverableScreenResultParseException
   {
-    Worksheet dataHeadersSheet = workbook.getWorksheet(DATA_HEADERS_SHEET_NAME)
-        .forOrigin(DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX, 0);
-    if(dataHeadersSheet == null) 
-      throw new UnrecoverableScreenResultParseException( DATA_HEADER_SHEET_NOT_FOUND_ERROR);
+    Worksheet dataHeadersSheet = workbook.getWorksheet(DATA_HEADERS_SHEET_NAME).forOrigin(DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX, 0);
+    if (dataHeadersSheet == null) { 
+      throw new UnrecoverableScreenResultParseException(DATA_HEADER_SHEET_NOT_FOUND_ERROR);
+    }
 
-    _dataHeaderIndex2DataHeaderColumn = new HashMap<Integer,Short>();
+    _dataHeaderIndex2DataHeaderColumn = Maps.newHashMap();
 
     int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
+    Map<DataHeaderProperty,Row> dataHeaderProperties = parseDataHeaderProperties(dataHeadersSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
-      Cell cell = dataHeadersSheet.getCell(iDataHeader, DataHeaderRow.COLUMN_IN_DATA_WORKSHEET.getRowIndex(), true);
+      Cell cell = dataHeaderProperties.get(DataHeaderProperty.COLUMN_IN_DATA_WORKSHEET).getCell(iDataHeader, true);
       String forColumnInRawDataWorksheet = cell.getString().trim();
       try {
         if (forColumnInRawDataWorksheet != null) {
           _dataHeaderIndex2DataHeaderColumn.put(iDataHeader,
-                                                (short) AlphabeticCounter.toIndex(forColumnInRawDataWorksheet));
+                                                AlphabeticCounter.toIndex(forColumnInRawDataWorksheet));
           ResultValueType rvt = screenResult.getResultValueTypesList().get(iDataHeader);
           _dataTableColumnLabel2RvtMap.put(forColumnInRawDataWorksheet, rvt);
         }
@@ -569,21 +555,26 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     int wellsWithDataLoaded = 0;
     int dataSheetsParsed = 0;
     int totalSheets = workbook.getWorkbook().getNumberOfSheets();
-    int totalDataSheets = totalSheets - FIRST_DATA_SHEET_INDEX;
+    int firstDataSheetIndex = workbook.getWorksheet(DATA_HEADERS_SHEET_NAME).getSheetIndex() + 1;
+    int totalDataSheets = Math.max(0, totalSheets - firstDataSheetIndex);
     plateNumberRange = plateNumberRange == null ? new IntRange(Integer.MIN_VALUE, Integer.MAX_VALUE) : plateNumberRange;
 
     // Note: we do this to make sure that the RVT's are persisted before we persist and clear the RV's
-    if(screenResult.getEntityId()==null) _genericEntityDao.persistEntity(screenResult);
-    else _genericEntityDao.saveOrUpdateEntity(screenResult);
+    if (screenResult.getEntityId() == null) {
+      _genericEntityDao.persistEntity(screenResult);
+    }
+    else {
+      _genericEntityDao.saveOrUpdateEntity(screenResult);
+    }
     _genericEntityDao.flush();
 
-    for (int iSheet = FIRST_DATA_SHEET_INDEX; iSheet < totalSheets; ++iSheet) {
+    for (int iSheet = firstDataSheetIndex; iSheet < totalSheets; ++iSheet) {
       String sheetName = workbook.getWorkbook().getSheet(iSheet).getName();
       log.info("parsing sheet " + (dataSheetsParsed + 1) + " of " + totalDataSheets + ", " + sheetName);
       Worksheet worksheet = workbook.getWorksheet(iSheet).forOrigin(0, RAWDATA_FIRST_DATA_ROW_INDEX);
 
       int iDataHeader = 0;
-      if (iSheet == FIRST_DATA_SHEET_INDEX && plateNumberRange.containsInteger(iSheet)) {
+      if (iSheet == firstDataSheetIndex && plateNumberRange.containsInteger(iSheet)) {
         for (ResultValueType rvt : screenResult.getResultValueTypes()) {
           determineNumericalnessOfDataHeader(rvt, workbook, iSheet, iDataHeader++);
         }
@@ -597,35 +588,39 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           Integer plateNumber = row.getCell(DataColumn.PLATE.ordinal(), true).getInteger();
           Cell wellNameCell = row.getCell(DataColumn.WELL_NAME.ordinal()); 
           String wellName = _wellNameParser.parse(wellNameCell);
-          if (!wellName.equals(""))
-          {
+          if (!wellName.equals("")) {
             WellKey wellKey = new WellKey(plateNumber, wellName);
-            if(!plateNumberRange.containsInteger(wellKey.getPlateNumber()) ) 
-            {
-              if(log.isDebugEnabled()) log.debug("Skipping, excluded range: " + plateNumberRange + ", row: " + row.getRow());
-            } else {
+            if (!plateNumberRange.containsInteger(wellKey.getPlateNumber())) {
+              if (log.isDebugEnabled()) {
+                log.debug("Skipping, excluded range: " + plateNumberRange + ", row: " + row.getRow());
+              }
+            } 
+            else {
               boolean duplicate = !parsedWellKeys.add(wellKey.getKey());
-              if( duplicate )
-              {
-                if( !_ignoreDuplicateErrors ) wellNameCell.addError("already parsed this well");
-                else log.debug("Already parsed: " + wellKey + ", duplicate found at: " + wellNameCell );
-              } else {
+              if (duplicate) {
+                if (!_ignoreDuplicateErrors) {
+                  wellNameCell.addError("already parsed this well");
+                }
+                else {
+                  log.debug("Already parsed: " + wellKey + ", duplicate found at: " + wellNameCell );
+                }
+              } 
+              else {
                 if (findLibraryWithPlate(wellKey.getPlateNumber()) == null) 
                 {
                   wellNameCell.addError(NO_SUCH_LIBRARY_WITH_PLATE);
-                } else {
+                } 
+                else {
                   Well well = _librariesDao.findWell(wellKey);
-                  if(well == null)
-                  {
+                  if (well == null) {
                     wellNameCell.addError(NO_SUCH_WELL + ": " + wellKey);
-                  } else {
+                  } 
+                  else {
                     readResultValues(screenResult, row, well, incrementalFlush);
                     ++wellsWithDataLoaded;
-                    if (incrementalFlush && wellsWithDataLoaded % ROWS_TO_CACHE == 0 )
-                    {
+                    if (incrementalFlush && wellsWithDataLoaded % ROWS_TO_CACHE == 0) {
                       saveResultValuesAndFlush(screenResult, incrementalFlush);
-                      if( log.isInfoEnabled() && wellsWithDataLoaded % (ROWS_TO_CACHE * 100) == 0) 
-                      {
+                      if (log.isInfoEnabled() && wellsWithDataLoaded % (ROWS_TO_CACHE * 100) == 0) {
                         long time = System.currentTimeMillis();
                         long cumulativeTime = time - startTime;
                         log.info("wellsWithDataLoaded: " + wellsWithDataLoaded 
@@ -634,7 +629,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                  + ", loopTime: " + (time - loopTime) );
                         loopTime = time;
                       }
-                    }//incremental
+                    } // incremental
                   }
                 }
               }
@@ -643,8 +638,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         }
       } // for row
       ++dataSheetsParsed;
-      if(wellsWithDataLoaded > 0)
-      {
+      if (wellsWithDataLoaded > 0) {
         saveResultValuesAndFlush(screenResult, incrementalFlush);
         log.info("Sheet: " + sheetName + " done, save, count: " + wellsWithDataLoaded);
         long time = System.currentTimeMillis();
@@ -654,16 +648,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                  + " min, avg row time: " + (double)cumulativeTime/(double)wellsWithDataLoaded );
       }    
     }
-    
-//    if(!incrementalFlush && wellsWithDataLoaded > 0)
-//    {
-//      saveResultValuesAndFlush(screenResult);
-//      long time = System.currentTimeMillis();
-//      long cumulativeTime = time - startTime;
-//      log.info("wellsWithDataLoaded: " + wellsWithDataLoaded 
-//               + ", cumulative time: " + (double)cumulativeTime/(double)60000 
-//               + " min, avg row time: " + (double)cumulativeTime/(double)wellsWithDataLoaded );
-//    }
+
     if (dataSheetsParsed == 0) {
       _workbook.addError(NO_DATA_SHEETS_FOUND_ERROR);
     } else {
@@ -857,42 +842,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
   }
 
-  /**
-   * TODO: is this necessary?  
-   * - all it does is read the screen number from the sheet, and compares it to the expected value.
-   * Parses the "Screen Info" worksheet.
-   * Creates a workbook error if this information is unsuccessfully retrieved.
-   */
-  private void parseScreenInfo(Workbook workbook, Screen screen)
-  {
-    Worksheet screenInfoSheet = workbook.getWorksheet(SCREEN_INFO_SHEET_NAME);
-    log.info("parse screen info");
-    if(screenInfoSheet != null)
-    {
-      for(Row row:screenInfoSheet)
-      {
-        Cell labelCell = row.getCell((short) 0);
-        String rowLabel = labelCell.getString();
-        if (rowLabel != null) {
-          if (rowLabel.equalsIgnoreCase(ScreenInfoRow.ID.getDisplayText())) 
-          {
-            Integer screenId = row.getCell((short) 1, true).getInteger();
-            if(screenId == null) {
-              // prior will generate one error already... but will keep this generic error also - sde
-              _workbook.addError(NO_SCREEN_ID_FOUND_ERROR + row);
-            }
-            
-            if (!screenId.equals(screen.getScreenNumber())) {
-              _workbook.addError("screen result data file is for screen number " +
-                               screenId +
-                               ", expected " + screen.getScreenNumber());
-            }
-          }
-        }
-      }
-    }
-  }
-  
   public class ColumnLabelsParser implements CellValueParser<ResultValueType>
   {
     protected Map<String,ResultValueType> _columnLabel2RvtMap;
@@ -931,7 +880,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
       return result;
     }
-
 
     protected ResultValueType doParseSingleValue(String value, Cell cell)
     {

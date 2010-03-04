@@ -44,6 +44,8 @@ import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Sets;
+
 
 public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 {
@@ -92,16 +94,15 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       {
         ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
         rvts[0] = screenResult.createResultValueType("rvt0");
-        rvts[0].setDerived(true);
+        rvts[0].makeDerived("", Sets.<ResultValueType>newHashSet());
         rvts[0].setAssayPhenotype("Mouse");
         rvts[1] = screenResult.createResultValueType("rvt1");
-        rvts[1].setDerived(false);
         rvts[1].setAssayPhenotype("Mouse");
         rvts[2] = screenResult.createResultValueType("rvt2");
-        rvts[2].setDerived(true);
+        rvts[2].makeDerived("", Sets.<ResultValueType>newHashSet());
         rvts[2].setAssayPhenotype("Mouse");
         rvts[3] = screenResult.createResultValueType("rvt3");
-        rvts[3].setDerived(true);
+        rvts[3].makeDerived("", Sets.<ResultValueType>newHashSet());
         rvts[3].setAssayPhenotype("Human");
         genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLabHead());

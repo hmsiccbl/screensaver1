@@ -13,7 +13,9 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The activity indicator type vocabulary.
+ * Vocabulary used to specify how the determination of "positives" is being
+ * recorded by a {@link ResultValueType}, when
+ * {@link ResultValueType#isPositiveIndicator()} is <code>true</code>.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

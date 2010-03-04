@@ -146,6 +146,11 @@ public class Worksheet implements Iterable<Row>
     return getWorksheet().getName();
   }
 
+  public int getSheetIndex()
+  {
+    return _sheetIndex;
+  }
+
   public int getRows()
   {
     return getWorksheet().getRows();

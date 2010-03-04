@@ -59,7 +59,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 {
   private static Logger log = Logger.getLogger(AbstractBackingBean.class);
 
-  private Properties _applicationProperties;
+  private Properties _applicationProperties = new Properties();
   private Messages _messages;
   private CurrentScreensaverUser _currentScreensaverUser;
 
@@ -456,5 +456,14 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
       }
     }
     return _featuresEnabled;
+  }
+  
+  public boolean isFeatureEnabled(String featureKey)
+  {
+    if (getFeaturesEnabled().containsKey(featureKey)) {
+      return getFeaturesEnabled().get(featureKey);
+    }
+    log.warn("unknown feature " + featureKey);
+    return false;
   }
 }

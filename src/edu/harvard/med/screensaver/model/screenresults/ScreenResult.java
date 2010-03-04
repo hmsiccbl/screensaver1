@@ -274,11 +274,10 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     return resultValueType;
   }
 
-
   public boolean deleteResultValueType(ResultValueType rvt)
   {
     if (!rvt.getDerivedTypes().isEmpty()) {
-      throw new DataModelViolationException("cannot delete " + rvt + " since it is derived from");
+      throw new DataModelViolationException("cannot delete " + rvt + " since it is derived from " + rvt.getDerivedTypes());
     }
     Set<ResultValueType> dissociateFrom = new HashSet<ResultValueType>();
     for (ResultValueType derivedFrom : rvt.getTypesDerivedFrom()) {

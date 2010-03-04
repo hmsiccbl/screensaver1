@@ -15,11 +15,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.joda.time.LocalDate;
-
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
@@ -39,16 +34,15 @@ import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader.MODE;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
-/**
- */
-public class ScreenResultParserDAOTest extends AbstractSpringPersistenceTest
+
+public class ScreenResultLoaderTest extends AbstractSpringPersistenceTest
 {
-  private static final Logger log = Logger.getLogger(ScreenResultParserDAOTest.class);
+  private static final Logger log = Logger.getLogger(ScreenResultLoaderTest.class);
 
-  /**
-   * Bean property, for database access via Spring and Hibernate.
-   */
   protected ScreenResultLoader screenResultLoader;
   protected LibraryCreator libraryCreator;
 
@@ -91,9 +85,7 @@ public class ScreenResultParserDAOTest extends AbstractSpringPersistenceTest
                 else if (row == 8)
                   libraryWellType = LibraryWellType.EMPTY;
               }
-              library.createWell(new WellKey(plateNumber, "" + (char) col +
-                                                          (row)),
-                                 libraryWellType);
+              library.createWell(new WellKey(plateNumber, "" + (char) col + row), libraryWellType);
             }
           }
         }
@@ -103,82 +95,28 @@ public class ScreenResultParserDAOTest extends AbstractSpringPersistenceTest
     
   }
   
-  /**
-   * test the counts
-   */
-  public void testForCounts115() throws Exception
+  public void testScreenResultLoaderNoIncrementalFlush() throws Exception
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR,
-                                 SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
-    Date now = new Date();
-
-    ScreenResult screenResult;
-    try {
-      screenResult = screenResultLoader.parseAndLoad(new Workbook(workbookFile),
-                                                     null,
-                                                     MODE.DELETE_IF_EXISTS,
-                                                     TEST_SCREEN_NUMBER,
-                                                     false);
-
-      doTestForCounts115(screenResult);
-
-      assertTrue("Screen parse time is incorrect: " +
-                 screenResult.getDateLastImported() + ", should be after: " +
-                 now, screenResult.getDateLastImported()
-                                  .getMillis() > now.getTime());
-      log.info("Screen data privacy expiration date: " + screenResult.getScreen().getDataPrivacyExpirationDate() );
-      LocalDate adjustedTime = new LocalDate(now).plusYears(2);
-      assertTrue("Screen data privacy expiration date is incorrect: " + screenResult.getScreen().getDataPrivacyExpirationDate() 
-                 + ", should be after: " + adjustedTime + ", compare: " + screenResult.getScreen().getDataPrivacyExpirationDate().compareTo(adjustedTime)
-                 , screenResult.getScreen().getDataPrivacyExpirationDate().compareTo(adjustedTime) == 0);
-      assertEquals(screenResult.getScreen().getDataPrivacyExpirationDate().getYear(),adjustedTime.getYear());
-      assertEquals(screenResult.getScreen().getDataPrivacyExpirationDate().getDayOfYear(),adjustedTime.getDayOfYear());
-    }
-    catch (ParseErrorsException e) {
-      log.error("Parse Errors");
-      for (ParseError pe : e.getErrors()) {
-        log.error("" + pe);
-      }
-      fail("due to parse errors");
-    }
-    catch (Exception e) {
-      log.warn("failure", e);
-      fail("Fail do to error: " + e);
-    }
+    doTest(false);
   }
   
-  
-  /**
-   * test the counts
-   */
-  public void testForCounts115Incremental() throws Exception
+  public void testScreenResultLoaderIncrementalFlush() throws Exception
   {
-    File workbookFile = new File(TEST_INPUT_FILE_DIR,
-                                 SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
+    doTest(true);
+  }  
+
+  private void doTest(boolean incrementalFlush) throws Exception
+  {
+    ScreenResult screenResult = null;
     Date now = new Date();
-
-
-    ScreenResult screenResult;
     try {
+      File workbookFile = new File(TEST_INPUT_FILE_DIR,
+                                   SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
       screenResult = screenResultLoader.parseAndLoad(new Workbook(workbookFile),
                                                      null,
                                                      MODE.DELETE_IF_EXISTS,
                                                      TEST_SCREEN_NUMBER,
-                                                     false);
-
-      doTestForCounts115(screenResult);
-
-      assertTrue("Screen parse time is incorrect: " +
-                 screenResult.getDateLastImported() + ", should be after: " +
-                 now, screenResult.getDateLastImported()
-                                  .getMillis() > now.getTime());
-      log.info("Screen data privacy expiration date: " + screenResult.getScreen().getDataPrivacyExpirationDate() );
-      LocalDate adjustedTime = new LocalDate(now).plusYears(2);
-      assertTrue("Screen data privacy expiration date is incorrect: " + screenResult.getScreen().getDataPrivacyExpirationDate() 
-                 + ", should be after: " + adjustedTime + ", compare: " + screenResult.getScreen().getDataPrivacyExpirationDate().compareTo(adjustedTime)
-                 , screenResult.getScreen().getDataPrivacyExpirationDate().compareTo(adjustedTime) == 0);
-      assertEquals(screenResult.getScreen().getDataPrivacyExpirationDate().getYear(),adjustedTime.getYear());
-      assertEquals(screenResult.getScreen().getDataPrivacyExpirationDate().getDayOfYear(),adjustedTime.getDayOfYear());
+                                                     incrementalFlush);
     }
     catch (ParseErrorsException e) {
       log.error("Parse Errors");
@@ -187,14 +125,11 @@ public class ScreenResultParserDAOTest extends AbstractSpringPersistenceTest
       }
       fail("due to parse errors");
     }
-    catch (Exception e) {
-      log.warn("failure", e);
-      fail("Fail do to error: " + e);
-    }
-  }  
+    
+    assertTrue("Screen parse time is incorrect: " +
+               screenResult.getDateLastImported() + ", should be after: " + now, 
+               screenResult.getDateLastImported().getMillis() > now.getTime());
 
-  private void doTestForCounts115(ScreenResult screenResult)
-  {
     List<ResultValueType> loadedRVTs = genericEntityDao.findEntitiesByProperty(ResultValueType.class,
                                                                                "screenResult",
                                                                                screenResult,
@@ -202,10 +137,8 @@ public class ScreenResultParserDAOTest extends AbstractSpringPersistenceTest
                                                                                "resultValues");
     assertNotNull(loadedRVTs);
     assertEquals("Number of RVT's: ", 7, loadedRVTs.size());
-    int iRvt = 0;
     for (ResultValueType actualRvt : loadedRVTs) {
-      assertEquals(960, actualRvt.getResultValues()
-                                 .size());
+      assertEquals(960, actualRvt.getResultValues().size());
     }
     List<AssayWell> assayWells = genericEntityDao.findEntitiesByProperty(AssayWell.class,
                                                                          "screenResult",
