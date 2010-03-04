@@ -257,9 +257,8 @@ public class WebDataAccessPolicy implements DataAccessPolicy
 
   public boolean visit(Library entity)
   {
-   
     ScreeningRoomUser owner = entity.getOwner();
-    ScreensaverUser user = _currentScreensaverUser.getScreensaverUser();
+    ScreensaverUser user = getScreensaverUser();
    
     // Equals is based on EntityId if present, otherwise by instance equality
     //In this example case Entity id is empty, so comparison is based on instance
@@ -267,11 +266,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     
     //if owner == null : not a validation library 
     //TODO add || isLabheadLibraryOwner(owner) , however this gives currently "No session" error.
-    if ((owner == null) || owner.equals(user)  || user.getScreensaverUserRoles().contains(ScreensaverUserRole.LIBRARIES_ADMIN)) {
-      return true;
-    }else {
-       return false;
-    }
+    return owner == null || owner.equals(user) || user.getScreensaverUserRoles().contains(ScreensaverUserRole.LIBRARIES_ADMIN);
   }
     
   public boolean visit(LibraryContentsVersion libraryContentsVersion)
