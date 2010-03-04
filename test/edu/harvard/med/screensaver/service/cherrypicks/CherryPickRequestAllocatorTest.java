@@ -442,7 +442,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
     // note: we want detached assay plate entity instances, as the methods being tested need to handle this
     final HashSet<CherryPickAssayPlate> assayPlatesToCancel = 
-      new HashSet<CherryPickAssayPlate>(genericEntityDao.reloadEntity(cpr, false, "cherryPickAssayPlates").getActiveCherryPickAssayPlates());
+      new HashSet<CherryPickAssayPlate>(genericEntityDao.reloadEntity(cpr, false, "cherryPickAssayPlates.labCherryPicks.wellVolumeAdjustments").getActiveCherryPickAssayPlates());
     assertEquals("assay plates to cancel count", 1, assayPlatesToCancel.size());
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
