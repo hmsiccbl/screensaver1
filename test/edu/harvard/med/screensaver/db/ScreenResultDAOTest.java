@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -274,7 +274,6 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
     final SortedSet<Well> expectedWells = new TreeSet<Well>();
     final int[] expectedExperimentalWellCount = new int[1];
     final int[] expectedPositives = new int[1];
-    final double indicatorCutoff = 5.0;
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
@@ -282,7 +281,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         ScreenResult screenResult = screen.createScreenResult();
         ResultValueType rvt1 = screenResult.createResultValueType("RVT1", null, false, true, false, "");
-        rvt1.makeNumericalPositivesIndicator(PositiveIndicatorDirection.HIGH_VALUES_INDICATE, indicatorCutoff);
+        rvt1.makePositivesIndicator(PositiveIndicatorType.PARTITION);
         ResultValueType rvt2 = screenResult.createResultValueType("RVT2", null, false, true, false, "");
         rvt2.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
         Library library = new Library(
@@ -292,6 +291,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           LibraryType.COMMERCIAL,
           1,
           1);
+        String values[] = { null, "1", "2", "3" };
         for (int i = 1; i <= 10; ++i) {
           int plateNumber = i;
           expectedPlateNumbers.add(i);
@@ -299,13 +299,13 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           expectedWells.add(well);
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           AssayWell assayWell = screenResult.createAssayWell(well, assayWellType);
-          boolean exclude = i % 4 == 0;
-          double rvt1Value = (double) i;
-          rvt1.createResultValue(assayWell, rvt1Value, 3, exclude);
+          boolean exclude = i % 8 == 0;
+          String rvt1Value = values[i % 4];
+          rvt1.createResultValue(assayWell, rvt1Value, exclude);
           rvt2.createResultValue(assayWell, "false", false);
           if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
             expectedExperimentalWellCount[0]++;
-            if (!exclude && rvt1Value >= indicatorCutoff) {
+            if (!exclude && rvt1Value != null) {
               log.debug("result value " + rvt1Value + " is deemed a positive by this test");
               ++expectedPositives[0];
             }

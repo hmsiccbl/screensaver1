@@ -45,7 +45,7 @@ public interface ScreenResultWorkbookSpecification
     HOW_DERIVED("If derived, how?"),
     COLUMNS_DERIVED_FROM("If derived, from which columns?"),
     IS_POSITIVE_INDICATOR("Is it a Screening Positive Indicator? (yes/no)"),
-    POSITIVE_INDICATOR_TYPE("Screening Positive Indicator Type (numerical, partitioned (S/M/W), boolean)"),
+    POSITIVE_INDICATOR_TYPE("Screening Positive Indicator Type (partitioned, boolean)"),
     NUMERICAL_POSITIVE_INDICATOR_DIRECTION("Numerical Screening Positive Indicator Cutoff Direction (< or >)"),
     NUMERICAL_POSITIVE_INDICATOR_CUTOFF("Numerical Screening Positive Indicator Cutoff Value"),
     PRIMARY_OR_FOLLOWUP("Primary or Follow Up?"),

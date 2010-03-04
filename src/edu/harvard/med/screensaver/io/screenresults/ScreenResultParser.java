@@ -45,7 +45,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -54,6 +53,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.AlphabeticCounter;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
@@ -116,7 +116,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String ASSAY_WELL_TYPE_INCONSISTENCY = "assay well type cannot be changed";
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
-  private static SortedMap<String,PositiveIndicatorDirection> indicatorDirectionMap = new TreeMap<String,PositiveIndicatorDirection>();
   private static SortedMap<String,PositiveIndicatorType> activityIndicatorTypeMap = new TreeMap<String,PositiveIndicatorType>();
   private static SortedMap<String,Boolean> rawOrDerivedMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
@@ -129,11 +128,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                               assayReadoutType);
     }
 
-    indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE, PositiveIndicatorDirection.LOW_VALUES_INDICATE);
-    indicatorDirectionMap.put(NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE, PositiveIndicatorDirection.HIGH_VALUES_INDICATE);
-
-    activityIndicatorTypeMap.put("Numeric", PositiveIndicatorType.NUMERICAL);
-    activityIndicatorTypeMap.put("Numerical", PositiveIndicatorType.NUMERICAL);
     activityIndicatorTypeMap.put("Boolean", PositiveIndicatorType.BOOLEAN);
     activityIndicatorTypeMap.put("Partitioned", PositiveIndicatorType.PARTITION);
     activityIndicatorTypeMap.put("Partition", PositiveIndicatorType.PARTITION);
@@ -187,7 +181,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private DerivedFromParser _columnsDerivedFromParser;
   private ExcludeParser _excludeParser;
   private CellVocabularyParser<AssayReadoutType> _assayReadoutTypeParser;
-  private CellVocabularyParser<PositiveIndicatorDirection> _indicatorDirectionParser;
   private CellVocabularyParser<PositiveIndicatorType> _positiveIndicatorTypeParser;
   private CellVocabularyParser<Boolean> _rawOrDerivedParser;
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
@@ -287,8 +280,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _dataTableColumnLabel2RvtMap = new TreeMap<String,ResultValueType>();
     _columnsDerivedFromParser = new DerivedFromParser(_dataTableColumnLabel2RvtMap);
     _excludeParser = new ExcludeParser(_dataTableColumnLabel2RvtMap);
-    _indicatorDirectionParser = new CellVocabularyParser<PositiveIndicatorDirection>(indicatorDirectionMap);
-    _positiveIndicatorTypeParser = new CellVocabularyParser<PositiveIndicatorType>(activityIndicatorTypeMap, PositiveIndicatorType.NUMERICAL);
+    _positiveIndicatorTypeParser = new CellVocabularyParser<PositiveIndicatorType>(activityIndicatorTypeMap, PositiveIndicatorType.BOOLEAN);
     _rawOrDerivedParser = new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE);
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
@@ -418,7 +410,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                              Predicates.notNull())));
           }
         }
-        else {
+      }
+      if (!!!rvt.isDerived()) {
+        if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.ASSAY_READOUT_TYPE)) {
           rvt.setAssayReadoutType(_assayReadoutTypeParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.ASSAY_READOUT_TYPE).getCell(iDataHeader, true)));
         }
       }
@@ -448,17 +442,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.IS_POSITIVE_INDICATOR)) {
         Boolean isPositivesIndicator = _booleanParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.IS_POSITIVE_INDICATOR).getCell(iDataHeader));
-        if (isPositivesIndicator) 
-        {
+        if (isPositivesIndicator) {
           if (validateRequiredDataPropertyDefined(DataHeaderProperty.POSITIVE_INDICATOR_TYPE, DataHeaderProperty.IS_POSITIVE_INDICATOR, dataHeaderPropertyRows, iDataHeader)) {
-            PositiveIndicatorType positiveIndicatorType = _positiveIndicatorTypeParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.POSITIVE_INDICATOR_TYPE).getCell(iDataHeader, true));
-            if (positiveIndicatorType == PositiveIndicatorType.NUMERICAL) {
-              rvt.makeNumericalPositivesIndicator(_indicatorDirectionParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.NUMERICAL_POSITIVE_INDICATOR_DIRECTION).getCell(iDataHeader, true)),
-                                                  dataHeaderPropertyRows.get(DataHeaderProperty.NUMERICAL_POSITIVE_INDICATOR_CUTOFF).getCell(iDataHeader, true).getDouble());
-            }
-            else {
-              rvt.makePositivesIndicator(positiveIndicatorType);
-            }
+            rvt.makePositivesIndicator(_positiveIndicatorTypeParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.POSITIVE_INDICATOR_TYPE).getCell(iDataHeader, true)));
           }
         }
       }
@@ -719,12 +705,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                       _partitionedValueParser.parse(cell).toString(),
                                       isExclude);
             }
-            else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
-              newResultValue =
-                rvt.createResultValue(assayWell,
-                                      cell.getDouble(),
-                                      cell.getDoublePrecision(),
-                                      isExclude);
+            else {
+              throw new DevelopmentException("unhandled PositiveIndicatorType: " + rvt.getPositiveIndicatorType());
             }
           }
           else { // not assay activity indicator
@@ -785,20 +767,15 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                                   int iDataHeader)
   {
     assert rvt.getResultValues().size() == 0 : "should not be attempting to set RVT numeric flag if it already has result values";
-    if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
-      rvt.setNumeric(true);
-    }
-    else {
-      for(Row row: workbook.getWorksheet(iSheet).forOrigin(RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX, RAWDATA_FIRST_DATA_ROW_INDEX))
-      {
-        Cell cell = row.getCell(iDataHeader);
-        if (!cell.isEmpty() && cell.getAsString().trim().length() > 0) {
-          rvt.setNumeric(cell.isNumeric());
-          return;
-        }
+    for(Row row: workbook.getWorksheet(iSheet).forOrigin(RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX, RAWDATA_FIRST_DATA_ROW_INDEX))
+    {
+      Cell cell = row.getCell(iDataHeader);
+      if (!cell.isEmpty() && cell.getAsString().trim().length() > 0) {
+        rvt.setNumeric(cell.isNumeric());
+        return;
       }
-      log.warn("all cells for data header " + rvt + " are empty on the first data worksheet; assuming data header is non-numeric");
     }
+    log.warn("all cells for data header " + rvt + " are empty on the first data worksheet; assuming data header is non-numeric");
   }
   
   private AssayWell findOrCreateAssayWell(Well well, AssayWellType assayWellType)

@@ -89,8 +89,6 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   private SortedSet<ResultValueType> _derivedTypes = new TreeSet<ResultValueType>();
   private boolean _isPositiveIndicator;
   private PositiveIndicatorType _positiveIndicatorType;
-  private PositiveIndicatorDirection _positiveIndicatorDirection;
-  private Double _positiveIndicatorCutoff;
   private boolean _isFollowUpData;
   private String _assayPhenotype;
   private String _comments;
@@ -577,50 +575,6 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get the indicator cutoff
-   * @return the indicator cutoff
-   */
-  @org.hibernate.annotations.Type(type="double")
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makePositivesIndicator() instead */) 
-  public Double getPositiveIndicatorCutoff()
-  {
-    return _positiveIndicatorCutoff;
-  }
-
-  /**
-   * Set the indicator cutoff
-   * @param indicatorCutoff the indicator cutoff
-   */
-  private void setPositiveIndicatorCutoff(Double indicatorCutoff)
-  {
-    _positiveIndicatorCutoff = indicatorCutoff;
-  }
-
-  /**
-   * Get the indicator direction, which indicates whether a "positive" exists
-   * based upon whether a numeric result value is above or below the indicator
-   * cutoff.
-   * @return an {@link PositiveIndicatorDirection} enum
-   */
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection$UserType")
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makePositivesIndicator() instead */) 
-  public PositiveIndicatorDirection getPositiveIndicatorDirection()
-  {
-    return _positiveIndicatorDirection;
-  }
-
-  /**
-   * Set the indicator direction, which indicates whether a "positive" exists
-   * based upon whether a numeric result value is above or below the indicator
-   * cutoff.
-   * @param indicatorDirection the indicator direction
-   */
-  private void setPositiveIndicatorDirection(PositiveIndicatorDirection indicatorDirection)
-  {
-    _positiveIndicatorDirection = indicatorDirection;
-  }
-
-  /**
    * Get whether this result value type is a positive indicator, meaning that
    * its result value data is used to determine whether a given well is deemed a
    * positive result in the screen.
@@ -1044,20 +998,6 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
           isPositive = true;
         }
       }
-      else if (getPositiveIndicatorType().equals(PositiveIndicatorType.NUMERICAL)) {
-        if (rv.getNumericValue() != null) {
-          if (getPositiveIndicatorDirection().equals(PositiveIndicatorDirection.HIGH_VALUES_INDICATE)) {
-            if (rv.getNumericValue() >= getPositiveIndicatorCutoff()) {
-              isPositive = true;
-            }
-          }
-          else {
-            if (rv.getNumericValue() <= getPositiveIndicatorCutoff()) {
-              isPositive = true;
-            }
-          }
-        }
-      }
       else if (getPositiveIndicatorType().equals(PositiveIndicatorType.PARTITION)) {
         String resultValue = rv.getValue();
         for (PartitionedValue pv : PartitionedValue.values()) {
@@ -1110,19 +1050,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
 
   public void makePositivesIndicator(PositiveIndicatorType type)
   {
-    assert type != PositiveIndicatorType.NUMERICAL : "use makeNumericalPositivesIndicator() instead";
     _isPositiveIndicator = true;
     setNumeric(false);
     _positiveIndicatorType = type;
-  }
-
-  public void makeNumericalPositivesIndicator(PositiveIndicatorDirection direction,
-                                              Double cutoff)
-  {
-    _isPositiveIndicator = true;
-    setPositiveIndicatorType(PositiveIndicatorType.NUMERICAL);
-    _positiveIndicatorDirection = direction;
-    _positiveIndicatorCutoff = cutoff;
-    setNumeric(true);
   }
 }

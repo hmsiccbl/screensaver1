@@ -1,5 +1,5 @@
-// $HeadURL$
-// $Id$
+// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/trunk/src/edu/harvard/med/screensaver/model/screenresults/PositiveIndicatorType.java $
+// $Id: PositiveIndicatorType.java 3872 2010-03-04 18:35:05Z atolopko $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -25,7 +25,6 @@ public enum PositiveIndicatorType implements VocabularyTerm
 
   // the vocabulary
   
-  NUMERICAL("Numerical"),
   BOOLEAN("Boolean"),
   PARTITION("Partition")
   ;

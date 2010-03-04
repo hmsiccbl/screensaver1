@@ -32,7 +32,6 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorDirection;
 import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -111,13 +110,13 @@ public class MakeDummyEntities
     positive1Rvt.setReplicateOrdinal(1);
     positive1Rvt.makeDerived("from replicate 1", Sets.newHashSet(screenResult.getResultValueTypesList().get(0), screenResult.getResultValueTypesList().get(2)));
     positive1Rvt.setAssayPhenotype("phenotype");
-    positive1Rvt.makeNumericalPositivesIndicator(PositiveIndicatorDirection.HIGH_VALUES_INDICATE, 10.0);
+    positive1Rvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
 
     ResultValueType positive2Rvt = screenResult.createResultValueType("positive2");
     positive2Rvt.setReplicateOrdinal(2);
     positive2Rvt.makeDerived("from replicate 2", Sets.newHashSet(screenResult.getResultValueTypesList().get(1), screenResult.getResultValueTypesList().get(3)));
     positive2Rvt.setAssayPhenotype("phenotype");
-    positive2Rvt.makeNumericalPositivesIndicator(PositiveIndicatorDirection.HIGH_VALUES_INDICATE, 10.0);
+    positive2Rvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
     
 
     ResultValueType positiveRvt = screenResult.createResultValueType("positive", null, true, true, false, "phenotype");

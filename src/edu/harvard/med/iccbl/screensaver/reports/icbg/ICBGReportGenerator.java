@@ -207,9 +207,7 @@ public class ICBGReportGenerator
   {
     ResultValueType scaledOrBooleanRVT =
       findRightmostIndicatingScaledOrBooleanRVT(screenResult);
-    ResultValueType numericalRVT =
-      findRightmostIndicatingNumericalRVT(screenResult);
-    if (scaledOrBooleanRVT == null && numericalRVT == null) {
+    if (scaledOrBooleanRVT == null) {
       log.info("no assay indicator for " + assayInfo.getAssayName());
       return false;
     }
@@ -219,9 +217,6 @@ public class ICBGReportGenerator
     List<ResultValueType> rvts = new ArrayList<ResultValueType>();
     if (scaledOrBooleanRVT != null) {
       rvts.add(scaledOrBooleanRVT);
-    }
-    if (numericalRVT != null) {
-      rvts.add(numericalRVT);
     }
 
     _currentBioactivitySheet = createBioactivitySheet();
@@ -234,11 +229,6 @@ public class ICBGReportGenerator
         mappedKeys.addAll(scaledOrBooleanRVMap.keySet());
       }
       Map<WellKey,ResultValue> numericalRVMap = null;
-      if (numericalRVT != null) {
-        numericalRVMap =
-          _screenResultsDAO.findResultValuesByPlate(plateNumber, numericalRVT);
-        mappedKeys.addAll(numericalRVMap.keySet());
-      }
       for (WellKey wellKey : mappedKeys) {
 /*		// DEBUG ONLY!
 		if (_currentBioactivityRow > 20) break;
@@ -246,15 +236,11 @@ public class ICBGReportGenerator
 		
         ResultValue scaledOrBooleanRV = (scaledOrBooleanRVT == null) ? null :
           scaledOrBooleanRVMap.get(wellKey);
-        ResultValue numericalRV = (numericalRVT == null) ? null :
-          numericalRVMap.get(wellKey);
         if (printBioactivityRow(
           assayInfo,
           wellKey,
           scaledOrBooleanRVT,
-          scaledOrBooleanRV,
-          numericalRVT,
-          numericalRV)) {
+          scaledOrBooleanRV)) {
           printedBioactivityRow = true;
         }
       }
@@ -281,31 +267,11 @@ public class ICBGReportGenerator
     return rightmostScaledOrBoolean;
   }
 
-  private ResultValueType findRightmostIndicatingNumericalRVT(
-    ScreenResult screenResult)
-  {
-    ResultValueType rightmostNumerical = null;
-    SortedSet<ResultValueType> resultValueTypes =
-      screenResult.getResultValueTypes();
-    for (ResultValueType rvt : resultValueTypes) {
-      if (! rvt.isPositiveIndicator()) {
-        continue;
-      }
-      PositiveIndicatorType indicatorType = rvt.getPositiveIndicatorType();
-      if (indicatorType.equals(PositiveIndicatorType.NUMERICAL)) {
-        rightmostNumerical = rvt;
-      }
-    }
-    return rightmostNumerical;
-  }
-  
   private boolean printBioactivityRow(
     AssayInfo assayInfo,
     WellKey wellKey,
     ResultValueType scaledOrBooleanRVT,
-    ResultValue scaledOrBooleanRV,
-    ResultValueType numericalRVT,
-    ResultValue numericalRV)
+    ResultValue scaledOrBooleanRV)
   {
     String lq = _mapper.getLQForWellKey(wellKey);
     if (lq == null) { return false; }
@@ -321,10 +287,7 @@ public class ICBGReportGenerator
     row.createCell((short) 2).setCellValue(wellName);
     row.createCell((short) 3).setCellValue(assayInfo.getAssayCategory());
     row.createCell((short) 4).setCellValue(assayName);
-    if (numericalRV != null && numericalRV.getNumericValue() != null) {
-      row.createCell((short) 5).setCellValue(numericalRV.getNumericValue());
-      row.createCell((short) 6).setCellValue(numericalRVT.getDescription());
-    }
+    // note: cells 5 and 6 used to be used for "numerical assay indicator", which no longer exists
     if (scaledOrBooleanRV != null) {
       if (scaledOrBooleanRVT.getPositiveIndicatorType().equals(PositiveIndicatorType.BOOLEAN)) {
         if (scaledOrBooleanRV.getValue().equals("true")) {

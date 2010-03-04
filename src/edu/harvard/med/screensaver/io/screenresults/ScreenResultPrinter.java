@@ -58,8 +58,6 @@ public class ScreenResultPrinter
       printer.println("\thowDerived=" + rvt.getHowDerived());
       printer.println("\tisActivityIndicator=" + rvt.isPositiveIndicator());
       printer.println("\tactivityIndicatorType=" + rvt.getPositiveIndicatorType());
-      printer.println("\tindicator cutoff=" + rvt.getPositiveIndicatorCutoff());
-      printer.println("\tindicator direction=" + rvt.getPositiveIndicatorDirection());
       printer.println("\tisFollowupData=" + rvt.isFollowUpData());
       printer.println("\tcomments="+rvt.getComments());
 

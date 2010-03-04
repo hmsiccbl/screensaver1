@@ -88,7 +88,6 @@ public class ResultValue extends AbstractEntity<Integer>
    * <li> Not Derived (Raw): returns Double
    * <li> Not an Activity Indicator: returns String
    * <li> PositiveIndicatorType.BOOLEAN: returns Boolean
-   * <li> PositiveIndicatorType.NUMERICAL: returns Double
    * <li> PositiveIndicatorType.PARTITION: returns String
    * (PartitionedValue.getDisplayValue())
    * </ul>
@@ -112,17 +111,6 @@ public class ResultValue extends AbstractEntity<Integer>
       PositiveIndicatorType activityIndicatorType = rvt.getPositiveIndicatorType();
       if (activityIndicatorType.equals(PositiveIndicatorType.BOOLEAN)) {
         return Boolean.valueOf(rv.getValue());
-      }
-      else if (activityIndicatorType.equals(PositiveIndicatorType.NUMERICAL)) {
-        if (rvt.isNumeric()) {
-          // should already have been handled above, but we include this case
-          // for completeness
-          return rv.getNumericValue();
-        }
-        else {
-          log.warn("expected ResultValue to have numeric value, since parent ResultValueType is numerical");
-          return rv.getValue();
-        }
       }
       else if (activityIndicatorType.equals(PositiveIndicatorType.PARTITION)) {
         return PartitionedValue.lookupByValue(rv.getValue()).getDisplayValue();
