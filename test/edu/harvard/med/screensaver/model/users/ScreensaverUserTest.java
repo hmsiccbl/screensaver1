@@ -58,28 +58,28 @@ public class ScreensaverUserTest extends AbstractSpringPersistenceTest
     user = new ScreeningRoomUser("First", "");
     assertEquals("First", user.getFullNameLastFirst());
     assertEquals("First", user.getFullNameFirstLast());
-    user = new ScreeningRoomUser("First", null, null);
+    user = new ScreeningRoomUser("First", null);
     assertEquals("First", user.getFullNameLastFirst());
     assertEquals("First", user.getFullNameFirstLast());
 
-    user = new ScreeningRoomUser("", "Last", null);
+    user = new ScreeningRoomUser("", "Last");
     assertEquals("Last", user.getFullNameLastFirst());
     assertEquals("Last", user.getFullNameFirstLast());
-    user = new ScreeningRoomUser(null, "Last", null);
+    user = new ScreeningRoomUser(null, "Last");
     assertEquals("Last", user.getFullNameLastFirst());
     assertEquals("Last", user.getFullNameFirstLast());
 
-    user = new ScreeningRoomUser("", "", null);
+    user = new ScreeningRoomUser("", "");
     assertEquals("", user.getFullNameLastFirst());
     assertEquals("", user.getFullNameFirstLast());
-    user = new ScreeningRoomUser(null, null, null);
+    user = new ScreeningRoomUser(null, null);
     assertEquals("", user.getFullNameLastFirst());
     assertEquals("", user.getFullNameFirstLast());
   }
   
   public void testPrimaryRoleUpdates()
   {
-    ScreensaverUser user = new ScreeningRoomUser("First", "Last", null);
+    ScreensaverUser user = new ScreeningRoomUser("First", "Last");
     user.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES);
     user.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
     user.addScreensaverUserRole(ScreensaverUserRole.RNAI_SCREENS); // note: implies Screener role
