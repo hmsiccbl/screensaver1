@@ -44,8 +44,8 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueTypeNumericalnessException;
@@ -116,7 +116,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static final String ASSAY_WELL_TYPE_INCONSISTENCY = "assay well type cannot be changed";
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
-  private static SortedMap<String,PositiveIndicatorType> activityIndicatorTypeMap = new TreeMap<String,PositiveIndicatorType>();
+  private static SortedMap<String,DataType> dataTypeMap = new TreeMap<String,DataType>();
   private static SortedMap<String,Boolean> rawOrDerivedMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
@@ -128,9 +128,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                               assayReadoutType);
     }
 
-    activityIndicatorTypeMap.put("Boolean", PositiveIndicatorType.BOOLEAN);
-    activityIndicatorTypeMap.put("Partitioned", PositiveIndicatorType.PARTITION);
-    activityIndicatorTypeMap.put("Partition", PositiveIndicatorType.PARTITION);
+    for (DataType dataType : DataType.values()) {
+      dataTypeMap.put(dataType.getValue(), dataType);
+    }
 
     rawOrDerivedMap.put("", false);
     rawOrDerivedMap.put(RAW_VALUE, false);
@@ -181,7 +181,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private DerivedFromParser _columnsDerivedFromParser;
   private ExcludeParser _excludeParser;
   private CellVocabularyParser<AssayReadoutType> _assayReadoutTypeParser;
-  private CellVocabularyParser<PositiveIndicatorType> _positiveIndicatorTypeParser;
+  private CellVocabularyParser<DataType> _dataTypeParser;
   private CellVocabularyParser<Boolean> _rawOrDerivedParser;
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
@@ -280,7 +280,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _dataTableColumnLabel2RvtMap = new TreeMap<String,ResultValueType>();
     _columnsDerivedFromParser = new DerivedFromParser(_dataTableColumnLabel2RvtMap);
     _excludeParser = new ExcludeParser(_dataTableColumnLabel2RvtMap);
-    _positiveIndicatorTypeParser = new CellVocabularyParser<PositiveIndicatorType>(activityIndicatorTypeMap, PositiveIndicatorType.BOOLEAN);
+    _dataTypeParser = new CellVocabularyParser<DataType>(dataTypeMap);
     _rawOrDerivedParser = new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE);
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
@@ -395,10 +395,41 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     Map<DataHeaderProperty,Row> dataHeaderPropertyRows = parseDataHeaderProperties(dataHeadersSheet);
     int dataHeaderCount = findDataHeaderColumnCount(dataHeadersSheet);
     for (int iDataHeader = 0; iDataHeader < dataHeaderCount; ++iDataHeader) {
+      if (!!!dataHeaderPropertyRows.containsKey(DataHeaderProperty.NAME)) {
+        _workbook.addError(DataHeaderProperty.NAME + " data header property is required");
+      }
       ResultValueType rvt = 
         screenResult.createResultValueType(dataHeaderPropertyRows.get(DataHeaderProperty.NAME).getCell(iDataHeader, true).getString());
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.DATA_TYPE)) {
+        Cell cell = dataHeaderPropertyRows.get(DataHeaderProperty.DATA_TYPE).getCell(iDataHeader, true);
+        DataType dataType = _dataTypeParser.parse(cell);
+        if (dataType != null) {
+          switch (dataType) {
+          case NUMERIC: {
+            Integer decimalPlaces = null;
+            if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.DECIMAL_PLACES)) {
+              Cell cell2 = dataHeaderPropertyRows.get(DataHeaderProperty.DECIMAL_PLACES).getCell(iDataHeader);
+              decimalPlaces = cell2.getInteger();
+              if (decimalPlaces != null && decimalPlaces < 0) {
+                cell2.addError("illegal value");
+              }
+            }
+            rvt.makeNumeric(decimalPlaces);
+            break;
+          }
+          case TEXT: rvt.makeTextual(); break;
+          case POSITIVE_INDICATOR_BOOLEAN: rvt.makeBooleanPositiveIndicator(); break;
+          case POSITIVE_INDICATOR_PARTITION: rvt.makePartitionPositiveIndicator(); break;
+          default: throw new DevelopmentException("unhandled data type " + dataType);
+          }
+        }
+      }
+      else {
+        rvt.makeNumeric(null);
+      }
+      
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.REPLICATE)) {
-        rvt.setReplicateOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.REPLICATE).getCell(iDataHeader).getInteger());
+        rvt.forReplicate(dataHeaderPropertyRows.get(DataHeaderProperty.REPLICATE).getCell(iDataHeader).getInteger());
       }
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.RAW_OR_DERIVED)) {
         boolean isDerived = _rawOrDerivedParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.RAW_OR_DERIVED).getCell(iDataHeader));
@@ -420,7 +451,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         rvt.setFollowUpData(_primaryOrFollowUpParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.PRIMARY_OR_FOLLOWUP).getCell(iDataHeader)));
       }
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.ASSAY_PHENOTYPE)) {
-        rvt.setAssayPhenotype(dataHeaderPropertyRows.get(DataHeaderProperty.ASSAY_PHENOTYPE).getCell(iDataHeader).getString());
+        rvt.forPhenotype(dataHeaderPropertyRows.get(DataHeaderProperty.ASSAY_PHENOTYPE).getCell(iDataHeader).getString());
       }
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.DESCRIPTION)) {
         rvt.setDescription(dataHeaderPropertyRows.get(DataHeaderProperty.DESCRIPTION).getCell(iDataHeader).getString());
@@ -429,24 +460,16 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
         rvt.setComments(dataHeaderPropertyRows.get(DataHeaderProperty.COMMENTS).getCell(iDataHeader).getString());
       }
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.TIME_POINT)) {
-        rvt.setTimePoint(dataHeaderPropertyRows.get(DataHeaderProperty.TIME_POINT).getCell(iDataHeader).getString());
-      }
-      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.CHANNEL)) {
-        rvt.setChannel(dataHeaderPropertyRows.get(DataHeaderProperty.CHANNEL).getCell(iDataHeader).getInteger());
+        rvt.forTimePoint(dataHeaderPropertyRows.get(DataHeaderProperty.TIME_POINT).getCell(iDataHeader).getString());
       }
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.TIME_POINT_ORDINAL)) {
-        rvt.setTimePointOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.TIME_POINT_ORDINAL).getCell(iDataHeader).getInteger());
+        rvt.forTimePointOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.TIME_POINT_ORDINAL).getCell(iDataHeader).getInteger());
+      }
+      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.CHANNEL)) {
+        rvt.forChannel(dataHeaderPropertyRows.get(DataHeaderProperty.CHANNEL).getCell(iDataHeader).getInteger());
       }
       if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.ZDEPTH_ORDINAL)) {
-        rvt.setZdepthOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.ZDEPTH_ORDINAL).getCell(iDataHeader).getInteger());
-      }
-      if (dataHeaderPropertyRows.containsKey(DataHeaderProperty.IS_POSITIVE_INDICATOR)) {
-        Boolean isPositivesIndicator = _booleanParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.IS_POSITIVE_INDICATOR).getCell(iDataHeader));
-        if (isPositivesIndicator) {
-          if (validateRequiredDataPropertyDefined(DataHeaderProperty.POSITIVE_INDICATOR_TYPE, DataHeaderProperty.IS_POSITIVE_INDICATOR, dataHeaderPropertyRows, iDataHeader)) {
-            rvt.makePositivesIndicator(_positiveIndicatorTypeParser.parse(dataHeaderPropertyRows.get(DataHeaderProperty.POSITIVE_INDICATOR_TYPE).getCell(iDataHeader, true)));
-          }
-        }
+        rvt.forZdepthOrdinal(dataHeaderPropertyRows.get(DataHeaderProperty.ZDEPTH_ORDINAL).getCell(iDataHeader).getInteger());
       }
       // note: we do this last so that _columnsDerivedFromParser does not allow the current column to be considered a valid "derived from" value
       _dataTableColumnLabel2RvtMap.put(dataHeaderPropertyRows.get(DataHeaderProperty.COLUMN_IN_DATA_WORKSHEET).getCell(iDataHeader, true).getAsString(), rvt);
@@ -559,12 +582,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       log.info("parsing sheet " + (dataSheetsParsed + 1) + " of " + totalDataSheets + ", " + sheetName);
       Worksheet worksheet = workbook.getWorksheet(iSheet).forOrigin(0, RAWDATA_FIRST_DATA_ROW_INDEX);
 
-      int iDataHeader = 0;
-      if (iSheet == firstDataSheetIndex && plateNumberRange.containsInteger(iSheet)) {
-        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          determineNumericalnessOfDataHeader(rvt, workbook, iSheet, iDataHeader++);
-        }
-      }
       for (Row row : worksheet) {
         // bring in the old findNextRow() logic
         if (row.getColumns() > 0 
@@ -687,7 +704,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           ResultValue newResultValue = null;
           if (rvt.isPositiveIndicator()) {
             String value;
-            if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
+            if (rvt.isBooleanPositiveIndicator()) {
               if (cell.isBoolean()) {
                 value = cell.getBoolean().toString();
               }
@@ -699,14 +716,14 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                       value,
                                       isExclude);
             }
-            else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
+            else if (rvt.isPartitionPositiveIndicator()) {
               newResultValue =
                 rvt.createResultValue(assayWell,
                                       _partitionedValueParser.parse(cell).toString(),
                                       isExclude);
             }
             else {
-              throw new DevelopmentException("unhandled PositiveIndicatorType: " + rvt.getPositiveIndicatorType());
+              throw new DevelopmentException("unhandled positive indicator type " + rvt.getDataType());
             }
           }
           else { // not assay activity indicator
@@ -714,7 +731,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
               newResultValue =
                 rvt.createResultValue(assayWell,
                                       cell.getDouble(),
-                                      cell.getDoublePrecision(),
                                       isExclude);
             }
             else {
@@ -753,31 +769,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
   }
 
-    
-  /**
-   * Determines if a data header contains numeric or non-numeric data, by
-   * reading ahead and making the determination based upon the first non-empty
-   * cell in the column for the specified data header. Note that if all cells
-   * for the column are empty, a non-numeric data header will be assumed
-   * (further worksheets of data are not considered).
-   */
-  private void determineNumericalnessOfDataHeader(ResultValueType rvt,
-                                                  Workbook workbook,
-                                                  int iSheet,
-                                                  int iDataHeader)
-  {
-    assert rvt.getResultValues().size() == 0 : "should not be attempting to set RVT numeric flag if it already has result values";
-    for(Row row: workbook.getWorksheet(iSheet).forOrigin(RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX, RAWDATA_FIRST_DATA_ROW_INDEX))
-    {
-      Cell cell = row.getCell(iDataHeader);
-      if (!cell.isEmpty() && cell.getAsString().trim().length() > 0) {
-        rvt.setNumeric(cell.isNumeric());
-        return;
-      }
-    }
-    log.warn("all cells for data header " + rvt + " are empty on the first data worksheet; assuming data header is non-numeric");
-  }
-  
   private AssayWell findOrCreateAssayWell(Well well, AssayWellType assayWellType)
     throws DataModelViolationException
   {

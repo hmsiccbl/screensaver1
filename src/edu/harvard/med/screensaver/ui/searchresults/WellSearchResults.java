@@ -737,7 +737,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 
       TableColumn<Well,?> column;
 //      if (rvt.isPositiveIndicator() &&
-//        rvt.getPositiveIndicatorType() == PositiveIndicatorType.BOOLEAN) {
+//        rvt.getPositiveIndicatorType() == DataType.BOOLEAN) {
 //          column = new BooleanEntityColumn<Well>(
 //            new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "positive", rvt),
 //            makeColumnName(rvt, screenNumber),
@@ -751,7 +751,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 //            }
 //          };
 //        }
-//        else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.NUMERICAL) {
+//        else if (rvt.getPositiveIndicatorType() == DataType.NUMERICAL) {
 //          column = new FixedDecimalEntityColumn<Well>(
 //            new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "numericValue", rvt),
 //            makeColumnName(rvt, screenNumber),
@@ -775,7 +775,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 //            }
 //          };
 //        }
-//        else if (rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
+//        else if (rvt.getPositiveIndicatorType() == DataType.PARTITION) {
 //          column = new VocabularyEntityColumn<Well,PartitionedValue>(
 //            new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "value", rvt),
 //            makeColumnName(rvt, screenNumber) + " Positive",
@@ -795,7 +795,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 //          };
 //        }
 //        else {
-//          throw new RuntimeException("system error; unhandled PositiveIndicatorType");
+//          throw new RuntimeException("system error; unhandled DataType");
 //        }
 //      }
 //      else

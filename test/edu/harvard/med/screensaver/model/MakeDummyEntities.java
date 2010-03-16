@@ -32,7 +32,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -101,31 +101,29 @@ public class MakeDummyEntities
 
     // create ResultValueTypes
 
-    screenResult.createResultValueType("numeric_repl1", 1, false, false, false, "phenotype").setNumeric(true);
-    screenResult.createResultValueType("numeric_repl2", 2, false, false, false, "phenotype").setNumeric(true);
-    screenResult.createResultValueType("text_repl1", 1, false, false, false, "phenotype").setNumeric(false);
-    screenResult.createResultValueType("text_repl2", 2, false, false, false, "phenotype").setNumeric(false);
+    screenResult.createResultValueType("numeric_repl1").forReplicate(1).forPhenotype("phenotype").makeNumeric(3);
+    screenResult.createResultValueType("numeric_repl2").forReplicate(2).forPhenotype("phenotype").makeNumeric(3);
+    screenResult.createResultValueType("text_repl1").forReplicate(1).forPhenotype("phenotype").makeTextual();
+    screenResult.createResultValueType("text_repl2").forReplicate(2).forPhenotype("phenotype").makeTextual();
 
     ResultValueType positive1Rvt = screenResult.createResultValueType("positive1");
-    positive1Rvt.setReplicateOrdinal(1);
+    positive1Rvt.forReplicate(1);
     positive1Rvt.makeDerived("from replicate 1", Sets.newHashSet(screenResult.getResultValueTypesList().get(0), screenResult.getResultValueTypesList().get(2)));
-    positive1Rvt.setAssayPhenotype("phenotype");
-    positive1Rvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
+    positive1Rvt.makePartitionPositiveIndicator();
+    positive1Rvt.forPhenotype("phenotype");
 
     ResultValueType positive2Rvt = screenResult.createResultValueType("positive2");
-    positive2Rvt.setReplicateOrdinal(2);
+    positive2Rvt.forReplicate(2);
     positive2Rvt.makeDerived("from replicate 2", Sets.newHashSet(screenResult.getResultValueTypesList().get(1), screenResult.getResultValueTypesList().get(3)));
-    positive2Rvt.setAssayPhenotype("phenotype");
-    positive2Rvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
+    positive2Rvt.makePartitionPositiveIndicator();
+    positive2Rvt.forPhenotype("phenotype");
     
 
-    ResultValueType positiveRvt = screenResult.createResultValueType("positive", null, true, true, false, "phenotype");
+    ResultValueType positiveRvt = screenResult.createResultValueType("positive").forPhenotype("phenotype");
     positiveRvt.makeDerived("from both replicates", Sets.newHashSet(screenResult.getResultValueTypesList().get(4), screenResult.getResultValueTypesList().get(5)));
-    positiveRvt.setNumeric(false);
-    positiveRvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
+    positiveRvt.makePartitionPositiveIndicator();
 
-    ResultValueType commentsRvt = screenResult.createResultValueType("comments");
-    commentsRvt.setNumeric(false);
+    ResultValueType commentsRvt = screenResult.createResultValueType("comments").makeTextual();
     commentsRvt.setDescription("a data header with sparse values (some are null, some are empty strings)");
 
     // create ResultValues
@@ -137,9 +135,9 @@ public class MakeDummyEntities
       AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
       for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
         if (rvt.isNumeric()) {
-          rvt.createResultValue(assayWell, Math.random() * 200.0 - 100.0, 3);
+          rvt.createResultValue(assayWell, Math.random() * 200.0 - 100.0);
         }
-        else if (rvt.isPositiveIndicator() && rvt.getPositiveIndicatorType() == PositiveIndicatorType.PARTITION) {
+        else if (rvt.isPartitionPositiveIndicator()) {
           rvt.createResultValue(assayWell, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
         }
         else if (rvt.equals(commentsRvt)) {

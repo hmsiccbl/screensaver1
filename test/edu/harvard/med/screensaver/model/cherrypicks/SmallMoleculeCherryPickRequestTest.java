@@ -94,7 +94,7 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
         ResultValueType resultValueType = screenResult.createResultValueType("values");
         for (Well well : wells) {
           AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
-          resultValueType.createResultValue(assayWell, "1.0");
+          resultValueType.createResultValue(assayWell, 1.0);
         }
         
         SmallMoleculeCherryPickRequest cherryPickRequest = (SmallMoleculeCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());

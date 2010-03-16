@@ -41,7 +41,7 @@ import edu.harvard.med.screensaver.io.workbook2.Worksheet;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -160,7 +160,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("numeric value", 2.133, numericValue, 0.0001);
     String formula = ((NumberFormulaCell) numericFormulaCell).getFormula();
     assertEquals("formula", "B2+C2", formula);
-    assertEquals("numeric data format precision",
+    assertEquals("numeric decimal places",
                  4,
                  ((NumberFormulaCell) numericFormulaCell).getNumberFormat().getMaximumFractionDigits());
 
@@ -176,9 +176,9 @@ public class ScreenResultParserTest extends AbstractSpringTest
                  parsedNumericValue.doubleValue(),
                  0.0001);
 
-    // test numeric precision (TODO: should probably be a separate unit test)
+    // test numeric decimal places (TODO: should probably be a separate unit test)
     Cell numericFormatFormulaCell = worksheet.getCell(3,1, false);
-    assertEquals("precision of numeric format on formula cell", 4,
+    assertEquals("decimal places of numeric format on formula cell", 4,
                  numericFormatFormulaCell.getDoublePrecision());
 //    Cell generalFormatFormulaCell = cellFactory.getCell((short) 4, (short) 1);
 //    assertEquals("precision of general format on formula cell", -1,
@@ -187,13 +187,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
 //    assertEquals("precision of general format on numeric cell", -1,
 //                 generalFormatNumericCell.getDoublePrecision());
     Cell numericFormatNumericCell = worksheet.getCell(2, 1);
-    assertEquals("precision of numeric format on numeric cell", 3,
+    assertEquals("decimal places of numeric format on numeric cell", 3,
                  numericFormatNumericCell.getDoublePrecision());
     Cell integerNumericFormatNumericCell = worksheet.getCell(5, 1);
-    assertEquals("precision of integer number format on numeric cell", 0,
+    assertEquals("decimal places of integer number format on numeric cell", 0,
                  integerNumericFormatNumericCell.getDoublePrecision());
     Cell percentageNumericCell = worksheet.getCell(6, 1);
-    assertEquals("precision of percentage number format on numeric cell", 3,
+    assertEquals("decimal places of percentage number format on numeric cell", 3,
                  percentageNumericCell.getDoublePrecision());
   }
 
@@ -278,12 +278,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
     List<WorkbookParseError> errors = mockScreenResultParser.getErrors();
-    assertTrue(errors.contains(new ParseError("unparseable value \"sushiraw\" (expected one of [, derived, raw])", "Data Headers:(C,7)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'B' (expected one of [E, F])", "Data Headers:(D,9)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'H' (expected one of [E, F, G])", "Data Headers:(E,9)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'D' (expected one of [E, F, G, H])", "Data Headers:(F,9)")));
-    assertTrue(errors.contains(new ParseError("value required", "Data Headers:(F,11)")));
-    assertTrue(errors.contains(new ParseError("unparseable value \"baloonean\" (expected one of [Boolean, Partition, Partitioned])", "Data Headers:(H,11)")));
+    assertTrue(errors.contains(new ParseError("value required", "Data Headers:(B,3)")));
+    assertTrue(errors.contains(new ParseError("illegal value", "Data Headers:(E,4)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"paradiso positive indicator\" (expected one of [Boolean Positive Indicator, Numeric, Partition Positive Indicator, Text])", "Data Headers:(G,3)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"sushiraw\" (expected one of [, derived, raw])", "Data Headers:(C,9)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'B' (expected one of [E, F])", "Data Headers:(D,11)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'H' (expected one of [E, F, G])", "Data Headers:(E,11)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'D' (expected one of [E, F, G, H])", "Data Headers:(F,11)")));
     assertTrue(errors.contains(new ParseError("unparseable value \"follow-up\" (expected one of [, follow up, primary])", "Data Headers:(E,12)")));
   }
 
@@ -413,28 +414,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     doTestScreenResult117ParseResult(screenResult);
   }
   
-  private void setDefaultValues(ResultValueType rvt)
-  {
-    if (rvt.getAssayPhenotype() == null) {
-      rvt.setAssayPhenotype("");
-    }
-    if (rvt.getComments() == null) {
-      rvt.setComments("");
-    }
-    if (rvt.getDescription() == null) {
-      rvt.setDescription("");
-    }
-    if (rvt.getHowDerived() == null) {
-      rvt.makeDerived("", Sets.<ResultValueType>newHashSet());
-    }
-    if (rvt.getName() == null) {
-      rvt.setName("");
-    }
-    if (rvt.getTimePoint() == null) {
-      rvt.setTimePoint("");
-    }
-  }
-  
   public void testMissingDerivedFrom() throws FileNotFoundException
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
@@ -467,55 +446,55 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     rvt = expectedScreenResult.createResultValueType("Luminescence1");
     rvt.setDescription("Desc1");
-    rvt.setReplicateOrdinal(1);
-    rvt.setTimePoint("0:10");
+    rvt.forReplicate(1);
+    rvt.forTimePoint("0:10");
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setAssayPhenotype("Phenotype1");
+    rvt.forPhenotype("Phenotype1");
     rvt.setComments("None");
-    rvt.setNumeric(true);
+    rvt.makeNumeric(0);
     expectedResultValueTypes.put(0, rvt);
 
     rvt = expectedScreenResult.createResultValueType("Luminescence2");
     rvt.setDescription("Desc2");
-    rvt.setReplicateOrdinal(2);
-    rvt.setTimePoint("0:10");
+    rvt.forReplicate(2);
+    rvt.forTimePoint("0:10");
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setAssayPhenotype("Phenotype1");
+    rvt.forPhenotype("Phenotype1");
     rvt.setFollowUpData(true);
     rvt.setComments("None");
-    rvt.setNumeric(true);
+    rvt.makeNumeric(0);
     expectedResultValueTypes.put(1, rvt);
 
     rvt = expectedScreenResult.createResultValueType("FI1");
     rvt.setDescription("Fold Induction");
-    rvt.setReplicateOrdinal(1);
+    rvt.forReplicate(1);
     rvt.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedResultValueTypes.get(0)));
-    rvt.setAssayPhenotype("Phenotype1");
-    rvt.setNumeric(true);
+    rvt.forPhenotype("Phenotype1");
+    rvt.makeNumeric(2);
     expectedResultValueTypes.put(2, rvt);
 
     rvt = expectedScreenResult.createResultValueType("FI2");
     rvt.setDescription("Fold Induction");
-    rvt.setReplicateOrdinal(2);
+    rvt.forReplicate(2);
     rvt.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedResultValueTypes.get(1)));
-    rvt.setAssayPhenotype("Phenotype1");
+    rvt.forPhenotype("Phenotype1");
     rvt.setFollowUpData(true);
-    rvt.setNumeric(true);
+    rvt.makeNumeric(2);
     expectedResultValueTypes.put(3, rvt);
 
     rvt = expectedScreenResult.createResultValueType("Average");
     rvt.makeDerived("Average", Sets.newHashSet(expectedResultValueTypes.get(2), expectedResultValueTypes.get(3)));
-    rvt.setNumeric(true);
+    rvt.makeNumeric(2);
     expectedResultValueTypes.put(4, rvt);
 
     rvt = expectedScreenResult.createResultValueType("PositiveIndicator2");
     rvt.makeDerived("W<=1.6, M<=1.7, S<=1.8", Sets.newHashSet(expectedResultValueTypes.get(4)));
-    rvt.makePositivesIndicator(PositiveIndicatorType.PARTITION);
+    rvt.makePartitionPositiveIndicator();
     expectedResultValueTypes.put(5, rvt);
 
     rvt = expectedScreenResult.createResultValueType("PositiveIndicator3");
     rvt.makeDerived("PositiveIndicator2 is S", Sets.newHashSet(expectedResultValueTypes.get(5)));
-    rvt.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
+    rvt.makeBooleanPositiveIndicator();
     expectedResultValueTypes.put(6, rvt);
 
 
@@ -558,10 +537,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     for (ResultValueType actualRvt : resultValueTypes) {
       ResultValueType expectedRvt = expectedResultValueTypes.get(iRvt);
       if (expectedRvt != null) {
-        setDefaultValues(expectedRvt);
-        setDefaultValues(actualRvt);
-        log.info("expectedRvt = " + expectedRvt.getName());
-        log.info("actualRvt = " + actualRvt.getName());
         assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(actualRvt));
 
         // compare result values
@@ -617,40 +592,40 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     ResultValueType rvt;
 
-    rvt = expectedScreenResult.createResultValueType("r1c1");
-    rvt.setReplicateOrdinal(1);
-    rvt.setChannel(1);
-    rvt.setTimePointOrdinal(1);
-    rvt.setZdepthOrdinal(4);
+    rvt = expectedScreenResult.createResultValueType("r1c1").
+    makeNumeric(0).
+    forReplicate(1).
+    forChannel(1).
+    forTimePointOrdinal(1).
+    forZdepthOrdinal(4);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setNumeric(true); //apparently some default at uploading in case not given
     expectedResultValueTypes.put(0, rvt);
 
-    rvt = expectedScreenResult.createResultValueType("r1c2");
-    rvt.setReplicateOrdinal(1);
-    rvt.setChannel(2);
-    rvt.setTimePointOrdinal(2);
-    rvt.setZdepthOrdinal(3);
+    rvt = expectedScreenResult.createResultValueType("r1c2").
+    makeNumeric(0).
+    forReplicate(1).
+    forChannel(2).
+    forTimePointOrdinal(2).
+    forZdepthOrdinal(3);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setNumeric(true);
     expectedResultValueTypes.put(1, rvt);
     
-    rvt = expectedScreenResult.createResultValueType("r2c1");
-    rvt.setReplicateOrdinal(2);
-    rvt.setChannel(1);
-    rvt.setTimePointOrdinal(3);
-    rvt.setZdepthOrdinal(2);
+    rvt = expectedScreenResult.createResultValueType("r2c1").
+    makeNumeric(0).
+    forReplicate(2).
+    forChannel(1).
+    forTimePointOrdinal(3).
+    forZdepthOrdinal(2);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setNumeric(true);
     expectedResultValueTypes.put(2, rvt);
     
-    rvt = expectedScreenResult.createResultValueType("r2c2");
-    rvt.setReplicateOrdinal(2);
-    rvt.setChannel(2);
-    rvt.setTimePointOrdinal(4);
-    rvt.setZdepthOrdinal(1);
+    rvt = expectedScreenResult.createResultValueType("r2c2").
+    makeNumeric(0).
+    forReplicate(2).
+    forChannel(2).
+    forTimePointOrdinal(4).
+    forZdepthOrdinal(1);
     rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.setNumeric(true);
     expectedResultValueTypes.put(3, rvt);
 
     //check the second result value type
@@ -723,7 +698,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
               assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric)",
                            expectedNumericValue,
                            rv.getNumericValue(),
-                           0.001);
+                           Math.pow(1, -rvt.getDecimalPlaces()));
             }
             else {
               assertEquals("rvt " + iRvt + " well #" + iWell + " result value (non-numeric)",

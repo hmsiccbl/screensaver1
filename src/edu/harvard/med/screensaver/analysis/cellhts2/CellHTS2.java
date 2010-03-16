@@ -33,6 +33,7 @@ import org.rosuda.REngine.Rserve.RserveException;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * This package contains an API for calls to a number of methods of CellHTS2
@@ -680,25 +681,26 @@ public class CellHTS2 {
         int r = rvt.getReplicateOrdinal();
         // rvt.getName();
 
-        ResultValueType rvtNew = screenResult.createResultValueType(rvtPrefix
-            + rvt.getName(), r, true, false, false, "phenotype",rvt.getChannel(),null,null);
-        rvtNew.setNumeric(true);
+        ResultValueType rvtNew = screenResult.createResultValueType(rvtPrefix + rvt.getName());
+        rvtNew.forReplicate(r).forChannel(rvt.getChannel()).makeDerived("cellHTS2", ImmutableSet.of(rvt)).makeNumeric(3).forPhenotype("phenotype");
 
         for (int i = 0; i < assayWells.size(); ++i) {
           AssayWell assayWell = assayWells.get(i);
-          rvtNew.createResultValue(assayWell, result[i][r - 1], 3);
+          rvtNew.createResultValue(assayWell, result[i][r - 1]);
         }
       }
     } else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
       double[] result = new double[arrayDimensions.getNrWells() *  arrayDimensions.getNrPlates()];
       result = rserveExtensions.tryEval(rConnection, rExpr2).asDoubles();
 
-      ResultValueType rvtSumm = screenResult.createResultValueType(
-          "cellhts2_summarized", null, true, false, false, "phenotype",null,null,null);
-      rvtSumm.setNumeric(true);
+      ResultValueType rvtSumm = 
+        screenResult.createResultValueType("cellhts2_summarized").
+        makeNumeric(3).
+        forPhenotype("phenotype").
+        makeDerived("cellHTS2", Collections.<ResultValueType>emptySet());
       for (int i = 0; i < assayWells.size(); ++i) {
         AssayWell assayWell = assayWells.get(i);
-        rvtSumm.createResultValue(assayWell, result[i], 3);
+        rvtSumm.createResultValue(assayWell, result[i]);
       }
     }
   }

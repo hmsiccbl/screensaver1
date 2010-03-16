@@ -268,7 +268,7 @@ public class CherryPickRequestExporter
         Object value = null;
         ResultValue rv = screenedWell.getResultValues().get(rvt);
         if (rv != null) {
-          value = ResultValue.getTypedValue(rv, rvt);
+          value = rv.getTypedValue();
         }
         data.add(value);
       }

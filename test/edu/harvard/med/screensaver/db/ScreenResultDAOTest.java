@@ -29,7 +29,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -66,15 +66,14 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
           ResultValueType[] rvt = new ResultValueType[replicates];
           for (int i = 0; i < replicates; i++) {
-            rvt[i] = screenResult.createResultValueType(
-              "rvt" + i,
-              i + 1,
-              false,
-              false,
-              false,
-              "human");
+            rvt[i] = screenResult.createResultValueType("rvt" + i).forReplicate(i + 1).forPhenotype("human");
             rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLUORESCENCE_INTENSITY);
-            rvt[i].makePositivesIndicator(i % 2 == 0 ? PositiveIndicatorType.BOOLEAN: PositiveIndicatorType.PARTITION);
+            if (i % 2 == 0) {
+              rvt[i].makeBooleanPositiveIndicator();
+            }
+            else {
+              rvt[i].makePartitionPositiveIndicator();
+            }
           }
 
           Library library = new Library(
@@ -142,8 +141,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
               iResultValue % 2 == 0 ? AssayReadoutType.PHOTOMETRY : AssayReadoutType.FLUORESCENCE_INTENSITY,
               rvt.getAssayReadoutType());
             assertEquals(
-              iResultValue % 2 == 0 ? PositiveIndicatorType.BOOLEAN: PositiveIndicatorType.PARTITION,
-              rvt.getPositiveIndicatorType());
+              iResultValue % 2 == 0 ? DataType.POSITIVE_INDICATOR_BOOLEAN: DataType.POSITIVE_INDICATOR_PARTITION,
+              rvt.getDataType());
             assertEquals(
               "human",
               rvt.getAssayPhenotype());
@@ -176,36 +175,18 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
 
           for (int i = 0; i < replicates; i++) {
-            ResultValueType rvt = screenResult.createResultValueType(
-              "rvt" + i,
-              1,
-              false,
-              false,
-              false,
-              "human");
+            ResultValueType rvt = screenResult.createResultValueType("rvt" + i).forReplicate(1).forPhenotype("human");
             derivedRvtSet1.add(rvt);
             if (i % 2 == 0) {
               derivedRvtSet2.add(rvt);
             }
           }
-          ResultValueType derivedRvt1 = screenResult.createResultValueType(
-            "derivedRvt1",
-            1,
-            false,
-            false,
-            false,
-            "human");
+          ResultValueType derivedRvt1 = screenResult.createResultValueType("derivedRvt1").forReplicate(1).forPhenotype("human");
           for (ResultValueType resultValueType : derivedRvtSet1) {
             derivedRvt1.addTypeDerivedFrom(resultValueType);
           }
 
-          ResultValueType derivedRvt2 = screenResult.createResultValueType(
-            "derivedRvt2",
-            1,
-            false,
-            false,
-            false,
-            "human");
+          ResultValueType derivedRvt2 = screenResult.createResultValueType("derivedRvt2").forReplicate(1).forPhenotype("human");
           for (ResultValueType resultValueType : derivedRvtSet2) {
             derivedRvt2.addTypeDerivedFrom(resultValueType);
           }
@@ -280,10 +261,10 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         ScreenResult screenResult = screen.createScreenResult();
-        ResultValueType rvt1 = screenResult.createResultValueType("RVT1", null, false, true, false, "");
-        rvt1.makePositivesIndicator(PositiveIndicatorType.PARTITION);
-        ResultValueType rvt2 = screenResult.createResultValueType("RVT2", null, false, true, false, "");
-        rvt2.makePositivesIndicator(PositiveIndicatorType.BOOLEAN);
+        ResultValueType rvt1 = screenResult.createResultValueType("RVT1");
+        rvt1.makePartitionPositiveIndicator();
+        ResultValueType rvt2 = screenResult.createResultValueType("RVT2");
+        rvt2.makeBooleanPositiveIndicator();
         Library library = new Library(
           "library 1",
           "lib1",
@@ -336,10 +317,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
     ScreenResult screenResult = screen.createScreenResult();
-    ResultValueType rvt1 = screenResult.createResultValueType("Raw Value");
-    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value");
-    rvt1.setNumeric(true);
-    rvt2.setNumeric(true);
+    ResultValueType rvt1 = screenResult.createResultValueType("Raw Value").makeNumeric(3);
+    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value").makeNumeric(3);
     Library library = new Library(
       "library 1",
       "lib1",
@@ -352,8 +331,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
       for (int iWell = 0; iWell < 10; ++iWell) {
         Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), LibraryWellType.EXPERIMENTAL);
         AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
-        rvt1.createResultValue(assayWell, (double) iWell, 3);
-        rvt2.createResultValue(assayWell, iWell + 10.0, 3);
+        rvt1.createResultValue(assayWell, (double) iWell);
+        rvt2.createResultValue(assayWell, iWell + 10.0);
       }
     }
     genericEntityDao.saveOrUpdateEntity(library);

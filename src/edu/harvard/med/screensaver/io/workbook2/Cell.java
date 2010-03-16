@@ -53,8 +53,6 @@ public class Cell
 
   public static final String INVALID_CELL_TYPE_ERROR = "invalid cell type";
   public static final String CELL_VALUE_REQUIRED_ERROR = "value required";
-  private static final Pattern DECIMAL_PRECISION_PATTERN = Pattern.compile(".*?(\\.([0#]+))?(%?)");
-  private static final String GENERAL_FORMAT = "GENERAL";
 
   
   // static methods

@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/trunk/src/edu/harvard/med/screensaver/model/screenresults/PositiveIndicatorType.java $
-// $Id: PositiveIndicatorType.java 3872 2010-03-04 18:35:05Z atolopko $
+// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/trunk/src/edu/harvard/med/screensaver/model/screenresults/DataType.java $
+// $Id: DataType.java 3872 2010-03-04 18:35:05Z atolopko $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 
@@ -20,45 +20,44 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public enum PositiveIndicatorType implements VocabularyTerm
+public enum DataType implements VocabularyTerm
 {
 
   // the vocabulary
   
-  BOOLEAN("Boolean"),
-  PARTITION("Partition")
+  NUMERIC("Numeric", false),
+  TEXT("Text", false),
+  POSITIVE_INDICATOR_BOOLEAN("Boolean Positive Indicator", true),
+  POSITIVE_INDICATOR_PARTITION("Partition Positive Indicator", true)
   ;
 
  
   // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link PositiveIndicatorType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link DataType} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<PositiveIndicatorType>
+  public static class UserType extends VocabularyUserType<DataType>
   {
     public UserType()
     {
-      super(PositiveIndicatorType.values());
+      super(DataType.values());
     }
   }
 
-
-  // private instance field and constructor
-
   private String _value;
+  private boolean _isPositiveIndicator;
 
+  
   /**
-   * Constructs a <code>PositiveIndicatorType</code> vocabulary term.
+   * Constructs a <code>DataType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private PositiveIndicatorType(String value)
+  private DataType(String value, boolean isPositiveIndicator)
   {
     _value = value;
+    _isPositiveIndicator = isPositiveIndicator;
   }
-
-
-  // public instance methods
 
   /**
    * Get the value of the vocabulary term.
@@ -69,12 +68,15 @@ public enum PositiveIndicatorType implements VocabularyTerm
     return _value;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString()
   {
     return getValue();
+  }
+
+
+  public boolean isPositiveIndicator()
+  {
+    return _isPositiveIndicator;
   }
 }

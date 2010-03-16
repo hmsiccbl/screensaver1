@@ -34,18 +34,17 @@ import org.hibernate.annotations.Index;
 
 
 /**
- * A <code>ResultValue</code> holds the actual value of a screen result data
- * point for a given {@link ScreenResult}, {@link ResultValueType}, and
- * {@link edu.harvard.med.screensaver.model.libraries.Well}. For alphanumeric
- * ResultValueTypes, the value is stored canonically as a string. For numeric
- * ResultValueTypes, the value is stored canonically as a double, allowing for
- * efficient sorting of numeric values in the database. For numeric ResultValue,
- * the getValue() will return a string representing the numeric value formatted
- * to the ResultValue's decimal precision. Note that the parent ResultValueType
- * contains an "isNumeric" property that indicates whether its member
- * ResultValues are numeric (the isNumeric flag is not stored with each
- * ResultValue for space efficiency).
- *
+ * A <code>ResultValue</code> holds the value of a screen result data point for
+ * a given {@link ResultValueType}, and {@link AssayWell}.
+ * For text-based ResultValueTypes, the value is stored canonically as a String.
+ * For numeric ResultValueTypes, the value is stored canonically as a double,
+ * allowing for efficient sorting and filtering of numeric values in the
+ * database, but also as a string, formatted to show the number of decimal places
+ * specified by the parent {@link ResultValueType}. Note that the parent
+ * {@link ResultValueType#isNumeric()()} contains an "isNumeric" property that
+ * indicates whether its member ResultValues are numeric (the isNumeric flag is
+ * not stored with each ResultValue for space efficiency).
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -64,7 +63,6 @@ public class ResultValue extends AbstractEntity<Integer>
 
   private static final long serialVersionUID = -4066041317098744417L;
   private static final Logger log = Logger.getLogger(ResultValue.class);
-  public static final int DEFAULT_DECIMAL_PRECISION = 3;
   private static final String[] FORMAT_STRINGS = new String[10];
   static {
     FORMAT_STRINGS[0] = "%1.0f";
@@ -76,8 +74,6 @@ public class ResultValue extends AbstractEntity<Integer>
   public static final RelationshipPath<ResultValue> ResultValueType = new RelationshipPath<ResultValue>(ResultValue.class, "resultValueType");
 
 
-  // public static methods
-
   /**
    * Returns the value of this <code>ResultValue</code> as an appropriately
    * typed object, depending upon {@link ResultValueType#isPositiveIndicator()},
@@ -87,8 +83,8 @@ public class ResultValue extends AbstractEntity<Integer>
    * <li> Well type is non-data-producer: returns <code>null</code>
    * <li> Not Derived (Raw): returns Double
    * <li> Not an Activity Indicator: returns String
-   * <li> PositiveIndicatorType.BOOLEAN: returns Boolean
-   * <li> PositiveIndicatorType.PARTITION: returns String
+   * <li> DataType.BOOLEAN: returns Boolean
+   * <li> DataType.PARTITION: returns String
    * (PartitionedValue.getDisplayValue())
    * </ul>
    *
@@ -96,27 +92,19 @@ public class ResultValue extends AbstractEntity<Integer>
    * @motivation to preserve typed data in exported Workbooks (rather than treat
    *             all result values as text strings)
    */
-  // TODO: now that ResultValue.resultValueType relationship exists, we can make this an instance method, and eliminate the RVT param
-  public static Object getTypedValue(ResultValue rv, ResultValueType rvt)
+  @Transient
+  public Object getTypedValue()
   {
-    if (rv == null || rv.isNull()) {
+    if (isNull()) {
       return null;
     }
 
-    if (rvt.isNumeric()) {
-      return rv.getNumericValue();
+    switch (getResultValueType().getDataType()) {
+    case NUMERIC: return getNumericValue();
+    case POSITIVE_INDICATOR_BOOLEAN: return Boolean.valueOf(getValue());
+    case POSITIVE_INDICATOR_PARTITION: return PartitionedValue.lookupByValue(getValue()).getDisplayValue();
+    default: return getValue();
     }
-
-    if (rvt.isPositiveIndicator()) {
-      PositiveIndicatorType activityIndicatorType = rvt.getPositiveIndicatorType();
-      if (activityIndicatorType.equals(PositiveIndicatorType.BOOLEAN)) {
-        return Boolean.valueOf(rv.getValue());
-      }
-      else if (activityIndicatorType.equals(PositiveIndicatorType.PARTITION)) {
-        return PartitionedValue.lookupByValue(rv.getValue()).getDisplayValue();
-      }
-    }
-    return rv.getValue();
   }
 
 
@@ -126,7 +114,6 @@ public class ResultValue extends AbstractEntity<Integer>
   private ResultValueType _resultValueType;
   private String _value;
   private Double _numericValue;
-  private Integer _numericDecimalPrecision;
   private AssayWellType _assayWellType;
   /**
    * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
@@ -151,7 +138,7 @@ public class ResultValue extends AbstractEntity<Integer>
               AssayWell assayWell,
               String value)
   {
-    this(rvt, assayWell, value, null, -1, false, false);
+    this(rvt, assayWell, value, null, false, false);
   }
 
   /**
@@ -160,15 +147,12 @@ public class ResultValue extends AbstractEntity<Integer>
    * @param rvt the parent ResultValueType
    * @param well the well of this ResultValue
    * @param numericValue the numerical value of the ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal
-   *          point, when displayed
    */
   ResultValue(ResultValueType rvt,
               AssayWell assayWell,
-              Double numericValue,
-              int decimalPrecision)
+              Double numericValue)
   {
-    this(rvt, assayWell, null, numericValue, decimalPrecision, false, false);
+    this(rvt, assayWell, null, numericValue, false, false);
   }
 
   /**
@@ -179,19 +163,16 @@ public class ResultValue extends AbstractEntity<Integer>
    * @param well the well of this ResultValue
    * @param assayWellType the AssayWellType of the ResultValue
    * @param numericalValue the numerical value of the ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal
-   *          point, when displayed
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   public ResultValue(ResultValueType rvt,
                      AssayWell assayWell,
                      Double numericalValue,
-                     int decimalPrecision,
                      boolean exclude,
                      boolean isPositive)
   {
-    this(rvt, assayWell, null, numericalValue, decimalPrecision, exclude, isPositive);
+    this(rvt, assayWell, null, numericalValue, exclude, isPositive);
   }
 
   /**
@@ -211,7 +192,7 @@ public class ResultValue extends AbstractEntity<Integer>
                      boolean exclude,
                      boolean isPositive)
   {
-    this(rvt, assayWell, value, null, 0, exclude, isPositive);
+    this(rvt, assayWell, value, null, exclude, isPositive);
   }
 
 
@@ -308,38 +289,26 @@ public class ResultValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Get the default decimal precision for this ResultValue's numeric value.
-   *
-   * @return the number of digits to be displayed after the decimal point when
-   *         value is displayed; null if ResultValue is not numeric or if
-   *         {@link #getNumericValue()} is null
-   */
-  public Integer getNumericDecimalPrecision()
-  {
-    return _numericDecimalPrecision;
-  }
-
-  /**
    * Formats the numeric value of this ResultValue.
    *
-   * @param decimalPrecision if &lt; 0, uses "general" formatting (%g), with
-   *          precision 9, as described in {@link java.util.Formatter}
+   * @param decimalPlaces if &lt; 0, uses "general" formatting (%g), with
+   *          9 decimal places, as described in {@link java.util.Formatter}
    * @return the formatted numeric value
    */
-  public String formatNumericValue(int decimalPrecision)
+  public String formatNumericValue(int decimalPlaces)
   {
     String strValue = null;
     if (_numericValue != null) {
-      if (decimalPrecision < 0) {
+      if (decimalPlaces < 0) {
         strValue = String.format("%g", _numericValue);
       }
-      else if (decimalPrecision <  FORMAT_STRINGS.length) {
+      else if (decimalPlaces <  FORMAT_STRINGS.length) {
         // optimization: use precomputed format strings, rather than creating
         // all those string objects
-        strValue = String.format(FORMAT_STRINGS[decimalPrecision], _numericValue);
+        strValue = String.format(FORMAT_STRINGS[decimalPlaces], _numericValue);
       }
       else {
-        strValue = String.format("%1." + decimalPrecision + "f", _numericValue);
+        strValue = String.format("%1." + decimalPlaces + "f", _numericValue);
       }
     }
     return strValue;
@@ -462,8 +431,6 @@ public class ResultValue extends AbstractEntity<Integer>
    * @param assayWellType the AssayWellType of the ResultValue
    * @param value the non-numerical value of the ResultValue
    * @param numericalValue the numerical value of the ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal
-   *          point, when displayed
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
@@ -471,7 +438,6 @@ public class ResultValue extends AbstractEntity<Integer>
               AssayWell assayWell,
               String value,
               Double numericalValue,
-              int decimalPrecision,
               boolean exclude,
               boolean isPositive)
   {
@@ -493,15 +459,12 @@ public class ResultValue extends AbstractEntity<Integer>
     // _well.getResultValues().put(rvt, this);
 
     setAssayWellType(assayWell.getAssayWellType()); // TODO: remove
-    if (value != null) {
+    if (!!!rvt.isNumeric()) {
       setValue(value);
     }
     else {
       setNumericValue(numericalValue);
-      if (decimalPrecision >= 0) {
-        setNumericDecimalPrecision(decimalPrecision);
-      }
-      setValue(formatNumericValue(decimalPrecision));
+      setValue(formatNumericValue(rvt.getDecimalPlaces()));
     }
     setExclude(exclude);
     setPositive(isPositive);
@@ -584,17 +547,6 @@ public class ResultValue extends AbstractEntity<Integer>
   private void setNumericValue(Double value)
   {
     _numericValue = value;
-  }
-
-  /**
-   * Set the numerical decimal precision.
-   *
-   * @param numericDecimalPrecision the new numerical decimal precision
-   * @motivation for hibernate
-   */
-  private void setNumericDecimalPrecision(Integer numericDecimalPrecision)
-  {
-    _numericDecimalPrecision = numericDecimalPrecision;
   }
 
   /**

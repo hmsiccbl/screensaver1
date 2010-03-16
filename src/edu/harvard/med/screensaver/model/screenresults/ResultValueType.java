@@ -39,8 +39,10 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 
 import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.OptimisticLock;
 
 /**
@@ -62,18 +64,17 @@ import org.hibernate.annotations.OptimisticLock;
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenResult.class)
 public class ResultValueType extends AbstractEntity<Integer> implements MetaDataType, Comparable
 {
-
   // TODO: perhaps we should split ResultValueType into subclasses, one for raw
   // data value descriptions and one for derived data descriptions?
 
   private static final Logger log = Logger.getLogger(ResultValueType.class);
   private static final long serialVersionUID = -2325466055774432202L;
 
-  public static final RelationshipPath<ResultValueType> ScreenResult = new RelationshipPath<ResultValueType>(ResultValueType.class, "screenResult"); 
-
-
-  // private instance data
-
+  public static final RelationshipPath<ResultValueType> ScreenResult = new RelationshipPath<ResultValueType>(ResultValueType.class, "screenResult");
+  
+  private static final DataType DEFAULT_DATA_TYPE = DataType.NUMERIC; 
+  private static final int DEFAULT_DECIMAL_PLACES = 3;
+  
   private Integer _version;
   private ScreenResult _screenResult;
   private Collection<ResultValue> _resultValues = new ArrayList<ResultValue>();
@@ -87,50 +88,38 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   private String _howDerived;
   private SortedSet<ResultValueType> _typesDerivedFrom = new TreeSet<ResultValueType>();
   private SortedSet<ResultValueType> _derivedTypes = new TreeSet<ResultValueType>();
-  private boolean _isPositiveIndicator;
-  private PositiveIndicatorType _positiveIndicatorType;
+  private DataType _dataType;
+  private Integer _decimalPlaces;
   private boolean _isFollowUpData;
   private String _assayPhenotype;
   private String _comments;
-  private boolean _isNumeric;
   private Integer _positivesCount;
   private Integer channel;
   private Integer timePointOrdinal;
   private Integer zdepthOrdinal;
 
-  // public instance methods
 
-  public Integer getChannel()
+  /**
+   * Constructs an uninitialized <code>ResultValueType</code> object.
+   * @motivation for Hibernate and proxy/concrete subclass constructors
+   */
+  protected ResultValueType() {}
+
+  /**
+   * Construct an initialized <code>ResultValueType</code>. Intended only for use by {@link ScreenResult}.
+   * @param screenResult the screen result
+   * @param name the name of this result value type
+   */
+  ResultValueType(ScreenResult screenResult, String name)
   {
-    return channel;
+    if (screenResult == null) {
+      throw new NullPointerException();
+    }
+    setScreenResult(screenResult);
+    setName(name);
+    setOrdinal(getScreenResult().getResultValueTypes().size());
   }
 
-  public void setChannel(Integer channel)
-  {
-    this.channel = channel;
-  }
-
-  public Integer getTimePointOrdinal()
-  {
-    return timePointOrdinal;
-  }
-
-  public void setTimePointOrdinal(Integer timePointOrdinal)
-  {
-    this.timePointOrdinal = timePointOrdinal;
-  }
-
-  public Integer getZdepthOrdinal()
-  {
-    return zdepthOrdinal;
-  }
-
-  public void setZdepthOrdinal(Integer zdepthOrdinal)
-  {
-    this.zdepthOrdinal = zdepthOrdinal;
-  }
-  
-  
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
   {
@@ -204,21 +193,22 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
                                        String value,
                                        Boolean exclude)
   {
-    return createResultValue(assayWell, value, null, 0, exclude);
+    if (isNumeric()) {
+      throw new DataModelViolationException("cannot add non-numeric result value to a numeric result value type");
+    }
+    return createResultValue(assayWell, value, null, exclude);
   }
 
   /**
    * Add a numeric, experimental type, non-excluded result value to the result value type.
    * @param well the well of the new ResultValue
    * @param numericValue the value of the new ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal point, when displayed
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,
-                                       Double numericValue,
-                                       Integer decimalPrecision)
+                                       Double numericValue)
   {
-    return createResultValue(assayWell, numericValue, decimalPrecision, false);
+    return createResultValue(assayWell, numericValue, false);
   }
 
   /**
@@ -226,37 +216,141 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @param well the well of the new ResultValue
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param numericValue the numeric value of the new ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal point, when value is displayed
    * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,
                                        Double numericValue,
-                                       Integer decimalPrecision,
                                        boolean exclude)
   {
-    return createResultValue(assayWell, null, numericValue, decimalPrecision, exclude);
+    if (!!!isNumeric()) {
+      throw new DataModelViolationException("cannot add numeric result vaue to a non-numeric result value type m");
+    }
+    return createResultValue(assayWell, null, numericValue, exclude);
+  }
+  
+  @Column(nullable=false, updatable=false)
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses make*() builder methods*/)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.DataType$UserType")
+  public DataType getDataType()
+  {
+    if (_dataType == null) {
+      _dataType = DEFAULT_DATA_TYPE;
+    }
+    return _dataType;
+  }
+
+  private void setDataType(DataType dataType)
+  {
+    if (_dataType != null && _dataType != dataType) {
+      throw new DataModelViolationException("data type is already set and cannot be changed");
+    }
+    _dataType = dataType;
+    if (dataType.isPositiveIndicator()) {
+      _positivesCount = Integer.valueOf(0);
+    }
+  }
+  
+  public ResultValueType forReplicate(Integer replicateOrdinal)
+  {
+    setReplicateOrdinal(replicateOrdinal);
+    return this;
+  }
+
+  public ResultValueType makeTextual()
+  {
+    setDataType(DataType.TEXT);
+    return this;
+  }
+  
+  public ResultValueType makeNumeric(Integer decimalPlaces)
+  {
+    setDataType(DataType.NUMERIC);
+    if (decimalPlaces == null || decimalPlaces < 0) {
+      decimalPlaces = DEFAULT_DECIMAL_PLACES;
+    }
+    _decimalPlaces = decimalPlaces;
+    return this;
+  }
+  
+  public ResultValueType makeBooleanPositiveIndicator()
+  {
+    setDataType(DataType.POSITIVE_INDICATOR_BOOLEAN);
+    return this;
+  }
+  
+  public ResultValueType makePartitionPositiveIndicator()
+  {
+    setDataType(DataType.POSITIVE_INDICATOR_PARTITION);
+    return this;
+  }
+  
+  public ResultValueType makeDerived(String howDerived, Set<ResultValueType> derivedFrom)
+  {
+    setDerived(true);
+    setHowDerived(howDerived);
+    for (ResultValueType rvt : derivedFrom) {
+      addTypeDerivedFrom(rvt);;
+    }
+    return this;
+  }
+
+  public ResultValueType forChannel(Integer channel)
+  {
+    setChannel(channel);
+    return this;
+  }
+  
+  public ResultValueType forTimePoint(String timepoint)
+  {
+    setTimePoint(timepoint);
+    return this;
+  }
+  
+  public ResultValueType forTimePointOrdinal(Integer timepointOrdinal)
+  {
+    setTimePointOrdinal(timePointOrdinal);
+    return this;
+  }
+  
+  public ResultValueType forZdepthOrdinal(Integer zdepthOrdinal)
+  {
+    setZdepthOrdinal(zdepthOrdinal);
+    return this;
+  }
+  
+  public ResultValueType forPhenotype(String phenotype)
+  {
+    setAssayPhenotype(phenotype);
+    return this;
+  }
+
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses makeNumeric() builder method*/)
+  public Integer getDecimalPlaces()
+  {
+    if (isNumeric() && _decimalPlaces == null) {
+      _decimalPlaces = DEFAULT_DECIMAL_PLACES;
+    }
+    return _decimalPlaces;
+  }
+  
+  private void setDecimalPlaces(Integer decimalPlaces)
+  {
+    _decimalPlaces = decimalPlaces;
   }
 
   /**
    * Return true iff this result value type contains numeric result values.
    * @return true iff this result value type contains numeric result values
    */
-  @Column(nullable=false, name="isNumeric")
+  @Transient
   public boolean isNumeric()
   {
-    return _isNumeric;
+    return getDataType() == DataType.NUMERIC;
   }
 
-  /**
-   * Set the numericalness of this result value type.
-   * @param isNumeric the new numericalness of this result value type
-   */
-  public void setNumeric(boolean isNumeric)
-  {
-    _isNumeric = isNumeric;
-  }
-  
   /**
    * Get the ordinal position of this <code>ResultValueType</code> within its
    * parent {@link ScreenResult}. This ordering is really only significant from
@@ -282,6 +376,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    *         produced.
    */
   // TODO: remove 'Ordinal' suffix, or replace with 'Number' (mathematically, ordinal includes the value 0)
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forReplicate() builder method*/)
   public Integer getReplicateOrdinal()
   {
     return _replicateOrdinal;
@@ -294,30 +390,10 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @param replicateOrdinal the replicate ordinal. May be null if assay replicates
    * were not produced.
    */
-  public void setReplicateOrdinal(Integer replicateOrdinal)
+  private void setReplicateOrdinal(Integer replicateOrdinal)
   {
     assert replicateOrdinal == null || replicateOrdinal > 0 : "replicate ordinal values must be positive (non-zero), unless null";
     _replicateOrdinal = replicateOrdinal;
-  }
-
-  /**
-   * Get the Positive Indicator Type.
-   * @return an {@link PositiveIndicatorType} enum
-   */
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType$UserType")
-  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makePositivesIndicator() instead */) 
-  public PositiveIndicatorType getPositiveIndicatorType()
-  {
-    return _positiveIndicatorType;
-  }
-
-  /**
-   * Set the Positive Indicator Type.
-   * @param positiveIndicatorType the Activity Indicator Type to set
-   */
-  private void setPositiveIndicatorType(PositiveIndicatorType positiveIndicatorType)
-  {
-    _positiveIndicatorType = positiveIndicatorType;
   }
 
   /**
@@ -325,6 +401,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @return a <code>String</code> representing the Assay Phenotype
    */
   @org.hibernate.annotations.Type(type="text")
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forPhenotype() builder method*/)
   public String getAssayPhenotype()
   {
     return _assayPhenotype;
@@ -334,7 +412,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * Set the Assay Phenotype.
    * @param assayPhenotype the Assay Phenotype to set
    */
-  public void setAssayPhenotype(String assayPhenotype)
+  private void setAssayPhenotype(String assayPhenotype)
   {
     _assayPhenotype = assayPhenotype;
   }
@@ -581,11 +659,22 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    *
    * @return true iff this result value type is a positive indicator
    */
-  @Column(nullable=false, updatable=false, name="isPositiveIndicator")
-  @org.hibernate.annotations.Immutable
+  @Transient
   public boolean isPositiveIndicator()
   {
-    return _isPositiveIndicator;
+    return getDataType().isPositiveIndicator();
+  }
+
+  @Transient
+  public boolean isPartitionPositiveIndicator()
+  {
+    return getDataType() == DataType.POSITIVE_INDICATOR_PARTITION;
+  }
+
+  @Transient
+  public boolean isBooleanPositiveIndicator()
+  {
+    return getDataType() == DataType.POSITIVE_INDICATOR_BOOLEAN;
   }
 
   /**
@@ -616,7 +705,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * Get the name of this result value type.
    * @return the name of this result value type
    */
-  @Column(nullable=false)
+  @Column(nullable=false, updatable=false)
+  @Immutable
   @org.hibernate.annotations.Type(type="text")
   public String getName()
   {
@@ -627,7 +717,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * Set the name of this <code>ResultValueType</code>.
    * @param name the name of this <code>ResultValueType</code>
    */
-  public void setName(String name)
+  private void setName(String name)
   {
     _name = name;
   }
@@ -639,6 +729,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @return the time point
    */
   @org.hibernate.annotations.Type(type="text")
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forTimePoint() instead*/)
   public String getTimePoint()
   {
     return _timePoint;
@@ -650,7 +742,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * <code>ResultValueType</code> were read. The format and units for the time point is arbitrary.
    * @param timePoint the time point
    */
-  public void setTimePoint(String timePoint)
+  private void setTimePoint(String timePoint)
   {
     _timePoint = timePoint;
   }
@@ -774,61 +866,6 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
     return map;
   }
 
-
-  // package constructor
-
-  /**
-   * Construct an initialized <code>ResultValueType</code>. Intended only for use by {@link ScreenResult}.
-   * @param screenResult the screen result
-   * @param name the name of this result value type
-   * @param replicateOrdinal the replicate ordinal
-   * @param isDerived true iff this result value type is derived from other result value types
-   * @param isPositiveIndicator true iff this result value type is a positive indicator
-   * @param isFollowupData true iff this result value type contains follow up data
-   * @param assayPhenotype the assay phenotype
-   */
-  ResultValueType(
-    ScreenResult screenResult,
-    String name,
-    Integer replicateOrdinal,
-    boolean isDerived,
-    boolean isPositiveIndicator,
-    boolean isFollowupData,
-    String assayPhenotype,
-    Integer channel,
-    Integer timePointOrdinal,
-    Integer zdepthOrdinal)
-  {
-    if (screenResult == null) {
-      throw new NullPointerException();
-    }
-    setScreenResult(screenResult);
-    setOrdinal(getScreenResult().getResultValueTypes().size());
-    setName(name);
-    setReplicateOrdinal(replicateOrdinal);
-    setDerived(isDerived);
-    setPositiveIndicator(isPositiveIndicator);
-    if (isPositiveIndicator) {
-      _positivesCount = 0;
-    }
-    setFollowUpData(isFollowupData);
-    setAssayPhenotype(assayPhenotype);
-    setChannel(channel);
-    setTimePointOrdinal(timePointOrdinal);
-    setZdepthOrdinal(zdepthOrdinal);
-  }
-
-  // protected constructor
-
-  /**
-   * Constructs an uninitialized <code>ResultValueType</code> object.
-   * @motivation for Hibernate and proxy/concrete subclass constructors
-   */
-  protected ResultValueType() {}
-
-
-  // private constructor and instance methods
-
   /**
    * Set the id for the result value type.
    * @param resultValueTypeId the new id for the result value type
@@ -869,16 +906,6 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set whether this <code>ResultValueType</code> is a positive indicator.
-   * @param isActivityIndicator set to <code>true</code> iff this
-   *          <code>ResultValueType</code> is a positive indicator
-   */
-  private void setPositiveIndicator(boolean isActivityIndicator)
-  {
-    _isPositiveIndicator = isActivityIndicator;
-  }
-
-  /**
    * Set the result values for this result value type.
    * 
    * @param resultValue the new result values for this result value type
@@ -892,14 +919,11 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   /**
    * Add a result value to the result value type. If the <code>value</code> parameter is not
    * null, then the <code>numericValue</code> parameter should be null, and the result value
-   * to add is non-numeric. Otherwise, <code>numericValue</code> should be non-null,
-   * <code>decimalPrecision</code> should contain a meaningful value, and the result value to
-   * add is numeric.
+   * to add is non-numeric. Otherwise, <code>numericValue</code> should be non-null.
    * @param well the well of the new ResultValue
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
    * @param numericValue the numeric value of the new ResultValue
-   * @param decimalPrecision the number of digits to appear after the decimal point, when value is displayed
    * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and result value type
    */
@@ -907,7 +931,6 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
     AssayWell assayWell,                                        
     String value,
     Double numericValue,
-    Integer decimalPrecision,
     boolean exclude)
   {
     if (isNumeric() && value != null) {
@@ -921,7 +944,6 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
                                               assayWell,
                                               value,
                                               numericValue,
-                                              decimalPrecision,
                                               exclude,
                                               false);
 
@@ -993,12 +1015,12 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   {
     boolean isPositive = false;
     if (isPositiveIndicator() && rv.isExperimentalWell() && !rv.isExclude()) {
-      if (getPositiveIndicatorType().equals(PositiveIndicatorType.BOOLEAN)) {
+      if (isBooleanPositiveIndicator()) {
         if (Boolean.parseBoolean(rv.getValue())) {
           isPositive = true;
         }
       }
-      else if (getPositiveIndicatorType().equals(PositiveIndicatorType.PARTITION)) {
+      else if (isPartitionPositiveIndicator()) {
         String resultValue = rv.getValue();
         for (PartitionedValue pv : PartitionedValue.values()) {
           if (!pv.equals(PartitionedValue.NONE) && pv.getValue().equals(resultValue)) {
@@ -1006,6 +1028,9 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
             break;
           }
         }
+      }
+      else {
+        throw new DevelopmentException("unhandled positive indicator type " + getDataType());
       }
     }
     if (log.isDebugEnabled()) {
@@ -1039,19 +1064,39 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
     }
   }
 
-  public void makeDerived(String howDerived, Set<ResultValueType> derivedFrom)
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forChannel() builder method*/)
+  public Integer getChannel()
   {
-    setDerived(true);
-    setHowDerived(howDerived);
-    for (ResultValueType rvt : derivedFrom) {
-      addTypeDerivedFrom(rvt);;
-    }
+    return channel;
   }
 
-  public void makePositivesIndicator(PositiveIndicatorType type)
+  private void setChannel(Integer channel)
   {
-    _isPositiveIndicator = true;
-    setNumeric(false);
-    _positiveIndicatorType = type;
+    this.channel = channel;
+  }
+
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forTimePointOrdinal() builder method*/)
+  public Integer getTimePointOrdinal()
+  {
+    return timePointOrdinal;
+  }
+
+  private void setTimePointOrdinal(Integer timePointOrdinal)
+  {
+    this.timePointOrdinal = timePointOrdinal;
+  }
+
+  @Immutable
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses forZdepthOrdinal() builder method*/)
+  public Integer getZdepthOrdinal()
+  {
+    return zdepthOrdinal;
+  }
+
+  private void setZdepthOrdinal(Integer zdepthOrdinal)
+  {
+    this.zdepthOrdinal = zdepthOrdinal;
   }
 }

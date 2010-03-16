@@ -87,7 +87,7 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
                      28,
                      screen.getScreenResult().getResultValueTypesList().get(0).getResultValues().size());
         assertEquals(screen.getScreenResult().getResultValueTypesList().get(0).getWellKeyToResultValueMap().get(new WellKey(1, "A01")).getValue(),
-                     "1071894");
+                     "1071894.000");
       }
     });
   }

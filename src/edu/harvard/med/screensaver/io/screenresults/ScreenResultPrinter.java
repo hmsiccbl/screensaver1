@@ -47,6 +47,8 @@ public class ScreenResultPrinter
       printer.println("Result Value Type:");
       printer.println("\tordinal=" + rvt.getOrdinal());
       printer.println("\tname=" + rvt.getName());
+      printer.println("\tdataType=" + rvt.getDataType());
+      printer.println("\tdecimalPlaces=" + rvt.getDecimalPlaces());
       printer.println("\tdescription="+rvt.getDescription());
       printer.println("\tisNumeric=" + rvt.isNumeric());
       printer.println("\treplicateOrdinal=" + rvt.getReplicateOrdinal());
@@ -57,7 +59,6 @@ public class ScreenResultPrinter
       printer.println("\tderivedFrom="+rvt.getTypesDerivedFrom()); // TODO
       printer.println("\thowDerived=" + rvt.getHowDerived());
       printer.println("\tisActivityIndicator=" + rvt.isPositiveIndicator());
-      printer.println("\tactivityIndicatorType=" + rvt.getPositiveIndicatorType());
       printer.println("\tisFollowupData=" + rvt.isFollowUpData());
       printer.println("\tcomments="+rvt.getComments());
 
@@ -71,8 +72,7 @@ public class ScreenResultPrinter
         if (maxResultValuesToPrint != null) {
           if (n < maxResultValuesToPrint / 2 || n >= nResultValues - maxResultValuesToPrint / 2) {
             ResultValue resultValue = rvt.getWellKeyToResultValueMap().get(wellKey);
-            printer.println("\t\t" + wellKey +
-                            "\t" + ResultValue.getTypedValue(resultValue, rvt));
+            printer.println("\t\t" + wellKey + "\t" + resultValue.getTypedValue());
           }
           else if (!ellipsesOnce) {
             printer.println("\t\t...");

@@ -50,6 +50,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
@@ -115,6 +116,10 @@ public class TestDataFactory
     if (type.equals(Concentration.class)) {
       Concentration val = new Concentration(((Integer) getTestValueForType(Integer.class)).longValue());
       return (T) val;
+    }
+    if (type.equals(Boolean.class)) {
+      _booleanTestValue = ! _booleanTestValue;
+      return (T) Boolean.valueOf(_booleanTestValue);
     }
     if (type.equals(Boolean.TYPE)) {
       _booleanTestValue = ! _booleanTestValue;
@@ -372,24 +377,32 @@ public class TestDataFactory
         return labCherryPick;
       }
     });
+
 //    _entityFactoryMap.put(ResultValue.class, new EntityFactory() {
 //      public AbstractEntity createEntity(AbstractEntity relatedEntity)
 //        throws DomainModelDefinitionException
 //      {
-//        // force usage of numeric RVT, so that numeric properties can be tested
-//        ResultValueType rvt = newInstance(ResultValueType.class);
-//        assert rvt.isNumeric();
+//        if (relatedEntity instanceof ResultValueType) {
+//          ResultValueType rvt = (ResultValueType) relatedEntity;
+//          AssayWell assayWell = newInstance(AssayWell.class, rvt.getScreenResult());
+//          if (rvt.isNumeric()) {
+//            return rvt.createResultValue(assayWell, getTestValueForType(Double.class));
+//          }
+//          else {
+//            return rvt.createResultValue(assayWell, getTestValueForType(String.class));
+//          }
+//        }
+//        ResultValueType rvt = newInstance(ResultValueType.class).makeNumeric(3);
 //        return newInstance(ResultValue.class, rvt);
 //      }
 //    });
-    
+//    
     _entityFactoryMap.put(ResultValueType.class, new EntityFactory() {
       public AbstractEntity createEntity(AbstractEntity relatedEntity)
         throws DomainModelDefinitionException
       {
         // force usage of numeric RVT, so that numeric properties can be tested (which also covers non-numeric RVT behaviors)
-        ResultValueType resultValueType = newInstance(ResultValueType.class, newInstance(ScreenResult.class));
-        resultValueType.setNumeric(true);
+        ResultValueType resultValueType = newInstance(ResultValueType.class, newInstance(ScreenResult.class)).makeNumeric(3);
         return resultValueType;
       }
     });

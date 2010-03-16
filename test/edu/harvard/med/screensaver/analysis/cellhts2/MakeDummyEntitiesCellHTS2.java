@@ -151,20 +151,8 @@ public class MakeDummyEntitiesCellHTS2
 
     // create ResultValueTypes
     // Define two replicates
-    ResultValueType normRep1 = screenResult.createResultValueType("rep1",
-                                                                  1,
-                                                                  false,
-                                                                  false,
-                                                                  false,
-                                                                  "phenotype");
-    normRep1.setNumeric(true);
-    ResultValueType normRep2 = screenResult.createResultValueType("rep2",
-                                                                  2,
-                                                                  false,
-                                                                  false,
-                                                                  false,
-                                                                  "phenotype");
-    normRep2.setNumeric(true);
+    ResultValueType normRep1 = screenResult.createResultValueType("rep1").forReplicate(1).forPhenotype("phenotype").makeNumeric(3);
+    ResultValueType normRep2 = screenResult.createResultValueType("rep2").forReplicate(2).forPhenotype("phenotype").makeNumeric(3);
 
     // create ResultValues
     // [Well(00001:A01), Well(00001:A02), Well(00001:B01), Well(00001:B02),
@@ -262,8 +250,8 @@ public class MakeDummyEntitiesCellHTS2
       if (withoutA01ResultValue && wellName.equals("A01")) { } 
       else {
         AssayWell assayWell = screenResult.createAssayWell(well, assayWellType);
-        normRep1.createResultValue(assayWell, rep1Values.get(i), 3, exclude);
-        normRep2.createResultValue(assayWell, rep2Values.get(i), 3, exclude);
+        normRep1.createResultValue(assayWell, rep1Values.get(i), exclude);
+        normRep2.createResultValue(assayWell, rep2Values.get(i), exclude);
       }
       
 

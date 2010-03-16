@@ -28,7 +28,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.PositiveIndicatorType;
+import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -252,15 +252,8 @@ public class ICBGReportGenerator
     ScreenResult screenResult)
   {
     ResultValueType rightmostScaledOrBoolean = null;
-    SortedSet<ResultValueType> resultValueTypes =
-      screenResult.getResultValueTypes();
-    for (ResultValueType rvt : resultValueTypes) {
-      if (! rvt.isPositiveIndicator()) {
-        continue;
-      }
-      PositiveIndicatorType indicatorType = rvt.getPositiveIndicatorType();
-      if (indicatorType.equals(PositiveIndicatorType.BOOLEAN) ||
-          indicatorType.equals(PositiveIndicatorType.PARTITION)) {
+    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
+      if (rvt.isPositiveIndicator()) {
         rightmostScaledOrBoolean = rvt;
       }
     }
@@ -289,7 +282,7 @@ public class ICBGReportGenerator
     row.createCell((short) 4).setCellValue(assayName);
     // note: cells 5 and 6 used to be used for "numerical assay indicator", which no longer exists
     if (scaledOrBooleanRV != null) {
-      if (scaledOrBooleanRVT.getPositiveIndicatorType().equals(PositiveIndicatorType.BOOLEAN)) {
+      if (scaledOrBooleanRVT.isBooleanPositiveIndicator()) {
         if (scaledOrBooleanRV.getValue().equals("true")) {
           row.createCell((short) 7).setCellValue("A");
         }
@@ -297,7 +290,7 @@ public class ICBGReportGenerator
           row.createCell((short) 7).setCellValue("I");          
         }
       }
-      else if (scaledOrBooleanRVT.getPositiveIndicatorType().equals(PositiveIndicatorType.PARTITION)) {
+      else if (scaledOrBooleanRVT.isPartitionPositiveIndicator()) {
         String partitionValue = scaledOrBooleanRV.getValue();
         if (partitionValue == null) {
           log.info("no partition value for well key " + wellKey);

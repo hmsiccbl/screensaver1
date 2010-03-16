@@ -37,6 +37,8 @@ public interface ScreenResultWorkbookSpecification
   public enum DataHeaderProperty {
     COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column"),
     NAME("Name"),
+    DATA_TYPE("Data Type"),
+    DECIMAL_PLACES("Decimal Places"),
     DESCRIPTION("Description"),
     REPLICATE("Replicate Number"),
     TIME_POINT("Time point"),
@@ -44,10 +46,6 @@ public interface ScreenResultWorkbookSpecification
     RAW_OR_DERIVED("Raw or Derived?"),
     HOW_DERIVED("If derived, how?"),
     COLUMNS_DERIVED_FROM("If derived, from which columns?"),
-    IS_POSITIVE_INDICATOR("Is it a Screening Positive Indicator? (yes/no)"),
-    POSITIVE_INDICATOR_TYPE("Screening Positive Indicator Type (partitioned, boolean)"),
-    NUMERICAL_POSITIVE_INDICATOR_DIRECTION("Numerical Screening Positive Indicator Cutoff Direction (< or >)"),
-    NUMERICAL_POSITIVE_INDICATOR_CUTOFF("Numerical Screening Positive Indicator Cutoff Value"),
     PRIMARY_OR_FOLLOWUP("Primary or Follow Up?"),
     ASSAY_PHENOTYPE("Which Assay Phenotype does it belong to?"),
     COMMENTS("Comments"),
@@ -102,36 +100,6 @@ public interface ScreenResultWorkbookSpecification
     {
       return _displayText;
     }
-  }
-
-  /**
-   * The row of the "Screen Info" worksheet.
-   */
-  public enum ScreenInfoRow {
-    ID("ID"),
-    TITLE("Screen Title"),
-    SUMMARY("Screen Summary"),
-    PI_LAB("PI/Lab"),
-    LEAD_SCREENER("Lead Screener"),
-    COLLABORATORS("Collaborators"),
-    PUBMED_ID("Pubmed ID"),
-    DATE_FIRST_LIBRARY_SCREENING("Date of First Library Screening"),
-    EMAIL("Email"),
-    LAB_AFFILIATION("Lab Affiliation"),
-    ;
-
-    private String _displayText;
-
-    private ScreenInfoRow(String displayText)
-    {
-      _displayText = displayText;
-    }
-
-    public String getDisplayText()
-    {
-      return _displayText;
-    }
-
   }
 
   public static final String YES_VALUE = "yes";
