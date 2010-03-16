@@ -33,7 +33,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
@@ -612,7 +612,7 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     boolean expectedVisible = me.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
     assertEquals("others' level 1 screen with non-overlapping hits visibility", expectedVisible, dataAccessPolicy.visit(othersLevel1ScreenWithNonOverlappingHits));
     assertEquals("others' level 1 screen with non-overlapping hits, details visibility", expectedVisible, dataAccessPolicy.isAllowedAccessToScreenDetails(othersLevel1ScreenWithNonOverlappingHits));
-    // TODO: we also need to test RVT access permissions
+    // TODO: we also need to test DataColumn access permissions
     assertEquals("others' level 1 screen with non-overlapping hits, overlapping hits visibility", expectedVisible, dataAccessPolicy.visit(findSomePositive(othersLevel1ScreenWithNonOverlappingHits)));
 
     assertTrue("others' level 1 screen with overlapping hits visible", dataAccessPolicy.visit(othersLevel1ScreenWithOverlappingHits));
@@ -635,9 +635,9 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
 
   private ResultValue findSomePositive(Screen screen)
   {
-    for (ResultValueType rvt : Iterables.reverse(screen.getScreenResult().getResultValueTypesList())) {
-      if (rvt.isPositiveIndicator()) {
-        for (ResultValue rv : rvt.getResultValues()) {
+    for (DataColumn col : Iterables.reverse(screen.getScreenResult().getDataColumnsList())) {
+      if (col.isPositiveIndicator()) {
+        for (ResultValue rv : col.getResultValues()) {
           if (rv.isPositive()) {
             return rv;
           }
@@ -669,38 +669,38 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     Screen myScreen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
     myScreen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     ScreenResult myScreenResult = myScreen.createScreenResult();
-    ResultValueType myRvt = myScreenResult.createResultValueType("myRvt").forReplicate(1);
-    myRvt.makeBooleanPositiveIndicator();
+    DataColumn myCol = myScreenResult.createDataColumn("myCol").forReplicate(1);
+    myCol.makeBooleanPositiveIndicator();
     AssayWell myAssayWell1 = myScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
-    ResultValue myResultValue1 = myRvt.createResultValue(myAssayWell1, "true");
+    ResultValue myResultValue1 = myCol.createResultValue(myAssayWell1, "true");
     assert myResultValue1.isPositive();
     AssayWell myAssayWell2 = myScreenResult.createAssayWell(well2, AssayWellType.EXPERIMENTAL);
-    ResultValue myResultValue2 = myRvt.createResultValue(myAssayWell2, "false");
+    ResultValue myResultValue2 = myCol.createResultValue(myAssayWell2, "false");
     assert !myResultValue2.isPositive();
     
     Screen othersNonMutualPositivesScreen = MakeDummyEntities.makeDummyScreen(3, ScreenType.SMALL_MOLECULE);
     othersNonMutualPositivesScreen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     ScreenResult othersNonMutualPositivesScreenResult = othersNonMutualPositivesScreen.createScreenResult();
-    ResultValueType othersNonMutualPositivesRvt = othersNonMutualPositivesScreenResult.createResultValueType("othersNonMutualPositivesRvt").forReplicate(1);
-    othersNonMutualPositivesRvt.makeBooleanPositiveIndicator();
+    DataColumn othersNonMutualPositivesCol = othersNonMutualPositivesScreenResult.createDataColumn("othersNonMutualPositivesCol").forReplicate(1);
+    othersNonMutualPositivesCol.makeBooleanPositiveIndicator();
     AssayWell othersNonMutualPositivesAssayWell1 = othersNonMutualPositivesScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
-    ResultValue othersNonMutualPositivesResultValue1 = othersNonMutualPositivesRvt.createResultValue(othersNonMutualPositivesAssayWell1, "false");
+    ResultValue othersNonMutualPositivesResultValue1 = othersNonMutualPositivesCol.createResultValue(othersNonMutualPositivesAssayWell1, "false");
     assert !othersNonMutualPositivesResultValue1.isPositive();
     AssayWell othersNonMutualPositivesAssayWell2 = othersNonMutualPositivesScreenResult.createAssayWell(well2, AssayWellType.EXPERIMENTAL);
-    ResultValue othersNonMutualPositivesResultValue2 = othersNonMutualPositivesRvt.createResultValue(othersNonMutualPositivesAssayWell2, "true");
+    ResultValue othersNonMutualPositivesResultValue2 = othersNonMutualPositivesCol.createResultValue(othersNonMutualPositivesAssayWell2, "true");
     assert othersNonMutualPositivesResultValue2.isPositive();
 
     // create another screen that *does* have mutual positives, as a sanity check
     Screen othersMutualPositivesScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.SMALL_MOLECULE);
     othersMutualPositivesScreen.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
     ScreenResult othersMutualPositivesScreenResult = othersMutualPositivesScreen.createScreenResult();
-    ResultValueType othersMutualPositivesRvt = othersMutualPositivesScreenResult.createResultValueType("othersMutualPositivesRvt").forReplicate(1);
-    othersMutualPositivesRvt.makeBooleanPositiveIndicator();
+    DataColumn othersMutualPositivesCol = othersMutualPositivesScreenResult.createDataColumn("othersMutualPositivesCol").forReplicate(1);
+    othersMutualPositivesCol.makeBooleanPositiveIndicator();
     AssayWell othersMutualPositivesAssayWell1 = othersMutualPositivesScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
-    ResultValue othersMutualPositivesResultValue1 = othersMutualPositivesRvt.createResultValue(othersMutualPositivesAssayWell1, "true");
+    ResultValue othersMutualPositivesResultValue1 = othersMutualPositivesCol.createResultValue(othersMutualPositivesAssayWell1, "true");
     assert othersMutualPositivesResultValue1.isPositive();
     AssayWell othersMutualPositivesAssayWell2 = othersMutualPositivesScreenResult.createAssayWell(well2, AssayWellType.EXPERIMENTAL);
-    ResultValue othersMutualPositivesResultValue2 = othersMutualPositivesRvt.createResultValue(othersMutualPositivesAssayWell2, "false");
+    ResultValue othersMutualPositivesResultValue2 = othersMutualPositivesCol.createResultValue(othersMutualPositivesAssayWell2, "false");
     assert !othersMutualPositivesResultValue2.isPositive();
     
     myScreen.getLabHead().addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES);

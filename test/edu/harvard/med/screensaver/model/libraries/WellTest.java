@@ -22,7 +22,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -66,13 +66,13 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
         ScreenResult screenResult = screen.getScreenResult();
         Well well = genericEntityDao.findEntityById(Well.class, screen.getScreenResult().getWells().first().getWellId());
         assertEquals("well.resultValues size",
-                     screenResult.getResultValueTypes().size(),
+                     screenResult.getDataColumns().size(),
                      well.getResultValues().size());
 
-        ResultValueType rvt = genericEntityDao.findEntityByProperty(ResultValueType.class, "name", "numeric_repl1");
-        ResultValue resultValue = well.getResultValues().get(rvt);
+        DataColumn col = genericEntityDao.findEntityByProperty(DataColumn.class, "name", "numeric_repl1");
+        ResultValue resultValue = well.getResultValues().get(col);
         assertNotNull(resultValue);
-        assertEquals(rvt, resultValue.getResultValueType());
+        assertEquals(col, resultValue.getDataColumn());
       }
     });
   }

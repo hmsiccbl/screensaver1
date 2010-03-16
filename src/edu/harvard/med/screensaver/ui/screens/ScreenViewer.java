@@ -112,8 +112,8 @@ public class ScreenViewer extends StudyViewer<Screen>
     getDao().needReadOnly(screen, "annotationTypes.annotationValues");
     getDao().needReadOnly(screen.getScreenResult(), "plateNumbers");
     getDao().needReadOnly(screen.getScreenResult(),
-                      "resultValueTypes.derivedTypes",
-                      "resultValueTypes.typesDerivedFrom");
+                      "dataColumns.derivedTypes",
+                      "dataColumns.typesDerivedFrom");
     getDao().needReadOnly(screen, 
                       Screen.pinTransferApprovalActivity.to(Activity.createdBy).getPath(),
                       Screen.pinTransferApprovalActivity.to(Activity.performedBy).getPath());

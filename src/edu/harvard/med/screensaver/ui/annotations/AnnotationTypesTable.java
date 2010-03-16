@@ -15,20 +15,14 @@ import java.util.List;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataTable;
 
-import org.apache.log4j.Logger;
-
 public class AnnotationTypesTable extends MetaDataTable<AnnotationType>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(AnnotationTypesTable.class);
-
-  // TODO: consider replacing DataHeaderRowDefinition with TableColumn<AnnotationType>
+  // TODO: consider replacing MetaDataTableRowDefinition with TableColumn<AnnotationType>
   @SuppressWarnings("unchecked")
   private final List<MetaDataTableRowDefinition<AnnotationType>> ANNOTATION_TYPE_ROW_DEFINTIIONS =
     Arrays.asList
     (
-     new MetaDataTableRowDefinition<AnnotationType>("description", "Description", "A description of the data header"),
+     new MetaDataTableRowDefinition<AnnotationType>("description", "Description", "A description of the data column"),
      new MetaDataTableRowDefinition<AnnotationType>("numeric", "Numeric", "Whether the annotation type has numeric data")
     );
 
@@ -37,12 +31,5 @@ public class AnnotationTypesTable extends MetaDataTable<AnnotationType>
   {
     return ANNOTATION_TYPE_ROW_DEFINTIIONS;
   }
-
-  // instance data members
-
-  // public constructors and methods
-
-  // private methods
-
 }
 

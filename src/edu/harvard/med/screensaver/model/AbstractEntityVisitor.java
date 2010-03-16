@@ -31,7 +31,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
@@ -99,7 +99,7 @@ public interface AbstractEntityVisitor
   public boolean visit(PlatesUsed entity);
   public boolean visit(Publication entity);
   public boolean visit(ResultValue entity);
-  public boolean visit(ResultValueType entity);
+  public boolean visit(DataColumn entity);
   public boolean visit(RNAiCherryPickRequest entity);
   public boolean visit(CherryPickScreening entity);
   public boolean visit(RNAiKnockdownConfirmation entity);

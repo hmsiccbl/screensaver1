@@ -49,7 +49,7 @@ import org.hibernate.annotations.OptimisticLock;
  * Provides the metadata for a subset of a
  * {@link edu.harvard.med.screensaver.model.screens.Screen Screen}'s
  * {@link ResultValue ResultValues}, all of which will have been produced "in the same
- * way". A <code>ResultValueType</code> can describe either how a subset of
+ * way". A <code>DataColumn</code> can describe either how a subset of
  * raw data values were generated via automated machine reading of assay plates,
  * or how a subset of derived data values were calculated. For raw data values,
  * the metadata describes the parameters of a single, physical machine read of a
@@ -62,15 +62,15 @@ import org.hibernate.annotations.OptimisticLock;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenResult.class)
-public class ResultValueType extends AbstractEntity<Integer> implements MetaDataType, Comparable
+public class DataColumn extends AbstractEntity<Integer> implements MetaDataType, Comparable
 {
-  // TODO: perhaps we should split ResultValueType into subclasses, one for raw
+  // TODO: perhaps we should split DataColumn into subclasses, one for raw
   // data value descriptions and one for derived data descriptions?
 
-  private static final Logger log = Logger.getLogger(ResultValueType.class);
+  private static final Logger log = Logger.getLogger(DataColumn.class);
   private static final long serialVersionUID = -2325466055774432202L;
 
-  public static final RelationshipPath<ResultValueType> ScreenResult = new RelationshipPath<ResultValueType>(ResultValueType.class, "screenResult");
+  public static final RelationshipPath<DataColumn> ScreenResult = new RelationshipPath<DataColumn>(DataColumn.class, "screenResult");
   
   private static final DataType DEFAULT_DATA_TYPE = DataType.NUMERIC; 
   private static final int DEFAULT_DECIMAL_PLACES = 3;
@@ -86,8 +86,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   private String _timePoint;
   private boolean _isDerived;
   private String _howDerived;
-  private SortedSet<ResultValueType> _typesDerivedFrom = new TreeSet<ResultValueType>();
-  private SortedSet<ResultValueType> _derivedTypes = new TreeSet<ResultValueType>();
+  private SortedSet<DataColumn> _typesDerivedFrom = new TreeSet<DataColumn>();
+  private SortedSet<DataColumn> _derivedTypes = new TreeSet<DataColumn>();
   private DataType _dataType;
   private Integer _decimalPlaces;
   private boolean _isFollowUpData;
@@ -100,24 +100,24 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
 
 
   /**
-   * Constructs an uninitialized <code>ResultValueType</code> object.
+   * Constructs an uninitialized <code>DataColumn</code> object.
    * @motivation for Hibernate and proxy/concrete subclass constructors
    */
-  protected ResultValueType() {}
+  protected DataColumn() {}
 
   /**
-   * Construct an initialized <code>ResultValueType</code>. Intended only for use by {@link ScreenResult}.
+   * Construct an initialized <code>DataColumn</code>. Intended only for use by {@link ScreenResult}.
    * @param screenResult the screen result
-   * @param name the name of this result value type
+   * @param name the name of this data column
    */
-  ResultValueType(ScreenResult screenResult, String name)
+  DataColumn(ScreenResult screenResult, String name)
   {
     if (screenResult == null) {
       throw new NullPointerException();
     }
     setScreenResult(screenResult);
     setName(name);
-    setOrdinal(getScreenResult().getResultValueTypes().size());
+    setOrdinal(getScreenResult().getDataColumns().size());
   }
 
   @Override
@@ -127,30 +127,30 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Defines natural ordering of <code>ResultValueType</code> objects, based
+   * Defines natural ordering of <code>DataColumn</code> objects, based
    * upon their ordinal field value. Note that natural ordering is only defined
-   * between <code>ResultValueType</code> objects that share the same parent
+   * between <code>DataColumn</code> objects that share the same parent
    * {@link ScreenResult}.
    */
   public int compareTo(Object that)
   {
-    return getOrdinal().compareTo(((ResultValueType) that).getOrdinal());
+    return getOrdinal().compareTo(((DataColumn) that).getOrdinal());
   }
 
   /**
-   * Get the id for the result value type.
-   * @return the id for the result value type
+   * Get the id for the data column.
+   * @return the id for the data column
    */
   @Id
   @org.hibernate.annotations.GenericGenerator(
-    name="result_value_type_id_seq",
+    name="data_column_id_seq",
     strategy="sequence",
     parameters = {
-      @org.hibernate.annotations.Parameter(name="sequence", value="result_value_type_id_seq")
+      @org.hibernate.annotations.Parameter(name="sequence", value="data_column_id_seq")
     }
   )
-  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="result_value_type_id_seq")
-  public Integer getResultValueTypeId()
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="data_column_id_seq")
+  public Integer getDataColumnId()
   {
     return getEntityId();
   }
@@ -163,7 +163,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
              cascade={})
   @JoinColumn(name="screenResultId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_result_value_type_to_screen_result")
+  @org.hibernate.annotations.ForeignKey(name="fk_data_column_to_screen_result")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public ScreenResult getScreenResult()
   {
@@ -171,10 +171,10 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Add a non-numeric, experimental type, non-excluded result value to the result value type.
+   * Add a non-numeric, experimental type, non-excluded result value to the data column.
    * @param well the well of the new ResultValue
    * @param value the value of the new ResultValue
-   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
+   * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell, String value)
   {
@@ -182,28 +182,28 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Add a non-numeric result value to the result value type.
+   * Add a non-numeric result value to the data column.
    * @param well the well of the new ResultValue
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
-   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
+   * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,
                                        String value,
                                        Boolean exclude)
   {
     if (isNumeric()) {
-      throw new DataModelViolationException("cannot add non-numeric result value to a numeric result value type");
+      throw new DataModelViolationException("cannot add non-numeric result value to a numeric data column");
     }
     return createResultValue(assayWell, value, null, exclude);
   }
 
   /**
-   * Add a numeric, experimental type, non-excluded result value to the result value type.
+   * Add a numeric, experimental type, non-excluded result value to the data column.
    * @param well the well of the new ResultValue
    * @param numericValue the value of the new ResultValue
-   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
+   * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,
                                        Double numericValue)
@@ -212,19 +212,19 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Add a numeric result value to the result value type.
+   * Add a numeric result value to the data column.
    * @param well the well of the new ResultValue
    * @param assayWellType the AssayWellType of the new ResultValue
    * @param numericValue the numeric value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
-   * @return a new ResultValue iff a result value did not already exist for the given well and result value type, otherwise null
+   * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,
                                        Double numericValue,
                                        boolean exclude)
   {
     if (!!!isNumeric()) {
-      throw new DataModelViolationException("cannot add numeric result vaue to a non-numeric result value type m");
+      throw new DataModelViolationException("cannot add numeric result vaue to a non-numeric data column");
     }
     return createResultValue(assayWell, null, numericValue, exclude);
   }
@@ -252,19 +252,19 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
     }
   }
   
-  public ResultValueType forReplicate(Integer replicateOrdinal)
+  public DataColumn forReplicate(Integer replicateOrdinal)
   {
     setReplicateOrdinal(replicateOrdinal);
     return this;
   }
 
-  public ResultValueType makeTextual()
+  public DataColumn makeTextual()
   {
     setDataType(DataType.TEXT);
     return this;
   }
   
-  public ResultValueType makeNumeric(Integer decimalPlaces)
+  public DataColumn makeNumeric(Integer decimalPlaces)
   {
     setDataType(DataType.NUMERIC);
     if (decimalPlaces == null || decimalPlaces < 0) {
@@ -274,53 +274,53 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
     return this;
   }
   
-  public ResultValueType makeBooleanPositiveIndicator()
+  public DataColumn makeBooleanPositiveIndicator()
   {
     setDataType(DataType.POSITIVE_INDICATOR_BOOLEAN);
     return this;
   }
   
-  public ResultValueType makePartitionPositiveIndicator()
+  public DataColumn makePartitionPositiveIndicator()
   {
     setDataType(DataType.POSITIVE_INDICATOR_PARTITION);
     return this;
   }
   
-  public ResultValueType makeDerived(String howDerived, Set<ResultValueType> derivedFrom)
+  public DataColumn makeDerived(String howDerived, Set<DataColumn> derivedFrom)
   {
     setDerived(true);
     setHowDerived(howDerived);
-    for (ResultValueType rvt : derivedFrom) {
-      addTypeDerivedFrom(rvt);;
+    for (DataColumn col : derivedFrom) {
+      addTypeDerivedFrom(col);;
     }
     return this;
   }
 
-  public ResultValueType forChannel(Integer channel)
+  public DataColumn forChannel(Integer channel)
   {
     setChannel(channel);
     return this;
   }
   
-  public ResultValueType forTimePoint(String timepoint)
+  public DataColumn forTimePoint(String timepoint)
   {
     setTimePoint(timepoint);
     return this;
   }
   
-  public ResultValueType forTimePointOrdinal(Integer timepointOrdinal)
+  public DataColumn forTimePointOrdinal(Integer timepointOrdinal)
   {
     setTimePointOrdinal(timePointOrdinal);
     return this;
   }
   
-  public ResultValueType forZdepthOrdinal(Integer zdepthOrdinal)
+  public DataColumn forZdepthOrdinal(Integer zdepthOrdinal)
   {
     setZdepthOrdinal(zdepthOrdinal);
     return this;
   }
   
-  public ResultValueType forPhenotype(String phenotype)
+  public DataColumn forPhenotype(String phenotype)
   {
     setAssayPhenotype(phenotype);
     return this;
@@ -342,8 +342,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Return true iff this result value type contains numeric result values.
-   * @return true iff this result value type contains numeric result values
+   * Return true iff this data column contains numeric result values.
+   * @return true iff this data column contains numeric result values
    */
   @Transient
   public boolean isNumeric()
@@ -352,13 +352,13 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get the ordinal position of this <code>ResultValueType</code> within its
+   * Get the ordinal position of this <code>DataColumn</code> within its
    * parent {@link ScreenResult}. This ordering is really only significant from
    * the standpoint of presenting a {@link ScreenResult} to the user
    * (historically speaking, it reflects the ordering found during spreadsheet
    * file import).
    * 
-   * @return the ordinal position of this <code>ResultValueType</code> within
+   * @return the ordinal position of this <code>DataColumn</code> within
    *         its parent {@link ScreenResult}
    */
   @Column(nullable=false, updatable=false)
@@ -370,7 +370,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
 
   /**
    * Get the replicate ordinal, a 1-based index indicating the assay replicate
-   * that produced this ResultValueType's data.
+   * that produced this DataColumn's data.
    * 
    * @return the replicate ordinal. May be null if assay replicates were not
    *         produced.
@@ -385,7 +385,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
 
   /**
    * Set the replicate ordinal, a 1-based index indicating the assay replicate
-   * that produced this ResultValueType's data. 
+   * that produced this DataColumn's data. 
    * 
    * @param replicateOrdinal the replicate ordinal. May be null if assay replicates
    * were not produced.
@@ -459,44 +459,44 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get the set of result value types that this result value type was derived from.
-   * By "derived", we mean that the calculated values of our {@link ResultValue ResultValues} depend upon
-   * the {@link ResultValue ResultValues} of other {@link ResultValueType ResultValueTypes}
+   * Get the set of data columns that this data column was derived from.
+   * By "derived", we mean that the calculated values of our {@link ResultValue}s depend upon
+   * the {@link ResultValue}s of other {@link DataColumn}s
    * (of the same stock plate well). The details of the derivation should be specified via
    * {@link #setHowDerived}.
-   * @return the set of result value types that this result value type was derived from
+   * @return the set of data columns that this data column was derived from
    */
   @ManyToMany(fetch=FetchType.LAZY)
   @JoinTable(
-    name="resultValueTypeDerivedFromLink",
-    joinColumns=@JoinColumn(name="derivedFromResultValueTypeId"),
-    inverseJoinColumns=@JoinColumn(name="derivedResultValueTypeId")
+    name="dataColumnDerivedFromLink",
+    joinColumns=@JoinColumn(name="derivedFromDataColumnId"),
+    inverseJoinColumns=@JoinColumn(name="derivedDataColumnId")
   )
-  @org.hibernate.annotations.ForeignKey(name="fk_derived_from_result_value_type")
+  @org.hibernate.annotations.ForeignKey(name="fk_derived_from_data_column")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
   @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="derivedTypes", singularPropertyName="typeDerivedFrom")
-  public SortedSet<ResultValueType> getTypesDerivedFrom()
+  public SortedSet<DataColumn> getTypesDerivedFrom()
   {
     return _typesDerivedFrom;
   }
 
   /**
-   * Add the result value type to the types derived from. Updates the 'derived'
+   * Add the data column to the types derived from. Updates the 'derived'
    * property and 'derived types' collection accordingly.
    * 
-   * @param typeDerivedFrom the result value type to add
-   * @return true iff the result value type was not already contained in the set
+   * @param typeDerivedFrom the data column to add
+   * @return true iff the data column was not already contained in the set
    *         of types derived from this type
    * @see #isDerived
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
    * @see #setDerived(boolean)
-   * @see #addDerivedType(ResultValueType)
-   * @see #removeDerivedType(ResultValueType)
-   * @see #removeTypeDerivedFrom(ResultValueType)
+   * @see #addDerivedType(DataColumn)
+   * @see #removeDerivedType(DataColumn)
+   * @see #removeTypeDerivedFrom(DataColumn)
    */
-  public boolean addTypeDerivedFrom(ResultValueType typeDerivedFrom) {
+  public boolean addTypeDerivedFrom(DataColumn typeDerivedFrom) {
     assert !(typeDerivedFrom.getDerivedTypes().contains(this) ^ getTypesDerivedFrom().contains(typeDerivedFrom)) :
       "asymmetric types derived from / derived types association encountered";
     if (getTypesDerivedFrom().add(typeDerivedFrom)) {
@@ -507,21 +507,21 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Remove the result value type from the types derived from. Updates the
+   * Remove the data column from the types derived from. Updates the
    * 'derived' property and 'derived types' collection accordingly.
    * 
-   * @param typeDerivedFrom the result value type to remove
-   * @return true iff the result value type was previously contained in the set
+   * @param typeDerivedFrom the data column to remove
+   * @return true iff the data column was previously contained in the set
    *         of types derived from this type
    * @see #isDerived
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
    * @see #setDerived(boolean)
-   * @see #addDerivedType(ResultValueType)
-   * @see #removeDerivedType(ResultValueType)
-   * @see #addTypeDerivedFrom(ResultValueType)
+   * @see #addDerivedType(DataColumn)
+   * @see #removeDerivedType(DataColumn)
+   * @see #addTypeDerivedFrom(DataColumn)
    */
-  public boolean removeTypeDerivedFrom(ResultValueType typeDerivedFrom) {
+  public boolean removeTypeDerivedFrom(DataColumn typeDerivedFrom) {
     assert ! (typeDerivedFrom.getDerivedTypes().contains(this) ^ getTypesDerivedFrom().contains(typeDerivedFrom)) :
       "asymmetric types derived from / derived types association encountered";
     if (getTypesDerivedFrom().remove(typeDerivedFrom)) {
@@ -532,46 +532,46 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get the set of result value types that derive from this result value type.
-   * @return the set of result value types that derive from this result value type
+   * Get the set of data columns that derive from this data column.
+   * @return the set of data columns that derive from this data column
    * @see #isDerived()
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
    * @see #setDerived(boolean)
-   * @see #addDerivedType(ResultValueType)
-   * @see #addTypeDerivedFrom(ResultValueType)
-   * @see #removeTypeDerivedFrom(ResultValueType)
+   * @see #addDerivedType(DataColumn)
+   * @see #addTypeDerivedFrom(DataColumn)
+   * @see #removeTypeDerivedFrom(DataColumn)
    */
   @ManyToMany(
     mappedBy="typesDerivedFrom",
-    targetEntity=ResultValueType.class,
+    targetEntity=DataColumn.class,
     fetch=FetchType.LAZY
   )
-  @org.hibernate.annotations.ForeignKey(name="fk_derived_result_value_type")
+  @org.hibernate.annotations.ForeignKey(name="fk_derived_data_column")
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
   @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="typesDerivedFrom")
-  public SortedSet<ResultValueType> getDerivedTypes()
+  public SortedSet<DataColumn> getDerivedTypes()
   {
     return _derivedTypes;
   }
 
   /**
-   * Add the result value type to the derived types. Updates the 'derived'
+   * Add the data column to the derived types. Updates the 'derived'
    * property and 'types derived from' collection accordingly.
    * 
-   * @param derivedType the result value type to add
-   * @return true iff the result value type was not already contained in the set
+   * @param derivedType the data column to add
+   * @return true iff the data column was not already contained in the set
    *         of derived types
    * @see #isDerived
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
    * @see #makeDerived(String, Set)
-   * @see #removeDerivedType(ResultValueType)
-   * @see #addTypeDerivedFrom(ResultValueType)
-   * @see #removeTypeDerivedFrom(ResultValueType)
+   * @see #removeDerivedType(DataColumn)
+   * @see #addTypeDerivedFrom(DataColumn)
+   * @see #removeTypeDerivedFrom(DataColumn)
    */
-  public boolean addDerivedType(ResultValueType derivedType) {
+  public boolean addDerivedType(DataColumn derivedType) {
     assert ! (derivedType.getTypesDerivedFrom().contains(this) ^ getDerivedTypes().contains(derivedType)) :
       "asymmetric derived types / types derived from association encountered";
     if (getDerivedTypes().add(derivedType)) {
@@ -583,21 +583,21 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Remove the result value type from the derived types. Updates the 'derived'
+   * Remove the data column from the derived types. Updates the 'derived'
    * property and 'types derived from' collection accordingly.
    * 
-   * @param derivedType the result value type to remove
-   * @return true iff the result value type was previously contained in the set
+   * @param derivedType the data column to remove
+   * @return true iff the data column was previously contained in the set
    *         of derived types
    * @see #isDerived
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
    * @see #setDerived(boolean)
-   * @see #addDerivedType(ResultValueType)
-   * @see #addTypeDerivedFrom(ResultValueType)
-   * @see #removeTypeDerivedFrom(ResultValueType)
+   * @see #addDerivedType(DataColumn)
+   * @see #addTypeDerivedFrom(DataColumn)
+   * @see #removeTypeDerivedFrom(DataColumn)
    */
-  public boolean removeDerivedType(ResultValueType derivedType) {
+  public boolean removeDerivedType(DataColumn derivedType) {
     assert ! (derivedType.getTypesDerivedFrom().contains(this) ^ getDerivedTypes().contains(derivedType)) :
       "asymmetric derived types / types derived from association encountered";
     if (getDerivedTypes().remove(derivedType)) {
@@ -609,8 +609,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get a description of this <code>ResultValueType</code>.
-   * @return a <code>String</code> description of this <code>ResultValueType</code>
+   * Get a description of this <code>DataColumn</code>.
+   * @return a <code>String</code> description of this <code>DataColumn</code>
    */
   @org.hibernate.annotations.Type(type="text")
   public String getDescription()
@@ -619,8 +619,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set a description of this <code>ResultValueType</code>.
-   * @param description the new description of this <code>ResultValueType</code>
+   * Set a description of this <code>DataColumn</code>.
+   * @param description the new description of this <code>DataColumn</code>
    */
   public void setDescription(String description)
   {
@@ -628,11 +628,11 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get then description of how this <code>ResultValueType</code> was derived
-   * from other <code>ResultValueType</code>s.
+   * Get then description of how this <code>DataColumn</code> was derived
+   * from other <code>DataColumn</code>s.
    * @return a <code>String</code> description of how this
-   *         <code>ResultValueType</code> was derived from other
-   *         <code>ResultValueType</code>s
+   *         <code>DataColumn</code> was derived from other
+   *         <code>DataColumn</code>s
    */
   @org.hibernate.annotations.Type(type="text")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makeDerived() instead */) 
@@ -642,10 +642,10 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set the description of how this <code>ResultValueType</code> was derived
-   * from other <code>ResultValueType</code>s.
-   * @param howDerived a description of how this <code>ResultValueType</code>
-   *          was derived from other <code>ResultValueType</code>s
+   * Set the description of how this <code>DataColumn</code> was derived
+   * from other <code>DataColumn</code>s.
+   * @param howDerived a description of how this <code>DataColumn</code>
+   *          was derived from other <code>DataColumn</code>s
    */
   private void setHowDerived(String howDerived)
   {
@@ -653,11 +653,11 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get whether this result value type is a positive indicator, meaning that
+   * Get whether this data column is a positive indicator, meaning that
    * its result value data is used to determine whether a given well is deemed a
    * positive result in the screen.
    *
-   * @return true iff this result value type is a positive indicator
+   * @return true iff this data column is a positive indicator
    */
   @Transient
   public boolean isPositiveIndicator()
@@ -678,10 +678,10 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get whether this result value type contains follow up data.
+   * Get whether this data column contains follow up data.
    * <p>
    * TODO: presumably generated during a subsequent library screening?
-   * @return true iff this result value type contains follow up data
+   * @return true iff this data column contains follow up data
    */
   @Column(nullable=false, name="isFollowUpData")
   public boolean isFollowUpData()
@@ -690,11 +690,11 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set whether this <code>ResultValueType</code> contains follow up data
+   * Set whether this <code>DataColumn</code> contains follow up data
    * <p>
    * TODO: presumably generated during a subsequent library screening?
    * @param isFollowUpData set to <code>true</code> iff this
-   *          <code>ResultValueType</code> contains follow up data
+   *          <code>DataColumn</code> contains follow up data
    */
   public void setFollowUpData(boolean isFollowUpData)
   {
@@ -702,8 +702,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get the name of this result value type.
-   * @return the name of this result value type
+   * Get the name of this data column.
+   * @return the name of this data column
    */
   @Column(nullable=false, updatable=false)
   @Immutable
@@ -714,8 +714,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set the name of this <code>ResultValueType</code>.
-   * @param name the name of this <code>ResultValueType</code>
+   * Set the name of this <code>DataColumn</code>.
+   * @param name the name of this <code>DataColumn</code>
    */
   private void setName(String name)
   {
@@ -725,7 +725,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   /**
    * Get the time point, indicating the time interval, relative to the time the
    * assay plate was first prepared, at which the {@link ResultValue ResultValues} for this
-   * <code>ResultValueType</code> were read. The format and units for the time point is arbitrary.
+   * <code>DataColumn</code> were read. The format and units for the time point is arbitrary.
    * @return the time point
    */
   @org.hibernate.annotations.Type(type="text")
@@ -739,7 +739,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   /**
    * Set the time point, indicating the time interval, relative to the time the
    * assay plate was first prepared, at which the {@link ResultValue ResultValues} for this
-   * <code>ResultValueType</code> were read. The format and units for the time point is arbitrary.
+   * <code>DataColumn</code> were read. The format and units for the time point is arbitrary.
    * @param timePoint the time point
    */
   private void setTimePoint(String timePoint)
@@ -748,19 +748,19 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get whether this result value type is derived from other result value
-   * types. Due to legacy screen result data, it is allowed that an RVT be
-   * derived, but have an empty set of "derived from" RVTs.
+   * Get whether this data column is derived from other result value
+   * types. Due to legacy screen result data, it is allowed that an DataColumn be
+   * derived, but have an empty set of "derived from" DataColumns.
    * 
-   * @return true iff this result value type is derived from other result value
+   * @return true iff this data column is derived from other result value
    *         types
    * @see #setDerived(boolean)
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
-   * @see #addDerivedType(ResultValueType)
-   * @see #removeDerivedType(ResultValueType)
-   * @see #addTypeDerivedFrom(ResultValueType)
-   * @see #removeTypeDerivedFrom(ResultValueType)
+   * @see #addDerivedType(DataColumn)
+   * @see #removeDerivedType(DataColumn)
+   * @see #addTypeDerivedFrom(DataColumn)
+   * @see #removeTypeDerivedFrom(DataColumn)
    */
   @Column(nullable=false, name="isDerived")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* uses makeDerived() instead */) 
@@ -770,20 +770,20 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set whether this <code>ResultValueType</code> is derived from other
-   * <code>ResultValueType</code>s. Due to legacy screen result data, it is
-   * allowed that an RVT be derived, but have an empty set of "derived from"
-   * RVTs.
+   * Set whether this <code>DataColumn</code> is derived from other
+   * <code>DataColumn</code>s. Due to legacy screen result data, it is
+   * allowed that an DataColumn be derived, but have an empty set of "derived from"
+   * DataColumns.
    * 
-   * @param isDerived <code>true</code> iff this <code>ResultValueType</code>
-   *          is derived from other <code>ResultValueType</code>s.
+   * @param isDerived <code>true</code> iff this <code>DataColumn</code>
+   *          is derived from other <code>DataColumn</code>s.
    * @see #isDerived
    * @see #getDerivedTypes()
    * @see #getTypesDerivedFrom()
-   * @see #addDerivedType(ResultValueType)
-   * @see #removeDerivedType(ResultValueType)
-   * @see #addTypeDerivedFrom(ResultValueType)
-   * @see #removeTypeDerivedFrom(ResultValueType)
+   * @see #addDerivedType(DataColumn)
+   * @see #removeDerivedType(DataColumn)
+   * @see #addTypeDerivedFrom(DataColumn)
+   * @see #removeTypeDerivedFrom(DataColumn)
    */
   private void setDerived(boolean isDerived)
   {
@@ -792,9 +792,9 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
 
   /**
    * Get the number of ResultValues that are positives, if this is an
-   * ActivityIndicator ResultValueType.
+   * ActivityIndicator DataColumn.
    * @return the number of ResultValues that are positives, if this is an
-   *         ActivityIndicator ResultValueType; otherwise null
+   *         ActivityIndicator DataColumn; otherwise null
    */
   @edu.harvard.med.screensaver.model.annotations.Column(
     hasNonconventionalSetterMethod=true,
@@ -823,7 +823,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Get a mapping from the well ids to the result values for this result value type.
+   * Get a mapping from the well ids to the result values for this data column.
    * <p>
    * WARNING: obtaining an iterator on the returned Map will cause Hibernate
    * to load all ResultValues. If you want to take advantage of extra-lazy
@@ -832,11 +832,11 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * <p>
    * WARNING: removing an element from this map is not supported; doing so
    * breaks ScreenResult.plateNumbers semantics.
-   * @return a mapping from the wells to result values for this result value type
+   * @return a mapping from the wells to result values for this data column
    * @motivation for hibernate
    */
   @OneToMany(fetch=FetchType.LAZY,
-             mappedBy="resultValueType")
+             mappedBy="dataColumn")
   @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.PERSIST })
   //@org.hibernate.annotations.MapKey(columns={ @Column(name="well_id") })
   @OptimisticLock(excluded=true)
@@ -851,7 +851,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
   
   /**
-   * @deprecated Use HQL to retrieve <code>ResultValueType.resultValues</code>,
+   * @deprecated Use HQL to retrieve <code>DataColumn.resultValues</code>,
    *             as needed. Not performant for large collection of ResultValues,
    *             and has excessive memory requirements. For legacy code only.
    */
@@ -867,13 +867,13 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set the id for the result value type.
-   * @param resultValueTypeId the new id for the result value type
+   * Set the id for the data column.
+   * @param dataColumnId the new id for the data column
    * @motivation for hibernate
    */
-  private void setResultValueTypeId(Integer resultValueTypeId)
+  private void setDataColumnId(Integer dataColumnId)
   {
-    setEntityId(resultValueTypeId);
+    setEntityId(dataColumnId);
   }
 
   /**
@@ -887,8 +887,8 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set the version number of the <code>ResultValueType</code>
-   * @param version the new version number for the <code>ResultValueType</code>
+   * Set the version number of the <code>DataColumn</code>
+   * @param version the new version number for the <code>DataColumn</code>
    * @motivation for hibernate
    */
   private void setVersion(Integer version)
@@ -906,9 +906,9 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set the result values for this result value type.
+   * Set the result values for this data column.
    * 
-   * @param resultValue the new result values for this result value type
+   * @param resultValue the new result values for this data column
    * @motivation for hibernate
    */
   private void setResultValues(Collection<ResultValue> resultValues)
@@ -917,7 +917,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Add a result value to the result value type. If the <code>value</code> parameter is not
+   * Add a result value to the data column. If the <code>value</code> parameter is not
    * null, then the <code>numericValue</code> parameter should be null, and the result value
    * to add is non-numeric. Otherwise, <code>numericValue</code> should be non-null.
    * @param well the well of the new ResultValue
@@ -925,7 +925,7 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
    * @param value the value of the new ResultValue
    * @param numericValue the numeric value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
-   * @return a new ResultValue iff a result value did not already exist for the given well and result value type
+   * @return a new ResultValue iff a result value did not already exist for the given well and data column
    */
   private ResultValue createResultValue(
     AssayWell assayWell,                                        
@@ -934,10 +934,10 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
     boolean exclude)
   {
     if (isNumeric() && value != null) {
-      throw new DataModelViolationException("cannot add a non-numeric value to a numeric ResultValueType");
+      throw new DataModelViolationException("cannot add a non-numeric value to a numeric DataColumn");
     }
     else if (! isNumeric() && numericValue != null) {
-      throw new DataModelViolationException("cannot add a numeric value to a non-numeric ResultValueType");
+      throw new DataModelViolationException("cannot add a numeric value to a non-numeric DataColumn");
     }
 
     ResultValue resultValue = new ResultValue(this,
@@ -978,34 +978,34 @@ public class ResultValueType extends AbstractEntity<Integer> implements MetaData
   }
 
   /**
-   * Set the set of result value types that this result value type was derived from. The caller
+   * Set the set of data columns that this data column was derived from. The caller
    * of this method must ensure bi-directionality is preserved.
-   * @param  the set of result value types that this result value type was derived from
+   * @param  the set of data columns that this data column was derived from
    * @motivation for hibernate
    */
-  private void setTypesDerivedFrom(SortedSet<ResultValueType> derivedFrom)
+  private void setTypesDerivedFrom(SortedSet<DataColumn> derivedFrom)
   {
     _typesDerivedFrom = derivedFrom;
   }
 
   /**
-   * Set the set of result value types that derive from this result value type. The caller of
+   * Set the set of data columns that derive from this data column. The caller of
    * this method must ensure bi-directionality is preserved.
-   * @param  the set of result value types that derive from this result value type
+   * @param  the set of data columns that derive from this data column
    * @motivation for hibernate
    */
-  private void setDerivedTypes(SortedSet<ResultValueType> derivedTypes)
+  private void setDerivedTypes(SortedSet<DataColumn> derivedTypes)
   {
     _derivedTypes = derivedTypes;
   }
 
   /**
    * Determine whether a result value is to be considered a positive, using its
-   * value and this ResultValueType's definition of what constitutes a positive.
-   * Only applicable for ResultValueTypes that are positive indicators.
+   * value and this DataColumn's definition of what constitutes a positive.
+   * Only applicable for DataColumns that are positive indicators.
    *
    * @param rv
-   * @return true iff ResultValueType is a positive indicator, result
+   * @return true iff DataColumn is a positive indicator, result
    *         value is for an experimental well, result value is not excluded,
    *         and the value of the result value meets the positive indicator type's
    *         criteria.

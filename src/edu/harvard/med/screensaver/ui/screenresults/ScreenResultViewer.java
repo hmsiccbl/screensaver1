@@ -15,7 +15,7 @@ import java.util.Collections;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
 import edu.harvard.med.screensaver.ui.EditResult;
@@ -44,7 +44,7 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
 
   private ScreenResultsDAO _screenResultsDao;
-  private ResultValueTypesTable _resultValueTypesTable;
+  private ScreenResultDataColumnsTables _screenResultDataColumnsTables;
   private WellSearchResults _wellSearchResults;
   private CellHts2Annotator _cellHts2Annotator;
 
@@ -67,7 +67,7 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
                             GenericEntityDAO dao,
                             ScreenResultsDAO screenResultsDao,
                             ScreenViewer screenViewer,
-                            ResultValueTypesTable resultValueTypesTable,
+                            ScreenResultDataColumnsTables screenResultDataColumnsTables,
                             WellSearchResults wellSearchResults,
                             CellHts2Annotator cellHts2Annotator,
                             CellHTS2Runner cellHTS2Runner)
@@ -79,13 +79,13 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
           dao);
     _screenResultsDao = screenResultsDao;
     _screenViewer = screenViewer;
-    _resultValueTypesTable = resultValueTypesTable;
+    _screenResultDataColumnsTables = screenResultDataColumnsTables;
     _wellSearchResults = wellSearchResults;
     _cellHts2Annotator = cellHts2Annotator;
     _cellHTS2Runner = cellHTS2Runner;
 
     getIsPanelCollapsedMap().put("screenResultSummary", false);
-    getIsPanelCollapsedMap().put("dataHeadersTable", true);
+    getIsPanelCollapsedMap().put("dataColumnsTable", true);
     getIsPanelCollapsedMap().put("dataTable", true);
     getIsPanelCollapsedMap().put("heatMaps", true);
   }
@@ -118,19 +118,19 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
     getIsPanelCollapsedMap().put("heatMaps", true);
 
     if (screenResult == null) {
-      _resultValueTypesTable.initialize(Collections.<ResultValueType>emptyList());
+      _screenResultDataColumnsTables.initialize(Collections.<DataColumn>emptyList());
     }
     else {
-      _resultValueTypesTable.initialize(screenResult.getResultValueTypesList());
+      _screenResultDataColumnsTables.initialize(screenResult.getDataColumnsList());
       _cellHTS2ReportFilePath = ScreensaverProperties.getProperty("cellHTS2report.filepath.base") + 
          ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + 
          screenResult.getScreenResultId();
     }
   }
 
-  public ResultValueTypesTable getDataHeadersTable()
+  public ScreenResultDataColumnsTables getDataColumnsTable()
   {
-    return _resultValueTypesTable;
+    return _screenResultDataColumnsTables;
   }
 
   public WellSearchResults getResultValueTable()

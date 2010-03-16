@@ -66,7 +66,7 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   private Well _libraryWell;
   private AssayWellType _assayWellType;
   private boolean _isPositive;
-  private Map<ResultValueType,ResultValue> _resultValues = new HashMap<ResultValueType,ResultValue>();
+  private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
 
 
   /*public*/ AssayWell(ScreenResult screenResult, Well libraryWell, AssayWellType assayWellType)
@@ -173,7 +173,7 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
 
   /**
    * Get whether this result value indicates a positive. Returns false if the
-   * {@link #getResultValueType() ResultValueType} is not a positive indicator.
+   * {@link #getDataColumn() DataColumn} is not a positive indicator.
    *
    * @return true whenever this result value is a positive indicator
    */
@@ -185,7 +185,7 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   }
 
   // TODO
-//  private void setResultValues(Map<ResultValueType,ResultValue> resultValues)
+//  private void setResultValues(Map<DataColumn,ResultValue> resultValues)
 //  {
 //    _resultValues = resultValues;
 //  }
@@ -195,8 +195,8 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
 //   * @return the set of result values
 //   */
 //  @OneToMany(fetch=FetchType.LAZY, mappedBy="assayWell")
-//  @MapKeyManyToMany(joinColumns={ @JoinColumn(name="resultValueTypeId") }, targetEntity=ResultValueType.class)
-//  public Map<ResultValueType,ResultValue> getResultValues()
+//  @MapKeyManyToMany(joinColumns={ @JoinColumn(name="dataColumnId") }, targetEntity=DataColumn.class)
+//  public Map<DataColumn,ResultValue> getResultValues()
 //  {
 //    return _resultValues;
 //  }

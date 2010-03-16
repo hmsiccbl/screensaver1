@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -247,22 +247,22 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
   }
 
-  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, ResultValueType rvt)
+  public Map<WellKey,ResultValue> findResultValuesByPlate(Integer plateNumber, DataColumn col)
   {
     return null;
   }
 
-  public Map<WellKey,List<ResultValue>> findResultValuesByPlate(Integer plateNumber, List<ResultValueType> rvt)
+  public Map<WellKey,List<ResultValue>> findResultValuesByPlate(Integer plateNumber, List<DataColumn> col)
   {
     return null;
   }
 
-  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(List<ResultValueType> selectedRvts,
+  public Map<WellKey,List<ResultValue>> findSortedResultValueTableByRange(List<DataColumn> selectedCols,
                                                                           int sortBy,
                                                                           SortDirection sortDirection,
                                                                           int fromIndex,
                                                                           Integer rowsToFetch,
-                                                                          ResultValueType positivesOnlyRvt,
+                                                                          DataColumn positivesOnlyCol,
                                                                           Integer plateNumber)
   {
     return null;

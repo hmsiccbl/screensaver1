@@ -17,12 +17,12 @@ TODO:
 -->
 
 	<t:outputText
-		value="Heat maps not available (there are no data headers with numeric data)"
-		rendered="#{empty heatMapViewer.screenResult.numericResultValueTypes}"
+		value="Heat maps not available (there are no data columns with numeric data)"
+		rendered="#{empty heatMapViewer.screenResult.numericDataColumns}"
 		styleClass="label" />
 
 	<t:panelGrid columns="1"
-		rendered="#{!empty heatMapViewer.screenResult.numericResultValueTypes}">
+		rendered="#{!empty heatMapViewer.screenResult.numericDataColumns}">
 
 		<t:panelGroup styleClass="commandPanel">
 			<t:outputLabel for="plateNumber" value="Plate:" styleClass="label" />
@@ -64,12 +64,12 @@ TODO:
 			styleClass="heatMapsTable">
 			<t:column>
 				<t:panelGrid>
-					<t:outputLabel for="dataHeader" value="Data header:"
+					<t:outputLabel for="dataColumn" value="Data column:"
 						styleClass="label" />
-					<t:selectOneMenu id="dataHeader"
-						value="#{heatMapConfig.dataHeaders.value}" required="true"
+					<t:selectOneMenu id="dataColumn"
+						value="#{heatMapConfig.dataColumns.value}" required="true"
 						styleClass="inputText">
-						<f:selectItems value="#{heatMapConfig.dataHeaders.selectItems}" />
+						<f:selectItems value="#{heatMapConfig.dataColumns.selectItems}" />
 					</t:selectOneMenu>
 
 					<t:outputLabel for="scoringType" value="Scoring:"

@@ -49,7 +49,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -95,8 +95,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private static final String WELL_COLUMNS_GROUP = TableColumn.UNGROUPED;
   private static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent";
   private static final String COMPOUND_COLUMNS_GROUP = "Compound";
-  private static final String OUR_DATA_HEADERS_COLUMNS_GROUP = "Data Headers";
-  private static final String OTHER_DATA_HEADERS_COLUMNS_GROUP = "Data Headers (Other Screen Results)";
+  private static final String OUR_DATA_COLUMNS_GROUP = "Data Columns";
+  private static final String OTHER_DATA_COLUMNS_GROUP = "Data Columns (Other Screen Results)";
   private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations";
   private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations (Other Studies)";
 
@@ -231,9 +231,9 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         screenResult,
         _dao));
       
-      // show columns for this screenResult's data headers
-      for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-        TableColumn<Well,?> column = getColumnManager().getColumn(makeColumnName(rvt, screenResult.getScreen().getScreenNumber()));
+      // show columns for this screenResult's data columns
+      for (DataColumn dataColumn : screenResult.getDataColumns()) {
+        TableColumn<Well,?> column = getColumnManager().getColumn(makeColumnName(dataColumn, screenResult.getScreen().getScreenNumber()));
         if (column != null) {
           column.setVisible(true);
         }
@@ -274,7 +274,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       _dao));
     getColumnManager().getColumn("Vendor").setVisible(true);
     getColumnManager().getColumn("Vendor ID").setVisible(true);
-    // show columns for this screenResult's data headers
+    // show columns for this screenResult's data columns
     for (AnnotationType at : study.getAnnotationTypes()) {
       getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getStudyNumber())).setVisible(true);
     }
@@ -321,7 +321,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     buildReagentPropertyColumns(columns);
     buildCompoundPropertyColumns(columns);
     buildSilencingReagentPropertyColumns(columns);
-    buildResultValueTypeColumns(columns);
+    buildDataColumns(columns);
     buildAnnotationTypeColumns(columns);
     return columns;
   }
@@ -722,47 +722,47 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     columns.get(columns.size() - 1).setVisible(false);
   }
 
-  private void buildResultValueTypeColumns(List<TableColumn<Well,?>> columns)
+  private void buildDataColumns(List<TableColumn<Well,?>> columns)
   {
     List<TableColumn<Well,?>> otherColumns = Lists.newArrayList();
     boolean isAssayWellTypeColumnCreated = false; 
     
-    for (Triple<ResultValueType,Integer,String> rvtAndScreenNumberAndTitle : findResultValueTypesForScreenResultsWithMutualPlates()) {
-      final ResultValueType rvt = rvtAndScreenNumberAndTitle.getFirst();
-      if (rvt.isRestricted()) {
+    for (Triple<DataColumn,Integer,String> columnAndScreenNumberAndTitle : findDataColumnsForScreenResultsWithMutualPlates()) {
+      final DataColumn dataColumn = columnAndScreenNumberAndTitle.getFirst();
+      if (dataColumn.isRestricted()) {
         continue;
       }
-      Integer screenNumber = rvtAndScreenNumberAndTitle.getSecond();
-      String screenTitle = rvtAndScreenNumberAndTitle.getThird();
+      Integer screenNumber = columnAndScreenNumberAndTitle.getSecond();
+      String screenTitle = columnAndScreenNumberAndTitle.getThird();
 
       TableColumn<Well,?> column;
-//      if (rvt.isPositiveIndicator() &&
-//        rvt.getPositiveIndicatorType() == DataType.BOOLEAN) {
+//      if (col.isPositiveIndicator() &&
+//        col.getPositiveIndicatorType() == DataType.BOOLEAN) {
 //          column = new BooleanEntityColumn<Well>(
-//            new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "positive", rvt),
-//            makeColumnName(rvt, screenNumber),
-//            rvt.getDescription(),
+//            new PropertyPath<Well>(Well.class, "resultValues[dataColumn]", "positive", dataColumn),
+//            makeColumnName(dataColumn, screenNumber),
+//            dataColumn.getDescription(),
 //            columnGroup) {
 //            @Override
 //            public Boolean getCellValue(Well well)
 //            {
-//              ResultValue rv = well.getResultValues().get(rvt);
+//              ResultValue rv = well.getResultValues().get(dataColumn);
 //              return rv == null ? null : rv.isPositive();
 //            }
 //          };
 //        }
-//        else if (rvt.getPositiveIndicatorType() == DataType.NUMERICAL) {
+//        else if (dataColumn.getPositiveIndicatorType() == DataType.NUMERICAL) {
 //          column = new FixedDecimalEntityColumn<Well>(
-//            new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "numericValue", rvt),
-//            makeColumnName(rvt, screenNumber),
-//            rvt.getDescription(),
+//            new PropertyPath<Well>(Well.class, "resultValues[dataColumn]", "numericValue", dataColumn),
+//            makeColumnName(dataColumn, screenNumber),
+//            dataColumn.getDescription(),
 //            columnGroup) {
 //            @Override
 //            public BigDecimal getCellValue(Well well)
 //            {
 //              // TODO: move this code to ResultValue
 //              BigDecimal value = null;
-//              ResultValue rv = well.getResultValues().get(rvt);
+//              ResultValue rv = well.getResultValues().get(dataColumn);
 //              if (rv != null && rv.getNumericValue() != null) {
 //                value = new BigDecimal(rv.getNumericValue());
 //                Integer scale = rv.getNumericDecimalPrecision();
@@ -775,18 +775,18 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 //            }
 //          };
 //        }
-//        else if (rvt.getPositiveIndicatorType() == DataType.PARTITION) {
+//        else if (dataColumn.getPositiveIndicatorType() == DataType.PARTITION) {
 //          column = new VocabularyEntityColumn<Well,PartitionedValue>(
-//            new PropertyPath<Well>(Well.class, "resultValues[resultValueType]", "value", rvt),
-//            makeColumnName(rvt, screenNumber) + " Positive",
-//            "Positive flag for " + makeColumnName(rvt, screenNumber),
+//            new PropertyPath<Well>(Well.class, "resultValues[dataColumn]", "value", dataColumn),
+//            makeColumnName(dataColumn, screenNumber) + " Positive",
+//            "Positive flag for " + makeColumnName(dataColumn, screenNumber),
 //            columnGroup,
 //            null,
 //            PartitionedValue.values()) {
 //            @Override
 //            public PartitionedValue getCellValue(Well well)
 //            {
-//              ResultValue rv = well.getResultValues().get(rvt);
+//              ResultValue rv = well.getResultValues().get(dataColumn);
 //              if (rv != null) {
 //                return PartitionedValue.lookupByValue(rv.getValue());
 //              }
@@ -799,16 +799,16 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
 //        }
 //      }
 //      else
-      if (rvt.isNumeric()) {
+      if (dataColumn.isNumeric()) {
         column = new RealEntityColumn<Well>(
-          Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), rvt).toProperty("numericValue"),
-          makeColumnName(rvt, screenNumber),
-          makeColumnDescription(rvt, screenNumber, screenTitle),
+          Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("numericValue"),
+          makeColumnName(dataColumn, screenNumber),
+          makeColumnDescription(dataColumn, screenNumber, screenTitle),
           makeScreenColumnGroup(screenNumber, screenTitle)) {
           @Override
           public Double getCellValue(Well well)
           {
-            ResultValue rv = well.getResultValues().get(rvt);
+            ResultValue rv = well.getResultValues().get(dataColumn);
             if (rv == null || rv.isRestricted()) { 
               return null;
             }
@@ -822,20 +822,20 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
             // only allowed to share mutual positives; in this case we do not
             // allow sorting or filtering on this column, since it would allow
             // hidden values to be inferred by the user
-            return !!!rvt.getScreenResult().isRestricted(); 
+            return !!!dataColumn.getScreenResult().isRestricted(); 
           }
         };
       }
       else {
         column = new TextEntityColumn<Well>(
-          Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), rvt).toProperty("value"),
-          makeColumnName(rvt, screenNumber),
-          makeColumnDescription(rvt, screenNumber, screenTitle),
+          Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("value"),
+          makeColumnName(dataColumn, screenNumber),
+          makeColumnDescription(dataColumn, screenNumber, screenTitle),
           makeScreenColumnGroup(screenNumber, screenTitle)) {
           @Override
           public String getCellValue(Well well)
           {
-            ResultValue rv = well.getResultValues().get(rvt);
+            ResultValue rv = well.getResultValues().get(dataColumn);
             if (rv == null || rv.isRestricted()) { 
               return null;
             }
@@ -849,18 +849,18 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
             // only allowed to share mutual positives; in this case we do not
             // allow sorting or filtering on this column, since it would allow
             // hidden values to be inferred by the user
-            return !!!rvt.getScreenResult().isRestricted(); 
+            return !!!dataColumn.getScreenResult().isRestricted(); 
           }
         };
       }
 
-      // request eager fetching of resultValueType, since Hibernate will otherwise fetch these with individual SELECTs
+      // request eager fetching of dataColumn, since Hibernate will otherwise fetch these with individual SELECTs
       // we also need to eager fetch all the way "up" to Screen, for data access policy checks
-      ((HasFetchPaths<Well>) column).addRelationshipPath(Well.resultValues.to(ResultValue.ResultValueType).to(ResultValueType.ScreenResult).to(ScreenResult.screen));
+      ((HasFetchPaths<Well>) column).addRelationshipPath(Well.resultValues.to(ResultValue.DataColumn).to(DataColumn.ScreenResult).to(ScreenResult.screen));
 
-      if (!isAssayWellTypeColumnCreated && column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
+      if (!isAssayWellTypeColumnCreated && column.getGroup().equals(OUR_DATA_COLUMNS_GROUP)) {
         columns.add(new EnumEntityColumn<Well,AssayWellType>(
-          Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), rvt).toProperty("assayWellType"),
+          Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("assayWellType"),
           "Assay Well Type",
           "The type of assay well, e.g., 'Experimental', 'Empty', 'Library Control', " +
           "'Assay Positive Control', 'Assay Control', 'Buffer', etc.",
@@ -869,12 +869,12 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           @Override
           public AssayWellType getCellValue(Well well)
           {
-            return well.getResultValues().get(rvt) == null ? null : well.getResultValues().get(rvt).getAssayWellType();
+            return well.getResultValues().get(dataColumn) == null ? null : well.getResultValues().get(dataColumn).getAssayWellType();
           }
         });
         isAssayWellTypeColumnCreated = true;
       }
-      if (column.getGroup().equals(OUR_DATA_HEADERS_COLUMNS_GROUP)) {
+      if (column.getGroup().equals(OUR_DATA_COLUMNS_GROUP)) {
         columns.add(column);
         column.setVisible(true);
       }
@@ -890,10 +890,10 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   {
     String columnGroup;
     if (_screenResult != null && _screenResult.getScreen().getScreenNumber().equals(screenNumber)) {
-      columnGroup = OUR_DATA_HEADERS_COLUMNS_GROUP;
+      columnGroup = OUR_DATA_COLUMNS_GROUP;
     }
     else {
-      columnGroup = OTHER_DATA_HEADERS_COLUMNS_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + screenNumber + " (" + screenTitle + ")";
+      columnGroup = OTHER_DATA_COLUMNS_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + screenNumber + " (" + screenTitle + ")";
     }
     return columnGroup;
   }
@@ -911,19 +911,19 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   }
   
   /**
-   * @return a list of RVTs that have RVs for plates in common with the wells of this search result, ordered by screen number and RVT ordinal
+   * @return a list of DataColumns that have RVs for plates in common with the wells of this search result, ordered by screen number and DataColumn ordinal
    */
-  private List<Triple<ResultValueType,Integer,String>> findResultValueTypesForScreenResultsWithMutualPlates()
+  private List<Triple<DataColumn,Integer,String>> findDataColumnsForScreenResultsWithMutualPlates()
   {
     return _dao.runQuery(new Query() {
-      public List<Triple<ResultValueType,Integer,String>> execute(Session session)
+      public List<Triple<DataColumn,Integer,String>> execute(Session session)
       {
         HqlBuilder hql = new HqlBuilder();
         hql.distinctProjectionValues();
-        // note: rvt->screenResult left fetch join eager fetches as a courtesy to caller, which needs it in impl of TableColumn.isSortableSearchable
-        hql.from(ResultValueType.class, "rvt").from("rvt", "screenResult", "sr", JoinType.LEFT_FETCH).from("sr", "screen", "s", JoinType.INNER);
-        hql.select("rvt").select("s", "screenNumber").select("s", "title");
-        hql.orderBy("s", "screenNumber").orderBy("rvt", "ordinal");
+        // note: dataColumn->screenResult left fetch join eager fetches as a courtesy to caller, which needs it in impl of TableColumn.isSortableSearchable
+        hql.from(DataColumn.class, "col").from("col", "screenResult", "sr", JoinType.LEFT_FETCH).from("sr", "screen", "s", JoinType.INNER);
+        hql.select("col").select("s", "screenNumber").select("s", "title");
+        hql.orderBy("s", "screenNumber").orderBy("col", "ordinal");
 
         if (_mode == WellSearchResultMode.SCREEN_RESULT_WELLS) {
           if (_screenResult == null) {
@@ -949,14 +949,14 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           hql.whereIn("p", _plateNumbers);
         }
         else {
-          // find all result value types, no additional HQL needed
+          // find all data columns, no additional HQL needed
         }
         if (log.isDebugEnabled()) {
-          log.debug("findValidResultValueTypes query: " + hql.toHql());
+          log.debug("findValidDataColumns query: " + hql.toHql());
         }
         org.hibernate.Query query = hql.toQuery(session, true);
-        query.setResultTransformer(new MetaDataColumnResultTransformer<ResultValueType>());
-        List<Triple<ResultValueType,Integer,String>> result = query.list();
+        query.setResultTransformer(new MetaDataColumnResultTransformer<DataColumn>());
+        List<Triple<DataColumn,Integer,String>> result = query.list();
         return result;
       }
     });
@@ -1183,7 +1183,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   
   static String makeColumnName(MetaDataType mdt, Integer parentIdentifier)
   {
-    // note: replacing "_" with white space allows column headers to wrap, creating narrower columns
+    // note: replacing "_" with white space allows column name labels to wrap, creating narrower columns
     return String.format("%s [%d]", mdt.getName().replaceAll("_", " "), parentIdentifier);
   }
 

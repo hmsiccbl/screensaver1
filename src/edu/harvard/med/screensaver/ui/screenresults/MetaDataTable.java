@@ -20,7 +20,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.util.HtmlUtils;
 
@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Backing bean for a "meta data" table, which displays information for a set of
- * data types (e.g. {@link ResultValueType} or {@link AnnotationType}), one data
+ * data types (e.g. {@link DataColumn} or {@link AnnotationType}), one data
  * type per column, one row per data type attribute.
  *
  * @motivation Encapsulate common functionality for ScreenResultViewer's Data

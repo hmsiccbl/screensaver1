@@ -53,7 +53,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
@@ -382,28 +382,28 @@ public class TestDataFactory
 //      public AbstractEntity createEntity(AbstractEntity relatedEntity)
 //        throws DomainModelDefinitionException
 //      {
-//        if (relatedEntity instanceof ResultValueType) {
-//          ResultValueType rvt = (ResultValueType) relatedEntity;
-//          AssayWell assayWell = newInstance(AssayWell.class, rvt.getScreenResult());
-//          if (rvt.isNumeric()) {
-//            return rvt.createResultValue(assayWell, getTestValueForType(Double.class));
+//        if (relatedEntity instanceof DataColumn) {
+//          DataColumn col = (DataColumn) relatedEntity;
+//          AssayWell assayWell = newInstance(AssayWell.class, col.getScreenResult());
+//          if (col.isNumeric()) {
+//            return col.createResultValue(assayWell, getTestValueForType(Double.class));
 //          }
 //          else {
-//            return rvt.createResultValue(assayWell, getTestValueForType(String.class));
+//            return col.createResultValue(assayWell, getTestValueForType(String.class));
 //          }
 //        }
-//        ResultValueType rvt = newInstance(ResultValueType.class).makeNumeric(3);
-//        return newInstance(ResultValue.class, rvt);
+//        DataColumn col = newInstance(DataColumn.class).makeNumeric(3);
+//        return newInstance(ResultValue.class, col);
 //      }
 //    });
 //    
-    _entityFactoryMap.put(ResultValueType.class, new EntityFactory() {
+    _entityFactoryMap.put(DataColumn.class, new EntityFactory() {
       public AbstractEntity createEntity(AbstractEntity relatedEntity)
         throws DomainModelDefinitionException
       {
-        // force usage of numeric RVT, so that numeric properties can be tested (which also covers non-numeric RVT behaviors)
-        ResultValueType resultValueType = newInstance(ResultValueType.class, newInstance(ScreenResult.class)).makeNumeric(3);
-        return resultValueType;
+        // force usage of numeric DataColumn, so that numeric properties can be tested (which also covers non-numeric DataColumn behaviors)
+        DataColumn dataColumn = newInstance(DataColumn.class, newInstance(ScreenResult.class)).makeNumeric(3);
+        return dataColumn;
       }
     });
     

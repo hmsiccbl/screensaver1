@@ -35,7 +35,7 @@ import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
@@ -255,7 +255,7 @@ public class HeatMapViewer extends AbstractBackingBean
     int heatMapIndex = _heatMapConfigurationsDataModel.getRowIndex();
     HeatMapConfiguration heatMapConfiguration = _heatMapConfigurations.get(heatMapIndex);
     StringBuilder title = new StringBuilder();
-    title.append(heatMapConfiguration.getDataHeaders().getSelection().getName());
+    title.append(heatMapConfiguration.getDataColumns().getSelection().getName());
     title.append(": ");
     title.append(heatMapConfiguration.getScoringType().getSelection().toString());
     List<Filter<Pair<WellKey,ResultValue>>> filterSelections = heatMapConfiguration.getExcludedWellFilters().getSelections();
@@ -296,11 +296,11 @@ public class HeatMapViewer extends AbstractBackingBean
       _heatMapStatistics = new ArrayList<DataModel>();
       PlateSize plateSize = _librariesDao.findLibraryWithPlate(_plateNumber.getSelection()).getPlateSize();
       for (HeatMapConfiguration heatMapConfig : _heatMapConfigurations) {
-        if (heatMapConfig.getDataHeaders().getSelection() != null &&
+        if (heatMapConfig.getDataColumns().getSelection() != null &&
           _plateNumber.getSelection() != null) {
           Map<WellKey,ResultValue> resultValues =
             _screenResultsDao.findResultValuesByPlate(_plateNumber.getSelection(),
-                                                      heatMapConfig.getDataHeaders().getSelection());
+                                                      heatMapConfig.getDataColumns().getSelection());
           HeatMap heatMap = new HeatMap(_plateNumber.getSelection(),
                                         plateSize,
                                         resultValues,
@@ -369,13 +369,13 @@ public class HeatMapViewer extends AbstractBackingBean
   // TODO: set initial values to previous HeatMapConfig
   public String addHeatMap()
   {
-    if (_screenResult.getNumericResultValueTypes().size() == 0) {
+    if (_screenResult.getNumericDataColumns().size() == 0) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
 
     HeatMapConfiguration heatMapConfiguration = new HeatMapConfiguration();
-    heatMapConfiguration.setDataHeaders(new UISelectOneBean<ResultValueType>(_screenResult.getNumericResultValueTypes()) {
-      protected String makeLabel(ResultValueType t) { return t.getName(); }
+    heatMapConfiguration.setDataColumns(new UISelectOneBean<DataColumn>(_screenResult.getNumericDataColumns()) {
+      protected String makeLabel(DataColumn t) { return t.getName(); }
     });
     heatMapConfiguration.setScoringType(new UISelectOneBean<ScoringType>(Arrays.asList(ScoringType.values())));
     heatMapConfiguration.setNumericFormat(new UISelectOneBean<NumberFormat>(NUMBER_FORMATS) {

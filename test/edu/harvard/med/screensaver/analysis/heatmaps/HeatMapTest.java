@@ -28,7 +28,7 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.Pair;
@@ -52,8 +52,8 @@ public class HeatMapTest extends AbstractSpringTest
     _parser = new ScreenResultParser(mockDao, mockDao, mockDao);
     _screenResult = _parser.parse(screen,
                                   new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, "ScreenResultHeatmapTest107.xls"));
-    ResultValueType rvt = _screenResult.getResultValueTypes().first();
-    _wellKeyToResultValueMap = rvt.getWellKeyToResultValueMap();
+    DataColumn col = _screenResult.getDataColumns().first();
+    _wellKeyToResultValueMap = col.getWellKeyToResultValueMap();
     if (_parser.getHasErrors()) {
       System.err.println("Parser errors:\n" + _parser.getErrors());
       fail("could not parse screen results");

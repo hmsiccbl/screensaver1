@@ -110,7 +110,7 @@ public abstract class ScreenResultLoader
       }
       else if(mode == MODE.APPEND_IF_EXISTS){
         log.info("appending existing screen result (loading existing screen result data)");
-        _dao.need(screen.getScreenResult(), "resultValueTypes");//.resultValues");
+        _dao.need(screen.getScreenResult(), "dataColumns");//.resultValues");
       }
       else{ //(mode == MODE.DELETE_IF_EXISTS){
         log.info("deleting existing screen result for " + screen);

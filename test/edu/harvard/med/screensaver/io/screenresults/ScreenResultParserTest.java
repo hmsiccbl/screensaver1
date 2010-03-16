@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -63,7 +63,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
   public static final String SCREEN_RESULT_117_TEST_WORKBOOK_FILE = "ScreenResultTest117.xls";
-  public static final String SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataHeaders.xls";
+  public static final String SCREEN_RESULT_115_30_DATA_COLUMNS_TEST_WORKBOOK_FILE = "ScreenResultTest115_30DataColumns.xls";
   public static final String SCREEN_RESULT_MISSING_DERIVED_FROM_WORKBOOK_FILE = "ScreenResultTest115-missing-derived-from.xls";
   public static final String ERRORS_TEST_WORKBOOK_FILE = "ScreenResultErrorsTest.xls";
   public static final String FORMULA_VALUE_TEST_WORKBOOK_FILE = "formula_value.xls";
@@ -112,7 +112,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
    */
   public void testReadExcelSpreadsheet() throws Exception
   {
-    String[] expectedSheetNames = new String[] { "Screen Info", "Data Headers", "PL_00001", "PL_00003", "PL_00002" };
+    String[] expectedSheetNames = new String[] { "Screen Info", "Data Columns", "PL_00001", "PL_00003", "PL_00002" };
     String[] expectedHeaderRowValues = new String[] {
       "Plate",
       "Well",
@@ -278,14 +278,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
     File workbookFile = new File(TEST_INPUT_FILE_DIR, ERRORS_TEST_WORKBOOK_FILE);
     mockScreenResultParser.parse(MakeDummyEntities.makeDummyScreen(115), workbookFile);
     List<WorkbookParseError> errors = mockScreenResultParser.getErrors();
-    assertTrue(errors.contains(new ParseError("value required", "Data Headers:(B,3)")));
-    assertTrue(errors.contains(new ParseError("illegal value", "Data Headers:(E,4)")));
-    assertTrue(errors.contains(new ParseError("unparseable value \"paradiso positive indicator\" (expected one of [Boolean Positive Indicator, Numeric, Partition Positive Indicator, Text])", "Data Headers:(G,3)")));
-    assertTrue(errors.contains(new ParseError("unparseable value \"sushiraw\" (expected one of [, derived, raw])", "Data Headers:(C,9)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'B' (expected one of [E, F])", "Data Headers:(D,11)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'H' (expected one of [E, F, G])", "Data Headers:(E,11)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Header column reference 'D' (expected one of [E, F, G, H])", "Data Headers:(F,11)")));
-    assertTrue(errors.contains(new ParseError("unparseable value \"follow-up\" (expected one of [, follow up, primary])", "Data Headers:(E,12)")));
+    assertTrue(errors.contains(new ParseError("value required", "Data Columns:(B,3)")));
+    assertTrue(errors.contains(new ParseError("illegal value", "Data Columns:(E,4)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"paradiso positive indicator\" (expected one of [Boolean Positive Indicator, Numeric, Partition Positive Indicator, Text])", "Data Columns:(G,3)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"sushiraw\" (expected one of [, derived, raw])", "Data Columns:(C,9)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'B' (expected one of [E, F])", "Data Columns:(D,11)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'H' (expected one of [E, F, G])", "Data Columns:(E,11)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'D' (expected one of [E, F, G, H])", "Data Columns:(F,11)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"follow-up\" (expected one of [, follow up, primary])", "Data Columns:(E,12)")));
   }
 
   /**
@@ -362,21 +362,21 @@ public class ScreenResultParserTest extends AbstractSpringTest
     int resultValues = 10;
     assertEquals("result value count",
                  resultValues,
-                 screenResult.getResultValueTypesList().get(0).getResultValues().size());
+                 screenResult.getDataColumnsList().get(0).getResultValues().size());
     int nonExcludedResultValues = resultValues - 1;
     List<Integer> expectedHitCount = Arrays.asList(6, 3);
     List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) nonExcludedResultValues,
                                                   expectedHitCount.get(1) / (double) nonExcludedResultValues);
 
-    int iPositiveIndicatorRvt = 0;
-    for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
-      if (rvt.isPositiveIndicator()) {
-        assertEquals("hit count", expectedHitCount.get(iPositiveIndicatorRvt), rvt.getPositivesCount());
+    int iPositiveIndicatorCol = 0;
+    for (DataColumn col : screenResult.getDataColumnsList()) {
+      if (col.isPositiveIndicator()) {
+        assertEquals("hit count", expectedHitCount.get(iPositiveIndicatorCol), col.getPositivesCount());
         assertEquals("hit ratio",
-                     expectedHitRatio.get(iPositiveIndicatorRvt).doubleValue(),
-                     rvt.getPositivesRatio().doubleValue(),
+                     expectedHitRatio.get(iPositiveIndicatorCol).doubleValue(),
+                     col.getPositivesRatio().doubleValue(),
                      0.01);
-        ++iPositiveIndicatorRvt;
+        ++iPositiveIndicatorCol;
       }
     }
   }
@@ -384,23 +384,23 @@ public class ScreenResultParserTest extends AbstractSpringTest
   public void testMultiCharColumnLabels() throws FileNotFoundException
   {
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_30_DATAHEADERS_TEST_WORKBOOK_FILE);
+    File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_30_DATA_COLUMNS_TEST_WORKBOOK_FILE);
     ScreenResult result = mockScreenResultParser.parse(screen,workbookFile);
     if (mockScreenResultParser.getHasErrors()) {
       log.debug("parse errors: " + mockScreenResultParser.getErrors());
     }
     assertFalse("screen result had no errors", mockScreenResultParser.getHasErrors());
-    List<ResultValueType> resultValueTypes = result.getResultValueTypesList();
-    assertEquals("ResultValueType count", 30, resultValueTypes.size());
+    List<DataColumn> dataColumns = result.getDataColumnsList();
+    assertEquals("DataColumn count", 30, dataColumns.size());
     for (int i = 0; i < 30 - 1; ++i) {
-      ResultValueType rvt = resultValueTypes.get(i);
-      assertEquals("is derived from next", resultValueTypes.get(i+1), rvt.getDerivedTypes().first());
-      Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
-      assertEquals(rvt.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
-      assertEquals(rvt.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
-      assertEquals(rvt.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
+      DataColumn col = dataColumns.get(i);
+      assertEquals("is derived from next", dataColumns.get(i+1), col.getDerivedTypes().first());
+      Map<WellKey,ResultValue> resultValues = col.getWellKeyToResultValueMap();
+      assertEquals(col.getName() + " result value 0", 1000.0 + i, resultValues.get(new WellKey(1, "A01")).getNumericValue());
+      assertEquals(col.getName() + " result value 1", 2000.0 + i, resultValues.get(new WellKey(1, "A02")).getNumericValue());
+      assertEquals(col.getName() + " result value 2", 3000.0 + i, resultValues.get(new WellKey(1, "A03")).getNumericValue());
     }
-    assertTrue("last is not derived from any", resultValueTypes.get(30 - 1).getDerivedTypes().isEmpty());
+    assertTrue("last is not derived from any", dataColumns.get(30 - 1).getDerivedTypes().isEmpty());
   }
   
   public void testParseScreenResultWithChannels() throws Exception
@@ -422,15 +422,15 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("screen result had no errors", 
                  Collections.<ParseError>emptyList(),
                  mockScreenResultParser.getErrors());
-    ResultValueType rvt0 = screenResult.getResultValueTypesList().get(0);
-    assertTrue("rvt 0 is derived", rvt0.isDerived());
-    assertEquals("rvt 0 'derived from' is empty", 0, rvt0.getTypesDerivedFrom().size());
+    DataColumn col0 = screenResult.getDataColumnsList().get(0);
+    assertTrue("col 0 is derived", col0.isDerived());
+    assertEquals("col 0 'derived from' is empty", 0, col0.getTypesDerivedFrom().size());
     
     // regression test that normal derived from values work as expected
-    ResultValueType rvt1 = screenResult.getResultValueTypesList().get(1);
-    assertTrue("rvt 1 is derived", rvt1.isDerived());
-    assertTrue("rvt 1 'types derived from' is not empty", rvt1.getTypesDerivedFrom().contains(rvt0));
-    assertTrue("rvt 0 'derived types' is not empty", rvt0.getDerivedTypes().contains(rvt1));
+    DataColumn col1 = screenResult.getDataColumnsList().get(1);
+    assertTrue("col 1 is derived", col1.isDerived());
+    assertTrue("col 1 'types derived from' is not empty", col1.getTypesDerivedFrom().contains(col0));
+    assertTrue("col 0 'derived types' is not empty", col0.getDerivedTypes().contains(col1));
   }
   
   // private methods
@@ -440,62 +440,62 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
 
     ScreenResult expectedScreenResult = makeScreenResult();
-    Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
+    Map<Integer,DataColumn> expectedDataColumns = new HashMap<Integer,DataColumn>();
 
-    ResultValueType rvt;
+    DataColumn dataColumn;
 
-    rvt = expectedScreenResult.createResultValueType("Luminescence1");
-    rvt.setDescription("Desc1");
-    rvt.forReplicate(1);
-    rvt.forTimePoint("0:10");
-    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.forPhenotype("Phenotype1");
-    rvt.setComments("None");
-    rvt.makeNumeric(0);
-    expectedResultValueTypes.put(0, rvt);
+    dataColumn = expectedScreenResult.createDataColumn("Luminescence1");
+    dataColumn.setDescription("Desc1");
+    dataColumn.forReplicate(1);
+    dataColumn.forTimePoint("0:10");
+    dataColumn.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    dataColumn.forPhenotype("Phenotype1");
+    dataColumn.setComments("None");
+    dataColumn.makeNumeric(0);
+    expectedDataColumns.put(0, dataColumn);
 
-    rvt = expectedScreenResult.createResultValueType("Luminescence2");
-    rvt.setDescription("Desc2");
-    rvt.forReplicate(2);
-    rvt.forTimePoint("0:10");
-    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    rvt.forPhenotype("Phenotype1");
-    rvt.setFollowUpData(true);
-    rvt.setComments("None");
-    rvt.makeNumeric(0);
-    expectedResultValueTypes.put(1, rvt);
+    dataColumn = expectedScreenResult.createDataColumn("Luminescence2");
+    dataColumn.setDescription("Desc2");
+    dataColumn.forReplicate(2);
+    dataColumn.forTimePoint("0:10");
+    dataColumn.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    dataColumn.forPhenotype("Phenotype1");
+    dataColumn.setFollowUpData(true);
+    dataColumn.setComments("None");
+    dataColumn.makeNumeric(0);
+    expectedDataColumns.put(1, dataColumn);
 
-    rvt = expectedScreenResult.createResultValueType("FI1");
-    rvt.setDescription("Fold Induction");
-    rvt.forReplicate(1);
-    rvt.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedResultValueTypes.get(0)));
-    rvt.forPhenotype("Phenotype1");
-    rvt.makeNumeric(2);
-    expectedResultValueTypes.put(2, rvt);
+    dataColumn = expectedScreenResult.createDataColumn("FI1");
+    dataColumn.setDescription("Fold Induction");
+    dataColumn.forReplicate(1);
+    dataColumn.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedDataColumns.get(0)));
+    dataColumn.forPhenotype("Phenotype1");
+    dataColumn.makeNumeric(2);
+    expectedDataColumns.put(2, dataColumn);
 
-    rvt = expectedScreenResult.createResultValueType("FI2");
-    rvt.setDescription("Fold Induction");
-    rvt.forReplicate(2);
-    rvt.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedResultValueTypes.get(1)));
-    rvt.forPhenotype("Phenotype1");
-    rvt.setFollowUpData(true);
-    rvt.makeNumeric(2);
-    expectedResultValueTypes.put(3, rvt);
+    dataColumn = expectedScreenResult.createDataColumn("FI2");
+    dataColumn.setDescription("Fold Induction");
+    dataColumn.forReplicate(2);
+    dataColumn.makeDerived("Divide compound well by plate median", Sets.newHashSet(expectedDataColumns.get(1)));
+    dataColumn.forPhenotype("Phenotype1");
+    dataColumn.setFollowUpData(true);
+    dataColumn.makeNumeric(2);
+    expectedDataColumns.put(3, dataColumn);
 
-    rvt = expectedScreenResult.createResultValueType("Average");
-    rvt.makeDerived("Average", Sets.newHashSet(expectedResultValueTypes.get(2), expectedResultValueTypes.get(3)));
-    rvt.makeNumeric(2);
-    expectedResultValueTypes.put(4, rvt);
+    dataColumn = expectedScreenResult.createDataColumn("Average");
+    dataColumn.makeDerived("Average", Sets.newHashSet(expectedDataColumns.get(2), expectedDataColumns.get(3)));
+    dataColumn.makeNumeric(2);
+    expectedDataColumns.put(4, dataColumn);
 
-    rvt = expectedScreenResult.createResultValueType("PositiveIndicator2");
-    rvt.makeDerived("W<=1.6, M<=1.7, S<=1.8", Sets.newHashSet(expectedResultValueTypes.get(4)));
-    rvt.makePartitionPositiveIndicator();
-    expectedResultValueTypes.put(5, rvt);
+    dataColumn = expectedScreenResult.createDataColumn("PositiveIndicator2");
+    dataColumn.makeDerived("W<=1.6, M<=1.7, S<=1.8", Sets.newHashSet(expectedDataColumns.get(4)));
+    dataColumn.makePartitionPositiveIndicator();
+    expectedDataColumns.put(5, dataColumn);
 
-    rvt = expectedScreenResult.createResultValueType("PositiveIndicator3");
-    rvt.makeDerived("PositiveIndicator2 is S", Sets.newHashSet(expectedResultValueTypes.get(5)));
-    rvt.makeBooleanPositiveIndicator();
-    expectedResultValueTypes.put(6, rvt);
+    dataColumn = expectedScreenResult.createDataColumn("PositiveIndicator3");
+    dataColumn.makeDerived("PositiveIndicator2 is S", Sets.newHashSet(expectedDataColumns.get(5)));
+    dataColumn.makeBooleanPositiveIndicator();
+    expectedDataColumns.put(6, dataColumn);
 
 
     Integer[] expectedPlateNumbers = {1, 1, 1, 1, 1, 1, 1, 1};
@@ -532,46 +532,46 @@ public class ScreenResultParserTest extends AbstractSpringTest
           { 1666646., 1154436., 1.52, 1.07, 1.295, "1", "false" },
           { null, null, null, null, null, "0", "false" } };
 
-    SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
-    int iRvt = 0;
-    for (ResultValueType actualRvt : resultValueTypes) {
-      ResultValueType expectedRvt = expectedResultValueTypes.get(iRvt);
-      if (expectedRvt != null) {
-        assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(actualRvt));
+    SortedSet<DataColumn> dataColumns = screenResult.getDataColumns();
+    int iCol = 0;
+    for (DataColumn actualCol : dataColumns) {
+      DataColumn expectedCol = expectedDataColumns.get(iCol);
+      if (expectedCol != null) {
+        assertTrue("DataColumn " + iCol, expectedCol.isEquivalent(actualCol));
 
         // compare result values
-        assertEquals(960, actualRvt.getResultValues().size());
+        assertEquals(960, actualCol.getResultValues().size());
         int iWell = 0;
-        Map<WellKey,ResultValue> resultValues = actualRvt.getWellKeyToResultValueMap();
+        Map<WellKey,ResultValue> resultValues = actualCol.getWellKeyToResultValueMap();
         for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
           ResultValue rv = resultValues.get(wellKey);
-          assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
+          assertEquals("col " + iCol + " well #" + iWell + " plate name",
                        expectedPlateNumbers[iWell],
                        new Integer(wellKey.getPlateNumber()));
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
+          assertEquals("col " + iCol + " well #" + iWell + " well name",
                        expectedWellNames[iWell],
                        wellKey.getWellName());
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+          assertEquals("col " + iCol + " well #" + iWell + " well type",
                        expectedAssayWellTypes[iWell],
                        rv.getAssayWellType());
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
-                       expectedExcludeValues[iWell][iRvt],
+          assertEquals("col " + iCol + " well #" + iWell + " well type",
+                       expectedExcludeValues[iWell][iCol],
                        rv.isExclude());
-          if (expectedValues[iWell][iRvt] == null) {
-            assertTrue("rvt " + iRvt + " well #" + iWell + " result value is null",
+          if (expectedValues[iWell][iCol] == null) {
+            assertTrue("col " + iCol + " well #" + iWell + " result value is null",
                        rv.isNull());
           }
           else {
-            if (expectedRvt.isNumeric()) {
-              double expectedNumericValue = (Double) expectedValues[iWell][iRvt];
-              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric)",
+            if (expectedCol.isNumeric()) {
+              double expectedNumericValue = (Double) expectedValues[iWell][iCol];
+              assertEquals("col " + iCol + " well #" + iWell + " result value (numeric)",
                            expectedNumericValue,
                            rv.getNumericValue(),
                            0.001);
             }
             else {
-              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (non-numeric)",
-                           expectedValues[iWell][iRvt].toString(),
+              assertEquals("col " + iCol + " well #" + iWell + " result value (non-numeric)",
+                           expectedValues[iWell][iCol].toString(),
                            rv.getValue());
             }
           }
@@ -579,7 +579,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
           if (iWell == expectedPlateNumbers.length) { break; }
         }
       }
-      ++iRvt;
+      ++iCol;
     }
   }
  
@@ -588,47 +588,47 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("replicate count", 2, screenResult.getReplicateCount().intValue());
 
     ScreenResult expectedScreenResult = makeScreenResult();
-    Map<Integer,ResultValueType> expectedResultValueTypes = new HashMap<Integer,ResultValueType>();
+    Map<Integer,DataColumn> expectedDataColumns = new HashMap<Integer,DataColumn>();
 
-    ResultValueType rvt;
+    DataColumn col;
 
-    rvt = expectedScreenResult.createResultValueType("r1c1").
+    col = expectedScreenResult.createDataColumn("r1c1").
     makeNumeric(0).
     forReplicate(1).
     forChannel(1).
     forTimePointOrdinal(1).
     forZdepthOrdinal(4);
-    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    expectedResultValueTypes.put(0, rvt);
+    col.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    expectedDataColumns.put(0, col);
 
-    rvt = expectedScreenResult.createResultValueType("r1c2").
+    col = expectedScreenResult.createDataColumn("r1c2").
     makeNumeric(0).
     forReplicate(1).
     forChannel(2).
     forTimePointOrdinal(2).
     forZdepthOrdinal(3);
-    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    expectedResultValueTypes.put(1, rvt);
+    col.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    expectedDataColumns.put(1, col);
     
-    rvt = expectedScreenResult.createResultValueType("r2c1").
+    col = expectedScreenResult.createDataColumn("r2c1").
     makeNumeric(0).
     forReplicate(2).
     forChannel(1).
     forTimePointOrdinal(3).
     forZdepthOrdinal(2);
-    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    expectedResultValueTypes.put(2, rvt);
+    col.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    expectedDataColumns.put(2, col);
     
-    rvt = expectedScreenResult.createResultValueType("r2c2").
+    col = expectedScreenResult.createDataColumn("r2c2").
     makeNumeric(0).
     forReplicate(2).
     forChannel(2).
     forTimePointOrdinal(4).
     forZdepthOrdinal(1);
-    rvt.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
-    expectedResultValueTypes.put(3, rvt);
+    col.setAssayReadoutType(AssayReadoutType.LUMINESCENCE);
+    expectedDataColumns.put(3, col);
 
-    //check the second result value type
+    //check the second data column
     Integer[] expectedPlateNumbers = {1,1,1,2,2,2};
 //
     String[] expectedWellNames = {"A01", "A02", "A03","A01", "A02", "A03"};
@@ -659,50 +659,50 @@ public class ScreenResultParserTest extends AbstractSpringTest
           {1174572.,125.,5432105.,89.}
     };
 
-    SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
-    int iRvt = 0;
-    for (ResultValueType actualRvt : resultValueTypes) {
-      ResultValueType expectedRvt = expectedResultValueTypes.get(iRvt);
-      if (expectedRvt != null) {
-//        setDefaultValues(expectedRvt);
-//        setDefaultValues(actualRvt);
-        log.info("expectedRvt = " + expectedRvt.getName());
-        log.info("actualRvt = " + actualRvt.getName());
-        assertTrue("ResultValueType " + iRvt, expectedRvt.isEquivalent(actualRvt));
+    SortedSet<DataColumn> dataColumns = screenResult.getDataColumns();
+    int iCol = 0;
+    for (DataColumn actualCol : dataColumns) {
+      DataColumn expectedCol = expectedDataColumns.get(iCol);
+      if (expectedCol != null) {
+//        setDefaultValues(expectedCol);
+//        setDefaultValues(actualCol);
+        log.info("expectedCol = " + expectedCol.getName());
+        log.info("actualCol = " + actualCol.getName());
+        assertTrue("DataColumn " + iCol, expectedCol.isEquivalent(actualCol));
 
         // TODO compare result values
-       assertEquals(6, actualRvt.getResultValues().size());
+       assertEquals(6, actualCol.getResultValues().size());
         int iWell = 0;
-        Map<WellKey,ResultValue> resultValues = actualRvt.getWellKeyToResultValueMap();
+        Map<WellKey,ResultValue> resultValues = actualCol.getWellKeyToResultValueMap();
         for (WellKey wellKey : new TreeSet<WellKey>(resultValues.keySet())) {
           ResultValue rv = resultValues.get(wellKey);
-         assertEquals("rvt " + iRvt + " well #" + iWell + " plate name",
+         assertEquals("col " + iCol + " well #" + iWell + " plate name",
                        expectedPlateNumbers[iWell],
                        new Integer(wellKey.getPlateNumber()));
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well name",
+          assertEquals("col " + iCol + " well #" + iWell + " well name",
                        expectedWellNames[iWell],
                        wellKey.getWellName());
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
+          assertEquals("col " + iCol + " well #" + iWell + " well type",
                        expectedAssayWellTypes[iWell],
                        rv.getAssayWellType());
-          assertEquals("rvt " + iRvt + " well #" + iWell + " well type",
-                       expectedExcludeValues[iWell][iRvt],
+          assertEquals("col " + iCol + " well #" + iWell + " well type",
+                       expectedExcludeValues[iWell][iCol],
                        rv.isExclude());
-        if (expectedValues[iWell][iRvt] == null) {
-            assertTrue("rvt " + iRvt + " well #" + iWell + " result value is null",
+        if (expectedValues[iWell][iCol] == null) {
+            assertTrue("col " + iCol + " well #" + iWell + " result value is null",
                        rv.isNull());
           }
           else {
-            if (expectedRvt.isNumeric()) {
-              double expectedNumericValue = (Double) expectedValues[iWell][iRvt];
-              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (numeric)",
+            if (expectedCol.isNumeric()) {
+              double expectedNumericValue = (Double) expectedValues[iWell][iCol];
+              assertEquals("col " + iCol + " well #" + iWell + " result value (numeric)",
                            expectedNumericValue,
                            rv.getNumericValue(),
-                           Math.pow(1, -rvt.getDecimalPlaces()));
+                           Math.pow(1, -col.getDecimalPlaces()));
             }
             else {
-              assertEquals("rvt " + iRvt + " well #" + iWell + " result value (non-numeric)",
-                           expectedValues[iWell][iRvt].toString(),
+              assertEquals("col " + iCol + " well #" + iWell + " result value (non-numeric)",
+                           expectedValues[iWell][iCol].toString(),
                            rv.getValue());
             }
           }
@@ -710,7 +710,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
           if (iWell == expectedPlateNumbers.length) { break; }
         }
       }
-      ++iRvt; 
+      ++iCol; 
     }  
   }
   

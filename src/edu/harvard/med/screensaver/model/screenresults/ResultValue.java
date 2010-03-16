@@ -35,13 +35,13 @@ import org.hibernate.annotations.Index;
 
 /**
  * A <code>ResultValue</code> holds the value of a screen result data point for
- * a given {@link ResultValueType}, and {@link AssayWell}.
- * For text-based ResultValueTypes, the value is stored canonically as a String.
- * For numeric ResultValueTypes, the value is stored canonically as a double,
+ * a given {@link DataColumn}, and {@link AssayWell}.
+ * For text-based DataColumns, the value is stored canonically as a String.
+ * For numeric DataColumns, the value is stored canonically as a double,
  * allowing for efficient sorting and filtering of numeric values in the
  * database, but also as a string, formatted to show the number of decimal places
- * specified by the parent {@link ResultValueType}. Note that the parent
- * {@link ResultValueType#isNumeric()()} contains an "isNumeric" property that
+ * specified by the parent {@link DataColumn}. Note that the parent
+ * {@link DataColumn#isNumeric()()} contains an "isNumeric" property that
  * indicates whether its member ResultValues are numeric (the isNumeric flag is
  * not stored with each ResultValue for space efficiency).
  * 
@@ -51,11 +51,11 @@ import org.hibernate.annotations.Index;
 @Entity
 @Immutable
 @org.hibernate.annotations.Proxy
-@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ResultValueType.class)
+@edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=DataColumn.class)
 @org.hibernate.annotations.Table(appliesTo = "result_value",
-                                 indexes={ @Index(name = "result_value_rvt_and_value_index", columnNames={ "resultValueTypeId", "value" }),
-                                           @Index(name = "result_value_rvt_and_numeric_value_index", columnNames={ "resultValueTypeId", "numericValue" }),
-                                           @Index(name = "result_value_rvt_and_positive_index", columnNames={ "resultValueTypeId", "isPositive" }) })
+                                 indexes={ @Index(name = "result_value_data_column_and_value_index", columnNames={ "dataColumnId", "value" }),
+                                           @Index(name = "result_value_data_column_and_numeric_value_index", columnNames={ "dataColumnId", "numericValue" }),
+                                           @Index(name = "result_value_data_column_and_positive_index", columnNames={ "dataColumnId", "isPositive" }) })
 public class ResultValue extends AbstractEntity<Integer>
 {
 
@@ -71,14 +71,14 @@ public class ResultValue extends AbstractEntity<Integer>
     }
   }
 
-  public static final RelationshipPath<ResultValue> ResultValueType = new RelationshipPath<ResultValue>(ResultValue.class, "resultValueType");
+  public static final RelationshipPath<ResultValue> DataColumn = new RelationshipPath<ResultValue>(ResultValue.class, "dataColumn");
 
 
   /**
    * Returns the value of this <code>ResultValue</code> as an appropriately
-   * typed object, depending upon {@link ResultValueType#isPositiveIndicator()},
-   * {@link ResultValueType#isDerived()()}, and
-   * {@link ResultValueType#getPositiveIndicatorType()}, as follows:
+   * typed object, depending upon {@link DataColumn#isPositiveIndicator()},
+   * {@link DataColumn#isDerived()()}, and
+   * {@link DataColumn#getPositiveIndicatorType()}, as follows:
    * <ul>
    * <li> Well type is non-data-producer: returns <code>null</code>
    * <li> Not Derived (Raw): returns Double
@@ -99,7 +99,7 @@ public class ResultValue extends AbstractEntity<Integer>
       return null;
     }
 
-    switch (getResultValueType().getDataType()) {
+    switch (getDataColumn().getDataType()) {
     case NUMERIC: return getNumericValue();
     case POSITIVE_INDICATOR_BOOLEAN: return Boolean.valueOf(getValue());
     case POSITIVE_INDICATOR_PARTITION: return PartitionedValue.lookupByValue(getValue()).getDisplayValue();
@@ -111,7 +111,7 @@ public class ResultValue extends AbstractEntity<Integer>
   // private instance data
 
   private Well _well;
-  private ResultValueType _resultValueType;
+  private DataColumn _dataColumn;
   private String _value;
   private Double _numericValue;
   private AssayWellType _assayWellType;
@@ -119,7 +119,7 @@ public class ResultValue extends AbstractEntity<Integer>
    * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
    * up to the application code and/or user interface to manage excluding the
    * full set of ResultValues associated with a stock plate well (row) or with a
-   * data header (column). But we do need to allow any arbitrary set of
+   * data column. But we do need to allow any arbitrary set of
    * ResultValues to be excluded.
    */
   private boolean _isExclude;
@@ -130,69 +130,69 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Constructs a <code>ResultValue</code>.
-   * @param rvt the parent ResultValueType
+   * @param dataColumn the parent DataColumn
    * @param well the well of this ResultValue
    * @param value the non-numerical value of the ResultValue
   */
-  ResultValue(ResultValueType rvt,
+  ResultValue(DataColumn dataColumn,
               AssayWell assayWell,
               String value)
   {
-    this(rvt, assayWell, value, null, false, false);
+    this(dataColumn, assayWell, value, null, false, false);
   }
 
   /**
    * Constructs a numeric ResultValue object
    *
-   * @param rvt the parent ResultValueType
+   * @param dataColumn the parent DataColumn
    * @param well the well of this ResultValue
    * @param numericValue the numerical value of the ResultValue
    */
-  ResultValue(ResultValueType rvt,
+  ResultValue(DataColumn dataColumn,
               AssayWell assayWell,
               Double numericValue)
   {
-    this(rvt, assayWell, null, numericValue, false, false);
+    this(dataColumn, assayWell, null, numericValue, false, false);
   }
 
   /**
    * Construct a numerical <code>ResultValue</code>. Intended for use only
    * for creating result values that will not need to be persisted.
    *
-   * @param rvt the parent ResultValueType
+   * @param dataColumn the parent DataColumn
    * @param well the well of this ResultValue
    * @param assayWellType the AssayWellType of the ResultValue
    * @param numericalValue the numerical value of the ResultValue
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
-  public ResultValue(ResultValueType rvt,
+  public ResultValue(DataColumn dataColumn,
                      AssayWell assayWell,
                      Double numericalValue,
                      boolean exclude,
                      boolean isPositive)
   {
-    this(rvt, assayWell, null, numericalValue, exclude, isPositive);
+    this(dataColumn, assayWell, null, numericalValue, exclude, isPositive);
   }
 
   /**
    * Construct a non-numerical <code>ResultValue</code>. Intended for use
    * only for creating result values that will not need to be persisted.
    *
-   * @param rvt the parent ResultValueType
+   * @param dataColumn the parent DataColumn
    * @param well the well of this ResultValue
    * @param assayWellType the AssayWellType of the ResultValue
    * @param value the non-numerical value of the ResultValue
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
-  public ResultValue(ResultValueType rvt,
+  public ResultValue(DataColumn dataColumn,
                      AssayWell assayWell,
                      String value,
                      boolean exclude,
                      boolean isPositive)
   {
-    this(rvt, assayWell, value, null, exclude, isPositive);
+    this(dataColumn, assayWell, value, null, exclude, isPositive);
   }
 
 
@@ -220,18 +220,18 @@ public class ResultValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Get the result value type.
-   * @return the result value type
+   * Get the data column.
+   * @return the data column
    */
   @ManyToOne(cascade={}, fetch=FetchType.LAZY)
-  @JoinColumn(name="resultValueTypeId", nullable=false, updatable=false)
+  @JoinColumn(name="dataColumnId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_result_value_type")
+  @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_data_column")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @Index(name="result_value_result_value_type_index")
-  public ResultValueType getResultValueType()
+  @Index(name="result_value_data_column_index")
+  public DataColumn getDataColumn()
   {
-    return _resultValueType;
+    return _dataColumn;
   }
 
   /**
@@ -341,7 +341,7 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Get whether this result value indicates a positive. Returns false if the
-   * {@link #getResultValueType() ResultValueType} is not a positive indicator.
+   * {@link #getDataColumn() DataColumn} is not a positive indicator.
    *
    * @return true whenever this result value is a positive indicator
    */
@@ -424,9 +424,9 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Construct an initialized <code>ResultValue</code>. Intended only for use by
-   * this class's constructors and {@link ResultValueType}.
+   * this class's constructors and {@link DataColumn}.
    * 
-   * @param rvt the parent ResultValueType
+   * @param dataColumn the parent DataColumn
    * @param well the well of this ResultValue
    * @param assayWellType the AssayWellType of the ResultValue
    * @param value the non-numerical value of the ResultValue
@@ -434,20 +434,20 @@ public class ResultValue extends AbstractEntity<Integer>
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
    * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
-  ResultValue(ResultValueType rvt,
+  ResultValue(DataColumn dataColumn,
               AssayWell assayWell,
               String value,
               Double numericalValue,
               boolean exclude,
               boolean isPositive)
   {
-    if (rvt == null) {
-      throw new DataModelViolationException("resultValueType is required for ResultValue");
+    if (dataColumn == null) {
+      throw new DataModelViolationException("dataColumn is required for ResultValue");
     }
     if (assayWell == null) {
       throw new DataModelViolationException("assay well is required for ResultValue");
     }
-    _resultValueType = rvt;
+    _dataColumn = dataColumn;
     _well = assayWell.getLibraryWell(); // TODO: remove
 
     // TODO: HACK: removing this update as it causes memory/performance
@@ -456,15 +456,15 @@ public class ResultValue extends AbstractEntity<Integer>
     // associations will be correct; these in-memory associations will only be
     // missing within the Hibernate session that was used to import the
     // ScreenResult
-    // _well.getResultValues().put(rvt, this);
+    // _well.getResultValues().put(dataColumn, this);
 
     setAssayWellType(assayWell.getAssayWellType()); // TODO: remove
-    if (!!!rvt.isNumeric()) {
+    if (!!!dataColumn.isNumeric()) {
       setValue(value);
     }
     else {
       setNumericValue(numericalValue);
-      setValue(formatNumericValue(rvt.getDecimalPlaces()));
+      setValue(formatNumericValue(dataColumn.getDecimalPlaces()));
     }
     setExclude(exclude);
     setPositive(isPositive);
@@ -475,10 +475,10 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Set whether this result value is a positive. Intended only for use by
-   * hibernate and {@link ResultValueType}.
+   * hibernate and {@link DataColumn}.
    * 
    * @param isPositive true iff this result value is a positive
-   * @motivation for hibernate and ResultValueType
+   * @motivation for hibernate and DataColumn
    */
   void setPositive(boolean isPositive)
   {
@@ -517,14 +517,14 @@ public class ResultValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Set the result value type.
+   * Set the data column.
    *
-   * @param resultValueType the new result value type
+   * @param dataColumn the new data column
    * @motivation for hibernate
    */
-  private void setResultValueType(ResultValueType resultValueType)
+  private void setDataColumn(DataColumn dataColumn)
   {
-    _resultValueType = resultValueType;
+    _dataColumn = dataColumn;
   }
 
   /**

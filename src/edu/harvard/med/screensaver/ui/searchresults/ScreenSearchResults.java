@@ -199,7 +199,7 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
     });
 
     columns.add(new TextSetEntityColumn<Screen>(
-      Screen.screenResult.to(ScreenResult.resultValueTypes),
+      Screen.screenResult.to(ScreenResult.dataColumns),
       "Assay Readout Type", "The assay readout type for the screen",
       TableColumn.UNGROUPED) {
       @Override

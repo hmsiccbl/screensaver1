@@ -40,8 +40,8 @@ public class ResultValueTest extends AbstractEntityInstanceTest<ResultValue>
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     Well well = library.createWell(new WellKey("00001:A01"), LibraryWellType.EXPERIMENTAL);
     AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
-    ResultValueType rvt = screenResult.createResultValueType("rvt").makeNumeric(3);
-    ResultValue rv = rvt.createResultValue(assayWell, 5.0123, true);
+    DataColumn col = screenResult.createDataColumn("col").makeNumeric(3);
+    ResultValue rv = col.createResultValue(assayWell, 5.0123, true);
     assertEquals("default decimal places formatted string", "5.012", rv.getValue());
     assertEquals("default decimal places formatted string", "5.0123", rv.formatNumericValue(4));
     assertEquals("default decimal places formatted string", "5", rv.formatNumericValue(0));

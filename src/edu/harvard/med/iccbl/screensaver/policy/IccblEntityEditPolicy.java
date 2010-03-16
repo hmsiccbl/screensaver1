@@ -34,7 +34,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
@@ -280,7 +280,7 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   }
 
   @Override
-  public boolean visit(ResultValueType entity)
+  public boolean visit(DataColumn entity)
   {
     return visit(entity.getScreenResult());
   }

@@ -13,28 +13,14 @@ package edu.harvard.med.screensaver.io.screenresults;
 
 public interface ScreenResultWorkbookSpecification
 {
-  public static final String DATA_HEADERS_SHEET_NAME = "Data Headers";
-  public static final int FIRST_DATA_SHEET_INDEX = 2;
-
-  public static final int DATA_HEADERS_FIRST_DATA_HEADER_COLUMN_INDEX = 1;
-  public static final char DATA_SHEET__FIRST_DATA_HEADER_COLUMN_LABEL = 'E';
-  public static final int METADATA_ROW_NAMES_COLUMN_INDEX = 0;
-  public static final int RAWDATA_HEADER_ROW_INDEX = 0;
-  public static final int RAWDATA_FIRST_DATA_ROW_INDEX = 1;
-  public static final int RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX = DataColumn.values().length;
-  public static final char RAWDATA_FIRST_DATA_HEADER_COLUMN_LABEL = (char) ('A' + RAWDATA_FIRST_DATA_HEADER_COLUMN_INDEX);
-  public static final int SCREENINFO_ROW_HEADER_COLUMN_INDEX = 0;
-  public static final int SCREENINFO_VALUE_COLUMN_INDEX = 1;
-  public static final int SCREENINFO_FIRST_DATA_ROW_INDEX = 0;
-
-  public static final String NUMERICAL_INDICATOR_DIRECTION_HIGH_VALUES_INDICATE = ">";
-  public static final String NUMERICAL_INDICATOR_DIRECTION_LOW_VALUES_INDICATE = "<";
+  public static final String DATA_COLUMNS_SHEET_NAME = "Data Columns";
+  public static final int DATA_COLUMNS_SHEET__FIRST_DATA_COLUMN__WORKSHEET_COLUMN_INDEX = 1;
+  public static final int DATA_SHEET__FIRST_DATA_ROW_INDEX = 1;
 
   /**
-   * The data rows of the "Data Headers" worksheet. Order of enum values is
-   * significant, as we use the ordinal() method.
+   * The rows of the "Data Columns" worksheet.
    */
-  public enum DataHeaderProperty {
+  public enum DataColumnProperty {
     COLUMN_IN_DATA_WORKSHEET("\"Data\" Worksheet Column"),
     NAME("Name"),
     DATA_TYPE("Data Type"),
@@ -55,7 +41,7 @@ public interface ScreenResultWorkbookSpecification
 
     private String _displayText;
 
-    private DataHeaderProperty(String displayText)
+    private DataColumnProperty(String displayText)
     {
       _displayText = displayText;
     }
@@ -65,9 +51,9 @@ public interface ScreenResultWorkbookSpecification
       return _displayText;
     }
     
-    public static DataHeaderProperty fromDisplayText(String displayText)
+    public static DataColumnProperty fromDisplayText(String displayText)
     {
-      for (DataHeaderProperty e : values()) {
+      for (DataColumnProperty e : values()) {
         if (e.getDisplayText().equalsIgnoreCase(displayText)) {
           return e;
         }
@@ -76,14 +62,14 @@ public interface ScreenResultWorkbookSpecification
     }
   };
 
-  public static final int METADATA_ROW_COUNT = DataHeaderProperty.values().length;
+  public static final int METADATA_ROW_COUNT = DataColumnProperty.values().length;
   public static final String FILENAMES_LIST_DELIMITER = "\\s*,\\s*";
 
   /**
    * The standard columns of the "Data" worksheet. Order of enum values is
    * significant, as we use the ordinal() method.
    */
-  public enum DataColumn {
+  public enum WellInfoColumn {
     PLATE("Plate"),
     WELL_NAME("Well"),
     ASSAY_WELL_TYPE("Type"),
@@ -91,7 +77,7 @@ public interface ScreenResultWorkbookSpecification
 
     private String _displayText;
 
-    private DataColumn(String displayText)
+    private WellInfoColumn(String displayText)
     {
       _displayText = displayText;
     }

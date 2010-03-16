@@ -51,7 +51,7 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
  * entities. Or, for example, a relationship that is a Map, keyed on an entity
  * type, there may be performance benefits to fetching the entities that
  * represent the keys of that map (to avoid Hibernate from fetching each of
- * these keys in an individual SELECT); e.g., Well.resultValues is a Map<ResultValueType,ResultValue>.
+ * these keys in an individual SELECT); e.g., Well.resultValues is a Map<DataColumn,ResultValue>.
  * 
  * @param E the root entity type of this column
  * @author ant4

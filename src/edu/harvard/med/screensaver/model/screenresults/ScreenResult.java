@@ -57,12 +57,12 @@ import org.joda.time.DateTime;
  * plates ("replicates"). Each replicate assay plate can have one or more
  * readouts performed on it, possibly over time intervals and/or with different
  * assay readout technologies. Every distinct readout type is identified by a
- * {@link ResultValueType}. A <code>ScreenResult</code> becomes the parent of
+ * {@link DataColumn}. A <code>ScreenResult</code> becomes the parent of
  * {@link ResultValue}s. For visualization purposes, one can imagine a
  * <code>ScreenResult</code> as representing a spreadsheet, where the column
- * headings are represented by {@link ResultValueType}s and the rows are
+ * headings are represented by {@link DataColumn}s and the rows are
  * identified by stock plate {@link Well}s, and each row contains a
- * {@link ResultValue} for each {@link ResultValueType} "column".
+ * {@link ResultValue} for each {@link DataColumn} "column".
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -76,7 +76,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   private static final long serialVersionUID = 0;
 
   public static final RelationshipPath<ScreenResult> screen = new RelationshipPath<ScreenResult>(ScreenResult.class, "screen");
-  public static final RelationshipPath<ScreenResult> resultValueTypes = new RelationshipPath<ScreenResult>(ScreenResult.class, "resultValueTypes");
+  public static final RelationshipPath<ScreenResult> dataColumns = new RelationshipPath<ScreenResult>(ScreenResult.class, "dataColumns");
 
   // private instance data
 
@@ -86,7 +86,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   private SortedSet<AssayWell> _assayWells = new TreeSet<AssayWell>();
   private boolean _isShareable;
   private Integer _replicateCount;
-  private SortedSet<ResultValueType> _resultValueTypes = new TreeSet<ResultValueType>();
+  private SortedSet<DataColumn> _dataColumns = new TreeSet<DataColumn>();
   private DateTime _dateLastImported;
 
   /**
@@ -185,8 +185,8 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   }
 
   /**
-   * Get the ordered set of all {@link ResultValueType ResultValueTypes} for this screen result.
-   * @return the ordered set of all {@link ResultValueType ResultValueTypes} for this screen
+   * Get the ordered set of all {@link DataColumn}s for this screen result.
+   * @return the ordered set of all {@link DataColumn}s for this screen
    * result.
    */
   @OneToMany(
@@ -200,44 +200,44 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     org.hibernate.annotations.CascadeType.SAVE_UPDATE,
     org.hibernate.annotations.CascadeType.DELETE_ORPHAN
   })
-  public SortedSet<ResultValueType> getResultValueTypes()
+  public SortedSet<DataColumn> getDataColumns()
   {
-    return _resultValueTypes;
+    return _dataColumns;
   }
 
   /**
-   * Create and return a new result value type for the screen result.
-   * @param name the name of this result value type
-   * @return the new result value type
+   * Create and return a new data column for the screen result.
+   * @param name the name of this data column
+   * @return the new data column
    */
-  public ResultValueType createResultValueType(String name)
+  public DataColumn createDataColumn(String name)
   {
     verifyNameIsUnique(name);
-    ResultValueType resultValueType = new ResultValueType(this, name);
-    _resultValueTypes.add(resultValueType);
-    return resultValueType;
+    DataColumn dataColumn = new DataColumn(this, name);
+    _dataColumns.add(dataColumn);
+    return dataColumn;
   }
 
-  public boolean deleteResultValueType(ResultValueType rvt)
+  public boolean deleteDataColumn(DataColumn dataColumn)
   {
-    if (!rvt.getDerivedTypes().isEmpty()) {
-      throw new DataModelViolationException("cannot delete " + rvt + " since it is derived from " + rvt.getDerivedTypes());
+    if (!dataColumn.getDerivedTypes().isEmpty()) {
+      throw new DataModelViolationException("cannot delete " + dataColumn + " since it is derived from " + dataColumn.getDerivedTypes());
     }
-    Set<ResultValueType> dissociateFrom = new HashSet<ResultValueType>();
-    for (ResultValueType derivedFrom : rvt.getTypesDerivedFrom()) {
+    Set<DataColumn> dissociateFrom = new HashSet<DataColumn>();
+    for (DataColumn derivedFrom : dataColumn.getTypesDerivedFrom()) {
       dissociateFrom.add(derivedFrom);
     }
-    for (ResultValueType derivedFrom : dissociateFrom) {
-      derivedFrom.removeDerivedType(rvt);
+    for (DataColumn derivedFrom : dissociateFrom) {
+      derivedFrom.removeDerivedType(dataColumn);
     }
-    return getResultValueTypes().remove(rvt);
+    return getDataColumns().remove(dataColumn);
   }
 
   /**
    * Get the number of replicates (assay plates) associated with this screen result. If the
    * replicate count was not explicitly specified at instantiation time, calculate the replicate
    * count by finding the maximum replicate ordinal value from the screen result's
-   * ResultValueTypes; if none of the ResultValueTypes have their replicate
+   * data columns; if none of the data columns have their replicate
    * ordinal values defined, replicate count is 1.
    *
    * @return the number of replicates (assay plates) associated with this
@@ -247,31 +247,31 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   public Integer getReplicateCount()
   {
     if (_replicateCount == null) {
-      if (getResultValueTypes().size() == 0) {
+      if (getDataColumns().size() == 0) {
         _replicateCount = 0;
       }
       else {
-        ResultValueType maxOrdinalRvt =
-          Collections.max(getResultValueTypes(),
-            new Comparator<ResultValueType>()
+        DataColumn maxOrdinalCol =
+          Collections.max(getDataColumns(),
+            new Comparator<DataColumn>()
             {
-              public int compare(ResultValueType rvt1, ResultValueType rvt2)
+              public int compare(DataColumn col1, DataColumn col2)
               {
-                if (rvt1.getReplicateOrdinal() == null && rvt2.getReplicateOrdinal() == null) {
+                if (col1.getReplicateOrdinal() == null && col2.getReplicateOrdinal() == null) {
                   return 0;
                 }
-                if (rvt1.getReplicateOrdinal() == null && rvt2.getReplicateOrdinal() != null) {
+                if (col1.getReplicateOrdinal() == null && col2.getReplicateOrdinal() != null) {
                   return -1;
                 }
-                if (rvt1.getReplicateOrdinal() != null && rvt2.getReplicateOrdinal() == null) {
+                if (col1.getReplicateOrdinal() != null && col2.getReplicateOrdinal() == null) {
                   return 1;
                 }
-                return rvt1.getReplicateOrdinal().compareTo(rvt2.getReplicateOrdinal());
+                return col1.getReplicateOrdinal().compareTo(col2.getReplicateOrdinal());
               }
             } );
-        _replicateCount = maxOrdinalRvt.getReplicateOrdinal();
+        _replicateCount = maxOrdinalCol.getReplicateOrdinal();
         if (_replicateCount == null) {
-          // every ResultValueType had null replicateOrdinal value
+          // every DataColumn had null replicateOrdinal value
           _replicateCount = 1;
         }
       }
@@ -422,46 +422,46 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   }
 
   /**
-   * Return a list of ResultValueTypes
-   * @return an ordered list of ResultValueTypes
-   * @motivation random access to ResultValueTypes by ordinal
+   * Return a list of DataColumns
+   * @return an ordered list of DataColumns
+   * @motivation random access to DataColumns by ordinal
    */
   @Transient
-  public List<ResultValueType> getResultValueTypesList()
+  public List<DataColumn> getDataColumnsList()
   {
-    return new ArrayList<ResultValueType>(_resultValueTypes);
+    return new ArrayList<DataColumn>(_dataColumns);
   }
 
   /**
-   * Return the subset of ResultValueTypes that contain numeric ResultValue data.
-   * @return the subset of ResultValueTypes that contain numeric ResultValue data
+   * Return the subset of DataColumns that contain numeric ResultValue data.
+   * @return the subset of DataColumns that contain numeric ResultValue data
    */
   @Transient
-  public List<ResultValueType> getNumericResultValueTypes()
+  public List<DataColumn> getNumericDataColumns()
   {
-    List<ResultValueType> numericResultValueTypes = new ArrayList<ResultValueType>();
-    for (ResultValueType rvt : getResultValueTypes()) {
-      if (rvt.isNumeric()) {
-        numericResultValueTypes.add(rvt);
+    List<DataColumn> numericDataColumns = new ArrayList<DataColumn>();
+    for (DataColumn col : getDataColumns()) {
+      if (col.isNumeric()) {
+        numericDataColumns.add(col);
       }
     }
-    return numericResultValueTypes;
+    return numericDataColumns;
   }
 
   /**
-   * Return the subset of ResultValueTypes that contain raw, numeric ResultValue data.
-   * @return the subset of ResultValueTypes that contain raw, numeric ResultValue data
+   * Return the subset of DataColumns that contain raw, numeric ResultValue data.
+   * @return the subset of DataColumns that contain raw, numeric ResultValue data
    */
   @Transient
-  public List<ResultValueType> getRawNumericResultValueTypes()
+  public List<DataColumn> getRawNumericDataColumns()
   {
-    List<ResultValueType> rawNumericResultValueTypes = new ArrayList<ResultValueType>();
-    for (ResultValueType rvt : getResultValueTypes()) {
-      if (!rvt.isDerived() && rvt.isNumeric()) {
-        rawNumericResultValueTypes.add(rvt);
+    List<DataColumn> rawNumericDataColumns = new ArrayList<DataColumn>();
+    for (DataColumn col : getDataColumns()) {
+      if (!col.isDerived() && col.isNumeric()) {
+        rawNumericDataColumns.add(col);
       }
     }
-    return rawNumericResultValueTypes;
+    return rawNumericDataColumns;
   }
   
   @Column
@@ -480,7 +480,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
 
   /**
    * Increment the number of experimental wells that have data in this screen result.
-   * Intended only for use by {@link ResultValueType}.
+   * Intended only for use by {@link DataColumn}.
    * @see #getExperimentalWellCount()
    */
   void incrementExperimentalWellCount()
@@ -550,14 +550,14 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   }
 
   /**
-   * Set the ordered set of all {@link ResultValueType ResultValueTypes} for this screen result.
-   * @param resultValueTypes the new ordered set of all {@link ResultValueType ResultValueTypes}
+   * Set the ordered set of all {@link DataColumn}s for this screen result.
+   * @param dataColumns the new ordered set of all {@link DataColumn}s
    * for this screen result.
    * @motivation for hibernate
    */
-  private void setResultValueTypes(SortedSet<ResultValueType> resultValueTypes)
+  private void setDataColumns(SortedSet<DataColumn> dataColumns)
   {
-    _resultValueTypes = resultValueTypes;
+    _dataColumns = dataColumns;
   }
 
   /**
@@ -591,9 +591,9 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
 
   private void verifyNameIsUnique(String name)
   {
-    for (ResultValueType rvt : getResultValueTypes()) {
-      if (rvt.getName().equals(name)) {
-        throw new DuplicateEntityException(this, rvt);
+    for (DataColumn col : getDataColumns()) {
+      if (col.getName().equals(name)) {
+        throw new DuplicateEntityException(this, col);
       }
     }
   }

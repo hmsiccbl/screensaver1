@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
@@ -288,7 +288,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   {
     // exceptions for SM positive RVs, allowing a subset of RVs to be visible, even if screen result is not visible
     if (entity.isPositive()) {
-      Screen screen = entity.getResultValueType().getScreenResult().getScreen();
+      Screen screen = entity.getDataColumn().getScreenResult().getScreen();
       if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
         if (findOthersVisibleSmallMoleculeScreens().contains(screen)) {
           if (findSmallMoleculeMutualPositiveWells().contains(entity.getWell())) {
@@ -298,15 +298,15 @@ public class WebDataAccessPolicy implements DataAccessPolicy
       }
     }
 
-    return visit(entity.getResultValueType().getScreenResult());
+    return visit(entity.getDataColumn().getScreenResult());
   }
 
-  public boolean visit(ResultValueType entity)
+  public boolean visit(DataColumn entity)
   {
-    // exceptions for SM positives RVTS, allowing a subset of RVTs to be visible, even if screen result is not visible
-    // TODO: we could make this even more strict by restricting RVTs that have
+    // exceptions for SM positives DataColumns, allowing a subset of DataColumns to be visible, even if screen result is not visible
+    // TODO: we could make this even more strict by restricting DataColumns that have
     // no mutual positive RVs with "my screens"; currently we show all positives
-    // RVTs if any positives RVT has a mutual positive
+    // DataColumns if any positives DataColumn has a mutual positive
     if (entity.isPositiveIndicator() && entity.getScreenResult().getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
       if (findOthersVisibleSmallMoleculeScreens().contains(entity.getScreenResult().getScreen())) {
         return true;

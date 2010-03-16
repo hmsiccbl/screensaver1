@@ -55,10 +55,10 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
                                             "screenNumber",
                                             1,
                                             true,
-                                            "screenResult.resultValueTypes")
+                                            "screenResult.dataColumns")
                                             .getScreenResult();
 
-    assertEquals("pre-cellHTS raw RVT count", 8, screenResult.getResultValueTypes().size());
+    assertEquals("pre-cellHTS raw DataColumn count", 8, screenResult.getDataColumns().size());
     cellHts2Annotator.runCellhts2( RMethod.NORMALIZE_PLATES,
         screenResult,
        "testAnalysis",
@@ -76,12 +76,12 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
                                             "screenNumber",
                                             1,
                                             true,
-                                            "screenResult.resultValueTypes")
+                                            "screenResult.dataColumns")
                                             .getScreenResult();
-    assertEquals("post-cellHTS raw RVT count", 10, screenResult.getResultValueTypes().size());
+    assertEquals("post-cellHTS raw DataColumn count", 10, screenResult.getDataColumns().size());
     for (int i = 8; i < 10; ++i ) {
-      assertTrue("RVT " + i + " + is cellHTS-generated",
-                 screenResult.getResultValueTypesList().get(i).getName().contains(CellHTS2.CELLHTS2_DATA_HEADER_PREFIX));
+      assertTrue("DataColumn " + i + " + is cellHTS-generated",
+                 screenResult.getDataColumnsList().get(i).getName().contains(CellHTS2.CELLHTS2_DATA_COLUMN_PREFIX));
     }
   }
 }

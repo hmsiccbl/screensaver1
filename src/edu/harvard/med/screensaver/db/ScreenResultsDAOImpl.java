@@ -17,7 +17,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 
@@ -50,14 +50,14 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
   {
   }
 
-  public Map<WellKey,ResultValue> findResultValuesByPlate(final Integer plateNumber, final ResultValueType rvt)
+  public Map<WellKey,ResultValue> findResultValuesByPlate(final Integer plateNumber, final DataColumn col)
   {
     List<ResultValue> result = runQuery(new edu.harvard.med.screensaver.db.Query() {
       public List<?> execute(Session session)
       {
-        String hql = "select r from ResultValue r where r.resultValueType.id = :rvtId and r.well.id >= :firstWellInclusive and r.well.id < :lastWellExclusive";
+        String hql = "select r from ResultValue r where r.dataColumn.id = :colId and r.well.id >= :firstWellInclusive and r.well.id < :lastWellExclusive";
         Query query = session.createQuery(hql);
-        query.setParameter("rvtId", rvt.getEntityId());
+        query.setParameter("colId", col.getEntityId());
         query.setParameter("firstWellInclusive", new WellKey(plateNumber, 0, 0).toString());
         query.setParameter("lastWellExclusive", new WellKey(plateNumber + 1, 0, 0).toString());
         return query.list();
@@ -96,13 +96,13 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
         
         log.info("delete ResultValues");
         int cumRows = 0;
-        query = session.createQuery("delete ResultValue v where v.resultValueType.id = :rvt");
-        for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-          query.setParameter("rvt", rvt.getResultValueTypeId());
+        query = session.createQuery("delete ResultValue v where v.dataColumn.id = :col");
+        for (DataColumn col : screenResult.getDataColumns()) {
+          query.setParameter("col", col.getDataColumnId());
           rows = query.executeUpdate();
           cumRows += rows;
-          log.debug("deleted " + rows + " result values for " + rvt);
-          rvt.getResultValues().clear();
+          log.debug("deleted " + rows + " result values for " + col);
+          col.getResultValues().clear();
         }
         log.info("deleted a total of " + cumRows + " result values");
         //screenResult.getPlateNumbers().clear();
@@ -132,7 +132,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
         String sql =  "insert into screen_result_well_link (screen_result_id, well_id) " +
                                 "select :screenResultId  as screen_result_id," +
                       "well_id from (select distinct(well_id) from result_value " +
-                                    "join result_value_type using(result_value_type_id) " +
+                                    "join data_column using(data_column_id) " +
                       "where screen_result_id = :screenResultId and well_id is not null) as well_id";
         
         

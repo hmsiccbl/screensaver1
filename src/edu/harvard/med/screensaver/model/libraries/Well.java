@@ -44,7 +44,7 @@ import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
@@ -97,7 +97,7 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private Map<LibraryContentsVersion,Reagent> _reagents = Maps.newHashMap();
   private Reagent _latestReleasedReagent;
   private String _facilityId;
-  private Map<ResultValueType,ResultValue> _resultValues = new HashMap<ResultValueType,ResultValue>();
+  private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
   private Set<ScreenResult> _screenResults = new HashSet<ScreenResult>();
   private AdministrativeActivity _deprecationActivity;
 
@@ -500,15 +500,15 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
    * @return the set of result values
    */
   @OneToMany(fetch=FetchType.LAZY, mappedBy="well")
-  @MapKeyManyToMany(joinColumns={ @JoinColumn(name="resultValueTypeId") }, targetEntity=ResultValueType.class)
+  @MapKeyManyToMany(joinColumns={ @JoinColumn(name="dataColumnId") }, targetEntity=DataColumn.class)
   @ToMany(hasNonconventionalMutation=true) // Map-based collections not yet supported, tested in WellTest.testResultValueMap()
-  public Map<ResultValueType,ResultValue> getResultValues()
+  public Map<DataColumn,ResultValue> getResultValues()
   {
     return _resultValues;
   }
 
 
-  private void setResultValues(Map<ResultValueType,ResultValue> resultValues)
+  private void setResultValues(Map<DataColumn,ResultValue> resultValues)
   {
     _resultValues = resultValues;
   }

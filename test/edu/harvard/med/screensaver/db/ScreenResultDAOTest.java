@@ -31,7 +31,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -64,15 +64,15 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
         public void runTransaction()
         {
           ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
-          ResultValueType[] rvt = new ResultValueType[replicates];
+          DataColumn[] col = new DataColumn[replicates];
           for (int i = 0; i < replicates; i++) {
-            rvt[i] = screenResult.createResultValueType("rvt" + i).forReplicate(i + 1).forPhenotype("human");
-            rvt[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLUORESCENCE_INTENSITY);
+            col[i] = screenResult.createDataColumn("col" + i).forReplicate(i + 1).forPhenotype("human");
+            col[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY: AssayReadoutType.FLUORESCENCE_INTENSITY);
             if (i % 2 == 0) {
-              rvt[i].makeBooleanPositiveIndicator();
+              col[i].makeBooleanPositiveIndicator();
             }
             else {
-              rvt[i].makePartitionPositiveIndicator();
+              col[i].makePartitionPositiveIndicator();
             }
           }
 
@@ -90,15 +90,15 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
                                           (iWell % library.getPlateSize().getColumns()));
             wells[iWell] = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
             AssayWell assayWell = screenResult.createAssayWell(wells[iWell], AssayWellType.EXPERIMENTAL);
-            for (int iResultValue = 0; iResultValue < rvt.length; ++iResultValue) {
-              rvt[iResultValue].createResultValue(assayWell,
+            for (int iResultValue = 0; iResultValue < col.length; ++iResultValue) {
+              col[iResultValue].createResultValue(assayWell,
                                                   "value " + iWell + "," + iResultValue,
                                                   iWell % 2 == 1);
             }
           }
           genericEntityDao.saveOrUpdateEntity(library);
 
-          // test the calculation of replicateCount from child ResultValueTypes,
+          // test the calculation of replicateCount from child DataColumns,
           // before setReplicate() is called by anyone
           assertEquals(replicates, screenResult.getReplicateCount().intValue());
 
@@ -131,27 +131,27 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
             genericEntityDao.findAllEntitiesOfType(ScreenResult.class).get(0);
           assertEquals(replicates,screenResult.getReplicateCount().intValue());
           int iResultValue = 0;
-          SortedSet<ResultValueType> resultValueTypes = screenResult.getResultValueTypes();
+          SortedSet<DataColumn> dataColumns = screenResult.getDataColumns();
           assertEquals(2, replicates);
-          for (ResultValueType rvt : resultValueTypes) {
+          for (DataColumn col : dataColumns) {
             assertEquals(
               screenResult,
-              rvt.getScreenResult());
+              col.getScreenResult());
             assertEquals(
               iResultValue % 2 == 0 ? AssayReadoutType.PHOTOMETRY : AssayReadoutType.FLUORESCENCE_INTENSITY,
-              rvt.getAssayReadoutType());
+              col.getAssayReadoutType());
             assertEquals(
               iResultValue % 2 == 0 ? DataType.POSITIVE_INDICATOR_BOOLEAN: DataType.POSITIVE_INDICATOR_PARTITION,
-              rvt.getDataType());
+              col.getDataType());
             assertEquals(
               "human",
-              rvt.getAssayPhenotype());
+              col.getAssayPhenotype());
 
-            Map<WellKey,ResultValue> resultValues = rvt.getWellKeyToResultValueMap();
+            Map<WellKey,ResultValue> resultValues = col.getWellKeyToResultValueMap();
             for (WellKey wellKey : resultValues.keySet()) {
               assertTrue(wellKeys.contains(wellKey));
               // note that our naming scheme is testing the ordering of the
-              // ResultValueType and ResultValue entities (within their parent
+              // DataColumn and ResultValue entities (within their parent
               // sets)
               ResultValue rv = resultValues.get(wellKey);
               assertEquals("value " + wellKey.getColumn() + "," + iResultValue, rv.getValue());
@@ -166,8 +166,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
   public void testDerivedScreenResults()
   {
     final int replicates = 3;
-    final SortedSet<ResultValueType> derivedRvtSet1 = new TreeSet<ResultValueType>();
-    final SortedSet<ResultValueType> derivedRvtSet2 = new TreeSet<ResultValueType>();
+    final SortedSet<DataColumn> derivedColSet1 = new TreeSet<DataColumn>();
+    final SortedSet<DataColumn> derivedColSet2 = new TreeSet<DataColumn>();
     genericEntityDao.doInTransaction(new DAOTransaction()
       {
         public void runTransaction()
@@ -175,20 +175,20 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
 
           for (int i = 0; i < replicates; i++) {
-            ResultValueType rvt = screenResult.createResultValueType("rvt" + i).forReplicate(1).forPhenotype("human");
-            derivedRvtSet1.add(rvt);
+            DataColumn col = screenResult.createDataColumn("col" + i).forReplicate(1).forPhenotype("human");
+            derivedColSet1.add(col);
             if (i % 2 == 0) {
-              derivedRvtSet2.add(rvt);
+              derivedColSet2.add(col);
             }
           }
-          ResultValueType derivedRvt1 = screenResult.createResultValueType("derivedRvt1").forReplicate(1).forPhenotype("human");
-          for (ResultValueType resultValueType : derivedRvtSet1) {
-            derivedRvt1.addTypeDerivedFrom(resultValueType);
+          DataColumn derivedCol1 = screenResult.createDataColumn("derivedCol1").forReplicate(1).forPhenotype("human");
+          for (DataColumn dataColumn : derivedColSet1) {
+            derivedCol1.addTypeDerivedFrom(dataColumn);
           }
 
-          ResultValueType derivedRvt2 = screenResult.createResultValueType("derivedRvt2").forReplicate(1).forPhenotype("human");
-          for (ResultValueType resultValueType : derivedRvtSet2) {
-            derivedRvt2.addTypeDerivedFrom(resultValueType);
+          DataColumn derivedCol2 = screenResult.createDataColumn("derivedCol2").forReplicate(1).forPhenotype("human");
+          for (DataColumn dataColumn : derivedColSet2) {
+            derivedCol2.addTypeDerivedFrom(dataColumn);
           }
 
           genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLeadScreener());
@@ -203,17 +203,17 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
         {
           List<ScreenResult> screenResults = genericEntityDao.findAllEntitiesOfType(ScreenResult.class);
           ScreenResult screenResult = screenResults.get(0);
-          SortedSet<ResultValueType> resultValueTypes =
-            new TreeSet<ResultValueType>(screenResult.getResultValueTypes());
+          SortedSet<DataColumn> dataColumns =
+            new TreeSet<DataColumn>(screenResult.getDataColumns());
 
-          ResultValueType derivedRvt = resultValueTypes.last();
-          Set<ResultValueType> derivedFromSet = derivedRvt.getTypesDerivedFrom();
-          assertEquals(derivedRvtSet2, derivedFromSet);
+          DataColumn derivedCol = dataColumns.last();
+          Set<DataColumn> derivedFromSet = derivedCol.getTypesDerivedFrom();
+          assertEquals(derivedColSet2, derivedFromSet);
 
-          resultValueTypes.remove(derivedRvt);
-          derivedRvt = resultValueTypes.last();
-          derivedFromSet = derivedRvt.getTypesDerivedFrom();
-          assertEquals(derivedRvtSet1, derivedFromSet);
+          dataColumns.remove(derivedCol);
+          derivedCol = dataColumns.last();
+          derivedFromSet = derivedCol.getTypesDerivedFrom();
+          assertEquals(derivedColSet1, derivedFromSet);
         }
       });
   }
@@ -247,7 +247,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
   /**
    * A ScreenResult's plateNumbers, wells, experimentWellCount, and positives
    * properties should be updated when a ResultValue is added to a
-   * ScreenResult's ResultValueType.
+   * ScreenResult's DataColumn.
    */
   public void testScreenResultDerivedPersistentValues()
   {
@@ -261,10 +261,10 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         ScreenResult screenResult = screen.createScreenResult();
-        ResultValueType rvt1 = screenResult.createResultValueType("RVT1");
-        rvt1.makePartitionPositiveIndicator();
-        ResultValueType rvt2 = screenResult.createResultValueType("RVT2");
-        rvt2.makeBooleanPositiveIndicator();
+        DataColumn col1 = screenResult.createDataColumn("DataColumn1");
+        col1.makePartitionPositiveIndicator();
+        DataColumn col2 = screenResult.createDataColumn("DataColumn2");
+        col2.makeBooleanPositiveIndicator();
         Library library = new Library(
           "library 1",
           "lib1",
@@ -281,13 +281,13 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
           AssayWell assayWell = screenResult.createAssayWell(well, assayWellType);
           boolean exclude = i % 8 == 0;
-          String rvt1Value = values[i % 4];
-          rvt1.createResultValue(assayWell, rvt1Value, exclude);
-          rvt2.createResultValue(assayWell, "false", false);
+          String col1Value = values[i % 4];
+          col1.createResultValue(assayWell, col1Value, exclude);
+          col2.createResultValue(assayWell, "false", false);
           if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
             expectedExperimentalWellCount[0]++;
-            if (!exclude && rvt1Value != null) {
-              log.debug("result value " + rvt1Value + " is deemed a positive by this test");
+            if (!exclude && col1Value != null) {
+              log.debug("result value " + col1Value + " is deemed a positive by this test");
               ++expectedPositives[0];
             }
           }
@@ -306,8 +306,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
         assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
         assertEquals("wells", expectedWells, screen.getScreenResult().getWells());
         assertEquals("experimental well count", expectedExperimentalWellCount[0], screen.getScreenResult().getExperimentalWellCount().intValue());
-        assertEquals("positives", expectedPositives[0], screen.getScreenResult().getResultValueTypesList().get(0).getPositivesCount().intValue());
-        assertEquals("0 positives (but not null)", 0, screen.getScreenResult().getResultValueTypesList().get(1).getPositivesCount().intValue());
+        assertEquals("positives", expectedPositives[0], screen.getScreenResult().getDataColumnsList().get(0).getPositivesCount().intValue());
+        assertEquals("0 positives (but not null)", 0, screen.getScreenResult().getDataColumnsList().get(1).getPositivesCount().intValue());
       }
     });
   }
@@ -317,8 +317,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
   {
     final Screen screen = MakeDummyEntities.makeDummyScreen(1);
     ScreenResult screenResult = screen.createScreenResult();
-    ResultValueType rvt1 = screenResult.createResultValueType("Raw Value").makeNumeric(3);
-    ResultValueType rvt2 = screenResult.createResultValueType("Derived Value").makeNumeric(3);
+    DataColumn col1 = screenResult.createDataColumn("Raw Value").makeNumeric(3);
+    DataColumn col2 = screenResult.createDataColumn("Derived Value").makeNumeric(3);
     Library library = new Library(
       "library 1",
       "lib1",
@@ -331,8 +331,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
       for (int iWell = 0; iWell < 10; ++iWell) {
         Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), LibraryWellType.EXPERIMENTAL);
         AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
-        rvt1.createResultValue(assayWell, (double) iWell);
-        rvt2.createResultValue(assayWell, iWell + 10.0);
+        col1.createResultValue(assayWell, (double) iWell);
+        col2.createResultValue(assayWell, iWell + 10.0);
       }
     }
     genericEntityDao.saveOrUpdateEntity(library);
@@ -340,8 +340,8 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(screen);
 
-    // test findResultValuesByPlate(Integer, RVT)
-    Map<WellKey,ResultValue> resultValues1 = screenResultsDao.findResultValuesByPlate(2, rvt1);
+    // test findResultValuesByPlate(Integer, DataColumn)
+    Map<WellKey,ResultValue> resultValues1 = screenResultsDao.findResultValuesByPlate(2, col1);
     assertEquals("result values size", 10, resultValues1.size());
     for (int iWell = 0; iWell < 10; ++iWell) {
       ResultValue rv = resultValues1.get(new WellKey(2, 0, iWell));

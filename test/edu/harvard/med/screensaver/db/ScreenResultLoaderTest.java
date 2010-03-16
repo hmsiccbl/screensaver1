@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -130,15 +130,15 @@ public class ScreenResultLoaderTest extends AbstractSpringPersistenceTest
                screenResult.getDateLastImported() + ", should be after: " + now, 
                screenResult.getDateLastImported().getMillis() > now.getTime());
 
-    List<ResultValueType> loadedRVTs = genericEntityDao.findEntitiesByProperty(ResultValueType.class,
+    List<DataColumn> loadedDataColumns = genericEntityDao.findEntitiesByProperty(DataColumn.class,
                                                                                "screenResult",
                                                                                screenResult,
                                                                                true,
                                                                                "resultValues");
-    assertNotNull(loadedRVTs);
-    assertEquals("Number of RVT's: ", 7, loadedRVTs.size());
-    for (ResultValueType actualRvt : loadedRVTs) {
-      assertEquals(960, actualRvt.getResultValues().size());
+    assertNotNull(loadedDataColumns);
+    assertEquals("Number of DataColumn's: ", 7, loadedDataColumns.size());
+    for (DataColumn actualCol : loadedDataColumns) {
+      assertEquals(960, actualCol.getResultValues().size());
     }
     List<AssayWell> assayWells = genericEntityDao.findEntitiesByProperty(AssayWell.class,
                                                                          "screenResult",
@@ -151,12 +151,12 @@ public class ScreenResultLoaderTest extends AbstractSpringPersistenceTest
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 115);
         ScreenResult screenResult = screen.getScreenResult();
         assertNotNull(screenResult);
-        ResultValueType rvt0 = screenResult.getResultValueTypesList().get(0);
-        rvt0.getWellKeyToResultValueMap().keySet().iterator();
-        ResultValue rv = rvt0.getWellKeyToResultValueMap().get(new WellKey(1,"A01"));
+        DataColumn col0 = screenResult.getDataColumnsList().get(0);
+        col0.getWellKeyToResultValueMap().keySet().iterator();
+        ResultValue rv = col0.getWellKeyToResultValueMap().get(new WellKey(1,"A01"));
         assertEquals("1071894", rv.getValue());
         // this tests how Hibernate will make use of WellKey, initializing with a concatenated key string
-        rv = rvt0.getWellKeyToResultValueMap().get(new WellKey("00001:A01"));
+        rv = col0.getWellKeyToResultValueMap().get(new WellKey("00001:A01"));
         assertEquals("1071894", rv.getValue());
       }
     });

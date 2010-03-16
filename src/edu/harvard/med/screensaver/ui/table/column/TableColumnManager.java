@@ -315,7 +315,7 @@ public class TableColumnManager<R> extends Observable implements Observer
   /**
    * Get the JSF column model, containing visible columns.
    *
-   * @return the data header column model
+   * @return the data columns column model
    */
   public ListDataModel getVisibleColumnModel()
   {

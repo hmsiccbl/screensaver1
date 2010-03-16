@@ -30,7 +30,7 @@ import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 
@@ -205,27 +205,27 @@ public class ICBGReportGenerator
    */
   private boolean printBioactivityRows(AssayInfo assayInfo, ScreenResult screenResult)
   {
-    ResultValueType scaledOrBooleanRVT =
-      findRightmostIndicatingScaledOrBooleanRVT(screenResult);
-    if (scaledOrBooleanRVT == null) {
+    DataColumn scaledOrBooleanDataColumn =
+      findRightmostIndicatingScaledOrBooleanDataColumn(screenResult);
+    if (scaledOrBooleanDataColumn == null) {
       log.info("no assay indicator for " + assayInfo.getAssayName());
       return false;
     }
     
     boolean printedBioactivityRow = false;
     
-    List<ResultValueType> rvts = new ArrayList<ResultValueType>();
-    if (scaledOrBooleanRVT != null) {
-      rvts.add(scaledOrBooleanRVT);
+    List<DataColumn> cols = new ArrayList<DataColumn>();
+    if (scaledOrBooleanDataColumn != null) {
+      cols.add(scaledOrBooleanDataColumn);
     }
 
     _currentBioactivitySheet = createBioactivitySheet();
     for (Integer plateNumber : _mapper.getMappedPlates()) {
       Set<WellKey> mappedKeys = new HashSet<WellKey>();
       Map<WellKey,ResultValue> scaledOrBooleanRVMap = null;
-      if (scaledOrBooleanRVT != null) {
+      if (scaledOrBooleanDataColumn != null) {
         scaledOrBooleanRVMap =
-          _screenResultsDAO.findResultValuesByPlate(plateNumber, scaledOrBooleanRVT);
+          _screenResultsDAO.findResultValuesByPlate(plateNumber, scaledOrBooleanDataColumn);
         mappedKeys.addAll(scaledOrBooleanRVMap.keySet());
       }
       Map<WellKey,ResultValue> numericalRVMap = null;
@@ -234,12 +234,12 @@ public class ICBGReportGenerator
 		if (_currentBioactivityRow > 20) break;
 */
 		
-        ResultValue scaledOrBooleanRV = (scaledOrBooleanRVT == null) ? null :
+        ResultValue scaledOrBooleanRV = (scaledOrBooleanDataColumn == null) ? null :
           scaledOrBooleanRVMap.get(wellKey);
         if (printBioactivityRow(
           assayInfo,
           wellKey,
-          scaledOrBooleanRVT,
+          scaledOrBooleanDataColumn,
           scaledOrBooleanRV)) {
           printedBioactivityRow = true;
         }
@@ -248,13 +248,13 @@ public class ICBGReportGenerator
     return printedBioactivityRow;
   }
   
-  private ResultValueType findRightmostIndicatingScaledOrBooleanRVT(
+  private DataColumn findRightmostIndicatingScaledOrBooleanDataColumn(
     ScreenResult screenResult)
   {
-    ResultValueType rightmostScaledOrBoolean = null;
-    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-      if (rvt.isPositiveIndicator()) {
-        rightmostScaledOrBoolean = rvt;
+    DataColumn rightmostScaledOrBoolean = null;
+    for (DataColumn col : screenResult.getDataColumns()) {
+      if (col.isPositiveIndicator()) {
+        rightmostScaledOrBoolean = col;
       }
     }
     return rightmostScaledOrBoolean;
@@ -263,7 +263,7 @@ public class ICBGReportGenerator
   private boolean printBioactivityRow(
     AssayInfo assayInfo,
     WellKey wellKey,
-    ResultValueType scaledOrBooleanRVT,
+    DataColumn scaledOrBooleanDataColumn,
     ResultValue scaledOrBooleanRV)
   {
     String lq = _mapper.getLQForWellKey(wellKey);
@@ -282,7 +282,7 @@ public class ICBGReportGenerator
     row.createCell((short) 4).setCellValue(assayName);
     // note: cells 5 and 6 used to be used for "numerical assay indicator", which no longer exists
     if (scaledOrBooleanRV != null) {
-      if (scaledOrBooleanRVT.isBooleanPositiveIndicator()) {
+      if (scaledOrBooleanDataColumn.isBooleanPositiveIndicator()) {
         if (scaledOrBooleanRV.getValue().equals("true")) {
           row.createCell((short) 7).setCellValue("A");
         }
@@ -290,7 +290,7 @@ public class ICBGReportGenerator
           row.createCell((short) 7).setCellValue("I");          
         }
       }
-      else if (scaledOrBooleanRVT.isPartitionPositiveIndicator()) {
+      else if (scaledOrBooleanDataColumn.isPartitionPositiveIndicator()) {
         String partitionValue = scaledOrBooleanRV.getValue();
         if (partitionValue == null) {
           log.info("no partition value for well key " + wellKey);

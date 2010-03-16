@@ -342,8 +342,8 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
   }
 
   /**
-   * Set the numericalness of this result value type.
-   * @param isNumeric the new numericalness of this result value type
+   * Set the numericalness of this annotation type.
+   * @param isNumeric the new numericalness of this annotation type
    */
   private void setNumeric(boolean isNumeric)
   {

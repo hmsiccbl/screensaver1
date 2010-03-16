@@ -103,9 +103,9 @@ import org.apache.log4j.Logger;
       WritableWorkbook errorAnnotatedWorkbook = jxl.Workbook.createWorkbook(dummyOutputStream);
       if (_workbook != null) {
         errorAnnotatedWorkbook = jxl.Workbook.createWorkbook(dummyOutputStream);
-        errorAnnotatedWorkbook.importSheet(ScreenResultWorkbookSpecification.DATA_HEADERS_SHEET_NAME,
+        errorAnnotatedWorkbook.importSheet(ScreenResultWorkbookSpecification.DATA_COLUMNS_SHEET_NAME,
                                            1,
-                                           _workbook.getWorkbook().getSheet(ScreenResultWorkbookSpecification.DATA_HEADERS_SHEET_NAME));
+                                           _workbook.getWorkbook().getSheet(ScreenResultWorkbookSpecification.DATA_COLUMNS_SHEET_NAME));
       }
 
       // annotate workbook with non-cell-specific error by appending to a specially created "errors" sheet

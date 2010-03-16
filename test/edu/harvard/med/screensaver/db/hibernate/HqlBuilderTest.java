@@ -26,11 +26,11 @@ public class HqlBuilderTest extends TestCase
     hb.select("s", "screenNumber").
     from(Screen.class, "s").
     from("s", "screenResult", "sr", JoinType.INNER).
-    from("sr", "resultValueTypes", "rvt", JoinType.INNER).
-    where("rvt", "numeric", Operator.EQUAL, true).
-    where("rvt", "name", Operator.EQUAL, "Positive").
+    from("sr", "dataColumns", "col", JoinType.INNER).
+    where("col", "numeric", Operator.EQUAL, true).
+    where("col", "name", Operator.EQUAL, "Positive").
     orderBy("s", "screenNumber");
-    assertEquals("hql text", "select s.screenNumber from Screen s join s.screenResult sr join sr.resultValueTypes rvt where rvt.numeric=:arg0 and rvt.name=:arg1 order by s.screenNumber",
+    assertEquals("hql text", "select s.screenNumber from Screen s join s.screenResult sr join sr.dataColumns col where col.numeric=:arg0 and col.name=:arg1 order by s.screenNumber",
                  hb.toHql());
     Map<String,Object> expectedArgs = new HashMap<String,Object>();
     expectedArgs.put("arg0", Boolean.TRUE);
@@ -41,22 +41,22 @@ public class HqlBuilderTest extends TestCase
   public void testWhereRestrictionBuilder()
   {
     HqlBuilder hb = new HqlBuilder();
-    hb.select("w", "id").select("rvt", "id").select("rv", "value");
+    hb.select("w", "id").select("col", "id").select("rv", "value");
     hb.from(Well.class, "w");
     hb.from("w", "resultValues", "rv", JoinType.LEFT_FETCH);
-    hb.from("rv", "resultValueType", "rvt");
+    hb.from("rv", "dataColumn", "col");
     Disjunction orClause = hb.disjunction();
     Conjunction and1 = hb.conjunction();
     Conjunction and2 = hb.conjunction();
-    and1.add(hb.simplePredicate("rvt", Operator.EQUAL, null)).
+    and1.add(hb.simplePredicate("col", Operator.EQUAL, null)).
          add(hb.simplePredicate("rv.value", Operator.GREATER_THAN, new Double(1.0)));
-    and2.add(hb.simplePredicate("rvt", Operator.EQUAL, null)).
+    and2.add(hb.simplePredicate("col", Operator.EQUAL, null)).
          add(hb.simplePredicate("rv.value", Operator.LESS_THAN, new Double(-1.0)));
     orClause.add(and1).add(and2);
     hb.where(orClause);
-    assertEquals("select w.id, rvt.id, rv.value " +
-    		"from Well w left join fetch w.resultValues rv left join rv.resultValueType rvt " +
-    		"where ((rvt=:arg0 and rv.value>:arg1) or (rvt=:arg2 and rv.value<:arg3))",
+    assertEquals("select w.id, col.id, rv.value " +
+    		"from Well w left join fetch w.resultValues rv left join rv.dataColumn col " +
+    		"where ((col=:arg0 and rv.value>:arg1) or (col=:arg2 and rv.value<:arg3))",
     		hb.toHql());
   }
 
@@ -84,9 +84,9 @@ public class HqlBuilderTest extends TestCase
     HqlBuilder hb = new HqlBuilder();
     hb.from(Well.class, "w");
     hb.from("w", "resultValues", "rv", JoinType.LEFT);
-    hb.restrictFrom("rv", "resultValueType.id", Operator.EQUAL, 1);
+    hb.restrictFrom("rv", "dataColumn.id", Operator.EQUAL, 1);
     hb.where(hb.simplePredicate("rv.value", Operator.GREATER_THAN, 5.0));
-    assertEquals("from Well w left join w.resultValues rv with rv.resultValueType.id=:arg0 where rv.value>:arg1",
+    assertEquals("from Well w left join w.resultValues rv with rv.dataColumn.id=:arg0 where rv.value>:arg1",
                  hb.toHql());
   }
   

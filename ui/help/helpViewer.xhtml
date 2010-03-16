@@ -262,7 +262,7 @@
 					</t:collapsiblePanel>
 
 					<t:collapsiblePanel
-						value="#{helpViewer.isPanelCollapsedMap['dataHeadersHelp']}"
+						value="#{helpViewer.isPanelCollapsedMap['dataColumnsHelp']}"
 						var="isCollapsed">
 						<f:facet name="header">
 							<t:div styleClass="subsectionHeader">
@@ -270,12 +270,12 @@
 									<h:graphicImage
 										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
 										styleClass="icon" />
-									<h:outputText value="Data Headers"
+									<h:outputText value="Data Columns"
 										styleClass="subsectionHeader" />
 								</t:headerLink>
 							</t:div>
 						</f:facet>
-						<ui:include src="screens/screenViewer/dataHeadersHelpBody.xhtml" />
+						<ui:include src="screens/screenViewer/dataColumnsHelpBody.xhtml" />
 					</t:collapsiblePanel>
 
 					<t:collapsiblePanel
@@ -473,7 +473,7 @@
 									<h:graphicImage
 										value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
 										styleClass="icon" />
-									<h:outputText value="Data Headers"
+									<h:outputText value="Data Columns"
 										styleClass="subsectionHeader" />
 								</t:headerLink>
 							</t:div>

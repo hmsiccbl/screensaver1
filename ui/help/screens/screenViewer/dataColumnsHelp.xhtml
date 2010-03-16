@@ -7,13 +7,13 @@
 	xmlns:t="http://myfaces.apache.org/tomahawk"
 	xmlns:s="http://myfaces.apache.org/sandbox">
 
-<ui:composition>
+<ui:composition template="/help/pageHelpTemplate.xhtml">
 
+  <ui:param name="pageTitle" value="Screen Viewer: Screen Result Data Columns Help" />
 
-  <f:verbatim escape="false">
-    <p>The Data section of the Screen Viewer page allows you to browse
-    the scren result data.</p>
-  </f:verbatim>
+	<ui:define name="body">
+        <ui:include src="dataColumnsHelpBody.xhtml" />
+	</ui:define>
 
 </ui:composition>
 

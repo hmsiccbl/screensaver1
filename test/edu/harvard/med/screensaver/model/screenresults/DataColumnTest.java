@@ -28,11 +28,11 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
-public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueType>
+public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
 {
   public static TestSuite suite()
   {
-    return buildTestSuite(ResultValueTypeTest.class, ResultValueType.class);
+    return buildTestSuite(DataColumnTest.class, DataColumn.class);
   }
 
   public static final String SCREEN_RESULT_FILE = "ScreenResultTest115-result-values-size.xls";
@@ -41,9 +41,9 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
   protected ScreenResultParser screenResultParser;
   protected LibrariesDAO librariesDao;
 
-  public ResultValueTypeTest() throws IntrospectionException
+  public DataColumnTest() throws IntrospectionException
   {
-    super(ResultValueType.class);
+    super(DataColumn.class);
   }
 
   /**
@@ -85,8 +85,8 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 115);
         assertEquals("result values count",
                      28,
-                     screen.getScreenResult().getResultValueTypesList().get(0).getResultValues().size());
-        assertEquals(screen.getScreenResult().getResultValueTypesList().get(0).getWellKeyToResultValueMap().get(new WellKey(1, "A01")).getValue(),
+                     screen.getScreenResult().getDataColumnsList().get(0).getResultValues().size());
+        assertEquals(screen.getScreenResult().getDataColumnsList().get(0).getWellKeyToResultValueMap().get(new WellKey(1, "A01")).getValue(),
                      "1071894.000");
       }
     });
@@ -113,22 +113,22 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
                                             "screenNumber",
                                             1,
                                             true,
-                                            "screenResult.resultValueTypes.derivedTypes",
-                                            "screenResult.resultValueTypes.typesDerivedFrom")
+                                            "screenResult.dataColumns.derivedTypes",
+                                            "screenResult.dataColumns.typesDerivedFrom")
                                             .getScreenResult();
-    assertEquals("pre-delete rvt count", 8, screenResult.getResultValueTypes().size());
+    assertEquals("pre-delete col count", 8, screenResult.getDataColumns().size());
 
     try {
-      screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(1));
-      fail("expected DataModelViolationException when deleting RVT that is derived from");
+      screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(1));
+      fail("expected DataModelViolationException when deleting DataColumn that is derived from");
     }
     catch (DataModelViolationException e) {}
 
-    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(6));
-    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(5));
-    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(3));
-    screenResult.deleteResultValueType(screenResult.getResultValueTypesList().get(1));
-    assertEquals("post-delete rvt count", 4, screenResult.getResultValueTypes().size());
+    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(6));
+    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(5));
+    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(3));
+    screenResult.deleteDataColumn(screenResult.getDataColumnsList().get(1));
+    assertEquals("post-delete col count", 4, screenResult.getDataColumns().size());
 
     genericEntityDao.saveOrUpdateEntity(screenResult);
 
@@ -137,10 +137,10 @@ public class ResultValueTypeTest extends AbstractEntityInstanceTest<ResultValueT
                                             "screenNumber",
                                             1,
                                             true,
-                                            "screenResult.resultValueTypes.derivedTypes",
-                                            "screenResult.resultValueTypes.typesDerivedFrom")
+                                            "screenResult.dataColumns.derivedTypes",
+                                            "screenResult.dataColumns.typesDerivedFrom")
                                             .getScreenResult();
-    assertEquals("post-delete, post-persist rvt count", 4, screenResult.getResultValueTypes().size());
+    assertEquals("post-delete, post-persist col count", 4, screenResult.getDataColumns().size());
 
   }
 }

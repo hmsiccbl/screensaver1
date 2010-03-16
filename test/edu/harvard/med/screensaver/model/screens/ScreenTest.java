@@ -101,8 +101,8 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(107);
         ScreenResult screenResult = screen.createScreenResult();
-        screenResult.createResultValueType("Luminescence");
-        screenResult.createResultValueType("FI");
+        screenResult.createDataColumn("Luminescence");
+        screenResult.createDataColumn("FI");
         genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(screen);
@@ -118,8 +118,8 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
         assertNotNull("screen in session", screen);
         for (Object key : session.getStatistics().getEntityKeys()) {
           EntityKey entityKey = (EntityKey) key;
-          assertFalse("no resultValueType entities in session",
-                      entityKey.getEntityName().contains("ResultValueType"));
+          assertFalse("no dataColumn entities in session",
+                      entityKey.getEntityName().contains("DataColumn"));
         }
       }
     });

@@ -29,7 +29,7 @@ public class PackageTestSuite extends TestSuite
     addTest(AnnotationTypeTest.suite());
     addTest(AnnotationValueTest.suite());
     addTest(ResultValueTest.suite());
-    addTest(ResultValueTypeTest.suite());
+    addTest(DataColumnTest.suite());
     addTest(ScreenResultTest.suite());
   }
 }

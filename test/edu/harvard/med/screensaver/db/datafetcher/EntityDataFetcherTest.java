@@ -36,7 +36,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -125,7 +125,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
       {
         _rnaiScreen = genericEntityDao.reloadEntity(_rnaiScreen, true);
         _screenResult = _rnaiScreen.getScreenResult();
-        genericEntityDao.needReadOnly(_screenResult, "resultValueTypes.resultValues");
+        genericEntityDao.needReadOnly(_screenResult, "dataColumns.resultValues");
         genericEntityDao.needReadOnly(_screenResult, "wells");
         _study = genericEntityDao.reloadEntity(_study, true, "annotationTypes.annotationValues");
         _rnaiLibrary = genericEntityDao.reloadEntity(_rnaiLibrary, true, "wells");
@@ -232,14 +232,14 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testDeepFetchDataRangeFiltered()
   {
-    ResultValueType rvt1 = _screenResult.getResultValueTypesList().get(0);
-    ResultValueType rvt2 = _screenResult.getResultValueTypesList().get(2);
-    ResultValueType rvt3 = _screenResult.getResultValueTypesList().get(6);
-    ResultValueType rvt4 = _screenResult.getResultValueTypesList().get(7); // "comments", with sparse result values
-    PropertyPath<Well> propertyPath1 = Well.resultValues.restrict("resultValueType", rvt1).toProperty("value");
-    PropertyPath<Well> propertyPath2 = Well.resultValues.restrict("resultValueType", rvt2).toProperty("value");
-    PropertyPath<Well> propertyPath3 = Well.resultValues.restrict("resultValueType", rvt3).toProperty("positive");
-    PropertyPath<Well> propertyPath4 = Well.resultValues.restrict("resultValueType", rvt4).toProperty("value");
+    DataColumn col1 = _screenResult.getDataColumnsList().get(0);
+    DataColumn col2 = _screenResult.getDataColumnsList().get(2);
+    DataColumn col3 = _screenResult.getDataColumnsList().get(6);
+    DataColumn col4 = _screenResult.getDataColumnsList().get(7); // "comments", with sparse result values
+    PropertyPath<Well> propertyPath1 = Well.resultValues.restrict("dataColumn", col1).toProperty("value");
+    PropertyPath<Well> propertyPath2 = Well.resultValues.restrict("dataColumn", col2).toProperty("value");
+    PropertyPath<Well> propertyPath3 = Well.resultValues.restrict("dataColumn", col3).toProperty("positive");
+    PropertyPath<Well> propertyPath4 = Well.resultValues.restrict("dataColumn", col4).toProperty("value");
     _relationships.add(propertyPath1.getRelationshipPath());
     _relationships.add(propertyPath2.getRelationshipPath());
     _relationships.add(propertyPath3.getRelationshipPath());
@@ -252,9 +252,9 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
 
     List<String> expectedWellKeys = new ArrayList<String>();
     for (Well well : _screenResult.getWells()) {
-      if (rvt3.getWellKeyToResultValueMap().get(well.getWellKey()).isPositive() &&
-        rvt4.getWellKeyToResultValueMap().get(well.getWellKey()) != null &&
-        rvt4.getWellKeyToResultValueMap().get(well.getWellKey()).getValue().length() > 0) {
+      if (col3.getWellKeyToResultValueMap().get(well.getWellKey()).isPositive() &&
+        col4.getWellKeyToResultValueMap().get(well.getWellKey()) != null &&
+        col4.getWellKeyToResultValueMap().get(well.getWellKey()).getValue().length() > 0) {
         expectedWellKeys.add(well.getWellKey().toString());
       }
     }
@@ -306,7 +306,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     Collections.sort(allData);
     Well well = allData.get(0);
     assertEquals("well.resultValues unrestricted size",
-                 _screenResult.getResultValueTypes().size() /*RVTs per screen result*/ * 2 /* screen results*/,
+                 _screenResult.getDataColumns().size() /*DataColumns per screen result*/ * 2 /* screen results*/,
                  well.getResultValues().size());
 
     _allWellsFetcher.setRelationshipsToFetch(Lists.newArrayList(Well.latestReleasedReagent.to(Reagent.annotationValues), Well.library.to(Library.contentsVersions)));
@@ -324,12 +324,12 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchRestrictedCollection()
   {
-    _relationships.add(Well.resultValues.to(ResultValue.ResultValueType).restrict(ResultValueType.ScreenResult.getLeaf(), _screenResult));
+    _relationships.add(Well.resultValues.to(ResultValue.DataColumn).restrict(DataColumn.ScreenResult.getLeaf(), _screenResult));
     _allWellsFetcher.setRelationshipsToFetch(_relationships);
     List<Well> allData = _allWellsFetcher.fetchAllData();
     Collections.sort(allData);
 
-    // test a well that has a RV for every RVT
+    // test a well that has a RV for every DataColumn
     Well well = allData.get(0);
     assertEquals("expected well", "02000:A01", well.getWellKey().toString());
     assertEquals("well.resultValues restricted size",
@@ -337,10 +337,10 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
                  // trying to filter collections when eager fetching; Hibernate
                  // does not naturally support this via
                  // EntityDataFetcher.getOrCreateFetchJoin()
-                 16, //_screenResult.getResultValueTypes().size(),
+                 16, //_screenResult.getDataColumns().size(),
                  well.getResultValues().size());
 
-    // test a well that does not have a RV for every RVT
+    // test a well that does not have a RV for every DataColumn
     well = allData.get(3);
     assertEquals("expected well", "02000:A04", well.getWellKey().toString());
     assertEquals("well.resultValues restricted size",
@@ -348,7 +348,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
                  // trying to filter collections when eager fetching; Hibernate
                  // does not naturally support this via
                  // EntityDataFetcher.getOrCreateFetchJoin()
-                 16 - 2 /*_screenResult.getResultValueTypes().size() - 1*/,
+                 16 - 2 /*_screenResult.getDataColumns().size() - 1*/,
                  well.getResultValues().size());
   }
 
@@ -380,9 +380,9 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     EntityDataFetcher<Well,String> wellSetFetcher = new EntitySetDataFetcher<Well,String>(Well.class,
       wellKeys,
       genericEntityDao);
-    ResultValueType commentsRvt = _screenResult.getResultValueTypesList().get(7); // has with sparse result values
+    DataColumn commentsCol = _screenResult.getDataColumnsList().get(7); // has with sparse result values
     _relationships.add(Well.latestReleasedReagent.to(Reagent.annotationValues));
-    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), commentsRvt));
+    _relationships.add(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), commentsCol));
     wellSetFetcher.setRelationshipsToFetch(_relationships);
 
     List<Well> allData = wellSetFetcher.fetchAllData();
@@ -403,8 +403,8 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchMultipleRestrictedCollectionsOfSameType()
   {
-    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(0)));
-    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(2)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), _screenResult.getDataColumnsList().get(0)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), _screenResult.getDataColumnsList().get(2)));
     _allWellsFetcher.setRelationshipsToFetch(_relationships);
     List<Well> allData = _allWellsFetcher.fetchAllData();
     Collections.sort(allData);
@@ -415,7 +415,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
                  // trying to filter collections when eager fetching; Hibernate
                  // does not naturally support this via
                  // EntityDataFetcher.getOrCreateFetchJoin()
-                 16, // 2 /* selected RVTs */,
+                 16, // 2 /* selected DataColumns */,
                  well.getResultValues().size());
 
   }
@@ -427,9 +427,9 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testEagerFetchMultipleRestrictedSparseCollectionsOfDifferentTypes()
   {
-    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(0)));
-    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(2)));
-    _relationships.add(Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), _screenResult.getResultValueTypesList().get(7)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), _screenResult.getDataColumnsList().get(0)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), _screenResult.getDataColumnsList().get(2)));
+    _relationships.add(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), _screenResult.getDataColumnsList().get(7)));
     Iterator<AnnotationType> annotationTypesIter = _study.getAnnotationTypes().iterator();
     AnnotationType annotationType1 = annotationTypesIter.next();
     AnnotationType annotationType2 = annotationTypesIter.next();
@@ -453,27 +453,27 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     Well well = allData.get(0);
     assertEquals("expected well", "02000:A01", well.getWellKey().toString());
     assertEquals("well.resultValues restricted size",
-                 16, //3 /* selected RVTs */,
+                 16, //3 /* selected DataColumns */,
                  well.getResultValues().size());
     assertEquals("well.reagent.annotationValues restricted size",
                  2 /* selected annotationTypes */,
                  well.<Reagent>getLatestReleasedReagent().getAnnotationValues().size());
 
-    // this well should have values for all RVTs, but undefined values for all AnnotTypes
+    // this well should have values for all DataColumns, but undefined values for all AnnotTypes
     well = allData.get(2);
     assertEquals("expected well", "02000:A03", well.getWellKey().toString());
     assertEquals("well.resultValues restricted size",
-                 16, //3 /* selected RVTs */,
+                 16, //3 /* selected DataColumns */,
                  well.getResultValues().size());
     assertEquals("well.reagent.annotationValues restricted size",
                  0 /* selected annotationTypes */,
                  well.<Reagent>getLatestReleasedReagent().getAnnotationValues().size());
 
-    // this well should have undefined values for one RVT and all AnnotTypes
+    // this well should have undefined values for one DataColumn and all AnnotTypes
     well = allData.get(3);
     assertEquals("expected well", "02000:A04", well.getWellKey().toString());
     assertEquals("well.resultValues restricted size",
-                 14, //2 /* selected RVTs */,
+                 14, //2 /* selected DataColumns */,
                  well.getResultValues().size());
     assertEquals("well.reagent.annotationValues restricted size",
                  0 /* selected annotationTypes */,
@@ -490,30 +490,30 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testAllFilterOperators()
   {
-    final ResultValueType numericRvt = _screenResult.getResultValueTypesList().get(0);
-    final ResultValueType textRvt = _screenResult.getResultValueTypesList().get(2);
-    final ResultValueType positiveRvt = _screenResult.getResultValueTypesList().get(6);
-    final ResultValueType commentRvt = _screenResult.getResultValueTypesList().get(7);
-    PropertyPath<Well> numericRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), numericRvt).toProperty("numericValue");
-    PropertyPath<Well> textRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), textRvt).toProperty("value");
-    PropertyPath<Well> positiveRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), positiveRvt).toProperty("value");
-    // the "comments" RVT contains blank and missing (null) resultValues, allowing us to test the EMPTY and NOT_EMPTY operators
-    PropertyPath<Well> commentRvtPropPath = Well.resultValues.restrict(ResultValue.ResultValueType.getLeaf(), commentRvt).toProperty("value");
-    _relationships.add(numericRvtPropPath.getRelationshipPath());
-    _relationships.add(textRvtPropPath.getRelationshipPath());
-    _relationships.add(positiveRvtPropPath.getRelationshipPath());
-    _relationships.add(commentRvtPropPath.getRelationshipPath());
+    final DataColumn numericCol = _screenResult.getDataColumnsList().get(0);
+    final DataColumn textCol = _screenResult.getDataColumnsList().get(2);
+    final DataColumn positiveCol = _screenResult.getDataColumnsList().get(6);
+    final DataColumn commentCol = _screenResult.getDataColumnsList().get(7);
+    PropertyPath<Well> numericColPropPath = Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), numericCol).toProperty("numericValue");
+    PropertyPath<Well> textColPropPath = Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), textCol).toProperty("value");
+    PropertyPath<Well> positiveColPropPath = Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), positiveCol).toProperty("value");
+    // the "comments" DataColumn contains blank and missing (null) resultValues, allowing us to test the EMPTY and NOT_EMPTY operators
+    PropertyPath<Well> commentColPropPath = Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), commentCol).toProperty("value");
+    _relationships.add(numericColPropPath.getRelationshipPath());
+    _relationships.add(textColPropPath.getRelationshipPath());
+    _relationships.add(positiveColPropPath.getRelationshipPath());
+    _relationships.add(commentColPropPath.getRelationshipPath());
     _allWellsFetcher.setRelationshipsToFetch(_relationships);
 
     List<Well> allData = _allWellsFetcher.fetchAllData();
     assertEquals("sanity check that we're testing filtering against full data set", _screenResult.getWells().size(), allData.size());
     Getter<Well,String> wellNameGetter = new Getter<Well,String>() { public String get(Well well) { return well.getWellName(); } };
-    Getter<Well,Double> rvNumericValueGetter = new Getter<Well,Double>() { public Double get(Well well) { return well.getResultValues().get(numericRvt).getNumericValue(); } };
-    Getter<Well,String> rvTextValueGetter = new Getter<Well,String>() { public String get(Well well) { return well.getResultValues().get(textRvt).getValue(); } };
-    Getter<Well,String> positiveValueGetter = new Getter<Well,String>() { public String get(Well well) { return well.getResultValues().get(positiveRvt).getValue(); } };
+    Getter<Well,Double> rvNumericValueGetter = new Getter<Well,Double>() { public Double get(Well well) { return well.getResultValues().get(numericCol).getNumericValue(); } };
+    Getter<Well,String> ColextValueGetter = new Getter<Well,String>() { public String get(Well well) { return well.getResultValues().get(textCol).getValue(); } };
+    Getter<Well,String> positiveValueGetter = new Getter<Well,String>() { public String get(Well well) { return well.getResultValues().get(positiveCol).getValue(); } };
     Getter<Well,String> commentValueGetter = new Getter<Well,String>() {
       public String get(Well well) {
-        ResultValue rv = well.getResultValues().get(commentRvt);
+        ResultValue rv = well.getResultValues().get(commentCol);
         return rv == null ? null : rv.getValue();
       }
     };
@@ -521,20 +521,20 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
       doTestFilterOperator(new PropertyPath<Well>(Well.class, "wellName"), new Criterion<String>(operator, "B18"), wellNameGetter, allData);
       if (operator.getOperatorClass() == OperatorClass.EQUALITY ||
         operator.getOperatorClass() == OperatorClass.RANKING) {
-        doTestFilterOperator(numericRvtPropPath, new Criterion<Double>(operator, new Double(1.0)), rvNumericValueGetter, allData);
-        doTestFilterOperator(textRvtPropPath, new Criterion<String>(operator, "text00100"), rvTextValueGetter, allData);
-        doTestFilterOperator(positiveRvtPropPath, new Criterion<String>(operator, PartitionedValue.MEDIUM.getValue()), positiveValueGetter, allData);
+        doTestFilterOperator(numericColPropPath, new Criterion<Double>(operator, new Double(1.0)), rvNumericValueGetter, allData);
+        doTestFilterOperator(textColPropPath, new Criterion<String>(operator, "text00100"), ColextValueGetter, allData);
+        doTestFilterOperator(positiveColPropPath, new Criterion<String>(operator, PartitionedValue.MEDIUM.getValue()), positiveValueGetter, allData);
       }
       else if (operator.getOperatorClass() == OperatorClass.EXTANT) {
-        // note: main purpose of next line is to test the empty/not-empty operators, since this rvt will have some empty-string values and some null values
-        doTestFilterOperator(commentRvtPropPath, new Criterion<String>(operator, "so so"), commentValueGetter, allData);
+        // note: main purpose of next line is to test the empty/not-empty operators, since this col will have some empty-string values and some null values
+        doTestFilterOperator(commentColPropPath, new Criterion<String>(operator, "so so"), commentValueGetter, allData);
        }
       else if (operator.getOperatorClass() == OperatorClass.TEXT) {
-        doTestFilterOperator(textRvtPropPath, new Criterion<String>(operator, "text*"), rvTextValueGetter, allData);
-        doTestFilterOperator(textRvtPropPath, new Criterion<String>(operator, "*100"), rvTextValueGetter, allData);
-        doTestFilterOperator(textRvtPropPath, new Criterion<String>(operator, "*xt*"), rvTextValueGetter, allData);
-        doTestFilterOperator(textRvtPropPath, new Criterion<String>(operator, "t*1"), rvTextValueGetter, allData);
-        doTestFilterOperator(textRvtPropPath, new Criterion<String>(operator, "*"), rvTextValueGetter, allData);
+        doTestFilterOperator(textColPropPath, new Criterion<String>(operator, "text*"), ColextValueGetter, allData);
+        doTestFilterOperator(textColPropPath, new Criterion<String>(operator, "*100"), ColextValueGetter, allData);
+        doTestFilterOperator(textColPropPath, new Criterion<String>(operator, "*xt*"), ColextValueGetter, allData);
+        doTestFilterOperator(textColPropPath, new Criterion<String>(operator, "t*1"), ColextValueGetter, allData);
+        doTestFilterOperator(textColPropPath, new Criterion<String>(operator, "*"), ColextValueGetter, allData);
       }
       else {
         fail("unhandled operator class: " + operator.getOperatorClass());

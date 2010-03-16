@@ -41,7 +41,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -149,10 +149,10 @@ public class MakeDummyEntitiesCellHTS2
     
     ScreenResult screenResult = screen.createScreenResult();
 
-    // create ResultValueTypes
+    // create DataColumns
     // Define two replicates
-    ResultValueType normRep1 = screenResult.createResultValueType("rep1").forReplicate(1).forPhenotype("phenotype").makeNumeric(3);
-    ResultValueType normRep2 = screenResult.createResultValueType("rep2").forReplicate(2).forPhenotype("phenotype").makeNumeric(3);
+    DataColumn normRep1 = screenResult.createDataColumn("rep1").forReplicate(1).forPhenotype("phenotype").makeNumeric(3);
+    DataColumn normRep2 = screenResult.createDataColumn("rep2").forReplicate(2).forPhenotype("phenotype").makeNumeric(3);
 
     // create ResultValues
     // [Well(00001:A01), Well(00001:A02), Well(00001:B01), Well(00001:B02),
@@ -253,10 +253,6 @@ public class MakeDummyEntitiesCellHTS2
         normRep1.createResultValue(assayWell, rep1Values.get(i), exclude);
         normRep2.createResultValue(assayWell, rep2Values.get(i), exclude);
       }
-      
-
-
-      // rvt.getResultValues();
     }
 
     return screenResult;

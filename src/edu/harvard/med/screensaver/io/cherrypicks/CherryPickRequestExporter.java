@@ -38,7 +38,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -164,7 +164,7 @@ public class CherryPickRequestExporter
       CherryPickRequest cherryPickRequest =
         _dao.reloadEntity(cherryPickRequestIn,
                           true,
-                          CherryPickRequest.screen.to(Screen.screenResult).to(ScreenResult.resultValueTypes).getPath());
+                          CherryPickRequest.screen.to(Screen.screenResult).to(ScreenResult.dataColumns).getPath());
       _dao.needReadOnly(cherryPickRequest,
                         CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).getPath());
       _dao.needReadOnly(cherryPickRequest,
@@ -263,10 +263,10 @@ public class CherryPickRequestExporter
 
     ScreenResult screenResult = screenerCherryPick.getCherryPickRequest().getScreen().getScreenResult();
     if (screenResult != null) {
-      Set<ResultValueType> rvts = screenResult.getResultValueTypes();
-      for (ResultValueType rvt : rvts) {
+      Set<DataColumn> cols = screenResult.getDataColumns();
+      for (DataColumn col : cols) {
         Object value = null;
-        ResultValue rv = screenedWell.getResultValues().get(rvt);
+        ResultValue rv = screenedWell.getResultValues().get(col);
         if (rv != null) {
           value = rv.getTypedValue();
         }
@@ -312,11 +312,11 @@ public class CherryPickRequestExporter
                             (Object[]) headers);
     int resultValueCol = 0;
     if (screen.getScreenResult() != null) {
-      for (ResultValueType rvt : screen.getScreenResult().getResultValueTypes()) {
+      for (DataColumn col : screen.getScreenResult().getDataColumns()) {
         Workbook2Utils.writeCell(sheet,
                                  0,
                                  headers.length + resultValueCol++,
-                                 rvt.getName());
+                                 col.getName());
       }
     }
   }

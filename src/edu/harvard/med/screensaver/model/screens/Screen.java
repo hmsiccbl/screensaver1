@@ -60,7 +60,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -1248,9 +1248,9 @@ public class Screen extends Study implements AttachedFilesEntity
   {
     Set<AssayReadoutType> assayReadoutTypes = new HashSet<AssayReadoutType>();
     if (getScreenResult() != null) {
-      for (ResultValueType rvt : getScreenResult().getResultValueTypes()) {
-        if (rvt.getAssayReadoutType() != null) {
-          assayReadoutTypes.add(rvt.getAssayReadoutType());
+      for (DataColumn col : getScreenResult().getDataColumns()) {
+        if (col.getAssayReadoutType() != null) {
+          assayReadoutTypes.add(col.getAssayReadoutType());
         }
       }
     }

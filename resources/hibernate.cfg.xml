@@ -57,7 +57,7 @@
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationValue" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AssayWell" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.ResultValue" />
-    <mapping class="edu.harvard.med.screensaver.model.screenresults.ResultValueType" />
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.DataColumn" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.ScreenResult" />
 
     <mapping class="edu.harvard.med.screensaver.model.users.AdministratorUser" />

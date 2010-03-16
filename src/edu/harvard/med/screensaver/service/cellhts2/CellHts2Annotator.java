@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.analysis.cellhts2.RMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.ScoreReplicatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.util.DeleteDir;
 
@@ -60,12 +60,12 @@ public class CellHts2Annotator
                                         NormalizePlatesScale normalizationScale,
                                         ScoreReplicatesMethod scoreReplicatesMethod,
                                         SummarizeReplicatesMethod summarizeReplicatesMethod,
-                                        boolean addNewCellHtsResultValueTypes,
+                                        boolean addNewCellHtsDataColumns,
                                         String reportOutputPath)
   throws CellHts2AnnotatorException
   {
     _dao.reattachEntity(screenResult);
-    deleteCellHtsDataHeaders(screenResult);
+    deleteCellHtsDataColumns(screenResult);
     try {
       try {
         _cellHts = new CellHTS2(screenResult,analysisName);
@@ -103,7 +103,7 @@ public class CellHts2Annotator
         _cellHts.run();
         
         //Add result of the methods which have run
-        if (addNewCellHtsResultValueTypes) {
+        if (addNewCellHtsDataColumns) {
           if (untilInclRmethod.getIndex() >= RMethod.NORMALIZE_PLATES.getIndex()){ 
             _cellHts.normalizePlatesAddResult();
           }
@@ -113,10 +113,10 @@ public class CellHts2Annotator
           if (untilInclRmethod.getIndex() >= RMethod.SUMMARIZE_REPLICATES.getIndex()){
             _cellHts.summarizeReplicatesAddResult();
           }
-          for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-            if (rvt.getName().startsWith(CellHTS2.CELLHTS2_DATA_HEADER_PREFIX)) {
-              _dao.persistEntity(rvt);
-              log.info("persisted new " + rvt);
+          for (DataColumn col : screenResult.getDataColumns()) {
+            if (col.getName().startsWith(CellHTS2.CELLHTS2_DATA_COLUMN_PREFIX)) {
+              _dao.persistEntity(col);
+              log.info("persisted new " + col);
             }
           }
         }
@@ -131,18 +131,18 @@ public class CellHts2Annotator
   }
  
 
-  private void deleteCellHtsDataHeaders(ScreenResult screenResult)
+  private void deleteCellHtsDataColumns(ScreenResult screenResult)
   {
-    Set<ResultValueType> toDelete = new HashSet<ResultValueType>();
-    for (ResultValueType rvt : screenResult.getResultValueTypes()) {
-      if (rvt.getName().startsWith(CellHTS2.CELLHTS2_DATA_HEADER_PREFIX)) {
-        toDelete.add(rvt);
+    Set<DataColumn> toDelete = new HashSet<DataColumn>();
+    for (DataColumn col : screenResult.getDataColumns()) {
+      if (col.getName().startsWith(CellHTS2.CELLHTS2_DATA_COLUMN_PREFIX)) {
+        toDelete.add(col);
       }
     }
-    for (ResultValueType rvt : toDelete) {
-      screenResult.deleteResultValueType(rvt);
+    for (DataColumn col : toDelete) {
+      screenResult.deleteDataColumn(col);
     }
-    log.info("deleted existing data headers " + toDelete);
+    log.info("deleted existing data columns " + toDelete);
   }
 
   // private methods

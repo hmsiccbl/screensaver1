@@ -31,7 +31,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -87,27 +87,27 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 
   public void testFindEntitiesByProperties()
   {
-    final ResultValueType[] rvts = new ResultValueType[4];
+    final DataColumn[] cols = new DataColumn[4];
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
         ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
-        rvts[0] = screenResult.createResultValueType("rvt0");
-        rvts[0].makeDerived("", Sets.<ResultValueType>newHashSet());
-        rvts[0].forPhenotype("Mouse");
-        rvts[1] = screenResult.createResultValueType("rvt1");
-        rvts[1].forPhenotype("Mouse");
-        rvts[2] = screenResult.createResultValueType("rvt2");
-        rvts[2].makeDerived("", Sets.<ResultValueType>newHashSet());
-        rvts[2].forPhenotype("Mouse");
-        rvts[3] = screenResult.createResultValueType("rvt3");
-        rvts[3].makeDerived("", Sets.<ResultValueType>newHashSet());
-        rvts[3].forPhenotype("Human");
+        cols[0] = screenResult.createDataColumn("col0");
+        cols[0].makeDerived("", Sets.<DataColumn>newHashSet());
+        cols[0].forPhenotype("Mouse");
+        cols[1] = screenResult.createDataColumn("col1");
+        cols[1].forPhenotype("Mouse");
+        cols[2] = screenResult.createDataColumn("col2");
+        cols[2].makeDerived("", Sets.<DataColumn>newHashSet());
+        cols[2].forPhenotype("Mouse");
+        cols[3] = screenResult.createDataColumn("col3");
+        cols[3].makeDerived("", Sets.<DataColumn>newHashSet());
+        cols[3].forPhenotype("Human");
         genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLeadScreener());
         genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLabHead());
         genericEntityDao.saveOrUpdateEntity(screenResult.getScreen());
-        genericEntityDao.saveOrUpdateEntity(rvts[0]);
+        genericEntityDao.saveOrUpdateEntity(cols[0]);
       }
     });
 
@@ -118,16 +118,16 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
         Map<String,Object> queryProperties = new HashMap<String,Object>();
         queryProperties.put("derived", true);
         queryProperties.put("assayPhenotype", "Mouse");
-        List<ResultValueType> entities = genericEntityDao.findEntitiesByProperties(
-          ResultValueType.class,
+        List<DataColumn> entities = genericEntityDao.findEntitiesByProperties(
+          DataColumn.class,
           queryProperties);
         assertEquals(2, entities.size());
-        for (ResultValueType resultValueType : entities) {
+        for (DataColumn dataColumn : entities) {
           assertTrue(
-            resultValueType.getName().equals("rvt0") ||
-            resultValueType.getName().equals("rvt2"));
-          assertEquals(true, resultValueType.isDerived());
-          assertEquals("Mouse", resultValueType.getAssayPhenotype());
+            dataColumn.getName().equals("col0") ||
+            dataColumn.getName().equals("col2"));
+          assertEquals(true, dataColumn.isDerived());
+          assertEquals("Mouse", dataColumn.getAssayPhenotype());
         }
       }
     });

@@ -466,7 +466,7 @@
     <constructor-arg ref="screenViewer" />
     <constructor-arg>
       <bean
-        class="edu.harvard.med.screensaver.ui.screenresults.ResultValueTypesTable"
+        class="edu.harvard.med.screensaver.ui.screenresults.ScreenResultDataColumnsTables"
         parent="uiBean" />
     </constructor-arg>
     <constructor-arg ref="wellsBrowser" />

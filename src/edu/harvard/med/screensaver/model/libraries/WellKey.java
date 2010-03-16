@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import org.apache.log4j.Logger;
 
 /**
- * @motivation Allows ResultValueType.resultValues map to have keys that is not
+ * @motivation Allows DataColumn.resultValues map to have keys that is not
  *             the full-blown Well entity. Allows the map values to be accessed
  *             without always having a Well object handy, and which can be
  *             expensive to obtain. It is reasonable that a portion of our

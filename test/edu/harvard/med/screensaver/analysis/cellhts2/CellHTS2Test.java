@@ -24,7 +24,7 @@ import org.rosuda.REngine.Rserve.RserveException;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 public class CellHTS2Test extends AbstractSpringTest
@@ -643,22 +643,22 @@ public class CellHTS2Test extends AbstractSpringTest
         }
     }
       // compare the values of the two newly added normalized replicates (type:
-      // ResultValueType)
-      // check resultValueType cellhts2_norm_rep1 and cellhts2_norm_rep2 are
+      // DataColumn)
+      // check DataColumn cellhts2_norm_rep1 and cellhts2_norm_rep2 are
       // present, with values
       List<ResultValue> actualValuesRep1 = null;
       List<ResultValue> actualValuesRep2 = null;
-      for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
-        if (rvt.getName()
+      for (DataColumn dataColumn : screenResult.getDataColumnsList()) {
+        if (dataColumn.getName()
                .length() >= 13) {
-          String substr = rvt.getName()
+          String substr = dataColumn.getName()
                              .substring(0, 13);
           if (substr.equals("cellhts2_norm")) {
-            if (rvt.getReplicateOrdinal() == 1) {
-              actualValuesRep1 = new ArrayList<ResultValue>(rvt.getResultValues());
+            if (dataColumn.getReplicateOrdinal() == 1) {
+              actualValuesRep1 = new ArrayList<ResultValue>(dataColumn.getResultValues());
             }
-            else if (rvt.getReplicateOrdinal() == 2) {
-              actualValuesRep2 = new ArrayList<ResultValue>(rvt.getResultValues());
+            else if (dataColumn.getReplicateOrdinal() == 2) {
+              actualValuesRep2 = new ArrayList<ResultValue>(dataColumn.getResultValues());
             }
           }
         }
@@ -724,22 +724,22 @@ public class CellHTS2Test extends AbstractSpringTest
       double[] expectedValuesRep2 = { -0.899321, -0.5995473, -0.2997737, 0.5995473, -1.0492078, -0.7494342, -0.4496605, 0.7494342 };
 
       // compare the values of the two newly added scored replicates (type:
-      // ResultValueType)
-      // check resultValueType cellhts2_scored_rep1 and cellhts2_norm_rep2 are
+      // DataColumn)
+      // check dataColumn cellhts2_scored_rep1 and cellhts2_norm_rep2 are
       // present, with values
       List<ResultValue> actualValuesRep1 = null;
       List<ResultValue> actualValuesRep2 = null;
-      for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
-        if (rvt.getName()
+      for (DataColumn col : screenResult.getDataColumnsList()) {
+        if (col.getName()
                .length() >= 13) {
-          String substr = rvt.getName()
+          String substr = col.getName()
                              .substring(0, 15);
           if (substr.equals("cellhts2_scored")) {
-            if (rvt.getReplicateOrdinal() == 1) {
-              actualValuesRep1 = new ArrayList<ResultValue>(rvt.getResultValues());
+            if (col.getReplicateOrdinal() == 1) {
+              actualValuesRep1 = new ArrayList<ResultValue>(col.getResultValues());
             }
-            else if (rvt.getReplicateOrdinal() == 2) {
-              actualValuesRep2 = new ArrayList<ResultValue>(rvt.getResultValues());
+            else if (col.getReplicateOrdinal() == 2) {
+              actualValuesRep2 = new ArrayList<ResultValue>(col.getResultValues());
             }
           }
         }
@@ -801,12 +801,12 @@ public class CellHTS2Test extends AbstractSpringTest
       // 3. CHECK EQUALS
       double[] expectedValues = { -0.98925310, -0.56957000, -0.14988680, 0.56957000, -1.19909470, -0.77941150, -0.35972840, 0.77941150 };
 
-      // compare the values of the newly added summarized ResultValueType
+      // compare the values of the newly added summarized DataColumn
       List<ResultValue> actualValues = null;
-      for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
-        if (rvt.getName()
+      for (DataColumn col : screenResult.getDataColumnsList()) {
+        if (col.getName()
                .equals("cellhts2_summarized")) {
-          actualValues = new ArrayList<ResultValue>(rvt.getResultValues());
+          actualValues = new ArrayList<ResultValue>(col.getResultValues());
         }
       }
 

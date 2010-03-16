@@ -38,7 +38,7 @@ public class CellHTS2Runner extends AbstractBackingBean
 	private SummarizeReplicatesMethod _summarizeReplicatesMethod = SummarizeReplicatesMethod.MEAN;
 	private String _screenResultFilePath;
 
-	private boolean _addNewCellHtsResultValueTypes;
+	private boolean _addNewCellHtsDataColumns;
 	private CellHts2Annotator _cellHts2Annotator;
 
 
@@ -108,14 +108,14 @@ public class CellHTS2Runner extends AbstractBackingBean
 	}
 
 
-	public boolean isAddNewCellHtsResultValueTypes()
+	public boolean isAddNewCellHtsDataColumns()
 	{
-		return _addNewCellHtsResultValueTypes;
+		return _addNewCellHtsDataColumns;
 	}
 
-	public void setAddNewCellHtsResultValueTypes(boolean addNewCellHtsResultValueTypes)
+	public void setAddNewCellHtsDataColumns(boolean addNewCellHtsDataColumns)
 	{
-		_addNewCellHtsResultValueTypes = addNewCellHtsResultValueTypes;
+		_addNewCellHtsDataColumns = addNewCellHtsDataColumns;
 	}
 
 	@UICommand
@@ -129,7 +129,7 @@ public class CellHTS2Runner extends AbstractBackingBean
 										_normalizePlatesScale,
 										_scoreReplicatesMethod,
 										_summarizeReplicatesMethod,
-										_addNewCellHtsResultValueTypes,
+										_addNewCellHtsDataColumns,
 										_screenResultFilePath);
 		return VIEW_SCREEN;
 	}

@@ -31,9 +31,8 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
-import edu.harvard.med.screensaver.model.screenresults.DataType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -99,32 +98,32 @@ public class MakeDummyEntities
   {
     ScreenResult screenResult = screen.createScreenResult();
 
-    // create ResultValueTypes
+    // create DataColumns
 
-    screenResult.createResultValueType("numeric_repl1").forReplicate(1).forPhenotype("phenotype").makeNumeric(3);
-    screenResult.createResultValueType("numeric_repl2").forReplicate(2).forPhenotype("phenotype").makeNumeric(3);
-    screenResult.createResultValueType("text_repl1").forReplicate(1).forPhenotype("phenotype").makeTextual();
-    screenResult.createResultValueType("text_repl2").forReplicate(2).forPhenotype("phenotype").makeTextual();
+    screenResult.createDataColumn("numeric_repl1").forReplicate(1).forPhenotype("phenotype").makeNumeric(3);
+    screenResult.createDataColumn("numeric_repl2").forReplicate(2).forPhenotype("phenotype").makeNumeric(3);
+    screenResult.createDataColumn("text_repl1").forReplicate(1).forPhenotype("phenotype").makeTextual();
+    screenResult.createDataColumn("text_repl2").forReplicate(2).forPhenotype("phenotype").makeTextual();
 
-    ResultValueType positive1Rvt = screenResult.createResultValueType("positive1");
-    positive1Rvt.forReplicate(1);
-    positive1Rvt.makeDerived("from replicate 1", Sets.newHashSet(screenResult.getResultValueTypesList().get(0), screenResult.getResultValueTypesList().get(2)));
-    positive1Rvt.makePartitionPositiveIndicator();
-    positive1Rvt.forPhenotype("phenotype");
+    DataColumn positive1Col = screenResult.createDataColumn("positive1");
+    positive1Col.forReplicate(1);
+    positive1Col.makeDerived("from replicate 1", Sets.newHashSet(screenResult.getDataColumnsList().get(0), screenResult.getDataColumnsList().get(2)));
+    positive1Col.makePartitionPositiveIndicator();
+    positive1Col.forPhenotype("phenotype");
 
-    ResultValueType positive2Rvt = screenResult.createResultValueType("positive2");
-    positive2Rvt.forReplicate(2);
-    positive2Rvt.makeDerived("from replicate 2", Sets.newHashSet(screenResult.getResultValueTypesList().get(1), screenResult.getResultValueTypesList().get(3)));
-    positive2Rvt.makePartitionPositiveIndicator();
-    positive2Rvt.forPhenotype("phenotype");
+    DataColumn positive2Col = screenResult.createDataColumn("positive2");
+    positive2Col.forReplicate(2);
+    positive2Col.makeDerived("from replicate 2", Sets.newHashSet(screenResult.getDataColumnsList().get(1), screenResult.getDataColumnsList().get(3)));
+    positive2Col.makePartitionPositiveIndicator();
+    positive2Col.forPhenotype("phenotype");
     
 
-    ResultValueType positiveRvt = screenResult.createResultValueType("positive").forPhenotype("phenotype");
-    positiveRvt.makeDerived("from both replicates", Sets.newHashSet(screenResult.getResultValueTypesList().get(4), screenResult.getResultValueTypesList().get(5)));
-    positiveRvt.makePartitionPositiveIndicator();
+    DataColumn positiveCol = screenResult.createDataColumn("positive").forPhenotype("phenotype");
+    positiveCol.makeDerived("from both replicates", Sets.newHashSet(screenResult.getDataColumnsList().get(4), screenResult.getDataColumnsList().get(5)));
+    positiveCol.makePartitionPositiveIndicator();
 
-    ResultValueType commentsRvt = screenResult.createResultValueType("comments").makeTextual();
-    commentsRvt.setDescription("a data header with sparse values (some are null, some are empty strings)");
+    DataColumn commentsCol = screenResult.createDataColumn("comments").makeTextual();
+    commentsCol.setDescription("a data column with sparse values (some are null, some are empty strings)");
 
     // create ResultValues
 
@@ -133,27 +132,27 @@ public class MakeDummyEntities
     for (int i = 0; i < wells.size(); ++i) {
       Well well = wells.get(i);
       AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
-      for (ResultValueType rvt : screenResult.getResultValueTypesList()) {
-        if (rvt.isNumeric()) {
-          rvt.createResultValue(assayWell, Math.random() * 200.0 - 100.0);
+      for (DataColumn col : screenResult.getDataColumnsList()) {
+        if (col.isNumeric()) {
+          col.createResultValue(assayWell, Math.random() * 200.0 - 100.0);
         }
-        else if (rvt.isPartitionPositiveIndicator()) {
-          rvt.createResultValue(assayWell, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
+        else if (col.isPartitionPositiveIndicator()) {
+          col.createResultValue(assayWell, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
         }
-        else if (rvt.equals(commentsRvt)) {
+        else if (col.equals(commentsCol)) {
           PartitionedValue pv = PartitionedValue.values()[i % PartitionedValue.values().length];
-          if (pv != PartitionedValue.NONE) { // else, a null test value, by virtue of not creating a RV for this well/rvt
-            rvt.createResultValue(assayWell, pv == PartitionedValue.STRONG ? "what a positive!" :
+          if (pv != PartitionedValue.NONE) { // else, a null test value, by virtue of not creating a RV for this well/dataColumn
+            col.createResultValue(assayWell, pv == PartitionedValue.STRONG ? "what a positive!" :
               pv == PartitionedValue.MEDIUM ? "so so" :
                 // a "empty string" test value
                 "");
           }
         }
-        else if (!rvt.isNumeric()) {
-          rvt.createResultValue(assayWell, String.format("text%05d", i));
+        else if (!col.isNumeric()) {
+          col.createResultValue(assayWell, String.format("text%05d", i));
         }
         else {
-          throw new RuntimeException("unhandled rvt type" + rvt);
+          throw new RuntimeException("unhandled data column data type" + col);
         }
       }
     }

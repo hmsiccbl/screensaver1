@@ -21,7 +21,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 
 import org.apache.log4j.Logger;
@@ -55,7 +55,7 @@ import com.google.common.collect.ImmutableSet;
 
 public class CellHTS2 {
 
-  public static final String CELLHTS2_DATA_HEADER_PREFIX = "cellhts2_";
+  public static final String CELLHTS2_DATA_COLUMN_PREFIX = "cellhts2_";
   public static final double NA = Double.longBitsToDouble(0x7ff00000000007a2L);
   
   private static Logger log = Logger.getLogger(CellHTS2.class);
@@ -256,12 +256,12 @@ public class CellHTS2 {
     this.plateNumberToSequenceNumberMap = createPlateNumberSequenceMapping(this.screenResult);
 
     Collection<ResultValue> resultValues;
-    for (ResultValueType rvt : this.screenResult.getRawNumericResultValueTypes()) {
-      Integer r = rvt.getReplicateOrdinal();
+    for (DataColumn col : this.screenResult.getRawNumericDataColumns()) {
+      Integer r = col.getReplicateOrdinal();
       if (r == null) {
         r = 1;
       }
-      resultValues = rvt.getResultValues();
+      resultValues = col.getResultValues();
 
       // For transfer the values for all the wells of a replicate to R at once,
       // create a double[][]
@@ -391,8 +391,8 @@ public class CellHTS2 {
     // need
     // information about assayWellType.
     int i = -1;
-    ResultValueType rvt = screenResult.getResultValueTypes().first();
-    for (ResultValue rv : rvt.getResultValues()) {
+    DataColumn col = screenResult.getDataColumns().first();
+    for (ResultValue rv : col.getResultValues()) {
       i++;
       WellKey wellKey = rv.getWell().getWellKey();
       plates[i] = this.plateNumberToSequenceNumberMap.get(wellKey.getPlateNumber()).toString();
@@ -431,13 +431,13 @@ public class CellHTS2 {
     ArrayList<Integer> slogP = new ArrayList<Integer>();
     ArrayList<String> slogW = new ArrayList<String>();
     ArrayList<Integer> slogS = new ArrayList<Integer>();
-    for (ResultValueType rvt2 : screenResult.getRawNumericResultValueTypes()) {
-      for (ResultValue rv : rvt2.getResultValues()) {
+    for (DataColumn col2 : screenResult.getRawNumericDataColumns()) {
+      for (ResultValue rv : col2.getResultValues()) {
         if (rv.isExclude()) {
           slogP.add(this.plateNumberToSequenceNumberMap.get(
               rv.getWell().getPlateNumber()));
           slogW.add(rv.getWell().getWellName());
-          slogS.add(rvt2.getReplicateOrdinal());
+          slogS.add(col2.getReplicateOrdinal());
         }
       }
     }
@@ -542,14 +542,14 @@ public class CellHTS2 {
     // {"MOCK","SEPT11","MOCK","CD47","MOCK","AAMP","MOCK","CD48"};
     // rConnection.assign("geneid", geneid);
 
-    ResultValueType firstRvt = screenResult.getResultValueTypes().first();
-    int n = firstRvt.getResultValues().size();
+    DataColumn firstCol = screenResult.getDataColumns().first();
+    int n = firstCol.getResultValues().size();
     int[] plates = new int[n];
     String[] wells = new String[n];
     String[] hfaIds = new String[n];
     String[] geneIds = new String[n];
     int i = 0;
-    for (ResultValue rv : firstRvt.getResultValues()) {
+    for (ResultValue rv : firstCol.getResultValues()) {
       plates[i] = this.plateNumberToSequenceNumberMap.get(rv.getWell().getPlateNumber());
       wells[i] = rv.getWell().getWellName();
       hfaIds[i] = "NA";
@@ -649,21 +649,21 @@ public class CellHTS2 {
 	    // retrieve returnObject
     String rExpr2 = null;
 
-    String rvtPrefix = CELLHTS2_DATA_HEADER_PREFIX;
+    String colPrefix = CELLHTS2_DATA_COLUMN_PREFIX;
     if (rMethod.equals(RMethod.NORMALIZE_PLATES)) {
       rExpr2 = "rcanData";
-      rvtPrefix += "norm_";
+      colPrefix += "norm_";
     } else if (rMethod.equals(RMethod.SCORE_REPLICATES)) {
       rExpr2 = "rcansData";
-      rvtPrefix += "scored_";
+      colPrefix += "scored_";
     } else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
       rExpr2 = "rcanssData";
-      rvtPrefix += "summarized";
+      colPrefix += "summarized";
     }
 
     // result = rConnection.eval(strEval).asDoubleMatrix();
-    // Add to the screenResult a derived ResultValueType for each of the raw
-    // ResultValueTypes
+    // Add to the screenResult a derived DataColumn for each of the raw
+    // DataColumns
     List<AssayWell> assayWells = new ArrayList<AssayWell>(screenResult.getAssayWells());
     Collections.sort(assayWells);
 
@@ -674,33 +674,33 @@ public class CellHTS2 {
       result = rserveExtensions.tryEval(rConnection, rExpr2).asDoubleMatrix();
 
       // looping through just to get the replicate name
-      for (ResultValueType rvt : screenResult.getRawNumericResultValueTypes()) {
+      for (DataColumn col : screenResult.getRawNumericDataColumns()) {
 
         // the position in the result matrix is based on the replicateOrdinal
-        // value of the rvt: see readPlateListDb
-        int r = rvt.getReplicateOrdinal();
-        // rvt.getName();
+        // value of the col: see readPlateListDb
+        int r = col.getReplicateOrdinal();
+        // col.getName();
 
-        ResultValueType rvtNew = screenResult.createResultValueType(rvtPrefix + rvt.getName());
-        rvtNew.forReplicate(r).forChannel(rvt.getChannel()).makeDerived("cellHTS2", ImmutableSet.of(rvt)).makeNumeric(3).forPhenotype("phenotype");
+        DataColumn colNew = screenResult.createDataColumn(colPrefix + col.getName());
+        colNew.forReplicate(r).forChannel(col.getChannel()).makeDerived("cellHTS2", ImmutableSet.of(col)).makeNumeric(3).forPhenotype("phenotype");
 
         for (int i = 0; i < assayWells.size(); ++i) {
           AssayWell assayWell = assayWells.get(i);
-          rvtNew.createResultValue(assayWell, result[i][r - 1]);
+          colNew.createResultValue(assayWell, result[i][r - 1]);
         }
       }
     } else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
       double[] result = new double[arrayDimensions.getNrWells() *  arrayDimensions.getNrPlates()];
       result = rserveExtensions.tryEval(rConnection, rExpr2).asDoubles();
 
-      ResultValueType rvtSumm = 
-        screenResult.createResultValueType("cellhts2_summarized").
+      DataColumn colSumm = 
+        screenResult.createDataColumn("cellhts2_summarized").
         makeNumeric(3).
         forPhenotype("phenotype").
-        makeDerived("cellHTS2", Collections.<ResultValueType>emptySet());
+        makeDerived("cellHTS2", Collections.<DataColumn>emptySet());
       for (int i = 0; i < assayWells.size(); ++i) {
         AssayWell assayWell = assayWells.get(i);
-        rvtSumm.createResultValue(assayWell, result[i]);
+        colSumm.createResultValue(assayWell, result[i]);
       }
     }
   }

@@ -30,7 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -91,10 +91,10 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
         Screen screen = MakeDummyEntities.makeDummyScreen(1);
         
         ScreenResult screenResult = screen.createScreenResult();
-        ResultValueType resultValueType = screenResult.createResultValueType("values");
+        DataColumn dataColumn = screenResult.createDataColumn("values");
         for (Well well : wells) {
           AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
-          resultValueType.createResultValue(assayWell, 1.0);
+          dataColumn.createResultValue(assayWell, 1.0);
         }
         
         SmallMoleculeCherryPickRequest cherryPickRequest = (SmallMoleculeCherryPickRequest) screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());

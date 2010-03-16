@@ -52,7 +52,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ResultValueType;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -278,7 +278,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   }
 
     /**
-   * Tests that WellSearchResults handles columns for ResultValueTypes and
+   * Tests that WellSearchResults handles columns for DataColumns and
    * AnnotationTypes. And so, transitively, tests the
    * SearchResults/EntityDataFetcher "feature" of specifying columns for a
    * <i>subset</i> of items contained in a child collection. Also tests in such
@@ -296,9 +296,9 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   
   public void doTestScreenResultWithResultValuesAndAnnotations(WellSearchResults wsr)
   {
-    final ResultValueType rvt1 = _screenResult.getResultValueTypesList().get(0);
-    final ResultValueType rvt2 = _screenResult.getResultValueTypesList().get(2);
-    final ResultValueType rvt3 = _screenResult.getResultValueTypesList().get(7); // comment, has sparse values
+    final DataColumn col1 = _screenResult.getDataColumnsList().get(0);
+    final DataColumn col2 = _screenResult.getDataColumnsList().get(2);
+    final DataColumn col3 = _screenResult.getDataColumnsList().get(7); // comment, has sparse values
     Iterator<AnnotationType> annotTypeIter = _study.getAnnotationTypes().iterator();
     final AnnotationType annotType1 = annotTypeIter.next();
     final AnnotationType annotType2 = annotTypeIter.next();
@@ -307,15 +307,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     Map<TableColumn<?,?>,Getter<Well,?>> columnsAndValueGetters = new HashMap<TableColumn<?,?>,Getter<Well,?>>();
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt1.getWellKeyToResultValueMap().get(well.getWellKey());
+                                 ResultValue rv = col1.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt2.getWellKeyToResultValueMap().get(well.getWellKey());
+                                 ResultValue rv = col2.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt3.getWellKeyToResultValueMap().get(well.getWellKey());
+                                 ResultValue rv = col3.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
@@ -335,15 +335,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     columnsAndValueGetters.clear();
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("numeric repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt1.getWellKeyToResultValueMap().get(well.getWellKey());
+                                 ResultValue rv = col1.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : new BigDecimal(rv.getNumericValue()).setScale(3, RoundingMode.HALF_UP); } } );
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text repl1 [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt2.getWellKeyToResultValueMap().get(well.getWellKey());
+                                 ResultValue rv = col2.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("comments [1]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
-                                 ResultValue rv = rvt3.getWellKeyToResultValueMap().get(well.getWellKey());
+                                 ResultValue rv = col3.getWellKeyToResultValueMap().get(well.getWellKey());
                                  return rv == null ? null : rv.getValue(); } } );
     columnsAndValueGetters.put(wsr.getColumnManager().getColumn("text annot [100000]"),
                                new Getter<Well,Object>() { public Object get(Well well) {
@@ -426,7 +426,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     TableColumn<Well,String> filterColumn2 =
       (TableColumn<Well,String>) wsr.getColumnManager().getColumn("positive [1]");
     filterColumn2.clearCriteria().addCriterion(new Criterion<String>(Operator.EQUAL, PartitionedValue.STRONG.getValue()));
-    // TODO: also test a numeric ResultValueType column
+    // TODO: also test a numeric DataColumn column
 
     DataTableModel model = wsr.getDataTableModel();
     verifySearchResult(wsr, model, _expectedKeys);
@@ -471,17 +471,17 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   public void doTestValidColumnSelections(WellSearchResults wsr)
   {
     Library rnaiLibrary = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library 3", true, Library.wells.getPath(), Library.contentsVersions.getPath());
-    ScreenResult rnaiScreenResult = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 3, true, "screenResult.resultValueTypes").getScreenResult();
+    ScreenResult rnaiScreenResult = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 3, true, "screenResult.dataColumns").getScreenResult();
     ScreenResult smallMolScreenResult = _screenResult;
     Library smallMolLibrary = _bigSmallMoleculeLibrary;
 
     List<String> smallMolColumnNames = new ArrayList<String>();
-    for (ResultValueType rvt : smallMolScreenResult.getResultValueTypes()) {
-      smallMolColumnNames.add(WellSearchResults.makeColumnName(rvt, smallMolScreenResult.getScreen().getScreenNumber()));
+    for (DataColumn col : smallMolScreenResult.getDataColumns()) {
+      smallMolColumnNames.add(WellSearchResults.makeColumnName(col, smallMolScreenResult.getScreen().getScreenNumber()));
     }
     List<String> rnaiColumnNames = new ArrayList<String>();
-    for (ResultValueType rvt : rnaiScreenResult.getResultValueTypes()) {
-      rnaiColumnNames.add(WellSearchResults.makeColumnName(rvt, rnaiScreenResult.getScreen().getScreenNumber()));
+    for (DataColumn col : rnaiScreenResult.getDataColumns()) {
+      rnaiColumnNames.add(WellSearchResults.makeColumnName(col, rnaiScreenResult.getScreen().getScreenNumber()));
     }
     for (AnnotationType at : _study.getAnnotationTypes()) {
       smallMolColumnNames.add(WellSearchResults.makeColumnName(at, _study.getStudyNumber()));
@@ -715,7 +715,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       public List execute(Session session) {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true);
         genericEntityDao.needReadOnly(screen.getScreenResult(), "wells");
-        genericEntityDao.needReadOnly(screen.getScreenResult(), "resultValueTypes.resultValues");
+        genericEntityDao.needReadOnly(screen.getScreenResult(), "dataColumns.resultValues");
         return Arrays.asList(screen.getScreenResult());
       }
     }).get(0);
