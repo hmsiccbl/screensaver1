@@ -263,13 +263,16 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     setDataType(DataType.TEXT);
     return this;
   }
-  
+
+  /**
+   * @param decimalPlaces the number of decimal places to be shown when
+   *          displaying the values of this column (this affect display only;
+   *          the full precision of the values are always stored); if null or
+   *          negative, the values are displayed to their full precision
+   */
   public DataColumn makeNumeric(Integer decimalPlaces)
   {
     setDataType(DataType.NUMERIC);
-    if (decimalPlaces == null || decimalPlaces < 0) {
-      decimalPlaces = DEFAULT_DECIMAL_PLACES;
-    }
     _decimalPlaces = decimalPlaces;
     return this;
   }
@@ -330,9 +333,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses makeNumeric() builder method*/)
   public Integer getDecimalPlaces()
   {
-    if (isNumeric() && _decimalPlaces == null) {
-      _decimalPlaces = DEFAULT_DECIMAL_PLACES;
-    }
     return _decimalPlaces;
   }
   

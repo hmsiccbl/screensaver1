@@ -286,11 +286,9 @@ public class CellHTS2 {
         int w = (wellKey.getRow() * arrayDimensions.getNrColsPlate())
             + (wellKey.getColumn());
         
-        Double value = null;
-        if (rv.getValue() == null) {
+        Double value = rv.getNumericValue();
+        if (value == null) {
         	value = CellHTS2.NA;
-        }else {
-        	value = new Double(rv.getValue()).doubleValue();
         }
         values[p - 1][w] = value;
       }

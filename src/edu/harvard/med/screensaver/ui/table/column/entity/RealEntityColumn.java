@@ -20,9 +20,9 @@ public abstract class RealEntityColumn<E extends AbstractEntity> extends RealCol
 {
   private FetchPaths<E> _fetchPaths;
   
-  public RealEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
+  public RealEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group, Integer decimalPlaces)
   {
-    super(name, description, group);
+    super(name, description, group, decimalPlaces);
     _fetchPaths = new FetchPaths<E>(relationshipPath);
   }
 

@@ -14,12 +14,6 @@ import java.beans.IntrospectionException;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class ResultValueTest extends AbstractEntityInstanceTest<ResultValue>
 {
@@ -31,21 +25,6 @@ public class ResultValueTest extends AbstractEntityInstanceTest<ResultValue>
   public ResultValueTest() throws IntrospectionException
   {
     super(ResultValue.class);
-  }
-
-  public void testResultValueNumericDecimalPlaces()
-  {
-    ScreenResult screenResult =
-      MakeDummyEntities.makeDummyScreen(1).createScreenResult();
-    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
-    Well well = library.createWell(new WellKey("00001:A01"), LibraryWellType.EXPERIMENTAL);
-    AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
-    DataColumn col = screenResult.createDataColumn("col").makeNumeric(3);
-    ResultValue rv = col.createResultValue(assayWell, 5.0123, true);
-    assertEquals("default decimal places formatted string", "5.012", rv.getValue());
-    assertEquals("default decimal places formatted string", "5.0123", rv.formatNumericValue(4));
-    assertEquals("default decimal places formatted string", "5", rv.formatNumericValue(0));
-    assertEquals("default decimal places formatted string", "5.0123000000", rv.formatNumericValue(10));
   }
 }
 

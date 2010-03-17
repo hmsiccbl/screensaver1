@@ -35,15 +35,13 @@ import org.hibernate.annotations.Index;
 
 /**
  * A <code>ResultValue</code> holds the value of a screen result data point for
- * a given {@link DataColumn}, and {@link AssayWell}.
- * For text-based DataColumns, the value is stored canonically as a String.
- * For numeric DataColumns, the value is stored canonically as a double,
- * allowing for efficient sorting and filtering of numeric values in the
- * database, but also as a string, formatted to show the number of decimal places
- * specified by the parent {@link DataColumn}. Note that the parent
- * {@link DataColumn#isNumeric()()} contains an "isNumeric" property that
- * indicates whether its member ResultValues are numeric (the isNumeric flag is
- * not stored with each ResultValue for space efficiency).
+ * a given {@link DataColumn}, and {@link AssayWell}. For text-based
+ * DataColumns, the value is stored canonically as a String. For numeric
+ * DataColumns, the value is stored canonically as a double, allowing for
+ * efficient sorting and filtering of numeric values in the database. Note that
+ * the parent {@link DataColumn#isNumeric()()} contains an "isNumeric" property
+ * that indicates whether its member ResultValues are numeric (the isNumeric
+ * flag is not stored with each ResultValue for space efficiency).
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -63,13 +61,6 @@ public class ResultValue extends AbstractEntity<Integer>
 
   private static final long serialVersionUID = -4066041317098744417L;
   private static final Logger log = Logger.getLogger(ResultValue.class);
-  private static final String[] FORMAT_STRINGS = new String[10];
-  static {
-    FORMAT_STRINGS[0] = "%1.0f";
-    for (int i = 1; i < FORMAT_STRINGS.length; i++) {
-      FORMAT_STRINGS[i] = "%1." + i + "f";
-    }
-  }
 
   public static final RelationshipPath<ResultValue> DataColumn = new RelationshipPath<ResultValue>(ResultValue.class, "dataColumn");
 
@@ -289,32 +280,6 @@ public class ResultValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Formats the numeric value of this ResultValue.
-   *
-   * @param decimalPlaces if &lt; 0, uses "general" formatting (%g), with
-   *          9 decimal places, as described in {@link java.util.Formatter}
-   * @return the formatted numeric value
-   */
-  public String formatNumericValue(int decimalPlaces)
-  {
-    String strValue = null;
-    if (_numericValue != null) {
-      if (decimalPlaces < 0) {
-        strValue = String.format("%g", _numericValue);
-      }
-      else if (decimalPlaces <  FORMAT_STRINGS.length) {
-        // optimization: use precomputed format strings, rather than creating
-        // all those string objects
-        strValue = String.format(FORMAT_STRINGS[decimalPlaces], _numericValue);
-      }
-      else {
-        strValue = String.format("%1." + decimalPlaces + "f", _numericValue);
-      }
-    }
-    return strValue;
-  }
-
-  /**
    * Get the assay well's type.
    *
    * @return the assay well's type
@@ -464,7 +429,6 @@ public class ResultValue extends AbstractEntity<Integer>
     }
     else {
       setNumericValue(numericalValue);
-      setValue(formatNumericValue(dataColumn.getDecimalPlaces()));
     }
     setExclude(exclude);
     setPositive(isPositive);

@@ -108,7 +108,7 @@ public class HeatMapCell
     boolean isExperimentalWell = false;
     boolean isControlWell = false;
     if (resultValue != null) {
-      hasValue = resultValue.getValue() != null;
+      hasValue = !resultValue.isNull();
       isExclude = resultValue.isExclude();
       isExperimentalWell = resultValue.isExperimentalWell();
       isControlWell = resultValue.isControlWell();

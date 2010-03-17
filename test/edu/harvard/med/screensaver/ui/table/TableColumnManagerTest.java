@@ -144,7 +144,7 @@ public class TableColumnManagerTest extends TestCase
       }
     };
     TableColumn<RowItem,?> valueCol = new RealColumn<RowItem>(
-      "Value", "The row's value", ADVANCED_COLUMNS_GROUP) {
+      "Value", "The row's value", ADVANCED_COLUMNS_GROUP, 3) {
       @Override
       public Double getCellValue(RowItem row) { return row.getValue(); }
     };

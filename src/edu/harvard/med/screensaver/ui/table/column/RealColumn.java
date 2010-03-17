@@ -12,8 +12,9 @@ package edu.harvard.med.screensaver.ui.table.column;
 
 public abstract class RealColumn<R> extends TableColumn<R,Double>
 {
-  public RealColumn(String name, String description, String group)
+  public RealColumn(String name, String description, String group, Integer decimalPlaces)
   {
     super(name, description, ColumnType.REAL, group);
+    setConverter(DoubleRoundingConverter.getInstance(decimalPlaces));
   }
 }

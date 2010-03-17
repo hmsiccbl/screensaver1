@@ -48,8 +48,8 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -804,7 +804,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("numericValue"),
           makeColumnName(dataColumn, screenNumber),
           makeColumnDescription(dataColumn, screenNumber, screenTitle),
-          makeScreenColumnGroup(screenNumber, screenTitle)) {
+          makeScreenColumnGroup(screenNumber, screenTitle),
+          dataColumn.getDecimalPlaces()) {
           @Override
           public Double getCellValue(Well well)
           {
@@ -977,7 +978,8 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
           Well.reagents.to(Reagent.annotationValues).restrict(AnnotationValue.annotationType.getLeaf(), annotationType).toProperty("numericValue"),
           makeColumnName(annotationType, studyNumber),
           WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle),
-          columnGroup) {
+          columnGroup,
+          -1) {
           @Override
           public Double getCellValue(Well well)
           {
