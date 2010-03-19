@@ -18,6 +18,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+import edu.harvard.med.screensaver.util.StringUtils;
+
 import com.google.common.collect.Maps;
 
 /**
@@ -44,7 +46,7 @@ public class DoubleRoundingConverter implements Converter
   public Object getAsObject(FacesContext arg0, UIComponent arg1, String n)
     throws ConverterException
   {
-    if (n == null) {
+    if (StringUtils.isEmpty(n)) {
       return null;
     }
     return Double.valueOf(getAsString(arg0, arg1, new Double(n)));
