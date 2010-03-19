@@ -30,7 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -131,7 +131,7 @@ public class MakeDummyEntities
     Collections.sort(wells);
     for (int i = 0; i < wells.size(); ++i) {
       Well well = wells.get(i);
-      AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
+      AssayWell assayWell = screenResult.createAssayWell(well);
       for (DataColumn col : screenResult.getDataColumnsList()) {
         if (col.isNumeric()) {
           col.createResultValue(assayWell, Math.random() * 200.0 - 100.0);

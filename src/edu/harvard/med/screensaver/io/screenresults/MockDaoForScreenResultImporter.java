@@ -17,19 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -42,14 +37,19 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.ui.libraries.WellCopy;
+
+import org.apache.log4j.Logger;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * A DAO implementation that can be used in a database-free environment.
@@ -67,6 +67,8 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 
   private static final String NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT = "PseudoLibraryForScreenResultImport";
 
+  private static final Set<String> EMPTY_WELL_NAMES = Sets.newHashSet("A01", "A04", "A07");
+
   private Library _library;
 
   public MockDaoForScreenResultImporter()
@@ -83,7 +85,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public Well findWell(WellKey wellKey)
   {
     try {
-      return _library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
+      return _library.createWell(wellKey, EMPTY_WELL_NAMES.contains(wellKey.getWellName()) ? LibraryWellType.EMPTY : LibraryWellType.EXPERIMENTAL);
     }
     catch (DuplicateEntityException e) {
       for (Well well : _library.getWells()) {

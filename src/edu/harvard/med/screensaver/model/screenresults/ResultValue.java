@@ -32,6 +32,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 
+import sun.security.action.GetLongAction;
+
 
 /**
  * A <code>ResultValue</code> holds the value of a screen result data point for
@@ -105,7 +107,7 @@ public class ResultValue extends AbstractEntity<Integer>
   private DataColumn _dataColumn;
   private String _value;
   private Double _numericValue;
-  private AssayWellType _assayWellType;
+  private AssayWellControlType _assayWellControlType;
   /**
    * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
    * up to the application code and/or user interface to manage excluding the
@@ -152,7 +154,6 @@ public class ResultValue extends AbstractEntity<Integer>
    *
    * @param dataColumn the parent DataColumn
    * @param well the well of this ResultValue
-   * @param assayWellType the AssayWellType of the ResultValue
    * @param numericalValue the numerical value of the ResultValue
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
    * @param isPositive whether this ResultValue is considered a 'positive' result 
@@ -171,8 +172,7 @@ public class ResultValue extends AbstractEntity<Integer>
    * only for creating result values that will not need to be persisted.
    *
    * @param dataColumn the parent DataColumn
-   * @param well the well of this ResultValue
-   * @param assayWellType the AssayWellType of the ResultValue
+   * @param assayWell the Assaywell of this ResultValue
    * @param value the non-numerical value of the ResultValue
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
    * @param isPositive whether this ResultValue is considered a 'positive' result 
@@ -264,7 +264,7 @@ public class ResultValue extends AbstractEntity<Integer>
   @Transient
   public boolean isNull()
   {
-    return _value == null;
+    return _value == null && _numericValue == null;
   }
 
   /**
@@ -284,11 +284,11 @@ public class ResultValue extends AbstractEntity<Integer>
    *
    * @return the assay well's type
    */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType")
-  public AssayWellType getAssayWellType()
+  @Column(nullable=true)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.AssayWellControlType$UserType")
+  public AssayWellControlType getAssayWellControlType()
   {
-    return _assayWellType;
+    return _assayWellControlType;
   }
 
   /**
@@ -318,28 +318,15 @@ public class ResultValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Return true iff the assay well type is
-   * {@link AssayWellType#EXPERIMENTAL experimental}.
-   *
-   * @return true iff the assay well type is experimental
-   * @see AssayWellType#EXPERIMENTAL
-   */
-  @Transient
-  public boolean isExperimentalWell()
-  {
-    return getAssayWellType().equals(AssayWellType.EXPERIMENTAL);
-  }
-
-  /**
    * Return true iff the assay well type is a control.
    *
    * @return true iff the assay well type is a control
-   * @see AssayWellType#isControl()
+   * @see AssayWellControlType#isControl()
    */
   @Transient
   public boolean isControlWell()
   {
-    return getAssayWellType().isControl();
+    return getWell().getLibraryWellType() == LibraryWellType.LIBRARY_CONTROL || getAssayWellControlType() != null;
   }
 
   @Transient
@@ -352,38 +339,15 @@ public class ResultValue extends AbstractEntity<Integer>
    * Return true iff the assay well type is data producing.
    *
    * @return true iff the assay well type is data producing
-   * @see AssayWellType#isDataProducing()
+   * @see AssayWellControlType#isDataProducing()
    */
   @Transient
   public boolean isDataProducerWell()
   {
-    return getAssayWellType().isDataProducing();
+    return 
+    getWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL ||
+    isControlWell();
   }
-
-  /**
-   * Return true iff the assay well type is {@link AssayWellType#OTHER other}.
-   *
-   * @return true iff the assay well type is other
-   * @see AssayWellType#OTHER
-   */
-  @Transient
-  public boolean isOtherWell()
-  {
-    return getAssayWellType().equals(AssayWellType.OTHER);
-  }
-
-  /**
-   * Return true iff the assay well type is {@link AssayWellType#EMPTY empty}.
-   *
-   * @return true iff the assay well type is empty
-   * @see AssayWellType#EMPTY
-   */
-  @Transient
-  public boolean isEmptyWell()
-  {
-    return getAssayWellType().equals(AssayWellType.EMPTY);
-  }
-
 
   // package constructor and instance method
 
@@ -392,8 +356,7 @@ public class ResultValue extends AbstractEntity<Integer>
    * this class's constructors and {@link DataColumn}.
    * 
    * @param dataColumn the parent DataColumn
-   * @param well the well of this ResultValue
-   * @param assayWellType the AssayWellType of the ResultValue
+   * @param assayWell the Assaywell of this ResultValue
    * @param value the non-numerical value of the ResultValue
    * @param numericalValue the numerical value of the ResultValue
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
@@ -423,7 +386,7 @@ public class ResultValue extends AbstractEntity<Integer>
     // ScreenResult
     // _well.getResultValues().put(dataColumn, this);
 
-    setAssayWellType(assayWell.getAssayWellType()); // TODO: remove
+    setAssayWellControlType(assayWell.getAssayWellControlType()); // TODO: remove
     if (!!!dataColumn.isNumeric()) {
       setValue(value);
     }
@@ -534,38 +497,11 @@ public class ResultValue extends AbstractEntity<Integer>
    * ResultValues for a given stock plate well (within the parent screen
    * result). But it's creates a lot of new bidirectional relationships!
    *
-   * @param assayWellType the new type of the assay well
+   * @param assayWellControlType the new type of the assay well
    * @motivation for hibernate
    */
-  private void setAssayWellType(AssayWellType assayWellType)
+  private void setAssayWellControlType(AssayWellControlType assayWellControlType)
   {
-    if (! isHibernateCaller()) {
-      validateAssayWellType(assayWellType);
-    }
-
-    // TODO: consider updating all related ResultValues (i.e., for the same well
-    // within this ScreenResult); would require parallel
-    // {get,set}HbnAssayWellType methods.
-    _assayWellType = assayWellType;
-  }
-
-
-  private void validateAssayWellType(AssayWellType assayWellType)
-  {
-    if (assayWellType == AssayWellType.ASSAY_CONTROL ||
-      assayWellType == AssayWellType.ASSAY_POSITIVE_CONTROL ||
-      assayWellType == AssayWellType.OTHER) {
-      if (_well.getLibraryWellType() != LibraryWellType.EMPTY) {
-        log.info(
-        /**throw new DataModelViolationException( **/
-                 "result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
-      }
-    }
-    else if (!_well.getLibraryWellType().getValue().equals(assayWellType.getValue())) {
-      log.info(
-               /**throw new DataModelViolationException( **/
-                 "result value assay well type: " + assayWellType.getValue()
-               + " does not match library well type of associated well: " + _well.getLibraryWellType().getValue());
-    }
+    _assayWellControlType = assayWellControlType;
   }
 }

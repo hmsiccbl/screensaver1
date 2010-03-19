@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.screenresults.heatmaps;
 import java.awt.Color;
 import java.text.NumberFormat;
 
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.ui.util.HtmlUtils;
@@ -62,7 +63,7 @@ public class HeatMapCell
       else if (resultValue.isDataProducerWell() && !resultValue.isNull()) {
         formattedValue = _popupText = format.format(scoredValue);
       }
-      else if (resultValue.isEmptyWell()) {
+      else if (resultValue.getWell().getLibraryWellType() == LibraryWellType.EMPTY) {
         _popupText = "<empty>";
       }
     }
@@ -110,7 +111,7 @@ public class HeatMapCell
     if (resultValue != null) {
       hasValue = !resultValue.isNull();
       isExclude = resultValue.isExclude();
-      isExperimentalWell = resultValue.isExperimentalWell();
+      isExperimentalWell = resultValue.getWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL;
       isControlWell = resultValue.isControlWell();
     }
     return getStyle(hasValue,

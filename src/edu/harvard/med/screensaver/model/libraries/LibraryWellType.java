@@ -9,17 +9,13 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.Map;
-
-import com.google.common.collect.Maps;
-
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
  * The library well type vocabulary.
  * 
- * @see edu.harvard.med.screensaver.model.screenresults.AssayWellType
+ * @see edu.harvard.med.screensaver.model.screenresults.AssayWellControlType
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -30,7 +26,7 @@ public enum LibraryWellType implements VocabularyTerm
   
   UNDEFINED("<undefined>"), // for cases where library has been created, but library contents have not yet been loaded (or have been unloaded) 
   EXPERIMENTAL("experimental"),
-  EMPTY("empty"), // for RNAi libraries, on assay, can become Assay Control, Assay Positive Control, Other (see AssayWellType)
+  EMPTY("empty"), // for RNAi libraries, on assay, can become Assay Control, Assay Positive Control, Other (see AssayWellControlType)
   DMSO("DMSO"), // small molecule libraries only
   LIBRARY_CONTROL("library control"), // RNAi libraries only
   BUFFER("buffer")  // RNAi libraries only

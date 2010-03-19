@@ -17,9 +17,11 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.harvard.med.screensaver.ScreensaverProperties;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -387,7 +389,7 @@ public class CellHTS2 {
     // Each replicate will be similar in content. Information is taken from the
     // first one. need to loop over resultvalues in stead over wells, because we
     // need
-    // information about assayWellType.
+    // information about assayWellControlType.
     int i = -1;
     DataColumn col = screenResult.getDataColumns().first();
     for (ResultValue rv : col.getResultValues()) {
@@ -400,16 +402,17 @@ public class CellHTS2 {
       // f.e. normalizePlates will generate error.
       // TODO add the preserved words in cellHTS2 (if exists) for E, C, B, DMSO,
       // O
-      if (rv.getAssayWellType().getAbbreviation().equals("P")) {
+      if (rv.getAssayWellControlType() == AssayWellControlType.ASSAY_POSITIVE_CONTROL) {
         contents[i] = "pos";
-      } else if (rv.getAssayWellType().getAbbreviation().equals("N") ) {
+      } else if (rv.getAssayWellControlType() == AssayWellControlType.ASSAY_CONTROL) {
         contents[i] = "N";
-      } else if (rv.getAssayWellType().getAbbreviation().equals("S") ) {
+      } else if (rv.getAssayWellControlType() == AssayWellControlType.ASSAY_CONTROL_SHARED) {
         contents[i] = "S";
-      } else if (rv.getAssayWellType().getAbbreviation().equals("X")) {
+      } else if (rv.getWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
         contents[i] = "sample";
       }
       // TODO: should use library controls too
+      // TODO: how to handle AssayWellControlType.OTHER?
 
     }
 

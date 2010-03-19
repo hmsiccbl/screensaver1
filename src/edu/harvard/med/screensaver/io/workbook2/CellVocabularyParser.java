@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 
 /**
@@ -115,7 +116,7 @@ public class CellVocabularyParser<T> implements CellValueParser<T>
 
   private T doParse(String text, Cell cell)
   {
-    if (text == null) {
+    if (StringUtils.isEmpty(text)) {
       return _valueToReturnIfUnparseable;
     }
     text = text.toLowerCase().trim();

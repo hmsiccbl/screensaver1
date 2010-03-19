@@ -40,7 +40,7 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -217,22 +217,22 @@ public class MakeDummyEntitiesCellHTS2
     }
 
 
-    AssayWellType assayWellType = null;
+    AssayWellControlType assayWellControlType = null;
     for (int i = 0; i < wells.size(); ++i) {
       Well well = wells.get(i);
       String wellName = well.getWellKey()
                             .getWellName();
       if (wellName.equals("A01")) {
-        assayWellType = AssayWellType.ASSAY_POSITIVE_CONTROL;
+        assayWellControlType = AssayWellControlType.ASSAY_POSITIVE_CONTROL;
       }
       else if (wellName.equals("B01")) {
-        assayWellType = AssayWellType.ASSAY_CONTROL;
+        assayWellControlType = AssayWellControlType.ASSAY_CONTROL;
       }
       else if (wellName.equals("C01")) {
-        assayWellType = AssayWellType.ASSAY_CONTROL_SHARED;
+        assayWellControlType = AssayWellControlType.ASSAY_CONTROL_SHARED;
       }
       else {
-        assayWellType = AssayWellType.EXPERIMENTAL;
+        assayWellControlType = null;
       }
 
       boolean exclude = false;
@@ -249,7 +249,7 @@ public class MakeDummyEntitiesCellHTS2
       
       if (withoutA01ResultValue && wellName.equals("A01")) { } 
       else {
-        AssayWell assayWell = screenResult.createAssayWell(well, assayWellType);
+        AssayWell assayWell = screenResult.createAssayWell(well);
         normRep1.createResultValue(assayWell, rep1Values.get(i), exclude);
         normRep2.createResultValue(assayWell, rep2Values.get(i), exclude);
       }

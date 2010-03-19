@@ -35,6 +35,7 @@ import javax.persistence.Version;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -184,7 +185,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   /**
    * Add a non-numeric result value to the data column.
    * @param well the well of the new ResultValue
-   * @param assayWellType the AssayWellType of the new ResultValue
    * @param value the value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
@@ -214,7 +214,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   /**
    * Add a numeric result value to the data column.
    * @param well the well of the new ResultValue
-   * @param assayWellType the AssayWellType of the new ResultValue
    * @param numericValue the numeric value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
@@ -920,8 +919,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * Add a result value to the data column. If the <code>value</code> parameter is not
    * null, then the <code>numericValue</code> parameter should be null, and the result value
    * to add is non-numeric. Otherwise, <code>numericValue</code> should be non-null.
-   * @param well the well of the new ResultValue
-   * @param assayWellType the AssayWellType of the new ResultValue
+   * @param assayWell the assayWell of the new ResultValue
    * @param value the value of the new ResultValue
    * @param numericValue the numeric value of the new ResultValue
    * @param exclude the exclude flag of the new ResultValue
@@ -947,8 +945,8 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                               exclude,
                                               false);
 
-    if (getOrdinal() == 0) { // yuck! due to denormalization...
-      if (resultValue.isExperimentalWell()) {
+    if (getOrdinal() == 0) { // yuck! due to denormalization... // TODO: should move to AssayWell constructor
+      if (assayWell.getLibraryWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
         getScreenResult().incrementExperimentalWellCount();
       }
     }
@@ -1014,7 +1012,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private boolean isPositive(ResultValue rv)
   {
     boolean isPositive = false;
-    if (isPositiveIndicator() && rv.isExperimentalWell() && !rv.isExclude()) {
+    if (isPositiveIndicator() && rv.getWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL && !rv.isExclude()) {
       if (isBooleanPositiveIndicator()) {
         if (Boolean.parseBoolean(rv.getValue())) {
           isPositive = true;
@@ -1035,7 +1033,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     }
     if (log.isDebugEnabled()) {
       if (isPositive) {
-        log.debug("result value [well=" + rv.getWell() + ", value=" + rv.getValue() + ", exclude=" + rv.isExclude() + ", wellType=" + rv.getAssayWellType() + "] is a positive");
+        log.debug("result value [well=" + rv.getWell() + ", value=" + rv.getValue() + ", exclude=" + rv.isExclude() + ", wellType=" + rv.getAssayWellControlType() + "] is a positive");
       }
     }
     return isPositive;

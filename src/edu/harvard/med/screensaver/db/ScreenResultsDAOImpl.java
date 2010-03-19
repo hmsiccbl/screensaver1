@@ -55,7 +55,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     List<ResultValue> result = runQuery(new edu.harvard.med.screensaver.db.Query() {
       public List<?> execute(Session session)
       {
-        String hql = "select r from ResultValue r where r.dataColumn.id = :colId and r.well.id >= :firstWellInclusive and r.well.id < :lastWellExclusive";
+        String hql = "select r from ResultValue r left join fetch r.well w where r.dataColumn.id = :colId and w.id >= :firstWellInclusive and w.id < :lastWellExclusive";
         Query query = session.createQuery(hql);
         query.setParameter("colId", col.getEntityId());
         query.setParameter("firstWellInclusive", new WellKey(plateNumber, 0, 0).toString());

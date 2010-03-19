@@ -353,9 +353,9 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     _assayWells = assayWells;
   }
   
-  public AssayWell createAssayWell(Well libraryWell, AssayWellType assayWellType)
+  public AssayWell createAssayWell(Well libraryWell)
   {
-    AssayWell assayWell = new AssayWell(this, libraryWell, assayWellType);
+    AssayWell assayWell = new AssayWell(this, libraryWell);
     if (!_assayWells.add(assayWell)) {
       throw new DuplicateEntityException(this, assayWell);
     }

@@ -154,10 +154,10 @@ public class ScreenResultLoaderTest extends AbstractSpringPersistenceTest
         DataColumn col0 = screenResult.getDataColumnsList().get(0);
         col0.getWellKeyToResultValueMap().keySet().iterator();
         ResultValue rv = col0.getWellKeyToResultValueMap().get(new WellKey(1,"A01"));
-        assertEquals("1071894", rv.getValue());
+        assertEquals(1071894.0, rv.getNumericValue().doubleValue(), 0.01);
         // this tests how Hibernate will make use of WellKey, initializing with a concatenated key string
         rv = col0.getWellKeyToResultValueMap().get(new WellKey("00001:A01"));
-        assertEquals("1071894", rv.getValue());
+        assertEquals(1071894.0, rv.getNumericValue().doubleValue(), 0.01);
       }
     });
     

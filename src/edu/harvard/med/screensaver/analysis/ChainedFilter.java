@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+
 public class ChainedFilter<T> implements Filter<T>
 {
   // static members

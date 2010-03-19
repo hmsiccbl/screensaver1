@@ -47,7 +47,7 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -669,23 +669,6 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       }
     });
 
-    // TODO
-//    if (_mode = WellSearchResultMode.SCREEN_RESULT_WELLS) {
-//      columns.add(new EnumEntityColumn<Well,AssayWellType>(
-//        Well.assayWells.restrict(AssayWell.screenResult.getLeaf()), _screenResult).toProperty("assayWellType"),
-//        "Assay Well Type",
-//        "The type of assay well, e.g., 'Experimental', 'Empty', 'Library Control', " +
-//        "'Assay Positive Control', 'Assay Control', 'Buffer', etc.",
-//        WELL_COLUMNS_GROUP,
-//        AssayWellType.values()) {
-//        @Override
-//        public AssayWellType getCellValue(Well well)
-//        {
-//          return well.getAssayWells().get(_screenResult) == null ? null : well.getAssayWells().get(_screenResult).getAssayWellType();
-//        }
-//      });
-//    }
-    
     columns.add(new TextEntityColumn<Well>(
       new PropertyPath<Well>(Well.class, "facilityId"),
       "Facility ID",
@@ -860,17 +843,16 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       ((HasFetchPaths<Well>) column).addRelationshipPath(Well.resultValues.to(ResultValue.DataColumn).to(DataColumn.ScreenResult).to(ScreenResult.screen));
 
       if (!isAssayWellTypeColumnCreated && column.getGroup().equals(OUR_DATA_COLUMNS_GROUP)) {
-        columns.add(new EnumEntityColumn<Well,AssayWellType>(
-          Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("assayWellType"),
-          "Assay Well Type",
-          "The type of assay well, e.g., 'Experimental', 'Empty', 'Library Control', " +
-          "'Assay Positive Control', 'Assay Control', 'Buffer', etc.",
+        columns.add(new EnumEntityColumn<Well,AssayWellControlType>(
+          Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("assayWellControlType"),
+          "Assay Well Control Type",
+          "The type of assay well control",
           column.getGroup(),
-          AssayWellType.values()) {
+          AssayWellControlType.values()) {
           @Override
-          public AssayWellType getCellValue(Well well)
+          public AssayWellControlType getCellValue(Well well)
           {
-            return well.getResultValues().get(dataColumn) == null ? null : well.getResultValues().get(dataColumn).getAssayWellType();
+            return well.getResultValues().get(dataColumn) == null ? null : well.getResultValues().get(dataColumn).getAssayWellControlType();
           }
         });
         isAssayWellTypeColumnCreated = true;

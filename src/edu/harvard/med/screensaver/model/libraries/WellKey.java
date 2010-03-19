@@ -172,6 +172,7 @@ public class WellKey implements Comparable/*, Serializable*/
   }
 
   @Transient
+  // TODO: this should return a WellName object!
   public String getWellName()
   {
     return _wellName.toString();

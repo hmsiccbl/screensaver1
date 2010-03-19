@@ -19,40 +19,27 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public enum AssayWellType implements VocabularyTerm
+public enum AssayWellControlType implements VocabularyTerm
 {
-
-  // the vocabulary
-  
-  EXPERIMENTAL("experimental", "X"),
-  EMPTY("empty", "E"),  
-  LIBRARY_CONTROL("library control", "C"),
   ASSAY_POSITIVE_CONTROL("assay positive control", "P"),
   ASSAY_CONTROL("assay control", "N"), // aka "assay negative control", but stakeholders prefer simply "assay control"
-  ASSAY_CONTROL_SHARED("assay control shared", "S"), //shared between screens
-  BUFFER("buffer", "B"), // RNAi only
-  DMSO("DMSO", "D"), // small molecule only
-                     // note: as of 2007-01-31, screen result files don't use this; they use EMPTY for what should be DMSO wells
-  OTHER("other", "O"),
+  ASSAY_CONTROL_SHARED("assay control shared", "S"), // shared between screens
+  OTHER_CONTROL("other", "O"),
   ;
  
-  
-  // static inner class
 
   /**
-   * A Hibernate <code>UserType</code> to map the {@link AssayWellType} vocabulary.
+   * A Hibernate <code>UserType</code> to map the {@link AssayWellControlType} vocabulary.
    */
-  public static class UserType extends VocabularyUserType<AssayWellType>
+  public static class UserType extends VocabularyUserType<AssayWellControlType>
   {
     public UserType()
     {
-      super(AssayWellType.values());
+      super(AssayWellControlType.values());
     }
   }
 
-
-  // private instance field and constructor
-
+  
   private String _value;
   private String _abbreviation;
 
@@ -60,14 +47,11 @@ public enum AssayWellType implements VocabularyTerm
    * Constructs a <code>WellType</code> vocabulary term.
    * @param value The value of the term.
    */
-  private AssayWellType(String value, String abbreviation)
+  private AssayWellControlType(String value, String abbreviation)
   {
     _value = value;
     _abbreviation = abbreviation;
   }
-
-
-  // public instance methods
 
   /**
    * Get the value of the vocabulary term.
@@ -83,26 +67,9 @@ public enum AssayWellType implements VocabularyTerm
     return _abbreviation;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString()
   {
     return getValue();
-  }
-
-  public boolean isDataProducing()
-  {
-    // TODO: I'm assuming wells of type "other" can contain data values --ant
-    return this.equals(AssayWellType.EXPERIMENTAL) || isControl() || this.equals(AssayWellType.OTHER);
-  }
-
-  public boolean isControl()
-  {
-    return this.equals(AssayWellType.ASSAY_CONTROL) ||
-    this.equals(AssayWellType.ASSAY_CONTROL_SHARED) ||
-    this.equals(AssayWellType.ASSAY_POSITIVE_CONTROL) ||
-    this.equals(AssayWellType.LIBRARY_CONTROL);
   }
 }

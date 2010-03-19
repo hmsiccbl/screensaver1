@@ -51,7 +51,7 @@ import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -148,8 +148,8 @@ public class TestDataFactory
     }
     if (VocabularyTerm.class.isAssignableFrom(type)) {
       // TODO: move these special cases to appropriate TestDataFactory.EntityFactory classes
-      if (type.equals(AssayWellType.class)) {
-        return (T) AssayWellType.EXPERIMENTAL;
+      if (type.equals(AssayWellControlType.class)) {
+        return (T) AssayWellControlType.ASSAY_CONTROL;
       }
       if (type.equals(LibraryWellType.class)) {
         return (T) LibraryWellType.LIBRARY_CONTROL;

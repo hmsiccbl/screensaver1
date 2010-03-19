@@ -40,10 +40,9 @@ import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.io.workbook2.Worksheet;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
-import edu.harvard.med.screensaver.model.screenresults.DataType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -224,7 +223,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     }
     assertFalse("screen result had errors: " + mockScreenResultParser.getErrors(),
                 mockScreenResultParser.getHasErrors());
-    assertEquals("well count", 4, (int) mockScreenResultParser.getParsedScreenResult().getExperimentalWellCount());
+    assertEquals("assay well count", 4, (int) mockScreenResultParser.getParsedScreenResult().getAssayWells().size());
   }
 
   // Note: this test was added to highlight a failure of the POI/HSSF library
@@ -362,10 +361,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals("result value count",
                  resultValues,
                  screenResult.getDataColumnsList().get(0).getResultValues().size());
-    int nonExcludedResultValues = resultValues - 1;
-    List<Integer> expectedHitCount = Arrays.asList(6, 3);
-    List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) nonExcludedResultValues,
-                                                  expectedHitCount.get(1) / (double) nonExcludedResultValues);
+    int experimentalWells = 7;
+    List<Integer> expectedHitCount = Arrays.asList(4, 2); // only experimental wells and non-excluded wells are considered
+    List<Double> expectedHitRatio = Arrays.asList(expectedHitCount.get(0) / (double) experimentalWells,
+                                                  expectedHitCount.get(1) / (double) experimentalWells);
 
     int iPositiveIndicatorCol = 0;
     for (DataColumn col : screenResult.getDataColumnsList()) {
@@ -501,15 +500,16 @@ public class ScreenResultParserTest extends AbstractSpringTest
 
     String[] expectedWellNames = {"A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08"};
 
-    AssayWellType[] expectedAssayWellTypes = {
-      AssayWellType.ASSAY_POSITIVE_CONTROL,
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.ASSAY_CONTROL,
-      AssayWellType.LIBRARY_CONTROL,
-      AssayWellType.BUFFER,
-      AssayWellType.OTHER,
-      AssayWellType.EMPTY};
+    AssayWellControlType[] expectedAssayWellControlTypes = {
+      AssayWellControlType.ASSAY_POSITIVE_CONTROL,
+      null,
+      null,
+      AssayWellControlType.ASSAY_CONTROL,
+      null,
+      null,
+      AssayWellControlType.OTHER_CONTROL,
+      null
+      };
 
     boolean[][] expectedExcludeValues = {
       {false, false, false, false, false, false, false},
@@ -551,8 +551,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        expectedWellNames[iWell],
                        wellKey.getWellName());
           assertEquals("col " + iCol + " well #" + iWell + " well type",
-                       expectedAssayWellTypes[iWell],
-                       rv.getAssayWellType());
+                       expectedAssayWellControlTypes[iWell],
+                       rv.getAssayWellControlType());
           assertEquals("col " + iCol + " well #" + iWell + " well type",
                        expectedExcludeValues[iWell][iCol],
                        rv.isExclude());
@@ -632,13 +632,13 @@ public class ScreenResultParserTest extends AbstractSpringTest
 //
     String[] expectedWellNames = {"A01", "A02", "A03","A01", "A02", "A03"};
 //
-    AssayWellType[] expectedAssayWellTypes = {
-      AssayWellType.ASSAY_POSITIVE_CONTROL,
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.ASSAY_CONTROL_SHARED,
-      AssayWellType.EXPERIMENTAL,
-      AssayWellType.EXPERIMENTAL};
+    AssayWellControlType[] expectedAssayWellTypes = {
+      AssayWellControlType.ASSAY_POSITIVE_CONTROL,
+      null,
+      null,
+      AssayWellControlType.ASSAY_CONTROL_SHARED,
+      null,
+      null };
 
     boolean[][] expectedExcludeValues = {
       {false, false, false, false},
@@ -683,7 +683,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        wellKey.getWellName());
           assertEquals("col " + iCol + " well #" + iWell + " well type",
                        expectedAssayWellTypes[iWell],
-                       rv.getAssayWellType());
+                       rv.getAssayWellControlType());
           assertEquals("col " + iCol + " well #" + iWell + " well type",
                        expectedExcludeValues[iWell][iCol],
                        rv.isExclude());

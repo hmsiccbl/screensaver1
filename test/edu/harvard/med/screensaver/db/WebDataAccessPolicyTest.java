@@ -30,7 +30,6 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -671,10 +670,10 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     ScreenResult myScreenResult = myScreen.createScreenResult();
     DataColumn myCol = myScreenResult.createDataColumn("myCol").forReplicate(1);
     myCol.makeBooleanPositiveIndicator();
-    AssayWell myAssayWell1 = myScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
+    AssayWell myAssayWell1 = myScreenResult.createAssayWell(well1);
     ResultValue myResultValue1 = myCol.createResultValue(myAssayWell1, "true");
     assert myResultValue1.isPositive();
-    AssayWell myAssayWell2 = myScreenResult.createAssayWell(well2, AssayWellType.EXPERIMENTAL);
+    AssayWell myAssayWell2 = myScreenResult.createAssayWell(well2);
     ResultValue myResultValue2 = myCol.createResultValue(myAssayWell2, "false");
     assert !myResultValue2.isPositive();
     
@@ -683,10 +682,10 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     ScreenResult othersNonMutualPositivesScreenResult = othersNonMutualPositivesScreen.createScreenResult();
     DataColumn othersNonMutualPositivesCol = othersNonMutualPositivesScreenResult.createDataColumn("othersNonMutualPositivesCol").forReplicate(1);
     othersNonMutualPositivesCol.makeBooleanPositiveIndicator();
-    AssayWell othersNonMutualPositivesAssayWell1 = othersNonMutualPositivesScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
+    AssayWell othersNonMutualPositivesAssayWell1 = othersNonMutualPositivesScreenResult.createAssayWell(well1);
     ResultValue othersNonMutualPositivesResultValue1 = othersNonMutualPositivesCol.createResultValue(othersNonMutualPositivesAssayWell1, "false");
     assert !othersNonMutualPositivesResultValue1.isPositive();
-    AssayWell othersNonMutualPositivesAssayWell2 = othersNonMutualPositivesScreenResult.createAssayWell(well2, AssayWellType.EXPERIMENTAL);
+    AssayWell othersNonMutualPositivesAssayWell2 = othersNonMutualPositivesScreenResult.createAssayWell(well2);
     ResultValue othersNonMutualPositivesResultValue2 = othersNonMutualPositivesCol.createResultValue(othersNonMutualPositivesAssayWell2, "true");
     assert othersNonMutualPositivesResultValue2.isPositive();
 
@@ -696,10 +695,10 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     ScreenResult othersMutualPositivesScreenResult = othersMutualPositivesScreen.createScreenResult();
     DataColumn othersMutualPositivesCol = othersMutualPositivesScreenResult.createDataColumn("othersMutualPositivesCol").forReplicate(1);
     othersMutualPositivesCol.makeBooleanPositiveIndicator();
-    AssayWell othersMutualPositivesAssayWell1 = othersMutualPositivesScreenResult.createAssayWell(well1, AssayWellType.EXPERIMENTAL);
+    AssayWell othersMutualPositivesAssayWell1 = othersMutualPositivesScreenResult.createAssayWell(well1);
     ResultValue othersMutualPositivesResultValue1 = othersMutualPositivesCol.createResultValue(othersMutualPositivesAssayWell1, "true");
     assert othersMutualPositivesResultValue1.isPositive();
-    AssayWell othersMutualPositivesAssayWell2 = othersMutualPositivesScreenResult.createAssayWell(well2, AssayWellType.EXPERIMENTAL);
+    AssayWell othersMutualPositivesAssayWell2 = othersMutualPositivesScreenResult.createAssayWell(well2);
     ResultValue othersMutualPositivesResultValue2 = othersMutualPositivesCol.createResultValue(othersMutualPositivesAssayWell2, "false");
     assert !othersMutualPositivesResultValue2.isPositive();
     

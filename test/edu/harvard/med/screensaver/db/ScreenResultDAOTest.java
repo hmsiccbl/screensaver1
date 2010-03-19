@@ -28,7 +28,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -89,7 +89,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
                                           (iWell / library.getPlateSize().getRows()),
                                           (iWell % library.getPlateSize().getColumns()));
             wells[iWell] = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
-            AssayWell assayWell = screenResult.createAssayWell(wells[iWell], AssayWellType.EXPERIMENTAL);
+            AssayWell assayWell = screenResult.createAssayWell(wells[iWell]);
             for (int iResultValue = 0; iResultValue < col.length; ++iResultValue) {
               col[iResultValue].createResultValue(assayWell,
                                                   "value " + iWell + "," + iResultValue,
@@ -278,13 +278,13 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
           expectedPlateNumbers.add(i);
           Well well = library.createWell(new WellKey(plateNumber, "A01"), LibraryWellType.EXPERIMENTAL);
           expectedWells.add(well);
-          AssayWellType assayWellType = i % 2 == 0 ? AssayWellType.EXPERIMENTAL : AssayWellType.ASSAY_POSITIVE_CONTROL;
-          AssayWell assayWell = screenResult.createAssayWell(well, assayWellType);
+          AssayWellControlType assayWellControlType = i % 2 == 0 ? null : AssayWellControlType.ASSAY_POSITIVE_CONTROL;
+          AssayWell assayWell = screenResult.createAssayWell(well);
           boolean exclude = i % 8 == 0;
           String col1Value = values[i % 4];
           col1.createResultValue(assayWell, col1Value, exclude);
           col2.createResultValue(assayWell, "false", false);
-          if (assayWellType.equals(AssayWellType.EXPERIMENTAL)) {
+          if (well.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
             expectedExperimentalWellCount[0]++;
             if (!exclude && col1Value != null) {
               log.debug("result value " + col1Value + " is deemed a positive by this test");
@@ -330,7 +330,7 @@ public class ScreenResultDAOTest extends AbstractSpringPersistenceTest
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {
         Well well = library.createWell(new WellKey(plateNumber, "A" + (iWell + 1)), LibraryWellType.EXPERIMENTAL);
-        AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
+        AssayWell assayWell = screenResult.createAssayWell(well);
         col1.createResultValue(assayWell, (double) iWell);
         col2.createResultValue(assayWell, iWell + 10.0);
       }

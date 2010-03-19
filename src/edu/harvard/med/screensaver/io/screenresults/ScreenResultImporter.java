@@ -104,10 +104,6 @@ public class ScreenResultImporter extends CommandLineApplication
                              .withLongOpt(INCREMENTAL_FLUSH_OPTION[LONG_OPTION])
                              .create(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION]));
 
-//    app.addCommandLineOption(OptionBuilder.withDescription("Ignore errors caused by mismatches between the Library Well Type and the Assay Well Type")
-//                                           .isRequired(false)
-//                                           .withLongOpt(IGNORE_WELLTYPE_ERRORS_OPTION[LONG_OPTION])
-//                                           .create(IGNORE_WELLTYPE_ERRORS_OPTION[SHORT_OPTION]));
     File inputFile = null;
     try {
       if (!app.processOptions(/* acceptDatabaseOptions= */true,

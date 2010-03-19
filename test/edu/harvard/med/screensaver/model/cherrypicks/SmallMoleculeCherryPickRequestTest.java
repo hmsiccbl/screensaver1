@@ -29,7 +29,6 @@ import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -93,7 +92,7 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
         ScreenResult screenResult = screen.createScreenResult();
         DataColumn dataColumn = screenResult.createDataColumn("values");
         for (Well well : wells) {
-          AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
+          AssayWell assayWell = screenResult.createAssayWell(well);
           dataColumn.createResultValue(assayWell, 1.0);
         }
         

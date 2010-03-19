@@ -17,11 +17,10 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -42,8 +41,8 @@ public class HeatMapCellTest extends AbstractSpringTest
     ScreenResult screenResult = screen.createScreenResult();
     DataColumn col = screenResult.createDataColumn("col1");
     Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
-    Well well = library.createWell(new WellKey(1, "A01"), LibraryWellType.EMPTY);
-    AssayWell assayWell = screenResult.createAssayWell(well, AssayWellType.EXPERIMENTAL);
+    Well well = library.createWell(new WellKey(1, "A01"), LibraryWellType.EXPERIMENTAL);
+    AssayWell assayWell = screenResult.createAssayWell(well);
     col.createResultValue(assayWell, 1.0);
 
     HeatMapCell cell = new HeatMapCell(col.getWellKeyToResultValueMap().get(well.getWellKey()),

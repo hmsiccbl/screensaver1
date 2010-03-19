@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellType;
+import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
@@ -117,7 +117,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,PartitionedValue> partitionedValueMap = new TreeMap<String,PartitionedValue>();
-  private static SortedMap<String,AssayWellType> assayWellTypeMap = new TreeMap<String,AssayWellType>();
+  private static SortedMap<String,AssayWellControlType> assayWellControlTypeMap = new TreeMap<String,AssayWellControlType>();
   static {
     for (AssayReadoutType assayReadoutType : AssayReadoutType.values()) {
       assayReadoutTypeMap.put(assayReadoutType.getValue(),
@@ -148,16 +148,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       partitionedValueMap.put(pv.getValue(), pv);
     }
 
-    assayWellTypeMap.put(AssayWellType.EXPERIMENTAL.getAbbreviation(), AssayWellType.EXPERIMENTAL);
-    assayWellTypeMap.put(AssayWellType.EMPTY.getAbbreviation(), AssayWellType.EMPTY);
-    assayWellTypeMap.put(AssayWellType.LIBRARY_CONTROL.getAbbreviation(), AssayWellType.LIBRARY_CONTROL);
-    assayWellTypeMap.put(AssayWellType.ASSAY_POSITIVE_CONTROL.getAbbreviation(), AssayWellType.ASSAY_POSITIVE_CONTROL);
-    assayWellTypeMap.put(AssayWellType.ASSAY_CONTROL_SHARED.getAbbreviation(), AssayWellType.ASSAY_CONTROL_SHARED);
-    assayWellTypeMap.put(AssayWellType.ASSAY_CONTROL.getAbbreviation(), AssayWellType.ASSAY_CONTROL);
-    assayWellTypeMap.put(AssayWellType.BUFFER.getAbbreviation(), AssayWellType.BUFFER);
-    assayWellTypeMap.put(AssayWellType.DMSO.getAbbreviation(), AssayWellType.DMSO);
-    assayWellTypeMap.put(AssayWellType.OTHER.getAbbreviation(), AssayWellType.OTHER);
-    assert assayWellTypeMap.size() == AssayWellType.values().length : "assayWellTypeMap not initialized properly";
+    for (AssayWellControlType awct : AssayWellControlType.values()) {
+      assayWellControlTypeMap.put(awct.getAbbreviation(), awct);
+    }
   }
 
   private LibrariesDAO _librariesDao;
@@ -178,7 +171,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
   private CellVocabularyParser<PartitionedValue> _partitionedValueParser;
-  private CellVocabularyParser<AssayWellType> _assayWellTypeParser;
+  private CellVocabularyParser<AssayWellControlType> _assayWellControlTypeParser;
   private WellNameParser _wellNameParser;
   
   private SortedMap<String,DataColumn> _worksheetColumnLabel2DataColumnObjectMap;
@@ -275,7 +268,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
     _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NONE);
-    _assayWellTypeParser = new CellVocabularyParser<AssayWellType>(assayWellTypeMap, AssayWellType.EXPERIMENTAL);
+    _assayWellControlTypeParser = new CellVocabularyParser<AssayWellControlType>(assayWellControlTypeMap);
     _wellNameParser = new WellNameParser();
 
     try {
@@ -679,11 +672,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private void readResultValues(ScreenResult screenResult, Row row, Well well, boolean incrementalFlush)
   {
-    AssayWellType assayWellType = 
-      _assayWellTypeParser.parse(row.getCell(WellInfoColumn.ASSAY_WELL_TYPE.ordinal()));
+    AssayWellControlType assayWellControlType = 
+      _assayWellControlTypeParser.parse(row.getCell(WellInfoColumn.ASSAY_WELL_TYPE.ordinal()));
     try {
-      AssayWell assayWell = findOrCreateAssayWell(well, assayWellType);
-      //TODO: temporarily suppressed the DataModelViolations until we decide if AssayWellType MUST match LibraryWellType
+      AssayWell assayWell = findOrCreateAssayWell(well, assayWellControlType);
+      //TODO: temporarily suppressed the DataModelViolations until we decide if AssayWellControlType MUST match LibraryWellType
       
       List<DataColumn> wellExcludes = _excludeParser.parseList(row.getCell(WellInfoColumn.EXCLUDE.ordinal()));
       int iDataColumn = 0;
@@ -756,7 +749,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
   }
 
-  private AssayWell findOrCreateAssayWell(Well well, AssayWellType assayWellType)
+  private AssayWell findOrCreateAssayWell(Well well, AssayWellControlType assayWellControlType)
     throws DataModelViolationException
   {
     // TODO: assay well should not already exist, unless we start supporting the appending of new data columns to existing assay well data  
@@ -768,7 +761,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 //      }
 //      return assayWell;
 //    }
-    return _screenResult.createAssayWell(well, assayWellType);
+    AssayWell assayWell = _screenResult.createAssayWell(well);
+    assayWell.setAssayWellControlType(assayWellControlType);
+    return assayWell;
   }  
   
   /**

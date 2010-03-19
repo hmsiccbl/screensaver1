@@ -64,12 +64,12 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   private Integer _version;
   private ScreenResult _screenResult;
   private Well _libraryWell;
-  private AssayWellType _assayWellType;
+  private AssayWellControlType _assayWellControlType;
   private boolean _isPositive;
   private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
 
 
-  /*public*/ AssayWell(ScreenResult screenResult, Well libraryWell, AssayWellType assayWellType)
+  /*public*/ AssayWell(ScreenResult screenResult, Well libraryWell)
   {
     if (screenResult == null) {
       throw new DataModelViolationException("screenResult is required");
@@ -81,8 +81,6 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
     _libraryWell = libraryWell;
 //    // TODO: remove, for performance of screen result import
 //    _libraryWell.getAssayWells().put(_screenResult, this);
-    _assayWellType = assayWellType;
-    validateAssayWellType(assayWellType);
   }
 
   @Override
@@ -211,72 +209,19 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
    *
    * @return the assay well's type
    */
-  @Column(nullable=false)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.AssayWellType$UserType")
-  public AssayWellType getAssayWellType()
+  @Column(nullable=true)
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.AssayWellControlType$UserType")
+  public AssayWellControlType getAssayWellControlType()
   {
-    return _assayWellType;
+    return _assayWellControlType;
   }
 
-  /**
-   * Return true iff the assay well type is
-   * {@link AssayWellType#EXPERIMENTAL experimental}.
-   *
-   * @return true iff the assay well type is experimental
-   * @see AssayWellType#EXPERIMENTAL
-   */
-  @Transient
-  public boolean isExperimentalWell()
+  public void setAssayWellControlType(AssayWellControlType assayWellControlType)
   {
-    return getAssayWellType().equals(AssayWellType.EXPERIMENTAL);
-  }
-
-  /**
-   * Return true iff the assay well type is a control.
-   *
-   * @return true iff the assay well type is a control
-   * @see AssayWellType#isControl()
-   */
-  @Transient
-  public boolean isControlWell()
-  {
-    return getAssayWellType().isControl();
-  }
-
-  /**
-   * Return true iff the assay well type is data producing.
-   *
-   * @return true iff the assay well type is data producing
-   * @see AssayWellType#isDataProducing()
-   */
-  @Transient
-  public boolean isDataProducerWell()
-  {
-    return getAssayWellType().isDataProducing();
-  }
-
-  /**
-   * Return true iff the assay well type is {@link AssayWellType#OTHER other}.
-   *
-   * @return true iff the assay well type is other
-   * @see AssayWellType#OTHER
-   */
-  @Transient
-  public boolean isOtherWell()
-  {
-    return getAssayWellType().equals(AssayWellType.OTHER);
-  }
-
-  /**
-   * Return true iff the assay well type is {@link AssayWellType#EMPTY empty}.
-   *
-   * @return true iff the assay well type is empty
-   * @see AssayWellType#EMPTY
-   */
-  @Transient
-  public boolean isEmptyWell()
-  {
-    return getAssayWellType().equals(AssayWellType.EMPTY);
+    if (!isHibernateCaller() && assayWellControlType != null && _libraryWell.getLibraryWellType() != LibraryWellType.EMPTY) {
+      throw new DataModelViolationException("assay well control type can only be defined if the library well type is 'empty'");
+    }
+    _assayWellControlType = assayWellControlType;
   }
 
   /**
@@ -292,27 +237,5 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   private void setAssayWellId(Integer assayWellId)
   {
     setEntityId(assayWellId);
-  }
-
-  /**
-   * @motivation for hibernate
-   */
-  private void setAssayWellType(AssayWellType assayWellType)
-  {
-    _assayWellType = assayWellType;
-  }
-
-  private void validateAssayWellType(AssayWellType assayWellType)
-  {
-    if (assayWellType == AssayWellType.ASSAY_CONTROL ||
-      assayWellType == AssayWellType.ASSAY_POSITIVE_CONTROL ||
-      assayWellType == AssayWellType.OTHER) {
-      if (_libraryWell.getLibraryWellType() != LibraryWellType.EMPTY) {
-        log.warn(/*(throw new DataModelViolationException(*/"result value assay well type can only be 'assay control', 'assay positive control', or 'other' if the library well type is 'empty'");
-      }
-    }
-    else if (!_libraryWell.getLibraryWellType().getValue().equals(assayWellType.getValue())) {
-      log.warn(/*throw new DataModelViolationException(*/"result value assay well type does not match library well type of associated well");
-    }
   }
 }
