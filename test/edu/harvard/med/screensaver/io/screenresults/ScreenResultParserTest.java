@@ -281,11 +281,10 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertTrue(errors.contains(new ParseError("value required", "Data Columns:(B,3)")));
     assertTrue(errors.contains(new ParseError("illegal value", "Data Columns:(E,4)")));
     assertTrue(errors.contains(new ParseError("unparseable value \"paradiso positive indicator\" (expected one of [Boolean Positive Indicator, Numeric, Partition Positive Indicator, Text])", "Data Columns:(G,3)")));
-    assertTrue(errors.contains(new ParseError("unparseable value \"sushiraw\" (expected one of [, derived, raw])", "Data Columns:(C,9)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'B' (expected one of [E, F])", "Data Columns:(D,11)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'H' (expected one of [E, F, G])", "Data Columns:(E,11)")));
-    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'D' (expected one of [E, F, G, H])", "Data Columns:(F,11)")));
-    assertTrue(errors.contains(new ParseError("unparseable value \"follow-up\" (expected one of [, follow up, primary])", "Data Columns:(E,12)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'B' (expected one of [E, F])", "Data Columns:(D,10)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'H' (expected one of [E, F, G])", "Data Columns:(E,10)")));
+    assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'D' (expected one of [E, F, G, H])", "Data Columns:(F,10)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"follow-up\" (expected one of [, follow up, primary])", "Data Columns:(E,11)")));
   }
 
   /**

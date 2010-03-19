@@ -53,6 +53,7 @@ import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.AlphabeticCounter;
 import edu.harvard.med.screensaver.util.DevelopmentException;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
@@ -113,7 +114,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
   private static SortedMap<String,AssayReadoutType> assayReadoutTypeMap = new TreeMap<String,AssayReadoutType>();
   private static SortedMap<String,DataType> dataTypeMap = new TreeMap<String,DataType>();
-  private static SortedMap<String,Boolean> rawOrDerivedMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,PartitionedValue> partitionedValueMap = new TreeMap<String,PartitionedValue>();
@@ -127,10 +127,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     for (DataType dataType : DataType.values()) {
       dataTypeMap.put(dataType.getValue(), dataType);
     }
-
-    rawOrDerivedMap.put("", false);
-    rawOrDerivedMap.put(RAW_VALUE, false);
-    rawOrDerivedMap.put(DERIVED_VALUE, true);
 
     primaryOrFollowUpMap.put("", false);
     primaryOrFollowUpMap.put(PRIMARY_VALUE, false);
@@ -174,7 +170,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private ScreenResult _screenResult;
   private Workbook _workbook;
 
-  private DerivedFromParser _columnsDerivedFromParser;
+  private ColumnLabelsParser _columnsDerivedFromParser;
   private ExcludeParser _excludeParser;
   private CellVocabularyParser<AssayReadoutType> _assayReadoutTypeParser;
   private CellVocabularyParser<DataType> _dataTypeParser;
@@ -273,10 +269,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _lastLibrary = null;
     _assayReadoutTypeParser = new CellVocabularyParser<AssayReadoutType>(assayReadoutTypeMap);
     _worksheetColumnLabel2DataColumnObjectMap = new TreeMap<String,DataColumn>();
-    _columnsDerivedFromParser = new DerivedFromParser(_worksheetColumnLabel2DataColumnObjectMap);
+    _columnsDerivedFromParser = new ColumnLabelsParser(_worksheetColumnLabel2DataColumnObjectMap);
     _excludeParser = new ExcludeParser(_worksheetColumnLabel2DataColumnObjectMap);
     _dataTypeParser = new CellVocabularyParser<DataType>(dataTypeMap);
-    _rawOrDerivedParser = new CellVocabularyParser<Boolean>(rawOrDerivedMap, Boolean.FALSE);
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
     _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NONE);
@@ -426,16 +421,17 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (dataColumnPropertyRows.containsKey(DataColumnProperty.REPLICATE)) {
         dataColumn.forReplicate(dataColumnPropertyRows.get(DataColumnProperty.REPLICATE).getCell(iDataColumn).getInteger());
       }
-      if (dataColumnPropertyRows.containsKey(DataColumnProperty.RAW_OR_DERIVED)) {
-        boolean isDerived = _rawOrDerivedParser.parse(dataColumnPropertyRows.get(DataColumnProperty.RAW_OR_DERIVED).getCell(iDataColumn));
-        if (isDerived) {
-          if (validateRequiredDataPropertyDefined(DataColumnProperty.COLUMNS_DERIVED_FROM, DataColumnProperty.RAW_OR_DERIVED, dataColumnPropertyRows, iDataColumn) &&
-            validateRequiredDataPropertyDefined(DataColumnProperty.HOW_DERIVED, DataColumnProperty.RAW_OR_DERIVED, dataColumnPropertyRows, iDataColumn)) {
-            dataColumn.makeDerived(dataColumnPropertyRows.get(DataColumnProperty.HOW_DERIVED).getCell(iDataColumn, true).getString(),
-                            Sets.newHashSet(Iterables.filter(_columnsDerivedFromParser.parseList(dataColumnPropertyRows.get(DataColumnProperty.COLUMNS_DERIVED_FROM).getCell(iDataColumn, true)),
-                                                             Predicates.notNull())));
-          }
-        }
+      String howDerived = null;
+      if (dataColumnPropertyRows.containsKey(DataColumnProperty.HOW_DERIVED)) {
+        howDerived = dataColumnPropertyRows.get(DataColumnProperty.HOW_DERIVED).getCell(iDataColumn).getString();
+      }
+      Set<DataColumn> columnsDerivedFrom = Collections.emptySet();
+      if (dataColumnPropertyRows.containsKey(DataColumnProperty.COLUMNS_DERIVED_FROM)) {
+        columnsDerivedFrom = Sets.newHashSet(Iterables.filter(_columnsDerivedFromParser.parseList(dataColumnPropertyRows.get(DataColumnProperty.COLUMNS_DERIVED_FROM).getCell(iDataColumn)),
+                                                              Predicates.notNull()));
+      }
+      if (!!!(StringUtils.isEmpty(howDerived) && columnsDerivedFrom.isEmpty())) { 
+        dataColumn.makeDerived(howDerived, columnsDerivedFrom);
       }
       if (!!!dataColumn.isDerived()) {
         if (dataColumnPropertyRows.containsKey(DataColumnProperty.ASSAY_READOUT_TYPE)) {
@@ -851,24 +847,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     }
   }
 
-  private class DerivedFromParser extends ColumnLabelsParser
-  {
-
-    public DerivedFromParser(Map<String,DataColumn> columnLabel2ColMap)
-    {
-      super(columnLabel2ColMap);
-    }
-
-    @Override
-    public List<DataColumn> parseList(Cell cell)
-    {
-      if (DERIVED_FROM_MISSING.equalsIgnoreCase(cell.getString().trim())) {
-        return Collections.emptyList();
-      }
-      return super.parseList(cell);
-    }
-  }
-
   private class ExcludeParser extends ColumnLabelsParser
   {
     public ExcludeParser(Map<String,DataColumn> columnLabel2ColMap)
@@ -879,7 +857,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     public List<DataColumn> parseList(Cell cell)
     {
       String textMultiValue = cell.getString();
-      List<DataColumn> result = new ArrayList<DataColumn>();
 
       if (textMultiValue != null &&
         textMultiValue.equalsIgnoreCase(ScreenResultWorkbookSpecification.EXCLUDE_ALL_VALUE)) {
@@ -887,7 +864,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       }
 
       if (textMultiValue == null) {
-        return result;
+        return Collections.emptyList();
       }
 
       return super.parseList(cell);

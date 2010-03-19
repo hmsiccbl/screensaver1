@@ -612,6 +612,5 @@ public class Cell
   public void addError(String msg)
   {
     _workbook.getParseErrorManager().addError(msg, this);
-    
   }
 }

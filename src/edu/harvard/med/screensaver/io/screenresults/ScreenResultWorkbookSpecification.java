@@ -29,7 +29,6 @@ public interface ScreenResultWorkbookSpecification
     REPLICATE("Replicate Number"),
     TIME_POINT("Time point"),
     ASSAY_READOUT_TYPE("Assay readout type"),
-    RAW_OR_DERIVED("Raw or Derived?"),
     HOW_DERIVED("If derived, how?"),
     COLUMNS_DERIVED_FROM("If derived, from which columns?"),
     PRIMARY_OR_FOLLOWUP("Primary or Follow Up?"),
@@ -66,7 +65,7 @@ public interface ScreenResultWorkbookSpecification
   public static final String FILENAMES_LIST_DELIMITER = "\\s*,\\s*";
 
   /**
-   * The standard columns of the "Data" worksheet. Order of enum values is
+   * The standard columns of the "Data" worksheets. Order of enum values is
    * significant, as we use the ordinal() method.
    */
   public enum WellInfoColumn {
@@ -91,10 +90,6 @@ public interface ScreenResultWorkbookSpecification
   public static final String YES_VALUE = "yes";
   public static final String NO_VALUE = "no";
 
-  public static final String RAW_VALUE = "raw";
-  public static final String DERIVED_VALUE = "derived";
-  public static final String DERIVED_FROM_MISSING = "n/a";
-  
   public static final String PRIMARY_VALUE = "primary";
   public static final String FOLLOWUP_VALUE = "follow up";
 
