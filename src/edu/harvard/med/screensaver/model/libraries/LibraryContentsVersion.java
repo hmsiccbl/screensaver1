@@ -46,8 +46,8 @@ import org.hibernate.annotations.Parameter;
  * scientific knowledge progresses (e.g. gene information can change
  * frequently). A LibraryContentsVersion thus maintains a snapshot of the
  * information that describes the reagents at a given point in time. The most
- * current version of a well's reagent is obtained via {@link Well#getReagent()}
- * , which defaults to that latest "released" library contents version (see
+ * current version of a well's reagent is obtained via {@link Well#getLatestReleasedReagent()},
+ * which defaults to that latest "released" library contents version (see
  * {@link Library#setLatestReleasedContentsVersion(LibraryContentsVersion)}). A
  * given, historical version of a well's reagent is obtained via
  * {@link Well#getReagents()}, using a {@link LibraryContentsVersion} as the
