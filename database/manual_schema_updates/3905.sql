@@ -20,9 +20,12 @@ alter table result_value_type drop column is_positive_indicator;
 alter table result_value_type drop column positive_indicator_type;
 
 
+/* note that this is destructive operation if the result_value records,
+for a given result_value_type, happened to have varying decimal
+precisions; all result_value records for the same result_value_type
+will now use the maximum precision found within that result_value_type */
 update result_value_type set decimal_places = (select max(numeric_decimal_precision) from result_value where result_value_type_id = result_value_type.result_value_type_id);
 update result_value_type set decimal_places = 3 where decimal_places is null;
-
 alter table result_value drop column numeric_decimal_precision;
 
 alter table result_value_type alter data_type set not null;

@@ -25,7 +25,7 @@ delete from screensaver_user_role where screensaver_user_role in ('medicinalChem
 
 /* update users' facility roles "smallMoleculeScreener" and "rnaiScreener" based upon
 existence of relationship with respective screen types */
-
+/* TODO: this will DELETE users' "smallMoleculeScreener" and "rnaiScreener" facility usage roles if the user does is not associated with a small molecule or RNAi screen, repsectively.  Do not run the following SQL statements if you would like to preserve these roles as they exist in your database.  Note however, the Screensaver itself will now add and remove these two roles if/when a user is associated or dissociated with a screen. */
 insert into screening_room_user_facility_usage_role (screening_room_user_id, facility_usage_role)
 select screensaver_user_id, 'smallMoleculeScreener' from screening_room_user sru where 
 exists (select * from screen where lab_head_id = sru.screensaver_user_id and screen_type = 'Small Molecule')

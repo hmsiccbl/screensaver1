@@ -32,7 +32,7 @@ alter table assay_well
 
 create sequence assay_well_id_seq;
 
-/* note: assay_well_type *should* be same for a grouping of rows, but ICCB-L legacy data does not comply */
+/* note: assay_well_type *should* be same for a given row of result values, but ICCB-L legacy data does not comply, requiring us to use an aggregate query with 'min(assay_well_type)' */
 insert into assay_well (assay_well_id, version, well_id, assay_well_type, is_positive, screen_result_id) 
 select nextval('assay_well_id_seq'), 0, well_id, min(assay_well_type), bool_or(is_positive), screen_result_id from result_value rv 
 join result_value_type rvt using(result_value_type_id) join screen_result sr using(screen_result_id) 
