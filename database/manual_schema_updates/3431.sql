@@ -456,24 +456,24 @@ drop table compound_nsc_number;
 drop index well_reagent_id_index;
 drop index well_gene_id_index;
 
-/* TODO: migrate data in this table before dropping */
+/* TODO: only ICCB-Longwood is expected to have used this table; however, if your database happens to contain data in this table, determine how you want to migrate this data before dropping the table */
 /*drop table gene_old_entrezgene_id cascade*/
 
-/* TODO: migrate data in this table before dropping */
+/* TODO: only ICCB-Longwood is expected to have used this table; however, if your database happens to contain data in this table, determine how you want to migrate this data before dropping the table */
 /*drop table gene_old_entrezgene_symbol cascade*/
 
-/* TODO: migrate data in this table before dropping */
+/* TODO: only ICCB-Longwood is expected to have used this table; however, if your database happens to contain data in this table, determine how you want to migrate this data before dropping the table */
 /*drop table silencing_reagent_non_targetted_genbank_accession_number cascade*/
 
 drop table well_silencing_reagent_link cascade;
 
-/* TODO: ensure all RNAi wells that had a gene have a reagent: 
+/* TODO: run this to ensure all RNAi wells that had a gene have a reagent: 
   select l.library_name, count(*) from well w join library l using(library_id) 
   where l.screen_type = 'RNAi' and w.gene_id is not null and w.reagent_id is null 
   group by l.library_name;
 */
 
-/* TODO: ensure all Small Molecule wells that had a smiles have a reagent: 
+/* TODO: run this to ensure all Small Molecule wells that had a smiles have a reagent: 
   select l.library_name, count(*) from well w join library l using(library_id) 
   where l.screen_type = 'Small Molecule' and w.smiles is not null and w.reagent_id is null 
   group by l.library_name;
@@ -493,10 +493,15 @@ drop table gene_genbank_accession_number_old;
 drop table annotation_value_old; 
 drop table study_reagent_link_old;
 
-/* TODO: this is only a heuristic; update as necessary to work with your facility's libraries */
+/* This flags each RNAi "pool" library explicitly as being a pool library. */
+/* TODO: this is only a heuristic; update as necessary to work with your facility's libraries;  */
 update library set is_pool = true where screen_type = 'RNAi' and library_name like '%Pool%';
 
-/* create pool-to-duplex mapping (works for ICCB-L RNAI libraries only, due to dependency on specific library naming conventions) */
+/* create pool-to-duplex mapping */
+/* TOOD: if you would like your database to reflect the mapping
+between RNAi duplex and pool wells, write the appropriate SQL; the
+following commented-out statements work for ICCB-L RNAi libraries
+only, due to dependency on specific library naming conventions) */
 /*
 insert into silencing_reagent_duplex_wells (silencing_reagent_id, well_id)
 select psr.reagent_id, dw.well_id

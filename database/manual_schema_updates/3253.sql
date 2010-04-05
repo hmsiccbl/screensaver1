@@ -30,7 +30,7 @@ alter table screen_funding_support_link
     foreign key (funding_support_id) 
     references funding_support;
 
-/* ICCB-L specific!  Modify as necessary for your facility's data */
+/* TODO: ICCB-L specific!  Modify as necessary for your facility's data.  If your screens specified any of these funding supports, you will need to insert at those that are in use.  */
 insert into funding_support (funding_support_id, value) values (nextval('funding_support_id_seq'), 'Other');
 insert into funding_support (funding_support_id, value) values (nextval('funding_support_id_seq'), 'Unspecified');
 insert into funding_support (funding_support_id, value) values (nextval('funding_support_id_seq'), 'Clardy Grants');
