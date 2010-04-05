@@ -6,6 +6,7 @@
 # authentication can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog).  
 # BASIC mode is useful during development, to avoid repeating the login step between Tomcat restarts.
 servlet.authentication.method=FORM
+app.name=screensaver
 
 # TODO: set your Tomcat installation directory here.  
 appserver.dir=/usr/local/tomcat
@@ -24,9 +25,7 @@ debug=false
 ### run-time properties
 
 screensaver.ui.application_name=Screensaver
-
-screensaver.ui.version=2009-02-26
-
+screensaver.ui.version=2010-04
 # build number placeholder value, below, will be replaced by Ant "build" target at build/deploy time, using the build.number property
 screensaver.ui.build_number=BUILD_NUMBER
 
