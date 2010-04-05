@@ -25,10 +25,9 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import jxl.write.WriteException;
-
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy;
+import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
@@ -37,9 +36,8 @@ import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
-import edu.harvard.med.screensaver.io.workbook2.Workbook;
-import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -55,12 +53,9 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
-import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
@@ -642,21 +637,8 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   @Override
   public void initializeEntity(CherryPickRequest cherryPickRequest)
   {
-    getDao().needReadOnly(cherryPickRequest.getScreen(), Screen.labActivities.getPath());
-    getDao().needReadOnly(cherryPickRequest.getScreen(), Screen.cherryPickRequests.getPath());
-    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(CherryPickLiquidTransfer.performedBy).getPath());
-    getDao().needReadOnly(cherryPickRequest,
-                          CherryPickRequest.screenerCherryPicks.to(ScreenerCherryPick.screenedWell).to(Well.deprecationActivity).getPath(),
-                          CherryPickRequest.screenerCherryPicks.to(ScreenerCherryPick.screenedWell).to(Well.latestReleasedReagent).getPath());
-    getDao().needReadOnly(cherryPickRequest,
-                          CherryPickRequest.labCherryPicks.to(LabCherryPick.assayPlate).getPath(),
-                          CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell).to(Well.latestReleasedReagent).getPath(),
-                          CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments).to(WellVolumeAdjustment.copy).getPath());
-    getDao().needReadOnly(cherryPickRequest,
-                          CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks).getPath());
-    getDao().needReadOnly(cherryPickRequest,
-                          CherryPickRequest.cherryPickScreenings.getPath());
-    getDao().needReadOnly(cherryPickRequest, "cherryPickAssayPlates.cherryPickLiquidTransfer.performedBy");
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.screenerCherryPicks.getPath());
+    getDao().needReadOnly(cherryPickRequest, CherryPickRequest.labCherryPicks.to(LabCherryPick.wellVolumeAdjustments).getPath());
   }
   
   @Override
@@ -731,16 +713,29 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   public DataModel getAssayPlatesDataModel()
   {
     if (_assayPlatesDataModel == null) {
-      List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
-      Collection<CherryPickAssayPlate> assayPlates =
-        _showFailedAssayPlates ? getEntity().getCherryPickAssayPlates() :
-          getEntity().getActiveCherryPickAssayPlates();
-      for (CherryPickAssayPlate assayPlate : assayPlates) {
-        AssayPlateRow row = new AssayPlateRow(assayPlate);
-        row.setSelected(_selectAllAssayPlates);
-        rows.add(row);
-      }
-      _assayPlatesDataModel = new ListDataModel(rows);
+      getDao().doInTransaction(new DAOTransaction() {
+        @Override
+        public void runTransaction()
+        {
+          CherryPickRequest cpr = getDao().reloadEntity(getEntity(), true);
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(CherryPickLiquidTransfer.performedBy).getPath());
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreening).to(Activity.performedBy).getPath());
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy).getPath());
+          getDao().needReadOnly(cpr, CherryPickRequest.screen.getPath());
+          // HACK: following reln is (only) needed by validateSelectedAssayPlates() in LIQUID_TRANSFER case 
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks).getPath());
+          List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
+          Collection<CherryPickAssayPlate> assayPlates =
+            _showFailedAssayPlates ? cpr.getCherryPickAssayPlates() :
+              cpr.getActiveCherryPickAssayPlates();
+          for (CherryPickAssayPlate assayPlate : assayPlates) {
+            AssayPlateRow row = new AssayPlateRow(assayPlate);
+            row.setSelected(_selectAllAssayPlates);
+            rows.add(row);
+          }
+          _assayPlatesDataModel = new ListDataModel(rows);
+        }
+      });
     }
     return _assayPlatesDataModel;
   }
@@ -999,18 +994,6 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   }
 
   @UICommand
-  public String downloadCherryPickRequest() throws WriteException, IOException
-  {
-    jxl.Workbook workbook = _cherryPickRequestExporter.exportCherryPickRequest(getEntity());
-    JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                       Workbook2Utils.toInputStream(workbook),
-                                       getEntity().getClass().getSimpleName() + "-" + getEntity().getCherryPickRequestNumber() + ".xls",
-                                       Workbook.MIME_TYPE);
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-
-  @UICommand
   @Transactional
   public String createNewCherryPickRequestForUnfulfilledCherryPicks()
   {
@@ -1140,5 +1123,9 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     _wellCopyVolumesBrowser.searchWellsForCherryPickRequest(getEntity(), forUnfulfilledOnly);
     return BROWSE_WELL_VOLUMES;
   }
-  
+
+  public boolean isSourcePlateReloadRequired()
+  {
+    return _cherryPickRequestPlateMapper.getAssayPlatesRequiringSourcePlateReload(getEntity()).size() > 0;
+  }
 }

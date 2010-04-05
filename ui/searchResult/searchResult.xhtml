@@ -158,9 +158,11 @@
 								rowIndexVar="itemIndex" rowCountVar="itemCount">
 								<t:commandLink disabled="#{! column.commandLink}"
 									action="#{searchResults.cellAction}">
-                  <t:outputText id="text" value="#{item}"
+                  <t:outputText id="text" rendered="#{column.columnType.name != 'IMAGE'}" value="#{item}"
                     converter="#{column.converter}"
                     styleClass="dataText" />
+                  <ss:graphicImage url="#{searchResults.cellValue}"
+                    rendered="#{column.columnType.name == 'IMAGE'}" />
                 </t:commandLink>
                 <t:outputText value=", "
                   rendered="#{itemIndex &lt; itemCount - 1}"

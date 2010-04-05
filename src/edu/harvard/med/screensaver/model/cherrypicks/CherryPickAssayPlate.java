@@ -121,6 +121,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
 
   public static final RelationshipPath<CherryPickAssayPlate> cherryPickRequest = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickRequest");
   public static final RelationshipPath<CherryPickAssayPlate> cherryPickLiquidTransfer = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickLiquidTransfer");
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickScreening = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickScreening");
   public static final RelationshipPath<CherryPickAssayPlate> labCherryPicks = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "labCherryPicks");
 
   // private instance data

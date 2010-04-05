@@ -21,27 +21,18 @@ import jxl.biff.EmptyCell;
 import jxl.write.Label;
 import jxl.write.Number;
 import jxl.write.WritableCell;
+import jxl.write.WritableImage;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
 import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.util.StringUtils;
 
-import org.apache.log4j.Logger;
+import com.google.common.base.Joiner;
 
 public class Workbook2Utils
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(Workbook2Utils.class);
-
-
-  // instance data members
-
-  // public constructors and methods
-
   public static void writeRow(WritableSheet sheet, int iRow, Object... fieldValues) throws RowsExceededException, WriteException
   {
     int iCol = 0;
@@ -63,12 +54,18 @@ public class Workbook2Utils
       cell = new Number(iCol, iRow, ((java.lang.Number) fieldValue).doubleValue());
     }
     else if (fieldValue instanceof Collection) {
-      cell = new Label(iCol, iRow, StringUtils.makeListString((Collection<?>) fieldValue, DataExporter.LIST_DELIMITER + " "));
+      cell = new Label(iCol, iRow, Joiner.on(DataExporter.LIST_DELIMITER + " ").join((Iterable<?>) fieldValue));
     }
     else {
       cell = new Label(iCol, iRow, fieldValue.toString());
     }
     sheet.addCell(cell);
+  }
+  
+  public static void writeImage(WritableSheet sheet, int iRow, int iCol, byte[] pngImage) throws WriteException, RowsExceededException
+  {
+    WritableImage writableImage = new WritableImage(iCol, iRow, 1, 1, pngImage);
+    sheet.addImage(writableImage);
   }
 
   public static InputStream toInputStream(Workbook workbook) throws IOException, WriteException
@@ -79,9 +76,5 @@ public class Workbook2Utils
     workbook2.close();
     return new BufferedInputStream(new ByteArrayInputStream(out.toByteArray()));
   }
-
-
-  // private methods
-
 }
 

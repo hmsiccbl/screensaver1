@@ -116,6 +116,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private ScreenDataSharingLevel _lastDataSharingLevel;
   private LabHead _lastLabHead;
   private ScreeningRoomUser _lastLeadScreener;
+  private LocalDate _lastMinAllowedDataPrivacyExpirationDate;
+  private LocalDate _lastMaxAllowedDataPrivacyExpirationDate;
 
 
   /**
@@ -188,6 +190,9 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _screenUpdateSearchResults.searchForParentEntity(screen);
     _labActivitySearchResults.searchLabActivitiesForScreen(screen);
     _cherryPickRequestSearchResults.searchForScreen(screen);
+    _lastMinAllowedDataPrivacyExpirationDate = screen.getMinAllowedDataPrivacyExpirationDate();
+    _lastMaxAllowedDataPrivacyExpirationDate = screen.getMaxAllowedDataPrivacyExpirationDate();
+    
   }
 
   private void initalizeAttachedFiles(Screen screen)
@@ -498,6 +503,19 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       String newLeadScreener = NullSafeUtils.toString(getEntity().getLeadScreener(), ScreensaverUser.ToDisplayStringFunction);
       recordUpdateActivity("changed lead screener from '" + lastLeadScreener + "' to '" + newLeadScreener + "'");
     }
+    
+    if (!!!NullSafeUtils.nullSafeEquals(_lastMinAllowedDataPrivacyExpirationDate, getEntity().getMinAllowedDataPrivacyExpirationDate())) {
+      String lastDate = NullSafeUtils.toString(_lastMinAllowedDataPrivacyExpirationDate);
+      String newDate = NullSafeUtils.toString(getEntity().getMinAllowedDataPrivacyExpirationDate());
+      recordUpdateActivity("changed Earliest Allowed Data Privacy Expiration Date'" + lastDate + "' to '" + newDate + "'");
+    }
+    
+    if (!!!NullSafeUtils.nullSafeEquals(_lastMaxAllowedDataPrivacyExpirationDate, getEntity().getMaxAllowedDataPrivacyExpirationDate())) {
+      String lastDate = NullSafeUtils.toString(_lastMaxAllowedDataPrivacyExpirationDate);
+      String newDate = NullSafeUtils.toString(getEntity().getMaxAllowedDataPrivacyExpirationDate());
+      recordUpdateActivity("changed Latest Allowed Data Privacy Expiration Date'" + lastDate + "' to '" + newDate + "'");
+    }
+    
     super.recordUpdateActivity();
   }
 
@@ -521,6 +539,23 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                                     _pinTransferApprovalDate,
                                     _pinTransferApprovalComments);
     }
+  }
+  
+  @Override
+  protected boolean validateEntity(Screen screen)
+  {
+    LocalDate max = screen.getMaxAllowedDataPrivacyExpirationDate();
+    LocalDate min = screen.getMinAllowedDataPrivacyExpirationDate();
+    
+    //TODO: consider using a Comparator Utility class! - sde4
+    if(max != null && min != null)
+    {
+      if(max.compareTo(min) < 0) {
+        showMessage("screens.dataPrivacyExpirationDateOrderError", min, max);
+        return false;
+      }
+    }
+    return super.validateEntity(screen);
   }
 
   @UICommand

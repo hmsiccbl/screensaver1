@@ -359,4 +359,10 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
     log.info("method not implemented: saveScreenResultWellLinkTable");
   }
+  
+  @Override
+  public int countExperimentalWells(int startPlate, int endPlate)
+  {
+    return 0;
+  }
 }

@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.RelatedProperty;
@@ -451,6 +452,11 @@ public class ModelIntrospectionUtil extends TestCase
     assertTrue("method must exist: " + fullMethodName,
                requirement != ExistenceRequirement.REQUIRED || foundMethod != null);
     return foundMethod;
+  }
+
+  public static boolean isDerivedProperty(PropertyDescriptor propertyDescriptor)
+  {
+    return hasAnnotation(Derived.class, propertyDescriptor);
   }
 
 //  public static boolean isContainmentRelationship(Class<? extends AbstractEntity> beanClass,

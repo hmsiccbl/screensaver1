@@ -70,4 +70,6 @@ public interface LibrariesDAO
 
   public Collection<String> findAllVendorNames();
 
+  public int countExperimentalWells(int startPlate, int endPlate);
+
 }

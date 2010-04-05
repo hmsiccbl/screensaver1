@@ -54,8 +54,14 @@
 
     <!-- LibraryScreening properties -->
 
+    <ss:property id="screenedExperimentalWellCount"
+      label="# Experimental Wells Screened"
+      value="#{activityViewer.entity.screenedExperimentalWellCount}"
+      description="The number of experimental library wells that were screened during this activity (ignoring replicates)"
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.editMode}" />
+
     <ss:property id="numberOfReplicates"
-      label="No. of Replicates Screened"
+      label="# Replicates Screened"
       value="#{activityViewer.entity.numberOfReplicates}"
       description="The number of replicates screened"
       editable="#{activityViewer.editMode}" editWidth="2"
@@ -103,14 +109,14 @@
 
     <ss:property id="screenerProvidedPlates" type="Boolean"
       submitOnChange="true" label="For screener-provided plates"
-      value="#{activityViewer.entity.special}"
+      value="#{activityViewer.entity.forScreenerProvidedPlates}"
       description="Whether the library screening was performed on plates provided by the screener"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening'}"
       editable="#{activityViewer.editMode &amp;&amp; activityViewer.libraryAndPlatesScreenedDataModel.rowCount == 0}" />
 
     <ss:property id="libraryPlatesScreened" label="Library Plates Screened"
       description="Plates screened by this library activity"
-      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.entity.special}">
+      rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.entity.forScreenerProvidedPlates}">
       <ui:define name="data">
         <ss:collectionTable id="platesScreened"
           editable="#{activityViewer.editMode}"

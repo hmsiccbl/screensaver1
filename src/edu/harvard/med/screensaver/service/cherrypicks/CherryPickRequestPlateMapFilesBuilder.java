@@ -88,13 +88,16 @@ public class CherryPickRequestPlateMapFilesBuilder
   // instance data members
 
   private GenericEntityDAO genericEntityDao;
+  private CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
 
 
   // public constructors and methods
 
-  public CherryPickRequestPlateMapFilesBuilder(GenericEntityDAO dao)
+  public CherryPickRequestPlateMapFilesBuilder(GenericEntityDAO dao,
+                                               CherryPickRequestPlateMapper cherryPickRequestPlateMapper)
   {
     this.genericEntityDao = dao;
+    this.cherryPickRequestPlateMapper = cherryPickRequestPlateMapper;
   }
 
 
@@ -177,7 +180,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     }
 
     Map<CherryPickAssayPlate,Integer> platesRequiringReload =
-      cherryPickRequest.getAssayPlatesRequiringSourcePlateReload();
+      cherryPickRequestPlateMapper.getAssayPlatesRequiringSourcePlateReload(cherryPickRequest);
     if (platesRequiringReload.size() > 0) {
       writer.println("WARNING: Some cherry pick plates will be created from the same source plate!");
       writer.println("You will need to reload one or more source plates for each of the following cherry pick plates:");

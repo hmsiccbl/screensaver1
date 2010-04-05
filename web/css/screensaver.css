@@ -122,7 +122,7 @@ hr {
   color: #000000;
   border-style: none;
   /* note: IE doesn't support border-spacing, seems to default to 1 */
-  border-spacing: 1px;
+  border-spacing: 0px 1px
   /*width: 100%;*/
 }
 
@@ -182,7 +182,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
   vertical-align: bottom;
 }
 
-.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader {
+.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader
+  {
   font-size: small;
 }
 
@@ -219,7 +220,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   display: none;
 }
 
-.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.fixedColumn100,.fixedColumn200,.fixedColumn300,.fixedColumn400,.greedyColumn,.collectionTableColumn
+.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.fixedColumn100,.fixedColumn200,.fixedColumn300,.greedyColumn,.collectionTableColumn
   {
   vertical-align: top;
   border-style: none;
@@ -229,8 +230,9 @@ a.heatMapValue:link,a.heatMapValue:visited {
   padding-right: 3px;
 }
 
-.fixedColumn400 {
-  width: 400px;
+/* we want table columns to preserve some internal, right-hand space for readability */
+.column,.keyColumn,.numericColumn,.textColumn,.fixedColumn100,.fixedColumn200,.fixedColumn300,.greedyColumn {
+  padding-right: 16px;
 }
 
 .fixedColumn300 {
@@ -296,6 +298,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .annotationTable {
+  
 }
 
 .annotationTable .greedyColumn {
@@ -320,7 +323,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   font-size: small;
   font-weight: bold;
   color: black;
-  background-color: #f0f0f0;
+  background-color: #e0e0e0;
   padding-left: 1px;
   padding-right: 1px;
   vertical-align: top;
@@ -328,6 +331,11 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .tableHeader {
   text-align: left;
+  /* this should match the padding-right used for the table columns (see above) */
+  padding-right: 16px;
+  border-right: 2px;
+  border-right-style: solid;
+  border-right-color: #ffffff;
 }
 
 .heatMapTableHeader {
@@ -345,7 +353,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .row2 {
-  background-color: #f8f8f8;
+  background-color: #f0f0f0;
 }
 
 .scroller {

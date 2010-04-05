@@ -297,6 +297,15 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     }
     catch (UnexpectedRollbackException e) { /* why are we getting this? */}
   }
+  
+  public void testCountExperimentalWells()
+  {
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 3);
+    genericEntityDao.persistEntity(library);
+    
+    assertEquals(384 * 3, librariesDao.countExperimentalWells(1000, 1003));
+    assertEquals(384, librariesDao.countExperimentalWells(1002, 1002));
+  }
 
   public void testCreateRNaiLibraryContentsInclOwner()
   {

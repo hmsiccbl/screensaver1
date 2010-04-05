@@ -32,6 +32,7 @@ insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) s
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screensAdmin';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'billingAdmin';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'screenResultsAdmin';
+insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'dataSharingLevelAdmin';
 insert into screensaver_user_role (screensaver_user_id, screensaver_user_role) select currval('screensaver_user_id_seq'), 'cherryPickRequestsAdmin';
 
 

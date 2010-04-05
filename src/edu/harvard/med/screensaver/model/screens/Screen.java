@@ -47,9 +47,11 @@ import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
+import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -67,6 +69,7 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 import org.apache.log4j.Logger;
@@ -160,7 +163,12 @@ public class Screen extends Study implements AttachedFilesEntity
   private AdministrativeActivity _pinTransferApprovalActivity;
   private Set<CherryPickRequest> _cherryPickRequests = new HashSet<CherryPickRequest>();
   private ScreenDataSharingLevel _dataSharingLevel;
+  private LocalDate _minAllowedDataPrivacyExpirationDate;
+  private LocalDate _maxAllowedDataPrivacyExpirationDate;
   private LocalDate _dataPrivacyExpirationDate;
+  private LocalDate _dataPrivacyExpirationNotifiedDate;
+  private int _screenedExperimentalWellCount;
+  private int _uniqueScreenedExperimentalWellCount;
 
 
   // public constructors
@@ -311,8 +319,7 @@ public class Screen extends Study implements AttachedFilesEntity
       _labHead = labHead;
       return;
     }
-    if ((labHead == null && _labHead == null) ||
-      (labHead != null && labHead.equals(_labHead))) {
+    if (NullSafeUtils.nullSafeEquals(labHead, _labHead)) {
       return;
     }
     if (_labHead != null) {
@@ -456,6 +463,28 @@ public class Screen extends Study implements AttachedFilesEntity
   public ScreenResult getScreenResult()
   {
     return _screenResult;
+  }
+  
+  @Derived
+  public int getScreenedExperimentalWellCount()
+  {
+    return _screenedExperimentalWellCount;
+  }
+
+  public void setScreenedExperimentalWellCount(int screenedExperimentalWellCount)
+  {
+    _screenedExperimentalWellCount = screenedExperimentalWellCount;
+  }
+
+  @Derived
+  public int getUniqueScreenedExperimentalWellCount()
+  {
+    return _uniqueScreenedExperimentalWellCount;
+  }
+
+  public void setUniqueScreenedExperimentalWellCount(int uniqueScreenedExperimentalWellCount)
+  {
+    _uniqueScreenedExperimentalWellCount = uniqueScreenedExperimentalWellCount;
   }
 
   /**
@@ -1705,9 +1734,103 @@ public class Screen extends Study implements AttachedFilesEntity
 
   public void setDataPrivacyExpirationDate(LocalDate dataPrivacyExpirationDate)
   {
+    if(dataPrivacyExpirationDate == null) {
+      if(_maxAllowedDataPrivacyExpirationDate != null ||
+        _minAllowedDataPrivacyExpirationDate != null) {
+        throw new DataModelViolationException("null value not allowed for condition if(maxAllowedDataPrivacyExpirationDate != null || minAllowedDataPrivacyExpirationDate != null)");
+      }
+    }
+  
+    LocalDate min = _minAllowedDataPrivacyExpirationDate;
+    LocalDate max = _maxAllowedDataPrivacyExpirationDate;
+    if( max != null 
+      && dataPrivacyExpirationDate.compareTo(max) > 0 )
+    {
+      dataPrivacyExpirationDate = max;
+    }
+    else if( min != null
+      && dataPrivacyExpirationDate.compareTo(min) < 0 )
+    {
+      dataPrivacyExpirationDate = min;
+    } 
     _dataPrivacyExpirationDate = dataPrivacyExpirationDate;
   }
   
+  public void setMinAllowedDataPrivacyExpirationDate(LocalDate minAllowedDataPrivacyExpirationDate)
+  {
+    _minAllowedDataPrivacyExpirationDate = minAllowedDataPrivacyExpirationDate;
+    if(minAllowedDataPrivacyExpirationDate == null) return;
+    if( _dataPrivacyExpirationDate  == null 
+      || _dataPrivacyExpirationDate.compareTo(minAllowedDataPrivacyExpirationDate) < 0 )
+    {
+      _dataPrivacyExpirationDate = minAllowedDataPrivacyExpirationDate;
+    }
+  }
+
+  @Column
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  public LocalDate getMinAllowedDataPrivacyExpirationDate()
+  {
+    return _minAllowedDataPrivacyExpirationDate;
+  }
+
+  public void setMaxAllowedDataPrivacyExpirationDate(LocalDate maxAllowedDataPrivacyExpirationDate)
+  {
+    _maxAllowedDataPrivacyExpirationDate = maxAllowedDataPrivacyExpirationDate;
+    if(maxAllowedDataPrivacyExpirationDate == null) return;
+    if( _dataPrivacyExpirationDate  == null 
+      || _dataPrivacyExpirationDate.compareTo(maxAllowedDataPrivacyExpirationDate) > 0 )
+    {
+      _dataPrivacyExpirationDate = maxAllowedDataPrivacyExpirationDate;
+    }
+  }
+
+  @Column
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  public LocalDate getMaxAllowedDataPrivacyExpirationDate()
+  {
+    return _maxAllowedDataPrivacyExpirationDate;
+  }
+  
+  /**
+   * Call this to set the {@link Screen#getDataPrivacyExpirationDate()} after the 
+   * {@link Screen#getMinAllowedDataPrivacyExpirationDate()} and the {@link Screen#getMaxAllowedDataPrivacyExpirationDate()}
+   * have been set.<br>
+   */
+  private void updateDataPrivacyExpirationDate()
+  {
+    LocalDate requestedDate = getDataPrivacyExpirationDate();
+    LocalDate max = getMaxAllowedDataPrivacyExpirationDate();
+    LocalDate min = getMinAllowedDataPrivacyExpirationDate();
+        
+    if( requestedDate.compareTo(max) > 0 & max != null )
+    {
+      _dataPrivacyExpirationDate = max;
+    }
+    else if(min != null
+      && requestedDate.compareTo(min) < 0 )
+    {
+      _dataPrivacyExpirationDate = min;
+    }else {
+      _dataPrivacyExpirationDate = requestedDate;
+    }
+  }
+
+  public void setDataPrivacyExpirationNotifiedDate(LocalDate dataPrivacyExpirationNotifiedDate)
+  {
+    _dataPrivacyExpirationNotifiedDate = dataPrivacyExpirationNotifiedDate;
+  }
+
+  /**
+   * The date at which a dataPrivacyExpiration email was sent to Screensaver Users associated with this Screen.
+   * @return
+   */
+  @Column
+  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  public LocalDate getDataPrivacyExpirationNotifiedDate()
+  {
+    return _dataPrivacyExpirationNotifiedDate;
+  }
   
 
 }

@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.ui.table.column;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -72,7 +73,11 @@ public enum ColumnType {
   INTEGER_SET(false,
               new IntegerConverter(),
               Sets.difference(Operator.COMPARABLE_OPERATORS, Operator.NEGATED_OPERATORS),
-              Operator.EQUAL);
+              Operator.EQUAL),
+  IMAGE(false,
+        new NoOpStringConverter(), 
+        Collections.<Operator>emptySet(),
+        null);
 
   private Converter _converter = NoOpStringConverter.getInstance();
   private boolean _isNumeric;

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.iccbl.screensaver.policy;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -97,7 +98,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   private Set<Screen> _publicScreens;
   private HashMultimap<String,Screen> _screensForFundingSupport = HashMultimap.create();
   private Set<Screen> _othersVisibleSmallMoleculeScreens;
-  private Set<Screen> _smallMoleculeScreensWithMutualPositives;
+  private Set<Screen> _smallMoleculeLevel1AndLevel2Screens;
   private Set<Screen> _mutualSmallMoleculeScreens;
   private Set<Well> _smallMoleculeMutualPositiveWells;
   private Set<Integer> _restrictedReagentLibraryPlates;
@@ -347,7 +348,6 @@ public class WebDataAccessPolicy implements DataAccessPolicy
       return true;
     }
     if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-      // TODO: handle expired SM DSL screen (treat as level 1)
       boolean isOthersVisibleScreen = findOthersVisibleSmallMoleculeScreens().contains(screen);
       if (isOthersVisibleScreen) {
         log.debug("screen is " + screen.getScreenNumber() + " visible: \"small molecule screen shared by others\"");
@@ -366,14 +366,10 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   {
     if (_othersVisibleSmallMoleculeScreens == null) {
       _othersVisibleSmallMoleculeScreens = Sets.newHashSet();
-      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS)) {
+      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES)) { // note: this implies level 1 users too! 
         if (userHasQualifiedDepositedSmallMoleculeData()) {
-          _othersVisibleSmallMoleculeScreens.addAll(findMutualSmallMoleculeScreens());
-          _othersVisibleSmallMoleculeScreens.addAll(findSmallMoleculeScreensWithMutualPositives());
+          _othersVisibleSmallMoleculeScreens.addAll(findAllSmallMoleculeLevel1AndLevel2Screens());
         }
-      }
-      else if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES)) {
-        _othersVisibleSmallMoleculeScreens.addAll(findSmallMoleculeScreensWithMutualPositives());
       }
     }
     return _othersVisibleSmallMoleculeScreens;
@@ -382,7 +378,13 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   private boolean userHasQualifiedDepositedSmallMoleculeData()
   {
     for (Screen myScreen : findMyScreens()) {
-      if (myScreen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_SCREENS) <= 0) { // verify it's "qualified" by virtue of being a level 0 or 1 screen
+      // level 1 users must have at least one level 0 or 1 screen to qualify (i.e., a level 1 user does NOT qualify with only a level 2 screen)
+      // level 2 users must have at least one level 0, 1, or 2 screen to qualify
+      ScreenDataSharingLevel maxQualifyingScreenDataSharingLevel = ScreenDataSharingLevel.MUTUAL_POSITIVES;
+      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS)) {
+        maxQualifyingScreenDataSharingLevel = ScreenDataSharingLevel.MUTUAL_SCREENS;
+      }
+      if (myScreen.getDataSharingLevel().compareTo(maxQualifyingScreenDataSharingLevel) <= 0) {
         if (myScreen.getScreenResult() != null) {
           return true;
         }
@@ -422,52 +424,26 @@ public class WebDataAccessPolicy implements DataAccessPolicy
     return _smallMoleculeMutualPositiveWells;
   }
 
-  private Set<Screen> findSmallMoleculeScreensWithMutualPositives()
+  private Set<Screen> findAllSmallMoleculeLevel1AndLevel2Screens()
   {
-    if (_smallMoleculeScreensWithMutualPositives == null) { 
-      _smallMoleculeScreensWithMutualPositives = Sets.newHashSet();
-////      _mutualPositivesSmallMoleculeScreens.addAll(
-////                                                  _dao.findEntitiesByHql(Screen.class,
-////                                                                         "select distinct s2 " +
-////                                                                         "from AssayWell aw1 join aw1.screenResult sr1 join sr1.screen s1, " +
-////                                                                         "AssayWell aw2 join aw2.screenResult sr2 join sr2.screen s2 " + 
-////                                                                         "where aw2.libraryWell.id = aw1.libraryWell.id and aw2.positive = true and aw1.positive = true and " +
-////                                                                         "s1 in (?) and " +
-////                                                                         "s2.screenType = ? and s1.screenType = ?",
-////                                                                         findMyScreens(),
-////                                                                         /*Iterables.transform(findMyScreens(), 
-////                                                                                             new Function<Screen,Integer>() { public Integer apply(Screen screen) { return screen.getScreenId(); } }),*/
-////                                                                         ScreenType.SMALL_MOLECULE,
-////                                                                         ScreenType.SMALL_MOLECULE));
-      if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES)) {
-        _smallMoleculeScreensWithMutualPositives.addAll(_dao.<Screen>runQuery(new Query() { 
-          public List execute(Session session)
-          {
-            // TODO: can probably optimize by using ANY operator to determine if at least one mutual positive hit occurs in another screen
-            return
-            new HqlBuilder().
-            select("s2").distinctProjectionValues().
-            from(AssayWell.class, "aw1").from("aw1", AssayWell.screenResult.getPath(), "sr1", JoinType.INNER).from("sr1", ScreenResult.screen.getPath(), "s1", JoinType.INNER).
-            from(AssayWell.class, "aw2").from("aw2", AssayWell.screenResult.getPath(), "sr2", JoinType.INNER).from("sr2", ScreenResult.screen.getPath(), "s2", JoinType.INNER).
-            where("aw1", "libraryWell", Operator.EQUAL, "aw2", "libraryWell").
-            where("aw1", "positive", Operator.EQUAL, Boolean.TRUE).
-            where("aw2", "positive", Operator.EQUAL, Boolean.TRUE).
-            where("s1", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
-            where("s2", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
-            where("s1", Operator.NOT_EQUAL, "s2"). // don't consider my screens as "others" screens
-            whereIn("s1", findMyScreens()).
-            whereIn("s1", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.SHARED, ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
-            whereIn("s2", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
-            toQuery(session, true).list();
-          }
-        }));
-        if (log.isDebugEnabled()) {
-          log.debug("others' small molecule screens with mutual positives: " + 
-                    Joiner.on(", ").join(Iterables.transform(_smallMoleculeScreensWithMutualPositives, Screen.ToScreenNumberFunction)));
+    if (_smallMoleculeLevel1AndLevel2Screens == null) { 
+      _smallMoleculeLevel1AndLevel2Screens = Sets.newHashSet();
+      _smallMoleculeLevel1AndLevel2Screens.addAll(_dao.<Screen>runQuery(new Query() { 
+        public List execute(Session session)
+        {
+          org.hibernate.Query query = session.createQuery("select distinct s from Screen s where s.screenType = :screenType and s.dataSharingLevel in (:dataSharingLevels) and s not in (:myScreens)");
+          query.setParameter("screenType", ScreenType.SMALL_MOLECULE);
+          query.setParameterList("dataSharingLevels", Sets.newHashSet(ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS));
+          query.setParameterList("myScreens", findMyScreens());
+          return query.list();
         }
+      }));
+      if (log.isDebugEnabled()) {
+        log.debug("others' level 1 and level 2 small molecule screens : " + 
+                  Joiner.on(", ").join(Iterables.transform(_smallMoleculeLevel1AndLevel2Screens, Screen.ToScreenNumberFunction)));
       }
     }
-    return _smallMoleculeScreensWithMutualPositives;
+    return _smallMoleculeLevel1AndLevel2Screens;
   }
 
   private Set<Screen> findMutualSmallMoleculeScreens()
@@ -707,7 +683,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   public void update()
   {
     _screensForFundingSupport = HashMultimap.create();
-    _smallMoleculeScreensWithMutualPositives = null;
+    _smallMoleculeLevel1AndLevel2Screens = null;
     _smallMoleculeMutualPositiveWells = null;
     _mutualSmallMoleculeScreens = null;
     _myScreens = null;

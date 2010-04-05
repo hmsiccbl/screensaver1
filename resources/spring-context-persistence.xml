@@ -45,12 +45,25 @@
       value="0" />
   </bean>
 
+  <!--  Register EntityUpdater domain logic classes here.  See edu.harvard.med.screensaver.domainlogic package-info.html -->
+  <!-- TODO: implement a mechanism to auto-detect and register all EntityUpdater classes, rather than having to explicitly register them here -->
+  <bean id="entityUpdatersList" class="java.util.ArrayList">
+    <constructor-arg>
+      <list>
+        <bean class="edu.harvard.med.screensaver.domainlogic.ScreenEntityUpdater">
+          <constructor-arg ref="genericEntityDao"/>
+          <constructor-arg ref="screenDao"/>
+        </bean>
+        <bean class="edu.harvard.med.screensaver.domainlogic.LibraryScreeningEntityUpdater">
+          <constructor-arg ref="librariesDao"/>
+        </bean>
+      </list>
+    </constructor-arg>
+  </bean>
+
 
   <!-- Hibernate configuration -->
 
-  <bean
-    id="dataAccessPolicyInjectorPostLoadEventListener"
-    class="edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener" />
 
   <bean
     id="hibernateSessionFactory"
@@ -85,9 +98,24 @@
     </property>
     <property name="eventListeners">
       <map>
-        <entry
-          key="post-load"
-          value-ref="dataAccessPolicyInjectorPostLoadEventListener" />
+        <entry key="post-load">
+          <list>
+            <bean class="edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener" />
+            <bean class="edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector" />
+          </list>
+        </entry>
+        <entry key="save-update">
+          <list>
+            <bean class="org.hibernate.event.def.DefaultSaveOrUpdateEventListener" />
+            <bean class="edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector" />
+          </list>
+        </entry>
+        <entry key="merge">
+          <list>
+            <bean class="org.hibernate.event.def.DefaultMergeEventListener" />
+            <bean class="edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector" />
+          </list>
+        </entry>
       </map>
     </property>
   </bean>

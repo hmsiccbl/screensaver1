@@ -1,4 +1,6 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/data-sharing-levels/src/edu/harvard/med/screensaver/io/screenresults/ScreenResultImporter.java $
+// $HeadURL:
+// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/data-sharing-levels/src/edu/harvard/med/screensaver/io/screenresults/ScreenResultImporter.java
+// $
 // $Id: ScreenResultImporter.java 3655 2009-11-20 00:57:00Z seanderickson1 $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
@@ -9,137 +11,410 @@
 
 package edu.harvard.med.iccbl.screensaver.io.users;
 
-import java.util.Arrays;
-import java.util.Date;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
+import com.google.common.collect.Lists;
+
+import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
 import edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater;
-import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.EmailService;
 import edu.harvard.med.screensaver.util.Pair;
 
-public class SmallMoleculeUserExpirationUpdater extends CommandLineApplication
+/**
+* Locates the _not yet expired_ users who have a SMUA with an activation on or before the date given, and it expires them.<br/>
+* The date will be 2 years before the current time.<br/>
+* see {@link UserAgreementUpdater#findUsersWithOldSMAgreements(LocalDate)}
+ * 
+ */
+public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
 {
+  
+  UserAgreementUpdater _userAgreementUpdater = null;
+  
   public SmallMoleculeUserExpirationUpdater(String[] cmdLineArgs)
   {
     super(cmdLineArgs);
+    _userAgreementUpdater = (UserAgreementUpdater) getSpringBean("userAgreementUpdater");
   }
 
   private static Logger log = Logger.getLogger(SmallMoleculeUserExpirationUpdater.class);
 
-  public static final int SHORT_OPTION_INDEX = 0;
-  public static final int LONG_OPTION_INDEX = 1;
-  public static final int DESCRIPTION_INDEX = 2;
+  private static final String EXPIRATION_MESSAGE_TXT_LOCATION = "../../../../../../../userAgreementPrivacyExpirationMessage.txt";
+  private static final int DEFAULT_EXPIRATION_TIME_DAYS = 730;
 
-  static final String[] ADMIN_USER_ECOMMONS_ID_OPTION = {
-    "u",
-    "ecommons-id",
-    "the eCommons ID of the administrative user performing the load"
+  public static final String[] NOTIFY_DAYS_AHEAD_OPTION = 
+  { "notifyonlyindays", 
+    "days", 
+    "notify-only-days-ahead", 
+    "specify this option to notify only, # days ahead of the expiration date" 
   };
 
-  public static final String[] EMAIL_RECIPIENT_LIST_OPTION = {
-    "mr", 
-    "mail-recipient-list", 
-    "default to the admin user email, the recipient(s) of the message, delimited by \"" + EmailService.DELIMITER + "\"" 
+  public static final String[] EXPIRATION_TIME_OPTION = 
+  { "expireindays", 
+    "days", 
+    "expire-in-days", 
+    "(optional) time, in days, for the Small Molecule User Agreement to expire (using date of activation value).  Default value is " + DEFAULT_EXPIRATION_TIME_DAYS + " days." 
   };
 
+  public static final String[] EXPIRE_OPTION = 
+  { "expire", 
+    "", 
+    "expire-user-roles", 
+    "specify this option to expire the users who's Small Molecule User Agreement is dated more than " + EXPIRATION_TIME_OPTION[LONG_OPTION_INDEX] + " days in the past."
+  };
+
+  public static final String[] EXPIRATION_EMAIL_MESSAGE_LOCATION = 
+  { 
+  "expirationemailfilelocation", "file location",
+  "expiration-email-file-location", 
+  "(optional) location of the message to send to users, first line of this text file is the subject, the rest is the email. " +
+  "Default location is relative to the location of this class, on the classpath: " + EXPIRATION_MESSAGE_TXT_LOCATION
+  };
+  
+  public static final String[] TEST_ONLY = { 
+    "testonly", "",
+    "test-only", 
+    "run the entire operation specified, then roll-back." 
+    };
+
+    
   @SuppressWarnings("static-access")
   public static void main(String[] args)
   {
-    SmallMoleculeUserExpirationUpdater app = new SmallMoleculeUserExpirationUpdater(args);
-    //TODO: allow this to be optional and glean the eCommons ID from the environment - sde4
-    app.addCommandLineOption(OptionBuilder
-                                 .hasArg()
-                                 .withArgName(ADMIN_USER_ECOMMONS_ID_OPTION[SHORT_OPTION_INDEX])
-                                 .isRequired()
-                                 .withDescription(ADMIN_USER_ECOMMONS_ID_OPTION[DESCRIPTION_INDEX])
-                                 .withLongOpt(ADMIN_USER_ECOMMONS_ID_OPTION[LONG_OPTION_INDEX])
-                                 .create(ADMIN_USER_ECOMMONS_ID_OPTION[SHORT_OPTION_INDEX]));
+    final SmallMoleculeUserExpirationUpdater app = new SmallMoleculeUserExpirationUpdater(args);
 
+    app.addCommandLineOption(OptionBuilder.hasArg()
+                             .withArgName(NOTIFY_DAYS_AHEAD_OPTION[ARG_INDEX])
+                             .withDescription(NOTIFY_DAYS_AHEAD_OPTION[DESCRIPTION_INDEX])
+                             .withLongOpt(NOTIFY_DAYS_AHEAD_OPTION[LONG_OPTION_INDEX])
+                             .create(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX]));
+    
+    app.addCommandLineOption(OptionBuilder.hasArg()
+                             .withArgName(EXPIRATION_TIME_OPTION[ARG_INDEX])
+                             .withDescription(EXPIRATION_TIME_OPTION[DESCRIPTION_INDEX])
+                             .withLongOpt(EXPIRATION_TIME_OPTION[LONG_OPTION_INDEX])
+                             .create(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX]));    
+    
     app.addCommandLineOption(OptionBuilder
-                             .hasArg()
-                             .withArgName(EMAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX])
-                             .withDescription(EMAIL_RECIPIENT_LIST_OPTION[DESCRIPTION_INDEX])
-                             .withLongOpt(EMAIL_RECIPIENT_LIST_OPTION[LONG_OPTION_INDEX])
-                             .create(EMAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]));
-
+                             .withDescription(EXPIRE_OPTION[DESCRIPTION_INDEX])
+                             .withLongOpt(EXPIRE_OPTION[LONG_OPTION_INDEX])
+                             .create(EXPIRE_OPTION[SHORT_OPTION_INDEX]));
+    
+    app.addCommandLineOption(OptionBuilder.hasArg()
+                             .withArgName(EXPIRATION_EMAIL_MESSAGE_LOCATION[ARG_INDEX])
+                             .withDescription(EXPIRATION_EMAIL_MESSAGE_LOCATION[DESCRIPTION_INDEX])
+                             .withLongOpt(EXPIRATION_EMAIL_MESSAGE_LOCATION[LONG_OPTION_INDEX])
+                             .create(EXPIRATION_EMAIL_MESSAGE_LOCATION[SHORT_OPTION_INDEX]));
+    
+    app.addCommandLineOption(OptionBuilder
+                         .withDescription(TEST_ONLY[DESCRIPTION_INDEX])
+                         .withLongOpt(TEST_ONLY[LONG_OPTION_INDEX])
+                         .create(TEST_ONLY[SHORT_OPTION_INDEX]));
+    
     try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true,
-                              /* showHelpOnError= */true)) {
+      if (!app.processOptions(/* acceptDatabaseOptions= */true, /* showHelpOnError= */true)) 
+      {
         return;
       }
-      
-      String ecommonsId = 
-        app.getCommandLineOptionValue(ADMIN_USER_ECOMMONS_ID_OPTION[SHORT_OPTION_INDEX]);
 
-      GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+      final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 
-      AdministratorUser admin = dao.findEntityByProperty(AdministratorUser.class, "ECommonsId", ecommonsId);
-      if (admin == null) {
-        throw new IllegalArgumentException("no administrator user with eCommons ID: " + ecommonsId);
-      }
-      
-      UserAgreementUpdater userAgreementUpdater =
-        (UserAgreementUpdater) app.getSpringBean("userAgreementUpdater");
-
-      LocalDate expireDate = new LocalDate(new Date()).minusYears(2);
-      List<Pair<ScreeningRoomUser,List<AdministrativeActivity>>> results = 
-        userAgreementUpdater.findAndUpdateUsersWithExpiredSMUserAgreements(expireDate, admin);
-      
-      if(results.isEmpty())
-      {
-        log.info("No Users have expired for the date: " + expireDate + " (2 years ago).");
-      }else{
-
-        String subject = "The Small Molecule User Agreement Update Service has updated " 
-            + (results.size()>0? (results.size() + " Users") : "1 User");
-        StringBuilder msg = new StringBuilder("User Update Actions:\n");
-        for(Pair<ScreeningRoomUser,List<AdministrativeActivity>> result:results)
+      dao.doInTransaction(new DAOTransaction() {
+        public void runTransaction()
         {
-          msg.append("User: \t" + result.getFirst().getFullNameFirstLast()
-                   + "\n\t\teCommons:" + result.getFirst().getECommonsId() 
-                   + "\n\t\temail:" + result.getFirst().getEmail());
-          for(AdministrativeActivity activity:result.getSecond())
+          try 
           {
-            msg.append("\n\t\tAction:" + activity.getComments());
+            AdministratorUser admin = app.getAdminUser(dao);
+            EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
+
+            int timeToExpireDays = DEFAULT_EXPIRATION_TIME_DAYS;
+            if(app.isCommandLineFlagSet(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX])) {
+              timeToExpireDays = app.getCommandLineOptionValue(EXPIRATION_TIME_OPTION[SHORT_OPTION_INDEX], Integer.class);
+            }
+            
+            if (app.isCommandLineFlagSet(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX])) 
+            {
+              Integer daysAheadToNotify = app.getCommandLineOptionValue(NOTIFY_DAYS_AHEAD_OPTION[SHORT_OPTION_INDEX],
+                                                                        Integer.class);
+              app.notifyAhead(admin, emailService, daysAheadToNotify, timeToExpireDays);
+            }
+            else if (app.isCommandLineFlagSet(EXPIRE_OPTION[SHORT_OPTION_INDEX]))
+            {
+              app.expire(admin, emailService, timeToExpireDays);
+            } else {
+              log.info("Must specify either the \"" + NOTIFY_DAYS_AHEAD_OPTION[LONG_OPTION_INDEX] + "\" option or the \"" + EXPIRE_OPTION[LONG_OPTION_INDEX] + "\" option");
+              app.showHelp();
+              System.exit(1);
+            }
+            if(app.isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+              throw new DAOTransactionRollbackException("Rollback, testing only");
+            }
           }
-          msg.append("\n");
-        }
-        log.info(subject);
-        log.info(msg.toString());
-        
-        if(app.isCommandLineFlagSet(EMAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]))
-        {
-          String[] recipients = new String[] { admin.getEmail() };
-          if(app.isCommandLineFlagSet(EMAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]))
-          {
-            String recipientList = app.getCommandLineOptionValue(EMAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]);
-            recipients = recipientList.split(EmailService.DELIMITER);
+          catch (Exception e) {
+            throw new DAOTransactionRollbackException(e);
           }
-          EmailService emailService = (EmailService) app.getSpringBean("emailService");
-          log.info("sending email to " + Arrays.asList(recipients));
-          emailService.send(subject, msg.toString(),admin.getEmail(),recipients);
         }
-      }
+      }); 
       System.exit(0);
     }
     catch (ParseException e) {
       log.error("error parsing command line options: " + e.getMessage());
     }
-    catch (MessagingException e) {
-      log.error("error sending email", e);
+
+    System.exit(1); // error
+  }
+
+
+  private void notifyAhead(AdministratorUser admin, EmailService emailService, final Integer daysToNotify, final int ageInDays)
+    throws ParseException,
+    MessagingException, IOException
+  {
+    LocalDate expireDate = new LocalDate().plusDays(daysToNotify);
+    LocalDate maxPerformedDate = expireDate.minusDays(ageInDays);
+
+    InternetAddress adminEmail = new InternetAddress(admin.getEmail());
+
+    List<Pair<ScreeningRoomUser, ChecklistItemEvent>> pairList = 
+      _userAgreementUpdater.findUsersWithOldSMAgreements(maxPerformedDate, false);
+
+    if (pairList.isEmpty()) {
+      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.warningNotification.noaction.subject");
+      String msg = "No Users have agreements (that haven't already been notified) dated earlier than the specified cutoff date: " + maxPerformedDate 
+               + ", or (now - ageInDaysToExpire + daysToNotify): (" + new LocalDate() + " - " + ageInDays + "D + "+ daysToNotify + "D).";
+      emailService.send(subject,
+                        msg,
+                        adminEmail,
+                        new InternetAddress[] { adminEmail }, null);
     }
-    System.exit(1); //error
+    else {
+      // send Admin summary email
+      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.warningNotification.subject", 
+                                            pairList.size(),
+                                            daysToNotify);
+      StringBuilder msg = 
+        new StringBuilder(getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.warningNotification.messageBoilerplate",
+                                               pairList.size(),
+                                               daysToNotify));
+      
+      if(isAdminEmailOnly()) msg.append("\n----NOTE: sending email only to data sharing level admins ---");
+      if(isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+        subject = "Testing: " + subject;
+        msg.append("\n----TEST Only: no database changes committed.-------");
+      }
+
+      msg.append("\nUsers: \n");
+      msg.append(printUserHeader() + "| Checklist Item Date\n");
+      for(Pair<ScreeningRoomUser, ChecklistItemEvent> pair: pairList)
+      {
+        msg.append(printUser(pair.getFirst()) + "| " + pair.getSecond().getDatePerformed() + "\n");
+      }      
+
+      Set<InternetAddress> adminRecipients = getExtraRecipients();
+      adminRecipients.add(adminEmail);
+      adminRecipients.addAll(getUserAgreementAdmins(adminEmail, emailService));
+
+      emailService.send(subject,
+                        msg.toString(),
+                        adminEmail,
+                        adminRecipients.toArray(new InternetAddress[] {}),
+                        (InternetAddress[])null);
+      if(isAdminEmailOnly() || isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX]))
+      {
+        for(Pair<ScreeningRoomUser, ChecklistItemEvent> pair: pairList)
+        {
+          // set the flag so that we don't notify for this CIE again.
+          _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
+        }
+      }
+      else
+      {
+        // send user an email
+        Pair<String,String> subjectMessage = getExpireNotificationSubjectMessage(); 
+        String message = MessageFormat.format(subjectMessage.getSecond(), EXPIRE_DATE_FORMATTER.print(expireDate));
+        for (Pair<ScreeningRoomUser, ChecklistItemEvent> pair: pairList) 
+        {
+          try {
+            InternetAddress userAddress = new InternetAddress(pair.getFirst().getEmail());
+            emailService.send(subjectMessage.getFirst(),
+                              message,
+                              adminEmail,
+                              new InternetAddress[] { userAddress },
+                              null);
+            // set the flag so that we don't notify for this CIE again.
+            _userAgreementUpdater.setLastNotifiedSMUAChecklistItemEvent(pair.getFirst(), pair.getSecond());
+          }catch(MessagingException e) {
+            //TODO: verify that we do _not_ want to stop on email addressee failure! - sde4
+            String errmsg = "Error, could not send the email to the User: " + 
+                          printUserInformation(pair.getFirst());
+            log.info(errmsg,e);
+            emailService.send("Send Failure for: " + subjectMessage.getFirst(),
+                              errmsg + "\n\n========Original Message=========" + message,
+                              adminEmail,
+                              adminRecipients.toArray(new InternetAddress[] {}),
+                              null );
+          }
+        }
+      }
+    }
+  }
+
+  private void expire(AdministratorUser admin, EmailService emailService, int timeToExpireDays)
+    throws ParseException,
+    MessagingException, IOException
+  {
+    LocalDate expireDate = new LocalDate().minusDays(timeToExpireDays);
+
+    List<Pair<ScreeningRoomUser,List<AdministrativeActivity>>> updates = Lists.newLinkedList();
+    List<Pair<ScreeningRoomUser, ChecklistItemEvent>> pairList = 
+      _userAgreementUpdater.findUsersWithOldSMAgreements(expireDate, true);
+    
+    for (Pair<ScreeningRoomUser, ChecklistItemEvent> pair : pairList) {
+      updates.add(new Pair<ScreeningRoomUser,List<AdministrativeActivity>>(
+        pair.getFirst(),_userAgreementUpdater.expireUser(pair.getFirst(),admin)));
+    }
+
+    InternetAddress adminEmail = new InternetAddress(admin.getEmail());
+    
+    if (updates.isEmpty()) {
+      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.expiration.noaction.subject");
+      String msg = "No Users have (non expired) agreements dated earlier than the specified cutoff date: " + expireDate;
+      log.info(msg);
+      emailService.send(subject,
+                        msg,
+                        adminEmail,
+                        new InternetAddress[] { adminEmail }, null);
+    }
+    else {
+      //Send a summary email to the admin and the recipient list
+      String subject = getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.expiration.subject", 
+                                            updates.size());
+      StringBuilder msg = 
+        new StringBuilder(getMessages().getMessage("admin.users.smallMoleculeUserAgreementExpiration.expiration.messageBoilerplate",
+                                               updates.size(),
+                                               timeToExpireDays));
+      if(isCommandLineFlagSet(TEST_ONLY[SHORT_OPTION_INDEX])) {
+        subject = "Testing: " + subject;
+        msg.append("\n----TEST Only: no database changes committed.-------");
+      }
+      msg.append("\n\n");
+
+      for (Pair<ScreeningRoomUser,List<AdministrativeActivity>> result : updates) 
+      {
+        msg.append("\nUser: \n");
+        msg.append(printUserHeader() + "\n");
+        msg.append(printUser(result.getFirst()) + "\n");
+        for (AdministrativeActivity activity : result.getSecond()) 
+        {
+          msg.append("\nComments:" + activity.getComments());
+        }
+        msg.append("\n");
+      }
+      Set<InternetAddress> adminRecipients = getExtraRecipients();
+      adminRecipients.add(adminEmail);
+      adminRecipients.addAll(getUserAgreementAdmins(adminEmail, emailService));
+
+      emailService.send(subject,
+                        msg.toString(),
+                        adminEmail,
+                        adminRecipients.toArray(new InternetAddress[] {}),
+                        (InternetAddress[])null);
+
+      // Have removed this per spec
+      //      // Send email to the users
+      //      List<String> ccrecipients = recipients;
+      //      Pair<String,String> subjectMessage = getExpireNotificationSubjectMessage(); // Note: nothing to replace
+      //      for (ScreeningRoomUser user: oldUsers) {
+      //        msg = new StringBuilder("Detail:\n");
+      //        emailService.send(subjectMessage.getFirst(),
+      //                          subjectMessage.getSecond(),
+      //                          admin.getEmail(),
+      //                          new String[] { user.getEmail() },
+      //                          ccrecipients.toArray(new String[] {})
+      //                          );
+      //      }
+    }
+  }
+
+  private Collection<? extends InternetAddress> getUserAgreementAdmins(InternetAddress emailAddressForErrors, 
+                                                                       EmailService emailServiceForErrorReporting)
+                                                              throws MessagingException
+  {
+    List<InternetAddress> adminRecipients = Lists.newLinkedList();
+    List<MessagingException> errors = Lists.newLinkedList();
+    List<String> failUsers = Lists.newLinkedList();
+    for(ScreensaverUser adminUser: _userAgreementUpdater.findUserAgreementAdmins())
+    {
+      try {
+        adminRecipients.add(new InternetAddress(adminUser.getEmail()));
+      }catch(MessagingException e) {
+        errors.add(e);
+        failUsers.add("" + printUserInformation(adminUser));
+      }
+    }
+    if(!errors.isEmpty())
+    {
+      String errMsg = "Warn: could not validate the email address for the dataSharingLevelAdmin roles";
+      emailServiceForErrorReporting.send("Error getting the email address for dataSharingLevelAdmin roles", 
+                                         errMsg + "\n" + failUsers + "\nErrors: " + errors, 
+                                         emailAddressForErrors, 
+                                         new InternetAddress[] { emailAddressForErrors } , null );
+    }
+    return adminRecipients;
+  }
+
+  /**
+   * Return the subject first and the message second.  
+   * Message:
+   * {0} Expiration Date
+   * @throws ParseException 
+   */
+  private Pair<String,String> getExpireNotificationSubjectMessage() throws IOException, ParseException
+  {
+    InputStream in = null;
+    if (isCommandLineFlagSet(EXPIRATION_EMAIL_MESSAGE_LOCATION[SHORT_OPTION_INDEX])) {
+      in = new FileInputStream(new File(getCommandLineOptionValue(EXPIRATION_EMAIL_MESSAGE_LOCATION[SHORT_OPTION_INDEX])));
+    }
+    else {
+      in = this.getClass()
+               .getResourceAsStream(EXPIRATION_MESSAGE_TXT_LOCATION);
+    }      
+    Scanner scanner = new Scanner(in);
+    try {
+      StringBuilder builder = new StringBuilder();
+      String subject = scanner.nextLine(); // first line is the subject
+      while(scanner.hasNextLine())
+      {
+        builder.append(scanner.nextLine()).append("\n");
+      }
+      return Pair.newPair(subject, builder.toString());
+    }
+    finally
+    {
+      scanner.close();
+    }
   }
 }

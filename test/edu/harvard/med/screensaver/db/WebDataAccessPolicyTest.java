@@ -608,18 +608,22 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     assertMyScreensVisible();
     assertOthersPublicScreensVisible();
     
+    // level 1 screeners can see details of other level 1 screens, regardless of overlapping hits
     boolean expectedVisible = me.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
-    assertEquals("others' level 1 screen with non-overlapping hits visibility", expectedVisible, dataAccessPolicy.visit(othersLevel1ScreenWithNonOverlappingHits));
+    
+    assertTrue("others' level 1 screen with non-overlapping hits visibility", dataAccessPolicy.visit(othersLevel1ScreenWithNonOverlappingHits));
     assertEquals("others' level 1 screen with non-overlapping hits, details visibility", expectedVisible, dataAccessPolicy.isAllowedAccessToScreenDetails(othersLevel1ScreenWithNonOverlappingHits));
     // TODO: we also need to test DataColumn access permissions
-    assertEquals("others' level 1 screen with non-overlapping hits, overlapping hits visibility", expectedVisible, dataAccessPolicy.visit(findSomePositive(othersLevel1ScreenWithNonOverlappingHits)));
+    assertEquals("others' level 1 screen with non-overlapping hits, non-overlapping hits visibility", expectedVisible, dataAccessPolicy.visit(findSomePositive(othersLevel1ScreenWithNonOverlappingHits)));
 
     assertTrue("others' level 1 screen with overlapping hits visible", dataAccessPolicy.visit(othersLevel1ScreenWithOverlappingHits));
     assertEquals("others' level 1 screen with overlapping hits, details visibility", expectedVisible, dataAccessPolicy.isAllowedAccessToScreenDetails(othersLevel1ScreenWithOverlappingHits));
     assertTrue("others' level 1 screen with overlapping hits, overlapping hits visible", dataAccessPolicy.visit(findSomePositive(othersLevel1ScreenWithOverlappingHits)));
 
-    assertFalse("others' level 2 screen with non-overlapping hits not visible", dataAccessPolicy.visit(othersLevel2ScreenWithNonOverlappingHits));
-    assertFalse("others' level 2 screen with non-overlapping hits, overlapping hits not visible", dataAccessPolicy.visit(findSomePositive(othersLevel2ScreenWithNonOverlappingHits)));
+    assertTrue("others' level 2 screen with non-overlapping hits visible", dataAccessPolicy.visit(othersLevel2ScreenWithNonOverlappingHits));
+    assertFalse("others' level 2 screen with non-overlapping hits visible, but not details", dataAccessPolicy.isAllowedAccessToScreenDetails(othersLevel2ScreenWithNonOverlappingHits));
+    assertFalse("others' level 2 screen with non-overlapping hits, non-overlapping hits not visible", dataAccessPolicy.visit(findSomePositive(othersLevel2ScreenWithNonOverlappingHits)));
+
     assertTrue("others' level 2 screen with overlapping hits visible", dataAccessPolicy.visit(othersLevel2ScreenWithOverlappingHits));
     assertFalse("others' level 2 screen with overlapping hits visible, but not details", dataAccessPolicy.isAllowedAccessToScreenDetails(othersLevel2ScreenWithOverlappingHits));
     assertTrue("others' level 2 screen with overlapping hits, overlapping hits visible", dataAccessPolicy.visit(findSomePositive(othersLevel2ScreenWithOverlappingHits)));
@@ -722,10 +726,12 @@ public class WebDataAccessPolicyTest extends AbstractTransactionalSpringContextT
     Screen othersNonMutualPositivesScreen = screens.get(1);
     Screen othersMutualPositivesScreen = screens.get(2);
     setCurrentUser(myScreen.getLabHead());
-    assertTrue("others mutual positives screen is visible (sanity check), forward direction", dataAccessPolicy.visit(othersMutualPositivesScreen));
-    assertFalse("others non-mutual positives screen is not visible, forward direction", dataAccessPolicy.visit(othersNonMutualPositivesScreen));
+    assertTrue("others mutual positives screen is visible (sanity check)", dataAccessPolicy.visit(othersMutualPositivesScreen));
+    assertTrue("others non-mutual positives screen is visible, but not details", 
+               dataAccessPolicy.visit(othersNonMutualPositivesScreen) && !dataAccessPolicy.isAllowedAccessToScreenDetails(othersNonMutualPositivesScreen));
     setCurrentUser(othersNonMutualPositivesScreen.getLabHead());
-    assertFalse("my non-mutual positives screen is not visible to others", dataAccessPolicy.visit(myScreen));
+    assertTrue("my non-mutual positives screen details are not visible to others", 
+               dataAccessPolicy.visit(myScreen) && !dataAccessPolicy.isAllowedAccessToScreenDetails(myScreen));
   }
   
   // test that positives on screen A that are not *mutual positives* with screen B are in fact restricted

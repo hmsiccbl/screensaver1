@@ -160,8 +160,8 @@ public class PlatesUsed extends AbstractEntity<Integer> implements Comparable<Pl
     setCopyName(copy.getName());
     _copy = copy;
   }
-
   
+
   // package constructor
 
   /**
@@ -171,11 +171,10 @@ public class PlatesUsed extends AbstractEntity<Integer> implements Comparable<Pl
    * @param endPlate the end plate
    * @param copy the copy
    */
-  PlatesUsed(
-    LibraryScreening libraryScreening,
-    Integer startPlate,
-    Integer endPlate,
-    Copy copy)
+  PlatesUsed(LibraryScreening libraryScreening,
+             Integer startPlate,
+             Integer endPlate,
+             Copy copy)
   {
     if (libraryScreening == null) {
       throw new RequiredPropertyException(this, LibraryScreening.class);

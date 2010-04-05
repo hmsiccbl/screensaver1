@@ -157,6 +157,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                                        null,
                                                        _wellViewer,
                                                        null,
+                                                       null,
                                                        Collections.<DataExporter<?>> emptyList()) {
     };
     _inMemoryWellSearchResults.setDataTableUIComponent(new UIData());
@@ -165,6 +166,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
                                                             new UnrestrictedDataAccessPolicy(),
                                                             null,
                                                             _wellViewer,
+                                                            null,
                                                             null,
                                                             Collections.<DataExporter<?>> emptyList()) {
       @Override

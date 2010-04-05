@@ -16,6 +16,14 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -25,17 +33,10 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class UserAgreementUpdater
 {
@@ -52,36 +53,29 @@ public class UserAgreementUpdater
     _dao = dao;
   }
   
-  @Transactional
-  public List<Pair<ScreeningRoomUser,List<AdministrativeActivity>>> findAndUpdateUsersWithExpiredSMUserAgreements(LocalDate date,
-                                                                                                          AdministratorUser recordedBy)
-  {
-    List<Pair<ScreeningRoomUser,List<AdministrativeActivity>>> updates = Lists.newLinkedList();
-    for(ScreeningRoomUser user:findUsersWithOldSMAgreements(date))
-    {
-      updates.add(new Pair<ScreeningRoomUser,List<AdministrativeActivity>>(user, expireUser(user, recordedBy)));
-    }
-    return updates;
-  }
-  
   /**
-   * This method locates the _not yet expired_ users who have a SMUA with an activation on or before the date given.
-   * @param date
-   * @return
+   * This method locates the<br>
+   * _not yet expired_ users who have a SMUA with an activation on or before the date given.
+   * @param showNotifiedItems if set, show items that have already been notified, as indicated by the
+   * sru.lastNotifiedSMUAChecklistItemEvent being set.
    */
   @Transactional 
-  public Set<ScreeningRoomUser> findUsersWithOldSMAgreements(LocalDate date)
+  public List<Pair<ScreeningRoomUser, ChecklistItemEvent>> findUsersWithOldSMAgreements(LocalDate date, boolean showNotifiedItems)
   {
     ChecklistItem userAgreementChecklistItem = _dao.findEntityByProperty(ChecklistItem.class, "itemName", USER_AGREEMENT_CHECKLIST_ITEM_NAME);
     if (userAgreementChecklistItem == null) {
       throw new BusinessRuleViolationException("checklist item '" + USER_AGREEMENT_CHECKLIST_ITEM_NAME + "' does not exist");
     }
-    String hql = "select sru from ScreeningRoomUser as sru inner join sru.checklistItemEvents cie where " +
+    String hql = "select distinct(sru) from ScreeningRoomUser as sru inner join sru.checklistItemEvents cie where " +
                   " cie.expiration != ? " +  // do this to limit the set, but not as the final check
-                  " and cie.checklistItem = ? ";
-    Set<ScreeningRoomUser> users = Sets.newHashSet(_dao.findEntitiesByHql(ScreeningRoomUser.class, hql, /*TODO: see if we eliminate this param*/ Boolean.TRUE, userAgreementChecklistItem));
+                  " and cie.checklistItem = ?  " +
+                  //                  "and ( sru.lastNotifiedSMUAChecklistItemEvent is null or sru.lastNotifiedSMUAChecklistItemEvent <> cie ) " +
+                  "order by sru.lastName, sru.firstName";
+    List<ScreeningRoomUser> users = _dao.findEntitiesByHql(ScreeningRoomUser.class, 
+                                                                          hql, /*TODO: see if we eliminate this param*/ Boolean.TRUE, 
+                                                                          userAgreementChecklistItem);
 
-    Set<ScreeningRoomUser> expiredSet = Sets.newHashSet();
+    List<Pair<ScreeningRoomUser,ChecklistItemEvent>> expiredSet = Lists.newLinkedList();
     for(ScreeningRoomUser user:users)
     {
       log.debug("test: " + user);
@@ -98,12 +92,35 @@ public class UserAgreementUpdater
         if(log.isDebugEnabled())
           log.debug("remove: " + user + ", expire date too new: " + checklistItemEvent.getDatePerformed());
       }else{
-        expiredSet.add(user);
+        if(!showNotifiedItems 
+          && checklistItemEvent.equals(user.getLastNotifiedSMUAChecklistItemEvent()))
+        {
+          log.info("Already notified the user for: " + checklistItemEvent);
+        }
+        else
+        {
+          expiredSet.add(Pair.newPair(user,checklistItemEvent));
+        }
       }
     }
     return expiredSet;
   }
   
+  public void setLastNotifiedSMUAChecklistItemEvent(ScreeningRoomUser sru, ChecklistItemEvent cie)
+  {
+    sru.setLastNotifiedSMUAChecklistItemEvent(cie);
+    _dao.saveOrUpdateEntity(sru);
+  }  
+  /**
+   * <ul>Expire a user, by 
+   * <li>creating an &quot;expiration&quot; ChecklistItemEvent 
+   * {@link ChecklistItemEvent#createChecklistItemExpirationEvent(LocalDate, AdministratorUser)}
+   * for the last ChecklistItemEvent for that user (provided it is not already an expiration).
+   * <li>removing the role returned as the {@link UserAgreementUpdater#findPrimaryDataSharingLevelRole(ScreeningRoomUser)}
+   * <li>removing the {@link ScreensaverUserRole#SCREENSAVER_USER} role if the user is not also a {@link ScreensaverUserRole#RNAI_SCREENS} user.
+   * </ul>
+   * @return a List of the activities performed.
+   */
   @Transactional
   public List<AdministrativeActivity> expireUser(ScreeningRoomUser user, AdministratorUser recordedBy)
   {
@@ -130,9 +147,12 @@ public class UserAgreementUpdater
       log.debug("User's last checklistItemEvent was already expired");
       return activitiesPerformed;
     }else{
-      events.last().createChecklistItemExpirationEvent(new LocalDate(), recordedBy);
+      ChecklistItemEvent cie = events.last();
+      cie.createChecklistItemExpirationEvent(new LocalDate(), recordedBy);
       activitiesPerformed.add(user.createUpdateActivity(recordedBy, 
-                                                        "expired '" + USER_AGREEMENT_CHECKLIST_ITEM_NAME + "' checklist item"));
+                                                        "expired '" + USER_AGREEMENT_CHECKLIST_ITEM_NAME + "' " +
+                                                        		", checklist item: " + cie.getChecklistItemEventId() + 
+                                                        		", datePerformed: " + cie.getDatePerformed()));
       removeRole(findPrimaryDataSharingLevelRole(user), user, recordedBy, activitiesPerformed);
       if (!!!user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS)) {
         removeRole(ScreensaverUserRole.SCREENSAVER_USER, user, recordedBy, activitiesPerformed);
@@ -154,10 +174,27 @@ public class UserAgreementUpdater
   {
     if (user.removeScreensaverUserRole(role)) {
       activitiesPerformed.add(user.createUpdateActivity(recordedBy, 
-                                                        "removed " + ScreensaverUserRole.SCREENSAVER_USER + " role after expiring the '" + USER_AGREEMENT_CHECKLIST_ITEM_NAME + "' checklist item"));
+                                                        "removed \"" + role.getDisplayableRoleName() + "\" role after expiring the '" + USER_AGREEMENT_CHECKLIST_ITEM_NAME + "' checklist item"));
     }
   }
 
+  /**
+   * Create a Small Molecule User Data Sharing Checklist Item for the User.<br>
+   * Details:
+   * <ul>
+   * <li>ChecklistItemEvent is active now
+   * <li>Remove current Data Sharing role(s) and add the passed in dataSharingRole to the user. 
+   * {@link UserAgreementUpdater#getCurrentDataSharingLevelRoleName(ScreeningRoomUser)}
+   * <li>Create the attached file containing the SMUA, referenced to the User.
+   * </ul>
+   * @param user
+   * @param dataSharingLevelRole
+   * @param userAgreementFileName
+   * @param userAgreementFileContents
+   * @param recordedBy
+   * @return
+   * @throws IOException
+   */
   @Transactional
   public ScreeningRoomUser updateUser(ScreeningRoomUser user, 
                                       ScreensaverUserRole dataSharingLevelRole, 
@@ -228,7 +265,20 @@ public class UserAgreementUpdater
       }
     }
   }
-
+  
+  /**
+   * This is used to get the set of admins that will be notified of actions taken.
+   * //TODO: [#2175] Screen Data Sharing And User Agreement Expiration Services 
+   */
+  public Set<ScreensaverUser> findUserAgreementAdmins()
+  {
+    String hql = "from ScreensaverUser where ? in elements (screensaverUserRoles)" ;
+    Set<ScreensaverUser> admins = Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.USERS_ADMIN.getRoleName()));
+    admins.addAll(Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.USER_ROLES_ADMIN.getRoleName())));
+    admins.addAll(Sets.newHashSet(_dao.findEntitiesByHql(ScreensaverUser.class, hql, ScreensaverUserRole.LAB_HEADS_ADMIN.getRoleName())));
+    return admins;
+  }
+  
   public static ScreensaverUserRole getCurrentDataSharingLevelRole(ScreeningRoomUser user)
   {
     TreeSet<ScreensaverUserRole> userSmDslRoles = Sets.newTreeSet(Sets.intersection(user.getScreensaverUserRoles(), DataSharingLevelMapper.UserSmDslRoles));

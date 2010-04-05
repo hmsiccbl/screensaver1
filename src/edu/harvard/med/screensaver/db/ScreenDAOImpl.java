@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -89,5 +90,15 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
       _dao.flush();
       log.info("deleted existing study");
     }
+  }
+
+  @Override
+  public int countScreenedExperimentalWells(Screen screen, boolean distinct)
+  {
+    String hql = "select count(" + (distinct ? "distinct " : "") + "w.id) " +
+    		"from Well w, LibraryScreening ls join ls.platesUsed pu " +
+    		"where w.plateNumber between pu.startPlate and pu.endPlate and ls.screen = ? and w.libraryWellType = 'experimental'";
+    Long count = (Long) getHibernateTemplate().find(hql, screen).get(0);
+    return count.intValue();
   }
 }

@@ -13,8 +13,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 
+import jxl.CellView;
 import jxl.Workbook;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
@@ -22,7 +24,9 @@ import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
 import edu.harvard.med.screensaver.io.TableDataExporter;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
+import edu.harvard.med.screensaver.ui.table.column.ColumnType;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
@@ -37,11 +41,14 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
   public static final String FORMAT_MIME_TYPE = "application/excel";
   public static final String FILE_EXTENSION = ".xls";
   private static final int HEADER_ROW_INDEX = 0;
-
   private static final int MAX_DATA_ROWS = 65536 - 1;
+  private static final int IMAGE_CELL_HEIGHT_2IN = 2880; // empirically determined value! see jxl.CellView#setSize()
+  private static final int IMAGE_CELL_WIDTH_2IN = 6642;  // empirically determined value! see jxl.CellView#setSize()
 
   private String _dataTypeName;
   private List<TableColumn<T,?>> _columns;
+
+  private StructureImageProvider _structureImageProvider;
 
 
   public GenericDataExporter(String dataTypeName)
@@ -111,10 +118,26 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
   {
     model.setRowIndex(i);
     T entity = (T) model.getRowData();
+    int rowIndex = (i % MAX_DATA_ROWS) + 1;
     int colIndex = 0;
     for (TableColumn<T,?> column : _columns) {
-      Workbook2Utils.writeCell(sheet, (i % MAX_DATA_ROWS) + 1, colIndex++, column.getCellValue(entity));
-    }
+      adjustCellSizes(sheet, rowIndex, colIndex);
+      if (column.getColumnType() == ColumnType.IMAGE) {
+        if (column.getCellValue(entity) != null) {
+          try {
+            byte[] imageData = IOUtils.toByteArray(new URL(column.getCellValue(entity).toString()).openStream());
+            Workbook2Utils.writeImage(sheet, rowIndex, colIndex, imageData);
+          }
+          catch (Exception e) {
+            Workbook2Utils.writeCell(sheet, rowIndex, colIndex, "<error: bad image source: " + column.getCellValue(entity) + ">");
+          }
+        }
+      }
+      else {
+        Workbook2Utils.writeCell(sheet, rowIndex, colIndex, column.getCellValue(entity));
+      }
+      colIndex++;
+    } 
   }
 
   private WritableSheet createSheet(WritableWorkbook workbook)
@@ -124,6 +147,19 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
       WritableSheet sheet = workbook.createSheet("data" + (nextSheetIndex + 1), nextSheetIndex);
       writeHeaders(sheet);
       return sheet;
+  }
+
+  private void adjustCellSizes(WritableSheet sheet, int rowIndex, int colIndex) throws RowsExceededException
+  {
+    TableColumn<T,?> column = _columns.get(colIndex);
+    if (column.getColumnType() == ColumnType.IMAGE) {
+      CellView colCellView = new CellView();
+      colCellView.setSize(IMAGE_CELL_WIDTH_2IN);
+      sheet.setColumnView(colIndex, colCellView);
+      CellView rowCellView = new CellView();
+      rowCellView.setSize(IMAGE_CELL_HEIGHT_2IN);
+      sheet.setRowView(rowIndex, rowCellView);
+    }
   }
 
   private void writeHeaders(WritableSheet sheet) throws RowsExceededException, WriteException

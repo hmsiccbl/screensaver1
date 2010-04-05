@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.db.hibernate.JoinType;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -65,6 +67,7 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
+import edu.harvard.med.screensaver.ui.table.column.entity.ImageEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerSetEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.RealEntityColumn;
@@ -118,6 +121,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private DataAccessPolicy _dataAccessPolicy;
   private LibraryViewer _libraryViewer;
   private WellsSdfDataExporter _wellsSdfDataExporter;
+  protected StructureImageProvider _structureImageProvider;
 
   private WellSearchResultMode _mode;
   private Library _library;
@@ -126,6 +130,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   private Set<ReagentVendorIdentifier> _reagentIds;
   private ScreenResult _screenResult;
   private Set<Integer> _plateNumbers;
+
 
   
   /**
@@ -142,6 +147,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
                            LibraryViewer libraryViewer,
                            WellViewer wellViewer,
                            WellsSdfDataExporter wellsSdfDataExporter,
+                           StructureImageProvider structureImageProvider,
                            List<DataExporter<?>> dataExporters)
   {
     super(Lists.newArrayList(Iterables.concat(Lists.newArrayList(wellsSdfDataExporter), dataExporters)), wellViewer);
@@ -149,6 +155,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     _dao = dao;
     _dataAccessPolicy = dataAccessPolicy;
     _libraryViewer = libraryViewer;
+    _structureImageProvider = structureImageProvider;
   }
 
   /**
@@ -464,6 +471,24 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   {
     columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,String>(
       SmallMoleculeReagent.class,
+      new ImageEntityColumn<SmallMoleculeReagent>(
+        new PropertyPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "id"),
+        "Compound Structure Image",
+        "The structure image for the compound in the well",
+        COMPOUND_COLUMNS_GROUP) {
+        @Override
+        public String getCellValue(SmallMoleculeReagent reagent)
+        {
+          if (_structureImageProvider != null) {
+              return _structureImageProvider.getImageUrl(reagent).toString();
+          }
+          return null;
+        }
+      }));
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,String>(
+      SmallMoleculeReagent.class,
       new TextEntityColumn<SmallMoleculeReagent>(
         new PropertyPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "smiles"),
         "Compound SMILES",
@@ -476,6 +501,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
         }
       }));
     columns.get(columns.size() - 1).setVisible(false);
+
     columns.add(new WellReagentEntityColumn<SmallMoleculeReagent,String>(
       SmallMoleculeReagent.class,
       new TextEntityColumn<SmallMoleculeReagent>(

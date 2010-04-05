@@ -15,17 +15,22 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener;
+import edu.harvard.med.screensaver.domainlogic.EntityUpdater;
 import edu.harvard.med.screensaver.model.annotations.Column;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.proxy.HibernateProxyHelper;
+
+import com.google.common.collect.Lists;
 
 import sun.reflect.Reflection;
 
@@ -60,8 +65,11 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
   private static Logger log = Logger.getLogger(AbstractEntity.class);
 
   private DataAccessPolicy _dataAccessPolicy;
+  private List<EntityUpdater> _entityUpdaters;
   private K _entityId;
   private Integer _hashCode;
+  private boolean _needsUpdate;
+
 
   @Transient
   public K getEntityId()
@@ -217,6 +225,44 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
   public DataAccessPolicy getDataAccessPolicy()
   {
     return _dataAccessPolicy;
+  }
+  
+  public void setEntityUpdaters(List<EntityUpdater> entityUpdaters)
+  {
+    _entityUpdaters = entityUpdaters;
+  }
+
+  @Transient
+  public List<EntityUpdater> getEntityUpdaters()
+  {
+    return _entityUpdaters;
+  }
+
+  @Override
+  public void invalidate()
+  {
+    log.debug("invalidated " + this + " (domain logic updaters will be invoked on flush)");
+    
+    _needsUpdate = true;
+  }
+
+  @Override
+  public void update()
+  {
+    if (_needsUpdate) {
+      log.debug(this + " domain logic updaters will be invoked now");
+      if (_entityUpdaters == null) {
+        throw new DevelopmentException("entity has not been injected with EntityUpdaters");
+      }
+      for (EntityUpdater entityUpdater : _entityUpdaters) {
+        log.info("invoking domain logic updater " + entityUpdater.getClass() + " on " + this);
+        entityUpdater.apply((Entity) this);
+      }
+      _needsUpdate = false;
+    }
+    else {
+      log.debug(this + " does not need domain logic updaters to be invoked"); 
+    }
   }
 
   /**

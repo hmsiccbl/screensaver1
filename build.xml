@@ -78,6 +78,7 @@
 	</condition>
 	<property name="src.dir" location="src" />
 	<property name="test.src.dir" location="test" />
+  <property name="contrib.dir" location="contrib" />
 	<property name="hibernate.cfg.xml" location="resources/hibernate.cfg.xml" />
 	<property name="build.dir" location="build" />
 	<property name="javadoc.dir" location="${build.dir}/api" />
@@ -202,13 +203,14 @@
 		<antcall target="set.servlet.authentication.method">
 			<param name="exploded.war.dir" location="${deploy.dir}" />
 		</antcall>
-	</target>
 
-  <copy file="${release.notes.file}"
-        todir="${deploy.dir}/main/"
-        verbose="${verbose}"
-        failonerror="false"
-  />
+	  <copy file="${release.notes.file}"
+	        todir="${deploy.dir}/main/"
+	        verbose="${verbose}"
+	        failonerror="false"
+	  />
+
+	</target>
 
   <target name="set.servlet.authentication.method">
 		<replace file="${exploded.war.dir}/WEB-INF/web.xml"
@@ -518,7 +520,7 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            listfiles="${verbose}"
-		       excludes="edu/harvard/med/iccbl/screensaver/pipelinepilot/**/*"
+		       excludes=""
     >
 		</javac>
 	</target>
@@ -533,14 +535,17 @@
 		
 		<mkdir dir="${pilot.build.dir}/classes" />
 		<!-- note: javac task clears out ${classes.dir}, so any files we copy there should be done afterwards -->
-		<javac srcdir="${src.dir}"
+		<javac 
            destdir="${pilot.build.dir}/classes"
            classpathref="pilot-build.library.path"
-           debug="true"
+           debug="${javac.debug}"
            optimize="${javac.optimize}"
            listfiles="${verbose}"
 		       includes="edu/harvard/med/iccbl/screensaver/pipelinepilot/**,edu/mit/broad/chembank/shared/mda/webservices/service/**/*"
     >
+		  <src path="${contrib.dir}"/>
+      <src path="${src.dir}" />
+      <exclude name="**/*Test.java"/>
 		</javac>
 	</target>
 
@@ -563,7 +568,7 @@
     <javac srcdir="${src.dir}"
            destdir="${build.dir}/classes"
            classpathref="build.library.path"
-           debug="true"
+           debug="${javac.debug}"
            optimize="${javac.optimize}"
            listfiles="${verbose}"
            includes="edu/harvard/med/iccbl/screensaver/service/**"
@@ -589,12 +594,13 @@
              classname="com.sun.tools.ws.ant.WsImport2"
              classpathref="build.library.path"
     />
-    <delete dir="src/edu/mit/broad/chembank/shared/mda" />
+    <delete dir="${build.dir}/chembank/" />
+	  <mkdir dir="${build.dir}/chembank/" />
 		<wsimport
       wsdl="http://chembank.broad.harvard.edu/webservices/MoleculeWebService?wsdl"
-      sourcedestdir="src"
+      sourcedestdir="${build.dir}/chembank/"
       package="edu.mit.broad.chembank.shared.mda.webservices.service"
-      destdir="src"
+      destdir="${build.dir}/chembank/"
 			verbose="true"
     />
 	</target>
@@ -629,7 +635,7 @@
 		<copy file="${screensaver.properties.file}"
           tofile="${classes.dir}/screensaver.properties"
           verbose="${verbose}"
-          failonerror="true"
+          failonerror="true" overwrite="true"
     />
 
     <replace file="${classes.dir}/screensaver.properties"

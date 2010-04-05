@@ -740,44 +740,6 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
     return isMapped() && getPendingCherryPickAssayPlates().size() == 0;
   }
 
-  /**
-   * Determine if this CherryPickRequest has a set of lab cherry picks from the
-   * same source plate than would fit on a single assay plate. This matters to
-   * the lab, which must be notified to manually reload the source plate when
-   * creating the cherry pick plates. We can detect this case when the last well
-   * (containing a cherry pick) on an assay plate is from the same source plate
-   * as the first well on the next assay plate.
-   */
-  @Transient
-  public boolean isSourcePlateReloadRequired()
-  {
-    return getAssayPlatesRequiringSourcePlateReload().size() > 0;
-  }
-
-  /**
-   * @see #isSourcePlateReloadRequired()
-   */
-  @Transient
-  public Map<CherryPickAssayPlate, Integer> getAssayPlatesRequiringSourcePlateReload()
-  {
-    Map<CherryPickAssayPlate,Integer> platesRequiringReload = new HashMap<CherryPickAssayPlate,Integer>();
-    LabCherryPick last = null;
-    for (CherryPickAssayPlate assayPlate : getActiveCherryPickAssayPlates()) {
-      if (assayPlate.getLabCherryPicks().size() > 0) {
-        if (last != null) {
-          LabCherryPick first = Collections.max(assayPlate.getLabCherryPicks(),
-                                                LabCherryPickColumnMajorOrderingComparator.getInstance());
-          if (last.getSourceWell().getPlateNumber().equals(first.getSourceWell().getPlateNumber())) {
-            platesRequiringReload.put(assayPlate, first.getSourceWell().getPlateNumber());
-          }
-        }
-        last = Collections.max(assayPlate.getLabCherryPicks(),
-                               LabCherryPickColumnMajorOrderingComparator.getInstance());
-      }
-    }
-    return platesRequiringReload;
-  }
-
   void incUnfulfilledLabCherryPicks()
   {
     ++_numberUnfulfilledLabCherryPicks;

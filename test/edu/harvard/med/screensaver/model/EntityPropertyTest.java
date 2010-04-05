@@ -205,6 +205,10 @@ public class EntityPropertyTest<E extends AbstractEntity> extends AbstractSpring
       log.warn("skipping testing setter of mutable property " + fullPropName(propertyDescriptor) + ": has non-conventional setter method");
       return;
     }
+    if (ModelIntrospectionUtil.isDerivedProperty(propertyDescriptor)) {
+      log.warn("skipping testing setter of derived property " + fullPropName(propertyDescriptor));
+      return;
+    }
 
     initTestEntity();
     Object testValue;

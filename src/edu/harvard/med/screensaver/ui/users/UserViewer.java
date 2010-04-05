@@ -211,6 +211,9 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     getDao().need(user, "screensLed.statusItems");
     getDao().need(user, "screensHeaded.statusItems");
     getDao().need(user, "screensCollaborated.statusItems");
+    getDao().need(user, "screensLed.labActivities");
+    getDao().need(user, "screensHeaded.labActivities");
+    getDao().need(user, "screensCollaborated.labActivities");
     getDao().need(user,
                   "screensLed.collaborators",
                   "screensLed.labHead",

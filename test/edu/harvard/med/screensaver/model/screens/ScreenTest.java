@@ -28,8 +28,12 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
+import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
@@ -135,14 +139,14 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     schemaUtil.truncateTablesOrCreateSchema();
     Screen screen1a = MakeDummyEntities.makeDummyScreen(1);
     genericEntityDao.persistEntity(screen1a);
-    Screen screen1b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(1), true, "labHead", "leadScreener");
+    Screen screen1b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", Integer.valueOf(1), true, "labHead", "leadScreener");
     assertEquals(screen1a.getLabHead().getEntityId(), screen1b.getLabHead().getEntityId());
     assertEquals(screen1a.getLeadScreener().getEntityId(), screen1b.getLeadScreener().getEntityId());
 
     Screen screen2a = MakeDummyEntities.makeDummyScreen(2);
     screen2a.setLeadScreener(screen2a.getLabHead());
     genericEntityDao.persistEntity(screen2a);
-    Screen screen2b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", new Integer(2), true, "labHead", "leadScreener");
+    Screen screen2b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", Integer.valueOf(2), true, "labHead", "leadScreener");
     assertEquals(screen2a.getLabHead().getEntityId(), screen2b.getLabHead().getEntityId());
     assertEquals(screen2a.getLabHead().getEntityId(), screen2b.getLeadScreener().getEntityId());
   }
@@ -288,6 +292,60 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
                                     new BillingItem("item3", new BigDecimal("3.33"), date)),
                  screen3.getBillingItems());
   }
+  
+  public void testScreenedExperimentalWellCount()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
 
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
+        Screen screen2 = MakeDummyEntities.makeDummyScreen(2);
+        genericEntityDao.persistEntity(screen1);
+        genericEntityDao.persistEntity(screen2);
+      }
+    });
+    
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 2);
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", ""); 
+        ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
+        Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 4);
+        LibraryScreening libraryScreening = screen1.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.createPlatesUsed(1000, 1000, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
+        libraryScreening.createPlatesUsed(1001, 1002, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
+        libraryScreening = screen1.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.createPlatesUsed(1001, 1002, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
+        libraryScreening = screen2.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.createPlatesUsed(1000, 1003, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
+        genericEntityDao.persistEntity(library);
+        screen1.update();
+      }
+    });
+    
+    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    assertEquals(384 * 5, screen.getScreenedExperimentalWellCount());
+    assertEquals(384 * 3, screen.getUniqueScreenedExperimentalWellCount());
+    
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        LibraryScreening libraryScreening = screen.getLabActivitiesOfType(LibraryScreening.class).first();
+        libraryScreening.deletePlatesUsed(libraryScreening.getPlatesUsed().first());
+        screen.update();
+        assertEquals(384 * 4, screen.getScreenedExperimentalWellCount());
+        assertEquals(384 * 2, screen.getUniqueScreenedExperimentalWellCount());
+      }
+    });
+  }
+  
 }
 

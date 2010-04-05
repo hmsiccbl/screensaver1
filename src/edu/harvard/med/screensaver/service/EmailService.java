@@ -10,14 +10,22 @@
 package edu.harvard.med.screensaver.service;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 
 public interface EmailService
 {
   public static final String DELIMITER = ",";
 
+  //  public void send(String subject,
+  //                   String message,
+  //                   String from,
+  //                   String[] recipients,
+  //                   String[] cclist) throws MessagingException;
   public void send(String subject,
                    String message,
-                   String from,
-                   String[] recipients) throws MessagingException;
+                   InternetAddress from,
+                   InternetAddress[] recipients,
+                   InternetAddress[] cclist) throws MessagingException;
+
 
 }

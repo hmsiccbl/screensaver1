@@ -18,10 +18,11 @@ import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
@@ -91,6 +92,23 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
       (List<TableColumn<LabActivity,?>>) super.buildColumns();
     
     IntegerEntityColumn<LabActivity> column = new IntegerEntityColumn<LabActivity>(
+      new PropertyPath<LabActivity>(LabActivity.class, "screenedExperimentalWellCount"),
+      "Experimental Wells Screened (Library Screening)", 
+      "The number of experimental library wells that were screened during this activity (ignoring replicates)", 
+      TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(LabActivity activity) 
+      { 
+        if (activity instanceof LibraryScreening) {
+          return ((LibraryScreening) activity).getScreenedExperimentalWellCount();
+        }
+        return null;
+      }
+    };
+    column.setVisible(false);
+    columns.add(2, column);
+
+    column = new IntegerEntityColumn<LabActivity>(
       (RelationshipPath) CherryPickScreening.cherryPickRequest,
       "Cherry Pick Request #", "The cherry pick request number, if applicable", TableColumn.UNGROUPED) {
       @Override

@@ -26,6 +26,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
@@ -86,6 +87,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   private Set<FacilityUsageRole> _facilityUsageRoles = Sets.newHashSet();
   private String _comsCrhbaPermitNumber;
   private String _comsCrhbaPermitPrincipalInvestigator;
+  private ChecklistItemEvent _lastNotifiedSMUAChecklistItemEvent;
 
   private LabHead _labHead;
   protected transient Lab _lab;
@@ -626,5 +628,22 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
         getFacilityUsageRoles().add(FacilityUsageRole.RNAI_SCREENER);
       }
     }
+  }
+
+  public void setLastNotifiedSMUAChecklistItemEvent(ChecklistItemEvent lastExpiredSMUAChecklistItemEvent)
+  {
+    _lastNotifiedSMUAChecklistItemEvent = lastExpiredSMUAChecklistItemEvent;
+  }
+
+  /**
+   * Get the ChecklistItemEvent of the successful notification, if any, that was sent to this User 
+   * for the Small Molecule User Agreement expiration. 
+   */
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "lastNotifiedSmuaChecklistItemEventId", nullable = true)
+  @org.hibernate.annotations.ForeignKey(name = "fk_screening_room_user_to_notified_checklist_item_event")
+  public ChecklistItemEvent getLastNotifiedSMUAChecklistItemEvent()
+  {
+    return _lastNotifiedSMUAChecklistItemEvent;
   }
 }

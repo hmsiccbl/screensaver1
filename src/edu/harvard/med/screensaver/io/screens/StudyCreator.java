@@ -76,6 +76,8 @@ public class StudyCreator
   protected String leadScreenerLastName;
   protected String leadScreenerEmail;
 
+  protected boolean replace;
+
 
   public StudyCreator(String[] args) throws ParseException
   {
@@ -103,6 +105,9 @@ public class StudyCreator
     leadScreenerEmail = app.getCommandLineOptionValue("le");
 
     screenResultFile = app.isCommandLineFlagSet("f") ?  app.getCommandLineOptionValue("f", File.class) : null;
+    
+    replace = app.isCommandLineFlagSet("r");
+    
 
     validateStudyNumber();
   }
@@ -136,7 +141,9 @@ public class StudyCreator
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("first name").withLongOpt("lead-screener-first-name").create("lf"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("last name").withLongOpt("lead-screener-last-name").create("ll"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("email").withLongOpt("lead-screener-email").create("le"));
-  }
+
+    app.addCommandLineOption(OptionBuilder.hasArg(false).withLongOpt("replace").withDescription("replace an existing with the same study number").create("r"));
+}
 
   public static void main(String[] args)
   {
@@ -167,6 +174,16 @@ public class StudyCreator
   public void createStudy()
   {
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    
+    Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", studyNumber);
+    if (study != null) {
+      if (!replace) {
+        log.error("study " + studyNumber + " already exists (use --replace flag to delete existing study first)"); 
+        return;
+      }
+      dao.deleteEntity(study);
+      log.error("deleted existing study " + studyNumber); 
+    }
 
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
@@ -185,7 +202,7 @@ public class StudyCreator
       }
 
     });
-    log.info("study succesfully added to database");
+    log.info("study " + studyNumber + " succesfully added to database");
   }
 
   protected Study newStudy()
@@ -231,6 +248,7 @@ public class StudyCreator
     ScreeningRoomUser newUser;
     if (isLabHead) {
       newUser = new LabHead(firstName, lastName, labAffiliation);
+      newUser.setEmail(email);
     }
     else {
       newUser = new ScreeningRoomUser(firstName, lastName);

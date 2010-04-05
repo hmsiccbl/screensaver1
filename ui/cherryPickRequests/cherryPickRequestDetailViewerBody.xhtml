@@ -19,7 +19,7 @@
     <t:commandButton id="showAdminWarnings"
       value="Show Cherry Pick Warnings"
       action="#{cherryPickRequestDetailViewer.showAdminWarnings}"
-      rendered="#{cherryPickRequestDetailViewer.readAdmin &amp;&amp; !empty cherryPickRequestDetailViewer.entity.screenerCherryPicks}"
+      rendered="#{cherryPickRequestDetailViewer.readAdmin &amp;&amp; cherryPickRequestDetailViewer.screenerCherryPickCount > 0}"
       styleClass="command"
       description="Show administrative warnings for screener cherry picks" />
     <t:commandButton id="downloadCherryPickRequestCommand"

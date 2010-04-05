@@ -25,6 +25,11 @@ public interface Entity<K extends Serializable>
   K getEntityId();
   boolean isTransient();
   boolean isRestricted();
+  /** 
+   * Invoke domain model logic to update derived properties.
+   */
+  void update();
+  void invalidate();
   Class<Entity<K>> getEntityClass();
   /**
    * To enable visitor to visit a particular subclass, override this method and

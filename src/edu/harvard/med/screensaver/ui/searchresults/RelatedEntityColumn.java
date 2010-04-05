@@ -99,6 +99,12 @@ public abstract class RelatedEntityColumn<F extends AbstractEntity, R extends Ab
   {
     return _delegateEntityColumn.isCommandLink();
   }
+  
+  @Override
+  public boolean isSortableSearchable()
+  {
+    return _delegateEntityColumn.isSortableSearchable();
+  }
 
   @Override
   public void setCellValue(F fromEntity, Object value)

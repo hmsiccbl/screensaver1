@@ -114,5 +114,10 @@
       <tag-name>checklistItems</tag-name>
       <source>../util/checklistItems.xhtml</source>
     </tag>
+    
+    <tag>
+      <tag-name>graphicImage</tag-name>
+      <source>../util/graphicImage.xhtml</source>
+    </tag>
 
 </facelet-taglib>

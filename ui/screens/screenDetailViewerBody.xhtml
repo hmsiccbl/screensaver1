@@ -162,9 +162,27 @@ TODO:
 
       <ss:property id="dataPrivacyExpirationDate"
         label="Data Privacy Expiration Date"
-        description="The date on which the screen will become visible to level 1 users"
-        value="#{screenDetailViewer.entity.dataPrivacyExpirationDate}"
+        description="The date on which the screen will become visible to level 1 users, set automatically, 26 months after last Screening activity"
+        value="#{empty screenDetailViewer.entity.dataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.dataPrivacyExpirationDate}"
+        type="Date" 
+        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
+      <ss:property id="minAllowedDataPrivacyExpirationDate"
+        label="Earliest Allowed Data Privacy Expiration Date (optional)"
+        description="If set, this is the earliest date on which the Data Privacy can expire"
+        value="#{! screenDetailViewer.editMode and empty screenDetailViewer.entity.minAllowedDataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.minAllowedDataPrivacyExpirationDate}"
         type="Date" editable="#{screenDetailViewer.editMode}"
+        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />      
+      <ss:property id="maxAllowedDataPrivacyExpirationDate"
+        label="Latest Allowed Data Privacy Expiration Date (optional)"
+        description="If set, this is the latest date on which the Data Privacy can expire"
+        value="#{! screenDetailViewer.editMode and empty screenDetailViewer.entity.maxAllowedDataPrivacyExpirationDate ? '&lt;not specified&gt;' : screenDetailViewer.entity.maxAllowedDataPrivacyExpirationDate}"
+        type="Date" editable="#{screenDetailViewer.editMode}"
+        adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
+      <ss:property id="dataPrivacyExpirationNotifiedDate"
+        label="Data Privacy Expiration Notification Sent Date"
+        description="Date at which the data privacy expiration notification was sent"
+        value="#{screenDetailViewer.entity.dataPrivacyExpirationNotifiedDate}"
+        type="Date" 
         adminOnly="true" rendered="#{screenDetailViewer.adminViewMode}" />
     </ss:propertyGroup>
 
@@ -359,174 +377,194 @@ TODO:
       </ui:define>
     </ss:property>
 
+    <ss:propertyGroup id="screenedExperimentalWellCountGroup"
+      label="# Experimental Wells Screened"
+      description="The number of experimental library wells that have been screened (ignoring replicates)"
+      rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}">
+      <ss:property id="screenedExperimentalWellCount" label="Non-unique"
+        value="#{screenDetailViewer.entity.screenedExperimentalWellCount}"
+        description="The number of experimental library wells that have been screened (counting duplicate wells multiple times, ignoring replicates)">
+      </ss:property>
+      <ss:property id="screenedExperimentalWellCountUnique"
+        label="Unique"
+        value="#{screenDetailViewer.entity.uniqueScreenedExperimentalWellCount}"
+        description="The number of experimental library wells that have been screened (counting duplicate wells once, ignoring replicates)">
+      </ss:property>
+    </ss:propertyGroup>
+
     <ss:property id="keywords"
-      label="#{screenDetailViewer.editMode ? 'Keywords (comma-separated)' : 'Keywords'}"
-      type="Set" value="#{screenDetailViewer.entity.keywords}"
-      editable="#{screenDetailViewer.editMode}" editWidth="80"
-      description="A set of keywords associated with the screen" />
+        label="#{screenDetailViewer.editMode ? 'Keywords (comma-separated)' : 'Keywords'}"
+        type="Set" value="#{screenDetailViewer.entity.keywords}"
+        editable="#{screenDetailViewer.editMode}" editWidth="80"
+        description="A set of keywords associated with the screen" />
 
-    <ss:property label="Billing Information" adminOnly="true"
-      rendered="#{(screenDetailViewer.editMode || screenDetailViewer.adminViewMode) &amp;&amp; screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['billingAdmin']}"
-      description="Information for tracking billing from ICCB-L to the lab performing the screen">
-      <ui:define name="data">
-        <t:collapsiblePanel var="isBillingInformationCollapsed"
-          value="#{screenDetailViewer.billingInformationCollapsed}">
-          <f:facet name="header">
-            <t:headerLink immediate="true">
-              <t:outputText id="billingInformationToggleText"
-                value="#{isBillingInformationCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
-                styleClass="dataText" />
-            </t:headerLink>
-          </f:facet>
-          <t:panelGrid id="billingInfoProperties" columns="4"
-            columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
-            styleClass="layoutPanel" style="width: 100%">
-            <ss:property id="billingInfoToBeRequested"
-              label="Billing Information to be Requested" type="Boolean"
-              value="#{screenDetailViewer.entity.billingInformation.toBeRequested}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="billingInfoToBeRequestedSeeComment"
-              label="See comments" type="Boolean"
-              value="#{screenDetailViewer.entity.billingInformation.seeComments}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="billingForSuppliesOnly"
-              label="Billing For Supplies Only" type="Boolean"
-              value="#{screenDetailViewer.entity.billingInformation.billingForSuppliesOnly}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="feeFormOnFile" label="Fee Form on File"
-              type="Boolean"
-              value="#{screenDetailViewer.entity.billingInformation.feeFormOnFile}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="amountToBeChargedForScreen"
-              label="Amount to be charged for Screen"
-              value="#{screenDetailViewer.entity.billingInformation.amountToBeChargedForScreen}"
-              editable="#{screenDetailViewer.editMode}" type="Currency" />
-            <ss:property id="facilitiesAndAdministrationCharge"
-              label="Facilities &amp; Administration Charge"
-              value="#{screenDetailViewer.entity.billingInformation.facilitiesAndAdministrationCharge}"
-              editable="#{screenDetailViewer.editMode}" type="Currency" />
-            <ss:property id="feeFormRequestedDate"
-              label="Fee Form Requested Date" type="Date"
-              value="#{screenDetailViewer.entity.billingInformation.feeFormRequestedDate}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="feeFormRequestedInitial"
-              label="Fee Form Requested Initials"
-              value="#{screenDetailViewer.entity.billingInformation.feeFormRequestedInitials}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="billingInfoReturnDate"
-              label="Billing Info Return Date" type="Date"
-              value="#{screenDetailViewer.entity.billingInformation.billingInfoReturnDate}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="dateCompleted5KCompounds"
-              label="Date Completed 5K Compounds" type="Date"
-              value="#{screenDetailViewer.entity.billingInformation.dateCompleted5KCompounds}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="dateFaxedToBillingDepartment"
-              label="Date Faxed To Billing Department" type="Date"
-              value="#{screenDetailViewer.entity.billingInformation.dateFaxedToBillingDepartment}"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="dateCharged" label="Date Charged"
-              type="Date"
-              value="#{screenDetailViewer.entity.billingInformation.dateCharged}"
-              editable="#{screenDetailViewer.editMode}" />
-          </t:panelGrid>
-          <t:panelGrid id="billingInfoProperties2" columns="2"
-            columnClasses="propertyLabelColumn,column"
-            styleClass="layoutPanel" style="width: 100%">
-            <ss:property id="billingInformationComments"
-              label="Comments" type="Textarea"
-              value="#{screenDetailViewer.entity.billingInformation.billingComments}"
-              editWidth="50" editHeight="3"
-              editable="#{screenDetailViewer.editMode}" />
-            <ss:property id="billingItems" label="Billing Items">
-              <ui:define name="data">
-                <ss:collectionTable id="billingItemsTable"
-                  dataModel="#{screenDetailViewer.billingItemsDataModel}"
-                  editable="#{screenDetailViewer.editMode}"
-                  actionBean="#{screenDetailViewer}"
-                  addAction="addBillingItem"
-                  deleteAction="deleteBillingItem">
-                  <ui:define name="columns">
-                    <t:column>
-                      <f:facet name="header">
-                        <t:outputText value="Billing Item" />
-                      </f:facet>
-                      <t:outputText value="#{element.itemToBeCharged}" />
-                    </t:column>
-                    <t:column>
-                      <f:facet name="header">
-                        <t:outputText value="Amount" />
-                      </f:facet>
-                      <t:outputText value="#{element.amount}"
-                        converter="#{currencyConverter}"
-                        styleClass="dataText" />
-                    </t:column>
-                    <t:column>
-                      <f:facet name="header">
-                        <t:outputText value="Date Sent for Billing" />
-                      </f:facet>
-                      <t:outputText value="#{element.dateSentForBilling}"
-                        converter="#{dateConverter}"
-                        styleClass="dataText" />
-                    </t:column>
-                  </ui:define>
-                  <ui:define name="addProperties">
-                    <t:panelGrid columns="6">
-                      <ss:property id="newBillingItemItemToBeCharged"
-                        label="Item" type="Text"
-                        value="#{screenDetailViewer.newBillingItem.itemToBeCharged}" />
-                      <ss:property id="newBillingItemAmount"
-                        label="Amount" type="Currency"
-                        value="#{screenDetailViewer.newBillingItem.amount}" />
-                      <ss:property id="newBillingItemDateSentForBilling"
-                        label="Date Sent for Billing" type="Date" required="false"
-                        value="#{screenDetailViewer.newBillingItem.dateSentForBilling}" />
-                    </t:panelGrid>
-                  </ui:define>
-                </ss:collectionTable>
-              </ui:define>
-            </ss:property>
-          </t:panelGrid>
-        </t:collapsiblePanel>
-      </ui:define>
-    </ss:property>
-
-    <ss:property id="pinTransferApprovalNull" type="text"
-      label="Pin Transfer Approval" adminOnly="true"
-      rendered="#{!screenDetailViewer.editMode &amp;&amp; screenDetailViewer.adminViewMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}"
-      value="&lt;not yet approved&gt;" />
-    <ss:propertyGroup id="pinTransferApproval"
-      label="Pin Transfer Approval" adminOnly="true"
-      rendered="#{screenDetailViewer.editMode || (screenDetailViewer.adminViewMode &amp;&amp; !empty screenDetailViewer.entity.pinTransferApprovalActivity)}">
-      <ss:property id="approvedBy" label="Approved By"
-        description="The staff member that approved for this screen to have pin transfer to assay plates performed"
-        value="#{screenDetailViewer.pinTransferApprovedBy}"
-        editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}">
+      <ss:property label="Billing Information" adminOnly="true"
+        rendered="#{(screenDetailViewer.editMode || screenDetailViewer.adminViewMode) &amp;&amp; screenDetailViewer.screensaverUser.isUserInRoleOfNameMap['billingAdmin']}"
+        description="Information for tracking billing from ICCB-L to the lab performing the screen">
         <ui:define name="data">
-          <ss:user user="#{value.selection}" />
-        </ui:define>
-        <ui:define name="editableData">
-          <t:selectOneMenu value="#{value.value}"
-            styleClass="inputText selectMenu">
-            <f:selectItems value="#{value.selectItems}" />
-          </t:selectOneMenu>
+          <t:collapsiblePanel var="isBillingInformationCollapsed"
+            value="#{screenDetailViewer.billingInformationCollapsed}">
+            <f:facet name="header">
+              <t:headerLink immediate="true">
+                <t:outputText id="billingInformationToggleText"
+                  value="#{isBillingInformationCollapsed ? 'Show &gt;&gt;' : 'Hide &lt;&lt;'}"
+                  styleClass="dataText" />
+              </t:headerLink>
+            </f:facet>
+            <t:panelGrid id="billingInfoProperties" columns="4"
+              columnClasses="propertyLabelColumn,column,propertyLabelColumn,column"
+              styleClass="layoutPanel" style="width: 100%">
+              <ss:property id="billingInfoToBeRequested"
+                label="Billing Information to be Requested"
+                type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.toBeRequested}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingInfoToBeRequestedSeeComment"
+                label="See comments" type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.seeComments}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingForSuppliesOnly"
+                label="Billing For Supplies Only" type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.billingForSuppliesOnly}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="feeFormOnFile" label="Fee Form on File"
+                type="Boolean"
+                value="#{screenDetailViewer.entity.billingInformation.feeFormOnFile}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="amountToBeChargedForScreen"
+                label="Amount to be charged for Screen"
+                value="#{screenDetailViewer.entity.billingInformation.amountToBeChargedForScreen}"
+                editable="#{screenDetailViewer.editMode}"
+                type="Currency" />
+              <ss:property id="facilitiesAndAdministrationCharge"
+                label="Facilities &amp; Administration Charge"
+                value="#{screenDetailViewer.entity.billingInformation.facilitiesAndAdministrationCharge}"
+                editable="#{screenDetailViewer.editMode}"
+                type="Currency" />
+              <ss:property id="feeFormRequestedDate"
+                label="Fee Form Requested Date" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.feeFormRequestedDate}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="feeFormRequestedInitial"
+                label="Fee Form Requested Initials"
+                value="#{screenDetailViewer.entity.billingInformation.feeFormRequestedInitials}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingInfoReturnDate"
+                label="Billing Info Return Date" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.billingInfoReturnDate}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="dateCompleted5KCompounds"
+                label="Date Completed 5K Compounds" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.dateCompleted5KCompounds}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="dateFaxedToBillingDepartment"
+                label="Date Faxed To Billing Department" type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.dateFaxedToBillingDepartment}"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="dateCharged" label="Date Charged"
+                type="Date"
+                value="#{screenDetailViewer.entity.billingInformation.dateCharged}"
+                editable="#{screenDetailViewer.editMode}" />
+            </t:panelGrid>
+            <t:panelGrid id="billingInfoProperties2" columns="2"
+              columnClasses="propertyLabelColumn,column"
+              styleClass="layoutPanel" style="width: 100%">
+              <ss:property id="billingInformationComments"
+                label="Comments" type="Textarea"
+                value="#{screenDetailViewer.entity.billingInformation.billingComments}"
+                editWidth="50" editHeight="3"
+                editable="#{screenDetailViewer.editMode}" />
+              <ss:property id="billingItems" label="Billing Items">
+                <ui:define name="data">
+                  <ss:collectionTable id="billingItemsTable"
+                    dataModel="#{screenDetailViewer.billingItemsDataModel}"
+                    editable="#{screenDetailViewer.editMode}"
+                    actionBean="#{screenDetailViewer}"
+                    addAction="addBillingItem"
+                    deleteAction="deleteBillingItem">
+                    <ui:define name="columns">
+                      <t:column>
+                        <f:facet name="header">
+                          <t:outputText value="Billing Item" />
+                        </f:facet>
+                        <t:outputText value="#{element.itemToBeCharged}" />
+                      </t:column>
+                      <t:column>
+                        <f:facet name="header">
+                          <t:outputText value="Amount" />
+                        </f:facet>
+                        <t:outputText value="#{element.amount}"
+                          converter="#{currencyConverter}"
+                          styleClass="dataText" />
+                      </t:column>
+                      <t:column>
+                        <f:facet name="header">
+                          <t:outputText value="Date Sent for Billing" />
+                        </f:facet>
+                        <t:outputText
+                          value="#{element.dateSentForBilling}"
+                          converter="#{dateConverter}"
+                          styleClass="dataText" />
+                      </t:column>
+                    </ui:define>
+                    <ui:define name="addProperties">
+                      <t:panelGrid columns="6">
+                        <ss:property id="newBillingItemItemToBeCharged"
+                          label="Item" type="Text"
+                          value="#{screenDetailViewer.newBillingItem.itemToBeCharged}" />
+                        <ss:property id="newBillingItemAmount"
+                          label="Amount" type="Currency"
+                          value="#{screenDetailViewer.newBillingItem.amount}" />
+                        <ss:property
+                          id="newBillingItemDateSentForBilling"
+                          label="Date Sent for Billing" type="Date"
+                          required="false"
+                          value="#{screenDetailViewer.newBillingItem.dateSentForBilling}" />
+                      </t:panelGrid>
+                    </ui:define>
+                  </ss:collectionTable>
+                </ui:define>
+              </ss:property>
+            </t:panelGrid>
+          </t:collapsiblePanel>
         </ui:define>
       </ss:property>
 
-      <ss:property id="pinTrasferApprovalDate" label="Date Approved"
-        type="Date"
-        description="The date this screen was approved to have pin transfer to assay plates performed"
-        value="#{screenDetailViewer.pinTransferApprovalDate}"
-        editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}" />
-        
-      <ss:property id="pinTransferApprovalComments" label="Comments"
-        type="Textarea" editWidth="80" editHeight="3"
-        description="Comments for the pin transfer approval"
-        value="#{screenDetailViewer.pinTransferApprovalComments}"
-        editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}" />
-        
-    </ss:propertyGroup>
+      <ss:property id="pinTransferApprovalNull" type="text"
+        label="Pin Transfer Approval" adminOnly="true"
+        rendered="#{!screenDetailViewer.editMode &amp;&amp; screenDetailViewer.adminViewMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}"
+        value="&lt;not yet approved&gt;" />
+      <ss:propertyGroup id="pinTransferApproval"
+        label="Pin Transfer Approval" adminOnly="true"
+        rendered="#{screenDetailViewer.editMode || (screenDetailViewer.adminViewMode &amp;&amp; !empty screenDetailViewer.entity.pinTransferApprovalActivity)}">
+        <ss:property id="approvedBy" label="Approved By"
+          description="The staff member that approved for this screen to have pin transfer to assay plates performed"
+          value="#{screenDetailViewer.pinTransferApprovedBy}"
+          editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}">
+          <ui:define name="data">
+            <ss:user user="#{value.selection}" />
+          </ui:define>
+          <ui:define name="editableData">
+            <t:selectOneMenu value="#{value.value}"
+              styleClass="inputText selectMenu">
+              <f:selectItems value="#{value.selectItems}" />
+            </t:selectOneMenu>
+          </ui:define>
+        </ss:property>
 
+        <ss:property id="pinTrasferApprovalDate" label="Date Approved"
+          type="Date"
+          description="The date this screen was approved to have pin transfer to assay plates performed"
+          value="#{screenDetailViewer.pinTransferApprovalDate}"
+          editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}" />
+
+        <ss:property id="pinTransferApprovalComments" label="Comments"
+          type="Textarea" editWidth="80" editHeight="3"
+          description="Comments for the pin transfer approval"
+          value="#{screenDetailViewer.pinTransferApprovalComments}"
+          editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}" />
+
+      </ss:propertyGroup>
   </ui:define>
 
   <ui:define name="tablesContent">

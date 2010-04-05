@@ -140,7 +140,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
           }
         }
 
-        assertFalse(cherryPickRequest.isSourcePlateReloadRequired());
+        assertTrue(cherryPickRequestPlateMapper.getAssayPlatesRequiringSourcePlateReload(cherryPickRequest).isEmpty());
       }
     });
   }
@@ -184,7 +184,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
         assertLabCherryPicksOnAssayPlate(cherryPickRequest, 12, 23, 2);
         assertLabCherryPicksOnAssayPlate(cherryPickRequest, 24, 27, 3);
 
-        assertTrue(cherryPickRequest.isSourcePlateReloadRequired());
+        assertFalse(cherryPickRequestPlateMapper.getAssayPlatesRequiringSourcePlateReload(cherryPickRequest).isEmpty());
       }
     });
   }

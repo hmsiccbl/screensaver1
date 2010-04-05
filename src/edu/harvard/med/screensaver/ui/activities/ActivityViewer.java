@@ -56,6 +56,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
 import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -380,6 +381,10 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
         }
       }
     }
+    if (entity instanceof LibraryScreening) {
+      ((LibraryScreening) entity).getScreen().update();
+      entity.update();
+    }
   }
 
   public DataModel getLibraryAndPlatesScreenedDataModel()
@@ -473,12 +478,13 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     return result;
   }
 
+  @UICommand
   public String deletePlatesScreened()
   {
     if (getEntity() instanceof LibraryScreening) {
       LibraryScreening libraryScreening = (LibraryScreening) getEntity();
       LibraryAndPlatesUsed libraryAndPlatesUsed = (LibraryAndPlatesUsed) getLibraryAndPlatesScreenedDataModel().getRowData();
-      libraryScreening.getPlatesUsed().remove(libraryAndPlatesUsed.getPlatesUsed());
+      libraryScreening.deletePlatesUsed(libraryAndPlatesUsed.getPlatesUsed());
       _libraryAndPlatesScreenedDataModel = null;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;

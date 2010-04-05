@@ -130,6 +130,7 @@
     class="edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder"
     scope="singleton">
     <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="cherryPickRequestPlateMapper"/>
   </bean>
 
   <bean
@@ -172,13 +173,34 @@
   </bean>
 
   <bean id="emailService"
-        class="edu.harvard.med.iccbl.screensaver.service.SmtpEmailService" scope="singleton">
+        class="edu.harvard.med.iccbl.screensaver.service.SmtpEmailService" 
+        scope="singleton">
     <constructor-arg value="${screensaver.service.smtpemailservice.host}" />
     <constructor-arg value="${screensaver.service.smtpemailservice.username}" />
   </bean>
 
-  <bean id="screenDataSharingLevelUpdater" class="edu.harvard.med.iccbl.screensaver.service.screens.ScreenDataSharingLevelUpdater" scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
+  
+  <bean
+    id="serviceMessages"
+    class="edu.harvard.med.screensaver.service.ServiceMessages">
+    <property name="messageSource">
+      <bean
+        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <!-- specify the properties (or xml) resource containing the localized messages, without a locale extension and without a file extension -->
+        <property
+          name="basename"
+          value="classpath:service_messages" />
+      </bean>
+    </property>
+    <!--  TODO property name="locale" value=""/-->
   </bean>
 
+  <bean 
+    id="screenDataSharingLevelUpdater" 
+    class="edu.harvard.med.iccbl.screensaver.service.screens.ScreenDataSharingLevelUpdater" 
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="serviceMessages"/>
+  </bean>
+  
 </beans>

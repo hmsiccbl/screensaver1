@@ -11,9 +11,12 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.beans.IntrospectionException;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.screens.ScreenTest;
 
 import org.apache.log4j.Logger;
 
@@ -35,14 +38,14 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Integer nextScreenNumber = screenDao.findNextScreenNumber();
-        assertEquals(new Integer(1), nextScreenNumber);
+        assertEquals(Integer.valueOf(1), nextScreenNumber);
         Screen screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
         genericEntityDao.persistEntity(screen.getLabHead());
         genericEntityDao.persistEntity(screen.getLeadScreener());
         genericEntityDao.persistEntity(screen);
 
         nextScreenNumber = screenDao.findNextScreenNumber();
-        assertEquals(new Integer(2), nextScreenNumber);
+        assertEquals(Integer.valueOf(2), nextScreenNumber);
         screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
         genericEntityDao.persistEntity(screen.getLabHead());
         genericEntityDao.persistEntity(screen.getLeadScreener());
@@ -50,13 +53,13 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
       }
     });
     Integer nextScreenNumber = screenDao.findNextScreenNumber();
-    assertEquals(new Integer(3), nextScreenNumber);
+    assertEquals(Integer.valueOf(3), nextScreenNumber);
     nextScreenNumber = screenDao.findNextScreenNumber();
-    assertEquals(new Integer(3), nextScreenNumber);
+    assertEquals(Integer.valueOf(3), nextScreenNumber);
 
     screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 2));
     nextScreenNumber = screenDao.findNextScreenNumber();
-    assertEquals(new Integer(2), nextScreenNumber);
+    assertEquals(Integer.valueOf(2), nextScreenNumber);
   }
   
   public void testDelete()
@@ -66,7 +69,7 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        assertEquals(new Integer(1), nextScreenNumber);
+        assertEquals(Integer.valueOf(1), nextScreenNumber);
         Screen screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
         genericEntityDao.persistEntity(screen);
       }
@@ -82,6 +85,11 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
 
     Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber);
     assertNull("screen not deleted", screen1);
+  }
+  
+  public void testCountScreenedExperimentalWellCount() throws IntrospectionException
+  {
+    new ScreenTest().testScreenedExperimentalWellCount();
   }
   
 }

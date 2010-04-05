@@ -36,8 +36,10 @@ public class SmtpEmailService implements EmailService
   public static final int LONG_OPTION_INDEX = 1;
   public static final int DESCRIPTION_INDEX = 2;
   public static final String[] MAIL_FROM_OPTION = { "mf", "mail-from", "from address for the mail, defaults to the username" };
+  public static final String[] MAIL_CC_LIST_OPTION = 
+  { "cclist", "mail-cc-list", "the cc recipient(s) of the message, delimited by \"" + DELIMITER + "\"" };
   public static final String[] MAIL_RECIPIENT_LIST_OPTION = 
-      { "mr", "mail-recipient-list", "the recipient(s) of the message, delimited by \"" + DELIMITER + "\"" };
+  { "recipientlist", "mail-recipient-list", "the recipient(s) of the message, delimited by \"" + DELIMITER + "\"" };
   public static final String[] MAIL_MESSAGE_OPTION = { "mm", "mail-message", "the mail message" };
   public static final String[] MAIL_SUBJECT_OPTION = { "ms", "mail-subject", "the mail subject" };
   public static final String[] MAIL_SERVER_OPTION = { "mh", "mail-host", "the smtp mail server host" };
@@ -79,28 +81,94 @@ public class SmtpEmailService implements EmailService
     this.useSmtps = useSmtps;
   }
 
+  /**
+   * For logging
+   */
+  public static String printEmail(String subject,
+                                  String message,
+                                  InternetAddress from,
+                                  InternetAddress[] recipients,
+                                  InternetAddress[] cclist)
+  {
+    return printEmailHeader(subject, from, recipients, cclist)  
+             + "\n========message========\n" + message;
+  }
+ 
+  public static String printEmailHeader(String subject,
+                                  InternetAddress from,
+                                  InternetAddress[] recipients,
+                                  InternetAddress[] cclist)
+  {
+    return "\nSubject: " + subject 
+             + "\nFrom: " + from 
+             + "\nTo: " + com.google.common.base.Joiner.on(',').join(recipients) 
+             + "\nCC: " + (cclist == null ? "" : com.google.common.base.Joiner.on(',').join(cclist));
+  }
+                                  
   public void send(String subject,
                    String message,
                    String from,
-                   String[] recipients) throws MessagingException
+                   String[] recipients,
+                   String[] cclist) throws MessagingException
   {
-    send(subject, message, from, recipients, host, username, password, useSmtps);
-  }
+    send(subject, message, from, recipients, cclist, host, username, password, useSmtps);
+  }   
+  
+  public void send(String subject,
+                       String message,
+                       InternetAddress from,
+                       InternetAddress[] recipients,
+                       InternetAddress[] cclist) throws MessagingException
+  {
+    send(subject, message, from, recipients, cclist, host, username, password, useSmtps);
+  } 
   
   private static void send(
                      String subject,
                      String message,
                      String from,
-                     String[] recipients,
+                     String[] srecipients,
+                     String[] scclist,
                      String host,
                      String username, 
                      String password, 
                      boolean useSmtps) 
     throws MessagingException
   {
-    log.info("send message: subject: " + subject);
-    log.info("useSMTPS: " + useSmtps);
-    log.info("host: " + host);
+    InternetAddress[] recipients = new InternetAddress[srecipients.length];
+    int i = 0;
+    for(String r:srecipients)
+    {
+      recipients[i++] = new InternetAddress(r);
+
+    }      
+    InternetAddress[] cclist = null;
+    i = 0;
+    if(scclist != null)
+    {
+      cclist = new InternetAddress[scclist.length];
+      for(String r:scclist)
+      {
+        cclist[i++]= new InternetAddress(r);
+      }
+    }
+    send(subject, message, new InternetAddress(from), recipients, cclist, host, username, password, useSmtps);
+  }
+  
+  private static void send(
+                     String subject,
+                     String message,
+                     InternetAddress from,
+                     InternetAddress[] recipients,
+                     InternetAddress[] cclist,
+                     String host,
+                     String username, 
+                     String password, 
+                     boolean useSmtps) 
+    throws MessagingException
+  {
+    log.info("try to send: " + printEmail(subject, message, from, recipients, cclist));
+    log.info("host: " + host + ", useSMTPS: " + useSmtps);
     Properties props = new Properties();
     String protocol = "smtp";
     if(useSmtps)  // need smtps to test with gmail
@@ -113,22 +181,18 @@ public class SmtpEmailService implements EmailService
 
     try {
       MimeMessage msg = new MimeMessage(session);
-      msg.setFrom(new InternetAddress(from));
+      msg.setFrom(from);  
       msg.setSubject(subject);
       msg.setContent(message, "text/plain");
-      for(String recipient:recipients)
-      {
-        msg.addRecipient(Message.RecipientType.TO, 
-                         new InternetAddress(recipient));
-      }
-
+      msg.addRecipients(Message.RecipientType.TO, recipients );
+      msg.addRecipients(Message.RecipientType.CC, cclist);
       t.connect(host, username, password);
       t.sendMessage(msg, msg.getAllRecipients());
     }
     finally {
       t.close();
     }
-    log.info("mail sent from: " + from + " to: " + Arrays.asList(recipients));
+    log.info("sent: " + printEmailHeader(subject, from, recipients, cclist) );
   }
 
   @SuppressWarnings("static-access")
@@ -142,6 +206,12 @@ public class SmtpEmailService implements EmailService
                              .withDescription(MAIL_RECIPIENT_LIST_OPTION[DESCRIPTION_INDEX])
                              .withLongOpt(MAIL_RECIPIENT_LIST_OPTION[LONG_OPTION_INDEX])
                              .create(MAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]));
+    app.addCommandLineOption(OptionBuilder.hasArg()
+                             .withArgName(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX])
+                             .isRequired()
+                             .withDescription(MAIL_CC_LIST_OPTION[DESCRIPTION_INDEX])
+                             .withLongOpt(MAIL_CC_LIST_OPTION[LONG_OPTION_INDEX])
+                             .create(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]));
     app.addCommandLineOption(OptionBuilder.hasArg()
                              .withArgName(MAIL_MESSAGE_OPTION[SHORT_OPTION_INDEX])
                              .isRequired()
@@ -194,6 +264,9 @@ public class SmtpEmailService implements EmailService
       String recipientlist = app.getCommandLineOptionValue(MAIL_RECIPIENT_LIST_OPTION[SHORT_OPTION_INDEX]);
       String[] recipients = recipientlist.split(DELIMITER);
       
+      String cclist = app.getCommandLineOptionValue(MAIL_CC_LIST_OPTION[SHORT_OPTION_INDEX]);
+      String[] ccrecipients = cclist.split(DELIMITER);
+      
       String mailHost = app.getCommandLineOptionValue(MAIL_SERVER_OPTION[SHORT_OPTION_INDEX]);
       String username = app.getCommandLineOptionValue(MAIL_USERNAME_OPTION[SHORT_OPTION_INDEX]);
       String password = app.getCommandLineOptionValue(MAIL_USER_PASSWORD_OPTION[SHORT_OPTION_INDEX]);
@@ -203,8 +276,10 @@ public class SmtpEmailService implements EmailService
       if(app.isCommandLineFlagSet(MAIL_FROM_OPTION[SHORT_OPTION_INDEX])){
         mailFrom = app.getCommandLineOptionValue(MAIL_FROM_OPTION[SHORT_OPTION_INDEX]);
       }
+      
+      //TODO: get the cclist
 
-      send(subject, message, mailFrom, recipients, mailHost, username, password, useSmtps);
+      send(subject, message, mailFrom, recipients, ccrecipients, mailHost, username, password, useSmtps);
       System.exit(0);
     }
     catch (ParseException e) {

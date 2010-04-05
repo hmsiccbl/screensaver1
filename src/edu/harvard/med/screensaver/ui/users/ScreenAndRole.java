@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.users;
 
+import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.Pair;
 
@@ -22,7 +23,15 @@ public class ScreenAndRole extends Pair<Screen,String> implements Comparable<Scr
   
   public Screen getScreen() { return getFirst(); }
   
-  public String getRole() { return getSecond(); }
+  public String getRole() { return getSecond(); } 
+  
+  public LabActivity getLastLabActivity() 
+  {
+    if (getScreen().getLabActivities().size() > 0) { 
+      return getScreen().getLabActivities().last();
+    }
+    return null;
+  }
 
   public int compareTo(ScreenAndRole other)
   {

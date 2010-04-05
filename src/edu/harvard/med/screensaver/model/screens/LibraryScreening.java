@@ -21,6 +21,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -62,7 +63,8 @@ public class LibraryScreening extends Screening
 
   private SortedSet<PlatesUsed> _platesUsed = new TreeSet<PlatesUsed>();
   private String _abaseTestsetId;
-  private boolean _isSpecial;
+  private boolean _isForScreenerProvidedPlates;
+  private int _screenedExperimentalWellCount;
 
 
   // public instance methods
@@ -77,7 +79,7 @@ public class LibraryScreening extends Screening
   @Transient
   public String getActivityTypeName()
   {
-    if (isSpecial()) {
+    if (isForScreenerProvidedPlates()) {
       return SPECIAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME;
     }
     return ACTIVITY_TYPE_NAME;
@@ -102,6 +104,17 @@ public class LibraryScreening extends Screening
   {
     return _platesUsed;
   }
+  
+  @Derived
+  public int getScreenedExperimentalWellCount()
+  {
+    return _screenedExperimentalWellCount;
+  }
+  
+  public void setScreenedExperimentalWellCount(int n)
+  {
+    _screenedExperimentalWellCount = n;
+  }
 
   /**
    * Create and return a new plates used for the library screening.
@@ -114,7 +127,19 @@ public class LibraryScreening extends Screening
   {
     PlatesUsed platesUsed = new PlatesUsed(this, startPlate, endPlate, copy);
     _platesUsed.add(platesUsed);
+    invalidate();
+    getScreen().invalidate();
     return platesUsed;
+  }
+
+  public boolean deletePlatesUsed(PlatesUsed platesUsed)
+  {
+    if (_platesUsed.remove(platesUsed)) {
+      invalidate();
+      getScreen().invalidate();
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -137,23 +162,19 @@ public class LibraryScreening extends Screening
   }
 
   /**
-   * Get the is special boolean flag.
+   * Get whether the screener-provided plates are being screened, in which case there will be no library plates associated with this activity.
    * @return the is special boolean flag
    */
-  @Column(name="isSpecial", nullable=false)
+  @Column(name="isForScreenerProvidedPlates", nullable=false)
   // TODO: rename property to isScreenerProvidedPlates
-  public boolean isSpecial()
+  public boolean isForScreenerProvidedPlates()
   {
-    return _isSpecial;
+    return _isForScreenerProvidedPlates;
   }
 
-  /**
-   * Set the is special boolean flag.
-   * @param isSpecial the new value for the is special boolean flag
-   */
-  public void setSpecial(boolean isSpecial)
+  public void setForScreenerProvidedPlates(boolean isForScreenerProvidedPlates)
   {
-    _isSpecial = isSpecial;
+    _isForScreenerProvidedPlates = isForScreenerProvidedPlates;
   }
 
 

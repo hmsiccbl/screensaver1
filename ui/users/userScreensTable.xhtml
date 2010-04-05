@@ -60,6 +60,13 @@
 				<t:outputText value="#{element.screen.dateCreated}"
 					converter="#{dateConverter}" styleClass="dataText" />
 			</t:column>
+      <t:column rendered="#{userViewer.readAdmin}">
+        <f:facet name="header">
+          <t:outputText value="Last Activity Date" />
+        </f:facet>
+        <t:outputText value="#{empty element.lastLabActivity ? null : element.lastLabActivity.dateOfActivity}"
+          converter="#{dateConverter}" styleClass="dataText" />
+      </t:column>
 		</ui:define>
 	</ss:collectionTable>
 

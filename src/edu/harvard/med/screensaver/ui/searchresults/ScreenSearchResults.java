@@ -23,6 +23,8 @@ import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.LabActivity;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -295,6 +297,34 @@ public class ScreenSearchResults extends EntitySearchResults<Screen,Integer>
       public Set<String> getCellValue(Screen screen)
       {
         return Sets.newHashSet(Iterables.transform(screen.getFundingSupports(), Functions.toStringFunction())); 
+      }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(columns.size() - 1).setVisible(false);
+    
+    columns.add(new IntegerEntityColumn<Screen>(
+      new PropertyPath<Screen>(Screen.class, "screenedExperimentalWellCount"),
+      "Experimental Wells Screened (Non-unique)", 
+      "The number of experimental library wells that have been screened (counting duplicate wells multiple times, ignoring replicates)", 
+      TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Screen screen) 
+      { 
+        return screen.getScreenedExperimentalWellCount();
+      }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new IntegerEntityColumn<Screen>(
+      new PropertyPath<Screen>(Screen.class, "screenedExperimentalWellCount"),
+      "Experimental Wells Screened (Unique)", 
+      "The number of experimental library wells that have been screened (counting duplicate wells once, ignoring replicates)",
+      TableColumn.UNGROUPED) {
+      @Override
+      public Integer getCellValue(Screen screen) 
+      { 
+        return screen.getUniqueScreenedExperimentalWellCount();
       }
     });
     columns.get(columns.size() - 1).setAdministrative(true);

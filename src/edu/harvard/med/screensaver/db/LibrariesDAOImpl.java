@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -286,5 +288,12 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       remainingVolumes.put((Copy) row[0], remainingVolume);
     }
     return remainingVolumes;
+  }
+
+  @Override
+  public int countExperimentalWells(int startPlate, int endPlate)
+  {
+    String hql = "select count(*) from Well w where w.plateNumber between ? and ? and w.libraryWellType = 'experimental'";
+    return ((Long) getHibernateTemplate().find(hql, Lists.newArrayList(startPlate, endPlate).toArray()).get(0)).intValue(); 
   }
 }

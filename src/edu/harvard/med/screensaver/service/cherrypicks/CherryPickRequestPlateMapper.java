@@ -15,10 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
@@ -67,7 +64,7 @@ public class CherryPickRequestPlateMapper
   @Transactional
   public void generatePlateMapping(final CherryPickRequest cherryPickRequestIn)
   {
-    CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reattachEntity(cherryPickRequestIn);
+    CherryPickRequest cherryPickRequest = (CherryPickRequest) genericEntityDao.reloadEntity(cherryPickRequestIn);
     doGeneratePlateMapping(cherryPickRequest);
   }
 
@@ -211,5 +208,37 @@ public class CherryPickRequestPlateMapper
     Collections.sort(toBeMapped, PlateMappingCherryPickComparator.getInstance());
     return toBeMapped;
   }
+  
+  /**
+   * Find any assay plates on the CherryPickRequest a set of lab cherry picks from the
+   * same source plate than would fit on a single assay plate. This matters to
+   * the lab, which must be notified to manually reload the source plate when
+   * creating the cherry pick plates. We can detect this case when the last well
+   * (containing a cherry pick) on an assay plate is from the same source plate
+   * as the first well on the next assay plate.
+   */
+  @Transactional(readOnly=true)
+  public Map<CherryPickAssayPlate, Integer> getAssayPlatesRequiringSourcePlateReload(CherryPickRequest cpr)
+  {
+    cpr = genericEntityDao.reloadEntity(cpr);
+    Map<CherryPickAssayPlate,Integer> platesRequiringReload = new HashMap<CherryPickAssayPlate,Integer>();
+    LabCherryPick last = null;
+    for (CherryPickAssayPlate assayPlate : cpr.getActiveCherryPickAssayPlates()) {
+      if (assayPlate.getLabCherryPicks().size() > 0) {
+        if (last != null) {
+          LabCherryPick first = Collections.max(assayPlate.getLabCherryPicks(),
+                                                LabCherryPickColumnMajorOrderingComparator.getInstance());
+          if (last.getSourceWell().getPlateNumber().equals(first.getSourceWell().getPlateNumber())) {
+            platesRequiringReload.put(assayPlate, first.getSourceWell().getPlateNumber());
+          }
+        }
+        last = Collections.max(assayPlate.getLabCherryPicks(),
+                               LabCherryPickColumnMajorOrderingComparator.getInstance());
+      }
+    }
+    return platesRequiringReload;
+  }
+
+  
 }
 
