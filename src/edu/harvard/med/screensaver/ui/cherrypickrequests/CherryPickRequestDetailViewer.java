@@ -133,6 +133,8 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
                           CherryPickRequest.requestedBy.getPath());
     getDao().needReadOnly(cherryPickRequest,
                           CherryPickRequest.emptyWellsOnAssayPlate.getPath());
+    getDao().needReadOnly(cherryPickRequest,
+                          CherryPickRequest.cherryPickScreenings.getPath());
   }
 
   @Override
