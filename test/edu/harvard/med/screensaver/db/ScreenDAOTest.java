@@ -86,10 +86,4 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
     Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber);
     assertNull("screen not deleted", screen1);
   }
-  
-  public void testCountScreenedExperimentalWellCount() throws IntrospectionException
-  {
-    new ScreenTest().testScreenedExperimentalWellCount();
-  }
-  
 }
