@@ -95,7 +95,7 @@ public class TestDataFactory
   @SuppressWarnings("unchecked")
   public <T> T getTestValueForType(Class<T> type) throws DomainModelDefinitionException
   {
-    if (type.equals(Integer.class)) {
+    if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
       _integerTestValue += 1;
       return (T) _integerTestValue;
     }
