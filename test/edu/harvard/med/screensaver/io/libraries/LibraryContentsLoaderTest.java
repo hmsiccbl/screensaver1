@@ -226,7 +226,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
       // expected error cells, [row,col]
       Set<ParseError> expectedErrors = Sets.newHashSet();
       expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must be null for well type: empty", "Human Kinases:(E,4)"));
-      expectedErrors.add(new ParseError("'buffer1' must be one of: [buffer, library control, DMSO, <undefined>, empty, experimental]", "Human Kinases:(C,5)"));
+      expectedErrors.add(new ParseError("'buffer1' must be one of: [buffer, DMSO, empty, experimental, <undefined>, library control]", "Human Kinases:(C,5)"));
       expectedErrors.add(new ParseError("Vendor and Vendor Reagent ID must both be specified, or neither should be specified", "Human Kinases:(E,6)"));
       expectedErrors.add(new ParseError("if sequence is specified, Vendor Reagent ID and Silencing Reagent Type must be specified", "Human Kinases:(H,7)"));
       expectedErrors.add(new ParseError("Well is required", "Human Kinases:(B,8)"));
