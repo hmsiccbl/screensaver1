@@ -676,8 +676,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       _assayWellControlTypeParser.parse(row.getCell(WellInfoColumn.ASSAY_WELL_TYPE.ordinal()));
     try {
       AssayWell assayWell = findOrCreateAssayWell(well, assayWellControlType);
-      //TODO: temporarily suppressed the DataModelViolations until we decide if AssayWellControlType MUST match LibraryWellType
-      
       List<DataColumn> wellExcludes = _excludeParser.parseList(row.getCell(WellInfoColumn.EXCLUDE.ordinal()));
       int iDataColumn = 0;
       for (DataColumn dataColumn : screenResult.getDataColumns()) 
