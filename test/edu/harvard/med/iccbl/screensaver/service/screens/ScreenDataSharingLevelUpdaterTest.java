@@ -276,17 +276,12 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
 
     startNewTransaction();
     screen2Published = genericEntityDao.reloadEntity(screen2Published);
+    screen3Mutual = genericEntityDao.reloadEntity(screen3Mutual);
     screen4Private = genericEntityDao.reloadEntity(screen4Private);
-    screenPrivatePublishedTransferred = genericEntityDao.reloadEntity(screenPrivatePublishedTransferred);
     
-    List<Screen> publishedScreens = screenDataSharingLevelUpdater.findNewPublishedPrivate();
+    Set<Screen> publishedScreens = Sets.newHashSet(screenDataSharingLevelUpdater.findNewPublishedPrivate());
     assertNotNull(publishedScreens);
-    assertTrue("Wrong number of publishedScreens found: " + publishedScreens, publishedScreens.size()==2);
-    Set<Screen> screens = Sets.newHashSet(publishedScreens);
-    
-    assertTrue("does not contain screen2Published", screens.contains(screen2Published));
-    assertTrue("does not contain screen4Private", screens.contains(screen4Private));
-    assertFalse("should not contain: screenPrivatePublishedTransferred", screens.contains(screenPrivatePublishedTransferred));
+    assertEquals(Sets.newHashSet(screen2Published, screen3Mutual, screen4Private), publishedScreens);
   }
 
   
