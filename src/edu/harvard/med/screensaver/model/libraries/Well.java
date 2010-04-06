@@ -496,8 +496,8 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
 
 
   /**
-   * Get the set of result values.
-   * @return the set of result values
+   * @return a Map of the result values associated with this well, as a map with
+   *         {@link DataColumn}s as keys
    */
   @OneToMany(fetch=FetchType.LAZY, mappedBy="well")
   @MapKeyManyToMany(joinColumns={ @JoinColumn(name="dataColumnId") }, targetEntity=DataColumn.class)

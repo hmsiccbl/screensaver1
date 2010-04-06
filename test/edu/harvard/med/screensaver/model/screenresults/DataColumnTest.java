@@ -46,52 +46,6 @@ public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
     super(DataColumn.class);
   }
 
-  /**
-   * Dual-purpose test:
-   * 1. Regression test for (apparent) Hibernate bug, which determines size of
-   * extra-lazy value-typed collections by counting non-null values of the first
-   * declared property, which may be nullable. If nullable, the reported
-   * collection size will be less than the real collection size!  RT #82230.
-   * 2. Test that the resultValues collection, mapped by WellKey, is working properly
-   */
-  public void testResultValuesSize()
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-    Library library = new Library("name", "short", ScreenType.SMALL_MOLECULE, LibraryType.DOS, 1, 3);
-    librariesDao.loadOrCreateWellsForLibrary(library);
-    genericEntityDao.saveOrUpdateEntity(library);
-
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        File workbookFile = new File(ScreenResultParserTest.TEST_INPUT_FILE_DIR, SCREEN_RESULT_FILE);
-        final Screen screen = MakeDummyEntities.makeDummyScreen(115);
-        genericEntityDao.persistEntity(screen);
-        try {
-          screenResultParser.parse(screen, workbookFile);
-        }
-        catch (FileNotFoundException e) {
-          fail(e.getMessage());
-        }
-        assertFalse("screen result had no errors", screenResultParser.getHasErrors());
-      }
-    });
-
-    genericEntityDao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 115);
-        assertEquals("result values count",
-                     28,
-                     screen.getScreenResult().getDataColumnsList().get(0).getResultValues().size());
-        assertEquals(screen.getScreenResult().getDataColumnsList().get(0).getWellKeyToResultValueMap().get(new WellKey(1, "A01")).getValue(),
-                     "1071894.000");
-      }
-    });
-  }
-
   public void testDeleteResultValueTest()
   {
     schemaUtil.truncateTablesOrCreateSchema();

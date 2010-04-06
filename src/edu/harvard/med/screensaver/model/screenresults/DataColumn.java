@@ -822,22 +822,18 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   }
 
   /**
-   * Get a mapping from the well ids to the result values for this data column.
+   * Get the result values for this data column.
    * <p>
-   * WARNING: obtaining an iterator on the returned Map will cause Hibernate
-   * to load all ResultValues. If you want to take advantage of extra-lazy
-   * loading, be sure to call only <code>size()</code> and <code>get(String wellId)</code>
-   * on the returned Map.
+   * WARNING: obtaining an iterator on the returned collection will cause Hibernate
+   * to load all of the ResultValues for this DataColumn, which may be very large!
    * <p>
    * WARNING: removing an element from this map is not supported; doing so
    * breaks ScreenResult.plateNumbers semantics.
-   * @return a mapping from the wells to result values for this data column
+   * @return a Collection of the result values for this data column
    * @motivation for hibernate
    */
-  @OneToMany(fetch=FetchType.LAZY,
-             mappedBy="dataColumn")
+  @OneToMany(fetch=FetchType.LAZY, mappedBy="dataColumn")
   @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.DELETE, org.hibernate.annotations.CascadeType.SAVE_UPDATE, org.hibernate.annotations.CascadeType.PERSIST })
-  //@org.hibernate.annotations.MapKey(columns={ @Column(name="well_id") })
   @OptimisticLock(excluded=true)
   public Collection<ResultValue> getResultValues()
   {
