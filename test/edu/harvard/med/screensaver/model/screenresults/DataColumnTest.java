@@ -10,23 +10,17 @@
 package edu.harvard.med.screensaver.model.screenresults;
 
 import java.beans.IntrospectionException;
-import java.io.File;
-import java.io.FileNotFoundException;
 
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
-import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
 {
@@ -34,9 +28,6 @@ public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
   {
     return buildTestSuite(DataColumnTest.class, DataColumn.class);
   }
-
-  public static final String SCREEN_RESULT_FILE = "ScreenResultTest115-result-values-size.xls";
-
 
   protected ScreenResultParser screenResultParser;
   protected LibrariesDAO librariesDao;
