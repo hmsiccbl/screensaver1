@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
 
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
@@ -146,6 +147,7 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
   @org.hibernate.annotations.ForeignKey(name = "fk_checklist_item_event_to_screening_room_user")
   @org.hibernate.annotations.Cascade({ /*org.hibernate.annotations.CascadeType.SAVE_UPDATE*/ })
   @org.hibernate.annotations.LazyToOne(org.hibernate.annotations.LazyToOneOption.PROXY)
+  @ToOne(unidirectional=true)
   public ScreeningRoomUser getScreeningRoomUser()
   {
     return _screeningRoomUser;
