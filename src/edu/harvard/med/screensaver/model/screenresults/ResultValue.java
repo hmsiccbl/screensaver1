@@ -247,6 +247,7 @@ public class ResultValue extends AbstractEntity<Integer>
    *         <code>ResultValue</code>; may return null.
    */
   @org.hibernate.annotations.Type(type="text")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* automated model tests can only test one type of result value, numeric or non-numeric, and since numeric is the more common choice that's the one we test automatically */) 
   //@Index(name="result_value_value_index")
   public String getValue()
   {
@@ -280,12 +281,12 @@ public class ResultValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Get the assay well's type.
-   *
-   * @return the assay well's type
+   * @deprecated use {@link AssayWell#getAssayWellControlType}; this will be removed in the future
    */
+  @Deprecated
   @Column(nullable=true)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.AssayWellControlType$UserType")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* set via parent AssayWel.assayWellControlType */)
   public AssayWellControlType getAssayWellControlType()
   {
     return _assayWellControlType;

@@ -378,25 +378,16 @@ public class TestDataFactory
       }
     });
 
-//    _entityFactoryMap.put(ResultValue.class, new EntityFactory() {
-//      public AbstractEntity createEntity(AbstractEntity relatedEntity)
-//        throws DomainModelDefinitionException
-//      {
-//        if (relatedEntity instanceof DataColumn) {
-//          DataColumn col = (DataColumn) relatedEntity;
-//          AssayWell assayWell = newInstance(AssayWell.class, col.getScreenResult());
-//          if (col.isNumeric()) {
-//            return col.createResultValue(assayWell, getTestValueForType(Double.class));
-//          }
-//          else {
-//            return col.createResultValue(assayWell, getTestValueForType(String.class));
-//          }
-//        }
-//        DataColumn col = newInstance(DataColumn.class).makeNumeric(3);
-//        return newInstance(ResultValue.class, col);
-//      }
-//    });
-//    
+    _entityFactoryMap.put(ResultValue.class, new EntityFactory() {
+      public AbstractEntity createEntity(AbstractEntity relatedEntity)
+        throws DomainModelDefinitionException
+      {
+        DataColumn col = newInstance(DataColumn.class).makeNumeric(3);
+        AssayWell assayWell = col.getScreenResult().createAssayWell(newInstance(Well.class));
+        return col.createResultValue(assayWell, getTestValueForType(Double.class));
+      }
+    });
+    
     _entityFactoryMap.put(DataColumn.class, new EntityFactory() {
       public AbstractEntity createEntity(AbstractEntity relatedEntity)
         throws DomainModelDefinitionException
