@@ -257,6 +257,15 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
     return _screensLed;
   }
 
+  public boolean addScreenLed(Screen screenLed)
+  {
+    if (_screensLed.add(screenLed)) {
+      screenLed.setLeadScreener(this);
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Get the set of screens for which this user was a collaborator.
    * @return the set of screens for which this user was a collaborator
