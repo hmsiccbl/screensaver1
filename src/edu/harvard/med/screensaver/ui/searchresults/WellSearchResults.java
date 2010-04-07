@@ -21,7 +21,6 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
@@ -55,6 +54,7 @@ import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
@@ -118,7 +118,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
   };
 
   private GenericEntityDAO _dao;
-  private DataAccessPolicy _dataAccessPolicy;
+  private EntityViewPolicy _entityViewPolicy;
   private LibraryViewer _libraryViewer;
   private WellsSdfDataExporter _wellsSdfDataExporter;
   protected StructureImageProvider _structureImageProvider;
@@ -143,7 +143,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
    * Construct a new <code>WellSearchResultsViewer</code> object.
    */
   public WellSearchResults(GenericEntityDAO dao,
-                           DataAccessPolicy dataAccessPolicy,
+                           EntityViewPolicy entityViewPolicy,
                            LibraryViewer libraryViewer,
                            WellViewer wellViewer,
                            WellsSdfDataExporter wellsSdfDataExporter,
@@ -153,7 +153,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
     super(Lists.newArrayList(Iterables.concat(Lists.newArrayList(wellsSdfDataExporter), dataExporters)), wellViewer);
     _wellsSdfDataExporter = wellsSdfDataExporter;
     _dao = dao;
-    _dataAccessPolicy = dataAccessPolicy;
+    _entityViewPolicy = entityViewPolicy;
     _libraryViewer = libraryViewer;
     _structureImageProvider = structureImageProvider;
   }
@@ -426,7 +426,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
       @Override
       public String getCellValue(SilencingReagent reagent)
       {
-        if (_dataAccessPolicy.isAllowedAccessToSilencingReagentSequence(reagent)) {
+        if (_entityViewPolicy.isAllowedAccessToSilencingReagentSequence(reagent)) {
           return reagent.getSequence();
         }
         return null;

@@ -14,9 +14,9 @@ package edu.harvard.med.screensaver.ui.table.model;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
 
@@ -24,10 +24,10 @@ import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
 /**
  * An {@link InMemoryDataModel} that fetches data using an
  * {@link EntityDataFetcher}. Filters out top-level entities that are
- * restricted, as determined by the current {@link DataAccessPolicy}. Note that
+ * restricted, as determined by the current {@link EntityViewPolicy}. Note that
  * this makes InMemoryEntityDataModel behave differently than
  * {@link VirtualPagingEntityDataModel}, which cannot apply the
- * DataAccessPolicy as that would require retrieving all of the entities.
+ * EntityViewPolicy as that would require retrieving all of the entities.
  * 
  * @author drew
  */

@@ -56,11 +56,12 @@ import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 
 /**
- * A {@link DataAccessPolicy} that allows any user to access any entity in the system.
+ * A {@link EntityViewPolicy} that allows any user to view any entity in the system.
  */
-public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
+public class DefaultEntityViewPolicy implements EntityViewPolicy
 {
   public boolean visit(AbaseTestset entity)
   {

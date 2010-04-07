@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/1.9.2-dev/src/edu/harvard/med/screensaver/db/accesspolicy/DataAccessPolicyInjectorPostLoadEventListener.java $
-// $Id: DataAccessPolicyInjectorPostLoadEventListener.java 3467 2009-09-09 19:26:58Z atolopko $
+// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/1.9.2-dev/src/edu/harvard/med/screensaver/db/accesspolicy/EntityViewPolicyInjectorPostLoadEventListener.java $
+// $Id: EntityViewPolicyInjectorPostLoadEventListener.java 3467 2009-09-09 19:26:58Z atolopko $
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 

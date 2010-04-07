@@ -15,7 +15,6 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
 import edu.harvard.med.screensaver.db.hibernate.JoinType;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -69,6 +68,7 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
@@ -81,15 +81,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 /**
- * A DataAccessPolicy implementation for ICCB-Longwood that is used by the production web application. 
+ * An EntityViewPolicy implementation for ICCB-Longwood that is used by the production web application. 
  */
-public class WebDataAccessPolicy implements DataAccessPolicy
+public class IccblEntityViewPolicy implements EntityViewPolicy
 {
   private static final String CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
   public static final String MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Marcus Library Screen";
   public static final String GRAY_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Gray Library Screen";
 
-  private static Logger log = Logger.getLogger(WebDataAccessPolicy.class);
+  private static Logger log = Logger.getLogger(IccblEntityViewPolicy.class);
 
   private CurrentScreensaverUser _currentScreensaverUser;
   private ScreensaverUser _screensaverUser;
@@ -103,9 +103,9 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   private Set<Well> _smallMoleculeMutualPositiveWells;
   private Set<Integer> _restrictedReagentLibraryPlates;
   
-  protected WebDataAccessPolicy() {}
+  protected IccblEntityViewPolicy() {}
 
-  public WebDataAccessPolicy(CurrentScreensaverUser user,
+  public IccblEntityViewPolicy(CurrentScreensaverUser user,
                              GenericEntityDAO dao) 
   {
     _currentScreensaverUser = user;
@@ -115,7 +115,7 @@ public class WebDataAccessPolicy implements DataAccessPolicy
   /**
    * @motivation for unit tests
    */
-  public WebDataAccessPolicy(ScreensaverUser user,
+  public IccblEntityViewPolicy(ScreensaverUser user,
                              GenericEntityDAO dao) 
   {
     _screensaverUser = user;

@@ -100,7 +100,7 @@
       <map>
         <entry key="post-load">
           <list>
-            <bean class="edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener" />
+            <bean class="edu.harvard.med.screensaver.db.accesspolicy.EntityViewPolicyInjectorPostLoadEventListener" />
             <bean class="edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector" />
           </list>
         </entry>

@@ -264,7 +264,7 @@
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.WellSearchResults">
     <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="dataAccessPolicy" />
+    <constructor-arg ref="entityViewPolicy" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="wellViewer" />
     <constructor-arg ref="sdfWellsDataExporter" />
@@ -326,7 +326,7 @@
     <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
-    <constructor-arg ref="dataAccessPolicy" />
+    <constructor-arg ref="entityViewPolicy" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="structureImageProvider" />
     <constructor-arg ref="studyViewer" />
@@ -441,7 +441,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenDao" />
     <constructor-arg ref="usersDao" />
-    <constructor-arg ref="dataAccessPolicy" />
+    <constructor-arg ref="entityViewPolicy" />
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="cherryPickRequestDetailViewer" />
     <constructor-arg ref="publicationInfoProvider" />

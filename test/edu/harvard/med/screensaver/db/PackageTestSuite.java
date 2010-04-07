@@ -36,6 +36,6 @@ public class PackageTestSuite extends TestSuite
     addTestSuite(ScreenResultDAOTest.class);
     addTestSuite(ScreenResultLoaderTest.class);
     addTestSuite(UsersDAOTest.class);
-    addTestSuite(WebDataAccessPolicyTest.class);
+    addTestSuite(IccbDataAccessPolicyTest.class);
   }
 }

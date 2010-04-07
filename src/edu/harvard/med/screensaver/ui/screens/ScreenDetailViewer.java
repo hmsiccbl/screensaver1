@@ -28,7 +28,6 @@ import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
@@ -51,6 +50,7 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
 import edu.harvard.med.screensaver.ui.EditResult;
@@ -86,7 +86,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private static Logger log = Logger.getLogger(ScreenDetailViewer.class);
 
   private ScreenDAO _screenDao;
-  private DataAccessPolicy _dataAccessPolicy;
+  private EntityViewPolicy _entityViewPolicy;
   private ScreenViewer _screenViewer;
   private ActivityViewer _activityViewer;
   private CherryPickRequestDetailViewer _cherryPickRequestDetailViewer;
@@ -132,7 +132,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                             GenericEntityDAO dao,
                             ScreenDAO screenDao,
                             UsersDAO usersDao,
-                            DataAccessPolicy dataAccessPolicy,
+                            EntityViewPolicy entityViewPolicy,
                             ActivityViewer activityViewer,
                             CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                             PublicationInfoProvider publicationInfoProvider,
@@ -147,7 +147,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
           EDIT_SCREEN,
           usersDao);
     _screenDao = screenDao;
-    _dataAccessPolicy = dataAccessPolicy;
+    _entityViewPolicy = entityViewPolicy;
     _screenViewer = screenViewer;
     _activityViewer = activityViewer;
     _cherryPickRequestDetailViewer = cherryPickRequestDetailViewer;
@@ -246,7 +246,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
    */
   public boolean isAllowedAccessToScreenDetails()
   {
-    return _dataAccessPolicy.isAllowedAccessToScreenDetails(getEntity());
+    return _entityViewPolicy.isAllowedAccessToScreenDetails(getEntity());
   }
 
   /**
@@ -257,7 +257,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
    */
   public boolean isAllowedAccessToScreenActivity()
   {
-    return _dataAccessPolicy.isAllowedAccessToScreenActivity(getEntity());
+    return _entityViewPolicy.isAllowedAccessToScreenActivity(getEntity());
   }
 
   public UISelectOneBean<FundingSupport> getNewFundingSupport()

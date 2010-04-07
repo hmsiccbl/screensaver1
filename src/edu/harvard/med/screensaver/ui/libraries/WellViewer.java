@@ -25,7 +25,6 @@ import javax.faces.model.ListDataModel;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.Gene;
@@ -41,6 +40,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
@@ -68,7 +68,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
 
   private LibraryViewer _libraryViewer;
   private LibrariesDAO _librariesDao;
-  private DataAccessPolicy _dataAccessPolicy;
+  private EntityViewPolicy _entityViewPolicy;
   private StructureImageProvider _structureImageProvider;
   private NameValueTable _nameValueTable;
   private NameValueTable _annotationNameValueTable;
@@ -89,7 +89,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
                     WellSearchResults wellSearchResults,
                     GenericEntityDAO dao,
                     LibrariesDAO librariesDAO,
-                    DataAccessPolicy dataAccessPolicy,
+                    EntityViewPolicy entityViewPolicy,
                     LibraryViewer libraryViewer,
                     StructureImageProvider structureImageProvider,
                     StudyViewer studyViewer,
@@ -102,7 +102,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
           dao,
           wellSearchResults);
     _librariesDao = librariesDAO;
-    _dataAccessPolicy = dataAccessPolicy;
+    _entityViewPolicy = entityViewPolicy;
     _libraryViewer = libraryViewer;
     _structureImageProvider = structureImageProvider;
     _studyViewer = studyViewer;
@@ -342,7 +342,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
   public boolean isAllowedAccessToSilencingReagentSequence(Well well)
   {
     if (well.getLatestReleasedReagent() != null && well.<Reagent>getLatestReleasedReagent() instanceof SilencingReagent) {
-      return _dataAccessPolicy.isAllowedAccessToSilencingReagentSequence((SilencingReagent) well.getLatestReleasedReagent());
+      return _entityViewPolicy.isAllowedAccessToSilencingReagentSequence((SilencingReagent) well.getLatestReleasedReagent());
     }
     return false;
   }

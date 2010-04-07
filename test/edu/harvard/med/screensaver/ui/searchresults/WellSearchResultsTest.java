@@ -33,7 +33,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.db.accesspolicy.UnrestrictedDataAccessPolicy;
+import edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityViewPolicy;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.Getter;
@@ -151,9 +151,9 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       });
     }
 
-    _wellViewer = new WellViewer(null, null, genericEntityDao, librariesDao, new UnrestrictedDataAccessPolicy(), null, null, null, null);
+    _wellViewer = new WellViewer(null, null, genericEntityDao, librariesDao, new DefaultEntityViewPolicy(), null, null, null, null);
     _inMemoryWellSearchResults = new WellSearchResults(genericEntityDao,
-                                                       new UnrestrictedDataAccessPolicy(),
+                                                       new DefaultEntityViewPolicy(),
                                                        null,
                                                        _wellViewer,
                                                        null,
@@ -163,7 +163,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     _inMemoryWellSearchResults.setDataTableUIComponent(new UIData());
 
     _virtualPagingWellSearchResults = new WellSearchResults(genericEntityDao,
-                                                            new UnrestrictedDataAccessPolicy(),
+                                                            new DefaultEntityViewPolicy(),
                                                             null,
                                                             _wellViewer,
                                                             null,

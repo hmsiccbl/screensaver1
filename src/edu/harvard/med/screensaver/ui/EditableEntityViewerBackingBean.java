@@ -191,7 +191,7 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity> extends 
     updateEntityProperties(getEntity());
     recordUpdateActivity();
     getDao().flush();
-    getDao().clear(); // forces entity to be reloaded from db in view mode; this ensures that newly created entities have dataAccessPolicy injected; also, any problems with persistence will be caught immediately after save during UI testing
+    getDao().clear(); // forces entity to be reloaded from db in view mode; this ensures that newly created entities have entityViewPolicy injected; also, any problems with persistence will be caught immediately after save during UI testing
     return postEditAction(editResult);
   }
 

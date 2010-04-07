@@ -20,10 +20,10 @@ import java.util.Map;
 
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicyInjectorPostLoadEventListener;
+import edu.harvard.med.screensaver.db.accesspolicy.EntityViewPolicyInjectorPostLoadEventListener;
 import edu.harvard.med.screensaver.domainlogic.EntityUpdater;
 import edu.harvard.med.screensaver.model.annotations.Column;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -62,7 +62,7 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
 {
   private static Logger log = Logger.getLogger(AbstractEntity.class);
 
-  private DataAccessPolicy _dataAccessPolicy;
+  private EntityViewPolicy _entityViewPolicy;
   private List<EntityUpdater> _entityUpdaters;
   private K _entityId;
   private Integer _hashCode;
@@ -195,34 +195,34 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
    * restricted entity is one whose data should not be made visible to the current
    * user.
    * 
-   * @see DataAccessPolicyInjectorPostLoadEventListener
-   * @throws UnsupportedOperationException if dataAccessPolicy not set
+   * @see EntityViewPolicyInjectorPostLoadEventListener
+   * @throws UnsupportedOperationException if entityViewPolicy not set
    */
   @Transient
   public boolean isRestricted()
   {
-    if (_dataAccessPolicy == null) {
-      throw new UnsupportedOperationException("dataAccessPolicy not set");
+    if (_entityViewPolicy == null) {
+      throw new UnsupportedOperationException("entityViewPolicy not set");
     }
-    Boolean isAllowed = (Boolean) acceptVisitor(_dataAccessPolicy);
+    Boolean isAllowed = (Boolean) acceptVisitor(_entityViewPolicy);
     return isAllowed == null ? true : !isAllowed;
   }
 
   /**
-   * @see DataAccessPolicyInjectorPostLoadEventListener
+   * @see EntityViewPolicyInjectorPostLoadEventListener
    */
-  public void setDataAccessPolicy(DataAccessPolicy dataAccessPolicy)
+  public void setEntityViewPolicy(EntityViewPolicy entityViewPolicy)
   {
-    _dataAccessPolicy = dataAccessPolicy;
+    _entityViewPolicy = entityViewPolicy;
   }
 
   /**
-   * @see DataAccessPolicyInjectorPostLoadEventListener
+   * @see EntityViewPolicyInjectorPostLoadEventListener
    */
   @Transient
-  public DataAccessPolicy getDataAccessPolicy()
+  public EntityViewPolicy getEntityViewPolicy()
   {
-    return _dataAccessPolicy;
+    return _entityViewPolicy;
   }
   
   public void setEntityUpdaters(List<EntityUpdater> entityUpdaters)
@@ -281,7 +281,7 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
    *         from the hibernate world
    */
   // TODO: try to replace this with a listener on the hibernate event model. see
-  // DataAccessPolicyInjectorPostLoadEventListener for example
+  // EntityViewPolicyInjectorPostLoadEventListener for example
   protected boolean isHibernateCaller()
   {
     return getCallingClassName().startsWith("org.hibernate.");

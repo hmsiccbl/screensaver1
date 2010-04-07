@@ -20,7 +20,7 @@ import jxl.Workbook;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.db.accesspolicy.UnrestrictedDataAccessPolicy;
+import edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityViewPolicy;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -44,7 +44,7 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
     final Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     genericEntityDao.persistEntity(library);
 
-    WellSearchResults wellSearchResults = new WellSearchResults(genericEntityDao, new UnrestrictedDataAccessPolicy(), null, null, null, null, Collections.<DataExporter<?>>emptyList());
+    WellSearchResults wellSearchResults = new WellSearchResults(genericEntityDao, new DefaultEntityViewPolicy(), null, null, null, null, Collections.<DataExporter<?>>emptyList());
     GenericDataExporter<Well> exporter = (GenericDataExporter<Well>) wellSearchResults.getDataExporters().get(0);
     wellSearchResults.searchAll();
     wellSearchResults.searchCommandListener(null); // invoke search now (necessary when using searchAllWells(), above

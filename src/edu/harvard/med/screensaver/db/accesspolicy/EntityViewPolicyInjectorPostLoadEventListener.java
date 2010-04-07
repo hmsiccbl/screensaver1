@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.db.accesspolicy;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 
 import org.hibernate.event.PostLoadEvent;
 import org.hibernate.event.def.DefaultPostLoadEventListener;
@@ -18,34 +19,35 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 
 /**
- * A Hibernate event listener that injects the specified DataAccessPolicy into
+ * A Hibernate event listener that injects the specified EntityViewPolicy into
  * every AbstractEntity object loaded by Hibernate.
  * 
  * @see AbstractEntity#isRestricted()
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-// HACK: we're forced to make this a BeanFactoryAware bean, in order to obtain a
-// DataAccessPolicy without creating a circular dependency in Spring
+// HACK: we're forced to make this a BeanFactoryAware bean, in order to obtain an
+// EntityViewPolicy without creating a circular dependency in Spring
 // configuration files (and using the Spring-recommended setter-based injection
 // strategy for handling circular dependencies could not be made to work).
-public class DataAccessPolicyInjectorPostLoadEventListener extends DefaultPostLoadEventListener implements BeanFactoryAware
+public class EntityViewPolicyInjectorPostLoadEventListener extends DefaultPostLoadEventListener implements BeanFactoryAware
 {
   private static final long serialVersionUID = 1L;
 
   private BeanFactory _beanFactory;
-  private DataAccessPolicy _dataAccessPolicy;
+  private EntityViewPolicy _entityViewPolicy;
   
   public void setBeanFactory(BeanFactory beanFactory) throws BeansException
   {
     _beanFactory = beanFactory;
   }
-  public DataAccessPolicy getDataAccessPolicy()
+  
+  public EntityViewPolicy getEntityViewPolicy()
   {
-    if (_dataAccessPolicy == null) {
-      _dataAccessPolicy = (DataAccessPolicy) _beanFactory.getBean("dataAccessPolicy");
+    if (_entityViewPolicy == null) {
+      _entityViewPolicy = (EntityViewPolicy) _beanFactory.getBean("entityViewPolicy");
     }
-    return _dataAccessPolicy;
+    return _entityViewPolicy;
   }
 
   @Override
@@ -56,7 +58,7 @@ public class DataAccessPolicyInjectorPostLoadEventListener extends DefaultPostLo
     
     if (event.getEntity() instanceof AbstractEntity) {
       AbstractEntity entity = (AbstractEntity) event.getEntity();
-      entity.setDataAccessPolicy(getDataAccessPolicy());
+      entity.setEntityViewPolicy(getEntityViewPolicy());
     }
   }
 }

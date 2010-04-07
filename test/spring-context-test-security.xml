@@ -27,8 +27,8 @@
   </bean>
   
   <bean
-    id="dataAccessPolicy"
-    class="edu.harvard.med.iccbl.screensaver.policy.WebDataAccessPolicy"
+    id="entityViewPolicy"
+    class="edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy"
     scope="prototype">
     <constructor-arg ref="currentScreensaverUser" />
     <constructor-arg ref="genericEntityDao" />

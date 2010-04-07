@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.model;
 
 import java.io.Serializable;
 
-import edu.harvard.med.screensaver.db.accesspolicy.DataAccessPolicy;
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 
 import com.google.common.base.Function;
 
@@ -38,7 +38,7 @@ public interface Entity<K extends Serializable>
   boolean isTransient();
 
   /**
-   * @return true if the {@link DataAccessPolicy} that is currently in use has
+   * @return true if the {@link EntityViewPolicy} that is currently in use has
    *         determined that the current user should not be allowed to access
    *         this entity
    */
@@ -75,7 +75,7 @@ public interface Entity<K extends Serializable>
    * 
    * @param visitor
    * @motivation to keep most of our AbstractEntity subclasses clean, as we
-   *             currently only have the DataAccessPolicy visitor, which does
+   *             currently only have the EntityViewPolicy visitor, which does
    *             not actually need to visit every subclass.
    */
    Object acceptVisitor(AbstractEntityVisitor visitor);
