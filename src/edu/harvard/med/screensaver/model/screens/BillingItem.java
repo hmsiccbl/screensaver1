@@ -88,7 +88,7 @@ public class BillingItem
    * @return the date sent for billing
    */
   @Column(nullable=true)
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateSentForBilling()
   {
     return _dateSentForBilling;

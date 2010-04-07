@@ -100,7 +100,7 @@ public class AbaseTestset extends AbstractEntity<Integer>
    * @return the testset date
    */
   @Column(nullable=false)
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getTestsetDate()
   {
     return _testsetDate;

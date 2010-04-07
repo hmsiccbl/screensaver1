@@ -1051,7 +1051,7 @@ public class Screen extends Study implements AttachedFilesEntity
    * @return the data meeting scheduled
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDataMeetingScheduled()
   {
     return _dataMeetingScheduled;
@@ -1071,7 +1071,7 @@ public class Screen extends Study implements AttachedFilesEntity
    * @return the data meeting completed date
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDataMeetingComplete()
   {
     return _dataMeetingComplete;
@@ -1256,7 +1256,7 @@ public class Screen extends Study implements AttachedFilesEntity
     _comsRegistrationNumber = comsRegistrationNumber;
   }
 
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getComsApprovalDate()
   {
     return _comsApprovalDate;
@@ -1305,7 +1305,7 @@ public class Screen extends Study implements AttachedFilesEntity
    * Get the date the publishable protocol was entered.
    * @return the date the publishable protocol was entered
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getPublishableProtocolDateEntered()
   {
     return _publishableProtocolDateEntered;
@@ -1414,7 +1414,7 @@ public class Screen extends Study implements AttachedFilesEntity
    * @return the date of application
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateOfApplication()
   {
     return _dateOfApplication;
@@ -1726,7 +1726,7 @@ public class Screen extends Study implements AttachedFilesEntity
    * The date on which a level 2 or 3 screen is to become level 1.
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDataPrivacyExpirationDate()
   {
     return _dataPrivacyExpirationDate;
@@ -1768,7 +1768,7 @@ public class Screen extends Study implements AttachedFilesEntity
   }
 
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getMinAllowedDataPrivacyExpirationDate()
   {
     return _minAllowedDataPrivacyExpirationDate;
@@ -1786,7 +1786,7 @@ public class Screen extends Study implements AttachedFilesEntity
   }
 
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getMaxAllowedDataPrivacyExpirationDate()
   {
     return _maxAllowedDataPrivacyExpirationDate;
@@ -1826,7 +1826,7 @@ public class Screen extends Study implements AttachedFilesEntity
    * @return
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDataPrivacyExpirationNotifiedDate()
   {
     return _dataPrivacyExpirationNotifiedDate;

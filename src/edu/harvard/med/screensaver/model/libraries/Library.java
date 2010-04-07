@@ -575,7 +575,7 @@ public class Library extends AuditedAbstractEntity<Integer>
    *
    * @return the date received
    */
-  @Type(type = "edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type = "edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateReceived()
   {
     return _dateReceived;
@@ -596,7 +596,7 @@ public class Library extends AuditedAbstractEntity<Integer>
    *
    * @return the date screenable
    */
-  @Type(type = "edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type = "edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateScreenable()
   {
     return _dateScreenable;

@@ -569,7 +569,7 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
    * Get the harvard id expiration date.
    * @return the harvard id expiration date
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getHarvardIdExpirationDate()
   {
     return _harvardIdExpirationDate;
@@ -587,7 +587,7 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
   /**
    * Get the harvard id requested expiration date.
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getHarvardIdRequestedExpirationDate()
   {
     return _harvardIdRequestedExpirationDate;

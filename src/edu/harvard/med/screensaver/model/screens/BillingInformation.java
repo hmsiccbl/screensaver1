@@ -145,7 +145,7 @@ public class BillingInformation
    * @return the billing info return date
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getBillingInfoReturnDate()
   {
     return _billingInfoReturnDate;
@@ -205,7 +205,7 @@ public class BillingInformation
    * @return the fee form requested date
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getFeeFormRequestedDate()
   {
     return _feeFormRequestedDate;
@@ -264,7 +264,7 @@ public class BillingInformation
    * @return the date completed 5-10K compounds
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateCompleted5KCompounds()
   {
     return _dateCompleted5KCompounds;
@@ -284,7 +284,7 @@ public class BillingInformation
    * @return the date faxed to billing department
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateFaxedToBillingDepartment()
   {
     return _dateFaxedToBillingDepartment;
@@ -304,7 +304,7 @@ public class BillingInformation
    * @return the date charged
    */
   @Column
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateCharged()
   {
     return _dateCharged;

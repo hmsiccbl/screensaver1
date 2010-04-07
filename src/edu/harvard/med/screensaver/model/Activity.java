@@ -171,7 +171,7 @@ public abstract class Activity extends AuditedAbstractEntity<Integer> implements
    * @return the date the activity was performed
    */
   @Column(nullable=false)
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateOfActivity()
   {
     return _dateOfActivity;

@@ -7,7 +7,7 @@
 //at Harvard Medical School. This software is distributed under the terms of
 //the GNU General Public License.
 
-package edu.harvard.med.screensaver.db.hibernate;
+package edu.harvard.med.screensaver.db.usertypes;
 
 import java.io.Serializable;
 import java.sql.Date;

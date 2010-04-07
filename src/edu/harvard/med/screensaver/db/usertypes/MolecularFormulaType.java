@@ -9,37 +9,24 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.db.hibernate;
+package edu.harvard.med.screensaver.db.usertypes;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import edu.harvard.med.screensaver.model.Volume;
 
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
 
-import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.VolumeUnit;
-
-public class VolumeType implements UserType
+public class MolecularFormulaType implements UserType
 {
-
-  // static members
-
-  public static final VolumeUnit NORMALIZED_UNITS = VolumeUnit.LITERS; 
-
-
-  // instance data members
-
-  // public constructors and methods
-
-
   public int[] sqlTypes() 
   {
-    return new int[]{ Hibernate.BIG_DECIMAL.sqlType() };
+    return new int[]{ Hibernate.TEXT.sqlType() };
   }
   
   public Object assemble(Serializable cached, Object owner)
@@ -79,10 +66,10 @@ public class VolumeType implements UserType
     throws HibernateException,
     SQLException
   {
-    BigDecimal rawValue = rs.getBigDecimal(names[0]);
+    String rawValue = rs.getString(names[0]);
     // Deferred check after first read
     if (rs.wasNull()) return null;
-    return new Volume(rawValue.toString(), NORMALIZED_UNITS).convertToReasonableUnits();
+    return rawValue;
   }
 
   public void nullSafeSet(PreparedStatement st, Object value, int index)
@@ -90,10 +77,10 @@ public class VolumeType implements UserType
     SQLException
   {
     if (value == null) {
-      st.setNull(index, Hibernate.BIG_DECIMAL.sqlType());
+      st.setNull(index, Hibernate.TEXT.sqlType());
     } 
     else {
-      st.setBigDecimal(index, ((Volume) value).getValue(NORMALIZED_UNITS));
+      st.setString(index, value.toString());
     }    
   }
 

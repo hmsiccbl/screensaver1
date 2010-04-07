@@ -86,7 +86,7 @@ public abstract class LabActivity extends Activity
    * @return the volume transferred per well
    */
   @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType") 
   public Volume getVolumeTransferredPerWell()
   {
     return _volumeTransferredPerWell;

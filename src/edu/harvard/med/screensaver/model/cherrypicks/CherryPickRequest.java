@@ -487,7 +487,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * @return the date of the request
    */
   @Column(nullable=false)
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateRequested()
   {
     return _dateRequested;
@@ -522,7 +522,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * @return the transferVolumePerWell
    */
   @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType")
   public Volume getTransferVolumePerWellRequested()
   {
     return _transferVolumePerWellRequested;
@@ -545,7 +545,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * @return the transferVolumePerWell
    */
   @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType")
   public Volume getTransferVolumePerWellApproved()
   {
     return _transferVolumePerWellApproved;
@@ -567,7 +567,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * Get the date the volume was approved.
    * @return the date the volume was approved
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateVolumeApproved()
   {
     return _dateVolumeApproved;

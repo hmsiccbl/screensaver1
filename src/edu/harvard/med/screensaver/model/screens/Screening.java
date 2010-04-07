@@ -97,7 +97,7 @@ public abstract class Screening extends LabActivity
    * Get the date the assay protocol was last modified.
    * @return the date the assay protocol was last modified
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getAssayProtocolLastModifiedDate()
   {
     return _assayProtocolLastModifiedDate;

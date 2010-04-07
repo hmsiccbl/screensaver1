@@ -167,7 +167,7 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
    */
   @Column(precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE, nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType")
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType")
   public Volume getVolume()
   {
     return _volume;

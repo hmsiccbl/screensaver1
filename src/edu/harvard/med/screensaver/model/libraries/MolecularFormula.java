@@ -23,7 +23,7 @@ public class MolecularFormula
     _molecularFormula = molecularFormula;
   }
 
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.MolecularFormulaType")
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.MolecularFormulaType")
   public String getMolecularFormula()
   {
     return _molecularFormula;

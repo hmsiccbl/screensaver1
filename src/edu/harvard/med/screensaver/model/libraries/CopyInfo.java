@@ -204,7 +204,7 @@ public class CopyInfo extends AbstractEntity<Integer>
    */
   @Column(nullable=false, precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hibernate.VolumeType") 
+  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType") 
   public Volume getWellVolume()
   {
     return _wellVolume;
@@ -233,7 +233,7 @@ public class CopyInfo extends AbstractEntity<Integer>
    * Get the date plated.
    * @return the date plated
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDatePlated()
   {
     return _datePlated;
@@ -252,7 +252,7 @@ public class CopyInfo extends AbstractEntity<Integer>
    * Get the date retired.
    * @return the date retired
    */
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDateRetired()
   {
     return _dateRetired;

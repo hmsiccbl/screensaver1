@@ -158,7 +158,7 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
    *         enacted
    */
   @Column(updatable=false)
-  @Type(type = "edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type = "edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   @Immutable
   public LocalDate getDatePerformed()
   {

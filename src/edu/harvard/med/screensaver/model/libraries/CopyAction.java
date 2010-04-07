@@ -119,7 +119,7 @@ public class CopyAction extends AbstractEntity<Integer>
    * @return the date
    */
   @Column(nullable=false)
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getDate()
   {
     return _date;

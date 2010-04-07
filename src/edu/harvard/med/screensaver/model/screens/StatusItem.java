@@ -111,7 +111,7 @@ public class StatusItem extends AbstractEntity<Integer> implements Comparable<St
    */
   @Column(nullable=false, updatable=false)
   @Immutable
-  @Type(type="edu.harvard.med.screensaver.db.hibernate.LocalDateType")
+  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
   public LocalDate getStatusDate()
   {
     return _statusDate;
