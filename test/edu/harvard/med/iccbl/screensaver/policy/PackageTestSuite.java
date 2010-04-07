@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.iccbl.screensaver;
+package edu.harvard.med.iccbl.screensaver.policy;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -26,8 +26,7 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    addTest(edu.harvard.med.iccbl.screensaver.policy.PackageTestSuite.suite());
-    addTest(edu.harvard.med.iccbl.screensaver.service.PackageTestSuite.suite());
+    addTestSuite(edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy.class);
   }
 
 }

@@ -7,13 +7,17 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.db;
+package edu.harvard.med.iccbl.screensaver.policy;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
 import edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.SchemaUtil;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
@@ -30,9 +34,8 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.DataType;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
