@@ -1,5 +1,5 @@
 /**
- * Provides classes that implement the Screensaver object model. The model is broken out
+ * Contains the entity classes that form the Screensaver domain model. The model is broken out
  * into the following major sections, each in its own package:
  * 
  * <dl>
@@ -30,17 +30,17 @@
  * 
  * <h3>Hibernate Annotations and the Java Persistence API</h3>
  * 
- * The object model is implemented with Hibernate Annotations. This provides an
- * implementation of, plus custom extensions to, the Java Persistence API. We also provide
- * our own set of custom extensions using annotations in the {@link
- * edu.harvard.med.screensaver.model.annotations annotations} subpackage. Our custom
- * extensions are mainly used to implement a comprehensive test suite of the model, which
+ * The domain model entity classes are mapped to a relational database schema using JPA 
+ * annotations and Hibernate annotations (for extended mapping functionality). Screensaver also provides
+ * its own set of domain model annotations in the {@link
+ * edu.harvard.med.screensaver.model.annotations} package. These annotations
+ * are mainly used to implement a comprehensive test suite of the model, which
  * tests for model correctness as thoroughly as possible.
  * 
  * <h3>Entity Identifiers</h3>
  * 
- * All object model classes derive from {@link AbstractEntity}. See the Javadoc comment in
- * that class to learn more about what it provides for the entity subclasses. Two different
+ * Domain model entity classes must implement the {@link Entity} interface and may extend 
+ * {@link AbstractEntity}. Two different
  * methods are used for implementing entity ids for the entity classes:
  * 
  * <ol>
@@ -138,17 +138,16 @@
  * <dd>We use the Java type <code>BigDecimal</code> to represent rational values, and
  * explicitly set the Hibernate type to <code>big_decimal</code>. This converts to
  * PostgreSQL type <code>numeric(19,2)</code>. We always include the units of the value
- * in the property name for the sake of clarity. So far, all float values represent
- * microliter liquid volumes.
+ * in the property name for the sake of clarity.
  * 
  * <dt>controlled vocabularies
- * <dd>All controller vocaubularies in our model are enums that implement the interface
+ * <dd>All controller vocabularies in our model are enums that implement the interface
  * {@link edu.harvard.med.screensaver.model.VocabularyTerm}. These enums all provide a public
  * static inner class that implements the abstract class {@link 
  * edu.harvard.med.screensaver.model.VocabularyUserType}; these inner classes become the
  * Hibernate type used for the controller vocabularies. More detail is provided in the class
  * documentation for {@link edu.harvard.med.screensaver.model.VocabularyUserType}. This rather
- * awkard system is forced upon us by a variety of
+ * awkward system is forced upon us by a variety of
  * constraints: we want to use enumerations; the Java implementation of enumerations has
  * functional limitations (e.g., they can't <code>extend</code> an existing class or enum);
  * and the Hibernate requirements for user types are required to implement a somewhat
@@ -180,34 +179,6 @@
  * ignore, trash, or re-convene them. An incomplete list of further miscellaneous conventions follows:
  * 
  * <dl>
- * 
- * <dt>ordering of fields, methods, and constructors
- * <dd>Fields, methods, and constructors are generally presented in the following order:
- * <ol>
- * <li>static fields
- * <li>static methods
- * <li>instance fields
- * <li>constructors and instance methods
- * </ol>
- * Within each of these categories, members are presented in order of their visibility:
- * <ol>
- * <li>public
- * <li>package protected
- * <li>protected
- * <li>private
- * </ol>
- * 
- * <dt>ordering and importing of annotation types
- * <dd>Persistence annotations are presented in the following order:
- * <ol>
- * <li><code>javax.persistence</code> annotations
- * <li><code>org.hibernate.annotations</code> annotations
- * <li><code>edu.harvard.med.screensaver.model.annotations</code> annotations
- * </ol>
- * To prevent confusion about where which annotation comes from, entity classes
- * always import JPA annotation classes, and never import Hibernate or
- * Screensaver-model annotations. Instead, every Hibernate and Screensaver-model
- * annotation is spelled out with the full class name.
  * 
  * <dt>naming of foreign keys
  * <dd>We provide names for foreign keys and other database constraints whenever Hibernate allows
