@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;

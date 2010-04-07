@@ -7,13 +7,17 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.db.hibernate;
+package edu.harvard.med.screensaver.db.hqlbuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
+import edu.harvard.med.screensaver.db.hqlbuilder.Conjunction;
+import edu.harvard.med.screensaver.db.hqlbuilder.Disjunction;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;

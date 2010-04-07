@@ -21,7 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.db.hibernate.HqlUtils;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlUtils;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.StringUtils;

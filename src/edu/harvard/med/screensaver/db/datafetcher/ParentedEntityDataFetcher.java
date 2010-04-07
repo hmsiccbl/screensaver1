@@ -12,8 +12,8 @@ package edu.harvard.med.screensaver.db.datafetcher;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
-import edu.harvard.med.screensaver.db.hibernate.JoinType;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 

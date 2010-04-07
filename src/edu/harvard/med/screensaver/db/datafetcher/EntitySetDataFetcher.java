@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 

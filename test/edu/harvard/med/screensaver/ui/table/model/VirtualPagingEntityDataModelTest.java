@@ -19,7 +19,7 @@ import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
-import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;

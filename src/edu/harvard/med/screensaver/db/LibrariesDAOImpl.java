@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
-import edu.harvard.med.screensaver.db.hibernate.JoinType;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;

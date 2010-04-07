@@ -21,9 +21,9 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
-import edu.harvard.med.screensaver.db.hibernate.Disjunction;
-import edu.harvard.med.screensaver.db.hibernate.HqlBuilder;
-import edu.harvard.med.screensaver.db.hibernate.JoinType;
+import edu.harvard.med.screensaver.db.hqlbuilder.Disjunction;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.meta.PropertyNameAndValue;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
