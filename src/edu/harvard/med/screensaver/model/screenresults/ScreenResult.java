@@ -52,18 +52,17 @@ import org.joda.time.DateTime;
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
  * each of the assay plates associated with a
- * {@link edu.harvard.med.screensaver.model.screens.Screen}. Each stock plate
- * of the library being screened will be replicated across one or more assay
- * plates ("replicates"). Each replicate assay plate can have one or more
- * readouts performed on it, possibly over time intervals and/or with different
- * assay readout technologies. Every distinct readout type is identified by a
+ * {@link edu.harvard.med.screensaver.model.screens.Screen}. Each stock plate of
+ * the library being screened will be replicated across one or more assay plates
+ * ("replicates"). Each replicate assay plate can have one or more readouts
+ * performed on it, possibly over time intervals and/or with different assay
+ * readout technologies. Every distinct readout type is identified by a
  * {@link DataColumn}. A <code>ScreenResult</code> becomes the parent of
  * {@link ResultValue}s. For visualization purposes, one can imagine a
  * <code>ScreenResult</code> as representing a spreadsheet, where the column
- * headings are represented by {@link DataColumn}s and the rows are
- * identified by stock plate {@link Well}s, and each row contains a
- * {@link ResultValue} for each {@link DataColumn} "column".
- *
+ * headings are represented by {@link DataColumn}s and the rows are identified
+ * by {@link AssayWell}s, and each cell contains a {@link ResultValue}.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

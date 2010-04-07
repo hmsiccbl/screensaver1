@@ -1,32 +1,16 @@
 /**
- * Contains the entity classes that form the Screensaver domain model. The model is broken out
- * into the following major sections, each in its own package:
+ * Contains the entity classes that form the Screensaver domain model. The model is grouped into conceptual subpackages:  
  * 
- * <dl>
+ * <ul>
  * 
- * <dt>{@link edu.harvard.med.screensaver.model.cherrypick cherrypicks}
- * <dd>Models the cherrypicks for a screen. Screeners choose their best and most interesting
- * hits for confirmation screens and other followup studies.
+ * <li>{@link edu.harvard.med.screensaver.model.users}
+ * <li>{@link edu.harvard.med.screensaver.model.libraries}
+ * <li>{@link edu.harvard.med.screensaver.model.screens}
+ * <li>{@link edu.harvard.med.screensaver.model.screenresults}
+ * <li>{@link edu.harvard.med.screensaver.model.activities}
+ * <li>{@link edu.harvard.med.screensaver.model.cherrypicks}
  * 
- * <dt>{@link edu.harvard.med.screensaver.model.libraries libraries}
- * <dd>Models all the information about the screening libraries, including their contents,
- * the various copies of the library plates stored in the screening room, and activities
- * performed on those copies.
- * 
- * <dt>{@link edu.harvard.med.screensaver.model.screenresults screenresults}
- * <dd>Models the results of the screens, including raw data and values derived from the
- * raw data.
- * 
- * <dt>{@link edu.harvard.med.screensaver.model.screens screens}
- * <dd>Models the screens themselves, tracking who was involved in the screens, administrative
- * information about the screens, including billing information, publications produced from
- * the screens, etc.
- * 
- * <dt>{@link edu.harvard.med.screensaver.model.users users}
- * <dd>Models all Screensaver users, including administrative users, screening room users,
- * as well as the authors of studies that are not actually screens.
- * 
- * </dl>
+ * </ul>
  * 
  * <h3>Hibernate Annotations and the Java Persistence API</h3>
  * 

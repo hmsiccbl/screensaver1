@@ -32,8 +32,6 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
 
-import sun.security.action.GetLongAction;
-
 
 /**
  * A <code>ResultValue</code> holds the value of a screen result data point for
@@ -41,7 +39,7 @@ import sun.security.action.GetLongAction;
  * DataColumns, the value is stored canonically as a String. For numeric
  * DataColumns, the value is stored canonically as a double, allowing for
  * efficient sorting and filtering of numeric values in the database. Note that
- * the parent {@link DataColumn#isNumeric()()} contains an "isNumeric" property
+ * the parent {@link DataColumn} contains an {@link DataColumn#isNumeric()} property
  * that indicates whether its member ResultValues are numeric (the isNumeric
  * flag is not stored with each ResultValue for space efficiency).
  * 
