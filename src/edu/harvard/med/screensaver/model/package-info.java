@@ -1,5 +1,5 @@
 /**
- * Contains the entity classes that form the Screensaver domain model. The model is grouped into conceptual subpackages:  
+ * Contains the entity classes that form the Screensaver domain model. The model is grouped into conceptual groups:  
  * 
  * <ul>
  * 
@@ -7,8 +7,8 @@
  * <li>{@link edu.harvard.med.screensaver.model.libraries}
  * <li>{@link edu.harvard.med.screensaver.model.screens}
  * <li>{@link edu.harvard.med.screensaver.model.screenresults}
- * <li>{@link edu.harvard.med.screensaver.model.activities}
  * <li>{@link edu.harvard.med.screensaver.model.cherrypicks}
+ * <li>{@link edu.harvard.med.screensaver.model.Activity} (activity entities are dispersed throughout multiple model packages)
  * 
  * </ul>
  * 
