@@ -30,8 +30,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.proxy.HibernateProxyHelper;
 
-import com.google.common.collect.Lists;
-
 import sun.reflect.Reflection;
 
 /**
@@ -265,12 +263,6 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
     }
   }
 
-  /**
-   * @motivation sometimes we need the "real" class of the concrete
-   *             AbstractEntity, and will not tolerate having the proxy subclass
-   * @return the concrete Class of this AbstractEntity, with the caveat that is
-   *         not a proxy subclass
-   */
   @SuppressWarnings("unchecked")
   @Transient
   final public Class<? extends AbstractEntity> getEntityClass()

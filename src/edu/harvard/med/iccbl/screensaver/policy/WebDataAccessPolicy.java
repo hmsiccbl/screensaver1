@@ -81,7 +81,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 /**
- * A DataAccessPolicy implementation that is used by the web application.
+ * A DataAccessPolicy implementation for ICCB-Longwood that is used by the production web application. 
  */
 public class WebDataAccessPolicy implements DataAccessPolicy
 {

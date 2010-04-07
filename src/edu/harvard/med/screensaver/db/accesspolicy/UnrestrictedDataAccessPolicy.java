@@ -34,18 +34,18 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
-import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -57,14 +57,11 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
-import org.apache.log4j.Logger;
-
+/**
+ * A {@link DataAccessPolicy} that allows any user to access any entity in the system.
+ */
 public class UnrestrictedDataAccessPolicy implements DataAccessPolicy
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(UnrestrictedDataAccessPolicy.class);
-
   public boolean visit(AbaseTestset entity)
   {
     return true;

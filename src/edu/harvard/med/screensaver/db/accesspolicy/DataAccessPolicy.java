@@ -13,6 +13,10 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
+/**
+ * Defines a policy for each entity type that is used to determine whether a
+ * entity instance should be accessible by the current user.
+ */
 public interface DataAccessPolicy extends AbstractEntityVisitor
 {
   /**
