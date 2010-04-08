@@ -1,7 +1,7 @@
 // $HeadURL:
 // svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/test/edu/harvard/med/screensaver/TestHibernate.java
 // $
-// $Id: ComplexDAOTest.java 2359 2008-05-09 21:16:57Z ant4 $
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

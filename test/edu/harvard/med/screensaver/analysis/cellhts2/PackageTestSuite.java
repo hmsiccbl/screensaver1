@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/test/edu/harvard/med/screensaver/db/PackageTestSuite.java $
-// $Id: PackageTestSuite.java 1611 2007-07-24 19:04:35Z s $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 

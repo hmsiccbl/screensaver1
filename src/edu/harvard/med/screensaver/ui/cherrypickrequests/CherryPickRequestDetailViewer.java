@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/data-sharing-levels/src/edu/harvard/med/screensaver/ui/cherrypickrequests/CherryPickRequestViewer.java $
-// $Id: CherryPickRequestViewer.java 3596 2009-11-09 16:27:10Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

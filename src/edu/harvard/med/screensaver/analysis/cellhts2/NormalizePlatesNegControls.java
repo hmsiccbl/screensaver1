@@ -1,4 +1,4 @@
-//$HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
+//$HeadURL$
 
 package edu.harvard.med.screensaver.analysis.cellhts2;
 

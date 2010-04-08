@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/data-sharing-levels/src/edu/harvard/med/screensaver/ui/table/column/entity/DateEntityColumn.java $
-// $Id: DateEntityColumn.java 3236 2009-06-23 19:31:29Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

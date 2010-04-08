@@ -1,5 +1,5 @@
-// $HeadURL: $
-// $Id: $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2008 by the President and Fellows of Harvard College.
 //

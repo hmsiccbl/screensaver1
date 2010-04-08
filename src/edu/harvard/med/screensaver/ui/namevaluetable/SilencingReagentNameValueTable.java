@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/library-mgmt-rework/src/edu/harvard/med/screensaver/ui/namevaluetable/GeneNameValueTable.java $
-// $Id: GeneNameValueTable.java 3278 2009-07-17 14:59:04Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

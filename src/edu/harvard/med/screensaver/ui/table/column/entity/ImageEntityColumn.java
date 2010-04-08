@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/1.9.2-dev/src/edu/harvard/med/screensaver/ui/table/column/entity/BooleanEntityColumn.java $
-// $Id: BooleanEntityColumn.java 3633 2009-11-16 17:31:25Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

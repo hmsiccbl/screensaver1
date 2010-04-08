@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/1.9.1-dev/src/edu/harvard/med/screensaver/db/accesspolicy/EntityViewPolicy.java $
-// $Id: EntityViewPolicy.java 3625 2009-11-13 19:19:37Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 

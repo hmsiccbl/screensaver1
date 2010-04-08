@@ -1,7 +1,7 @@
 // $HeadURL:
 // svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/src/edu/harvard/med/screensaver/model/screenresults/ResultValue.java
 // $
-// $Id: ResultValue.java 2679 2008-08-05 13:34:13Z ant4 $
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

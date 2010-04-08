@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/trunk/src/edu/harvard/med/screensaver/ui/libraries/LibraryViewer.java $
-// $Id: LibraryViewer.java 2825 2008-11-03 18:56:46Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2008 by the President and Fellows of Harvard College.
 //

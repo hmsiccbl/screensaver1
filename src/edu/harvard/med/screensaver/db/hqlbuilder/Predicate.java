@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/trunk/src/edu/harvard/med/screensaver/db/hibernate/Predicate.java $
-// $Id: Predicate.java 3831 2010-02-25 16:07:09Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

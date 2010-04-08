@@ -1,7 +1,7 @@
 // $HeadURL:
 // http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/data-sharing-levels/src/edu/harvard/med/screensaver/io/screenresults/ScreenResultImporter.java
 // $
-// $Id: ScreenResultImporter.java 3655 2009-11-20 00:57:00Z seanderickson1 $
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

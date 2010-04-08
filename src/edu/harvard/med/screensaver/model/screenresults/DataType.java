@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/trunk/src/edu/harvard/med/screensaver/model/screenresults/DataType.java $
-// $Id: DataType.java 3872 2010-03-04 18:35:05Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 // 

@@ -1,5 +1,5 @@
-// $HeadURL: svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/search-result-redesign/test/edu/harvard/med/screensaver/db/PackageTestSuite.java $
-// $Id: PackageTestSuite.java 2116 2008-01-22 17:08:25Z ant4 $
+// $HeadURL$
+// $Id$
 //
 // Copyright 2006 by the President and Fellows of Harvard College.
 //

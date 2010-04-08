@@ -1,5 +1,5 @@
-//$HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/library-mgmt-rework/src/edu/harvard/med/screensaver/io/libraries/rnai/RNAiLibraryContentsParser.java $
-//$Id: RNAiLibraryContentsParser.java 3235 2009-06-23 16:26:27Z seanderickson1 $
+//$HeadURL$
+//$Id$
 
 //Copyright 2006 by the President and Fellows of Harvard College.
 //Screensaver is an open-source project developed by the ICCB-L and NSRB labs
