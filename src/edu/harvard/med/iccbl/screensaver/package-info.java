@@ -6,8 +6,8 @@ package edu.harvard.med.iccbl.screensaver;
  * classes may be useful to other facilities, but more often than not will
  * require adaptation or modification if used by other facilities.
  * <p>
- * Classes within this package that are used in the web application should
- * always implement interfaces defined within/under the
+ * Ideally, classes within this package that are used in the web application
+ * should implement interfaces defined within/under the
  * edu.harvard.med.screensaver core package. The concrete classes in this
  * package should only be referenced within Spring configuration files, and
  * never directly by the Screensaver core classes. In other words, there should
