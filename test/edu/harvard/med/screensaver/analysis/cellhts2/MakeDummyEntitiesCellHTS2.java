@@ -3,7 +3,7 @@
 // $
 // $Id$
 //
-// Copyright 2008 by the President and Fellows of NKI.
+// Copyright © 2008, 2010 by the President and Fellows of NKI.
 // 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of

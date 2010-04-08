@@ -3,7 +3,7 @@
 // $
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
-// Copyright 2006 by the President and Fellows of Harvard College.
+// Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 // 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
