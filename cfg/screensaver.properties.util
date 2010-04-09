@@ -10,6 +10,10 @@ log4j.properties.file=cfg/log4j.properties.util
 
 ### run-time properties
 
+### run-time properties
+screensaver.service.smtpemailservice.host=
+screensaver.service.smtpemailservice.username=
+
 # database connection
 SCREENSAVER_PGSQL_SERVER=localhost
 SCREENSAVER_PGSQL_DB=screensaver
