@@ -434,7 +434,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   /**
    * It is preferable to use {@link #isFeatureEnabled(String)}, as this handles
-   * undefined feature keys. Use should only need to call this method from JSF
+   * undefined feature keys. You should only need to call this method from JSF
    * EL expressions.
    * 
    * @return a Map of the UI features in Screensaver that can be enabled or
