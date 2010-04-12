@@ -109,7 +109,6 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
 
   /**
    * To make update persistent, override in subclasses and add necessary Hibernate annotations on the overriding method.
-   * @return
    */
   @Transient
   public SortedSet<AdministrativeActivity> getUpdateActivities()

@@ -46,7 +46,7 @@ import org.hibernate.usertype.UserType;
  * Hibernate-annotated with the <code>UserType</code>. For example:
  *
  * <pre>
- *   @org.hibernate.annotations.Type(
+ *   &#64;org.hibernate.annotations.Type(
  *     type="term.VTS$UserType"
  *   )
  * </pre>

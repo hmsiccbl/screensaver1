@@ -49,9 +49,9 @@ import com.google.common.collect.ImmutableSet;
  * It is the responsibility of calling code to ensure that all required entity
  * relationships are accessible. This implies that methods in this class should
  * either be called within an active Hibernate session (e.g. by a
+ * &#64;Transactional method), or the ScreenResult has already had the necessary
+ * relationships eagerly fetched.
  * 
- * @Transactional method), or the ScreenResult has already had the necessary
- *                relationships eagerly fetched.
  * @author Cor Lieftink
  */
 
@@ -757,18 +757,10 @@ public class CellHTS2 {
     setLastRMethodToRun(RMethod.SUMMARIZE_REPLICATES);
   }
 
-  /**
-   * screenResult: takes a screenResult which included resultTypes of 'scored'
-   * 
-   * @return
-   */
-
- 
   public void summarizeReplicatesAddResult() throws RserveException,REXPMismatchException {
 	 addRMethodResult(RMethod.SUMMARIZE_REPLICATES);
   }
   
-
   public void writeReportInit(String reportOutputPath)
   {
     this.reportOutputPath = reportOutputPath;

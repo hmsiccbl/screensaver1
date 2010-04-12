@@ -48,8 +48,6 @@ public class Worksheet implements Iterable<Row>
   
   /**
    * Returns an iterator that iterates from the given row index until the last defined row in the worksheet.
-   * @param fromRow
-   * @return
    */
   public Iterator<Row> iterator()
   {
@@ -92,7 +90,7 @@ public class Worksheet implements Iterable<Row>
   }
   
   /**
-   * @see #getCell(short, int, boolean)
+   * @see #getCell(int, int, boolean)
    */
   public Cell getCell(int column, int row)
   {

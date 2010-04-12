@@ -197,8 +197,8 @@ public class Workbook implements Iterable<Worksheet>
       
     /**
      * Create RowIterator that iterates between the specified range of rows.
-     * @param fromRow the first row index to be iterated, zero-based, inclusive
-     * @param toRow the last row index to be iterated, zero-based, inclusive; must be <= max supported row index by worksheet
+     * @param begin the first row index to be iterated, zero-based, inclusive
+     * @param end the last row index to be iterated, zero-based, inclusive; must be <= max supported row index by worksheet
      */
     public WorksheetIterator(int begin, int end)
     {

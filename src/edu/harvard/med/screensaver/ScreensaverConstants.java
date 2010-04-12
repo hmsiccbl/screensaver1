@@ -77,7 +77,7 @@ public interface ScreensaverConstants
 
   /**
    * Note: If you configure a larger default PlateSize, be sure to update
-   * @Column(length=3) on WellName.getName() so that length is large enough to
+   * &#64;Column(length=3) on WellName.getName() so that length is large enough to
    * accommodate multi-letter row labels.
    */
   public static final PlateSize DEFAULT_PLATE_SIZE = PlateSize.WELLS_384;
