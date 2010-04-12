@@ -104,9 +104,9 @@ public class LabHead extends ScreeningRoomUser
   }
 
   /**
-   * @motivation: overriding superclass only to add annotations needed by model
-   *              unit tests, since this is an immutable property in the
-   *              subclass, but not in the superclass
+   * @motivation overriding superclass only to add annotations needed by model
+   *             unit tests, since this is an immutable property in the
+   *             subclass, but not in the superclass
    */
   @Override
   @Immutable

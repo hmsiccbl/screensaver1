@@ -169,8 +169,6 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
    * The versioned reagents for this Well, accessible as a map, keyed on library
    * contents version number. A Well has only one reagent at a given point in
    * time.
-   * 
-   * @return
    */
   @MapKey(name="libraryContentsVersion")
   @OneToMany(mappedBy="well", cascade={ CascadeType.PERSIST, CascadeType.MERGE }, fetch=FetchType.LAZY)

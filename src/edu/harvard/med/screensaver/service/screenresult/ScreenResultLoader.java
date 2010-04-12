@@ -82,7 +82,6 @@ public abstract class ScreenResultLoader
    * @param screenNumber
    * @param incrementalFlush force the loader to periodically flush cached ResultValues and other Entities being held by the 
    *        Hibernate session.  Use this value to limit memory requirements for large datasets.  
-   * @return
    * @throws ParseErrorsException
    * @throws EntityNotFoundException
    * @throws EntityExistsException
@@ -127,7 +126,6 @@ public abstract class ScreenResultLoader
    * @param finalPlateNumberRange
    * @param incrementalFlush force the loader to periodically flush cached ResultValues and other Entities being held by the 
    *        Hibernate session.  Use this value to limit memory requirements for large datasets.  
-   * @return
    * @throws ParseErrorsException
    * @throws EntityNotFoundException
    * @throws EntityExistsException

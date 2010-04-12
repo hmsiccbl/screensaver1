@@ -173,8 +173,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
 
   /**
    * Add a non-numeric, experimental type, non-excluded result value to the data column.
-   * @param well the well of the new ResultValue
-   * @param value the value of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell, String value)
@@ -184,9 +182,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
 
   /**
    * Add a non-numeric result value to the data column.
-   * @param well the well of the new ResultValue
-   * @param value the value of the new ResultValue
-   * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,
@@ -201,8 +196,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
 
   /**
    * Add a numeric, experimental type, non-excluded result value to the data column.
-   * @param well the well of the new ResultValue
-   * @param numericValue the value of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,
@@ -213,9 +206,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
 
   /**
    * Add a numeric result value to the data column.
-   * @param well the well of the new ResultValue
-   * @param numericValue the numeric value of the new ResultValue
-   * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and data column, otherwise null
    */
   public ResultValue createResultValue(AssayWell assayWell,

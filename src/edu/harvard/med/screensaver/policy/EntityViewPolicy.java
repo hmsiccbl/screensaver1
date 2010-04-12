@@ -34,7 +34,7 @@ public interface EntityViewPolicy extends AbstractEntityVisitor
    * Determine whether the current user can see the Status Items, Lab
    * Activities, and Cherry Pick Requests tables. These are considered more
    * private than the screen details (see
-   * {@link #isAllowedAccessToScreenDetails()}).
+   * {@link #isAllowedAccessToScreenDetails}).
    * @deprecated This is a hack, but helps to keep data access logic in single,
    *             central location. Should separate out properties that need
    *             additional protection into a related entity, in order to use

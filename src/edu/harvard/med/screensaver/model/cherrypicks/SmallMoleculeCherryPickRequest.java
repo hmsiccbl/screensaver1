@@ -41,12 +41,9 @@ public class SmallMoleculeCherryPickRequest extends CherryPickRequest
   private static final Volume DEFAULT_TRANSFER_VOLUME = new Volume("1.20", VolumeUnit.MICROLITERS);
 
   /**
-   * Construct an initialized <code>SmallMoleculeCherryPickRequest</code>. Intended only for use
-   * by {@link Screen}.
-   * @param screen the screen
-   * @param requestedBy the user that made the request
-   * @param dateRequested the date created
-   * @motivation for creating CherryPickRequests from legacy ScreenDB cherry pick visits
+   * Construct an initialized <code>SmallMoleculeCherryPickRequest</code>.
+   * 
+   * @motivation Intended only for use by {@link Screen}.
    */
   public SmallMoleculeCherryPickRequest(
     AdministratorUser createdBy,

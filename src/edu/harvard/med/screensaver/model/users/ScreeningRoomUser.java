@@ -114,15 +114,6 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
 
   /**
    * Construct an initialized <code>ScreeningRoomUser</code>.
-   * @param firstName the first name
-   * @param lastName the last name
-   * @param email the email
-   * @param phone the phone number
-   * @param mailingAddress the mailing address
-   * @param comments the comments
-   * @param eCommonsId the eCommonds ID
-   * @param harvardId the harvard ID
-   * @param userClassification the user classification
    */
   public ScreeningRoomUser(
     String firstName,
@@ -189,7 +180,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
    * @param checklistItem the checklist item
    * @param datePerformed the date the checklist item was performed by the user or otherwise enacted
    * @return the new checklist item for the user
-   * @see ChecklistItemEvent#createChecklistItemExpirationEvent(LocalDate, AdministrativeActivity)
+   * @see ChecklistItemEvent#createChecklistItemExpirationEvent(LocalDate, AdministratorUser)
    */
   public ChecklistItemEvent createChecklistItemActivationEvent(ChecklistItem checklistItem,
                                                                LocalDate datePerformed,
@@ -624,8 +615,6 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   /**
    * Adds the appropriate {@link FacilityUsageRole} for the screen type of the
    * screen with which the user is being associated with.
-   * 
-   * @param screen
    */
   public void updateFacilityUsageRoleForAssociatedScreens()
   {

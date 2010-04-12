@@ -286,7 +286,7 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    *          ":formId:subviewId:fieldId"). If the specified component cannot be
    *          found then the messages will be sent to the generalized message
    *          list, see {@link #showMessage(String, Object...)}
-   * @param messageKey the key to the message resource in the
+   * @param msgKey the key to the message resource in the
    *          <code>messages</code> bean.
    * @param msgArgs arguments for the message resource
    * @return null if the component can not be found
@@ -372,10 +372,6 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
    * Report the provided application error message to the user. An application
    * error is one that a developer would not be concerned about, and that
    * occurred due to so-called "user error".
-   *
-   * @param errorMessage the error message to report
-   * @see #reportSystemError(String)
-   * @see #reportSystemError(Throwable)
    */
   protected void reportApplicationError(String errorMessage)
   {

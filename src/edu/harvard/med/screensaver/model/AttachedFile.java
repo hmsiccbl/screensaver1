@@ -237,7 +237,7 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   /**
    * Construct an initialized <code>AttachedFile</code>. Intended only for use
    * by {@link ScreeningRoomUser}; use
-   * {@link ScreeningRoomUser#createAttachedFile(String, AttachedFileType, InputStream) or
+   * {@link ScreeningRoomUser#createAttachedFile(String, AttachedFileType, InputStream)} or
    * {@link ScreeningRoomUser#createAttachedFile(String, AttachedFileType, String)}.
    * 
    * @param screeningRoomUser the screening room user

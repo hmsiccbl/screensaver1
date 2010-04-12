@@ -108,10 +108,7 @@ public class BillingItem
 
   /**
    * Construct an initialized <code>BillingItem</code>. Intended for use by {@link
-   * BillingInformation#createBillingItem} only.
-   * @param itemToBeCharged the item to be charged
-   * @param amount the amount
-   * @param dateSentForBilling the date sent for billing
+   * Screen#createBillingItem} only.
    */
   BillingItem(
     String itemToBeCharged,

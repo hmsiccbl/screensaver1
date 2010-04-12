@@ -41,12 +41,12 @@ import com.google.common.base.Function;
 
 
 /**
- * A set of plates representing a copy of a {@link Library)'s contents. A facility creates and uses
+ * A set of plates representing a copy of a {@link Library}'s contents. A facility creates and uses
  * multiple copies of a library, rather than working with a single master copy, in
  * order to reduce reagent freeze/thaw cycles, minimize the impact of loss due to a
  * physical loss, etc.  Note that in the Screensaver domain model, a library Copy represents
  * the physical instances of library plates that exist in reality.  A copy is a physical manifestation 
- * of a {@link Library), which only specifies the layout of reagents across a 
+ * of a {@link Library}, which only specifies the layout of reagents across a 
  * set plates.  Therefore, even if a facility decided to work with a single, master set of library 
  * plates, in Screensaver one would still have to define a single Copy for this master set of plates. 
  * 

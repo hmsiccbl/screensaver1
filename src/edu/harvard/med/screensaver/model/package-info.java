@@ -23,8 +23,8 @@
  * 
  * <h3>Entity Identifiers</h3>
  * 
- * Domain model entity classes must implement the {@link Entity} interface and may extend 
- * {@link AbstractEntity}. Two different
+ * Domain model entity classes must implement the {@link edu.harvard.med.screensaver.model.Entity} interface and may extend 
+ * {@link edu.harvard.med.screensaver.model.AbstractEntity}. Two different
  * methods are used for implementing entity ids for the entity classes:
  * 
  * <ol>
@@ -40,9 +40,9 @@
  * entity with a given type and entity id, <i>per session</i>. So care must be taken to
  * assure that the objects belong to the same session before comparing for identity in this
  * way. DAO methods {@link
- * edu.harvard.med.screensaver.db.GenericEntityDAO#reattachEntity(AbstractEntity)}, {@link
- * edu.harvard.med.screensaver.db.GenericEntityDAO#reloadEntity(AbstractEntity)}, and {@link
- * edu.harvard.med.screensaver.db.GenericEntityDAO#reloadEntity(AbstractEntity, boolean,
+ * edu.harvard.med.screensaver.db.GenericEntityDAO#reattachEntity(Entity)}, {@link
+ * edu.harvard.med.screensaver.db.GenericEntityDAO#reloadEntity(Entity)}, and {@link
+ * edu.harvard.med.screensaver.db.GenericEntityDAO#reloadEntity(Entity, boolean,
  * String[])} may be found useful for
  * looking up a version of an entity that lives in the current session.
  * 

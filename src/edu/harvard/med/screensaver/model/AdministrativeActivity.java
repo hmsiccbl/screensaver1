@@ -76,11 +76,6 @@ public class AdministrativeActivity extends Activity
 
   /**
    * Construct an initialized <code>AdministrativeActivity</code>.
-   * @param recordedBy the administrator using Screensaver when this activity was created
-   * @param performedBy the user that performed the activity
-   * @param dateOfActivity the date the activity took place
-   * @param approvedBy the administrator use who approved the activity
-   * @param dateApproved the date the activity was approved
    */
   public AdministrativeActivity(AdministratorUser recordedBy, 
                                 AdministratorUser performedBy,

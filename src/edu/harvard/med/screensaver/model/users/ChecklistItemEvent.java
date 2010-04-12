@@ -207,10 +207,6 @@ public class ChecklistItemEvent extends AuditedAbstractEntity<Integer> implement
    * Construct an initialized "not applicable" <code>ChecklistItemEvent</code> 
    * <p>
    * Intended only for use by {@link ScreeningRoomUser}.
-   * 
-   * @param isNotApplicable 
-   *
-   * @see #ChecklistItemEvent(ChecklistItem, ScreeningRoomUser, LocalDate, AdministrativeActivity)
    **/
   ChecklistItemEvent(ChecklistItem checklistItem,
                      ScreeningRoomUser screeningRoomUser,

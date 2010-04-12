@@ -75,11 +75,7 @@ public class SilencingReagent extends Reagent
   /**
    * Construct a <code>SilencingReagent</code>.
    *
-   * @param vendorGene the gene information provided by the vendor of the library
-   * @param gene the gene information as provided by the screening facility
-   * @param silencingReagentType the silencing reagent type
-   * @param sequence the sequence
-   * @motivation for use of {@link Gene#createSilencingReagent} methods only
+   * @motivation for use of {@link Well#createSilencingReagent} methods only
    */
   SilencingReagent(ReagentVendorIdentifier rvi,
                    Well well,
@@ -114,9 +110,7 @@ public class SilencingReagent extends Reagent
    * The genetic sequence of the silencing reagent. For pool wells, this may be
    * null (or empty), or can be a delimited list of the sequences of the
    * constituent duplexes. If left null/empty, it is still possible to find the
-   * duplex sequences via {@link #getDuplexWells()}.{@link Well#getReagent}.
-   * 
-   * @return
+   * duplex sequences via {@link #getDuplexWells}.{@link Well#getLatestReleasedReagent}.
    */
   @Column(nullable=true)
   @org.hibernate.annotations.Type(type="text")
@@ -158,8 +152,6 @@ public class SilencingReagent extends Reagent
    * information provided by the vendor. Also, if it is determined that this
    * silencing reagent in fact targets a different gene than expected, the
    * facility gene information can be used reflect this fact.
-   * 
-   * @return
    */
   @OneToOne(cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, fetch=FetchType.LAZY)
   @JoinColumn(name="facilityGeneId", nullable=true, unique=true)
@@ -207,9 +199,6 @@ public class SilencingReagent extends Reagent
    * targeted gene is the same); the model allows for real-world errors, where a
    * pool well is erroneously contains silencing reagents that target different
    * genes.
-   * 
-   * @param duplexWell
-   * @return
    */
   public SilencingReagent withDuplexWell(Well duplexWell)
   {

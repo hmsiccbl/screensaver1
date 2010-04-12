@@ -168,10 +168,8 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   }
 
   /**
-   * Get whether this result value indicates a positive. Returns false if the
-   * {@link #getDataColumn() DataColumn} is not a positive indicator.
-   *
-   * @return true whenever this result value is a positive indicator
+   * Get whether this assay well contains at least one {@link ResultValue} that
+   * is a {@link ResultValue#isPositive() positive}.
    */
   @Column(nullable=false, name="isPositive")
   @org.hibernate.annotations.Index(name="assay_well_well_positives_only_index")

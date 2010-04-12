@@ -17,10 +17,10 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
  * Vocabulary for {@link ResultValue#getValue()} when parent's
- * {@link DataColumn#getPositiveIndicatorType()} is
- * {@link edu.harvard.med.screensaver.model.screenresults.DataType#PARTITION}
+ * {@link DataColumn#getDataType} is
+ * {@link edu.harvard.med.screensaver.model.screenresults.DataType#POSITIVE_INDICATOR_PARTITION}
  * . <i>NOT CURRENTLY USED IN THE PERSISTED MODEL. See
- * {@link ResultValue#getTypedValue(ResultValue, DataColumn)}.</i>
+ * {@link ResultValue#getTypedValue}.</i>
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */

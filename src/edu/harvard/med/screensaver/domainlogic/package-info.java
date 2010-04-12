@@ -24,7 +24,7 @@
  * which should never have such DAO or persistence-layer dependencies.
  * </ol>
  * To overcome these problems, we implement our model's non-trivial domain logic
- * outside of the entity classes themselves, in separate {@link EntityUpdater}
+ * outside of the entity classes themselves, in separate {@link edu.harvard.med.screensaver.domainlogic.EntityUpdater}
  * classes. The logic in these classes will be invoked at the appropriate times
  * to keep the model consistent with its invariants. This logic is to be
  * considered part of the domain model. Contrast this with the service layer,
@@ -36,13 +36,13 @@
  * Architectural overview:
  * <ul>
  * <li>Domain logic should be implemented in classes within this package that
- * implement the {@link EntityUpdater} interface.</li>
+ * implement the {@link edu.harvard.med.screensaver.domainlogic.EntityUpdater} interface.</li>
  * <li>All EntityUpdater classes must be registered in
  * spring-context-persistence.xml by adding to them to the
  * <code>entityUpdatersList</code> Spring bean.</li>
  * <li>The registered EntityUpdater classes are injected into every Entity that
  * is managed by Hibernate. This is performed by the
- * {@link EntityUpdatersInjector}, which makes use of Hibernate's event handler
+ * {@link edu.harvard.med.screensaver.domainlogic.EntityUpdatersInjector}, which makes use of Hibernate's event handler
  * mechanism. In this way, every entity maintains the domain logic it must
  * invoke to keep its state consistent with respect to its invariants.</li>
  * <li>When a domain entity class performs an operation that requires one or

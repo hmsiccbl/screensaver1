@@ -839,8 +839,8 @@ public class Screen extends Study implements AttachedFilesEntity
 
   /**
    * Create and return a new attached file for the screen. Use
-   * {@link Publication#createAttachedFile(String, InputStream)} to create an
-   * attached file that is associated with a Publication.
+   * {@link Publication#createAttachedFile} to create an attached file that is
+   * associated with a Publication.
    * 
    * @param filename the filename
    * @param fileType the file type
@@ -1822,8 +1822,8 @@ public class Screen extends Study implements AttachedFilesEntity
   }
 
   /**
-   * The date at which a dataPrivacyExpiration email was sent to Screensaver Users associated with this Screen.
-   * @return
+   * The date at which a dataPrivacyExpiration email was sent to Screensaver
+   * Users associated with this Screen.
    */
   @Column
   @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")

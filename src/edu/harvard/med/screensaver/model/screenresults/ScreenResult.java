@@ -106,9 +106,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
 
   /**
    * Construct an initialized <code>ScreenResult</code>. Intended only for use by {@link Screen}.
-   * @param screen the screen
-   * @param isShareable whether this screen result can be viewed by all users of the system
-   * @param replicateCount
    */
   public ScreenResult(Screen screen, Integer replicateCount)
   {

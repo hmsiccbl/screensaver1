@@ -356,12 +356,10 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
 
   /**
    * Create and return a new lab cherry pick for the cherry pick request.
-   * @param cherryPickRequest TODO
-   * @param sourceWell the source well
-   * @return the new lab cherry pick
-   * @throws DataModelViolationException whenever the cherry pick request for the provided
-   * screener cherry pick does not match the cherry pick request asked to create the lab cherry
-   * pick
+   * 
+   * @throws DataModelViolationException whenever the cherry pick request for
+   *           the provided screener cherry pick does not match the cherry pick
+   *           request asked to create the lab cherry pick
    */
   public LabCherryPick createLabCherryPick(Well sourceWell)
   {

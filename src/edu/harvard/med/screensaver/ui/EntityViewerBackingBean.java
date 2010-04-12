@@ -144,8 +144,6 @@ public abstract class EntityViewerBackingBean<E extends Entity> extends Abstract
 
   /**
    * Override this method if the entity type of this viewer has an ID that is not of type Integer
-   * @param entityIdAsString
-   * @return
    */
   protected Serializable convertEntityId(String entityIdAsString)
   {

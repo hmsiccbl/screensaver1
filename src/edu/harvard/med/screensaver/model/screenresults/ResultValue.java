@@ -67,18 +67,16 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Returns the value of this <code>ResultValue</code> as an appropriately
-   * typed object, depending upon {@link DataColumn#isPositiveIndicator()},
-   * {@link DataColumn#isDerived()()}, and
-   * {@link DataColumn#getPositiveIndicatorType()}, as follows:
+   * typed object, depending upon the {@link DataColumn#getDataType() data
+   * column's data type}.
    * <ul>
-   * <li> Well type is non-data-producer: returns <code>null</code>
-   * <li> Not Derived (Raw): returns Double
-   * <li> Not an Activity Indicator: returns String
-   * <li> DataType.BOOLEAN: returns Boolean
-   * <li> DataType.PARTITION: returns String
-   * (PartitionedValue.getDisplayValue())
+   * <li>Well type is non-data-producer: returns <code>null</code>
+   * <li>Not Derived (Raw): returns Double
+   * <li>Not an Activity Indicator: returns String
+   * <li>DataType.BOOLEAN: returns Boolean
+   * <li>DataType.PARTITION: returns String (PartitionedValue.getDisplayValue())
    * </ul>
-   *
+   * 
    * @return a Boolean, Double, or String
    * @motivation to preserve typed data in exported Workbooks (rather than treat
    *             all result values as text strings)
@@ -121,9 +119,6 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Constructs a <code>ResultValue</code>.
-   * @param dataColumn the parent DataColumn
-   * @param well the well of this ResultValue
-   * @param value the non-numerical value of the ResultValue
   */
   ResultValue(DataColumn dataColumn,
               AssayWell assayWell,
@@ -134,10 +129,6 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Constructs a numeric ResultValue object
-   *
-   * @param dataColumn the parent DataColumn
-   * @param well the well of this ResultValue
-   * @param numericValue the numerical value of the ResultValue
    */
   ResultValue(DataColumn dataColumn,
               AssayWell assayWell,
@@ -149,12 +140,6 @@ public class ResultValue extends AbstractEntity<Integer>
   /**
    * Construct a numerical <code>ResultValue</code>. Intended for use only
    * for creating result values that will not need to be persisted.
-   *
-   * @param dataColumn the parent DataColumn
-   * @param well the well of this ResultValue
-   * @param numericalValue the numerical value of the ResultValue
-   * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
-   * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   public ResultValue(DataColumn dataColumn,
                      AssayWell assayWell,
@@ -168,12 +153,6 @@ public class ResultValue extends AbstractEntity<Integer>
   /**
    * Construct a non-numerical <code>ResultValue</code>. Intended for use
    * only for creating result values that will not need to be persisted.
-   *
-   * @param dataColumn the parent DataColumn
-   * @param assayWell the Assaywell of this ResultValue
-   * @param value the non-numerical value of the ResultValue
-   * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
-   * @param isPositive whether this ResultValue is considered a 'positive' result 
    */
   public ResultValue(DataColumn dataColumn,
                      AssayWell assayWell,
@@ -320,7 +299,6 @@ public class ResultValue extends AbstractEntity<Integer>
    * Return true iff the assay well type is a control.
    *
    * @return true iff the assay well type is a control
-   * @see AssayWellControlType#isControl()
    */
   @Transient
   public boolean isControlWell()
@@ -338,7 +316,6 @@ public class ResultValue extends AbstractEntity<Integer>
    * Return true iff the assay well type is data producing.
    *
    * @return true iff the assay well type is data producing
-   * @see AssayWellControlType#isDataProducing()
    */
   @Transient
   public boolean isDataProducerWell()

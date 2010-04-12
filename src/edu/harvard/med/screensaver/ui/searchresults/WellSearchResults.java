@@ -1121,7 +1121,7 @@ public class WellSearchResults extends EntitySearchResults<Well,String>
    * <li>triggers execution of the search.</li>
    * </ol>
    * 
-   * @see WellSearchResults#searchAllWells()
+   * @see WellSearchResults#searchAll
    */
   public void searchCommandListener(javax.faces.event.ActionEvent e)
   {
