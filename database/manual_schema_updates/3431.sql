@@ -296,6 +296,13 @@ alter table molfile drop column well_id;
 alter table molfile add primary key (reagent_id, ordinal);
 alter table molfile add constraint molfile_reagent_id_key unique (reagent_id);
 
+/* fix missing small molecule reagents (due to missing compounds in
+old schema); these small molecule reagents will not have any compound
+information associated with them (as they did not have it to start
+with), but we need these empty records to exist to meet relational
+integrity constraints */
+insert into small_molecule_reagent (reagent_id) select r.reagent_id from library l join well w using(library_id) join reagent r using(well_id) left join small_molecule_reagent r2 on(r.reagent_id=r2.reagent_id) where r2.reagent_id is null and l.screen_type = 'Small Molecule' and l.library_type <> 'Natural Products';
+
 
 /* Study and Annotation links to reagent */
 
@@ -526,7 +533,11 @@ pl.library_name not like '%Pool%' and pl.screen_type = 'RNAi' and pl.is_pool and
 dl.library_name like '%Duplex%' and dl.screen_type = 'RNAi' and
 pg.entrezgene_id=dg.entrezgene_id;
 
-/* pre-condition: ensure all reagent tuples have an associated {small_molecule,silencing,natural_product}_reagent tuple:
+/* TODO: you should perform a test run of this script and manually run
+these post-conditions (prior to COMMIT, below) to ensure that your
+updated database meets relational integrity constraints. */
+
+/* post-condition: ensure all reagent tuples have an associated {small_molecule,silencing,natural_product}_reagent tuple:
   select l.short_name, count(*) from library l join well w
   using(library_id) join reagent r using(well_id) left join
   small_molecule_reagent r2 on(r.reagent_id=r2.reagent_id) left join
@@ -535,17 +546,15 @@ pg.entrezgene_id=dg.entrezgene_id;
   r2.reagent_id is null and r3.reagent_id is null and r4.reagent_id is
   null and l.screen_type = 'Small Molecule' and l.library_type <>
   'Natural Products' group by l.short_name;
- */
-/* fix missing small molecule reagents (due to missing compounds in old schema) */
-insert into small_molecule_reagent (reagent_id) select r.reagent_id from library l join well w using(library_id) join reagent r using(well_id) left join small_molecule_reagent r2 on(r.reagent_id=r2.reagent_id) where r2.reagent_id is null and l.screen_type = 'Small Molecule' and l.library_type <> 'Natural Products';
+*/
 
-/* pre-condition: ensure both vendor name and identifier are specified together:
+/* post-condition: ensure both vendor name and identifier are specified together:
   select count(*) from reagent where (vendor_name is null and
   vendor_identifier is not null) or (vendor_name is not null and
   vendor_identifier is null);
 */
 
-/* pre-condition: verify that exactly 4 duplex wells exist for each pool; report those that don't:
+/* post-condition: verify that exactly 4 duplex wells exist for each pool; report those that don't:
     select pw.well_id, count(*) from well pw join reagent r
     using(well_id) join silencing_reagent_duplex_wells l
     on(l.silencing_reagent_id=r.reagent_id) group by pw.well_id having
