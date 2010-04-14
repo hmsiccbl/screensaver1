@@ -6,6 +6,7 @@ SELECT
 current_timestamp,
 'result_value.value set to null for numeric data columns, since it is never used';
 
+drop index result_value_rvt_and_value_index;
 update result_value set value = null from data_column dc where result_value.data_column_id = dc.data_column_id and dc.data_type = 'Numeric';
-
+create index result_value_rvt_and_value_index on result_value (result_value_type_id, value);
 COMMIT;
