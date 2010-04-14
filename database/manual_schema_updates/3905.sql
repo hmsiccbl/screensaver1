@@ -11,7 +11,7 @@ alter table result_value_type add data_type text /*not null*/;
 alter table result_value_type add decimal_places int4;
 
 update result_value_type set data_type = 'Boolean Positive Indicator' where is_positive_indicator and positive_indicator_type = 'Boolean';
-update result_value_type set data_type = 'Boolean Positive Indicator' where is_positive_indicator and positive_indicator_type = 'Partition';
+update result_value_type set data_type = 'Partition Positive Indicator' where is_positive_indicator and positive_indicator_type = 'Partition';
 update result_value_type set data_type = 'Numeric' where not is_positive_indicator and is_numeric;
 update result_value_type set data_type = 'Text' where not is_positive_indicator and not is_numeric;
 
