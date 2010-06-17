@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -11,10 +9,10 @@
 
 package edu.harvard.med.screensaver.model.meta;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
 
 /**
  * Mechanism for specifying an entity property within an entity object
@@ -37,6 +35,7 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
    * particular property name other than the collection element itself.
    */
   public final static String COLLECTION_OF_VALUES = "";
+  public final static String FULL_ENTITY = "*";
 
 
   // instance data members
@@ -62,7 +61,8 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
   {
     super(relationshipPath.getRootEntityClass(),
           relationshipPath._path,
-          relationshipPath._restrictions);
+          relationshipPath._restrictions,
+          relationshipPath._cardinality);
     _propertyName = propertyName;
     _asFormattedPath = _asString = null; // force init by PropertyPath, not RelatioshipPath
   }
@@ -72,7 +72,8 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
     return new RelationshipPath<E>(
       getRootEntityClass(),
       _path,
-      _restrictions);
+                                   _restrictions,
+                                   _cardinality);
   }
 
   public String getPropertyName()

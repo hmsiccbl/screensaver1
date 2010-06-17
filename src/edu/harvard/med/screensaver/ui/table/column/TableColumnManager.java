@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/table/TableSortManager.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -25,6 +23,13 @@ import java.util.Set;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.tree2.TreeModel;
+import org.apache.myfaces.custom.tree2.TreeModelBase;
+import org.apache.myfaces.custom.tree2.TreeNode;
+import org.apache.myfaces.custom.tree2.TreeNodeBase;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -35,13 +40,6 @@ import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.SortChangedEvent;
 import edu.harvard.med.screensaver.ui.table.SortDirectionSelector;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.tree2.TreeModel;
-import org.apache.myfaces.custom.tree2.TreeModelBase;
-import org.apache.myfaces.custom.tree2.TreeNode;
-import org.apache.myfaces.custom.tree2.TreeNodeBase;
 
 /**
  * Notifies observers when set of available columns are changed, either from

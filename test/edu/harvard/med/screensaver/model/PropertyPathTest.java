@@ -9,10 +9,9 @@
 
 package edu.harvard.med.screensaver.model;
 
-import java.io.Serializable;
-
 import junit.framework.TestCase;
 
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath.RelationshipPathIterator;
@@ -38,7 +37,7 @@ public class PropertyPathTest extends TestCase
   public void testZeroElementPath()
   {
     PropertyPath propertyPath = new PropertyPath<AbstractEntity>(AbstractEntity.class, "name");
-    assertEquals(propertyPath.getRootEntityClass(), AbstractEntity.class);
+    assertEquals(AbstractEntity.class, propertyPath.getRootEntityClass());
     assertEquals("size", 0, propertyPath.getPathLength());
     assertEquals("<AbstractEntity>.name", propertyPath.toString());
     assertEquals("name", propertyPath.getPath());
@@ -51,7 +50,7 @@ public class PropertyPathTest extends TestCase
   public void testOneElementPath()
   {
     PropertyPath<AbstractEntity> propertyPath = new RelationshipPath<AbstractEntity>(AbstractEntity.class, "child").toProperty("name");
-    assertEquals(propertyPath.getRootEntityClass(), AbstractEntity.class);
+    assertEquals(AbstractEntity.class, propertyPath.getRootEntityClass());
     assertEquals("size", 1, propertyPath.getPathLength());
     assertEquals("<AbstractEntity>.child.name", propertyPath.toString());
     assertEquals("child.name", propertyPath.getPath());
@@ -199,6 +198,20 @@ public class PropertyPathTest extends TestCase
     assertEquals(3, relationship.getPathLength());
     assertEquals("child.grandchild.greatgrandchild.name", relationship.getPath());
     assertEquals("<AbstractEntity>.child.grandchild[age=1].greatgrandchild.name", relationship.toString());
+  }
+
+  public void testCardinality()
+  {
+    assertEquals(Cardinality.TO_ONE, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "parent", Cardinality.TO_ONE).getCardinality());
+    assertEquals(Cardinality.TO_ONE, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "parent", Cardinality.TO_ONE).to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "parent", Cardinality.TO_ONE)).getCardinality());
+    assertEquals(Cardinality.TO_ONE, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "parent", Cardinality.TO_ONE).to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "parent", Cardinality.TO_ONE)).toProperty("value").getCardinality());
+    assertEquals(Cardinality.TO_MANY, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "parent", Cardinality.TO_ONE).to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "items", Cardinality.TO_MANY)).toCollectionOfValues().getCardinality());
+    assertEquals(Cardinality.TO_MANY, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY).getCardinality());
+    assertEquals(Cardinality.TO_MANY, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY).to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY)).getCardinality());
+    assertEquals(Cardinality.TO_MANY, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY).to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY)).to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "parent", Cardinality.TO_ONE)).getCardinality());
+    assertEquals(Cardinality.TO_MANY, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY).to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY)).toProperty("value").getCardinality());
+    assertEquals(Cardinality.TO_ONE, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY).restrict("name", "Sam").to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY)).restrict("name", "Joe").getCardinality()); 
+    assertEquals(Cardinality.TO_MANY, new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY).restrict("name", "Sam").to(new RelationshipPath<AbstractEntity>(AbstractEntity.class, "children", Cardinality.TO_MANY)).getCardinality());
   }
 
 }

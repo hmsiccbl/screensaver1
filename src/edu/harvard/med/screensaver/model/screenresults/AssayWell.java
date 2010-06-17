@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/src/edu/harvard/med/screensaver/model/screenresults/ResultValue.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -24,6 +22,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Index;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -31,10 +32,8 @@ import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Index;
 
 
 /**
@@ -56,8 +55,8 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   private static final long serialVersionUID = 1L;
   private static final Logger log = Logger.getLogger(AssayWell.class);
   
-  public static final RelationshipPath<AssayWell> screenResult = new RelationshipPath<AssayWell>(AssayWell.class, "screenResult");
-  public static final RelationshipPath<AssayWell> libraryWell = new RelationshipPath<AssayWell>(AssayWell.class, "libraryWell");
+  public static final RelationshipPath<AssayWell> screenResult = new RelationshipPath<AssayWell>(AssayWell.class, "screenResult", Cardinality.TO_ONE);
+  public static final RelationshipPath<AssayWell> libraryWell = new RelationshipPath<AssayWell>(AssayWell.class, "libraryWell", Cardinality.TO_ONE);
 
   private Integer _version;
   private ScreenResult _screenResult;
@@ -214,8 +213,11 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
 
   public void setAssayWellControlType(AssayWellControlType assayWellControlType)
   {
-    if (!isHibernateCaller() && assayWellControlType != null && _libraryWell.getLibraryWellType() != LibraryWellType.EMPTY) {
-      throw new DataModelViolationException("assay well control type can only be defined if the library well type is 'empty'");
+    if (!isHibernateCaller() &&
+      assayWellControlType != null &&
+      _libraryWell.getLibraryWellType() != LibraryWellType.EMPTY &&
+      _libraryWell.getLibraryWellType() != LibraryWellType.DMSO) {
+      throw new DataModelViolationException("assay well control type can only be defined if the library well type is 'empty' or 'DMSO'");
     }
     _assayWellControlType = assayWellControlType;
   }

@@ -11,14 +11,16 @@ package edu.harvard.med.screensaver.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
-public interface DataExporter<D>
+public interface DataExporter<T>
 {
   public static final String LIST_DELIMITER = ";";
 
   public String getFormatName();
   public String getMimeType();
   public String getFileName();
-  public InputStream export(D dataSource) throws IOException;
+
+  public InputStream export(Iterator<T> iterator) throws IOException;
 }
 

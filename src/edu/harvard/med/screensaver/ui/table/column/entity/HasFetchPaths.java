@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.

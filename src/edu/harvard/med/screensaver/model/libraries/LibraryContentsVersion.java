@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.io.Serializable;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,6 +24,9 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Parameter;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -33,10 +34,8 @@ import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Parameter;
 
 /**
  * A specific version of the reagent information for a library. Over time, the
@@ -68,9 +67,9 @@ public class LibraryContentsVersion extends AbstractEntity<Integer> implements C
 
   public static final int FIRST_VERSION_NUMBER = 1;
   
-  public static final RelationshipPath<LibraryContentsVersion> library = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "library");
-  public static final RelationshipPath<LibraryContentsVersion> loadingActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "loadingActivity");
-  public static final RelationshipPath<LibraryContentsVersion> releaseActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "releaseActivity");
+  public static final RelationshipPath<LibraryContentsVersion> library = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "library", Cardinality.TO_ONE);
+  public static final RelationshipPath<LibraryContentsVersion> loadingActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "loadingActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<LibraryContentsVersion> releaseActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "releaseActivity", Cardinality.TO_ONE);
 
   private Integer _version; /* for Hibernate optimistic locking */ 
   private Integer _versionNumber; /* for domain model */

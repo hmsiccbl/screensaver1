@@ -1,5 +1,5 @@
-// $HeadURL:svn+ssh://cl163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/collaboration/src/edu/harvard/med/screensaver/model/users/ChecklistItemEvent.java $
-// $Id:ChecklistItemEvent.java 2585 2008-07-21 10:16:39Z cl163 $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 //
@@ -22,14 +22,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
-
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.annotations.ToMany;
-import edu.harvard.med.screensaver.model.annotations.ToOne;
 
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Parameter;
@@ -37,6 +29,13 @@ import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
 
 
 /**

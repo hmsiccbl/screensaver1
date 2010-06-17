@@ -1,6 +1,5 @@
 // $HeadURL$
 // $Id$
-// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 //
@@ -32,19 +31,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.OptimisticLock;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
-import edu.harvard.med.screensaver.util.DevelopmentException;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.OptimisticLock;
 
 /**
  * Provides the metadata for a subset of a
@@ -63,7 +62,7 @@ import org.hibernate.annotations.OptimisticLock;
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenResult.class)
-public class DataColumn extends AbstractEntity<Integer> implements MetaDataType, Comparable
+public class DataColumn extends AbstractEntity<Integer> implements MetaDataType, Comparable<DataColumn>
 {
   // TODO: perhaps we should split DataColumn into subclasses, one for raw
   // data value descriptions and one for derived data descriptions?
@@ -71,7 +70,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private static final Logger log = Logger.getLogger(DataColumn.class);
   private static final long serialVersionUID = -2325466055774432202L;
 
-  public static final RelationshipPath<DataColumn> ScreenResult = new RelationshipPath<DataColumn>(DataColumn.class, "screenResult");
+  public static final RelationshipPath<DataColumn> ScreenResult = new RelationshipPath<DataColumn>(DataColumn.class, "screenResult", Cardinality.TO_ONE);
   
   private static final DataType DEFAULT_DATA_TYPE = DataType.NUMERIC; 
   private static final int DEFAULT_DECIMAL_PLACES = 3;
@@ -129,13 +128,15 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
 
   /**
    * Defines natural ordering of <code>DataColumn</code> objects, based
-   * upon their ordinal field value. Note that natural ordering is only defined
-   * between <code>DataColumn</code> objects that share the same parent
-   * {@link ScreenResult}.
+   * upon their ordinal field value.
    */
-  public int compareTo(Object that)
+  public int compareTo(DataColumn other)
   {
-    return getOrdinal().compareTo(((DataColumn) that).getOrdinal());
+    int result = getScreenResult().getScreen().getScreenNumber().compareTo(other.getScreenResult().getScreen().getScreenNumber());
+    if (result == 0) {
+      result = getOrdinal().compareTo(other.getOrdinal());
+    }
+    return result;
   }
 
   /**
@@ -188,10 +189,10 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                        String value,
                                        Boolean exclude)
   {
-    if (isNumeric()) {
-      throw new DataModelViolationException("cannot add non-numeric result value to a numeric data column");
+    if (getDataType() != DataType.TEXT) {
+      throw new DataModelViolationException("not a text data column");
     }
-    return createResultValue(assayWell, value, null, exclude);
+    return createResultValue(assayWell, value, null, null, null, exclude);
   }
 
   /**
@@ -212,12 +213,32 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                        Double numericValue,
                                        boolean exclude)
   {
-    if (!!!isNumeric()) {
-      throw new DataModelViolationException("cannot add numeric result vaue to a non-numeric data column");
+    if (getDataType() != DataType.NUMERIC) {
+      throw new DataModelViolationException("not a numeric data column");
     }
-    return createResultValue(assayWell, null, numericValue, exclude);
+    return createResultValue(assayWell, null, numericValue, null, null, exclude);
   }
   
+  public ResultValue createPartitionedPositiveResultValue(AssayWell assayWell,
+                                                          PartitionedValue value,
+                                                          boolean exclude)
+  {
+    if (getDataType() != DataType.POSITIVE_INDICATOR_PARTITION) {
+      throw new DataModelViolationException("not a partition positive indicator data column");
+    }
+    return createResultValue(assayWell, null, null, value, null, exclude);
+  }
+  
+  public ResultValue createBooleanPositiveResultValue(AssayWell assayWell,
+                                                      Boolean value,
+                                                      boolean exclude)
+  {
+    if (getDataType() != DataType.POSITIVE_INDICATOR_BOOLEAN) {
+      throw new DataModelViolationException("not a boolean positive indicator data column");
+    }
+    return createResultValue(assayWell, null, null, null, value, exclude);
+  }
+
   @Column(nullable=false, updatable=false)
   @Immutable
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /*uses make*() builder methods*/)
@@ -911,25 +932,20 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    * @param exclude the exclude flag of the new ResultValue
    * @return a new ResultValue iff a result value did not already exist for the given well and data column
    */
-  private ResultValue createResultValue(
-    AssayWell assayWell,                                        
-    String value,
-    Double numericValue,
-    boolean exclude)
+  private ResultValue createResultValue(AssayWell assayWell,
+                                        String value,
+                                        Double numericValue,
+                                        PartitionedValue partitionPositiveIndicatorValue,
+                                        Boolean booleanPositiveIndicatorValue,
+                                        boolean exclude)
   {
-    if (isNumeric() && value != null) {
-      throw new DataModelViolationException("cannot add a non-numeric value to a numeric DataColumn");
-    }
-    else if (! isNumeric() && numericValue != null) {
-      throw new DataModelViolationException("cannot add a numeric value to a non-numeric DataColumn");
-    }
-
     ResultValue resultValue = new ResultValue(this,
                                               assayWell,
                                               value,
                                               numericValue,
-                                              exclude,
-                                              false);
+                                              partitionPositiveIndicatorValue,
+                                              booleanPositiveIndicatorValue,
+                                              exclude);
 
     if (getOrdinal() == 0) { // yuck! due to denormalization... // TODO: should move to AssayWell constructor
       if (assayWell.getLibraryWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
@@ -937,13 +953,9 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
       }
     }
 
-    if (isPositive(resultValue)) {
+    if (resultValue.isPositive()) {
       incrementPositivesCount();
-      resultValue.setPositive(true);
       assayWell.setPositive(true);
-    }
-    else {
-      resultValue.setPositive(false);
     }
 
     getScreenResult().addWell(assayWell.getLibraryWell());
@@ -981,48 +993,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private void setDerivedTypes(SortedSet<DataColumn> derivedTypes)
   {
     _derivedTypes = derivedTypes;
-  }
-
-  /**
-   * Determine whether a result value is to be considered a positive, using its
-   * value and this DataColumn's definition of what constitutes a positive.
-   * Only applicable for DataColumns that are positive indicators.
-   *
-   * @param rv
-   * @return true iff DataColumn is a positive indicator, result
-   *         value is for an experimental well, result value is not excluded,
-   *         and the value of the result value meets the positive indicator type's
-   *         criteria.
-   */
-  @Transient
-  private boolean isPositive(ResultValue rv)
-  {
-    boolean isPositive = false;
-    if (isPositiveIndicator() && rv.getWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL && !rv.isExclude()) {
-      if (isBooleanPositiveIndicator()) {
-        if (Boolean.parseBoolean(rv.getValue())) {
-          isPositive = true;
-        }
-      }
-      else if (isPartitionPositiveIndicator()) {
-        String resultValue = rv.getValue();
-        for (PartitionedValue pv : PartitionedValue.values()) {
-          if (!pv.equals(PartitionedValue.NONE) && pv.getValue().equals(resultValue)) {
-            isPositive = true;
-            break;
-          }
-        }
-      }
-      else {
-        throw new DevelopmentException("unhandled positive indicator type " + getDataType());
-      }
-    }
-    if (log.isDebugEnabled()) {
-      if (isPositive) {
-        log.debug("result value [well=" + rv.getWell() + ", value=" + rv.getValue() + ", exclude=" + rv.isExclude() + ", wellType=" + rv.getAssayWellControlType() + "] is a positive");
-      }
-    }
-    return isPositive;
   }
 
   /**

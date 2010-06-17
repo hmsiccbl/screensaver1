@@ -18,12 +18,12 @@ import edu.harvard.med.screensaver.ui.table.column.FixedDecimalColumn;
 
 public abstract class FixedDecimalEntityColumn<E extends AbstractEntity> extends FixedDecimalColumn<E> implements HasFetchPaths<E>
 {
-  private FetchPaths<E> _fetchPaths;
+  private FetchPaths<E,E> _fetchPaths;
   
   public FixedDecimalEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
     super(name, description, group);
-    _fetchPaths = new FetchPaths<E>(relationshipPath);
+    _fetchPaths = new FetchPaths<E,E>(relationshipPath);
   }
 
   public void addRelationshipPath(RelationshipPath<E> path)

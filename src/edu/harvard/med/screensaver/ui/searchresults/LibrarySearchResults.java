@@ -13,18 +13,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
@@ -36,12 +39,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextSetEntityColumn;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 
 
 /**
@@ -50,7 +48,7 @@ import com.google.common.collect.Sets;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
+public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library,Integer>
 {
   private static final Logger log = Logger.getLogger(LibrarySearchResults.class);
   public static final Set<LibraryType> LIBRARY_TYPES_TO_DISPLAY =
@@ -89,14 +87,13 @@ public class LibrarySearchResults extends EntitySearchResults<Library,Integer>
   @SuppressWarnings("unchecked")
   public void searchLibraryScreenType(ScreenType screenType)
   {
-    initialize(new AllEntitiesOfTypeDataFetcher<Library,Integer>(Library.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Library>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
-      protected void addDomainRestrictions(HqlBuilder hql,
-                                           Map<RelationshipPath<Library>,String> path2Alias)
+      public void addDomainRestrictions(HqlBuilder hql)
       {
         hql.whereIn(getRootAlias(), "libraryType", LIBRARY_TYPES_TO_DISPLAY);
       }
-    });
+    }));
 
     TableColumn<Library,ScreenType> column = (TableColumn<Library,ScreenType>) getColumnManager().getColumn("Screen Type");
     column.clearCriteria();

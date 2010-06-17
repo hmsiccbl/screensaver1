@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,14 +21,15 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 
 /**
  * Annotation value on a library reagent.
@@ -45,23 +44,16 @@ import org.hibernate.annotations.Immutable;
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=AnnotationType.class)
 public class AnnotationValue extends AbstractEntity<Integer>
 {
-
-  // private static data
-
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationValue.class);
 
-  public static final RelationshipPath<AnnotationValue> annotationType = new RelationshipPath<AnnotationValue>(AnnotationValue.class, "annotationType");
-
-  // private instance data
+  public static final RelationshipPath<AnnotationValue> annotationType = new RelationshipPath<AnnotationValue>(AnnotationValue.class, "annotationType", Cardinality.TO_ONE);
 
   private AnnotationType _annotationType;
   private Reagent _reagent;
   private String _value;
   private Double _numericValue;
 
-
-  // private instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -74,13 +66,10 @@ public class AnnotationValue extends AbstractEntity<Integer>
    * @return the id for the annotation value
    */
   @Id
-  @org.hibernate.annotations.GenericGenerator(
-    name="annotation_value_id_seq",
-    strategy="sequence",
+  @org.hibernate.annotations.GenericGenerator(name = "annotation_value_id_seq", strategy = "seqhilo",
     parameters = {
-      @org.hibernate.annotations.Parameter(name="sequence", value="annotation_value_id_seq")
-    }
-  )
+    @org.hibernate.annotations.Parameter(name = "sequence", value = "annotation_value_id_seq"),
+    @org.hibernate.annotations.Parameter(name = "max_lo", value = "50") })
   @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="annotation_value_id_seq")
   public Integer getAnnotationValueId()
   {
@@ -153,17 +142,16 @@ public class AnnotationValue extends AbstractEntity<Integer>
   }
 
 
-  // protected constructor
-
   /**
-   * Construct an initialized <code>AnnotationValue</code>. Intended only for use by
+   * Construct an initialized <code>AnnotationValue</code>. 
+   * TODO: change this comment now that this is public:  Intended only for use by
    * {@link AnnotationType}.
    */
-  AnnotationValue(
+  public AnnotationValue(
     AnnotationType annotationType,
     Reagent reagent,
     String value,
-    Double numericValue)
+    Double numericValue )
   {
     if (reagent == null) {
       throw new RequiredPropertyException(this, "reagent"); 
@@ -175,20 +163,14 @@ public class AnnotationValue extends AbstractEntity<Integer>
     _reagent = reagent;
     _value = value;
     _numericValue = numericValue;
-    _reagent.getAnnotationValues().put(annotationType, this);
+
   }
-
-
-  // protected constructor
 
   /**
    * Construct an uninitialized <code>AnnotationValue</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected AnnotationValue() {}
-
-
-  // private constructor and instance methods
 
   /**
    * Set the id for the annotation value.

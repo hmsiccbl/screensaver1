@@ -18,9 +18,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.TestDataFactory;
@@ -31,11 +36,6 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 
 public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
@@ -97,9 +97,8 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
 
   public void testExportWellsDataToSDF() throws IOException
   {
-    WellsSdfDataExporter wellsDataExporter =
-      new WellsSdfDataExporter(genericEntityDao);
-    wellsDataExporter.setLibraryContentsVersion(null);
+    LibraryContentsVersionReference lcvRef = new LibraryContentsVersionReference();
+    WellsSdfDataExporter wellsDataExporter = new WellsSdfDataExporter(genericEntityDao, lcvRef);
     
     Set<String> wellKeys = new HashSet<String>();
     wellKeys.add("00001:A01");
@@ -109,15 +108,15 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
     LibraryContentsVersion lcv1 = genericEntityDao.findEntityByProperty(LibraryContentsVersion.class, "versionNumber", Integer.valueOf(1));
     LibraryContentsVersion lcv2 = genericEntityDao.findEntityByProperty(LibraryContentsVersion.class, "versionNumber", Integer.valueOf(2));
 
-    InputStream exportedData = wellsDataExporter.export(wellKeys);
+    InputStream exportedData = wellsDataExporter.export(wellKeys.iterator());
     verifyExpectedWellsExported(wellKeys, lcv1, exportedData);
     
-    wellsDataExporter.setLibraryContentsVersion(lcv1);
-    exportedData = wellsDataExporter.export(wellKeys);
+    lcvRef.setValue(lcv1);
+    exportedData = wellsDataExporter.export(wellKeys.iterator());
     verifyExpectedWellsExported(wellKeys, lcv1, exportedData);
     
-    wellsDataExporter.setLibraryContentsVersion(lcv2);
-    exportedData = wellsDataExporter.export(wellKeys);
+    lcvRef.setValue(lcv2);
+    exportedData = wellsDataExporter.export(wellKeys.iterator());
     verifyExpectedWellsExported(wellKeys, lcv2, exportedData);
   }
 

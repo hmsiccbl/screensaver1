@@ -34,6 +34,11 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
@@ -41,13 +46,9 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -74,7 +75,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
 
   private static final long serialVersionUID = 0;
 
-  public static final RelationshipPath<ScreenResult> screen = new RelationshipPath<ScreenResult>(ScreenResult.class, "screen");
+  public static final RelationshipPath<ScreenResult> screen = new RelationshipPath<ScreenResult>(ScreenResult.class, "screen", Cardinality.TO_ONE);
   public static final RelationshipPath<ScreenResult> dataColumns = new RelationshipPath<ScreenResult>(ScreenResult.class, "dataColumns");
 
   // private instance data

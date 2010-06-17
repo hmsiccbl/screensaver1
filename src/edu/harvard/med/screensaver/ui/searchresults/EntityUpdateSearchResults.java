@@ -11,11 +11,18 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.Entity;
@@ -26,15 +33,9 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateTimeEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 
-import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity, K extends Serializable> extends EntitySearchResults<AdministrativeActivity,K>
+public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity,K extends Serializable> extends EntityBasedEntitySearchResults<AdministrativeActivity,K>
 {
   private static Logger log = Logger.getLogger(EntityUpdateSearchResults.class);
   
@@ -59,14 +60,16 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity, K exten
   public void searchForParentEntity(AE auditedEntity)
   {
     _auditedEntity = auditedEntity;
-    Set<K> keys = (Set<K>) Sets.newHashSet(Iterables.transform(auditedEntity.getUpdateActivities(), Entity.ToEntityId));
 
-    EntitySetDataFetcher<AdministrativeActivity,K> dataFetcher = 
-      new EntitySetDataFetcher<AdministrativeActivity,K>(
-        AdministrativeActivity.class,
-        keys,
-        _dao);
-    initialize(dataFetcher);
+    EntityDataFetcher<AdministrativeActivity,K> dataFetcher = 
+      new EntityDataFetcher<AdministrativeActivity,K>(AdministrativeActivity.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), Sets.newHashSet(Iterables.transform(_auditedEntity.getUpdateActivities(), Entity.ToEntityId)));
+      }
+      };
+    initialize(new InMemoryEntityDataModel<AdministrativeActivity>(dataFetcher));
     getColumnManager().setSortColumnName("Date");
     getColumnManager().setSortDirection(SortDirection.DESCENDING);
   }

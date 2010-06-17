@@ -71,13 +71,12 @@ public abstract class RelatedEntityColumn<F extends AbstractEntity, R extends Ab
     _relatedEntityClass = relatedEntityClass;
     _delegateEntityColumn = delegateEntityColumn;
     PropertyPath<R> propPath = ((HasFetchPaths<R>) delegateEntityColumn).getPropertyPath();
-    Iterator<RelationshipPath<R>> iter = ((HasFetchPaths<R>) delegateEntityColumn).getRelationshipPaths().iterator(); 
+    Iterator<RelationshipPath<R>> iter = ((HasFetchPaths<R>) delegateEntityColumn).getRelationshipPaths().iterator();
     if (propPath != null) {
-      _fetchPaths = new FetchPaths<F>(toRelatedEntityPath.to(propPath));
-      iter.next();
+      _fetchPaths = new FetchPaths<F,F>(toRelatedEntityPath.to(propPath));
     }
     else {
-      _fetchPaths = new FetchPaths<F>(toRelatedEntityPath.to(iter.next()));
+      _fetchPaths = new FetchPaths<F,F>(toRelatedEntityPath.to(iter.next()));
     }
     while (iter.hasNext()) {
       _fetchPaths.addRelationshipPath(toRelatedEntityPath.to(iter.next()));

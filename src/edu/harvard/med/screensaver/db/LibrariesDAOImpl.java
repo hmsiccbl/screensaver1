@@ -9,10 +9,22 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
+
+import com.google.common.base.Functions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
@@ -31,14 +43,8 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 {
@@ -293,5 +299,48 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     String hql = "select count(*) from Well w where w.plateNumber between ? and ? and w.libraryWellType = 'experimental'";
     return ((Long) getHibernateTemplate().find(hql, Lists.newArrayList(startPlate, endPlate).toArray()).get(0)).intValue(); 
+  }
+
+  @Override
+  public Set<ScreenType> findScreenTypesForReagents(Set<ReagentVendorIdentifier> reagentIds)
+  {
+    Set<ScreenType> result = Sets.newHashSet();
+    Multimap<String,ReagentVendorIdentifier> indexByVendorName = Multimaps.index(reagentIds, ReagentVendorIdentifier.ToVendorName);
+    for (Entry<String,Collection<ReagentVendorIdentifier>> entry : indexByVendorName.asMap().entrySet()) {
+      Set<String> idsForVendor = Sets.newHashSet(Iterables.transform(entry.getValue(), ReagentVendorIdentifier.ToVendorIdentifier)); 
+      final HqlBuilder hql = new HqlBuilder().
+      select("l", "screenType").distinctProjectionValues().
+      from(Reagent.class, "r").
+      from("r", Reagent.well.getLeaf(), "w").
+      from("w", Well.library.getLeaf(), "l").
+      whereIn("r", Reagent.vendorIdentifier.getPath(), idsForVendor).
+      where("r", Reagent.vendorName.getPath(), Operator.EQUAL, entry.getKey());
+      List<ScreenType> vendorResult = runQuery(new Query<ScreenType>() {
+        public List<ScreenType> execute(Session session)
+        {
+          return hql.toQuery(session, true).list();
+        }
+      });
+      result.addAll(vendorResult);
+    }
+    return result;
+  }
+
+  @Override
+  public Set<ScreenType> findScreenTypesForWells(Set<WellKey> wellKeys)
+  {
+    Set<String> wellIds = Sets.newHashSet(Iterables.transform(wellKeys, Functions.toStringFunction()));
+    final HqlBuilder hql = new HqlBuilder().
+    select("l", "screenType").distinctProjectionValues().
+    from(Well.class, "w").
+    from("w", Well.library.getLeaf(), "l").
+    whereIn("w", "id", wellIds);
+    List<ScreenType> screenTypes = runQuery(new Query<ScreenType>() {
+      public List<ScreenType> execute(Session session)
+      {
+        return hql.toQuery(session, true).list();
+      }
+    });
+    return Sets.newHashSet(screenTypes);
   }
 }

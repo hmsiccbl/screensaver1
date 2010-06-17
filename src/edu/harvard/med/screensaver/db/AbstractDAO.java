@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.HibernateException;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
@@ -25,6 +26,13 @@ public class AbstractDAO extends HibernateDaoSupport
   // static members
 
   private static Logger log = Logger.getLogger(AbstractDAO.class);
+
+  /**
+   * This controls the number of to be read before flushing the hibernate
+   * cache and persisting all of the entities. This value should be matched to
+   * the hibernate.jdbc.batch_size property on the hibernateSessionFactory bean.
+   */
+  public static final int ROWS_TO_CACHE = 50;
 
 
   // instance data members
@@ -73,6 +81,17 @@ public class AbstractDAO extends HibernateDaoSupport
     getHibernateTemplate().execute(new HibernateCallback()
     {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
+      {
+        return query.execute(session);
+      }
+    });
+  }
+  
+  public ScrollableResults runScrollQuery(final edu.harvard.med.screensaver.db.ScrollQuery query)
+  {
+    return (ScrollableResults) getHibernateTemplate().execute(new HibernateCallback()
+    {
+      public ScrollableResults doInHibernate(Session session) throws HibernateException, SQLException
       {
         return query.execute(session);
       }

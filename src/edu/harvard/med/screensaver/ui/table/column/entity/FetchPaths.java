@@ -56,11 +56,10 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
  * @param E the root entity type of this column
  * @author ant4
  */
-public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
+public class FetchPaths<E extends AbstractEntity, R> implements HasFetchPaths<E>
 {
   private PropertyPath<E> _propertyPath;
   private Set<RelationshipPath<E>> _relationshipPaths = new HashSet<RelationshipPath<E>>(1);
-  private boolean _isSingleProperty;
 
   /**
    * Constructs an EntityColumn with a RelationshipPath, thus specifying how to
@@ -70,10 +69,7 @@ public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
   public FetchPaths(RelationshipPath<E> relationshipPath)
   {
     if (relationshipPath instanceof PropertyPath) {
-      PropertyPath<E> propertyPath = (PropertyPath<E>) relationshipPath;
-      _relationshipPaths.add(propertyPath.getRelationshipPath());
-      _propertyPath = propertyPath;
-      _isSingleProperty = true;
+      _propertyPath = (PropertyPath<E>) relationshipPath;
     }
     else {
       _relationshipPaths.add(relationshipPath);
@@ -93,23 +89,30 @@ public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
   public void addRelationshipPath(RelationshipPath<E> path) 
   {
     _relationshipPaths.add(path);
-    _isSingleProperty = false;
   }
 
   public boolean isFetchableProperty()
   {
-    return _isSingleProperty;
+    return getPropertyPath() != null;
   }
 
-  public static <E extends AbstractEntity> List<PropertyPath<E>> getPropertyPaths(List<? extends TableColumn<E,?>> columns)
+  public static <E extends AbstractEntity, R> List<PropertyPath<E>> getPropertyPaths(List<? extends TableColumn<R,?>> columns)
   {
     List<PropertyPath<E>> propertyPaths = new ArrayList<PropertyPath<E>>();
-    for (TableColumn<E,?> column : columns) {
+    for (TableColumn<R,?> column : columns) {
       if (column instanceof HasFetchPaths) {
         if (column.isVisible()) {
           HasFetchPaths<E> entityColumn = (HasFetchPaths<E>) column;
           if (entityColumn.getPropertyPath() != null) {
             propertyPaths.add(entityColumn.getPropertyPath());
+          }
+          for (RelationshipPath<E> relPath : entityColumn.getRelationshipPaths()) {
+            if (relPath instanceof PropertyPath) {
+              propertyPaths.add((PropertyPath<E>) relPath);
+            }
+            else {
+              propertyPaths.add(relPath.toFullEntity());
+            }
           }
         }
       }
@@ -117,10 +120,10 @@ public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
     return propertyPaths;
   }
 
-  public static <E extends AbstractEntity> Map<PropertyPath<E>,List<? extends Criterion<?>>> getFilteringCriteria(List<? extends TableColumn<E,?>> columns)
+  public static <E extends AbstractEntity, R> Map<PropertyPath<E>,List<? extends Criterion<?>>> getFilteringCriteria(List<? extends TableColumn<R,?>> columns)
   {
     Map<PropertyPath<E>,List<? extends Criterion<?>>> criteria = new HashMap<PropertyPath<E>,List<? extends Criterion<?>>>();
-    for (TableColumn<E,?> column : columns) {
+    for (TableColumn<R,?> column : columns) {
       if (column instanceof HasFetchPaths) {
         if (column.isVisible()) {
           HasFetchPaths<E> fetchPaths = (HasFetchPaths<E>) column;
@@ -132,18 +135,5 @@ public class FetchPaths<E extends AbstractEntity> implements HasFetchPaths<E>
       }
     }
     return criteria;
-  }
-
-  public static <E extends AbstractEntity> List<RelationshipPath<E>> getRelationshipPaths(List<? extends TableColumn<E,?>> columns)
-  {
-    List<RelationshipPath<E>> relationshipPaths = new ArrayList<RelationshipPath<E>>();
-    for (TableColumn<E,?> column : columns) {
-      if (column instanceof HasFetchPaths) {
-        if (column.isVisible()) {
-          relationshipPaths.addAll(((HasFetchPaths<E>) column).getRelationshipPaths());
-        }
-      }
-    }
-    return relationshipPaths;
   }
 }

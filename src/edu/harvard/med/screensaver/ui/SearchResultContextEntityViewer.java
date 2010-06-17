@@ -12,7 +12,7 @@ package edu.harvard.med.screensaver.ui;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 
-public interface SearchResultContextEntityViewer<E extends AbstractEntity>
+public interface SearchResultContextEntityViewer<E extends AbstractEntity,R>
 {
-  EntitySearchResults<E,?> getContextualSearchResults();
+  EntitySearchResults<E,R,?> getContextualSearchResults();
 }

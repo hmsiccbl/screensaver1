@@ -11,10 +11,14 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -34,12 +38,8 @@ import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VolumeEntityColumn;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
-
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 
 /**
@@ -48,7 +48,7 @@ import com.google.common.collect.Sets;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPickRequest,Integer>
+public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResults<CherryPickRequest,Integer>
 {
   private ScreenViewer _screenViewer;
   private UserViewer _userViewer;
@@ -76,8 +76,8 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
   public void searchAll()
   {
     EntityDataFetcher<CherryPickRequest,Integer> dataFetcher =
-      (EntityDataFetcher<CherryPickRequest,Integer>) new AllEntitiesOfTypeDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao);
-    initialize(dataFetcher);
+      (EntityDataFetcher<CherryPickRequest,Integer>) new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao);
+    initialize(new InMemoryEntityDataModel<CherryPickRequest>(dataFetcher));
 
     // default to descending sort order on cherry pick request number
     getColumnManager().setSortAscending(false);
@@ -92,12 +92,15 @@ public class CherryPickRequestSearchResults extends EntitySearchResults<CherryPi
     column.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, screenType));
   }
 
-  public void searchForScreen(Screen screen)
+  public void searchForScreen(final Screen screen)
   {
-    initialize(new ParentedEntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class,
-      CherryPickRequest.screen,
-      screen,
-      _dao));
+    initialize(new InMemoryEntityDataModel<CherryPickRequest>(new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, CherryPickRequest.screen, screen, getRootAlias());
+      }
+    }));
   }
 
 

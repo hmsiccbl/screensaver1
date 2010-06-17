@@ -10,22 +10,19 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.ReagentVendorIdentifierListParser;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
 
 public class ReagentFinder extends AbstractBackingBean
 {
@@ -101,53 +98,18 @@ public class ReagentFinder extends AbstractBackingBean
     return _vendorSelector;
   }
 
-  /**
-   * Find the reagents specified in the reagent vendor identifier list, and view
-   * results in the Reagents Browser.
-   */
   @UICommand
   public String findReagents()
   {
-    final String[] result = new String[1];
-    _dao.doInTransaction(new DAOTransaction()
-    {
-      public void runTransaction()
-      {
-        try {
-          ReagentVendorIdentifierParserResult parseResult =
-            _reagentVendorIdentifierListParser.parseReagentVendorIdentifiers(_vendorSelector.getSelection(),
-                                                                             _reagentVendorIdentifierList);
-          // display parse errors before proceeding with successfully parsed ReagentVendorIdentifiers
-          for (Pair<Integer,String> error : parseResult.getErrors()) {
-            showMessage("libraries.reagentVendorIdentifierListParseError", error.getSecond());
-          }
-
-          Set<ReagentVendorIdentifier> foundReagentIds = new HashSet<ReagentVendorIdentifier>();
-          for (ReagentVendorIdentifier reagentVendorIdentifier : parseResult.getParsedReagentVendorIdentifiers()) {
-            // TODO: eliminate this dao call here; it's wasteful; make this check when loading the data later on
-            Set<Reagent> reagents = _librariesDao.findReagents(reagentVendorIdentifier, true);
-            if (reagents.size() > 0) {
-              foundReagentIds.add(reagentVendorIdentifier);
-            }
-            else {
-              showMessage("libraries.noSuchReagent", reagentVendorIdentifier);
-            }
-          }
-
-          if (foundReagentIds.size() == 0) {
-            result[0] = REDISPLAY_PAGE_ACTION_RESULT;
-          }
-          else {
-            _wellsBrowser.searchReagents(foundReagentIds);
-            result[0] = BROWSE_WELLS;
-          }
-        }
-        catch (RuntimeException e) {
-          log.error("on find reagents: ", e);
-          throw e;
-        }
-      }
-    });
-    return result[0];
+    ReagentVendorIdentifierParserResult parseResult =
+      _reagentVendorIdentifierListParser.parseReagentVendorIdentifiers(_vendorSelector.getSelection(),
+                                                                       _reagentVendorIdentifierList);
+    // display parse errors before showing the search result for the successfully parsed ReagentVendorIdentifiers
+    for (Pair<Integer,String> error : parseResult.getErrors()) {
+      showMessage("libraries.reagentVendorIdentifierListParseError", error.getSecond());
+    }
+    SortedSet<ReagentVendorIdentifier> rvis = parseResult.getParsedReagentVendorIdentifiers();
+    _wellsBrowser.searchReagents(rvis);
+    return BROWSE_WELLS;
   }
 }

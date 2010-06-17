@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -21,7 +19,7 @@ import edu.harvard.med.screensaver.ui.table.column.EnumColumn;
 
 public abstract class EnumEntityColumn<E extends AbstractEntity, ENUM extends Enum<ENUM>> extends EnumColumn<E,ENUM> implements HasFetchPaths<E>
 {
-  private FetchPaths<E> _fetchPaths;
+  private FetchPaths<E,E> _fetchPaths;
   
   public EnumEntityColumn(RelationshipPath<E> relationshipPath,
                           String name,
@@ -33,7 +31,7 @@ public abstract class EnumEntityColumn<E extends AbstractEntity, ENUM extends En
           description,
           group,
           items);
-    _fetchPaths = new FetchPaths<E>(relationshipPath);
+    _fetchPaths = new FetchPaths<E,E>(relationshipPath);
   }
 
   public void addRelationshipPath(RelationshipPath<E> path)

@@ -11,9 +11,10 @@ package edu.harvard.med.screensaver.model;
 
 import java.io.Serializable;
 
-import edu.harvard.med.screensaver.policy.EntityViewPolicy;
-
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+
+import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 
 /** 
  * Interface for domain model entity classes.
@@ -25,7 +26,14 @@ public interface Entity<K extends Serializable>
     {
       return entity.getEntityId();
     }
-  }; 
+  };
+
+  public static final Predicate<Entity> NotRestricted = new Predicate<Entity>() {
+    public boolean apply(Entity e)
+    {
+      return !!!e.isRestricted();
+    }
+  };
 
   /**
    * @return a unique identifier for this entity

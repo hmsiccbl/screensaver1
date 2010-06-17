@@ -9,33 +9,33 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 
-import org.springframework.transaction.annotation.Transactional;
 
-
-public abstract class SearchResultContextEntityViewerBackingBean<E extends AbstractEntity> extends EntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E>
+public abstract class SearchResultContextEntityViewerBackingBean<E extends AbstractEntity,R> extends EntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E,R>
 {
-  private EntitySearchResults<E,?> _entitySearchResults;
+  private EntitySearchResults<E,R,?> _entitySearchResults;
   private String _browserActionResult;
 
   public SearchResultContextEntityViewerBackingBean() {}
 
-  public SearchResultContextEntityViewerBackingBean(SearchResultContextEntityViewerBackingBean<E> thisProxy,
+  public SearchResultContextEntityViewerBackingBean(SearchResultContextEntityViewerBackingBean<E,R> thisProxy,
                                                     Class<E> entityClass,
                                                     String browserActionResult,
                                                     String viewerActionResult,
                                                     GenericEntityDAO dao,
-                                                    EntitySearchResults<E,?> entitySearchResults)
+                                                    EntitySearchResults<E,R,?> entitySearchResults)
   {
     super(thisProxy, entityClass, viewerActionResult, dao);
     _browserActionResult = browserActionResult;
     _entitySearchResults = entitySearchResults;
   }
 
-  public EntitySearchResults<E,?> getContextualSearchResults()
+  public EntitySearchResults<E,R,?> getContextualSearchResults()
   {
     return _entitySearchResults;
   }

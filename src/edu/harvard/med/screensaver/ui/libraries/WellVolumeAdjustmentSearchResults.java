@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.VolumeUnit;
@@ -21,7 +23,7 @@ import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.FixedDecimalEntityColumn;
@@ -30,9 +32,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 
-import org.joda.time.LocalDate;
-
-public class WellVolumeAdjustmentSearchResults extends EntitySearchResults<WellVolumeAdjustment,Integer>
+public class WellVolumeAdjustmentSearchResults extends EntityBasedEntitySearchResults<WellVolumeAdjustment,Integer>
 {
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private UserViewer _userViewer;

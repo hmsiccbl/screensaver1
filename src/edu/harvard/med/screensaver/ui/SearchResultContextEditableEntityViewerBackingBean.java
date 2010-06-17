@@ -9,41 +9,40 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
-
-import org.springframework.transaction.annotation.Transactional;
 
 
 // TODO: this class should be removed if/when we refactor the subclasses to have
 // "detail" viewers for the editable parts; since we never actually *edit*
 // within a search result context (we only view), this class doesn't really make
 // sense
-public abstract class SearchResultContextEditableEntityViewerBackingBean<E extends AbstractEntity> extends EditableEntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E>
+public abstract class SearchResultContextEditableEntityViewerBackingBean<E extends AbstractEntity,R> extends EditableEntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E,R>
 {
 
-  private EntitySearchResults<E,?> _entitySearchResults;
+  private EntitySearchResults<E,R,?> _entitySearchResults;
   private String _browserActionResult;
 
   public SearchResultContextEditableEntityViewerBackingBean()
   {
   }
 
-  public SearchResultContextEditableEntityViewerBackingBean(SearchResultContextEditableEntityViewerBackingBean<E> thisProxy,
+  public SearchResultContextEditableEntityViewerBackingBean(SearchResultContextEditableEntityViewerBackingBean<E,R> thisProxy,
                                                             Class<E> entityClass,
                                                             String browserActionResult,
                                                             String viewerActionResult,
                                                             GenericEntityDAO dao,
-                                                            EntitySearchResults<E,?> entitySearchResults)
+                                                            EntitySearchResults<E,R,?> entitySearchResults)
   {
     super(thisProxy, entityClass, viewerActionResult, dao);
     _entitySearchResults = entitySearchResults;
     _browserActionResult = browserActionResult;
   }
   
-  public EntitySearchResults<E,?> getContextualSearchResults()
+  public EntitySearchResults<E,R,?> getContextualSearchResults()
   {
     return _entitySearchResults;
   }

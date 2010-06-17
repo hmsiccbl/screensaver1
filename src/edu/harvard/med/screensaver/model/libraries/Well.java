@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/model/libraries/Well.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -34,6 +32,10 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.MapKeyManyToMany;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
@@ -42,16 +44,12 @@ import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.MapKeyManyToMany;
-
-import com.google.common.collect.Maps;
 
 
 /**
@@ -80,11 +78,11 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
     return _wellParsePattern.matcher(wellName).matches();
   }
 
-  public static final RelationshipPath<Well> library = new RelationshipPath<Well>(Well.class, "library");
+  public static final RelationshipPath<Well> library = new RelationshipPath<Well>(Well.class, "library", Cardinality.TO_ONE);
   public static final RelationshipPath<Well> reagents = new RelationshipPath<Well>(Well.class, "reagents");
-  public static final RelationshipPath<Well> latestReleasedReagent = new RelationshipPath<Well>(Well.class, "latestReleasedReagent");
+  public static final RelationshipPath<Well> latestReleasedReagent = new RelationshipPath<Well>(Well.class, "latestReleasedReagent", Cardinality.TO_ONE);
   public static final RelationshipPath<Well> resultValues = new RelationshipPath<Well>(Well.class, "resultValues");
-  public static final RelationshipPath<Well> deprecationActivity = new RelationshipPath<Well>(Well.class, "deprecationActivity");
+  public static final RelationshipPath<Well> deprecationActivity = new RelationshipPath<Well>(Well.class, "deprecationActivity", Cardinality.TO_ONE);
   public static final RelationshipPath<Well> screenResults = new RelationshipPath<Well>(Well.class, "screenResults");
 
 

@@ -11,6 +11,8 @@ package edu.harvard.med.screensaver.ui.screens;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
@@ -22,10 +24,8 @@ import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
-import org.apache.log4j.Logger;
 
-
-public class StudyViewer<E extends Study> extends SearchResultContextEntityViewerBackingBean<E>
+public class StudyViewer<E extends Study> extends SearchResultContextEntityViewerBackingBean<E,E>
 {
   private static Logger log = Logger.getLogger(StudyViewer.class);
 
@@ -53,7 +53,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
           ScreensaverConstants.BROWSE_STUDIES,
           ScreensaverConstants.VIEW_STUDY,
           dao,
-          (EntitySearchResults<E,?>) studiesBrowser);
+          (EntitySearchResults<E,E,?>) studiesBrowser);
     _studyDetailViewer = studyDetailViewer;
     _annotationTypesTable = annotationTypesTable;
     _wellsBrowser = wellsBrowser;
@@ -63,7 +63,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
 
   protected StudyViewer(Class<E> entityClass,
                         StudyViewer thisProxy,
-                        EntitySearchResults<E,?> studiesBrowser,
+                        EntitySearchResults<E,E,?> studiesBrowser,
                         String browserActionResult,
                         String viewerActionResult,
                         GenericEntityDAO dao,
@@ -75,7 +75,7 @@ public class StudyViewer<E extends Study> extends SearchResultContextEntityViewe
           browserActionResult,
           viewerActionResult,
           dao,
-          (EntitySearchResults<E,?>) studiesBrowser);
+          (EntitySearchResults<E,E,?>) studiesBrowser);
     _annotationTypesTable = annotationTypesTable;
     _wellsBrowser = wellSearchResults;
 

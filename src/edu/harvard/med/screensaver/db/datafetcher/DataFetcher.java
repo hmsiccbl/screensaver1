@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -15,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 
 /**
@@ -51,6 +50,22 @@ import edu.harvard.med.screensaver.ui.table.Criterion;
  */
 public interface DataFetcher<R, K, P>
 {
+  /**
+   * Allows subclass to add a fixed set of restrictions that will narrow the
+   * query result to a particular entity domain. For example, entities sharing
+   * the same parent, an arbitrary set of entity keys, etc. This restriction is
+   * effectively AND'ed with the criteria set via {@link #setFilteringCriteria(Map)}.
+   * 
+   * @motivation This method is a convenience to the client code, which will
+   *             usually use {@link #setFilteringCriteria(Map)} for user-specified,
+   *             column-associated criteria. Use of this method allows the
+   *             client code to set a top-level restriction that is respected
+   *             even as the user modifies column-based filtering criteria.
+   */
+  void addDomainRestrictions(HqlBuilder hql);
+
+  void setPropertiesToFetch(List<P> properties);
+
   void setFilteringCriteria(Map<P,List<? extends Criterion<?>>> criteria);
 
   void setOrderBy(List<P> orderByProperties /* TODO: , List<SortDirection> orderByDirections */);

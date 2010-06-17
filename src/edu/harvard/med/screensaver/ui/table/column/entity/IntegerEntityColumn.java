@@ -18,12 +18,12 @@ import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
 
 public abstract class IntegerEntityColumn<E extends AbstractEntity> extends IntegerColumn<E> implements HasFetchPaths<E>
 {
-  private FetchPaths<E> _fetchPaths;
+  private FetchPaths<E,E> _fetchPaths;
   
   public IntegerEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
     super(name, description, group);
-    _fetchPaths = new FetchPaths<E>(relationshipPath);
+    _fetchPaths = new FetchPaths<E,E>(relationshipPath);
   }
 
   public void addRelationshipPath(RelationshipPath<E> path)

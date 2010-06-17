@@ -21,23 +21,23 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
-import edu.harvard.med.screensaver.model.annotations.ToMany;
-import edu.harvard.med.screensaver.model.annotations.ToOne;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 
 /**
@@ -53,8 +53,8 @@ public class SilencingReagent extends Reagent
 {
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<SilencingReagent> vendorGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "vendorGene");
-  public static final RelationshipPath<SilencingReagent> facilityGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "facilityGene");
+  public static final RelationshipPath<SilencingReagent> vendorGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "vendorGene", Cardinality.TO_ONE);
+  public static final RelationshipPath<SilencingReagent> facilityGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "facilityGene", Cardinality.TO_ONE);
   public static final RelationshipPath<SilencingReagent> duplexWells = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "duplexWells");
   
   private static final Function<Well,SilencingReagent> wellToReagentTransformer = 

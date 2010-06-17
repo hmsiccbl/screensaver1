@@ -24,6 +24,17 @@ public abstract class VocabularyColumn<R,V> extends TableColumn<R,V> implements 
   private Set<V> _items;
   private ArrayList<SelectItem> _selectItems;
 
+  /**
+   * 
+   * Constructs a VocabularyColumn object.
+   * @param name
+   * @param description
+   * @param group
+   * @param converter
+   * @param items will be used for getVocabularySelections; which populates the displayed values ( &lt;option&gt )in the &lt;selectItems&gt; element,
+   *        this will be converted by the Converter.getAsString() method to a &quot;model&quot; value, which is then used for the 
+   *        &quot;value&quot; portion of the &lt;option&gt element of the &lt;selectItems&gt.  see criterion.xhtml
+   */
   public VocabularyColumn(String name,
                           String description,
                           String group,

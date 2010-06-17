@@ -22,14 +22,20 @@ import java.util.Set;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter;
+import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -38,7 +44,6 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
@@ -52,13 +57,7 @@ import edu.harvard.med.screensaver.ui.table.SimpleCell;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
-public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well> 
+public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,Tuple<String>>
 {
   
   private static final Logger log = Logger.getLogger(WellViewer.class);
@@ -74,6 +73,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
   private NameValueTable _annotationNameValueTable;
   private StudyViewer _studyViewer;
   private WellsSdfDataExporter _wellsSdfDataExporter;
+  private LibraryContentsVersionReference _libraryContentsVersionRef;
 
   private DataModel _otherWellsDataModel;
   private DataModel _duplexWellsDataModel;
@@ -93,7 +93,8 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
                     LibraryViewer libraryViewer,
                     StructureImageProvider structureImageProvider,
                     StudyViewer studyViewer,
-                    WellsSdfDataExporter wellsSdfDataExporter)
+                    WellsSdfDataExporter wellsSdfDataExporter,
+                    LibraryContentsVersionReference libraryContentsVersionRef)
   {
     super(thisProxy,
           Well.class,
@@ -107,6 +108,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
     _structureImageProvider = structureImageProvider;
     _studyViewer = studyViewer;
     _wellsSdfDataExporter = wellsSdfDataExporter;
+    _libraryContentsVersionRef = libraryContentsVersionRef;
     getIsPanelCollapsedMap().put("otherWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("duplexWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("annotations", Boolean.TRUE);
@@ -151,8 +153,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
   public String downloadSDFile()
   {
     try {
-      _wellsSdfDataExporter.setLibraryContentsVersion(_versionedReagent == null ? null : _versionedReagent.getLibraryContentsVersion());
-      InputStream inputStream = _wellsSdfDataExporter.export(Sets.newHashSet(getEntity().getWellKey().toString()));
+      InputStream inputStream = _wellsSdfDataExporter.export(ImmutableSet.of(getEntity().getWellKey().toString()).iterator());
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
                                          _wellsSdfDataExporter.getFileName(),
@@ -304,8 +305,8 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well>
   protected void initializeEntity(Well well)
   {
     getDao().needReadOnly(well, Well.library.getPath());
-    LibraryContentsVersion lcv = ((WellSearchResults) getContextualSearchResults()).getLibraryContentsVersion();
-    _versionedReagent = lcv == null ? well.getLatestReleasedReagent() : well.getReagents().get(lcv);
+    _versionedReagent = _libraryContentsVersionRef.value() == null ? well.getLatestReleasedReagent()
+      : well.getReagents().get(_libraryContentsVersionRef.value());
     if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
       getDao().needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.genbankAccessionNumbers).getPath());
       getDao().needReadOnly(_versionedReagent, SilencingReagent.vendorGene.to(Gene.entrezgeneSymbols).getPath());

@@ -1,10 +1,8 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
-
+//
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
-
+//
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
@@ -19,9 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
-import edu.harvard.med.screensaver.db.hqlbuilder.Disjunction;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -31,18 +32,15 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-
 /**
  * DataFetcher that fetches entities or entity networks from persistent storage.
  * As entities have relationships, and thus form entity networks, this
  * DataFetcher allows the network "structure" to be specified via
  * {@link #setRelationshipsToFetch}. Subclasses can also enforce
  * additional, implicit filtering constraints on the data set to be fetched via
- * {@link #addDomainRestrictions(HqlBuilder, Map)}.
+ * {@link #addDomainRestrictions(HqlBuilder)}.
  */
-public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements DataFetcher<E,K,PropertyPath<E>>
+public class EntityDataFetcher<E extends AbstractEntity,K> implements DataFetcher<E,K,PropertyPath<E>>
 {
   // static members
 
@@ -53,7 +51,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
 
   protected GenericEntityDAO _dao;
 
-  private Set<RelationshipPath<E>> _relationships;
+  private Set<PropertyPath<E>> _properties;
   private Map<PropertyPath<E>,List<? extends Criterion<?>>> _criteria = Collections.emptyMap();
   private List<PropertyPath<E>> _orderByProperties = Collections.emptyList();
   private Class<E> _rootEntityClass;
@@ -61,30 +59,15 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
 
   // public constructors and methods
 
-  protected EntityDataFetcher(Class<E> rootEntityClass, GenericEntityDAO dao)
+  public EntityDataFetcher(Class<E> rootEntityClass, GenericEntityDAO dao)
   {
     _rootEntityClass = rootEntityClass;
     _dao = dao;
   }
 
-  /**
-   * Allows subclass to add a fixed set of restrictions that will narrow the
-   * query result to a particular entity domain. For example, entities sharing
-   * the same parent, an arbitrary set of entity keys, etc. This restriction is
-   * effectively AND'ed with the criteria set via {@link #setFilteringCriteria(Map)}.
-   *
-   * @motivation This method is a convenience to the client code, which will
-   *             usually use {@link #setFilteringCriteria(Map)} for user-specified,
-   *             column-associated criteria. Use of this method allows the
-   *             client code to set a top-level restriction that is respected
-   *             even as the user modifies column-based filtering criteria.
-   */
-  protected abstract void addDomainRestrictions(HqlBuilder hql,
-                                                Map<RelationshipPath<E>,String> path2Alias);
-
-  public void setRelationshipsToFetch(List<RelationshipPath<E>> relationships)
+  public void setPropertiesToFetch(List<PropertyPath<E>> properties)
   {
-    _relationships = new HashSet<RelationshipPath<E>>(relationships);
+    _properties = new HashSet<PropertyPath<E>>(properties);
   }
 
   // DataFetcher interface methods
@@ -135,7 +118,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
       public List<E> execute(Session session)
       {
         HqlBuilder hql = new HqlBuilder();
-        Map<RelationshipPath<E>,String> path2Alias = new HashMap<RelationshipPath<E>,String>();
+        Map<RelationshipPath<E>,String> path2Alias = Maps.newHashMap();
         getOrCreateJoin(hql, new RelationshipPath<E>(_rootEntityClass, ""), path2Alias);
 
         // projection
@@ -164,7 +147,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
         }
 
         // restrict to a domain
-        addDomainRestrictions(hql, path2Alias);
+        addDomainRestrictions(hql);
 
         // we add a group by clause in case the Relationships provided by
         // client code does not restrict each relationship to single entity
@@ -185,8 +168,8 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
    */
   protected Query buildFetchDataQuery(final Set<K> keys)
   {
-    if (_relationships == null) {
-      throw new IllegalStateException("relationships to fetch is not set");
+    if (_properties == null) {
+      throw new IllegalStateException("properties to fetch is not set");
     }
     return new Query<E>() {
       /**
@@ -216,8 +199,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
       {
         HqlBuilder hql = new HqlBuilder();
         Map<RelationshipPath<E>,String> path2Alias = new HashMap<RelationshipPath<E>,String>();
-        Map<String,Disjunction> alias2Restriction = new HashMap<String,Disjunction>();
-        getOrCreateFetchJoin(hql, new RelationshipPath<E>(_rootEntityClass, ""), path2Alias, alias2Restriction);
+        getOrCreateFetchJoin(hql, new RelationshipPath<E>(_rootEntityClass, ""), path2Alias);
 
         // add an explicit select clause for the root entity *only*, otherwise
         // Hibernate may return other entity types as well, which will cause the
@@ -225,7 +207,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
         hql.select(getRootAlias());
 
         for (RelationshipPath<E> path : paths) {
-          getOrCreateFetchJoin(hql, path, path2Alias, alias2Restriction);
+          getOrCreateFetchJoin(hql, path, path2Alias);
         }
 
         if (keys != null) {
@@ -234,7 +216,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
         else {
           // if explicit set of keys has not been provided, we must still
           // restrict result with top-level restrictions
-          addDomainRestrictions(hql, path2Alias);
+          addDomainRestrictions(hql);
         }
 
         // we apply a 'distinct' filter in case the Relationships provided by
@@ -261,17 +243,18 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
       {
         Map<String,Set<RelationshipPath<E>>> groupedPaths =
           new HashMap<String,Set<RelationshipPath<E>>>();
-        for (RelationshipPath<E> path : _relationships) {
+        for (PropertyPath<E> path : _properties) {
+          RelationshipPath<E> relPath = path.getRelationshipPath();
           String groupName = "<unrestricted>";
           if (path.hasRestrictions()) {
-            groupName = path.getPath();
+            groupName = relPath.getPath();
           }
           Set<RelationshipPath<E>> group = groupedPaths.get(groupName);
           if (group == null) {
             group = new HashSet<RelationshipPath<E>>();
             groupedPaths.put(groupName, group);
           }
-          group.add(path);
+          group.add(relPath);
         }
         return groupedPaths;
       }
@@ -375,8 +358,7 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
    */
   protected String getOrCreateFetchJoin(HqlBuilder hql,
                                         RelationshipPath<E> path,
-                                        Map<RelationshipPath<E>,String> path2Alias,
-                                        Map<String,Disjunction> alias2Restriction)
+                                        Map<RelationshipPath<E>,String> path2Alias)
   {
     assert !(path instanceof PropertyPath) : "use path.getRelationshipPath() for path arg, when path is a PropertyPath";
 
@@ -401,34 +383,18 @@ public abstract class EntityDataFetcher<E extends AbstractEntity,K> implements D
         return alias;
       }
       // create joins for path ancestry nodes, recursively
-      String parentAlias = getOrCreateFetchJoin(hql, path.getAncestryPath(), path2Alias, alias2Restriction);
+      String parentAlias = getOrCreateFetchJoin(hql, path.getAncestryPath(), path2Alias);
       // create join for path leaf node
       alias = "x" + path2Alias.size();
       hql.from(parentAlias, path.getLeaf(), alias, JoinType.LEFT_FETCH);
     }
     
-    // TODO: Hibernate doesn't support restricting (filtering) collections when
-    // doing a 'left join fetch' operator. Really, I tried.
-    
-//    // add relationship path restrictions, adding to the disjunctive clause for this alias
-//    if (path.getPathLength() > 0 && !path2Alias.containsKey(path)) {
-//      PropertyNameAndValue restrictionPropertyNameAndValue =
-//        path.getLeafRestrictionPropertyNameAndValue();
-//      if (restrictionPropertyNameAndValue != null) {
-//        Disjunction or = alias2Restriction.get(alias);
-//        if (or == null) {
-//          or = hql.disjunction();
-//          hql.where(or);
-//          alias2Restriction.put(alias, or);
-//        }
-//        String propName = restrictionPropertyNameAndValue.getName();
-//        Object value = restrictionPropertyNameAndValue.getValue();
-//        or.add(hql.predicate(alias + "." + propName, Operator.EQUAL, value));
-//      }
-//    }
-
     path2Alias.put(path, alias);
 
     return alias;
   }
+
+  @Override
+  public void addDomainRestrictions(HqlBuilder hql)
+  {}
 }

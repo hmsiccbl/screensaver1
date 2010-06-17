@@ -25,12 +25,16 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.google.common.collect.Sets;
 import jxl.BooleanFormulaCell;
 import jxl.CellType;
 import jxl.NumberFormulaCell;
 import jxl.Sheet;
 import jxl.read.biff.BiffException;
 import jxl.write.WriteException;
+import org.apache.commons.lang.math.IntRange;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.ParseError;
@@ -42,17 +46,12 @@ import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.commons.lang.math.IntRange;
-import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-
-import com.google.common.collect.Sets;
 
 public class ScreenResultParserTest extends AbstractSpringTest
 {
@@ -522,14 +521,14 @@ public class ScreenResultParserTest extends AbstractSpringTest
       {false, false, false, false, false, false, false}};
 
     Object[][] expectedValues = {
-          { 1071894., 1196906., 0.98, 1.11, 1.045, "0", "true" },
-          { 1174576., 1469296., null, 5.8,  5.80, "3", "true" },
-          { 1294182., 1280934., 1.18, 1.19, 1.185, "0", "false" },
-          { 1158888., 1458878., 1.06, 1.35, 1.205, "1", "false" },
-          { 1385142., 1383446., 1.26, 1.28, 1.270, "1", "false" },
-          { null, null, null, null, null, "0", "false" },
-          { 1666646., 1154436., 1.52, 1.07, 1.295, "1", "false" },
-          { null, null, null, null, null, "0", "false" } };
+          { 1071894., 1196906., 0.98, 1.11, 1.045, PartitionedValue.NOT_POSITIVE, Boolean.TRUE },
+          { 1174576., 1469296., null, 5.8, 5.80, PartitionedValue.STRONG, Boolean.TRUE },
+          { 1294182., 1280934., 1.18, 1.19, 1.185, PartitionedValue.NOT_POSITIVE, Boolean.FALSE },
+          { 1158888., 1458878., 1.06, 1.35, 1.205, PartitionedValue.WEAK, Boolean.FALSE },
+          { 1385142., 1383446., 1.26, 1.28, 1.270, PartitionedValue.WEAK, Boolean.FALSE },
+          { null, null, null, null, null, PartitionedValue.NOT_POSITIVE, Boolean.FALSE },
+          { 1666646., 1154436., 1.52, 1.07, 1.295, PartitionedValue.WEAK, Boolean.FALSE },
+          { null, null, null, null, null, PartitionedValue.NOT_POSITIVE, Boolean.FALSE } };
 
     SortedSet<DataColumn> dataColumns = screenResult.getDataColumns();
     int iCol = 0;
@@ -561,18 +560,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
                        rv.isNull());
           }
           else {
-            if (expectedCol.isNumeric()) {
-              double expectedNumericValue = (Double) expectedValues[iWell][iCol];
-              assertEquals("col " + iCol + " well #" + iWell + " result value (numeric)",
-                           expectedNumericValue,
-                           rv.getNumericValue(),
-                           0.001);
-            }
-            else {
-              assertEquals("col " + iCol + " well #" + iWell + " result value (non-numeric)",
-                           expectedValues[iWell][iCol].toString(),
-                           rv.getValue());
-            }
+            assertEquals("col " + iCol + " well #" + iWell + " result value", expectedValues[iWell][iCol], rv.getTypedValue());
           }
           ++iWell;
           if (iWell == expectedPlateNumbers.length) { break; }

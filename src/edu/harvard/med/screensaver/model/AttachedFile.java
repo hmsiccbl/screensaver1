@@ -28,21 +28,21 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-
-import edu.harvard.med.screensaver.model.annotations.ToMany;
-import edu.harvard.med.screensaver.model.annotations.ToOne;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
+
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
 
 /**
@@ -63,9 +63,9 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   private static final Logger log = Logger.getLogger(AttachedFile.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<AttachedFile> fileType = new RelationshipPath<AttachedFile>(AttachedFile.class, "fileType");
-  public static final RelationshipPath<AttachedFile> screen = new RelationshipPath<AttachedFile>(AttachedFile.class, "screen");
-  public static final RelationshipPath<AttachedFile> screeningRoomUser = new RelationshipPath<AttachedFile>(AttachedFile.class, "screeningRoomUser");
+  public static final RelationshipPath<AttachedFile> fileType = new RelationshipPath<AttachedFile>(AttachedFile.class, "fileType", Cardinality.TO_ONE);
+  public static final RelationshipPath<AttachedFile> screen = new RelationshipPath<AttachedFile>(AttachedFile.class, "screen", Cardinality.TO_ONE);
+  public static final RelationshipPath<AttachedFile> screeningRoomUser = new RelationshipPath<AttachedFile>(AttachedFile.class, "screeningRoomUser", Cardinality.TO_ONE);
 
 
   // instance fields

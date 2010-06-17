@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.model.screenresults;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,21 +24,21 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.annotations.OptimisticLock;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.annotations.OptimisticLock;
 
 /**
  * Annotation type on a reagent.
@@ -59,7 +58,7 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationType.class);
   
-  public static final RelationshipPath<AnnotationType> study = new RelationshipPath<AnnotationType>(AnnotationType.class, "study");
+  public static final RelationshipPath<AnnotationType> study = new RelationshipPath<AnnotationType>(AnnotationType.class, "study", Cardinality.TO_ONE);
   public static final RelationshipPath<AnnotationType> annotationValues = new RelationshipPath<AnnotationType>(AnnotationType.class, "annotationValues");
 
 
@@ -97,6 +96,7 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
     _description = description;
     _ordinal = ordinal;
     _isNumeric = isNumeric;
+    //TODO: may have to lazily make this connection, re: large studies, [#2268] -sde4  
     _study.getAnnotationTypes().add(this);
   }
 
@@ -195,11 +195,17 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
       }
       return null;
     }
+    
     AnnotationValue annotationValue = new AnnotationValue(
       this,
       reagent,
       value,
       _isNumeric && value != null ? new Double(value) : null);
+
+    //TODO: may have to lazily make this connection, re: large studies, [#2268] -sde4  
+    reagent.getAnnotationValues().put(this, annotationValue);
+    
+    //TODO: may have to lazily make this connection, re: large studies, [#2268] -sde4  
     getStudy().addReagent(reagent);
     _values.put(reagent, annotationValue);
     return annotationValue;
@@ -348,5 +354,12 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
   private void setNumeric(boolean isNumeric)
   {
     _isNumeric = isNumeric;
+  }
+
+
+  public void clearAnnotationValues()
+  {
+    _values.clear();
+    
   }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
@@ -33,8 +34,6 @@ import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
  */
 public class InMemoryEntityDataModel<E extends AbstractEntity> extends InMemoryDataModel<E>
 {
-  // static members
-
   public InMemoryEntityDataModel(EntityDataFetcher<E,?> dataFetcher)
   {
     super(dataFetcher);
@@ -43,7 +42,8 @@ public class InMemoryEntityDataModel<E extends AbstractEntity> extends InMemoryD
   @Override
   public void fetch(List<? extends TableColumn<E,?>> columns)
   {
-    ((EntityDataFetcher<E,?>) _dataFetcher).setRelationshipsToFetch(FetchPaths.getRelationshipPaths(columns));
+    List<PropertyPath<E>> propertyPaths = FetchPaths.getPropertyPaths(columns);
+    ((EntityDataFetcher<E,?>) _dataFetcher).setPropertiesToFetch(propertyPaths);
     super.fetch(columns);
     for (Iterator<E> iter = _unfilteredData.iterator(); iter.hasNext();) {
       E entity = iter.next();

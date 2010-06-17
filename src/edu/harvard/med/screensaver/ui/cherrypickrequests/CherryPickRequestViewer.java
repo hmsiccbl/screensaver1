@@ -25,14 +25,20 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
@@ -65,6 +71,7 @@ import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LabCherryPickReagentEntityColumn;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerCherryPickReagentEntityColumn;
@@ -77,21 +84,18 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Lists;
 
 /**
  * Backing bean for Cherry Pick Request Viewer page.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class CherryPickRequestViewer extends SearchResultContextEntityViewerBackingBean<CherryPickRequest>
+public class CherryPickRequestViewer extends SearchResultContextEntityViewerBackingBean<CherryPickRequest,CherryPickRequest>
 {
   private static Logger log = Logger.getLogger(CherryPickRequestViewer.class);
 
@@ -122,8 +126,8 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
   private String _cherryPicksInput;
 
-  private EntitySearchResults<ScreenerCherryPick,Integer> _screenerCherryPicksSearchResult;
-  private EntitySearchResults<LabCherryPick,Integer> _labCherryPicksSearchResult;
+  private EntitySearchResults<ScreenerCherryPick,ScreenerCherryPick,Integer> _screenerCherryPicksSearchResult;
+  private EntitySearchResults<LabCherryPick,LabCherryPick,Integer> _labCherryPicksSearchResult;
 
   private DataModel _assayPlatesDataModel;
   private boolean _selectAllAssayPlates = true;
@@ -138,7 +142,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
   public CherryPickRequestViewer(CherryPickRequestViewer thisProxy,
                                  CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
-                                 EntitySearchResults<CherryPickRequest,?> cherryPickRequestsBrowser,
+                                 EntitySearchResults<CherryPickRequest,CherryPickRequest,?> cherryPickRequestsBrowser,
                                  ActivityViewer activityViewer,
                                  GenericEntityDAO dao,
                                  LibrariesDAO librariesDao,
@@ -174,11 +178,11 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
   private void buildLabCherryPickSearchResult()
   {
-    _labCherryPicksSearchResult = new EntitySearchResults<LabCherryPick,Integer>() {
+    _labCherryPicksSearchResult = new EntityBasedEntitySearchResults<LabCherryPick,Integer>() {
       @Override
       public void searchAll()
       {
-        initialize(buildCherryPicksDataFetcher(LabCherryPick.class, null));
+        initialize(buildCherryPicksDataTableModel(LabCherryPick.class, null));
       }
       
       @Override
@@ -202,11 +206,11 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
   private void buildScreenerCherryPickSearchResult()
   {
-    _screenerCherryPicksSearchResult = new EntitySearchResults<ScreenerCherryPick,Integer>() {
+    _screenerCherryPicksSearchResult = new EntityBasedEntitySearchResults<ScreenerCherryPick,Integer>() {
       @Override
       public void searchAll()
       {
-        initialize(buildCherryPicksDataFetcher(ScreenerCherryPick.class, null));
+        initialize(buildCherryPicksDataTableModel(ScreenerCherryPick.class, null));
       }
       
       @Override
@@ -620,17 +624,20 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     return labCherryPicksTableCompoundSorts;
   }
 
-  private <T extends AbstractEntity> DataFetcher<T,Integer,PropertyPath<T>> buildCherryPicksDataFetcher(Class<T> clazz, CherryPickRequest cpr)
+  private <T extends AbstractEntity> DataTableModel<T> buildCherryPicksDataTableModel(final Class<T> clazz,
+                                                                                      final CherryPickRequest cpr)
   {
     if (cpr == null) {
-      return new NoOpDataFetcher<T,Integer,PropertyPath<T>>();
+      return new InMemoryDataModel<T>(new NoOpDataFetcher<T,Integer,PropertyPath<T>>());
     }
     else {
-      return new ParentedEntityDataFetcher<T,Integer>(
-        clazz,
-        new RelationshipPath<T>(clazz, "cherryPickRequest"),
-        cpr,
-        getDao());
+      return new InMemoryEntityDataModel<T>(new EntityDataFetcher<T,Integer>(clazz, getDao()) {
+        @Override
+        public void addDomainRestrictions(HqlBuilder hql)
+        {
+          DataFetcherUtil.addDomainRestrictions(hql, new RelationshipPath<T>(clazz, "cherryPickRequest"), cpr, getRootAlias());
+        }
+      });
     }
   }
 
@@ -646,8 +653,8 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   {
     _cherryPickRequestDetailViewer.setEntity(cherryPickRequest);
     _cherryPicksInput = null;
-    getLabCherryPicksSearchResult().initialize(buildCherryPicksDataFetcher(LabCherryPick.class, cherryPickRequest));
-    getScreenerCherryPicksSearchResult().initialize(buildCherryPicksDataFetcher(ScreenerCherryPick.class, cherryPickRequest));
+    getLabCherryPicksSearchResult().initialize(buildCherryPicksDataTableModel(LabCherryPick.class, cherryPickRequest));
+    getScreenerCherryPicksSearchResult().initialize(buildCherryPicksDataTableModel(ScreenerCherryPick.class, cherryPickRequest));
 
     _assayPlatesDataModel = null;
     
@@ -669,7 +676,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     _cherryPicksInput = cherryPicksInput;
   }
 
-  public EntitySearchResults<ScreenerCherryPick,Integer> getScreenerCherryPicksSearchResult()
+  public EntitySearchResults<ScreenerCherryPick,ScreenerCherryPick,Integer> getScreenerCherryPicksSearchResult()
   {
     if (_screenerCherryPicksSearchResult == null) {
       buildScreenerCherryPickSearchResult();
@@ -677,7 +684,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     return _screenerCherryPicksSearchResult;
   }
 
-  public EntitySearchResults<LabCherryPick,Integer> getLabCherryPicksSearchResult()
+  public EntitySearchResults<LabCherryPick,LabCherryPick,Integer> getLabCherryPicksSearchResult()
   {
     if (_labCherryPicksSearchResult == null) {
       buildLabCherryPickSearchResult();

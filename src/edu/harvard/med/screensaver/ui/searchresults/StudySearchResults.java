@@ -10,10 +10,11 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.List;
-import java.util.Map;
+
+import com.google.common.collect.Lists;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -30,9 +31,8 @@ import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
-
-import com.google.common.collect.Lists;
 
 
 /**
@@ -41,7 +41,7 @@ import com.google.common.collect.Lists;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class StudySearchResults extends EntitySearchResults<Screen,Integer>
+public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,Integer>
 {
 
   // private static final fields
@@ -74,15 +74,14 @@ public class StudySearchResults extends EntitySearchResults<Screen,Integer>
   @Override
   public void searchAll()
   {
-    initialize(new AllEntitiesOfTypeDataFetcher<Screen,Integer>(Screen.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
-      protected void addDomainRestrictions(HqlBuilder hql,
-                                           Map<RelationshipPath<Screen>,String> path2Alias)
+      public void addDomainRestrictions(HqlBuilder hql)
       {
-        super.addDomainRestrictions(hql, path2Alias);
+        super.addDomainRestrictions(hql);
         hql.where(getRootAlias(), "screenNumber", Operator.GREATER_THAN_EQUAL, Study.MIN_STUDY_NUMBER);
       }
-    });
+    }));
   }
 
 

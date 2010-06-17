@@ -102,13 +102,30 @@ public class AdminEmailApplication extends CommandLineApplication
                              .withDescription(EMAIL_DSL_ADMINS_ONLY[DESCRIPTION_INDEX])
                              .withLongOpt(EMAIL_DSL_ADMINS_ONLY[LONG_OPTION_INDEX])
                              .create(EMAIL_DSL_ADMINS_ONLY[SHORT_OPTION_INDEX]));
-
-    _messages = (ServiceMessages)getSpringBean("serviceMessages");
   }
 
   public boolean isAdminEmailOnly() throws ParseException
   {
     return isCommandLineFlagSet(EMAIL_DSL_ADMINS_ONLY[SHORT_OPTION_INDEX]);
+  }
+  
+  public InternetAddress getEmail(ScreensaverUser user)
+    throws MessagingException, ParseException
+  {
+    try {
+      return new InternetAddress(user.getEmail());
+    }
+    catch (AddressException e) {
+      if (isCommandLineFlagSet(NO_NOTIFY_OPTION[SHORT_OPTION_INDEX])) {
+        log.warn("email address is wrong: " +
+                                   printUserInformation(user) + "," + e.getMessage());
+        //Note: this is just to clean up the name for testing, this doesn't fix the address
+        return new InternetAddress(user.getFullNameFirstLast().replaceAll("[^a-zA-Z0-9]", "_")+ "@dev.null");
+      } else {
+        throw new MessagingException("email address is wrong: " +
+                                   printUserInformation(user), e);
+      }
+    }
   }
   
   public final EmailService getEmailServiceBasedOnCommandLineOption(AdministratorUser admin)
@@ -238,6 +255,9 @@ public class AdminEmailApplication extends CommandLineApplication
 
   public ServiceMessages getMessages()
   {
+    if (_messages == null) {
+      _messages = (ServiceMessages) getSpringBean("serviceMessages");
+    }
     return _messages;
   }
 

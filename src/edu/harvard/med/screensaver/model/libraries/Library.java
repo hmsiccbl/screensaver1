@@ -30,21 +30,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
-import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.annotations.ToMany;
-import edu.harvard.med.screensaver.model.annotations.ToOne;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.util.DevelopmentException;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
@@ -54,7 +40,21 @@ import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Sets;
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 
 /**
  * A library represents a set of reagents and their layout into wells across
@@ -102,7 +102,7 @@ public class Library extends AuditedAbstractEntity<Integer>
   private static final long serialVersionUID = 0L;
 
   public static final RelationshipPath<Library> contentsVersions = new RelationshipPath<Library>(Library.class, "contentsVersions");
-  public static final RelationshipPath<Library> latestReleasedContentsVersion = new RelationshipPath<Library>(Library.class, "latestReleasedContentsVersion");
+  public static final RelationshipPath<Library> latestReleasedContentsVersion = new RelationshipPath<Library>(Library.class, "latestReleasedContentsVersion", Cardinality.TO_ONE);
   public static final RelationshipPath<Library> wells = new RelationshipPath<Library>(Library.class, "wells");
   public static final RelationshipPath<Library> copies = new RelationshipPath<Library>(Library.class, "copies");
   public static final PropertyPath<Library> startPlate = new PropertyPath<Library>(Library.class, "startPlate");

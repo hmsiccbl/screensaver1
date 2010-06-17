@@ -12,6 +12,13 @@ package edu.harvard.med.iccbl.screensaver.policy;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -71,14 +78,6 @@ import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-
 /**
  * An EntityViewPolicy implementation for ICCB-Longwood that is used by the production web application. 
  */
@@ -99,7 +98,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   private Set<Screen> _othersVisibleSmallMoleculeScreens;
   private Set<Screen> _smallMoleculeLevel1AndLevel2Screens;
   private Set<Screen> _mutualSmallMoleculeScreens;
-  private Set<Well> _smallMoleculeMutualPositiveWells;
+  private Set<String> _smallMoleculeMutualPositiveWellIds;
   private Set<Integer> _restrictedReagentLibraryPlates;
   
   protected IccblEntityViewPolicy() {}
@@ -287,32 +286,60 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   public boolean visit(ResultValue entity)
   {
     // exceptions for SM positive RVs, allowing a subset of RVs to be visible, even if screen result is not visible
-    if (entity.isPositive()) {
-      Screen screen = entity.getDataColumn().getScreenResult().getScreen();
-      if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-        if (findOthersVisibleSmallMoleculeScreens().contains(screen)) {
-          if (findSmallMoleculeMutualPositiveWells().contains(entity.getWell())) {
-            return true;
-          }
-        }
-      }
+    if (isAllowedAccessToResultValueDueToMutualPositive(entity.isPositive(),
+                                                     entity.getDataColumn().getScreenResult().getScreen(),
+                                                     entity.getWell().getWellId())) {
+      return true;
     }
 
     return visit(entity.getDataColumn().getScreenResult());
   }
 
-  public boolean visit(DataColumn entity)
+  @Override
+  public boolean isAllowedAccessToResultValueDueToMutualPositive(boolean isPositive, Screen screen, String wellId)
   {
-    // exceptions for SM positives DataColumns, allowing a subset of DataColumns to be visible, even if screen result is not visible
-    // TODO: we could make this even more strict by restricting DataColumns that have
-    // no mutual positive RVs with "my screens"; currently we show all positives
-    // DataColumns if any positives DataColumn has a mutual positive
-    if (entity.isPositiveIndicator() && entity.getScreenResult().getScreen().getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
-      if (findOthersVisibleSmallMoleculeScreens().contains(entity.getScreenResult().getScreen())) {
-        return true;
+    if (isPositive) {
+      if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+        if (findOthersVisibleSmallMoleculeScreens().contains(screen)) {
+          if (findSmallMoleculeMutualPositiveWellIds().contains(wellId)) {
+            return true;
+          }
+        }
       }
     }
+    return false;
+  }
+
+  public boolean visit(DataColumn entity)
+  {
+    if (isAllowedAccessToDataColumnDueToMutualPositives(entity)) {
+      return true;
+    }
     return visit(entity.getScreenResult());
+  }
+
+  @Override
+  public boolean isAllowedAccessToDataColumnDueToMutualPositives(DataColumn entity)
+  {
+    // allow DataColumn containing mutual positives to be visible, even if the parent screen result is not visible
+    // note: currently, we show all positives DataColumns from a given screen to be visible if any *one* of its positives DataColumns 
+    // have a mutual positive; we could make this even more strict by restricting the positives DataColumns that have no mutual positives
+    if (!!!visit(entity.getScreenResult())) {
+      if (entity.isPositiveIndicator()) {
+        Screen othersScreen = entity.getScreenResult().getScreen();
+        if (othersScreen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
+          ScreenDataSharingLevel myScreenDataSharingLevel =
+            DataSharingLevelMapper.getScreenDataSharingLevelForUser(ScreenType.SMALL_MOLECULE, getScreensaverUser());
+          if (myScreenDataSharingLevel == ScreenDataSharingLevel.MUTUAL_POSITIVES ||
+            othersScreen.getDataSharingLevel() == ScreenDataSharingLevel.MUTUAL_POSITIVES) {
+            if (findOthersVisibleSmallMoleculeScreens().contains(entity.getScreenResult().getScreen())) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
   }
 
   public boolean visit(RNAiKnockdownConfirmation entity)
@@ -392,35 +419,35 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return false;
   }
 
-  private Set<Well> findSmallMoleculeMutualPositiveWells()
+  private Set<String> findSmallMoleculeMutualPositiveWellIds()
   {
-    if (_smallMoleculeMutualPositiveWells == null) {
-      _smallMoleculeMutualPositiveWells = Sets.newHashSet();
+    if (_smallMoleculeMutualPositiveWellIds == null) {
+      _smallMoleculeMutualPositiveWellIds = Sets.newHashSet();
       if (getScreensaverUser().getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES)) {
-        _smallMoleculeMutualPositiveWells.addAll(_dao.<Well>runQuery(new Query() { 
+        _smallMoleculeMutualPositiveWellIds.addAll(_dao.<String>runQuery(new Query() {
           public List execute(Session session)
           {
             // TODO: can probably optimize by using ANY operator to determine if at least one mutual positive hit occurs in another screen
             return
             new HqlBuilder().
-            select("lw2").distinctProjectionValues().
-            from(AssayWell.class, "aw1").from("aw1", AssayWell.screenResult.getPath(), "sr1", JoinType.INNER).from("sr1", ScreenResult.screen.getPath(), "s1", JoinType.INNER).
-            from(AssayWell.class, "aw2").from("aw2", AssayWell.screenResult.getPath(), "sr2", JoinType.INNER).from("sr2", ScreenResult.screen.getPath(), "s2", JoinType.INNER).from("aw2", AssayWell.libraryWell.getPath(), "lw2", JoinType.INNER).
-            where("aw1", "libraryWell", Operator.EQUAL, "aw2", "libraryWell").
-            where("aw1", "positive", Operator.EQUAL, Boolean.TRUE).
-            where("aw2", "positive", Operator.EQUAL, Boolean.TRUE).
-            where("s1", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
-            where("s2", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
-            where("s1", Operator.NOT_EQUAL, "s2"). // don't consider my screens as "others" screens
-            whereIn("s1", findMyScreens()).
-            whereIn("s1", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.SHARED, ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
-            whereIn("s2", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
-            toQuery(session, true).list();
+              select("lw2", "id").distinctProjectionValues().
+              from(AssayWell.class, "aw1").from("aw1", AssayWell.screenResult.getPath(), "sr1", JoinType.INNER).from("sr1", ScreenResult.screen.getPath(), "s1", JoinType.INNER).
+              from(AssayWell.class, "aw2").from("aw2", AssayWell.screenResult.getPath(), "sr2", JoinType.INNER).from("sr2", ScreenResult.screen.getPath(), "s2", JoinType.INNER).from("aw2", AssayWell.libraryWell.getPath(), "lw2", JoinType.INNER).
+              where("aw1", "libraryWell", Operator.EQUAL, "aw2", "libraryWell").
+              where("aw1", "positive", Operator.EQUAL, Boolean.TRUE).
+              where("aw2", "positive", Operator.EQUAL, Boolean.TRUE).
+              where("s1", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
+              where("s2", "screenType", Operator.EQUAL, ScreenType.SMALL_MOLECULE).
+              where("s1", Operator.NOT_EQUAL, "s2"). // don't consider my screens as "others" screens
+              whereIn("s1", findMyScreens()).
+              whereIn("s1", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.SHARED, ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
+              whereIn("s2", "dataSharingLevel", Sets.newHashSet(ScreenDataSharingLevel.MUTUAL_POSITIVES, ScreenDataSharingLevel.MUTUAL_SCREENS)).
+              toQuery(session, true).list();
           }
         }));
       }
     }
-    return _smallMoleculeMutualPositiveWells;
+    return _smallMoleculeMutualPositiveWellIds;
   }
 
   private Set<Screen> findAllSmallMoleculeLevel1AndLevel2Screens()
@@ -683,7 +710,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   {
     _screensForFundingSupport = HashMultimap.create();
     _smallMoleculeLevel1AndLevel2Screens = null;
-    _smallMoleculeMutualPositiveWells = null;
+    _smallMoleculeMutualPositiveWellIds = null;
     _mutualSmallMoleculeScreens = null;
     _myScreens = null;
     _othersVisibleSmallMoleculeScreens = null;

@@ -259,17 +259,41 @@
   </bean>
 
   <bean
+    id="libraryContentsVersionRef"
+    class="edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference"
+    scope="session">
+    <aop:scoped-proxy/>
+  </bean>
+  
+  <bean
+    id="wellsSdfDataExporterForUi"
+    class="edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter"
+    scope="session">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryContentsVersionRef" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
     id="wellsBrowser"
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.WellSearchResults">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
     <constructor-arg ref="entityViewPolicy" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="wellViewer" />
-    <constructor-arg ref="sdfWellsDataExporter" />
     <constructor-arg ref="structureImageProvider" />
-    <constructor-arg><list/></constructor-arg>
+    <constructor-arg ref="libraryContentsVersionRef" />
+    <constructor-arg>
+      <list>
+          <bean class="edu.harvard.med.screensaver.ui.searchresults.DataExporterAdapter">
+            <constructor-arg ref="wellsSdfDataExporterForUi" />
+            <constructor-arg><bean class="edu.harvard.med.screensaver.db.datafetcher.TupleToKeyFunction" /></constructor-arg>
+          </bean>
+      </list>
+    </constructor-arg>
     <aop:scoped-proxy/>
   </bean>
 
@@ -330,7 +354,8 @@
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="structureImageProvider" />
     <constructor-arg ref="studyViewer" />
-    <constructor-arg ref="sdfWellsDataExporter" />
+    <constructor-arg ref="wellsSdfDataExporterForUi" />
+    <constructor-arg ref="libraryContentsVersionRef" />
     <aop:scoped-proxy/>
   </bean>
 

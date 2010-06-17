@@ -19,9 +19,11 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.EnumColumn;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
@@ -29,8 +31,6 @@ import edu.harvard.med.screensaver.ui.table.column.RealColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-
-import org.apache.log4j.Logger;
 
 public class DataTableTest extends TestCase
 {
@@ -117,6 +117,16 @@ public class DataTableTest extends TestCase
       public void setOrderBy(List<String> orderByProperties)
       {
         throw new UnsupportedOperationException("this DataFetcher expected to be used by InMemoryDataModel only");
+      }
+
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+      }
+
+      @Override
+      public void setPropertiesToFetch(List<String> properties)
+      {
       }
     };
 

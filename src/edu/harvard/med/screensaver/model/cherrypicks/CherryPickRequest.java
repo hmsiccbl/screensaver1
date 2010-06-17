@@ -10,8 +10,6 @@
 package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +35,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
@@ -49,20 +54,13 @@ import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.service.cherrypicks.LabCherryPickColumnMajorOrderingComparator;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
 
 
 /**
@@ -87,9 +85,9 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(CherryPickRequest.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<CherryPickRequest> screen = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen");
-  public static final RelationshipPath<CherryPickRequest> requestedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "requestedBy");
-  public static final RelationshipPath<CherryPickRequest> volumeApprovedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "volumeApprovedBy");
+  public static final RelationshipPath<CherryPickRequest> screen = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickRequest> requestedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "requestedBy", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickRequest> volumeApprovedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "volumeApprovedBy", Cardinality.TO_ONE);
   public static final RelationshipPath<CherryPickRequest> emptyWellsOnAssayPlate = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "emptyWellsOnAssayPlate");
   public static final RelationshipPath<CherryPickRequest> screenerCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screenerCherryPicks");
   public static final RelationshipPath<CherryPickRequest> labCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class,"labCherryPicks");

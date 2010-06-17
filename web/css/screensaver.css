@@ -513,3 +513,8 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
   font-style: italic;
   font-weight: bold;
 }
+
+.positivesDataColumnLegend {
+  font-size: x-small;
+  color: gray;
+}

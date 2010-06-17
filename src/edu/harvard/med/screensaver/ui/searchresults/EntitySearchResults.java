@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -13,23 +11,27 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.faces.component.UIData;
 import javax.faces.event.ActionEvent;
+import javax.faces.model.DataModelListener;
+
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.datascroller.HtmlDataScroller;
+import org.apache.myfaces.custom.datascroller.ScrollerActionEvent;
 
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UICommand;
@@ -37,93 +39,31 @@ import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
-import edu.harvard.med.screensaver.ui.table.model.VirtualPagingEntityDataModel;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.util.ValueReference;
-
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.datascroller.HtmlDataScroller;
-import org.apache.myfaces.custom.datascroller.ScrollerActionEvent;
 
 /**
- * SearchResults subclass that presents a particular type of domain model
- * entity. Subclass adds:
- * <ul>
- * <li>"Summary" and "Entity" viewing modes, corresponding to a multi-entity
- * list view and a single-entity full page view, respectively.</li>
- * <li>Dynamically decides whether to use InMemoryDataModel of
- * VirtualPagingDataModel, based upon data size and column composition.</li>
- * <li>Management of "filter mode"</li>
- * <li>Downloading of search results via one or more {@link DataExporter}s.</li>
- * </ul>
- *
+ * SearchResults where each row represents an {@link Entity}. Provides "Summary" and "Entity" viewing modes, where
+ * Summary mode is the normal table-based view of entities, and Entity mode show a detailed, full-page view of a
+ * single-entity. Provides the ability to download the search results via one or more {@link DataExporter}s.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class EntitySearchResults<E extends AbstractEntity, K> extends SearchResults<E,K,PropertyPath<E>>
+public abstract class EntitySearchResults<E extends AbstractEntity, R, K> extends SearchResults<R,K,PropertyPath<E>>
 {
   private static Logger log = Logger.getLogger(EntitySearchResults.class);
   private static final String[] CAPABILITIES = { "viewEntity", "exportData", "filter" };
 
-  private List<DataExporter<?>> _dataExporters = new ArrayList<DataExporter<?>>();
-  private UISelectOneBean<DataExporter<?>> _dataExporterSelector;
+  private List<DataExporter<R>> _dataExporters = Lists.newArrayList();
+  private UISelectOneBean<DataExporter<R>> _dataExporterSelector;
 
   private Observer _rowsPerPageSelectorObserver;
   private EntityViewer<E> _entityViewer;
 
-  protected final class InMemoryEntitySearchResultsDataModel extends InMemoryEntityDataModel<E>
+  public void initialize(DataTableModel<R> dataTableModel)
   {
-    public InMemoryEntitySearchResultsDataModel(EntityDataFetcher<E,?> dataFetcher)
-    {
-      super(dataFetcher);
-    }
-
-    @Override
-    public void filter(List<? extends TableColumn<E,?>> columns)
-    {
-      super.filter(columns);
-      updateEntityView();
-    }
-
-    @Override
-    public void sort(List<? extends TableColumn<E,?>> sortColumns,
-                     SortDirection sortDirection)
-    {
-      super.sort(sortColumns, sortDirection);
-      updateEntityView();
-    }
-  }
-
-  protected final class VirtualPagingEntitySearchResultsDataModel extends VirtualPagingEntityDataModel<K,E>
-  {
-    public VirtualPagingEntitySearchResultsDataModel(EntityDataFetcher<E,K> dataFetcher)
-    {
-      super(dataFetcher, new ValueReference<Integer>() { public Integer value() { return getRowsPerPage(); } });
-    }
-    
-    @Override
-    public void filter(List<? extends TableColumn<E,?>> columns)
-    {
-      super.filter(columns);
-      updateEntityView();
-    }
-    
-    @Override
-    public void sort(List<? extends TableColumn<E,?>> sortColumns,
-                     SortDirection sortDirection)
-    {
-      super.sort(sortColumns, sortDirection);
-      updateEntityView();
-    }
-  }
-
-  @Override
-  public void initialize(DataFetcher<E,K,PropertyPath<E>> dataFetcher)
-  {
-    super.initialize(dataFetcher);
+    super.initialize(new EntitySearchResultsDataModel(dataTableModel));
 
     // reset to default rows-per-page, if in "entity view" mode
     if (isEntityView()) {
@@ -131,9 +71,9 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
   }
 
-  public void initialize(DataFetcher<E,K,PropertyPath<E>> dataFetcher, List<? extends TableColumn<E,?>> columns)
+  public void initialize(DataTableModel<R> dataTableModel, List<? extends TableColumn<R,?>> columns)
   {
-    super.initialize(dataFetcher, columns);
+    super.initialize(new EntitySearchResultsDataModel(dataTableModel), columns);
     
     // reset to default rows-per-page, if in "entity view" mode
     if (isEntityView()) {
@@ -224,27 +164,27 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
    */
   public EntitySearchResults(EntityViewer<E> entityViewer)
   {
-    this(Collections.<DataExporter<?>>emptyList(), entityViewer);
+    this(Collections.<DataExporter<R>>emptyList(), entityViewer);
   }
 
   /**
    * @param dataExporters a List of DataExporters that must be one of the reified
    *          types DataExporter<DataTableModel<E>> or DataExporter<E>
    */
-  public EntitySearchResults(List<DataExporter<?>> dataExporters, EntityViewer<E> entityViewer)
+  public EntitySearchResults(List<DataExporter<R>> dataExporters, EntityViewer<E> entityViewer)
   {
     super(CAPABILITIES);
     _entityViewer = entityViewer;
     if (_entityViewer == null) {
       getCapabilities().remove("viewEntity");
     }
-    _dataExporters.add(new GenericDataExporter<E>("searchResult"));
+    _dataExporters.add(new GenericDataExporter<R>("searchResult"));
     _dataExporters.addAll(dataExporters);
   }
 
   public boolean isRowRestricted()
   {
-    return getRowData().isRestricted();
+    return rowToEntity(getRowData()).isRestricted();
   }
 
   public boolean isSummaryView()
@@ -266,6 +206,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   }
 
  
+  abstract protected E rowToEntity(R row);
+
   abstract public void searchAll();
 
   /**
@@ -305,7 +247,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   {
     if (rowIndex >= 0 && rowIndex < getRowCount()) {
       getDataTableModel().setRowIndex(rowIndex);
-      E entity = (E) getRowData();
+      R row = (R) getRowData();
+      E entity = rowToEntity(row);
       log.debug("viewEntityAtRow(): setting entity to view: " + entity + " at row " + rowIndex);
       scrollToRow(rowIndex);
       _entityViewer.setEntity(entity);
@@ -353,30 +296,17 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
   }
 
-  /**
-   * @motivation type safety of return type
-   */
-  @Override
-  public EntityDataFetcher<E,K> getDataFetcher()
-  {
-    return (EntityDataFetcher<E,K>) super.getDataFetcher();
-  }
-
-  /**
-   * @return a List of DataExporters that will be one of the reified types
-   *         DataExporter<DataTableModel<E>> or DataExporter<E>
-   */
-  public List<DataExporter<?>> getDataExporters()
+  public List<DataExporter<R>> getDataExporters()
   {
     return _dataExporters;
   }
 
-  public UISelectOneBean<DataExporter<?>> getDataExporterSelector()
+  public UISelectOneBean<DataExporter<R>> getDataExporterSelector()
   {
     if (_dataExporterSelector == null) {
-      _dataExporterSelector = new UISelectOneBean<DataExporter<?>>(getDataExporters()) {
+      _dataExporterSelector = new UISelectOneBean<DataExporter<R>>(getDataExporters()) {
         @Override
-        protected String makeLabel(DataExporter<?> dataExporter)
+        protected String makeLabel(DataExporter<R> dataExporter)
         {
           return dataExporter.getFormatName();
         }
@@ -394,13 +324,11 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
       DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
       InputStream inputStream;
       log.debug("starting exporting data for download");
+      // TODO: TableDataExporter should be injected with the associated data table so they can retrieve the columns on demand
       if (dataExporter instanceof TableDataExporter) {
-        ((TableDataExporter<E>) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
-        inputStream = ((TableDataExporter<E>) dataExporter).export(getDataTableModel());
+        ((TableDataExporter<R>) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
       }
-      else {
-        inputStream = ((DataExporter<Collection<K>>) dataExporter).export(getDataFetcher().findAllKeys());
-      }
+      inputStream = ((DataExporter<R>) dataExporter).export(getDataTableModel().iterator());
       log.debug("finished exporting data for download");
       JSFUtils.handleUserDownloadRequest(getFacesContext(),
                                          inputStream,
@@ -414,17 +342,6 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   }
 
   // private methods
-
-  @Override
-  protected DataTableModel<E> buildDataTableModel(DataFetcher<E,K,PropertyPath<E>> dataFetcher,
-                                                  List<? extends TableColumn<E,?>> columns)
-  {
-    if (dataFetcher instanceof EntityDataFetcher) {
-      return new InMemoryEntitySearchResultsDataModel((EntityDataFetcher<E,K>) dataFetcher);
-    }
-    // for no-op (empty data model)
-    return new InMemoryDataModel<E>(dataFetcher);
-  }
 
   public void dataScrollerListener(ActionEvent event)
   {
@@ -486,7 +403,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
     }
   }
 
-  private void updateEntityView()
+  protected void updateEntityView()
   {
     if (isEntityView()) {
       if (getDataTableUIComponent() != null) {
@@ -500,13 +417,116 @@ public abstract class EntitySearchResults<E extends AbstractEntity, K> extends S
   {
     DataTableModel model = (DataTableModel) getDataTableModel();
     if (model.getModelType() == DataTableModelType.IN_MEMORY) { 
-      List<E> data = (List<E>) model.getWrappedData();
+      List<R> data = (List<R>) model.getWrappedData();
       for (int i = 0; i < data.size(); i++) {
-        if (data.get(i).equals(entity)) {
+        if (rowToEntity(data.get(i)).equals(entity)) {
           return i;
         }
       }
     }
     return -1;
+  }
+  
+  private class EntitySearchResultsDataModel extends DataTableModel<R>
+  {
+    private DataTableModel<R> _baseDataModel;
+
+    protected EntitySearchResultsDataModel(DataTableModel<R> baseDataModel)
+    {
+      super();
+      _baseDataModel = baseDataModel;
+    }
+
+    @Override
+    public void addDataModelListener(DataModelListener listener)
+    {
+      _baseDataModel.addDataModelListener(listener);
+    }
+
+    @Override
+    public DataModelListener[] getDataModelListeners()
+    {
+      return _baseDataModel.getDataModelListeners();
+    }
+
+    @Override
+    public void removeDataModelListener(DataModelListener listener)
+    {
+      _baseDataModel.removeDataModelListener(listener);
+    }
+
+    @Override
+    public void fetch(List<? extends TableColumn<R,?>> columns)
+    {
+      _baseDataModel.fetch(columns);
+    }
+
+    @Override
+    public void filter(List<? extends TableColumn<R,?>> filterColumns)
+    {
+      _baseDataModel.filter(filterColumns);
+      updateEntityView();
+    }
+
+    @Override
+    public DataTableModelType getModelType()
+    {
+      return _baseDataModel.getModelType();
+    }
+
+    @Override
+    public void sort(List<? extends TableColumn<R,?>> sortColumns, SortDirection sortDirection)
+    {
+      _baseDataModel.sort(sortColumns, sortDirection);
+      updateEntityView();
+    }
+
+    @Override
+    public int getRowCount()
+    {
+      return _baseDataModel.getRowCount();
+    }
+
+    @Override
+    public Object getRowData()
+    {
+      return _baseDataModel.getRowData();
+    }
+
+    @Override
+    public int getRowIndex()
+    {
+      return _baseDataModel.getRowIndex();
+    }
+
+    @Override
+    public Object getWrappedData()
+    {
+      return _baseDataModel.getWrappedData();
+    }
+
+    @Override
+    public boolean isRowAvailable()
+    {
+      return _baseDataModel.isRowAvailable();
+    }
+
+    @Override
+    public void setRowIndex(int rowIndex)
+    {
+      _baseDataModel.setRowIndex(rowIndex);
+    }
+
+    @Override
+    public void setWrappedData(Object data)
+    {
+      _baseDataModel.setWrappedData(data);
+    }
+
+    @Override
+    public Iterator<R> iterator()
+    {
+      return _baseDataModel.iterator();
+    }
   }
 }

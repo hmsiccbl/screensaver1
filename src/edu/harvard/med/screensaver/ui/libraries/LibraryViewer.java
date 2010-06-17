@@ -12,6 +12,11 @@ package edu.harvard.med.screensaver.ui.libraries;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataIntegrityViolationException;
+
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -25,18 +30,11 @@ import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 /**
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Library>
+public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Library,Library>
 {
   private static Logger log = Logger.getLogger(LibraryViewer.class);
 

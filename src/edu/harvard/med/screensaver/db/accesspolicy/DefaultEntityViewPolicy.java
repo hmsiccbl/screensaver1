@@ -312,5 +312,15 @@ public class DefaultEntityViewPolicy implements EntityViewPolicy
   {
     return true;
   }
+
+  public boolean isAllowedAccessToDataColumnDueToMutualPositives(DataColumn dataColumn)
+  {
+    return true;
+  }
+
+  public boolean isAllowedAccessToResultValueDueToMutualPositive(boolean isPositive, Screen screen, String wellId)
+  {
+    return true;
+  }
 }
 

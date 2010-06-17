@@ -22,15 +22,16 @@ import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.Column;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
 
 /**
  * A Hibernate entity bean representing a lab head.
@@ -50,7 +51,7 @@ public class LabHead extends ScreeningRoomUser
   
   public static final RelationshipPath<LabHead> screensHeaded = new RelationshipPath<LabHead>(LabHead.class, "screensHeaded");
   public static final RelationshipPath<LabHead> labMembers = new RelationshipPath<LabHead>(LabHead.class, "labMembers");
-  public static final RelationshipPath<LabHead> labAffiliation = new RelationshipPath<LabHead>(LabHead.class, "labAffiliation");
+  public static final RelationshipPath<LabHead> labAffiliation = new RelationshipPath<LabHead>(LabHead.class, "labAffiliation", Cardinality.TO_ONE);
 
 
   // instance data members

@@ -19,15 +19,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-
+import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
-import com.google.common.collect.Sets;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 /**
  * Parent class of entity types that require auditing of their creation and
@@ -56,7 +56,7 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
   private static final long serialVersionUID = 1L;
 
   public static final RelationshipPath<AuditedAbstractEntity> dateCreated = new RelationshipPath<AuditedAbstractEntity>(AuditedAbstractEntity.class, "dateCreated");
-  public static final RelationshipPath<AuditedAbstractEntity> createdBy = new RelationshipPath<AuditedAbstractEntity>(AuditedAbstractEntity.class, "createdBy");
+  public static final RelationshipPath<AuditedAbstractEntity> createdBy = new RelationshipPath<AuditedAbstractEntity>(AuditedAbstractEntity.class, "createdBy", Cardinality.TO_ONE);
   public static final RelationshipPath<AuditedAbstractEntity> updateActivities = new RelationshipPath<AuditedAbstractEntity>(AuditedAbstractEntity.class, "updateActivities");
   
   protected SortedSet<AdministrativeActivity> _updateActivities = Sets.newTreeSet();

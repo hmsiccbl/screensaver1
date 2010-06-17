@@ -31,17 +31,18 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
 
 /**
  * A CherryPickAssayPlate represents an assay plate that is created as the
@@ -119,9 +120,9 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(CherryPickAssayPlate.class);
 
-  public static final RelationshipPath<CherryPickAssayPlate> cherryPickRequest = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickRequest");
-  public static final RelationshipPath<CherryPickAssayPlate> cherryPickLiquidTransfer = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickLiquidTransfer");
-  public static final RelationshipPath<CherryPickAssayPlate> cherryPickScreening = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickScreening");
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickRequest = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickRequest", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickLiquidTransfer = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickLiquidTransfer", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickScreening = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickScreening", Cardinality.TO_ONE);
   public static final RelationshipPath<CherryPickAssayPlate> labCherryPicks = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "labCherryPicks");
 
   // private instance data

@@ -18,12 +18,12 @@ import edu.harvard.med.screensaver.ui.table.column.RealColumn;
 
 public abstract class RealEntityColumn<E extends AbstractEntity> extends RealColumn<E> implements HasFetchPaths<E>
 {
-  private FetchPaths<E> _fetchPaths;
+  private FetchPaths<E,E> _fetchPaths;
   
   public RealEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group, Integer decimalPlaces)
   {
     super(name, description, group, decimalPlaces);
-    _fetchPaths = new FetchPaths<E>(relationshipPath);
+    _fetchPaths = new FetchPaths<E,E>(relationshipPath);
   }
 
   public void addRelationshipPath(RelationshipPath<E> path)

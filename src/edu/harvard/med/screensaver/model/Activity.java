@@ -28,17 +28,18 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.annotations.ToMany;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
+
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 
 /**
@@ -55,7 +56,7 @@ public abstract class Activity extends AuditedAbstractEntity<Integer> implements
   private static final Logger log = Logger.getLogger(Activity.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<Activity> performedBy = new RelationshipPath<Activity>(Activity.class, "performedBy");
+  public static final RelationshipPath<Activity> performedBy = new RelationshipPath<Activity>(Activity.class, "performedBy", Cardinality.TO_ONE);
 
 
   // instance fields

@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/model/AbstractEntity.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -20,17 +18,16 @@ import java.util.Map;
 
 import javax.persistence.Transient;
 
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.proxy.HibernateProxyHelper;
+import sun.reflect.Reflection;
+
 import edu.harvard.med.screensaver.db.accesspolicy.EntityViewPolicyInjectorPostLoadEventListener;
 import edu.harvard.med.screensaver.domainlogic.EntityUpdater;
 import edu.harvard.med.screensaver.model.annotations.Column;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.util.DevelopmentException;
-
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.proxy.HibernateProxyHelper;
-
-import sun.reflect.Reflection;
 
 /**
  * An abstract superclass for the entity beans in the domain model. Provides an

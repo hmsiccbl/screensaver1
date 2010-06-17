@@ -24,7 +24,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.cli.OptionBuilder;
@@ -452,7 +451,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
         msg.append("\t" + printUserHeader() + "\n");
         for(ScreensaverUser user:screen.getAssociatedScreeningRoomUsers())
         {
-          msg.append("\t").append(printUser(user));
+          msg.append("\t").append(printUser(user)).append("\n");
         }
       }
 
@@ -461,8 +460,8 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
                                             "---",
                                             "[-- a Small Molecule Screen Title]", 
                                             "[expire_date]" );
-      msg.append("=============================example email=================================");
-      msg.append("Subject: " + subjectMessage.getFirst());
+      msg.append("\n\n=============================example email=================================");
+      msg.append("\nSubject: " + subjectMessage.getFirst());
       msg.append(notificationMessage);
       
       Set<InternetAddress> adminRecipients = getExtraRecipients();
@@ -589,20 +588,20 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
     }
   }
   
-  private InternetAddress getEmail(ScreensaverUser admin)
-    throws MessagingException
-  {
-    try {
-      return new InternetAddress(admin.getEmail());
-    }
-    catch (AddressException e) {
-      throw new MessagingException("Admin address is wrong: " + printUserInformation(admin), e);
-    }
-  }
+  //  private InternetAddress getEmail(ScreensaverUser admin)
+  //    throws MessagingException
+  //  {
+  //    try {
+  //      return new InternetAddress(admin.getEmail());
+  //    }
+  //    catch (AddressException e) {
+  //      throw new MessagingException("Admin address is wrong: " + printUserInformation(admin), e);
+  //    }
+  //  }
 
   public List<InternetAddress> getDataSharingLevelAdminEmails(InternetAddress emailAddressForErrors, 
                                                               EmailService emailServiceForErrorReporting) 
-                                                              throws MessagingException
+                                                              throws MessagingException, ParseException
   {
     List<InternetAddress> adminRecipients = Lists.newLinkedList();
     List<MessagingException> errors = Lists.newLinkedList();

@@ -25,20 +25,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.IsHitConfirmedViaExperimentation;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -62,8 +62,8 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(ScreenerCherryPick.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<ScreenerCherryPick> cherryPickRequest = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "cherryPickRequest");
-  public static final RelationshipPath<ScreenerCherryPick> screenedWell = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell");
+  public static final RelationshipPath<ScreenerCherryPick> cherryPickRequest = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "cherryPickRequest", Cardinality.TO_ONE);
+  public static final RelationshipPath<ScreenerCherryPick> screenedWell = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell", Cardinality.TO_ONE);
   public static final RelationshipPath<ScreenerCherryPick> labCherryPicks = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "labCherryPicks");
 
 

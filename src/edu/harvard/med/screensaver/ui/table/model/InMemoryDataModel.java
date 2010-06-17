@@ -18,6 +18,8 @@ import java.util.List;
 import javax.faces.model.DataModelListener;
 import javax.faces.model.ListDataModel;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -25,8 +27,6 @@ import edu.harvard.med.screensaver.ui.table.CriterionMatchException;
 import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.column.CompoundColumnComparator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-
-import org.apache.log4j.Logger;
 
 
 public class InMemoryDataModel<R> extends DataTableModel<R>
@@ -194,4 +194,32 @@ public class InMemoryDataModel<R> extends DataTableModel<R>
   {
     return _baseModel.getDataModelListeners();
   }
+
+  @Override
+  public Iterator<R> iterator()
+  {
+    return new Iterator<R>() {
+      private int row = 0;
+
+      @Override
+      public boolean hasNext()
+      {
+        return row < getRowCount();
+      }
+
+      @Override
+      public R next()
+      {
+        setRowIndex(row++);
+        return (R) getRowData();
+      }
+
+      @Override
+      public void remove()
+      {
+        throw new UnsupportedOperationException();
+      }
+    };
+  }
+
 }

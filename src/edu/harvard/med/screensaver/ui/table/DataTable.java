@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -23,7 +21,6 @@ import javax.faces.event.ValueChangeEvent;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
@@ -35,14 +32,14 @@ import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
  * JSF backing bean for data tables. Provides the following functionality:
  * <ul>
  * <li>manages DataModel, UIData, and {@link TableColumnManager} objects
- * <li>handles (re)sorting, (re)filtering, and changes to column composition,
- * in response to notifications from its {@link TableColumnManager}</li>
+ * <li>handles (re)sorting, (re)filtering, and changes to column composition, in response to notifications from its
+ * {@link TableColumnManager}</li>
  * <li>handles "rows per page" command (via JSF listener method)</li>
  * <li>handles "goto row" command (via JSF listener method)</li>
- * <li>reports whether the "current" column is numeric
- * {@link #isNumericColumn()}</li>
+ * <li>reports whether the "current" column is numeric {@link #isNumericColumn()}</li>
+ * <li>Management of "filter mode"</li>
  * </ul>
- *
+ * 
  * @param R the type of the data object associated with each row
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -348,8 +345,16 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
       else if (arg instanceof ColumnVisibilityChangedEvent) {
         log.debug("DataTable notified of column visibility change: " + arg);
         ColumnVisibilityChangedEvent event = (ColumnVisibilityChangedEvent) arg;
+        if (!event.getColumnsRemoved().isEmpty()) {
+          // note: if removedColumn is also a sort column, TableColumnManager
+          // will handle issuing the event that forces a resort(), as necessary
+          // TODO: this is only beneficial for export, since we'll be re-reading all the data, and shouldn't read data for columns that are no longer visible
+          if (getDataTableModel().getModelType() == DataTableModelType.VIRTUAL_PAGING) {
+            refetch();
+          }
+        }
         if (event.getColumnsAdded().size() > 0) {
-          // TODO: only refetch if the added columns add new RelationshipPaths! (we may already have fetched the data for this column)
+          // TODO: if InMemoryModel, only refetch if the added columns add new RelationshipPaths! (since we'll already have the data for the new columns)
           refetch();
           for (TableColumn<?,?> addedColumn : event.getColumnsAdded()) {
             if (addedColumn.hasCriteria()) {
@@ -365,8 +370,6 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
               break;
             }
           }
-          // note: if removedColumn is also a sort column, TableColumnManager
-          // will handle issuing the event that forces a resort(), as necessary
         }
       }
     }

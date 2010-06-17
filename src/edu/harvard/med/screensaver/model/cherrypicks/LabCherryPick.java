@@ -22,10 +22,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Parameter;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -33,15 +34,12 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
 
 
 /**
@@ -150,11 +148,11 @@ public class LabCherryPick extends AbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(LabCherryPick.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<LabCherryPick> cherryPickRequest = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "cherryPickRequest");
-  public static final RelationshipPath<LabCherryPick> screenerCherryPick = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "screenerCherryPick");
-  public static final RelationshipPath<LabCherryPick> sourceWell = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "sourceWell");
+  public static final RelationshipPath<LabCherryPick> cherryPickRequest = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "cherryPickRequest", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabCherryPick> screenerCherryPick = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "screenerCherryPick", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabCherryPick> sourceWell = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "sourceWell", Cardinality.TO_ONE);
   public static final RelationshipPath<LabCherryPick> wellVolumeAdjustments = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "wellVolumeAdjustments");
-  public static final RelationshipPath<LabCherryPick> assayPlate = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "assayPlate");
+  public static final RelationshipPath<LabCherryPick> assayPlate = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "assayPlate", Cardinality.TO_ONE);
   
   // private instance data
 

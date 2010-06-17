@@ -15,9 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import edu.harvard.med.screensaver.ui.table.Criterion;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.ui.table.Criterion;
 
 // TODO: Probably need an AggregatePropertyPath class.  
 /**
@@ -53,6 +54,16 @@ public abstract class AggregateDataFetcher<AT extends Comparable<AT>,AK,BT,BK> i
     _baseDataFetcher = baseDataFetcher; 
   }
   
+  @Override
+  public void addDomainRestrictions(HqlBuilder hql)
+  {}
+
+  @Override
+  public void setPropertiesToFetch(List<Object> properties)
+  {
+    throw new UnsupportedOperationException("AggregateDataFetcher expects data to be fetched by base data fetcher");
+  }
+
   public List<AT> fetchAllData()
   {
     List<BT> nonAggregatedData = _baseDataFetcher.fetchAllData();

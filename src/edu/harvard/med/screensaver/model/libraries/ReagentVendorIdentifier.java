@@ -13,9 +13,10 @@ import java.io.Serializable;
 
 import javax.persistence.Embeddable;
 
-import edu.harvard.med.screensaver.model.RequiredPropertyException;
-
+import com.google.common.base.Function;
 import org.hibernate.annotations.Type;
+
+import edu.harvard.med.screensaver.model.RequiredPropertyException;
 
 
 /**
@@ -28,6 +29,21 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
   private static final long serialVersionUID = 1L;
 
   static final ReagentVendorIdentifier NULL_VENDOR_ID = new ReagentVendorIdentifier();
+
+  public static Function<ReagentVendorIdentifier,String> ToVendorName = new Function<ReagentVendorIdentifier,String>() {
+    public String apply(ReagentVendorIdentifier rvi)
+    {
+      return rvi.getVendorName();
+    }
+  };
+
+  public static Function<ReagentVendorIdentifier,String> ToVendorIdentifier = new Function<ReagentVendorIdentifier,String>() {
+    public String apply(ReagentVendorIdentifier rvi)
+    {
+      return rvi.getVendorIdentifier();
+    }
+  };
+
   static { NULL_VENDOR_ID._asString = ""; }
 
   private String _vendorName;

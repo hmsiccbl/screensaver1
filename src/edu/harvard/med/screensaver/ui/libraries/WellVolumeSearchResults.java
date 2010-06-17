@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/libraries/WellVolumeSearchResults.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -15,8 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
@@ -27,12 +27,6 @@ import edu.harvard.med.screensaver.ui.table.column.SetColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
 import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Sets;
 
 /**
  * Aggregates WellVolumeAdjustments into WellVolumes, and provides these
@@ -74,15 +68,6 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
-  }
-
-  // public methods
-
-  @Override
-  protected DataTableModel<WellVolume> buildDataTableModel(DataFetcher<WellVolume,WellKey,Object> dataFetcher,
-                                                           List<? extends TableColumn<WellVolume,?>> columns)
-  {
-    return new InMemoryDataModel<WellVolume>(dataFetcher);
   }
 
   @Override

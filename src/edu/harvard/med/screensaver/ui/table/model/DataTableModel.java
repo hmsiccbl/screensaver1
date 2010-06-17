@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -11,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.table.model;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.faces.model.DataModel;
@@ -45,9 +44,7 @@ public abstract class DataTableModel<R> extends DataModel
   // TODO
   // public abstract R getRowData(int rowIndex);
   
-  // TODO
-  // public abstract Iterator<R> iterator();
-  
+  public abstract Iterator<R> iterator();
   
   /**
    * @motivation for unit tests

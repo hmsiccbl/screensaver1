@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public interface LibrariesDAO
 {
@@ -71,5 +72,9 @@ public interface LibrariesDAO
   public Collection<String> findAllVendorNames();
 
   public int countExperimentalWells(int startPlate, int endPlate);
+
+  public Set<ScreenType> findScreenTypesForWells(Set<WellKey> wellKeys);
+
+  public Set<ScreenType> findScreenTypesForReagents(Set<ReagentVendorIdentifier> reagentIds);
 
 }

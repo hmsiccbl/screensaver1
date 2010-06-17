@@ -13,11 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -30,14 +33,10 @@ import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VocabularyEntityColumn;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.ui.util.VocabularlyConverter;
 import edu.harvard.med.screensaver.util.CollectionUtils;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Lists;
 
 
 /**
@@ -46,7 +45,7 @@ import com.google.common.collect.Lists;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class ActivitySearchResults<A extends Activity> extends EntitySearchResults<A,Integer>
+public abstract class ActivitySearchResults<A extends Activity> extends EntityBasedEntitySearchResults<A,Integer>
 {
   private static final Logger log = Logger.getLogger(ActivitySearchResults.class);
 
@@ -77,28 +76,29 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntitySe
   @Override
   public void searchAll()
   {
-    EntityDataFetcher<A,Integer> dataFetcher =
-      (EntityDataFetcher<A,Integer>) new AllEntitiesOfTypeDataFetcher<A,Integer>(
-        _type,
-        _dao);
-    initialize(dataFetcher);
+    initialize(new InMemoryEntityDataModel<A>(new EntityDataFetcher<A,Integer>(_type, _dao)));
   }
 
-  public void searchActivitiesForUser(ScreensaverUser user)
+  public void searchActivitiesForUser(final ScreensaverUser user)
   {
-    initialize((EntityDataFetcher<A,Integer>) new ParentedEntityDataFetcher<A,Integer>(
-      _type,
-      new RelationshipPath<A>(_type, "performedBy"),
-      user,
-      _dao));
+    initialize(new InMemoryEntityDataModel<A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, new RelationshipPath<A>(_type, "performedBy"), user, getRootAlias());
+      }
+    }));
   }
 
-  public void searchActivities(Set<Activity> activities)
+  public void searchActivities(final Set<Activity> activities)
   {
-    initialize((EntityDataFetcher<A,Integer>) new EntitySetDataFetcher<A,Integer>(
-      _type,
-      CollectionUtils.<Integer>entityIds(activities),
-      _dao));
+    initialize(new InMemoryEntityDataModel<A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), CollectionUtils.<Integer>entityIds(activities));
+      }
+    }));
   }
 
 

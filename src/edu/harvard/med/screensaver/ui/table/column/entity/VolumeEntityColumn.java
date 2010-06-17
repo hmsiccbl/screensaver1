@@ -18,12 +18,12 @@ import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 
 public abstract class VolumeEntityColumn<E extends AbstractEntity> extends VolumeColumn<E> implements HasFetchPaths<E>
 {
-  private FetchPaths<E> _fetchPaths;
+  private FetchPaths<E,E> _fetchPaths;
   
   public VolumeEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
     super(name, description, group);
-    _fetchPaths = new FetchPaths<E>(relationshipPath);
+    _fetchPaths = new FetchPaths<E,E>(relationshipPath);
   }
 
   public void addRelationshipPath(RelationshipPath<E> path)

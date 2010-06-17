@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/model/libraries/Well.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -31,18 +29,19 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.MapKeyManyToMany;
+import org.hibernate.annotations.Type;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.MapKeyManyToMany;
-import org.hibernate.annotations.Type;
 
 
 /**
@@ -62,8 +61,8 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
 {
   private static final long serialVersionUID = 1;
 
-  public static final RelationshipPath<Reagent> libraryContentsVersion = new RelationshipPath<Reagent>(Reagent.class, "libraryContentsVersion");
-  public static final RelationshipPath<Reagent> well = new RelationshipPath<Reagent>(Reagent.class, "well");
+  public static final RelationshipPath<Reagent> libraryContentsVersion = new RelationshipPath<Reagent>(Reagent.class, "libraryContentsVersion", Cardinality.TO_ONE);
+  public static final RelationshipPath<Reagent> well = new RelationshipPath<Reagent>(Reagent.class, "well", Cardinality.TO_ONE);
   public static final RelationshipPath<Reagent> annotationValues = new RelationshipPath<Reagent>(Reagent.class, "annotationValues");
   public static final RelationshipPath<Reagent> studies = new RelationshipPath<Reagent>(Reagent.class, "studies");
   public static final PropertyPath<Reagent> vendorName = new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorName");
@@ -166,7 +165,11 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
   }
 
   @ManyToMany(targetEntity = Screen.class, mappedBy = "reagents", fetch = FetchType.LAZY)
-  @ToMany(singularPropertyName = "study", hasNonconventionalMutation=true /* model unit tests don't handle immutable to-many relationships, tested in ReagentTest#testAnnotationValueMap */) 
+  @ToMany(singularPropertyName = "study", hasNonconventionalMutation = true /*
+                                                                             * model unit tests don't handle immutable
+                                                                             * to-many relationships, tested in
+                                                                             * ReagentTest#testAnnotationValueMap
+                                                                             */)
   @JoinColumn(name = "studyId", nullable = false, updatable = false)
   @org.hibernate.annotations.ForeignKey(name = "fk_reagent_to_study")
   @org.hibernate.annotations.LazyCollection(value = org.hibernate.annotations.LazyCollectionOption.TRUE)
@@ -186,8 +189,13 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
 
   public boolean removeStudy(Screen study)
   {
+    return removeStudy(study, true);
+  }
+
+  public boolean removeStudy(Screen study, boolean removeReagentStudyLink)
+  {
     if (_studies.remove(study)) {
-      study.removeReagent(this);
+      if (removeReagentStudyLink) study.removeReagent(this);
       return true;
     }
     return false;

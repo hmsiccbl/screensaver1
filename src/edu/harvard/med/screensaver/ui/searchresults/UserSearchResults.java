@@ -13,30 +13,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.AllEntitiesOfTypeDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.EntitySetDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextSetEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
-import edu.harvard.med.screensaver.util.CollectionUtils;
-
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 
 /**
@@ -44,7 +45,7 @@ import com.google.common.collect.Sets;
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchResults<E,Integer>
+public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEntitySearchResults<E,Integer>
 {
   private GenericEntityDAO _dao;
   private Class<E> _type;
@@ -72,16 +73,21 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntitySearchRe
   public void searchAll()
   {
     setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchAll"));
-    initialize(new AllEntitiesOfTypeDataFetcher<E,Integer>(_type, _dao));
+    initialize(new InMemoryEntityDataModel<E>(new EntityDataFetcher<E,Integer>(_type, _dao)));
     // default to descending sort order on user ID, to show last created first
     getColumnManager().setSortAscending(false);
   }
 
-  public void searchUsers(Set<ScreeningRoomUser> users)
+  public void searchUsers(final Set<ScreeningRoomUser> users)
   {
-    initialize(new EntitySetDataFetcher<E,Integer>(_type,
-      CollectionUtils.<Integer>entityIds(users),
-      _dao));
+    initialize(new InMemoryEntityDataModel<E>(new EntityDataFetcher<E,Integer>(_type, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), Sets.newHashSet(Iterables.transform(users, Entity.ToEntityId)));
+      }
+    }));
+    
     // default to ascending sort order on user name
     getColumnManager().setSortColumnName("Name");
     getColumnManager().setSortAscending(true);

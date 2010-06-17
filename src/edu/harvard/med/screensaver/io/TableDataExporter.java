@@ -12,9 +12,8 @@ package edu.harvard.med.screensaver.io;
 import java.util.List;
 
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
-public interface TableDataExporter<R> extends DataExporter<DataTableModel<R>>
+public interface TableDataExporter<R> extends DataExporter<R>
 {
   void setTableColumns(List<TableColumn<R,?>> columns);
 }

@@ -13,8 +13,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
+import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -29,15 +38,8 @@ import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 
 public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
 {
@@ -76,12 +78,15 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
     _screenSearchResults = screenSearchResults;
   }
 
-  public void searchLabActivitiesForScreen(Screen screen)
+  public void searchLabActivitiesForScreen(final Screen screen)
   {
-    initialize(new ParentedEntityDataFetcher<LabActivity,Integer>(LabActivity.class,
-      new RelationshipPath<LabActivity>(LabActivity.class, "screen"),
-      screen,
-      _dao));
+    initialize(new InMemoryEntityDataModel<LabActivity>(new EntityDataFetcher<LabActivity,Integer>(LabActivity.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, LabActivity.Screen, screen, getRootAlias());
+      }
+    }));
   }
 
   @SuppressWarnings("unchecked")
@@ -148,7 +153,7 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
                         new Function<TableColumn<Screen,?>,TableColumn<LabActivity,?>>() { 
       public TableColumn<LabActivity,?> apply(TableColumn<Screen,?> delegateColumn) 
       { 
-        RelatedEntityColumn<LabActivity,Screen,Object> column = new RelatedEntityColumn<LabActivity,Screen,Object>(Screen.class, LabActivity.Screen, (TableColumn<Screen,Object>) delegateColumn, SCREEEN_COLUMN_GROUP) 
+        RelatedEntityColumn<LabActivity,Screen,Object> column = new RelatedEntityColumn<LabActivity,Screen,Object>(Screen.class, LabActivity.Screen, (TableColumn<Screen,Object>) delegateColumn, SCREEEN_COLUMN_GROUP)
         { 
           public Screen getRelatedEntity(LabActivity a) { return a.getScreen(); } 
         };

@@ -14,18 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.ui.table.Criterion;
-
-import org.apache.log4j.Logger;
 
 public class NoOpDataFetcher<R,K,P> implements DataFetcher<R,K,P>
 {
-  // static members
-
-  private static Logger log = Logger.getLogger(NoOpDataFetcher.class);
-
-  // instance data members
-
   public void setFilteringCriteria(Map<P,List<? extends Criterion<?>>> criteria)
   {
   }
@@ -54,5 +47,12 @@ public class NoOpDataFetcher<R,K,P> implements DataFetcher<R,K,P>
     return 0;
   }
 
+  @Override
+  public void addDomainRestrictions(HqlBuilder hql)
+  {}
+
+  @Override
+  public void setPropertiesToFetch(List<P> properties)
+  {}
 }
 

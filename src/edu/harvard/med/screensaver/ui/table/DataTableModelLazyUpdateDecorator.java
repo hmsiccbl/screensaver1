@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -11,16 +9,17 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.faces.model.DataModelListener;
+
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-
-import org.apache.log4j.Logger;
 
 /**
  * Delays the actual invocation of {@link #fetch}, {@link #sort} and
@@ -189,5 +188,11 @@ public class DataTableModelLazyUpdateDecorator<R> extends DataTableModel<R>
       log.debug("executing lazy sort() now");
       _base.sort(_sortColumns, _sortDirection);
     }
+  }
+
+  @Override
+  public Iterator<R> iterator()
+  {
+    return _base.iterator();
   }
 }

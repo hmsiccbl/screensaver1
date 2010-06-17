@@ -18,12 +18,12 @@ import edu.harvard.med.screensaver.ui.table.column.DateTimeColumn;
 
 public abstract class DateTimeEntityColumn<E extends AbstractEntity> extends DateTimeColumn<E> implements HasFetchPaths<E>
 {
-  private FetchPaths<E> _fetchPaths;
+  private FetchPaths<E,E> _fetchPaths;
   
   public DateTimeEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
     super(name, description, group);
-    _fetchPaths = new FetchPaths<E>(relationshipPath);
+    _fetchPaths = new FetchPaths<E,E>(relationshipPath);
   }
 
   public void addRelationshipPath(RelationshipPath<E> path)

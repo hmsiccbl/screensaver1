@@ -40,6 +40,13 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.google.common.base.Function;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
@@ -60,6 +67,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -71,14 +79,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
-
-import com.google.common.base.Function;
 
 
 
@@ -98,9 +98,9 @@ public class Screen extends Study implements AttachedFilesEntity
   private static final Logger log = Logger.getLogger(Screen.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<Screen> screenResult = new RelationshipPath<Screen>(Screen.class, "screenResult");
-  public static final RelationshipPath<Screen> labHead = new RelationshipPath<Screen>(Screen.class, "labHead");
-  public static final RelationshipPath<Screen> leadScreener = new RelationshipPath<Screen>(Screen.class, "leadScreener");
+  public static final RelationshipPath<Screen> screenResult = new RelationshipPath<Screen>(Screen.class, "screenResult", Cardinality.TO_ONE);
+  public static final RelationshipPath<Screen> labHead = new RelationshipPath<Screen>(Screen.class, "labHead", Cardinality.TO_ONE);
+  public static final RelationshipPath<Screen> leadScreener = new RelationshipPath<Screen>(Screen.class, "leadScreener", Cardinality.TO_ONE);
   public static final RelationshipPath<Screen> collaborators = new RelationshipPath<Screen>(Screen.class, "collaborators");
   public static final RelationshipPath<Screen> annotationTypes = new RelationshipPath<Screen>(Screen.class, "annotationTypes");
   public static final RelationshipPath<Screen> cherryPickRequests = new RelationshipPath<Screen>(Screen.class, "cherryPickRequests");
@@ -111,7 +111,8 @@ public class Screen extends Study implements AttachedFilesEntity
   public static final RelationshipPath<Screen> attachedFiles = new RelationshipPath<Screen>(Screen.class, "attachedFiles");
   public static final RelationshipPath<Screen> publications = new RelationshipPath<Screen>(Screen.class, "publications");
   public static final RelationshipPath<Screen> keywords = new RelationshipPath<Screen>(Screen.class, "keywords");
-  public static final RelationshipPath<Screen> pinTransferApprovalActivity = new RelationshipPath<Screen>(Screen.class, "pinTransferApprovalActivity");
+  public static final RelationshipPath<Screen> pinTransferApprovalActivity = new RelationshipPath<Screen>(Screen.class, "pinTransferApprovalActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<Screen> reagents = new RelationshipPath<Screen>(Screen.class, "reagents");
 
   public static final Function<Screen,Integer> ToScreenNumberFunction = new Function<Screen,Integer>() { public Integer apply(Screen s) { return s.getScreenNumber(); } };
 
@@ -1479,15 +1480,11 @@ public class Screen extends Study implements AttachedFilesEntity
    * @motivation efficiently find all reagent-related data for a study (w/o reading annotationTypes.annotationValues.reagents)
    * @return the set of reagents associated with this screen result
    */
-  @ManyToMany(fetch=FetchType.LAZY)
-  @JoinTable(
-    name="studyReagentLink",
-    joinColumns=@JoinColumn(name="studyId"),
-    inverseJoinColumns=@JoinColumn(name="reagentId")
-  )
-  @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="studies")
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "studyReagentLink", joinColumns = @JoinColumn(name = "studyId"), inverseJoinColumns = @JoinColumn(name = "reagentId"))
+  @org.hibernate.annotations.ForeignKey(name = "fk_reagent_link_to_study")
+  @org.hibernate.annotations.LazyCollection(value = org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty = "studies")
   public Set<Reagent> getReagents()
   {
     return _reagents;
@@ -1500,8 +1497,12 @@ public class Screen extends Study implements AttachedFilesEntity
    */
   public boolean addReagent(Reagent reagent)
   {
+    return addReagent(reagent, true);
+  }
+  public boolean addReagent(Reagent reagent, boolean createStudiesLink)
+  {
     if (_reagents.add(reagent)) {
-      reagent.addStudy(this);
+      if(createStudiesLink) reagent.addStudy(this);
       return true;
     }
     return false;

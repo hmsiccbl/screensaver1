@@ -31,6 +31,12 @@ import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -40,18 +46,11 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 
 /**
@@ -72,7 +71,7 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   private static final Logger log = Logger.getLogger(ScreeningRoomUser.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<ScreeningRoomUser> LabHead = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead");
+  public static final RelationshipPath<ScreeningRoomUser> LabHead = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead", Cardinality.TO_ONE);
   public static final RelationshipPath<ScreeningRoomUser> attachedFiles = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "attachedFiles");
   public static final RelationshipPath<ScreeningRoomUser> screensLed = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "screensLed");
   public static final RelationshipPath<ScreeningRoomUser> screensCollaborated = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "screensCollaborated");

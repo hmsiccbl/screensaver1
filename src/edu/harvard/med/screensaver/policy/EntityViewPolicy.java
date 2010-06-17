@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.policy;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
@@ -52,5 +53,9 @@ public interface EntityViewPolicy extends AbstractEntityVisitor
    */
   @Deprecated()
   public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent);
+
+  boolean isAllowedAccessToDataColumnDueToMutualPositives(DataColumn dataColumn);
+
+  boolean isAllowedAccessToResultValueDueToMutualPositive(boolean isPositive, Screen screen, String wellId);
 
 }

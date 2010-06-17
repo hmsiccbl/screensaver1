@@ -59,7 +59,7 @@
             value="${appserver.dir}/bin/shutdown.sh"
   />
 	<condition property="appserver.jprofiler.opts"
-             value="-agentlib:jprofilerti -Xbootclasspath/a:/usr/local/jprofiler4/bin/agent.jar"
+             value="-agentlib:jprofilerti -Xbootclasspath/a:/usr/local/dev/jprofiler/bin/agent.jar"
              else=""
   >
 		<istrue value="${profile}" />

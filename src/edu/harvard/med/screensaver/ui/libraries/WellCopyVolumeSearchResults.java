@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +30,8 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AggregateDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.ParentedEntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.Volume;
@@ -43,7 +44,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -107,8 +108,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
     EntityDataFetcher<WellVolumeAdjustment,Integer> wvaFetcher =
       new EntityDataFetcher<WellVolumeAdjustment,Integer>(WellVolumeAdjustment.class, _dao) {
       @Override
-      protected void addDomainRestrictions(HqlBuilder hql,
-                                           Map<RelationshipPath<WellVolumeAdjustment>,String> path2Alias)
+        public void addDomainRestrictions(HqlBuilder hql)
       {
         Set<String> wellKeyStrings = new HashSet<String>();
         for (WellKey wellKey : wellKeys) {
@@ -118,8 +118,8 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
       }
     };
     addRelationshipsToFetch(wvaFetcher);
-
-    initialize(new AggregateDataFetcher<WellCopy,Pair<WellKey,String>,WellVolumeAdjustment,Integer>(wvaFetcher) {
+    DataFetcher<WellCopy,Pair<WellKey,String>,Object> wellCopyDataFetcher =
+      new AggregateDataFetcher<WellCopy,Pair<WellKey,String>,WellVolumeAdjustment,Integer>(wvaFetcher) {
       @Override
       protected SortedSet<WellCopy> aggregateData(List<WellVolumeAdjustment> nonAggregatedData)
       {
@@ -130,19 +130,32 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
         }
         return aggregateWellVolumeAdjustments(result, nonAggregatedData);
       }
-    });
+    };
+    DataFetcher<WellVolume,WellKey,Object> wellVolumeDataFetcher =
+      new AggregateDataFetcher<WellVolume,WellKey,WellCopy,Pair<WellKey,String>>(wellCopyDataFetcher) {
+      @Override
+      protected SortedSet<WellVolume> aggregateData(List<WellCopy> nonAggregatedData)
+      {
+        return aggregateWellCopies(nonAggregatedData);
+      }
+      };
+    _wellVolumeSearchResults.initialize(new InMemoryDataModel<WellVolume>(wellVolumeDataFetcher));
   }
 
   public void searchWellsForLibrary(final Library library)
   {
     EntityDataFetcher<WellVolumeAdjustment,Integer> wvaFetcher =
-      new ParentedEntityDataFetcher<WellVolumeAdjustment,Integer>(WellVolumeAdjustment.class,
-        WellVolumeAdjustment.well.to(Well.library),
-        library,
-        _dao);
+      new EntityDataFetcher<WellVolumeAdjustment,Integer>(WellVolumeAdjustment.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, WellVolumeAdjustment.well.to(Well.library), library, getRootAlias());
+      }
+      };
     addRelationshipsToFetch(wvaFetcher);
 
-    initialize(new AggregateDataFetcher<WellCopy,Pair<WellKey,String>,WellVolumeAdjustment,Integer>(wvaFetcher) {
+    DataFetcher<WellCopy,Pair<WellKey,String>,Object> wellCopyDataFetcher =
+      new AggregateDataFetcher<WellCopy,Pair<WellKey,String>,WellVolumeAdjustment,Integer>(wvaFetcher) {
       @Override
       @Transactional
       protected SortedSet<WellCopy> aggregateData(List<WellVolumeAdjustment> nonAggregatedData)
@@ -158,7 +171,17 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
         return aggregateWellVolumeAdjustments(makeWellCopyVolumes(library2[0], new TreeSet<WellCopy>()),
                                               nonAggregatedData);
       }
-    });
+      };
+    initialize(new InMemoryDataModel<WellCopy>(wellCopyDataFetcher));
+    DataFetcher<WellVolume,WellKey,Object> wellVolumeDataFetcher =
+      new AggregateDataFetcher<WellVolume,WellKey,WellCopy,Pair<WellKey,String>>(wellCopyDataFetcher) {
+        @Override
+        protected SortedSet<WellVolume> aggregateData(List<WellCopy> nonAggregatedData)
+      {
+        return aggregateWellCopies(nonAggregatedData);
+      }
+      };
+    _wellVolumeSearchResults.initialize(new InMemoryDataModel<WellVolume>(wellVolumeDataFetcher));
   }
 
   public void searchWellsForCherryPickRequest(CherryPickRequest cherryPickRequest,
@@ -178,30 +201,15 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
   }
 
   @Override
-  public void initialize(DataFetcher<WellCopy,Pair<WellKey,String>,Object> dataFetcher)
+  public void initialize(DataTableModel<WellCopy> dataTableModel)
   {
-    super.initialize(dataFetcher);
-
-    _wellVolumeSearchResults.initialize(new AggregateDataFetcher<WellVolume,WellKey,WellCopy,Pair<WellKey,String>>(dataFetcher) {
-      @Override
-      protected SortedSet<WellVolume> aggregateData(List<WellCopy> nonAggregatedData)
-      {
-        return aggregateWellCopies(nonAggregatedData);
-      }
-    });
+    super.initialize(dataTableModel);
   }
 
-//  public WellVolumeSearchResults getWellVolumeSearchResults()
+  //  public WellVolumeSearchResults getWellVolumeSearchResults()
 //  {
 //    return _wellVolumeSearchResults;
 //  }
-
-  @Override
-  protected DataTableModel<WellCopy> buildDataTableModel(DataFetcher<WellCopy,Pair<WellKey,String>,Object> dataFetcher,
-                                                         List<? extends TableColumn<WellCopy,?>> columns)
-  {
-    return new InMemoryDataModel<WellCopy>(dataFetcher);
-  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -525,9 +533,9 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
 
   private void addRelationshipsToFetch(EntityDataFetcher<WellVolumeAdjustment,Integer> wvaFetcher)
   {
-    List<RelationshipPath<WellVolumeAdjustment>> relationships = new ArrayList<RelationshipPath<WellVolumeAdjustment>>();
-    relationships.add(WellVolumeAdjustment.well.to(Well.library));
-    relationships.add(WellVolumeAdjustment.copy.to(Copy.copyInfos));
-    wvaFetcher.setRelationshipsToFetch(relationships);
+    List<PropertyPath<WellVolumeAdjustment>> relationships = Lists.newArrayList();
+    relationships.add(WellVolumeAdjustment.well.to(Well.library).toFullEntity());
+    relationships.add(WellVolumeAdjustment.copy.to(Copy.copyInfos).toFullEntity());
+    wvaFetcher.setPropertiesToFetch(relationships);
   }
 }

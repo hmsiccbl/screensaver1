@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/src/edu/harvard/med/screensaver/model/screenresults/ResultValue.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -21,16 +19,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Index;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Index;
 
 
 /**
@@ -56,19 +57,94 @@ import org.hibernate.annotations.Index;
                                            @Index(name = "result_value_data_column_and_positive_index", columnNames={ "dataColumnId", "isPositive" }) })
 public class ResultValue extends AbstractEntity<Integer>
 {
-
-  // private static data
-
   private static final long serialVersionUID = -4066041317098744417L;
   private static final Logger log = Logger.getLogger(ResultValue.class);
 
-  public static final RelationshipPath<ResultValue> DataColumn = new RelationshipPath<ResultValue>(ResultValue.class, "dataColumn");
+  public static final RelationshipPath<ResultValue> DataColumn = new RelationshipPath<ResultValue>(ResultValue.class, "dataColumn", Cardinality.TO_ONE);
 
+  private Well _well;
+  private DataColumn _dataColumn;
+  private String _value;
+  private Double _numericValue;
+  private AssayWellControlType _assayWellControlType;
+  /**
+   * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
+   * up to the application code and/or user interface to manage excluding the
+   * full set of ResultValues associated with a stock plate well (row) or with a
+   * data column. But we do need to allow any arbitrary set of
+   * ResultValues to be excluded.
+   */
+  private boolean _isExclude;
+  private boolean _isPositive;
+
+  private PartitionedValue _partitionedPositiveValue;
+  private Boolean _booleanPositiveValue;
 
   /**
+   * Constructs a <code>ResultValue</code>.
+   * Construct an initialized <code>ResultValue</code>. Intended only for use by
+   * this class's constructors and {@link DataColumn}.
+   * 
+   * @param dataColumn the parent DataColumn
+   * @param assayWell the Assaywell of this ResultValue
+   * @param value the non-numerical value of the ResultValue
+   * @param numericValue the numeric value of the ResultValue
+   * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of
+   *          positives
+   * @param isPositive whether this ResultValue is considered a 'positive' result
+  */
+  ResultValue(DataColumn dataColumn,
+              AssayWell assayWell,
+              String value,
+              Double numericValue,
+              PartitionedValue partitionPositiveIndicatorValue,
+              Boolean booleanPositiveIndicatorValue,
+              boolean exclude)
+  {
+    if (dataColumn == null) {
+      throw new DataModelViolationException("dataColumn is required for ResultValue");
+    }
+    if (assayWell == null) {
+      throw new DataModelViolationException("assay well is required for ResultValue");
+    }
+    _dataColumn = dataColumn;
+    _well = assayWell.getLibraryWell(); // TODO: remove
+
+    // TODO: HACK: removing this update as it causes memory/performance
+    // problems when loading ScreenResults; fortunately, when ScreenResult is
+    // read in from database from a new Hibernate session, the in-memory
+    // associations will be correct; these in-memory associations will only be
+    // missing within the Hibernate session that was used to import the
+    // ScreenResult
+    // _well.getResultValues().put(dataColumn, this);
+
+    setAssayWellControlType(assayWell.getAssayWellControlType()); // TODO: remove
+    setExclude(exclude);
+
+    switch (dataColumn.getDataType()) {
+      case NUMERIC:
+        _numericValue = numericValue;
+        break;
+      case POSITIVE_INDICATOR_BOOLEAN:
+        setBooleanPositiveValue(booleanPositiveIndicatorValue);
+        break;
+      case POSITIVE_INDICATOR_PARTITION:
+        setPartitionedPositiveValue(partitionPositiveIndicatorValue);
+        break;
+      case TEXT:
+        setValue(value);
+        break;
+      default:
+        throw new DevelopmentException("unhandled data type");
+    }
+
+  }
+
+  /**
+   * Constructs a numeric ResultValue object
    * Returns the value of this <code>ResultValue</code> as an appropriately
-   * typed object, depending upon the {@link DataColumn#getDataType() data
-   * column's data type}.
+   * typed object, depending upon {@link DataColumn#isPositiveIndicator()}, {@link DataColumn#isDerived()()}, and
+   * {@link DataColumn#getPositiveIndicatorType()}, as follows:
    * <ul>
    * <li>Well type is non-data-producer: returns <code>null</code>
    * <li>Not Derived (Raw): returns Double
@@ -89,82 +165,58 @@ public class ResultValue extends AbstractEntity<Integer>
     }
 
     switch (getDataColumn().getDataType()) {
-    case NUMERIC: return getNumericValue();
-    case POSITIVE_INDICATOR_BOOLEAN: return Boolean.valueOf(getValue());
-    case POSITIVE_INDICATOR_PARTITION: return PartitionedValue.lookupByValue(getValue()).getDisplayValue();
-    default: return getValue();
+      case NUMERIC:
+        return getNumericValue();
+      case POSITIVE_INDICATOR_BOOLEAN:
+        return getBooleanPositiveValue();
+      case POSITIVE_INDICATOR_PARTITION:
+        return getPartitionedPositiveValue();
+      default:
+        return getValue();
     }
   }
 
-
-  // private instance data
-
-  private Well _well;
-  private DataColumn _dataColumn;
-  private String _value;
-  private Double _numericValue;
-  private AssayWellControlType _assayWellControlType;
-  /**
-   * Note that we maintain an "exclude" flag on a per-ResultValue basis. It is
-   * up to the application code and/or user interface to manage excluding the
-   * full set of ResultValues associated with a stock plate well (row) or with a
-   * data column. But we do need to allow any arbitrary set of
-   * ResultValues to be excluded.
-   */
-  private boolean _isExclude;
-  private boolean _isPositive;
-
-
-  // public constructors
-
-  /**
-   * Constructs a <code>ResultValue</code>.
-  */
-  ResultValue(DataColumn dataColumn,
-              AssayWell assayWell,
-              String value)
+  @Column(name = "value", updatable = false, insertable = false)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.screenresults.PartitionedValueUserType")
+  public PartitionedValue getPartitionedPositiveValue()
   {
-    this(dataColumn, assayWell, value, null, false, false);
+    return _partitionedPositiveValue;
   }
 
-  /**
-   * Constructs a numeric ResultValue object
-   */
-  ResultValue(DataColumn dataColumn,
-              AssayWell assayWell,
-              Double numericValue)
+  public void setPartitionedPositiveValue(PartitionedValue value)
   {
-    this(dataColumn, assayWell, null, numericValue, false, false);
+    if (!isHibernateCaller()) {
+      if (value == null) {
+        value = PartitionedValue.NOT_POSITIVE;
+      }
+      if (value != PartitionedValue.NOT_POSITIVE && isPositiveCandidate()) {
+        setPositive(true);
+      }
+      setValue(value.toStorageValue());
+    }
+    _partitionedPositiveValue = value;
   }
 
-  /**
-   * Construct a numerical <code>ResultValue</code>. Intended for use only
-   * for creating result values that will not need to be persisted.
-   */
-  public ResultValue(DataColumn dataColumn,
-                     AssayWell assayWell,
-                     Double numericalValue,
-                     boolean exclude,
-                     boolean isPositive)
+  @Column(name = "value", updatable = false, insertable = false)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.screenresults.BooleanPositiveValueUserType")
+  public Boolean getBooleanPositiveValue()
   {
-    this(dataColumn, assayWell, null, numericalValue, exclude, isPositive);
+    return _booleanPositiveValue;
   }
 
-  /**
-   * Construct a non-numerical <code>ResultValue</code>. Intended for use
-   * only for creating result values that will not need to be persisted.
-   */
-  public ResultValue(DataColumn dataColumn,
-                     AssayWell assayWell,
-                     String value,
-                     boolean exclude,
-                     boolean isPositive)
+  public void setBooleanPositiveValue(Boolean value)
   {
-    this(dataColumn, assayWell, value, null, exclude, isPositive);
+    if (!isHibernateCaller()) {
+      if (value == null) {
+        value = Boolean.FALSE;
+      }
+      if (value.equals(Boolean.TRUE) && isPositiveCandidate()) {
+        setPositive(true);
+      }
+      setValue(value.toString());
+    }
+    _booleanPositiveValue = value;
   }
-
-
-  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -235,14 +287,14 @@ public class ResultValue extends AbstractEntity<Integer>
    * Return true whenever this result value has a null value.
    *
    * @return true whenever this result value has a null value
-   * @motivation reduces confusion as to whether callers needs to check both
-   *             {@link #getValue()} and {@link #getNumericValue()} to determine
+   * @motivation convenience, to avoid having to call each of {@link #getValue()}, {@link #getNumericValue()},
+   *             {@link #getBooleanPositiveValue()}, and {@link #getPartitionedPositiveValue()} to determine
    *             if ResultValue is null
    */
   @Transient
   public boolean isNull()
   {
-    return _value == null && _numericValue == null;
+    return _value == null && _numericValue == null && _partitionedPositiveValue == null && _booleanPositiveValue == null;
   }
 
   /**
@@ -283,10 +335,12 @@ public class ResultValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Get whether this result value indicates a positive. Returns false if the
-   * {@link #getDataColumn() DataColumn} is not a positive indicator.
+   * Get whether this result value indicates a positive. Returns false if the {@link #getDataColumn() DataColumn} is not
+   * a positive indicator. <i>Note: this flag may not agree with the screener-provided value (true/false, or S/M/W), as
+   * it will not be set for screener-indicated positives that are not in experimental wells or that have been
+   * {@link #isExclude() excluded}.
    *
-   * @return true whenever this result value is a positive indicator
+   * @return true if this result value is a positive indicator
    */
   @Column(nullable=false, name="isPositive")
   @org.hibernate.annotations.Index(name="result_value_is_positive_index")
@@ -325,57 +379,6 @@ public class ResultValue extends AbstractEntity<Integer>
     isControlWell();
   }
 
-  // package constructor and instance method
-
-  /**
-   * Construct an initialized <code>ResultValue</code>. Intended only for use by
-   * this class's constructors and {@link DataColumn}.
-   * 
-   * @param dataColumn the parent DataColumn
-   * @param assayWell the Assaywell of this ResultValue
-   * @param value the non-numerical value of the ResultValue
-   * @param numericalValue the numerical value of the ResultValue
-   * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of positives 
-   * @param isPositive whether this ResultValue is considered a 'positive' result 
-   */
-  ResultValue(DataColumn dataColumn,
-              AssayWell assayWell,
-              String value,
-              Double numericalValue,
-              boolean exclude,
-              boolean isPositive)
-  {
-    if (dataColumn == null) {
-      throw new DataModelViolationException("dataColumn is required for ResultValue");
-    }
-    if (assayWell == null) {
-      throw new DataModelViolationException("assay well is required for ResultValue");
-    }
-    _dataColumn = dataColumn;
-    _well = assayWell.getLibraryWell(); // TODO: remove
-
-    // TODO: HACK: removing this update as it causes memory/performance
-    // problems when loading ScreenResults; fortunately, when ScreenResult is
-    // read in from database from a new Hibernate session, the in-memory
-    // associations will be correct; these in-memory associations will only be
-    // missing within the Hibernate session that was used to import the
-    // ScreenResult
-    // _well.getResultValues().put(dataColumn, this);
-
-    setAssayWellControlType(assayWell.getAssayWellControlType()); // TODO: remove
-    if (!!!dataColumn.isNumeric()) {
-      setValue(value);
-    }
-    else {
-      setNumericValue(numericalValue);
-    }
-    setExclude(exclude);
-    setPositive(isPositive);
-  }
-
-
-  // package-protected methods
-
   /**
    * Set whether this result value is a positive. Intended only for use by
    * hibernate and {@link DataColumn}.
@@ -388,8 +391,6 @@ public class ResultValue extends AbstractEntity<Integer>
     _isPositive = isPositive;
   }
 
-
-  // private constructor and instance methods
 
   /**
    * Constructs an uninitialized ResultValue object.
@@ -479,5 +480,11 @@ public class ResultValue extends AbstractEntity<Integer>
   private void setAssayWellControlType(AssayWellControlType assayWellControlType)
   {
     _assayWellControlType = assayWellControlType;
+  }
+
+  @Transient
+  private boolean isPositiveCandidate()
+  {
+    return !isExclude() && getWell().getLibraryWellType() == LibraryWellType.EXPERIMENTAL;
   }
 }

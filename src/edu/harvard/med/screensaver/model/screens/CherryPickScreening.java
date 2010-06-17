@@ -19,18 +19,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import com.google.common.collect.Sets;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 /**
  * A library screening performed on set of cherry picks, as requested by a
@@ -49,7 +49,8 @@ public class CherryPickScreening extends Screening
   private static final long serialVersionUID = 1L;
 
   public static final String ACTIVITY_TYPE_NAME = "Cherry Pick Screening";
-  public static final RelationshipPath<CherryPickScreening> cherryPickRequest = new RelationshipPath<CherryPickScreening>(CherryPickScreening.class, "cherryPickRequest");
+
+  public static final RelationshipPath<CherryPickScreening> cherryPickRequest = new RelationshipPath<CherryPickScreening>(CherryPickScreening.class, "cherryPickRequest", Cardinality.TO_ONE);
   public static final RelationshipPath<CherryPickScreening> assayPlatesScreened = new RelationshipPath<CherryPickScreening>(CherryPickScreening.class, "assayPlatesScreened");
 
   private CherryPickRequest _cherryPickRequest;

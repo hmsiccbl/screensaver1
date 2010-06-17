@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/screenresults/ScreenResultParser.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -26,6 +24,15 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang.math.IntRange;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+
+import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
@@ -54,15 +61,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.util.AlphabeticCounter;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.commons.lang.math.IntRange;
-import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * Parses data from a workbook files (a.k.a. Excel spreadsheets) necessary for
@@ -96,13 +94,6 @@ import com.google.common.collect.Sets;
 public class ScreenResultParser implements ScreenResultWorkbookSpecification
 {
   private static final Logger log = Logger.getLogger(ScreenResultParser.class);
-
-  /**
-   * This controls the number of Rows to be read before flushing the hibernate cache and persisting all 
-   * of the ResultValues that are being cached on the DataColumn objects.
-   * This value should be matched to the hibernate.jdbc.batch_size property on the hibernateSessionFactory bean.
-   */
-  public static final int ROWS_TO_CACHE = 50;
 
   private static final String NO_SCREEN_ID_FOUND_ERROR = "Screen ID not found for row: ";
   private static final String DATA_COLUMNS_SHEET_NOT_FOUND_ERROR = "\"Data Columns\" sheet not found";
@@ -143,9 +134,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     booleanMap.put("1", true);
 
     for (PartitionedValue pv : PartitionedValue.values()) {
-      partitionedValueMap.put(pv.getDisplayValue().toLowerCase(), pv);
-      partitionedValueMap.put(pv.getDisplayValue().toUpperCase(), pv);
-      partitionedValueMap.put(pv.getValue(), pv);
+      partitionedValueMap.put(pv.getValue().toLowerCase(), pv);
+      partitionedValueMap.put(pv.getValue().toUpperCase(), pv);
     }
 
     for (AssayWellControlType awct : AssayWellControlType.values()) {
@@ -267,7 +257,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _dataTypeParser = new CellVocabularyParser<DataType>(dataTypeMap);
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
-    _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NONE);
+    _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NOT_POSITIVE);
     _assayWellControlTypeParser = new CellVocabularyParser<AssayWellControlType>(assayWellControlTypeMap);
     _wellNameParser = new WellNameParser();
 
@@ -605,9 +595,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                   else {
                     readResultValues(screenResult, row, well, incrementalFlush);
                     ++wellsWithDataLoaded;
-                    if (incrementalFlush && wellsWithDataLoaded % ROWS_TO_CACHE == 0) {
+                    if (incrementalFlush && wellsWithDataLoaded % AbstractDAO.ROWS_TO_CACHE == 0) {
                       saveResultValuesAndFlush(screenResult, incrementalFlush);
-                      if (log.isInfoEnabled() && wellsWithDataLoaded % (ROWS_TO_CACHE * 100) == 0) {
+                      if (log.isInfoEnabled() && wellsWithDataLoaded % (AbstractDAO.ROWS_TO_CACHE * 100) == 0) {
                         long time = System.currentTimeMillis();
                         long cumulativeTime = time - startTime;
                         log.info("wellsWithDataLoaded: " + wellsWithDataLoaded 
@@ -678,59 +668,43 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       AssayWell assayWell = findOrCreateAssayWell(well, assayWellControlType);
       List<DataColumn> wellExcludes = _excludeParser.parseList(row.getCell(WellInfoColumn.EXCLUDE.ordinal()));
       int iDataColumn = 0;
-      for (DataColumn dataColumn : screenResult.getDataColumns()) 
-      {
+      for (DataColumn dataColumn : screenResult.getDataColumns()) {
         Cell cell = row.getCell(getDataColumn(iDataColumn));
         boolean isExclude = (wellExcludes != null && wellExcludes.contains(dataColumn));
 
         ResultValue newResultValue = null;
-        if (dataColumn.isPositiveIndicator()) {
-          String value;
-          if (dataColumn.isBooleanPositiveIndicator()) {
-            if (cell.isBoolean()) {
-              value = cell.getBoolean().toString();
-            }
-            else {
-              value = _booleanParser.parse(cell).toString();
-            }
-            newResultValue =
-              dataColumn.createResultValue(assayWell,
-                                    value,
-                                    isExclude);
-          }
-          else if (dataColumn.isPartitionPositiveIndicator()) {
-            newResultValue =
-              dataColumn.createResultValue(assayWell,
-                                    _partitionedValueParser.parse(cell).toString(),
-                                    isExclude);
-          }
-          else {
-            throw new DevelopmentException("unhandled positive indicator type " + dataColumn.getDataType());
-          }
+        if (dataColumn.isBooleanPositiveIndicator()) {
+          newResultValue =
+            dataColumn.createBooleanPositiveResultValue(assayWell,
+                                                        cell.isBoolean() ? cell.getBoolean() : _booleanParser.parse(cell),
+                                                        isExclude);
         }
-        else { // not assay activity indicator
-          if (dataColumn.isNumeric()) {
-            newResultValue =
-              dataColumn.createResultValue(assayWell,
-                                    cell.getDouble(),
-                                    isExclude);
-          }
-          else {
-            newResultValue =
-              dataColumn.createResultValue(assayWell,
-                                    cell.getString(),
-                                    isExclude);
-          }
+        else if (dataColumn.isPartitionPositiveIndicator()) {
+          newResultValue =
+            dataColumn.createPartitionedPositiveResultValue(assayWell,
+                                                            _partitionedValueParser.parse(cell),
+                                                            isExclude);
+        }
+        else if (dataColumn.isNumeric()) {
+          newResultValue =
+            dataColumn.createResultValue(assayWell,
+                                         cell.getDouble(),
+                                         isExclude);
+        }
+        else {
+          newResultValue =
+            dataColumn.createResultValue(assayWell,
+                                         cell.getString(),
+                                         isExclude);
         }
         if (newResultValue == null) {
           cell.addError("duplicate well");
         }
 
         ++iDataColumn;
-      } // DataColumns
+      }
   
-      if(incrementalFlush)
-      {
+      if (incrementalFlush) {
         // [#2119] Optimize ScreenResultParser for scalability:
         // - in memory RV's must be reloaded as needed
         // - many-to-many relationship screen_result_well_link will be populated manually see ScreenResultsDao.saveScreenResultWellLinkTable()

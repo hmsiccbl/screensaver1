@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/branches/schema-upgrade-2007/.eclipse.prefs/codetemplates.xml
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -11,21 +9,20 @@
 
 package edu.harvard.med.screensaver.model.meta;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.util.Pair;
 import edu.harvard.med.screensaver.util.ParallelIterator;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Lists;
 
 /**
  * Defines the path of relationships between a root entity and a related entity
@@ -46,6 +43,8 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
 {
   // static members
 
+  private static final Cardinality DEFAULT_CARDINALITY = Cardinality.TO_MANY;
+
   private static Logger log = Logger.getLogger(RelationshipPath.class);
 
 // private static Pattern collectionIndexPattern = Pattern.compile("(.+)\\*");
@@ -55,11 +54,13 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
 
   private Class<E> _rootEntityClass;
   /*private Class<L> _leafClass;*/
-  protected List<String> _path = new ArrayList<String>();
-  protected List<PropertyNameAndValue> _restrictions = new ArrayList<PropertyNameAndValue>();
+  protected List<String> _path = Lists.newArrayList();
+  protected List<PropertyNameAndValue> _restrictions = Lists.newArrayList();
+  protected List<Cardinality> _cardinality = Lists.newArrayList();
   protected Integer _hashCode;
   protected String _asFormattedPath;
   protected String _asString;
+
 
 
   // public constructors and methods
@@ -104,14 +105,19 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
   public RelationshipPath(Class<E> rootEntityClass,
                           String relatedEntityName)
   {
+    this(rootEntityClass, relatedEntityName, DEFAULT_CARDINALITY);
+  }
+
+  public RelationshipPath(Class<E> rootEntityClass,
+                          String relatedEntityName,
+                          Cardinality cardinality)
+  {
     _rootEntityClass = rootEntityClass;
-    if (StringUtils.isEmpty(relatedEntityName)) {
-      _path = Collections.emptyList();
-    }
-    else {
+    if (!!!StringUtils.isEmpty(relatedEntityName)) {
       _path = Collections.singletonList(relatedEntityName);
+      _restrictions.add(null);
+      _cardinality.add(cardinality);
     }
-    _restrictions.add(null);
   }
 
   public RelationshipPath<E> restrict(String restrictionPropertyName, 
@@ -120,26 +126,35 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
     List<PropertyNameAndValue> newRestrictions = Lists.newArrayList(_restrictions);
     newRestrictions.set(newRestrictions.size() - 1,
                         new PropertyNameAndValue(restrictionPropertyName, restrictionValue));
-    return new RelationshipPath<E>(_rootEntityClass, _path, newRestrictions); 
+    return new RelationshipPath<E>(_rootEntityClass, _path, newRestrictions, _cardinality);
   }
 
   public RelationshipPath<E> to(String relatedEntityName)
   {
-    ArrayList<String> newPath = Lists.newArrayList(_path);
+    return to(relatedEntityName, DEFAULT_CARDINALITY);
+  }
+
+  public RelationshipPath<E> to(String relatedEntityName, Cardinality cardinality)
+  {
+    List<String> newPath = Lists.newArrayList(_path);
     newPath.add(relatedEntityName);
-    ArrayList<PropertyNameAndValue> newRestrictions = Lists.newArrayList(_restrictions);
+    List<PropertyNameAndValue> newRestrictions = Lists.newArrayList(_restrictions);
     newRestrictions.add(null);
-    return new RelationshipPath<E>(_rootEntityClass, newPath, newRestrictions);
+    List<Cardinality> newCardinality = Lists.newArrayList(_cardinality);
+    newCardinality.add(cardinality);
+    return new RelationshipPath<E>(_rootEntityClass, newPath, newRestrictions, newCardinality);
   }
 
   public RelationshipPath<E> to(RelationshipPath<? extends AbstractEntity> relationship)
   {
     assert !!!(this instanceof PropertyPath);
-    ArrayList<String> newPath = Lists.newArrayList(_path);
+    List<String> newPath = Lists.newArrayList(_path);
     newPath.addAll(relationship._path);
-    ArrayList<PropertyNameAndValue> newRestrictions = Lists.newArrayList(_restrictions);
+    List<PropertyNameAndValue> newRestrictions = Lists.newArrayList(_restrictions);
     newRestrictions.addAll(relationship._restrictions);
-    return new RelationshipPath<E>(_rootEntityClass, newPath, newRestrictions);
+    List<Cardinality> newCardinality = Lists.newArrayList(_cardinality);
+    newCardinality.addAll(relationship._cardinality);
+    return new RelationshipPath<E>(_rootEntityClass, newPath, newRestrictions, newCardinality);
   }
   
   public PropertyPath<E> to(PropertyPath<? extends AbstractEntity> relationship)
@@ -158,13 +173,20 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
     return toProperty(PropertyPath.COLLECTION_OF_VALUES);
   }
 
+  public PropertyPath<E> toFullEntity()
+  {
+    return toProperty(PropertyPath.FULL_ENTITY);
+  }
+
   protected RelationshipPath(Class<E> rootEntityClass,
                              List<String> path,
-                             List<PropertyNameAndValue> restrictions)
+                             List<PropertyNameAndValue> restrictions,
+                             List<Cardinality> cardinality)
   {
     _rootEntityClass = rootEntityClass;
     _path.addAll(path);
     _restrictions.addAll(restrictions);
+    _cardinality.addAll(cardinality);
   }
 
   public Class<E> getRootEntityClass()
@@ -199,7 +221,8 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
     int i = Math.max(0, _path.size() - 1);
     return new RelationshipPath<E>(_rootEntityClass,
                                    _path.subList(0, i),
-                                   _restrictions.subList(0, i));
+                                   _restrictions.subList(0, i),
+                                   _cardinality.subList(0, i));
   }
 
   public String getLeaf()
@@ -253,7 +276,7 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
 
   public boolean hasRestrictions()
   {
-    return CollectionUtils.cardinality(null, _restrictions) != _restrictions.size();
+    return Iterables.any(_restrictions, Predicates.notNull());
   }
 
   public PropertyNameAndValue getRestrictionPropertyNameAndValue(int i)
@@ -273,6 +296,19 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
   {
     return new RelationshipPathIterator(_path.iterator(),
                                         _restrictions.iterator());
+  }
+
+  public Cardinality getCardinality()
+  {
+    ParallelIterator<Cardinality,PropertyNameAndValue> iterator = new ParallelIterator<Cardinality,PropertyNameAndValue>(_cardinality.iterator(), _restrictions.iterator());
+    while (iterator.hasNext()) {
+      iterator.next();
+      if (iterator.getFirst() == Cardinality.TO_MANY &&
+        iterator.getSecond() == null) {
+        return Cardinality.TO_MANY;
+      }
+    }
+    return Cardinality.TO_ONE;
   }
 
   public class RelationshipPathIterator extends ParallelIterator<String,PropertyNameAndValue>
@@ -305,10 +341,9 @@ public class RelationshipPath<E extends AbstractEntity/*,L*/> implements Iterabl
     public RelationshipPath getIntermediatePath()
     {
       RelationshipPath intermediatePropertyPath = new RelationshipPath<E>(_rootEntityClass,
-                                                                          _path.subList(0,
-                                                                                        _index + 1),
-                                                                          _restrictions.subList(0,
-                                                                                                _index + 1));
+                                                                          _path.subList(0, _index + 1),
+                                                                          _restrictions.subList(0, _index + 1),
+                                                                          _cardinality.subList(0, _index + 1));
       return intermediatePropertyPath;
 
     }

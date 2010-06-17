@@ -226,6 +226,7 @@ public class StudyCreator
     parser.parse((Screen) study, new FileInputStream(screenResultFile));
   }
 
+  //TODO: this should be exposed on it's own service object - sde4
   public static ScreeningRoomUser findOrCreateScreeningRoomUser(GenericEntityDAO dao,
                                                                 String firstName,
                                                                 String lastName,

@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 import jxl.CellView;
@@ -22,16 +23,15 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.ui.table.column.ColumnType;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 
 public class GenericDataExporter<T> implements TableDataExporter<T> 
 {
@@ -61,14 +61,14 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
     _columns = columns;
   }
 
-  public InputStream export(DataTableModel<T> model)
-    throws IOException
+  @Override
+  public InputStream export(Iterator<T> iter) throws IOException
   {
     assert _columns != null : "must call setTableColumns() first";
     final ByteArrayOutputStream out = new ByteArrayOutputStream();
     try {
       WritableWorkbook workbook = Workbook.createWorkbook(out);
-      writeWorkbook(workbook, model);
+      writeWorkbook(workbook, iter);
       workbook.write();
       workbook.close();
       out.close();
@@ -78,7 +78,7 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
       if (e instanceof IOException) {
         throw (IOException) e;
       }
-      throw new IOException(e.getMessage());
+      throw new DevelopmentException(e.getMessage());
     }
     finally {
       IOUtils.closeQuietly(out);
@@ -101,40 +101,45 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
   }
 
   private void writeWorkbook(WritableWorkbook workbook, 
-                             DataTableModel<T> model) 
+                             Iterator<T> iter)
     throws RowsExceededException, WriteException
   {
     WritableSheet sheet = null;
-    for (int i = 0; i < model.getRowCount(); ++i) {
+    int i = 0;
+    while (iter.hasNext()) {
       if (i % MAX_DATA_ROWS == 0) {
         sheet = createSheet(workbook);
       }
-      writeRow(i, sheet, model);
+      writeRow(i, sheet, iter.next());
+      ++i;
+      if (i % 1000 == 0) {
+        if (log.isDebugEnabled()) {
+          log.debug("wrote " + i + " rows to workbook");
+        }
+      }
     }
   }
 
-  private void writeRow(int i, WritableSheet sheet, DataTableModel<T> model)
+  private void writeRow(int i, WritableSheet sheet, T datum)
     throws WriteException, RowsExceededException
   {
-    model.setRowIndex(i);
-    T entity = (T) model.getRowData();
     int rowIndex = (i % MAX_DATA_ROWS) + 1;
     int colIndex = 0;
     for (TableColumn<T,?> column : _columns) {
       adjustCellSizes(sheet, rowIndex, colIndex);
       if (column.getColumnType() == ColumnType.IMAGE) {
-        if (column.getCellValue(entity) != null) {
+        if (column.getCellValue(datum) != null) {
           try {
-            byte[] imageData = IOUtils.toByteArray(new URL(column.getCellValue(entity).toString()).openStream());
+            byte[] imageData = IOUtils.toByteArray(new URL(column.getCellValue(datum).toString()).openStream());
             Workbook2Utils.writeImage(sheet, rowIndex, colIndex, imageData);
           }
           catch (Exception e) {
-            Workbook2Utils.writeCell(sheet, rowIndex, colIndex, "<error: bad image source: " + column.getCellValue(entity) + ">");
+            Workbook2Utils.writeCell(sheet, rowIndex, colIndex, "<error: bad image source: " + column.getCellValue(datum) + ">");
           }
         }
       }
       else {
-        Workbook2Utils.writeCell(sheet, rowIndex, colIndex, column.getCellValue(entity));
+        Workbook2Utils.writeCell(sheet, rowIndex, colIndex, column.getCellValue(datum));
       }
       colIndex++;
     } 

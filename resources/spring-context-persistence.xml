@@ -208,6 +208,7 @@
   <bean
     id="screenResultsDao"
     class="edu.harvard.med.screensaver.db.ScreenResultsDAOImpl">
+    <constructor-arg ref="genericEntityDao" />
     <property
       name="hibernateTemplate"
       ref="hibernateTemplate" />

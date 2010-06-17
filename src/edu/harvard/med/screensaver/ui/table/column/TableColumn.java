@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/table/TableColumn.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -22,12 +20,12 @@ import java.util.Observer;
 
 import javax.faces.convert.Converter;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.ui.table.ColumnVisibilityChangedEvent;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.util.NoOpStringConverter;
-
-import org.apache.log4j.Logger;
 
 /**
  * @param R the row type
@@ -406,5 +404,23 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
   public boolean isSortableSearchable()
   {
     return true;
+  }
+
+  @Override
+  public boolean equals(Object other)
+  {
+    if (other == null) {
+      return false;
+    }
+    if (!(other instanceof TableColumn)) {
+      return false;
+    }
+    return _name.equals(((TableColumn) other).getName());
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return _name.hashCode();
   }
 }

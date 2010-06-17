@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/test/edu/harvard/med/screensaver/TestHibernate.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -12,6 +10,11 @@
 package edu.harvard.med.screensaver.db;
 
 import java.util.Set;
+
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -35,16 +38,13 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.UnexpectedRollbackException;
 
 
 /**
@@ -319,5 +319,32 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     Library resultLibrary = genericEntityDao.findEntityById(Library.class,new Integer(library.getLibraryId()));
     ScreeningRoomUser resultOwner = resultLibrary.getOwner();
     resultOwner.equals(owner);
+  }
+
+  public void testScreenTypesForWellsAndReagents()
+  {
+    Library rnaiLib = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
+    Library smLib = MakeDummyEntities.makeDummyLibrary(2, ScreenType.SMALL_MOLECULE, 1);
+    genericEntityDao.persistEntity(rnaiLib);
+    genericEntityDao.persistEntity(smLib);
+    WellKey rnaiWellId = rnaiLib.getWells().iterator().next().getWellKey();
+    WellKey smWellId = smLib.getWells().iterator().next().getWellKey();
+    ReagentVendorIdentifier rnaiReagentId = rnaiLib.getWells().iterator().next().getReagents().values().iterator().next().getVendorId();
+    ReagentVendorIdentifier smReagentId = smLib.getWells().iterator().next().getReagents().values().iterator().next().getVendorId();
+    
+    assertEquals(Sets.newHashSet(ScreenType.SMALL_MOLECULE, ScreenType.RNAI),
+                 librariesDao.findScreenTypesForWells(Sets.newHashSet(rnaiWellId, smWellId)));
+    assertEquals(Sets.newHashSet(ScreenType.SMALL_MOLECULE),
+                 librariesDao.findScreenTypesForWells(Sets.newHashSet(smWellId)));
+    assertEquals(Sets.newHashSet(ScreenType.RNAI),
+                 librariesDao.findScreenTypesForWells(Sets.newHashSet(rnaiWellId)));
+
+    assertEquals(Sets.newHashSet(ScreenType.SMALL_MOLECULE, ScreenType.RNAI),
+                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(rnaiReagentId, smReagentId)));
+    assertEquals(Sets.newHashSet(ScreenType.SMALL_MOLECULE),
+                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(smReagentId)));
+    assertEquals(Sets.newHashSet(ScreenType.RNAI),
+                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(rnaiReagentId)));
+
   }
 }

@@ -16,6 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -30,7 +34,6 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -43,11 +46,6 @@ import edu.harvard.med.screensaver.model.users.AffiliationCategory;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 public class MakeDummyEntities
 {
@@ -137,11 +135,11 @@ public class MakeDummyEntities
           col.createResultValue(assayWell, Math.random() * 200.0 - 100.0);
         }
         else if (col.isPartitionPositiveIndicator()) {
-          col.createResultValue(assayWell, PartitionedValue.values()[i % PartitionedValue.values().length].getValue());
+          col.createPartitionedPositiveResultValue(assayWell, PartitionedValue.values()[3 - (i % PartitionedValue.values().length)], false);
         }
         else if (col.equals(commentsCol)) {
-          PartitionedValue pv = PartitionedValue.values()[i % PartitionedValue.values().length];
-          if (pv != PartitionedValue.NONE) { // else, a null test value, by virtue of not creating a RV for this well/dataColumn
+          PartitionedValue pv = PartitionedValue.values()[3 - (i % PartitionedValue.values().length)];
+          if (pv != PartitionedValue.NOT_POSITIVE) { // else, a null test value, by virtue of not creating a RV for this well/dataColumn
             col.createResultValue(assayWell, pv == PartitionedValue.STRONG ? "what a positive!" :
               pv == PartitionedValue.MEDIUM ? "so so" :
                 // a "empty string" test value
@@ -164,18 +162,32 @@ public class MakeDummyEntities
   {
     assert library.getLatestReleasedContentsVersion() != null;
 
+    int annotationOrdinal = 0;
     Screen study = MakeDummyEntities.makeDummyScreen(Study.MIN_STUDY_NUMBER, library.getScreenType());
-    AnnotationType annotType1 = new AnnotationType(study, "numeric_annot", "numeric annotation", 0, true);
-    AnnotationType annotType2 = new AnnotationType(study, "text_annot", "text annotation", 1, false);
+    AnnotationType annotType1 = new AnnotationType(study, "numeric_annot", "numeric annotation", annotationOrdinal++, true);
+    AnnotationType annotType2 = new AnnotationType(study, "text_annot", "text annotation", annotationOrdinal++, false);
     Iterator<Well> wellIter = new TreeSet<Well>(library.getWells()).iterator();
-    Reagent reagent1 = wellIter.next().getLatestReleasedReagent();
-    assert reagent1 != null : "expected reagents to exist in the provided library";
-    annotType1.createAnnotationValue(reagent1, "1.01" );
-    annotType2.createAnnotationValue(reagent1, "aaa" );
-    Reagent reagent2 = wellIter.next().getLatestReleasedReagent();
-    assert reagent2 != null : "expected reagents to exist in the provided library";
-    annotType1.createAnnotationValue(reagent2, "-2.02" );
-    annotType2.createAnnotationValue(reagent2, "bbb" );
+
+    // create annotations for reagents in all library contents versions (historic, released, not-yet-released) 
+    Well well1 = wellIter.next();
+    assert !well1.getReagents().isEmpty() : "expected reagents to exist in the provided library";
+    for (Reagent reagent : well1.getReagents().values()) {
+      boolean isLatestReleasedLCV = reagent.equals(reagent.getWell().getLatestReleasedReagent());
+      annotType1.createAnnotationValue(reagent,
+                                       "1.01" + (isLatestReleasedLCV ? "" : "1"));
+      annotType2.createAnnotationValue(reagent,
+                                       "aaa" + (isLatestReleasedLCV ? "" : " (non-released)"));
+    }
+    Well well2 = wellIter.next();
+    assert !well2.getReagents().isEmpty() : "expected reagents to exist in the provided library";
+    for (Reagent reagent : well2.getReagents().values()) {
+      boolean isLatestReleasedLCV = reagent.equals(reagent.getWell().getLatestReleasedReagent());
+      annotType1.createAnnotationValue(reagent,
+                                       "-2.02" + (isLatestReleasedLCV ? "" : "2"));
+      annotType2.createAnnotationValue(reagent,
+                                       "bbb" + (isLatestReleasedLCV ? "" : " (non-released)"));
+    }
+
     return study;
   }
 

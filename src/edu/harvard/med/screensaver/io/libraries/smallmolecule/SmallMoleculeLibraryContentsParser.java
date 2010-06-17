@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/libraries/compound/SmallMoleculeLibraryContentsLoader.java
-// $
+// $HeadURL$
 // $Id: SmallMoleculeLibraryContentsLoader.java 1990 2007-10-24 02:12:17Z ant4
 // $
 //
@@ -17,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseException;
@@ -29,8 +29,6 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
 
 /**
  * Parses the contents of a small molecule Library from an SDFile into the

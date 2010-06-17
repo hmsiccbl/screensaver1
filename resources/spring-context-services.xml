@@ -152,6 +152,11 @@
     class="edu.harvard.med.screensaver.io.libraries.WellsSdfDataExporter"
     scope="singleton">
     <constructor-arg ref="genericEntityDao" />
+    <constructor-arg>
+      <bean
+        id="libraryContentsVersionRef"
+        class="edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference" />
+    </constructor-arg>
   </bean>
   
   <bean

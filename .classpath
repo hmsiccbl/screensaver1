@@ -63,7 +63,7 @@
 	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/commons-el-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/jstl-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/myfaces-api-1.1.5.jar"/>
+	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/myfaces-api-1.1.5.jar" sourcepath="/usr/local/dev/myfaces-core-1.1.5/src"/>
 	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/myfaces-impl-1.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/tomahawk-1.1.6.jar"/>
 	<classpathentry kind="lib" path="lib/web/apache-myfaces-1.1.5/tomahawk-sandbox-1.1.7-SNAPSHOT.jar"/>

@@ -1,6 +1,4 @@
-// $HeadURL:
-// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/searchresults/SearchResults.java
-// $
+// $HeadURL$
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -17,16 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.ScreensaverProperties;
-import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
 import edu.harvard.med.screensaver.ui.table.EditableDataTable;
 import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -55,7 +51,6 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
   // private instance data
 
   private Map<String,Boolean> _capabilities = new HashMap<String,Boolean>();
-  private DataFetcher<R,K,P> _dataFetcher;
 
 
   // public constructor
@@ -68,7 +63,6 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
 
   protected SearchResults(String[] capabilities)
   {
-    _dataFetcher = new NoOpDataFetcher<R,K,P>();
     if (capabilities != null) {
       for (String capability : capabilities) {
         _capabilities.put(capability, true);
@@ -87,15 +81,14 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
    * 
    * @param dataFetcher
    */
-  public void initialize(DataFetcher<R,K,P> dataFetcher)
+  public void initialize(DataTableModel<R> dataTableModel)
   {
-    initialize(dataFetcher, buildColumns());
+    initialize(dataTableModel, buildColumns());
   }
   
-  public void initialize(DataFetcher<R,K,P> dataFetcher, List<? extends TableColumn<R,?>> columns)
+  public void initialize(DataTableModel<R> dataTableModel, List<? extends TableColumn<R,?>> columns)
   {
-    _dataFetcher = dataFetcher;
-    initialize(buildDataTableModel(dataFetcher, columns),
+    initialize(dataTableModel,
                columns,
                buildRowsPerPageSelector(),
                !isFeatureEnabled("data_table_tree_column_selector"));               
@@ -103,13 +96,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
 
   // abstract methods
 
-  abstract protected DataTableModel<R> buildDataTableModel(DataFetcher<R,K,P> dataFetcher, List<? extends TableColumn<R,?>> columns);
   abstract protected List<? extends TableColumn<R,?>> buildColumns();
-
-  protected DataFetcher<R,K,P> getDataFetcher()
-  {
-    return _dataFetcher;
-  }
 
   // public methods
 

@@ -9,14 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.table.column.entity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.faces.convert.Converter;
-import javax.faces.model.SelectItem;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
@@ -26,8 +24,7 @@ import edu.harvard.med.screensaver.ui.table.column.VocabularyColumn;
 public abstract class VocabularyEntityColumn<E extends AbstractEntity,V> extends VocabularyColumn<E,V> implements HasFetchPaths<E>
 {
   private Set<V> _items;
-  private ArrayList<SelectItem> _selectItems;
-  private FetchPaths<E> _fetchPaths;
+  private FetchPaths<E,E> _fetchPaths;
   
   public VocabularyEntityColumn(RelationshipPath<E> relationshipPath,
                                 String name,
@@ -39,7 +36,7 @@ public abstract class VocabularyEntityColumn<E extends AbstractEntity,V> extends
     super(name, description, group, converter, items);
     setConverter(converter);
     _items = new LinkedHashSet<V>(items);
-    _fetchPaths = new FetchPaths<E>(relationshipPath);    
+    _fetchPaths = new FetchPaths<E,E>(relationshipPath);    
   }
 
   public VocabularyEntityColumn(RelationshipPath<E> relationshpPath,

@@ -26,18 +26,18 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.google.common.base.Function;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Function;
 
 
 /**
@@ -66,7 +66,7 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
   private static final long serialVersionUID = 0L;
   
   public static final RelationshipPath<Copy> copyInfos = new RelationshipPath<Copy>(Copy.class, "copyInfos");
-  public static final RelationshipPath<Copy> library = new RelationshipPath<Copy>(Copy.class, "library");
+  public static final RelationshipPath<Copy> library = new RelationshipPath<Copy>(Copy.class, "library", Cardinality.TO_ONE);
 
   public static final Function<Copy,String> ToName = new Function<Copy,String>() { public String apply(Copy c) { return c.getName(); } };
 
