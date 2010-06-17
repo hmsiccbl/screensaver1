@@ -26,7 +26,7 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    addTestSuite(edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy.class);
+    addTestSuite(edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicyTest.class);
   }
 
 }

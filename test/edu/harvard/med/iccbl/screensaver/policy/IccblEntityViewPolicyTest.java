@@ -62,11 +62,11 @@ import com.google.common.collect.Lists;
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class IccbDataAccessPolicyTest extends AbstractTransactionalSpringContextTests
+public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContextTests
 {
   // static members
 
-  private static Logger log = Logger.getLogger(IccbDataAccessPolicyTest.class);
+  private static Logger log = Logger.getLogger(IccblEntityViewPolicyTest.class);
 
 
   // instance data members
@@ -103,7 +103,7 @@ public class IccbDataAccessPolicyTest extends AbstractTransactionalSpringContext
     return new String[] { "spring-context-test-security.xml" };
   }
 
-  public IccbDataAccessPolicyTest() 
+  public IccblEntityViewPolicyTest() 
   {
     setPopulateProtectedVariables(true);
   }
