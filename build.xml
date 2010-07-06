@@ -557,20 +557,20 @@
     <jar destfile="${iccb-soaputils.jar}" basedir="${soap.build.dir}/classes" />
   </target>
 
-  <!-- 
-   pipeline-pilot component task: build the chembank soap access classes 
-   -->
   <target name="chembank-wsimport" description="TODO: remove, as this is legacy, as soon as the pilot components are retired.  see chembank-codegen-axis2chembank-codegen-axis2 - sde4">
+    <!-- 
+     pipeline-pilot component task: build the chembank soap access classes 
+     -->
     <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport2" classpathref="build.library.path" />
     <delete dir="${contrib.dir}/edu/mit/" />
     <wsimport wsdl="http://chembank.broad.harvard.edu/webservices/MoleculeWebService?wsdl" sourcedestdir="${contrib.dir}" package="edu.mit.broad.chembank.shared.mda.webservices.service" destdir="${contrib.dir}" verbose="true" />
   </target>
 
-	<!-- 
-	   Note 1: to use this with the IDE, designate the contrib directory as a "source" directory in the project properties. 
-	   Note 2: this task requires the axis2 libraries: http://ws.apache.org/axis2/download.cgi
-	-->
   <target name="chembank-codegen-axis2">
+    <!-- 
+       Note 1: to use this with the IDE, designate the contrib directory as a "source" directory in the project properties. 
+       Note 2: this task requires the axis2 libraries: http://ws.apache.org/axis2/download.cgi
+    -->
     <taskdef name="AntCodegenTask" classname="org.apache.axis2.tool.ant.AntCodegenTask" classpathref="build.library.path" />
     <delete dir="${contrib.dir}/edu/mit/broad/chembank/shared/mda/webservices/service" />
 	  <!-- NOTE: this file is in error as of 4/19/2010, the order of the Molecule elements is wrong, should be 
@@ -609,11 +609,11 @@
 	  </target>
   -->
 
-  <!-- 
-	   Note 1: to use this with the IDE, designate the contrib directory as a "source" directory in the project properties. 
-	   Note 2: this task requires the axis2 libraries: http://ws.apache.org/axis2/download.cgi
-  -->
   <target name="pubchem-codegen-axis2">
+    <!-- 
+       Note 1: to use this with the IDE, designate the contrib directory as a "source" directory in the project properties. 
+       Note 2: this task requires the axis2 libraries: http://ws.apache.org/axis2/download.cgi
+    -->
     <taskdef name="AntCodegenTask" classname="org.apache.axis2.tool.ant.AntCodegenTask" classpathref="build.library.path" />
     <delete dir="${contrib.dir}/gov/nih/nlm/ncbi/pubchem" />
     <AntCodegenTask wsdlfilename="http://pubchem.ncbi.nlm.nih.gov/pug_soap/pug_soap.cgi?wsdl" output="${contrib.dir}" packagename="gov.nih.nlm.ncbi.pubchem" serverside="false" unpackClasses="true" />
