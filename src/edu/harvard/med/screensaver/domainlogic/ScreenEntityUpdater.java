@@ -9,12 +9,12 @@
 
 package edu.harvard.med.screensaver.domainlogic;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.springframework.transaction.annotation.Transactional;
 
 public class ScreenEntityUpdater implements EntityUpdater
 {
@@ -42,6 +42,7 @@ public class ScreenEntityUpdater implements EntityUpdater
     Screen screen = (Screen) entity;
     screen.setScreenedExperimentalWellCount(_screenDao.countScreenedExperimentalWells(screen, false));
     screen.setUniqueScreenedExperimentalWellCount(_screenDao.countScreenedExperimentalWells(screen, true));
+    screen.setFulfilledLabCherryPicksCount(_screenDao.countFulfilledLabCherryPicks(screen));
     _dao.saveOrUpdateEntity(screen);
   }
 

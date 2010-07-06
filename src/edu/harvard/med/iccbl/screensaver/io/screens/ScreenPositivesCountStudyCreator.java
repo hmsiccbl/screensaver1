@@ -312,12 +312,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                        screenType,
                        StudyType.IN_SILICO,
                        title);
-    if (ScreenType.SMALL_MOLECULE == screenType) {
-      study.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_POSITIVES);
-    }
-    else {
-      study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
-    }
+    study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);
 
     AnnotationType positivesCountAnnotType = study.createAnnotationType(positiveCountAnnotationName,

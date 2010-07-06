@@ -55,6 +55,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
@@ -85,14 +86,15 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(CherryPickRequest.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<CherryPickRequest> screen = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screen", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickRequest> requestedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "requestedBy", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickRequest> volumeApprovedBy = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "volumeApprovedBy", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickRequest> emptyWellsOnAssayPlate = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "emptyWellsOnAssayPlate");
-  public static final RelationshipPath<CherryPickRequest> screenerCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "screenerCherryPicks");
-  public static final RelationshipPath<CherryPickRequest> labCherryPicks = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class,"labCherryPicks");
-  public static final RelationshipPath<CherryPickRequest> cherryPickAssayPlates = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickAssayPlates");
-  public static final RelationshipPath<CherryPickRequest> cherryPickScreenings = new RelationshipPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickScreenings");
+  public static final RelationshipPath<CherryPickRequest> thisEntity = RelationshipPath.from(CherryPickRequest.class);
+  public static final RelationshipPath<CherryPickRequest> screen = thisEntity.to("screen", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickRequest> requestedBy = thisEntity.to("requestedBy", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickRequest> volumeApprovedBy = thisEntity.to("volumeApprovedBy", Cardinality.TO_ONE);
+  public static final PropertyPath<CherryPickRequest> emptyWellsOnAssayPlate = thisEntity.toCollectionOfValues("emptyWellsOnAssayPlate");
+  public static final RelationshipPath<CherryPickRequest> screenerCherryPicks = thisEntity.to("screenerCherryPicks");
+  public static final RelationshipPath<CherryPickRequest> labCherryPicks = thisEntity.to("labCherryPicks");
+  public static final RelationshipPath<CherryPickRequest> cherryPickAssayPlates = thisEntity.to("cherryPickAssayPlates");
+  public static final RelationshipPath<CherryPickRequest> cherryPickScreenings = thisEntity.to("cherryPickScreenings");
 
   private Integer _version;
   private Screen _screen;
@@ -121,6 +123,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
   private CherryPickAssayProtocolsFollowed _cherryPickAssayProtocolsFollowed;
   private String _cherryPickAssayProtocolComments;
   private CherryPickFollowupResultsStatus _cherryPickFollowupResultsStatus;
+  private boolean _keepSourcePlateCherryPicksTogether = true;
 
 
   /**
@@ -308,9 +311,9 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
    * invocation, due to caching of the result; if the status of CPAPs change,
    * you should reload the CPR in a new Hibernate session to obtain an
    * up-to-date result!</i> Get the set of active cherry pick assay plates.
-   *
-   * @return the set of active cherry pick assay plates, which excludes any
-   *         assay plates that are failed
+   * 
+   * @return the set of active cherry pick assay plates, which is the CPAP with the largest attemptOrdinal, for each
+   *         distinct plate name.
    */
   @Transient
   public List<CherryPickAssayPlate> getActiveCherryPickAssayPlates()
@@ -320,8 +323,7 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
       for (CherryPickAssayPlate assayPlate : _cherryPickAssayPlates) {
         if (!plateOrdinalToActiveAssayPlate.containsKey(assayPlate.getPlateOrdinal()) ||
           assayPlate.getAttemptOrdinal() > plateOrdinalToActiveAssayPlate.get(assayPlate.getPlateOrdinal()).getAttemptOrdinal()) {
-          plateOrdinalToActiveAssayPlate.put(assayPlate.getPlateOrdinal(),
-                                             assayPlate);
+          plateOrdinalToActiveAssayPlate.put(assayPlate.getPlateOrdinal(), assayPlate);
         }
       }
       _activeAssayPlates = new ArrayList<CherryPickAssayPlate>();
@@ -910,5 +912,15 @@ public abstract class CherryPickRequest extends AuditedAbstractEntity<Integer>
   {
     _labCherryPicks.add(labCherryPick);
     incUnfulfilledLabCherryPicks();
+  }
+
+  public boolean isKeepSourcePlateCherryPicksTogether()
+  {
+    return _keepSourcePlateCherryPicksTogether;
+  }
+
+  public void setKeepSourcePlateCherryPicksTogether(boolean keepSourcePlateCherryPicksTogether)
+  {
+    _keepSourcePlateCherryPicksTogether = keepSourcePlateCherryPicksTogether;
   }
 }

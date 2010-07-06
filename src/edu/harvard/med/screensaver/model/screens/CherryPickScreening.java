@@ -50,8 +50,8 @@ public class CherryPickScreening extends Screening
 
   public static final String ACTIVITY_TYPE_NAME = "Cherry Pick Screening";
 
-  public static final RelationshipPath<CherryPickScreening> cherryPickRequest = new RelationshipPath<CherryPickScreening>(CherryPickScreening.class, "cherryPickRequest", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickScreening> assayPlatesScreened = new RelationshipPath<CherryPickScreening>(CherryPickScreening.class, "assayPlatesScreened");
+  public static final RelationshipPath<CherryPickScreening> cherryPickRequest = RelationshipPath.from(CherryPickScreening.class).to("cherryPickRequest", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickScreening> assayPlatesScreened = RelationshipPath.from(CherryPickScreening.class).to("assayPlatesScreened");
 
   private CherryPickRequest _cherryPickRequest;
   private SortedSet<CherryPickAssayPlate> _assayPlatesScreened = Sets.newTreeSet();

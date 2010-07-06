@@ -53,9 +53,9 @@ public class SilencingReagent extends Reagent
 {
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<SilencingReagent> vendorGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "vendorGene", Cardinality.TO_ONE);
-  public static final RelationshipPath<SilencingReagent> facilityGene = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "facilityGene", Cardinality.TO_ONE);
-  public static final RelationshipPath<SilencingReagent> duplexWells = new RelationshipPath<SilencingReagent>(SilencingReagent.class, "duplexWells");
+  public static final RelationshipPath<SilencingReagent> vendorGene = RelationshipPath.from(SilencingReagent.class).to("vendorGene", Cardinality.TO_ONE);
+  public static final RelationshipPath<SilencingReagent> facilityGene = RelationshipPath.from(SilencingReagent.class).to("facilityGene", Cardinality.TO_ONE);
+  public static final RelationshipPath<SilencingReagent> duplexWells = RelationshipPath.from(SilencingReagent.class).to("duplexWells");
   
   private static final Function<Well,SilencingReagent> wellToReagentTransformer = 
     new Function<Well, SilencingReagent>() { public SilencingReagent apply(Well well) { return well.<SilencingReagent>getLatestReleasedReagent(); } };

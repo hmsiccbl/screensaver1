@@ -89,19 +89,6 @@
     <!--  TODO property name="locale" value=""/-->
   </bean>
 
-  <!--  user authentication -->
-
-  <bean
-    id="currentScreensaverUser"
-    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
-    scope="session">
-    <property
-      name="dao"
-      ref="genericEntityDao" />
-    <aop:scoped-proxy />
-  </bean>
-
-
   <!-- JSF beans -->
 
   <!-- WARNING: if scope attribute is defined here, it will NOT be inherited!!! -->
@@ -210,10 +197,7 @@
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.libraries.ReagentFinder">
-    <constructor-arg ref="genericEntityDao" />
-    <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellsBrowser" />
-    <constructor-arg ref="reagentVendorIdentiferListParser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -227,7 +211,6 @@
     <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="wellViewer" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
-    <constructor-arg ref="plateWellListParser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -538,7 +521,6 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="wellCopyVolumesBrowser" />
-    <constructor-arg ref="plateWellListParser" />
     <constructor-arg ref="cherryPickRequestCherryPicksAdder" />
     <constructor-arg ref="cherryPickRequestAllocator" />
     <constructor-arg ref="cherryPickRequestPlateMapper" />

@@ -11,9 +11,7 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
@@ -22,7 +20,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
@@ -48,7 +45,6 @@ import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 
@@ -78,12 +74,11 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
     return _wellParsePattern.matcher(wellName).matches();
   }
 
-  public static final RelationshipPath<Well> library = new RelationshipPath<Well>(Well.class, "library", Cardinality.TO_ONE);
-  public static final RelationshipPath<Well> reagents = new RelationshipPath<Well>(Well.class, "reagents");
-  public static final RelationshipPath<Well> latestReleasedReagent = new RelationshipPath<Well>(Well.class, "latestReleasedReagent", Cardinality.TO_ONE);
-  public static final RelationshipPath<Well> resultValues = new RelationshipPath<Well>(Well.class, "resultValues");
-  public static final RelationshipPath<Well> deprecationActivity = new RelationshipPath<Well>(Well.class, "deprecationActivity", Cardinality.TO_ONE);
-  public static final RelationshipPath<Well> screenResults = new RelationshipPath<Well>(Well.class, "screenResults");
+  public static final RelationshipPath<Well> library = RelationshipPath.from(Well.class).to("library", Cardinality.TO_ONE);
+  public static final RelationshipPath<Well> reagents = RelationshipPath.from(Well.class).to("reagents");
+  public static final RelationshipPath<Well> latestReleasedReagent = RelationshipPath.from(Well.class).to("latestReleasedReagent", Cardinality.TO_ONE);
+  public static final RelationshipPath<Well> resultValues = RelationshipPath.from(Well.class).to("resultValues", ResultValue.class, "well", Cardinality.TO_MANY);
+  public static final RelationshipPath<Well> deprecationActivity = RelationshipPath.from(Well.class).to("deprecationActivity", Cardinality.TO_ONE);
 
 
   // instance fields
@@ -96,7 +91,6 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private Reagent _latestReleasedReagent;
   private String _facilityId;
   private Map<DataColumn,ResultValue> _resultValues = new HashMap<DataColumn,ResultValue>();
-  private Set<ScreenResult> _screenResults = new HashSet<ScreenResult>();
   private AdministrativeActivity _deprecationActivity;
 
 
@@ -507,42 +501,6 @@ public class Well extends SemanticIDAbstractEntity<String> implements Comparable
   private void setResultValues(Map<DataColumn,ResultValue> resultValues)
   {
     _resultValues = resultValues;
-  }
-
-  @ManyToMany(cascade={},
-              targetEntity=ScreenResult.class,
-              mappedBy="wells",
-              fetch=FetchType.LAZY)
-  @JoinColumn(name="screenResultId", nullable=false, updatable=false)
-  @org.hibernate.annotations.ForeignKey(name="fk_well_to_screen_result")
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="screenResult")
-  public Set<ScreenResult> getScreenResults()
-  {
-    return _screenResults;
-  }
-
-  private void setScreenResults(Set<ScreenResult> screenResults)
-  {
-    _screenResults = screenResults;
-  }
-
-  public boolean addScreenResult(ScreenResult screenResult)
-  {
-    if (_screenResults.add(screenResult)) {
-      screenResult.addWell(this);
-      return true;
-    }
-    return false;
-  }
-
-  public boolean removeScreenResult(ScreenResult screenResult)
-  {
-    if (_screenResults.remove(screenResult)) {
-      screenResult.removeWell(this);
-      return true;
-    }
-    return false;
   }
 
   private void setWellId(String wellId)

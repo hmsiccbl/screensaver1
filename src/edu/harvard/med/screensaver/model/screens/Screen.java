@@ -68,6 +68,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequ
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -98,21 +99,22 @@ public class Screen extends Study implements AttachedFilesEntity
   private static final Logger log = Logger.getLogger(Screen.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<Screen> screenResult = new RelationshipPath<Screen>(Screen.class, "screenResult", Cardinality.TO_ONE);
-  public static final RelationshipPath<Screen> labHead = new RelationshipPath<Screen>(Screen.class, "labHead", Cardinality.TO_ONE);
-  public static final RelationshipPath<Screen> leadScreener = new RelationshipPath<Screen>(Screen.class, "leadScreener", Cardinality.TO_ONE);
-  public static final RelationshipPath<Screen> collaborators = new RelationshipPath<Screen>(Screen.class, "collaborators");
-  public static final RelationshipPath<Screen> annotationTypes = new RelationshipPath<Screen>(Screen.class, "annotationTypes");
-  public static final RelationshipPath<Screen> cherryPickRequests = new RelationshipPath<Screen>(Screen.class, "cherryPickRequests");
-  public static final RelationshipPath<Screen> labActivities = new RelationshipPath<Screen>(Screen.class, "labActivities");
-  public static final RelationshipPath<Screen> statusItems = new RelationshipPath<Screen>(Screen.class, "statusItems");
-  public static final RelationshipPath<Screen> fundingSupports = new RelationshipPath<Screen>(Screen.class, "fundingSupports");
-  public static final RelationshipPath<Screen> billingItems = new RelationshipPath<Screen>(Screen.class, "billingItems");
-  public static final RelationshipPath<Screen> attachedFiles = new RelationshipPath<Screen>(Screen.class, "attachedFiles");
-  public static final RelationshipPath<Screen> publications = new RelationshipPath<Screen>(Screen.class, "publications");
-  public static final RelationshipPath<Screen> keywords = new RelationshipPath<Screen>(Screen.class, "keywords");
-  public static final RelationshipPath<Screen> pinTransferApprovalActivity = new RelationshipPath<Screen>(Screen.class, "pinTransferApprovalActivity", Cardinality.TO_ONE);
-  public static final RelationshipPath<Screen> reagents = new RelationshipPath<Screen>(Screen.class, "reagents");
+  public static final RelationshipPath<Screen> thisEntity = RelationshipPath.from(Screen.class);
+  public static final RelationshipPath<Screen> screenResult = thisEntity.to("screenResult", Cardinality.TO_ONE);
+  public static final RelationshipPath<Screen> labHead = thisEntity.to("labHead", Cardinality.TO_ONE);
+  public static final RelationshipPath<Screen> leadScreener = thisEntity.to("leadScreener", Cardinality.TO_ONE);
+  public static final RelationshipPath<Screen> collaborators = thisEntity.to("collaborators");
+  public static final RelationshipPath<Screen> annotationTypes = thisEntity.to("annotationTypes");
+  public static final RelationshipPath<Screen> cherryPickRequests = thisEntity.to("cherryPickRequests");
+  public static final RelationshipPath<Screen> labActivities = thisEntity.to("labActivities");
+  public static final RelationshipPath<Screen> statusItems = thisEntity.to("statusItems");
+  public static final RelationshipPath<Screen> fundingSupports = thisEntity.to("fundingSupports");
+  public static final PropertyPath<Screen> billingItems = thisEntity.toCollectionOfValues("billingItems");
+  public static final RelationshipPath<Screen> attachedFiles = thisEntity.to("attachedFiles");
+  public static final RelationshipPath<Screen> publications = thisEntity.to("publications");
+  public static final PropertyPath<Screen> keywords = thisEntity.toCollectionOfValues("keywords");
+  public static final RelationshipPath<Screen> pinTransferApprovalActivity = thisEntity.to("pinTransferApprovalActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<Screen> reagents = thisEntity.to("reagents");
 
   public static final Function<Screen,Integer> ToScreenNumberFunction = new Function<Screen,Integer>() { public Integer apply(Screen s) { return s.getScreenNumber(); } };
 
@@ -170,6 +172,7 @@ public class Screen extends Study implements AttachedFilesEntity
   private LocalDate _dataPrivacyExpirationNotifiedDate;
   private int _screenedExperimentalWellCount;
   private int _uniqueScreenedExperimentalWellCount;
+  private int _fulfilledLabCherryPicksCount;
 
 
   // public constructors
@@ -486,6 +489,18 @@ public class Screen extends Study implements AttachedFilesEntity
   public void setUniqueScreenedExperimentalWellCount(int uniqueScreenedExperimentalWellCount)
   {
     _uniqueScreenedExperimentalWellCount = uniqueScreenedExperimentalWellCount;
+  }
+
+  @Derived
+  public int getFulfilledLabCherryPicksCount()
+  {
+    // see ScreenDao.countFulfilledLabCherryPicks(Screen)
+    return _fulfilledLabCherryPicksCount;
+  }
+
+  public void setFulfilledLabCherryPicksCount(int fulfilledLabCherryPicksCount)
+  {
+    _fulfilledLabCherryPicksCount = fulfilledLabCherryPicksCount;
   }
 
   /**

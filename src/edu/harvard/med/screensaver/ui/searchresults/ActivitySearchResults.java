@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -85,7 +84,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
-        DataFetcherUtil.addDomainRestrictions(hql, new RelationshipPath<A>(_type, "performedBy"), user, getRootAlias());
+        DataFetcherUtil.addDomainRestrictions(hql, Activity.performedBy, user, getRootAlias());
       }
     }));
   }
@@ -108,8 +107,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   protected List<? extends TableColumn<A,?>> buildColumns()
   {
     ArrayList<TableColumn<A,?>> columns = Lists.newArrayList();
-    columns.add(new IntegerEntityColumn<A>(
-      new PropertyPath<A>(_type, "activityId"),
+    columns.add(new IntegerEntityColumn<A>(RelationshipPath.from(_type).toId(),
       "Activity ID",
       "The activity number",
       TableColumn.UNGROUPED) {
@@ -122,8 +120,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
       @Override
       public boolean isCommandLink() { return true; }
     });
-    columns.add(new VocabularyEntityColumn<A,String>(
-      new PropertyPath<A>(_type, "activityType"),
+    columns.add(new VocabularyEntityColumn<A,String>(RelationshipPath.from(_type).toProperty("activityType"),
       "Activity Type",
       "The type of the activity",
       TableColumn.UNGROUPED,
@@ -134,16 +131,14 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
         return activity.getActivityTypeName();
       }
     });
-    columns.add(new DateEntityColumn<A>(
-      new PropertyPath<A>(_type, "datePerformed"),
+    columns.add(new DateEntityColumn<A>(RelationshipPath.from(_type).toProperty("datePerformed"),
       "Date Performed", "The date of the activity", TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(Activity activity) {
         return activity.getDateOfActivity();
       }
     });
-    columns.add(new DateEntityColumn<A>(
-      new PropertyPath<A>(_type, "dateRecorded"),
+    columns.add(new DateEntityColumn<A>(RelationshipPath.from(_type).toProperty("dateRecorded"),
       "Date Recorded", "The date the activity was recorded", TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(A activity) {
@@ -151,8 +146,7 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
       }
     });
     columns.get(columns.size() - 1).setVisible(showAdminStatusFields());
-    columns.add(new UserNameColumn<A,ScreensaverUser>(
-      new RelationshipPath<A>(_type, "performedBy"),
+    columns.add(new UserNameColumn<A,ScreensaverUser>(RelationshipPath.from(_type).to(Activity.performedBy.getLeaf()),
       "Performed By", "The person that performed the activity", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreensaverUser getUser(A activity) { return (ScreensaverUser) activity.getPerformedBy(); }

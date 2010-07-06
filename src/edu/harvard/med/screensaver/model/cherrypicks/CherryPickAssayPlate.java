@@ -120,10 +120,11 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(CherryPickAssayPlate.class);
 
-  public static final RelationshipPath<CherryPickAssayPlate> cherryPickRequest = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickRequest", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickAssayPlate> cherryPickLiquidTransfer = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickLiquidTransfer", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickAssayPlate> cherryPickScreening = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "cherryPickScreening", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickAssayPlate> labCherryPicks = new RelationshipPath<CherryPickAssayPlate>(CherryPickAssayPlate.class, "labCherryPicks");
+  public static final RelationshipPath<CherryPickAssayPlate> thisEntity = RelationshipPath.from(CherryPickAssayPlate.class);
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickRequest = thisEntity.to("cherryPickRequest", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickLiquidTransfer = thisEntity.to("cherryPickLiquidTransfer", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickScreening = thisEntity.to("cherryPickScreening", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickAssayPlate> labCherryPicks = thisEntity.to("labCherryPicks");
 
   // private instance data
 
@@ -353,6 +354,9 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
     _cherryPickLiquidTransfer = cherryPickLiquidTransfer;
     if (_cherryPickLiquidTransfer != null) {
       _cherryPickLiquidTransfer.getCherryPickAssayPlates().add(this);
+    }
+    if (cherryPickLiquidTransfer.getStatus() == CherryPickLiquidTransferStatus.SUCCESSFUL) {
+      cherryPickLiquidTransfer.getScreen().invalidate();
     }
   }
 

@@ -29,6 +29,7 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -54,11 +55,11 @@ public class TupleDataFetcherTest extends AbstractSpringPersistenceTest
       new TupleDataFetcher<ScreeningRoomUser,Integer>(ScreeningRoomUser.class, genericEntityDao);
     
     ArrayList<PropertyPath<ScreeningRoomUser>> properties = 
-      Lists.newArrayList(new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "id"),
-                         new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "lastName"),
-                         new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "firstName"),
-                         new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "loginId"),
-                         new PropertyPath<ScreeningRoomUser>(ScreeningRoomUser.class, "dateCreated"),
+      Lists.newArrayList(RelationshipPath.from(ScreeningRoomUser.class).toProperty("id"),
+                         RelationshipPath.from(ScreeningRoomUser.class).toProperty("lastName"),
+                         RelationshipPath.from(ScreeningRoomUser.class).toProperty("firstName"),
+                         RelationshipPath.from(ScreeningRoomUser.class).toProperty("loginId"),
+                         RelationshipPath.from(ScreeningRoomUser.class).toProperty("dateCreated"),
                          ScreeningRoomUser.LabHead.toProperty("lastName"));
     dataFetcher.setPropertiesToFetch(properties);
       
@@ -108,7 +109,7 @@ public class TupleDataFetcherTest extends AbstractSpringPersistenceTest
     DataColumn positiveDataColumn = screenResult.getDataColumnsList().get(6);
     assert positiveDataColumn != null && positiveDataColumn.getName().equals("positive");
     ArrayList<PropertyPath<Well>> properties =
-      Lists.newArrayList(new PropertyPath<Well>(Well.class, "id"),
+      Lists.newArrayList(RelationshipPath.from(Well.class).toProperty("id"),
                          Well.library.toProperty("libraryName"),
                          Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), numericDataColumn).toProperty("numericValue"),
                          Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), numericDataColumn).toProperty("positive"),
@@ -146,7 +147,7 @@ public class TupleDataFetcherTest extends AbstractSpringPersistenceTest
     TupleDataFetcher<Well,String> dataFetcher =
       new TupleDataFetcher<Well,String>(Well.class, genericEntityDao);
     ArrayList<PropertyPath<Well>> properties =
-      Lists.newArrayList(new PropertyPath<Well>(Well.class, "id"),
+      Lists.newArrayList(RelationshipPath.from(Well.class).toProperty("id"),
                          Well.latestReleasedReagent.toProperty("id"),
                          Well.latestReleasedReagent.toFullEntity());
     dataFetcher.setPropertiesToFetch(properties);
@@ -167,14 +168,14 @@ public class TupleDataFetcherTest extends AbstractSpringPersistenceTest
     TupleDataFetcher<Well,String> dataFetcher =
       new TupleDataFetcher<Well,String>(Well.class, genericEntityDao);
     ArrayList<PropertyPath<Well>> properties =
-      Lists.newArrayList(new PropertyPath<Well>(Well.class, "id"),
+      Lists.newArrayList(RelationshipPath.from(Well.class).toProperty("id"),
                          Well.latestReleasedReagent.toProperty("id"),
-                         Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols).toCollectionOfValues());
+                         Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols));
     dataFetcher.setPropertiesToFetch(properties);
     Map<String,Tuple<String>> result = dataFetcher.fetchData(Sets.newHashSet(well.getWellId()));
     Tuple<String> tuple = result.get(well.getWellId());
     assertNotNull(tuple);
-    Object propValue = tuple.getProperty("latestReleasedReagent.facilityGene.entrezgeneSymbols.");
+    Object propValue = tuple.getProperty("latestReleasedReagent.facilityGene.entrezgeneSymbols");
     assertNotNull(propValue);
     assertTrue(propValue instanceof List);
     assertEquals(Sets.newHashSet("xxx", "yyy"), Sets.newHashSet((List<String>) propValue));

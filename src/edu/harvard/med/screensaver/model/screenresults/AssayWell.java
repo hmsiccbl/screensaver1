@@ -55,8 +55,8 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   private static final long serialVersionUID = 1L;
   private static final Logger log = Logger.getLogger(AssayWell.class);
   
-  public static final RelationshipPath<AssayWell> screenResult = new RelationshipPath<AssayWell>(AssayWell.class, "screenResult", Cardinality.TO_ONE);
-  public static final RelationshipPath<AssayWell> libraryWell = new RelationshipPath<AssayWell>(AssayWell.class, "libraryWell", Cardinality.TO_ONE);
+  public static final RelationshipPath<AssayWell> screenResult = RelationshipPath.from(AssayWell.class).to("screenResult", Cardinality.TO_ONE);
+  public static final RelationshipPath<AssayWell> libraryWell = RelationshipPath.from(AssayWell.class).to("libraryWell", Cardinality.TO_ONE);
 
   private Integer _version;
   private ScreenResult _screenResult;

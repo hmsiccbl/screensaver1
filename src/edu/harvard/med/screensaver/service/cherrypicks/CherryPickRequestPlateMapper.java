@@ -16,6 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
@@ -23,11 +27,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.util.Pair;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Lists;
 
 /**
  * For a cherry pick request, generates the layout of the cherry picks onto a
@@ -91,13 +90,19 @@ public class CherryPickRequestPlateMapper
 
       labCherryPicksAssignedToCurrentPlate.clear();
       do {
-        List<LabCherryPick> nextIndivisibleBlock = findNextIndivisibleBlock(toBeMapped);
-        if (nextIndivisibleBlock.size() == 0) {
+        List<LabCherryPick> nextBlock;
+        if (cherryPickRequest.isKeepSourcePlateCherryPicksTogether()) {
+          nextBlock = findNextIndivisibleBlock(toBeMapped);
+        }
+        else {
+          nextBlock = Lists.newArrayList(toBeMapped);
+        }
+        if (nextBlock.size() == 0) {
           break;
         }
         int remainingWellCountOnPlate = availableWellNamesMaster.size() - labCherryPicksAssignedToCurrentPlate.size();
 
-        if (remainingWellCountOnPlate - nextIndivisibleBlock.size() < 0) {
+        if (remainingWellCountOnPlate - nextBlock.size() < 0) {
           // if there were more wells from a given source plate than can fit on a single assay plate;
           // we have to split the source plate wells across multiple assay plates;
           // so we take lab cherry picks that wouldn't fit on the plate and add them
@@ -105,14 +110,14 @@ public class CherryPickRequestPlateMapper
           if (labCherryPicksAssignedToCurrentPlate.size() == 0) {
             // don't map the lab cherry picks that won't fit on this plate; this
             // is the one case where we are allowed to divide our indivisibleBlock!
-            nextIndivisibleBlock.subList(remainingWellCountOnPlate, nextIndivisibleBlock.size()).clear();
+            nextBlock.subList(remainingWellCountOnPlate, nextBlock.size()).clear();
           }
           else {
             break;
           }
         }
-        labCherryPicksAssignedToCurrentPlate.addAll(nextIndivisibleBlock);
-        toBeMapped.removeAll(nextIndivisibleBlock);
+        labCherryPicksAssignedToCurrentPlate.addAll(nextBlock);
+        toBeMapped.removeAll(nextBlock);
       } while (true);
 
       availableWellNamesOnCurrentPlate = new ArrayList<WellName>(availableWellNamesMaster);

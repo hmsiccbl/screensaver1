@@ -9,9 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,53 +61,61 @@ import edu.harvard.med.screensaver.ui.table.column.TextColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanTupleColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumTupleColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
+import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerSetTupleColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerTupleColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextTupleColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
-public class GenericDataExporterTest extends AbstractSpringPersistenceTest
+public class DataExportersTest extends AbstractSpringPersistenceTest
 {
-  private static Logger log = Logger.getLogger(GenericDataExporterTest.class);
+  private static Logger log = Logger.getLogger(DataExportersTest.class);
+  private List<TableColumn<Tuple<String>,?>> _columns;
+  private List<Tuple<String>> _expectedData;
 
-  public void testGenericDataExporter() throws Exception
+  @Override
+  protected void onSetUp() throws Exception
   {
-    final Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+    super.onSetUp();
+
+    Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     genericEntityDao.persistEntity(library);
 
-    GenericDataExporter<Tuple<String>> dataExporter = new GenericDataExporter<Tuple<String>>("test");
+    _columns = Lists.newArrayList();
     RelationshipPath<Well> relPath = Well.latestReleasedReagent;
+    _columns.add(new IntegerTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("plateNumber"), "Plate", "", ""));
+    _columns.add(new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("wellName"), "Well", "", ""));
+    _columns.add(new EnumTupleColumn<Well,String,ScreenType>(Well.library.toProperty("screenType"), "Screen Type", "", "", ScreenType.values()));
+    _columns.add(new EnumTupleColumn<Well,String,LibraryWellType>(RelationshipPath.from(Well.class).toProperty("libraryWellType"), "Library Well Type", "", "", LibraryWellType.values()));
+    _columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorName), "Reagent Vendor", "", ""));
+    _columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorIdentifier), "Reagent ID", "", ""));
+    _columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("smiles"), "Compound SMILES", "", ""));
+    _columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids), "PubChem CIDs", "", ""));
+    _columns.add(new BooleanTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("deprecated"), "Is Deprecated", "", ""));
+    TextTupleColumn<Well,String> wellColumn = (TextTupleColumn<Well,String>) _columns.get(1);
 
-    List<TableColumn<Tuple<String>,?>> columns = Lists.newArrayList();
-    columns.add(new IntegerTupleColumn<Well,String>(new PropertyPath<Well>(Well.class, "plateNumber"), "Plate", "", ""));
-    columns.add(new TextTupleColumn<Well,String>(new PropertyPath<Well>(Well.class, "wellName"), "Well", "", ""));
-    columns.add(new EnumTupleColumn<Well,String,ScreenType>(Well.library.toProperty("screenType"), "Screen Type", "", "", ScreenType.values()));
-    columns.add(new EnumTupleColumn<Well,String,LibraryWellType>(new PropertyPath<Well>(Well.class, "libraryWellType"), "Library Well Type", "", "", LibraryWellType.values()));
-    columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorName), "Vendor", "", ""));
-    columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorIdentifier), "Vendor ID", "", ""));
-    columns.add(new TextTupleColumn<Well,String>(relPath.toProperty("smiles"), "Compound SMILES", "", ""));
-    columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids).toCollectionOfValues(), "PubChem CIDs", "", ""));
-    columns.add(new BooleanTupleColumn<Well,String>(new PropertyPath<Well>(Well.class, "deprecated"), "Is Deprecated", "", ""));
-
-    TextTupleColumn<Well,String> wellColumn = (TextTupleColumn<Well,String>) columns.get(1);
-    dataExporter.setTableColumns(columns);
-    
     TupleDataFetcher<Well,String> dataFetcher = new TupleDataFetcher<Well,String>(Well.class, genericEntityDao);
-    dataFetcher.setPropertiesToFetch(FetchPaths.<Well,Tuple<String>>getPropertyPaths(columns));
+    dataFetcher.setPropertiesToFetch(FetchPaths.<Well,Tuple<String>>getPropertyPaths(_columns));
     List<Criterion<String>> criteria = ImmutableList.of(new Criterion<String>(Operator.TEXT_STARTS_WITH, "B"));
     Map<PropertyPath<Well>,List<? extends Criterion<?>>> map = ImmutableMap.<PropertyPath<Well>,List<? extends Criterion<?>>>of(wellColumn.getPropertyPath(), criteria);
     dataFetcher.setFilteringCriteria(map);
     dataFetcher.setOrderBy(ImmutableList.of(wellColumn.getPropertyPath()));
     
-    
     List<String> keys = dataFetcher.findAllKeys();
     Map<String,Tuple<String>> data = dataFetcher.fetchData(Sets.newHashSet(keys));
-    List<Tuple<String>> orderedData = Lists.newArrayList();
+    _expectedData = Lists.newArrayList();
     Collections.reverse(keys);
     for (String string : keys) {
-      orderedData.add(data.get(string));
+      _expectedData.add(data.get(string));
     }
-    Iterator<Tuple<String>> wellTuples = orderedData.iterator();
+  }
+
+  public void testExcelWorkbookDataExporter() throws Exception
+  {
+    ExcelWorkbookDataExporter<Tuple<String>> dataExporter = new ExcelWorkbookDataExporter<Tuple<String>>("test");
+    dataExporter.setTableColumns(_columns);
+
+    Iterator<Tuple<String>> wellTuples = _expectedData.iterator();
     InputStream exportedData = dataExporter.export(wellTuples);
     Workbook workbook = Workbook.getWorkbook(exportedData);
     Sheet sheet = workbook.getSheet(0);
@@ -113,19 +125,59 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
     assertEquals("column 1 header", "Well", row[1].getContents());
     assertEquals("column 2 header", "Screen Type", row[2].getContents());
     assertEquals("column 3 header", "Library Well Type", row[3].getContents());
-    assertEquals("column 4 header", "Vendor", row[4].getContents());
-    assertEquals("column 5 header", "Vendor ID", row[5].getContents());
+    assertEquals("column 4 header", "Reagent Vendor", row[4].getContents());
+    assertEquals("column 5 header", "Reagent ID", row[5].getContents());
     assertEquals("column 6 header", "Compound SMILES", row[6].getContents());
     assertEquals("column 7 header", "PubChem CIDs", row[7].getContents());
     assertEquals("column 8 header", "Is Deprecated", row[8].getContents());
     for (int rowIndex = 1; rowIndex <= 24; ++rowIndex) {
-      assertEquals("filtered, sorted well column desc; rowIndex=" + rowIndex,
-                   String.format("B%02d", 25 - rowIndex),
-                   sheet.getCell(1, rowIndex).getContents());
+      for (int colIndex = 0; colIndex < 5; ++colIndex) {
+        assertEquals("filtered, sorted well column desc; rowIndex=" + rowIndex + ", column=" + _columns.get(colIndex).getName(),
+                     _expectedData.get(rowIndex - 1).getProperty(TupleDataFetcher.makePropertyKey(((HasFetchPaths) _columns.get(colIndex)).getPropertyPath())).toString(),
+                     sheet.getCell(colIndex, rowIndex).getContents().toString());
+      }
     }
   }
   
-  public void testMultipleSheetExport() throws Exception 
+  public void testCsvDataExporter() throws Exception
+  {
+    CsvDataExporter<Tuple<String>> dataExporter = new CsvDataExporter<Tuple<String>>("test");
+    dataExporter.setTableColumns(_columns);
+
+    Iterator<Tuple<String>> wellTuples = _expectedData.iterator();
+    InputStream exportedData = dataExporter.export(wellTuples);
+    BufferedInputStream bis = new BufferedInputStream(exportedData);
+    BufferedReader in = new BufferedReader(new InputStreamReader(bis));
+    String[] row = nextRow(in);
+    assertEquals("column 0 header", "Plate", row[0]);
+    assertEquals("column 1 header", "Well", row[1]);
+    assertEquals("column 2 header", "Screen Type", row[2]);
+    assertEquals("column 3 header", "Library Well Type", row[3]);
+    assertEquals("column 4 header", "Reagent Vendor", row[4]);
+    assertEquals("column 5 header", "Reagent ID", row[5]);
+    assertEquals("column 6 header", "Compound SMILES", row[6]);
+    assertEquals("column 7 header", "PubChem CIDs", row[7]);
+    assertEquals("column 8 header", "Is Deprecated", row[8]);
+
+    int rowIndex = 0;
+    while ((row = nextRow(in)) != null) {
+      for (int colIndex = 0; colIndex < 5; ++colIndex) {
+        assertEquals("filtered, sorted well column desc; rowIndex=" + rowIndex + ", column=" + _columns.get(colIndex).getName(),
+                     _expectedData.get(Integer.valueOf(rowIndex)).getProperty(TupleDataFetcher.makePropertyKey(((HasFetchPaths) _columns.get(colIndex)).getPropertyPath())).toString(),
+                     row[colIndex]);
+      }
+      ++rowIndex;
+    }
+  }
+
+  private String[] nextRow(BufferedReader in) throws IOException
+  {
+    String line = in.readLine();
+    if (line == null) { return null; }
+    return line.split(",");
+  }
+
+  public void testExcelWorkbookExporterMultipleSheetExport() throws Exception
   {
     DataTableModel<String> model = new DataTableModel<String>() {
       private int _rowIndex;
@@ -163,7 +215,7 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
         }}; 
       }
     };
-    GenericDataExporter<String> exporter = new GenericDataExporter<String>("test");
+    ExcelWorkbookDataExporter<String> exporter = new ExcelWorkbookDataExporter<String>("test");
     class TestColumn extends TextColumn<String> {
       public TestColumn() { super("column", "", ""); }
       @Override
@@ -200,12 +252,12 @@ public class GenericDataExporterTest extends AbstractSpringPersistenceTest
                                                             null,
                                                             new DefaultEntityViewPolicy(),
                                                             null, null, null, null,
-                                                            Lists.<DataExporter<Tuple<String>>>newArrayList(new GenericDataExporter<Tuple<String>>("wells")));
+                                                            Lists.<DataExporter<Tuple<String>>>newArrayList(new ExcelWorkbookDataExporter<Tuple<String>>("wells")));
     ScreenResult screenResult = dao.findEntityByProperty(Screen.class, "screenNumber", 974, true, Screen.screenResult.to(ScreenResult.dataColumns).getPath()).getScreenResult();
     searchResults.searchWellsForScreenResult(screenResult);
     searchResults.getRowCount(); // force initial data fetch
 
-    GenericDataExporter<Tuple<String>> dataExporter = (GenericDataExporter<Tuple<String>>) searchResults.getDataExporterSelector().getDefaultSelection();
+    ExcelWorkbookDataExporter<Tuple<String>> dataExporter = (ExcelWorkbookDataExporter<Tuple<String>>) searchResults.getDataExporterSelector().getDefaultSelection();
 
     log.debug("starting exporting data for download");
     dataExporter.setTableColumns(searchResults.getColumnManager().getVisibleColumns());

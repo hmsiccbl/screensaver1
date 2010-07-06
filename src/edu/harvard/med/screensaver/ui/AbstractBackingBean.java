@@ -25,16 +25,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.util.Messages;
 import edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Maps;
 
 /**
  * A base class for JSF backing beans. A backing bean is responsible for
@@ -198,12 +200,12 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   protected Application getApplicationContext()
   {
-    return getFacesContext().getApplication();
+    return getFacesContext() == null ? null : getFacesContext().getApplication();
   }
 
   protected ExternalContext getExternalContext()
   {
-    return getFacesContext().getExternalContext();
+    return getFacesContext() == null ? null : getFacesContext().getExternalContext();
   }
 
   protected Map getRequestMap()
@@ -223,9 +225,10 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 
   protected HttpSession getHttpSession()
   {
-    Object httpSession = getExternalContext().getSession(false);
+    Object httpSession = getExternalContext() == null ? null : getExternalContext().getSession(false);
     if (httpSession == null) {
-      return null;
+      log.warn("using MockHttpSession");
+      httpSession = new MockHttpSession();
     }
     assert httpSession instanceof HttpSession : "not running in an HTTP-based application server";
     return (HttpSession) httpSession;
@@ -235,7 +238,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   {
     Object request = getExternalContext().getRequest();
     if (request == null) {
-      return null;
+      log.warn("using MockHttpServletRequest");
+      request = new MockHttpServletRequest();
     }
     assert request instanceof HttpServletRequest : "not running in an Servlet-based application server";
     return (HttpServletRequest) request;
@@ -245,7 +249,8 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   {
     Object response = getExternalContext().getResponse();
     if (response == null) {
-      return null;
+      log.warn("using MockHttpServletResponset");
+      response = new MockHttpServletResponse();
     }
     assert response instanceof HttpServletResponse : "not running in an Servlet-based application server";
     return (HttpServletResponse) response;

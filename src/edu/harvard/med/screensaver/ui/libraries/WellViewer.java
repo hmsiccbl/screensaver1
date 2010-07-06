@@ -13,10 +13,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.faces.model.DataModel;
@@ -24,7 +25,6 @@ import javax.faces.model.ListDataModel;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
@@ -42,14 +42,11 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.namevaluetable.NameValueTable;
-import edu.harvard.med.screensaver.ui.namevaluetable.WellNameValueTable;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
 import edu.harvard.med.screensaver.ui.searchresults.AnnotationHeaderColumn;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
@@ -64,13 +61,21 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 
   // HACK: for special case message
   private static final String SPECIAL_CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
+  public static final String GENBANK_ACCESSION_NUMBER_LOOKUP_URL_PREFIX =
+    "http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=";
+  public static final String ENTREZGENE_ID_LOOKUP_URL_PREFIX =
+    "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=gene&cmd=Retrieve&dopt=full_report&list_uids=";
+  public static final String PUBCHEM_CID_LOOKUP_URL_PREFIX =
+    "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid=";
+  public static final String CHEMBANK_ID_LOOKUP_URL_PREFIX =
+    "http://chembank.broad.harvard.edu/chemistry/viewMolecule.htm?cbid=";
 
   private LibraryViewer _libraryViewer;
   private LibrariesDAO _librariesDao;
   private EntityViewPolicy _entityViewPolicy;
   private StructureImageProvider _structureImageProvider;
-  private NameValueTable _nameValueTable;
-  private NameValueTable _annotationNameValueTable;
+  //  private NameValueTable _nameValueTable;
+  private List<SimpleCell> _annotationNameValueTable;
   private StudyViewer _studyViewer;
   private WellsSdfDataExporter _wellsSdfDataExporter;
   private LibraryContentsVersionReference _libraryContentsVersionRef;
@@ -108,7 +113,8 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     _structureImageProvider = structureImageProvider;
     _studyViewer = studyViewer;
     _wellsSdfDataExporter = wellsSdfDataExporter;
-    _libraryContentsVersionRef = libraryContentsVersionRef;
+    _libraryContentsVersionRef = libraryContentsVersionRef == null ? new LibraryContentsVersionReference()
+      : libraryContentsVersionRef;
     getIsPanelCollapsedMap().put("otherWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("duplexWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("annotations", Boolean.TRUE);
@@ -214,97 +220,89 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 //    return BROWSE_WELLS;
 //  }
 
-  public NameValueTable getNameValueTable()
+
+  public DataModel getAnnotationNameValueTable()
   {
-    return _nameValueTable;
+    return new ListDataModel(_annotationNameValueTable);
   }
 
-  public void setNameValueTable(NameValueTable nameValueTable)
+  public boolean isAnnotationListAvailable()
   {
-    _nameValueTable = nameValueTable;
-  }
-
-  public NameValueTable getAnnotationNameValueTable()
-  {
-    return _annotationNameValueTable;
-  }
-
-  private void setAnnotationNameValueTable(NameValueTable annotationNameValueTable)
-  {
-    _annotationNameValueTable = annotationNameValueTable;
+    return !_annotationNameValueTable.isEmpty();
   }
 
   private void initializeAnnotationValuesTable(Well well)
   {
     List<AnnotationValue> annotationValues = new ArrayList<AnnotationValue>();
-    Map<Integer,List<SimpleCell>> studyNumberToStudyInfoMap = Maps.newHashMap();
     if (_versionedReagent != null) {
       getDao().needReadOnly(_versionedReagent, Reagent.annotationValues.getPath());
       annotationValues.addAll(_versionedReagent.getAnnotationValues().values());
-      for (Iterator iterator = annotationValues.iterator(); iterator.hasNext(); ) {
+      for (Iterator iterator = annotationValues.iterator(); iterator.hasNext();) {
         AnnotationValue annotationValue = (AnnotationValue) iterator.next();
         if (annotationValue.isRestricted()) {
           iterator.remove();
         }
       }
-      //TODO: remove annotations that the user has not selected to view, 
-      // also use user settings to see which annotations to view
-
-      // Optional header information
-      // Note, rather than Lazy load the table, (i.e. extend DataTableModelLazyUpdateDecorator)
-      // Just fill the whole table now, since if this is being created, then
-      // we will need the data anyway.
-      // group by study
-      studyNumberToStudyInfoMap = Maps.newHashMapWithExpectedSize(annotationValues.size());
-
-      for (AnnotationValue value: annotationValues)
+    }
+    Collections.sort(annotationValues, new Comparator<AnnotationValue>() {
+      public int compare(AnnotationValue o1, AnnotationValue o2)
       {
-        final AnnotationType type = value.getAnnotationType();
-        // once per study
-        Integer studyNumber = value.getAnnotationType().getStudy().getStudyNumber();
-        if(! studyNumberToStudyInfoMap.containsKey(studyNumber))
-        {
-          // create empty list either way
-          List<SimpleCell> headerInfo = new ArrayList<SimpleCell>();
+        return o1.getAnnotationType().getStudy().getStudyNumber()
+          .compareTo(o2.getAnnotationType().getStudy().getStudyNumber());
+      }
+    });
 
-          // Now build a 2xN array of header values mapped to the study number
-          for(AnnotationHeaderColumn headerColumn : EnumSet.allOf(AnnotationHeaderColumn.class))
-          {
-            String headerValue = headerColumn.getValue(_versionedReagent, type);
-            if (!StringUtils.isEmpty(headerValue)) {
-              final Study study = type.getStudy();
-              if (headerColumn == AnnotationHeaderColumn.STUDY_NAME) {
-                headerInfo.add(
-                               new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription()) 
-                               {
-                                 @Override
-                                 public boolean isCommandLink() { return true; }
+    _annotationNameValueTable = new ArrayList<SimpleCell>(annotationValues.size());
 
-                                 @Override
-                                 public Object cellAction() 
-                                 { 
-                                   return _studyViewer.viewEntity(study); 
-                                 }
-                               });
-              } 
-              else {
-                headerInfo.add(new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription()));
+    // Create the top level list of AV's
+    for (AnnotationValue value : annotationValues) {
+      // for each AV, create Meta "grouping" information 
+      // - this is all of the study information
+      List<SimpleCell> metaInformation = new ArrayList<SimpleCell>();
+      for (AnnotationHeaderColumn headerColumn : EnumSet.allOf(AnnotationHeaderColumn.class)) {
+        String headerValue = headerColumn.getValue(value.getReagent(), value.getAnnotationType());
+        if (!StringUtils.isEmpty(headerValue)) {
+          final Study study = value.getAnnotationType().getStudy();
+          if (headerColumn == AnnotationHeaderColumn.STUDY_NAME) {
+            SimpleCell cell =
+              new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription())
+              {
+              @Override
+              public boolean isCommandLink()
+                            {
+                return true;
               }
-            }
+
+              @Override
+              public Object cellAction()
+                            {
+                return _studyViewer.viewEntity(study);
+              }
+            };
+            metaInformation.add(cell);
           }
-          // add even if empty - will just show the number
-          studyNumberToStudyInfoMap.put(studyNumber, headerInfo);
+          else {
+            metaInformation.add(new SimpleCell(headerColumn.getColName(), headerValue, headerColumn.getDescription()));
+          }
         }
       }
+      String textValue = value.getAnnotationType().isNumeric() ? "" + value.getNumericValue() : value.getValue();
+      _annotationNameValueTable.add(
+        new SimpleCell(
+                       value.getAnnotationType().getName(),
+                       textValue,
+                       value.getAnnotationType().getDescription(),
+                       metaInformation)
+        .setGroupId("" + value.getAnnotationType().getStudy().getStudyNumber()));
+
     }
-    
-    setAnnotationNameValueTable(new AnnotationNameValueTable(annotationValues, studyNumberToStudyInfoMap, null));
   }
 
   @Override
   protected void initializeEntity(Well well)
   {
     getDao().needReadOnly(well, Well.library.getPath());
+    getDao().needReadOnly(well, Well.deprecationActivity.getPath());
     _versionedReagent = _libraryContentsVersionRef.value() == null ? well.getLatestReleasedReagent()
       : well.getReagents().get(_libraryContentsVersionRef.value());
     if (well.getLibrary().getReagentType().equals(SilencingReagent.class)) {
@@ -320,37 +318,89 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
       getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.chembankIds.getPath());
       getDao().needReadOnly(_versionedReagent, SmallMoleculeReagent.molfileList.getPath());
     }
+    getDao().needReadOnly(_versionedReagent, Reagent.libraryContentsVersion.getPath());
   }
 
   @Override
   protected void initializeViewer(Well well)
   {
     initializeAnnotationValuesTable(well);
-    setNameValueTable(new WellNameValueTable(well,
-                                             _versionedReagent,
-                                             this,
-                                             _libraryViewer,
-                                             _structureImageProvider));
     _otherWellsDataModel = null;
     _duplexWellsDataModel = null;
   }
 
   public boolean isAllowedAccessToSilencingReagentSequence() 
   {
-    return isAllowedAccessToSilencingReagentSequence(getEntity());
+    if (isAllowedAccessToSilencingReagent()) {
+      return _entityViewPolicy.
+        isAllowedAccessToSilencingReagentSequence((SilencingReagent) getEntity().getLatestReleasedReagent());
+    }
+    return false;
   }
 
-  public boolean isAllowedAccessToSilencingReagentSequence(Well well)
+  public boolean isAllowedAccessToSilencingReagent()
   {
-    if (well.getLatestReleasedReagent() != null && well.<Reagent>getLatestReleasedReagent() instanceof SilencingReagent) {
-      return _entityViewPolicy.isAllowedAccessToSilencingReagentSequence((SilencingReagent) well.getLatestReleasedReagent());
+    if (isUnrestrictedReagent()
+      && getEntity().<Reagent>getLatestReleasedReagent() instanceof SilencingReagent) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean isAllowedAccessToSmallMoleculeReagent()
+  {
+    if (isUnrestrictedReagent()
+      && getEntity().<Reagent>getLatestReleasedReagent() instanceof SmallMoleculeReagent) {
+      return true;
     }
     return false;
   }
   
+  public boolean isUnrestrictedReagent()
+  {
+    Well well = getEntity();
+    return well.getLatestReleasedReagent() != null
+      && !well.getLatestReleasedReagent().isRestricted();
+  }
+
   @Override
   protected Serializable convertEntityId(String entityIdAsString)
   {
     return entityIdAsString;
+  }
+
+  public String getGenbankAccessionNumberUrlPrefix()
+  {
+    return GENBANK_ACCESSION_NUMBER_LOOKUP_URL_PREFIX;
+  }
+
+  public String getEntrezgeneIdUrlPrefix()
+  {
+    return ENTREZGENE_ID_LOOKUP_URL_PREFIX;
+  }
+
+  public String getPubchemCidUrlPrefix()
+  {
+    return PUBCHEM_CID_LOOKUP_URL_PREFIX;
+  }
+
+  public String getChembankIdUrlPrefix()
+  {
+    return CHEMBANK_ID_LOOKUP_URL_PREFIX;
+  }
+
+  public String getCompoundImageUrl()
+  {
+    if (!isAllowedAccessToSmallMoleculeReagent()) return null; //TODO: is there a RTE to throw? - sde4
+    // TODO: should we be using well.getLatestReleasedReagent()? - sde4
+    return "" + _structureImageProvider.getImageUrl((SmallMoleculeReagent) getVersionedReagent());
+  }
+
+  public String getCompoundMolecularFormula()
+  {
+    if (!isAllowedAccessToSmallMoleculeReagent()) return null; //TODO: is there a RTE to throw? - sde4
+    // TODO: should we be using well.getLatestReleasedReagent()? - sde4
+    return ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula() == null ?
+      "" : ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula().toHtml();
   }
 }

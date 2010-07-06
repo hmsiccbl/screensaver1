@@ -9,8 +9,6 @@
 
 package edu.harvard.med.screensaver.db.datafetcher;
 
-import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcherTest;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -29,5 +27,6 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(EntityDataFetcherTest.class);
+    addTestSuite(TupleDataFetcherTest.class);
   }
 }

@@ -17,7 +17,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
@@ -51,16 +53,17 @@ import edu.harvard.med.screensaver.util.DevelopmentException;
 @Immutable
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=DataColumn.class)
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "dataColumnId", "well_id" }) })
 @org.hibernate.annotations.Table(appliesTo = "result_value",
-                                 indexes={ @Index(name = "result_value_data_column_and_value_index", columnNames={ "dataColumnId", "value" }),
-                                           @Index(name = "result_value_data_column_and_numeric_value_index", columnNames={ "dataColumnId", "numericValue" }),
-                                           @Index(name = "result_value_data_column_and_positive_index", columnNames={ "dataColumnId", "isPositive" }) })
+ indexes = {
+  @Index(name = "result_value_data_column_and_value_index", columnNames = { "dataColumnId", "value" }),
+  @Index(name = "result_value_data_column_and_numeric_value_index", columnNames = { "dataColumnId", "numericValue" }) })
 public class ResultValue extends AbstractEntity<Integer>
 {
   private static final long serialVersionUID = -4066041317098744417L;
   private static final Logger log = Logger.getLogger(ResultValue.class);
 
-  public static final RelationshipPath<ResultValue> DataColumn = new RelationshipPath<ResultValue>(ResultValue.class, "dataColumn", Cardinality.TO_ONE);
+  public static final RelationshipPath<ResultValue> DataColumn = RelationshipPath.from(ResultValue.class).to("dataColumn", Cardinality.TO_ONE);
 
   private Well _well;
   private DataColumn _dataColumn;
@@ -248,7 +251,6 @@ public class ResultValue extends AbstractEntity<Integer>
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_data_column")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @Index(name="result_value_data_column_index")
   public DataColumn getDataColumn()
   {
     return _dataColumn;
@@ -263,7 +265,6 @@ public class ResultValue extends AbstractEntity<Integer>
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_result_value_to_well")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @Index(name="result_value_well_index")
   public Well getWell()
   {
     return _well;
@@ -277,7 +278,6 @@ public class ResultValue extends AbstractEntity<Integer>
    */
   @org.hibernate.annotations.Type(type="text")
   @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true /* automated model tests can only test one type of result value, numeric or non-numeric, and since numeric is the more common choice that's the one we test automatically */) 
-  //@Index(name="result_value_value_index")
   public String getValue()
   {
     return _value;
@@ -303,7 +303,6 @@ public class ResultValue extends AbstractEntity<Integer>
    * @return a {@link java.lang.Double} representing the numeric value of this
    *         <code>ResultValue</code>; may return null.
    */
-  //@Index(name="result_value_numeric_value_index")
   public Double getNumericValue()
   {
     return _numericValue;
@@ -343,7 +342,6 @@ public class ResultValue extends AbstractEntity<Integer>
    * @return true if this result value is a positive indicator
    */
   @Column(nullable=false, name="isPositive")
-  @org.hibernate.annotations.Index(name="result_value_is_positive_index")
   public boolean isPositive()
   {
     return _isPositive;

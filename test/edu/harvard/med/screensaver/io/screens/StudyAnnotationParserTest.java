@@ -12,6 +12,8 @@ package edu.harvard.med.screensaver.io.screens;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -23,8 +25,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 
-import org.apache.log4j.Logger;
-
 public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 {
   private static final String WORKBOOK_FILE = "edu/harvard/med/screensaver/io/screens/test-study.xls";
@@ -35,7 +35,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 
   public void testStudyAnnotationParser() throws UnrecoverableParseException
   {
-    String[] rvIds = { "Vendor1 1", "Vendor1 2", "Vendor1 3" };
+    String[] rvIds = { "Vendor1 rnai1", "Vendor1 rnai2", "Vendor1 rnai3" };
     Object[][] expectedData = {
       { 1.0, 2.0, 3.0 },
       { "a", "b", "c" }

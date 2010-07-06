@@ -36,7 +36,6 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.table.DataTableModelType;
-import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
@@ -58,7 +57,7 @@ public abstract class EntitySearchResults<E extends AbstractEntity, R, K> extend
   private List<DataExporter<R>> _dataExporters = Lists.newArrayList();
   private UISelectOneBean<DataExporter<R>> _dataExporterSelector;
 
-  private Observer _rowsPerPageSelectorObserver;
+  protected Observer _rowsPerPageSelectorObserver;
   private EntityViewer<E> _entityViewer;
 
   public void initialize(DataTableModel<R> dataTableModel)
@@ -107,16 +106,16 @@ public abstract class EntitySearchResults<E extends AbstractEntity, R, K> extend
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  final protected RowsPerPageSelector buildRowsPerPageSelector()
+  protected UISelectOneBean<Integer> buildRowsPerPageSelector()
   {
     // note: we need a special "single" (1) selection item, for viewing the
     // entity in its full viewer page
-    RowsPerPageSelector rowsPerPageSelector = new RowsPerPageSelector(Arrays.asList(1,
-                                                                                    10,
-                                                                                    20,
-                                                                                    50,
-                                                                                    100),
-                                                                      20) {
+    UISelectOneBean<Integer> rowsPerPageSelector = new UISelectOneBean<Integer>(Arrays.asList(1,
+                                                                                              10,
+                                                                                              20,
+                                                                                              50,
+                                                                                              100),
+                                                                                20) {
       @Override
       public String makeLabel(Integer value)
       {
@@ -178,7 +177,8 @@ public abstract class EntitySearchResults<E extends AbstractEntity, R, K> extend
     if (_entityViewer == null) {
       getCapabilities().remove("viewEntity");
     }
-    _dataExporters.add(new GenericDataExporter<R>("searchResult"));
+    _dataExporters.add(new CsvDataExporter<R>("searchResult"));
+    _dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult"));
     _dataExporters.addAll(dataExporters);
   }
 

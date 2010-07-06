@@ -18,32 +18,48 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import junit.framework.TestSuite;
-
-import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
-import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.AttachedFile;
-import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
-import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.engine.EntityKey;
 import org.joda.time.LocalDate;
 
-import com.google.common.collect.Lists;
+import edu.harvard.med.screensaver.db.DAOTransaction;
+import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
+import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
+import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
+import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.AttachedFile;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.MakeDummyEntities;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
+import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
+import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.LabHead;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder;
+import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 
 public class ScreenTest extends AbstractEntityInstanceTest<Screen>
 {
+  protected CherryPickRequestAllocator cherryPickRequestAllocator;
+  protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
+  protected CherryPickRequestCherryPicksAdder cherryPickRequestCherryPicksAdder;
+  
+  
   public static TestSuite suite()
   {
     return buildTestSuite(ScreenTest.class, Screen.class);
@@ -345,6 +361,104 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
         assertEquals(384 * 2, screen.getUniqueScreenedExperimentalWellCount());
       }
     });
+  }
+  
+  public void testFulfilledLabCherryPicksCount()
+  {
+    doTestFulfilledLabCherryPicksCount(CherryPickLiquidTransferStatus.CANCELED, 0);
+    doTestFulfilledLabCherryPicksCount(CherryPickLiquidTransferStatus.FAILED, 0);
+    doTestFulfilledLabCherryPicksCount(CherryPickLiquidTransferStatus.SUCCESSFUL, 384);
+  }
+
+  private void doTestFulfilledLabCherryPicksCount(final CherryPickLiquidTransferStatus status,
+                                                  int expectedFulfilledLabCherryPicksCount)
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    final int[] ids = new int[3];
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
+        Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+        library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A").createCopyInfo(1000, "", PlateType.ABGENE, new Volume(1000));
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        ScreeningRoomUser screener = new LabHead(admin);
+        
+        screener.setFirstName("Lab");
+        screener.setLastName("Head");
+        
+        CherryPickRequest cpr = screen.createCherryPickRequest(admin, screener, new LocalDate());
+        cpr.setTransferVolumePerWellApproved(new Volume(1));
+        
+        genericEntityDao.persistEntity(screener);
+        genericEntityDao.persistEntity(admin);
+        genericEntityDao.persistEntity(library);
+        genericEntityDao.persistEntity(screen);
+
+        ids[0] = library.getLibraryId();
+        ids[1] = cpr.getCherryPickRequestId();
+        ids[2] = admin.getScreensaverUserId();
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Library library = genericEntityDao.findEntityById(Library.class, ids[0]);
+        CherryPickRequest cpr = genericEntityDao.findEntityById(CherryPickRequest.class, ids[1]);
+
+        assertNotNull(cpr);
+        assertNotNull(library);
+        assertNotNull(screen1);
+
+        String input = Joiner.on("\n").appendTo(new StringBuilder(), Iterables.transform(library.getWells(), Well.ToEntityId)).toString();
+        // steps from CherryPickRequestViewerTest.initializeAssayPlates
+        // 1. add screener CPs; map to lab CPs
+        // cherryPickRequestViewer.viewEntity(cpr);
+        // cherryPickRequestViewer.setCherryPicksInput(input);
+        // cherryPickRequestViewer.addCherryPicksForWells();
+        PlateWellListParserResult result = PlateWellListParser.parseWellsFromPlateWellList(input);
+        cpr = cherryPickRequestCherryPicksAdder.addCherryPicksForWells(cpr, result.getParsedWellKeys(), false);
+
+        assertNotNull(cpr);
+        assertEquals(384, cpr.getScreenerCherryPicks().size());
+
+        // 2. reserve reagent
+        //    cherryPickRequestViewer.allocateCherryPicks();
+        cherryPickRequestAllocator.allocate(cpr);
+        assertEquals(384, cpr.getLabCherryPicks().size());
+        assertEquals(0, cpr.getNumberUnfulfilledLabCherryPicks());
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        CherryPickRequest cpr = genericEntityDao.findEntityById(CherryPickRequest.class, ids[1]);
+        AdministratorUser admin = genericEntityDao.findEntityById(AdministratorUser.class, ids[2]);
+
+        // steps from CherryPickRequestViewerTest.initializeAssayPlates
+        //    cherryPickRequestViewer.plateMapCherryPicks();
+        cherryPickRequestPlateMapper.generatePlateMapping(cpr);
+        cpr = genericEntityDao.reloadEntity(cpr, true, CherryPickRequest.cherryPickAssayPlates.getPath());
+        assertEquals(1, cpr.getCherryPickAssayPlates().size());
+
+        // actions in CPRV.recordSuccessfulCreationOfAssayPlates()
+        CherryPickLiquidTransfer cplt = screen.createCherryPickLiquidTransfer(admin,
+                                                                              MakeDummyEntities.makeDummyUser(1, "Lab", "Guy"),
+                                                                              new LocalDate(),
+                                                                              status);
+        for (CherryPickAssayPlate cpap : cpr.getActiveCherryPickAssayPlates()) {
+          cplt.addCherryPickAssayPlate(cpap);
+        }
+        screen.update();
+      }
+    });
+    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    assertEquals(expectedFulfilledLabCherryPicksCount, screen.getFulfilledLabCherryPicksCount());
   }
   
 }

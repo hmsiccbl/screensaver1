@@ -36,17 +36,10 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
-import edu.harvard.med.screensaver.model.annotations.ToMany;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.util.CryptoUtils;
-import edu.harvard.med.screensaver.util.StringUtils;
-
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Sort;
@@ -54,10 +47,17 @@ import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.util.CryptoUtils;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 
 /**
@@ -86,9 +86,9 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
   private static final Logger log = Logger.getLogger(ScreensaverUser.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<ScreensaverUser> labAffiliation = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "labAffiliation"); 
-  public static final RelationshipPath<ScreensaverUser> activitiesPerformed = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "activitiesPerformed"); 
-  public static final RelationshipPath<ScreensaverUser> roles = new RelationshipPath<ScreensaverUser>(ScreensaverUser.class, "screensaverUserRoles");
+  public static final RelationshipPath<ScreensaverUser> labAffiliation = RelationshipPath.from(ScreensaverUser.class).to("labAffiliation"); 
+  public static final RelationshipPath<ScreensaverUser> activitiesPerformed = RelationshipPath.from(ScreensaverUser.class).to("activitiesPerformed"); 
+  public static final PropertyPath<ScreensaverUser> roles = RelationshipPath.from(ScreensaverUser.class).toCollectionOfValues("screensaverUserRoles");
 
   public static final Function<ScreensaverUser,String> ToDisplayStringFunction = new Function<ScreensaverUser,String>() { public String apply(ScreensaverUser u) { return u.getFullNameFirstLast() + " (" + u.getEntityId() + ")"; } };
 

@@ -10,13 +10,12 @@
 package edu.harvard.med.screensaver.db.datafetcher;
 
 
+import java.util.Iterator;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.meta.PropertyNameAndValue;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.util.Pair;
 
 public class DataFetcherUtil
 {
@@ -32,9 +31,10 @@ public class DataFetcherUtil
     }
     int n = 1;
     String alias = rootAlias;
-    for (Pair<String,PropertyNameAndValue> node : _parentEntityPath) {
+    Iterator<String> iter = _parentEntityPath.pathIterator();
+    while (iter.hasNext()) {
       String nextAlias = "p" + n++;
-      hql.from(alias, node.getFirst(), nextAlias);
+      hql.from(alias, iter.next(), nextAlias);
       alias = nextAlias;
     }
     hql.where(alias, _parentEntity);

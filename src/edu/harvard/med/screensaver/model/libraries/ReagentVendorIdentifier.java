@@ -56,14 +56,14 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
       throw new RequiredPropertyException(Reagent.class, "reagent vendor name");
     }
     if (reagentIdentifier == null) {
-      throw new RequiredPropertyException(Reagent.class, "reagent vendor identifier");
+      throw new RequiredPropertyException(Reagent.class, "reagent identifier");
     }
     setVendorName(vendorName);
     setVendorIdentifier(reagentIdentifier);
   }
 
   /**
-   * @return vendor the library vendor (from {@link Library#getVendor}).
+   * @return vendor the vendor that produced and provided the reagent
    */
   @Type(type="text")
   public String getVendorName()
@@ -72,7 +72,7 @@ public class ReagentVendorIdentifier implements Serializable, Comparable<Reagent
   }
 
   /**
-   * @return vendorId the vendor ID
+   * @return the vendor-assigned identifier for the reagent
    */
   @Type(type="text")
   public String getVendorIdentifier()

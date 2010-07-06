@@ -9,19 +9,15 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -302,28 +298,21 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   }
 
   @Override
-  public Set<ScreenType> findScreenTypesForReagents(Set<ReagentVendorIdentifier> reagentIds)
+  public Set<ScreenType> findScreenTypesForReagents(Set<String> reagentIds)
   {
-    Set<ScreenType> result = Sets.newHashSet();
-    Multimap<String,ReagentVendorIdentifier> indexByVendorName = Multimaps.index(reagentIds, ReagentVendorIdentifier.ToVendorName);
-    for (Entry<String,Collection<ReagentVendorIdentifier>> entry : indexByVendorName.asMap().entrySet()) {
-      Set<String> idsForVendor = Sets.newHashSet(Iterables.transform(entry.getValue(), ReagentVendorIdentifier.ToVendorIdentifier)); 
-      final HqlBuilder hql = new HqlBuilder().
+    final HqlBuilder hql = new HqlBuilder().
       select("l", "screenType").distinctProjectionValues().
       from(Reagent.class, "r").
       from("r", Reagent.well.getLeaf(), "w").
       from("w", Well.library.getLeaf(), "l").
-      whereIn("r", Reagent.vendorIdentifier.getPath(), idsForVendor).
-      where("r", Reagent.vendorName.getPath(), Operator.EQUAL, entry.getKey());
-      List<ScreenType> vendorResult = runQuery(new Query<ScreenType>() {
-        public List<ScreenType> execute(Session session)
-        {
-          return hql.toQuery(session, true).list();
-        }
-      });
-      result.addAll(vendorResult);
-    }
-    return result;
+      whereIn("r", Reagent.vendorIdentifier.getPath(), reagentIds);
+    List<ScreenType> screenTypes = runQuery(new Query<ScreenType>() {
+      public List<ScreenType> execute(Session session)
+      {
+        return hql.toQuery(session, true).list();
+      }
+    });
+    return Sets.newTreeSet(screenTypes);
   }
 
   @Override
@@ -341,6 +330,6 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
         return hql.toQuery(session, true).list();
       }
     });
-    return Sets.newHashSet(screenTypes);
+    return Sets.newTreeSet(screenTypes);
   }
 }

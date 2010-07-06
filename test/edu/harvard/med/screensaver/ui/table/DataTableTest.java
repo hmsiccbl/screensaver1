@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.ui.table.column.RealColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 public class DataTableTest extends TestCase
 {
@@ -134,7 +135,7 @@ public class DataTableTest extends TestCase
     _dataTable.initialize(new InMemoryDataModel<RowItem>(_dataFetcher) {
       @Override
       public void sort(List<? extends TableColumn<RowItem,?>> sortColumns,
-                            SortDirection sortDirection)
+                       SortDirection sortDirection)
       {
         ++_sortCount;
         super.sort(sortColumns, sortDirection);
@@ -147,9 +148,9 @@ public class DataTableTest extends TestCase
         super.filter(columns);
       }
     },
-    _columns,
-    new RowsPerPageSelector(Arrays.asList(1, 2, 4), 2),
-    false);                          
+                          _columns,
+                          new UISelectOneBean<Integer>(Arrays.asList(1, 2, 4), 2),
+                          false);
   }
   
   public void testRefetchOnColumnVisibilityChange()

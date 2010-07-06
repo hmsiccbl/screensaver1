@@ -15,11 +15,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.io.libraries.smallmolecule.StructureImageProvider;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-
-import org.apache.log4j.Logger;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -45,6 +45,9 @@ public class PlateWellFileNameStructureImageProvider implements StructureImagePr
   public URL getImageUrl(SmallMoleculeReagent reagent)
   {
     try {
+      if (reagent == null) {
+        return null;
+      }
       if (reagent.isRestricted()) {
         return null;
       }

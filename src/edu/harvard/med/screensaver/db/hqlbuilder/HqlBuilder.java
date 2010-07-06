@@ -15,18 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.util.StringUtils;
-
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 public class HqlBuilder
 {
@@ -365,7 +364,7 @@ public class HqlBuilder
   private void checkAliasIsUnique(String alias)
   {
     if (!_aliases.add(alias)) {
-      throw new IllegalArgumentException("alias " + alias + " already used");
+      throw new IllegalArgumentException("alias " + alias + " is already used");
     }
   }
   

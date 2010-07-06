@@ -316,7 +316,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     library.setOwner(owner);
 
     genericEntityDao.saveOrUpdateEntity(library);
-    Library resultLibrary = genericEntityDao.findEntityById(Library.class,new Integer(library.getLibraryId()));
+    Library resultLibrary = genericEntityDao.findEntityById(Library.class, Integer.valueOf(library.getLibraryId()));
     ScreeningRoomUser resultOwner = resultLibrary.getOwner();
     resultOwner.equals(owner);
   }
@@ -340,11 +340,11 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
                  librariesDao.findScreenTypesForWells(Sets.newHashSet(rnaiWellId)));
 
     assertEquals(Sets.newHashSet(ScreenType.SMALL_MOLECULE, ScreenType.RNAI),
-                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(rnaiReagentId, smReagentId)));
+                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(rnaiReagentId.getVendorIdentifier(), smReagentId.getVendorIdentifier())));
     assertEquals(Sets.newHashSet(ScreenType.SMALL_MOLECULE),
-                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(smReagentId)));
+                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(smReagentId.getVendorIdentifier())));
     assertEquals(Sets.newHashSet(ScreenType.RNAI),
-                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(rnaiReagentId)));
+                 librariesDao.findScreenTypesForReagents(Sets.newHashSet(rnaiReagentId.getVendorIdentifier())));
 
   }
 }

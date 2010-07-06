@@ -30,7 +30,7 @@ public class TextSetTupleColumn<E extends AbstractEntity,K> extends SetColumn<Tu
   
   public TextSetTupleColumn(PropertyPath<E> propertyPath, String name, String description, String group)
   {
-    super(name, description, group, ColumnType.INTEGER_SET);
+    super(name, description, group, ColumnType.TEXT_SET);
     _fetchPaths = new FetchPaths<E,Tuple<K>>(propertyPath);
     _propertyKey = TupleDataFetcher.makePropertyKey(_fetchPaths.getPropertyPath());
   }

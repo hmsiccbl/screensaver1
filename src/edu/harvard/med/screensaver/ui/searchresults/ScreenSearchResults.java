@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
@@ -226,7 +226,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
     
     columns.add(new DateEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "dateCreated"),
+                                             RelationshipPath.from(Screen.class).toProperty("dateCreated"),
       "Date Created", "The date the screen was added to the database",
       TableColumn.UNGROUPED) {
       @Override
@@ -236,7 +236,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setVisible(false);
     
     columns.add(new EnumEntityColumn<Screen,ScreenDataSharingLevel>(
-      new PropertyPath<Screen>(Screen.class, "dataSharingLevel"),
+                                                                    RelationshipPath.from(Screen.class).toProperty("dataSharingLevel"),
       "Data Sharing Level", 
       "The data sharing level", 
       TableColumn.UNGROUPED,
@@ -248,7 +248,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setVisible(false);
     
     columns.add(new DateEntityColumn<Screen>(
-      new PropertyPath<Screen>(Screen.class, "dataPrivacyExpirationDate"),
+                                             RelationshipPath.from(Screen.class).toProperty("dataPrivacyExpirationDate"),
       "Data Privacy Expiration Date", 
       "The date on which the screen will become visible to level 1 users", 
       TableColumn.UNGROUPED) {
@@ -307,8 +307,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
     
-    columns.add(new IntegerEntityColumn<Screen>(
-      new PropertyPath<Screen>(Screen.class, "screenedExperimentalWellCount"),
+    columns.add(new IntegerEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("screenedExperimentalWellCount"),
       "Experimental Wells Screened (Non-unique)", 
       "The number of experimental library wells that have been screened (counting duplicate wells multiple times, ignoring replicates)", 
       TableColumn.UNGROUPED) {
@@ -321,8 +320,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new IntegerEntityColumn<Screen>(
-      new PropertyPath<Screen>(Screen.class, "screenedExperimentalWellCount"),
+    columns.add(new IntegerEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("screenedExperimentalWellCount"),
       "Experimental Wells Screened (Unique)", 
       "The number of experimental library wells that have been screened (counting duplicate wells once, ignoring replicates)",
       TableColumn.UNGROUPED) {
@@ -341,8 +339,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   List<TableColumn<Screen,?>> buildScreenSummaryColumns()
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
-    columns.add(new IntegerEntityColumn<Screen>(
-      new PropertyPath<Screen>(Screen.class, "screenNumber"),
+    columns.add(new IntegerEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("screenNumber"),
       "Screen Number", "The screen number", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(Screen screen) { return screen.getScreenNumber(); }
@@ -356,14 +353,12 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       @Override
       public boolean isCommandLink() { return true; }
     });
-    columns.add(new EnumEntityColumn<Screen, ScreenType>(
-      new PropertyPath<Screen>(Screen.class, "screenType"),
+    columns.add(new EnumEntityColumn<Screen,ScreenType>(RelationshipPath.from(Screen.class).toProperty("screenType"),
       "Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
       @Override
       public ScreenType getCellValue(Screen screen) { return screen.getScreenType(); }
     });
-    columns.add(new TextEntityColumn<Screen>(
-      new PropertyPath<Screen>(Screen.class, "title"),
+    columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("title"),
       "Title", "The title of the screen", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Screen screen) { return screen.getTitle(); }

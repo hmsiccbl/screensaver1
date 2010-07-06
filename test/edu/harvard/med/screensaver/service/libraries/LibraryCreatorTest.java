@@ -43,7 +43,7 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
       LibraryType.SIRNA,
       50439,
       50439);
-    library.setVendor("Dharmacon");
+    library.setProvider("Dharmacon");
     library.setDescription("test library");
 
     try {

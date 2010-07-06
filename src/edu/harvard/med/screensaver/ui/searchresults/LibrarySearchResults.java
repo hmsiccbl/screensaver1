@@ -27,9 +27,8 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
@@ -104,7 +103,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   protected List<? extends TableColumn<Library,?>> buildColumns()
   {
     ArrayList<TableColumn<Library,?>> columns = Lists.newArrayList();
-    columns.add(new TextEntityColumn<Library>(new PropertyPath(Library.class, "shortName"),
+    columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("shortName"),
       "Short Name", "The abbreviated name for the library", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Library library) 
@@ -118,24 +117,34 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       @Override
       public Object cellAction(Library library) { return viewSelectedEntity(); }
     });
-    columns.add(new TextEntityColumn<Library>(new PropertyPath(Library.class, "libraryName"),
+    columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("libraryName"),
       "Library Name", "The full name of the library", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Library library) { return library==null? "null" : library.getLibraryName() ; }
     });
-    columns.add(new EnumEntityColumn<Library,ScreenType>(new PropertyPath(Library.class, "screenType"),
+    columns.add(new TextEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("provider"),
+                                              "Provider",
+                                              "The vendor or source that provided the library",
+                                              TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Library library)
+      {
+        return library.getProvider();
+      }
+    });
+    columns.add(new EnumEntityColumn<Library,ScreenType>(RelationshipPath.from(Library.class).toProperty("screenType"),
       "Screen Type", "'RNAi' or 'Small Molecule'",
       TableColumn.UNGROUPED, ScreenType.values()) {
       @Override
       public ScreenType getCellValue(Library library) { return library==null? null : library.getScreenType(); }
     });
-    columns.add(new EnumEntityColumn<Library,LibraryType>(new PropertyPath(Library.class, "libraryType"),
+    columns.add(new EnumEntityColumn<Library,LibraryType>(RelationshipPath.from(Library.class).toProperty("libraryType"),
       "Library Type", "The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc.",
       TableColumn.UNGROUPED, LibraryType.values()) {
       @Override
       public LibraryType getCellValue(Library library) { return library==null? null : library.getLibraryType(); }
     });
-    columns.add(new BooleanEntityColumn<Library>(new PropertyPath(Library.class, "pool"),
+    columns.add(new BooleanEntityColumn<Library>(RelationshipPath.from(Library.class).toProperty("pool"),
       "Is Pool", 
       "Whether wells contains pools of reagents or single reagents",
       TableColumn.UNGROUPED) {
@@ -156,40 +165,33 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
       @Override
       public Integer getCellValue(Library library) { return library==null? null : library.getEndPlate(); }
     });
-    if (getScreensaverUser().isUserInRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN) ||
-      getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN)) {
-      columns.add(new TextEntityColumn<Library>(new PropertyPath(Library.class, "vendor"),
-        "Vendor/Source", "The vendor or source that produced the library",
-        TableColumn.UNGROUPED) {
-        @Override
-        public String getCellValue(Library library) { return library==null? null : library.getVendor(); }
-      });
-      columns.get(columns.size() - 1).setAdministrative(true);
-      columns.add(new TextSetEntityColumn<Library>(
-        Library.copies.toProperty("name"),
-        "Copies",
-        "The copies that have been made of this library",
-        TableColumn.UNGROUPED) {
-        @Override
-        public Set<String> getCellValue(Library library)
-        {
-          if (library == null) {
-            return null;
-          }
-          return Sets.newHashSet(Iterables.transform(library.getCopies(), Copy.ToName));
+
+    columns.add(new TextSetEntityColumn<Library>(Library.copies.toProperty("name"),
+                                                 "Copies",
+                                                 "The copies that have been made of this library",
+                                                 TableColumn.UNGROUPED) {
+      @Override
+      public Set<String> getCellValue(Library library)
+      {
+        if (library == null) {
+          return null;
         }
-      });
-      columns.get(columns.size() - 1).setAdministrative(true);
-      columns.add(new EnumEntityColumn<Library,LibraryScreeningStatus>(new PropertyPath(Library.class, "screeningStatus"),
-        "Screening Status", "Screening status for the library, e.g., 'Allowed','Not Allowed', 'Not Yet Plated', etc.",
-        TableColumn.UNGROUPED
-        , LibraryScreeningStatus.values()) {
-        @Override
-        public LibraryScreeningStatus getCellValue(Library library) 
-        { return library==null? null : library.getScreeningStatus(); }
-      });
-      columns.get(columns.size() - 1).setAdministrative(true);
-    }
+        return Sets.newHashSet(Iterables.transform(library.getCopies(), Copy.ToName));
+      }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+
+    columns.add(new EnumEntityColumn<Library,LibraryScreeningStatus>(RelationshipPath.from(Library.class).toProperty("screeningStatus"),
+                                                                     "Screening Status", "Screening status for the library, e.g., 'Allowed','Not Allowed', 'Not Yet Plated', etc.",
+                                                                     TableColumn.UNGROUPED,
+                                                                     LibraryScreeningStatus.values()) {
+      @Override
+      public LibraryScreeningStatus getCellValue(Library library)
+      {
+        return library == null ? null : library.getScreeningStatus();
+      }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
 
 //    TableColumnManager<Library> columnManager = getColumnManager();
 //    columnManager.addCompoundSortColumns(columnManager.getColumn("Screen Type"),

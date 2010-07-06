@@ -65,8 +65,8 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
   private static final Logger log = Logger.getLogger(Copy.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<Copy> copyInfos = new RelationshipPath<Copy>(Copy.class, "copyInfos");
-  public static final RelationshipPath<Copy> library = new RelationshipPath<Copy>(Copy.class, "library", Cardinality.TO_ONE);
+  public static final RelationshipPath<Copy> copyInfos = RelationshipPath.from(Copy.class).to("copyInfos");
+  public static final RelationshipPath<Copy> library = RelationshipPath.from(Copy.class).to("library", Cardinality.TO_ONE);
 
   public static final Function<Copy,String> ToName = new Function<Copy,String>() { public String apply(Copy c) { return c.getName(); } };
 

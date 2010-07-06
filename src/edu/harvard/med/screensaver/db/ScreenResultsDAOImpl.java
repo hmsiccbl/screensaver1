@@ -113,6 +113,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
           toQuery(session, true).list();
       }
     });
+    // TODO: integrate the following into the HQL... sde4
     List<DataColumn> finalColumns = Lists.newLinkedList();
     for (DataColumn dc : columns) {
       if (dc.isPositiveIndicator()) {

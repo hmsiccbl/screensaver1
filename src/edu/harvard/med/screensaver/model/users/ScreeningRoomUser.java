@@ -38,7 +38,6 @@ import org.hibernate.annotations.SortType;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.AttachedFilesEntity;
@@ -47,6 +46,7 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -71,11 +71,11 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
   private static final Logger log = Logger.getLogger(ScreeningRoomUser.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<ScreeningRoomUser> LabHead = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "labHead", Cardinality.TO_ONE);
-  public static final RelationshipPath<ScreeningRoomUser> attachedFiles = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "attachedFiles");
-  public static final RelationshipPath<ScreeningRoomUser> screensLed = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "screensLed");
-  public static final RelationshipPath<ScreeningRoomUser> screensCollaborated = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "screensCollaborated");
-  public static final RelationshipPath<ScreeningRoomUser> facilityUsageRoles = new RelationshipPath<ScreeningRoomUser>(ScreeningRoomUser.class, "facilityUsageRoles");
+  public static final RelationshipPath<ScreeningRoomUser> LabHead = RelationshipPath.from(ScreeningRoomUser.class).to("labHead", Cardinality.TO_ONE);
+  public static final RelationshipPath<ScreeningRoomUser> attachedFiles = RelationshipPath.from(ScreeningRoomUser.class).to("attachedFiles");
+  public static final RelationshipPath<ScreeningRoomUser> screensLed = RelationshipPath.from(ScreeningRoomUser.class).to("screensLed");
+  public static final RelationshipPath<ScreeningRoomUser> screensCollaborated = RelationshipPath.from(ScreeningRoomUser.class).to("screensCollaborated");
+  public static final PropertyPath<ScreeningRoomUser> facilityUsageRoles = PropertyPath.from(ScreeningRoomUser.class).toCollectionOfValues("facilityUsageRoles");
 
   // private instance data
 

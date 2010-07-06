@@ -392,6 +392,12 @@ TODO:
       </ss:property>
     </ss:propertyGroup>
 
+    <ss:property id="fulfilledLabCherryPicksCount"
+      label="Total Fulfilled Duplex Cherry Picks to Date"
+      value="#{screenDetailViewer.entity.fulfilledLabCherryPicksCount}"
+      rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}"
+      description="Total Fulfilled Duplex Cherry Picks to Date" />
+      
     <ss:property id="keywords"
         label="#{screenDetailViewer.editMode ? 'Keywords (comma-separated)' : 'Keywords'}"
         type="Set" value="#{screenDetailViewer.entity.keywords}"
@@ -562,7 +568,7 @@ TODO:
           type="Textarea" editWidth="80" editHeight="3"
           description="Comments for the pin transfer approval"
           value="#{screenDetailViewer.pinTransferApprovalComments}"
-          editable="#{screenDetailViewer.editMode &amp;&amp; empty screenDetailViewer.entity.pinTransferApprovalActivity}" />
+          editable="#{screenDetailViewer.editMode }" />
 
       </ss:propertyGroup>
   </ui:define>

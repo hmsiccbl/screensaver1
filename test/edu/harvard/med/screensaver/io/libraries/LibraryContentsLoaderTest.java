@@ -369,7 +369,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         ScreenType.SMALL_MOLECULE,
         LibraryType.NATURAL_PRODUCTS,
         TEST_PLATE, TEST_PLATE);
-    library.setVendor("test vendor");
+    library.setProvider("test vendor");
     libraryCreator.createLibrary(library);
 
     String filename = "clean_data_natural_product.xls";

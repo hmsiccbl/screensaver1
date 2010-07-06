@@ -32,7 +32,6 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
-import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -140,7 +139,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   protected void initializeNewEntity(Activity activity)
   {
     if (activity instanceof LabActivity) {
-      // note: activity must be transient, while activity.screen must managed
+      // note: activity must be transient, while activity.screen must be managed
       getDao().needReadOnly(((LabActivity) activity).getScreen(), Screen.labHead.getPath(), Screen.leadScreener.getPath());
       getDao().needReadOnly(((LabActivity) activity).getScreen(), Screen.collaborators.getPath());
     }
@@ -149,6 +148,9 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       getDao().needReadOnly(((CherryPickScreening) activity).getCherryPickRequest(), CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(Activity.performedBy).getPath());
     }
 
+    if (activity instanceof CherryPickLiquidTransfer) {
+      getDao().needReadOnly(((CherryPickLiquidTransfer) activity).getCherryPickRequest(), CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(Activity.performedBy).getPath());
+    }
     // set null dateOfActivity, to force user to enter a valid date
     // TODO: this model shouldn't allow this null value, and we should really set to null at the UI component level only
     if (activity instanceof LibraryScreening) {
@@ -311,14 +313,16 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     boolean valid = true;
     if (entity instanceof Screening) {
       try {
-        Volume.makeVolume(_volumeValue,_volumeType.getSelection());
+        Volume.makeVolume(getVolumeTransferredPerWellValue(),
+                          getVolumeTransferredPerWellType().getSelection());
       } 
       catch (Exception e) {
         showFieldInputError("Volume Transferred Per Replicate", e.getLocalizedMessage());
         valid = false;
       }
       try {
-        Concentration.makeConcentration(_concentrationValue, _concentrationType.getSelection());
+        Concentration.makeConcentration(getConcentrationValue(),
+                                        getConcentrationType().getSelection());
       } 
       catch (Exception e) {
         showFieldInputError("Concentration", e.getLocalizedMessage());
@@ -343,13 +347,12 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   @Override
   protected void updateEntityProperties(Activity entity) 
   {
-    entity.setPerformedBy(getPerformedBy().getSelection());
     if (entity instanceof Screening) {
-      ((Screening) getEntity()).setVolumeTransferredPerWell(Volume.makeVolume(_volumeValue,_volumeType.getSelection()));
-      ((Screening) getEntity()).setConcentration(Concentration.makeConcentration(_concentrationValue, _concentrationType.getSelection()));
+      ((Screening) entity).setVolumeTransferredPerWell(Volume.makeVolume(_volumeValue, _volumeType.getSelection()));
+      ((Screening) entity).setConcentration(Concentration.makeConcentration(_concentrationValue, _concentrationType.getSelection()));
     }
     if (entity instanceof CherryPickScreening) {
-      CherryPickScreening screening = (CherryPickScreening) getEntity();
+      CherryPickScreening screening = (CherryPickScreening) entity;
       for (SelectableRow<CherryPickAssayPlate> row : (List<SelectableRow<CherryPickAssayPlate>>) getCherryPickPlatesDataModel().getWrappedData()) {
         if (row.isSelected() && !screening.getAssayPlatesScreened().contains(row.getData())) {
           screening.addAssayPlateScreened(row.getData());
@@ -362,26 +365,25 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
       }
     }
     if (entity instanceof CherryPickLiquidTransfer) {
-      CherryPickLiquidTransfer cplt = (CherryPickLiquidTransfer) getEntity();
       if (_editingNewEntity) {
-        for (CherryPickAssayPlate plate : cplt.getCherryPickAssayPlates()) {
-          getDao().saveOrUpdateEntity(plate);
-        }
-        if (cplt.getStatus() == CherryPickLiquidTransferStatus.FAILED) {
-          Set<LabCherryPick> unfulfillable = _cherryPickRequestAllocator.reallocateAssayPlates(cplt.getCherryPickAssayPlates());
-          if (!unfulfillable.isEmpty()) {
-            showMessage("cherryPicks.someCherryPicksUnfulfillable");
+        CherryPickLiquidTransfer cplt = (CherryPickLiquidTransfer) entity;
+        for (CherryPickAssayPlate cpap : cplt.getCherryPickAssayPlates()) {
+          getDao().saveOrUpdateEntity(cpap);
+          for (LabCherryPick lcp : cpap.getLabCherryPicks()) {
+            getDao().saveOrUpdateEntity(lcp);
           }
         }
-        else if (cplt.getStatus() == CherryPickLiquidTransferStatus.CANCELED) {
-          _cherryPickRequestAllocator.deallocateAssayPlates(cplt.getCherryPickAssayPlates());
-        }
+        // do calculations necessitated by invalidate calls on the screen 
+        // (i.e. for screen.getFulfilledLabCherryPicksCount invalidated in CPAP.setCherryPickLiquidTransfer )...
+        cplt.getScreen().update();
       }
     }
     if (entity instanceof LibraryScreening) {
       ((LibraryScreening) entity).getScreen().update();
       entity.update();
     }
+    // note: execute this after parent entity (Screen/CPR) is reattached, to avoid NonUniqueObjectExceptions
+    entity.setPerformedBy(getPerformedBy().getSelection());
   }
 
   public DataModel getLibraryAndPlatesScreenedDataModel()
@@ -498,18 +500,42 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   {
     if (getEntity() instanceof LibraryScreening) {
       switch (editResult) {
-      case CANCEL_EDIT: return getThisProxy().reload();
-      case SAVE_EDIT: return getThisProxy().reload();
-      case CANCEL_NEW: return _screenViewer.reload();
-      case SAVE_NEW: return _screenViewer.reload();
+        case CANCEL_EDIT:
+          return getThisProxy().reload();
+        case SAVE_EDIT:
+          return getThisProxy().reload();
+        case CANCEL_NEW:
+          return _screenViewer.reload();
+        case SAVE_NEW:
+          return _screenViewer.reload();
       }
     }
-    else if (getEntity() instanceof CherryPickLiquidTransfer || getEntity() instanceof CherryPickScreening) {
+    else if (getEntity() instanceof CherryPickLiquidTransfer) {
       switch (editResult) {
-      case CANCEL_EDIT: return getThisProxy().reload();
-      case SAVE_EDIT: return getThisProxy().reload();
-      case CANCEL_NEW: return _cherryPickRequestViewer.reload();
-      case SAVE_NEW: return _cherryPickRequestViewer.reload();
+        case CANCEL_EDIT:
+          return getThisProxy().reload();
+        case SAVE_EDIT:
+          return getThisProxy().reload();
+        case CANCEL_NEW:
+          return _cherryPickRequestViewer.reload();
+        case SAVE_NEW: {
+          if (((CherryPickLiquidTransfer) getEntity()).isFailed()) {
+            _cherryPickRequestViewer.createNewAssayPlatesForFailed();
+          }
+          return _cherryPickRequestViewer.reload();
+        }
+      }
+    }
+    else if (getEntity() instanceof CherryPickScreening) {
+      switch (editResult) {
+        case CANCEL_EDIT:
+          return getThisProxy().reload();
+        case SAVE_EDIT:
+          return getThisProxy().reload();
+        case CANCEL_NEW:
+          return _cherryPickRequestViewer.reload();
+        case SAVE_NEW:
+          return _cherryPickRequestViewer.reload();
       }
     } 
     return null;

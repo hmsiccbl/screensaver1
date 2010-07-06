@@ -23,6 +23,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Index;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -40,14 +41,17 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 @Entity
 @Immutable
 @org.hibernate.annotations.Proxy
-@Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "annotationTypeId", "reagentId" }) })
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "annotationTypeId", "reagentId" }) })
+@org.hibernate.annotations.Table(appliesTo = "annotation_value", indexes = {
+  @Index(name = "annot_value_annot_type_and_value_index", columnNames = { "annotationTypeId", "value" }),
+  @Index(name = "annot_value_annot_type_and_numeric_value_index", columnNames = { "annotationTypeId", "numericValue" }) })
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=AnnotationType.class)
 public class AnnotationValue extends AbstractEntity<Integer>
 {
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationValue.class);
 
-  public static final RelationshipPath<AnnotationValue> annotationType = new RelationshipPath<AnnotationValue>(AnnotationValue.class, "annotationType", Cardinality.TO_ONE);
+  public static final RelationshipPath<AnnotationValue> annotationType = RelationshipPath.from(AnnotationValue.class).to("annotationType", Cardinality.TO_ONE);
 
   private AnnotationType _annotationType;
   private Reagent _reagent;
@@ -99,7 +103,6 @@ public class AnnotationValue extends AbstractEntity<Integer>
   @org.hibernate.annotations.Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_annotation_value_to_reagent")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @org.hibernate.annotations.Index(name="annotation_value_reagent_id_index", columnNames={"reagentId"})
   public Reagent getReagent()
   {
     return _reagent;
@@ -112,7 +115,6 @@ public class AnnotationValue extends AbstractEntity<Integer>
   @Column(updatable=false)
   @org.hibernate.annotations.Type(type="text")
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.Index(name="annotation_value_value_index")
   public String getValue()
   {
     return _value;
@@ -125,7 +127,6 @@ public class AnnotationValue extends AbstractEntity<Integer>
    */
   @Column(updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.Index(name="annotation_value_numeric_value_index")
   public Double getNumericValue()
   {
     return _numericValue;

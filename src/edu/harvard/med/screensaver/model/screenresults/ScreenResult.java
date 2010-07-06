@@ -75,8 +75,8 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
 
   private static final long serialVersionUID = 0;
 
-  public static final RelationshipPath<ScreenResult> screen = new RelationshipPath<ScreenResult>(ScreenResult.class, "screen", Cardinality.TO_ONE);
-  public static final RelationshipPath<ScreenResult> dataColumns = new RelationshipPath<ScreenResult>(ScreenResult.class, "dataColumns");
+  public static final RelationshipPath<ScreenResult> screen = RelationshipPath.from(ScreenResult.class).to("screen", Cardinality.TO_ONE);
+  public static final RelationshipPath<ScreenResult> dataColumns = RelationshipPath.from(ScreenResult.class).to("dataColumns");
 
   // private instance data
 
@@ -378,17 +378,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   public boolean addWell(Well well)
   {
     _plateNumbers.add(well.getPlateNumber());
-    if (_wells.add(well)) {
-      // TODO: HACK: removing this update as it causes memory/performance
-      // problems when loading ScreenResults; fortunately, when ScreenResult is
-      // read in from database from a new Hibernate session, the in-memory
-      // associations will be correct; these in-memory associations will only be
-      // missing within the Hibernate session that was used to import the
-      // ScreenResult
-      //well.addScreenResult(this);
-      return true;
-    }
-    return false;
+    return _wells.add(well);
   }
 
   /**
@@ -399,11 +389,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   public boolean removeWell(Well well)
   {
     // TODO: remove plateNumber if a plate's well count becomes zero
-    if (_wells.remove(well)) {
-      well.removeScreenResult(this);
-      return true;
-    }
-    return false;
+    return _wells.remove(well);
   }
 
   /**

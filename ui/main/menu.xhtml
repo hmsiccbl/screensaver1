@@ -57,7 +57,7 @@
             rendered="#{menu.screener || menu.readAdmin}" />
           <t:commandNavigation2 action="#{menu.findReagents}"
             styleClass="menuItem" value="Find Reagents" accesskey="R"
-            title="Look up one or more reagents by vendor reagent ID" />
+            title="Look up one or more reagents by vendor-assigned reagent identifiers" />
           <t:commandNavigation2 action="#{menu.browseWells}"
             value="Browse Wells" styleClass="menuItem" 
             title="Look up one or more library wells by plate number and well name"
@@ -151,10 +151,12 @@
             value="Plate" styleClass="menuItem" />
           <t:outputLabel id="wellNameLabel" for="wellName" value="Well"
             styleClass="menuItem" />
-	  <t:outputText id="filler" value=""/>
+	      <t:outputText id="filler" value=""/>
           <t:inputText id="plateNumber"
             value="#{wellFinder.plateNumber}" size="5"
-            styleClass="inputText" />
+            styleClass="inputText">
+            <f:converter converterId="javax.faces.Integer" />
+          </t:inputText>
           <t:inputText id="wellName" value="#{wellFinder.wellName}"
             size="3" styleClass="inputText" />
           <t:commandButton action="#{wellFinder.findWell}"

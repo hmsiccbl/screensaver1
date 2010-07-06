@@ -23,7 +23,6 @@ import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.FacilityUsageRole;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -100,11 +99,11 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
   protected List<? extends TableColumn<E,?>> buildColumns()
   {
     ArrayList<TableColumn<E,?>> columns = Lists.newArrayList();
-    columns.add(new IntegerEntityColumn<E>(
-      new PropertyPath<E>(_type, "userId"),
-      "User ID",
-      "The user ID",
-      TableColumn.UNGROUPED) {
+    RelationshipPath<E> pathRoot = RelationshipPath.from(_type);
+    columns.add(new IntegerEntityColumn<E>(pathRoot.toProperty("userId"),
+                                           "User ID",
+                                           "The user ID",
+                                           TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(E user) { return user.getScreensaverUserId(); }
 
@@ -114,70 +113,78 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
       @Override
       public boolean isCommandLink() { return true; }
     });
-    columns.add(new UserNameColumn<E,E>(
-      new RelationshipPath<E>(_type, ""),
-      "Name", "The full name of the user (last, first)", TableColumn.UNGROUPED, (UserViewer) getEntityViewer()) {
+    columns.add(new UserNameColumn<E,E>(pathRoot,
+                                        "Name",
+                                        "The full name of the user (last, first)",
+                                        TableColumn.UNGROUPED,
+                                        (UserViewer) getEntityViewer()) {
       @Override
       protected E getUser(E user)
       {
         return user;
       }
     });
-    columns.add(new TextEntityColumn<E>(
-      new PropertyPath<E>(_type, "email"),
-      "Email", "The email of the user", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("email"),
+                                        "Email",
+                                        "The email of the user",
+                                        TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(ScreensaverUser user) { return user.getEmail(); }
     });
-    columns.add(new TextEntityColumn<E>(
-      new PropertyPath<E>(_type, "phone"),
-      "Phone", "The phone number for this user", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("phone"),
+                                        "Phone",
+                                        "The phone number for this user",
+                                        TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(ScreensaverUser user) { return user.getPhone(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
-    columns.add(new TextEntityColumn<E>(
-      new PropertyPath<E>(_type, "mailingAddress"),
-      "Mailing Address", "The mailing address of the user", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("mailingAddress"),
+                                        "Mailing Address",
+                                        "The mailing address of the user",
+                                        TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(ScreensaverUser user) { return user.getMailingAddress(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
-    columns.add(new TextEntityColumn<E>(
-      new PropertyPath<E>(_type, "ECommonsId"),
-      "eCommons ID", "The eCommons ID of the user", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("ECommonsId"),
+                                        "eCommons ID",
+                                        "The eCommons ID of the user",
+                                        TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(ScreensaverUser user) { return user.getECommonsId(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
-    columns.add(new TextEntityColumn<E>(
-      new PropertyPath<E>(_type, "loginId"),
-      "Login ID", "The login ID of the user", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("loginId"),
+                                        "Login ID",
+                                        "The login ID of the user",
+                                        TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(ScreensaverUser user) { return user.getLoginId(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new TextEntityColumn<E>(
-      new PropertyPath<E>(_type, "harvardId"),
-      "Harvard ID", "The Harvard ID of the user", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("harvardId"),
+                                        "Harvard ID",
+                                        "The Harvard ID of the user",
+                                        TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(ScreensaverUser user) { return user.getHarvardId(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
-    columns.add(new DateEntityColumn<E>(
-      new PropertyPath<E>(_type, "harvardIdExpirationDate"),
-      "Harvard ID Initial Expiration Date", "The date this user's Harvard ID is initially set to expire", TableColumn.UNGROUPED) {
+    columns.add(new DateEntityColumn<E>(pathRoot.toProperty("harvardIdExpirationDate"),
+                                        "Harvard ID Initial Expiration Date",
+                                        "The date this user's Harvard ID is initially set to expire",
+                                        TableColumn.UNGROUPED) {
       protected LocalDate getDate(E user) { return user.getHarvardIdExpirationDate(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new TextSetEntityColumn<E>(
-      (RelationshipPath<E>) ScreeningRoomUser.facilityUsageRoles,
-      "Facility Usage Roles",
-      "Record of what the user is doing at the facility", 
-      TableColumn.UNGROUPED) {
+    columns.add(new TextSetEntityColumn<E>(pathRoot.to(ScreeningRoomUser.facilityUsageRoles), // convert to a path with same root type as all other column paths 
+                                           "Facility Usage Roles",
+                                           "Record of what the user is doing at the facility",
+                                           TableColumn.UNGROUPED) {
       public Set<String> getCellValue(ScreensaverUser user) 
       { 
         if (user instanceof ScreeningRoomUser) {
@@ -190,11 +197,10 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new TextSetEntityColumn<E>(
-      (RelationshipPath<E>) ScreensaverUser.roles,
-      "Data Access Roles",
-      "The primary data access roles assigned to this user's account", 
-      TableColumn.UNGROUPED) {
+    columns.add(new TextSetEntityColumn<E>(pathRoot.to(ScreensaverUser.roles), // convert to a path with same root type as all other column paths
+                                           "Data Access Roles",
+                                           "The primary data access roles assigned to this user's account",
+                                           TableColumn.UNGROUPED) {
       public Set<String> getCellValue(ScreensaverUser user) 
       { 
         Set<ScreensaverUserRole> roles = Sets.newHashSet(user.getPrimaryScreensaverUserRoles());
@@ -206,10 +212,10 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new DateEntityColumn<E>(
-      new PropertyPath<E>(_type, "dateCreated"),
-      "Date Created",
-      "The date the user's account was created", TableColumn.UNGROUPED) {
+    columns.add(new DateEntityColumn<E>(pathRoot.toProperty("dateCreated"),
+                                        "Date Created",
+                                        "The date the user's account was created",
+                                        TableColumn.UNGROUPED) {
       public LocalDate getDate(ScreensaverUser user) { return user.getDateCreated().toLocalDate(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);

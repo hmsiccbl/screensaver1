@@ -54,7 +54,7 @@ public class CherryPickLiquidTransfer extends LabActivity
 
   public static final String ACTIVITY_TYPE_NAME =  "Cherry Pick Plate Activity";
   
-  public static final RelationshipPath<CherryPickLiquidTransfer> cherryPickAssayPlates = new RelationshipPath<CherryPickLiquidTransfer>(CherryPickLiquidTransfer.class, "cherryPickAssayPlates");
+  public static final RelationshipPath<CherryPickLiquidTransfer> cherryPickAssayPlates = RelationshipPath.from(CherryPickLiquidTransfer.class).to("cherryPickAssayPlates");
 
   
   // private instance data

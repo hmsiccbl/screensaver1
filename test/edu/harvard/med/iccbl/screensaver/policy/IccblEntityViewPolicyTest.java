@@ -13,7 +13,12 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.test.AbstractTransactionalSpringContextTests;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
@@ -48,13 +53,6 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.test.AbstractTransactionalSpringContextTests;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 /**
  * Tests WedDataAccessPolicy implementation, as well as Hibernate interceptor-based
@@ -678,10 +676,10 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
     DataColumn myCol = myScreenResult.createDataColumn("myCol").forReplicate(1);
     myCol.makeBooleanPositiveIndicator();
     AssayWell myAssayWell1 = myScreenResult.createAssayWell(well1);
-    ResultValue myResultValue1 = myCol.createResultValue(myAssayWell1, "true");
+    ResultValue myResultValue1 = myCol.createBooleanPositiveResultValue(myAssayWell1, true, false);
     assert myResultValue1.isPositive();
     AssayWell myAssayWell2 = myScreenResult.createAssayWell(well2);
-    ResultValue myResultValue2 = myCol.createResultValue(myAssayWell2, "false");
+    ResultValue myResultValue2 = myCol.createBooleanPositiveResultValue(myAssayWell2, false, false);
     assert !myResultValue2.isPositive();
     
     Screen othersNonMutualPositivesScreen = MakeDummyEntities.makeDummyScreen(3, ScreenType.SMALL_MOLECULE);
@@ -690,10 +688,10 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
     DataColumn othersNonMutualPositivesCol = othersNonMutualPositivesScreenResult.createDataColumn("othersNonMutualPositivesCol").forReplicate(1);
     othersNonMutualPositivesCol.makeBooleanPositiveIndicator();
     AssayWell othersNonMutualPositivesAssayWell1 = othersNonMutualPositivesScreenResult.createAssayWell(well1);
-    ResultValue othersNonMutualPositivesResultValue1 = othersNonMutualPositivesCol.createResultValue(othersNonMutualPositivesAssayWell1, "false");
+    ResultValue othersNonMutualPositivesResultValue1 = othersNonMutualPositivesCol.createBooleanPositiveResultValue(othersNonMutualPositivesAssayWell1, false, false);
     assert !othersNonMutualPositivesResultValue1.isPositive();
     AssayWell othersNonMutualPositivesAssayWell2 = othersNonMutualPositivesScreenResult.createAssayWell(well2);
-    ResultValue othersNonMutualPositivesResultValue2 = othersNonMutualPositivesCol.createResultValue(othersNonMutualPositivesAssayWell2, "true");
+    ResultValue othersNonMutualPositivesResultValue2 = othersNonMutualPositivesCol.createBooleanPositiveResultValue(othersNonMutualPositivesAssayWell2, true, false);
     assert othersNonMutualPositivesResultValue2.isPositive();
 
     // create another screen that *does* have mutual positives, as a sanity check
@@ -703,10 +701,10 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
     DataColumn othersMutualPositivesCol = othersMutualPositivesScreenResult.createDataColumn("othersMutualPositivesCol").forReplicate(1);
     othersMutualPositivesCol.makeBooleanPositiveIndicator();
     AssayWell othersMutualPositivesAssayWell1 = othersMutualPositivesScreenResult.createAssayWell(well1);
-    ResultValue othersMutualPositivesResultValue1 = othersMutualPositivesCol.createResultValue(othersMutualPositivesAssayWell1, "true");
+    ResultValue othersMutualPositivesResultValue1 = othersMutualPositivesCol.createBooleanPositiveResultValue(othersMutualPositivesAssayWell1, true, false);
     assert othersMutualPositivesResultValue1.isPositive();
     AssayWell othersMutualPositivesAssayWell2 = othersMutualPositivesScreenResult.createAssayWell(well2);
-    ResultValue othersMutualPositivesResultValue2 = othersMutualPositivesCol.createResultValue(othersMutualPositivesAssayWell2, "false");
+    ResultValue othersMutualPositivesResultValue2 = othersMutualPositivesCol.createBooleanPositiveResultValue(othersMutualPositivesAssayWell2, false, false);
     assert !othersMutualPositivesResultValue2.isPositive();
     
     myScreen.getLabHead().addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES);

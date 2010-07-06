@@ -28,13 +28,16 @@
 
     <t:div id="screenerWelcomeMessage" rendered="#{!menu.readAdmin}">
       <ul>
-        <li>Use "Browse Libraries" to view the contents of ICCB-L
-        small molecule and RNAi libraries, including structures, SMILES
-        strings, vendor information, and links to PubChem, ChemBank, and
-        GenBank.</li>
+        <li>Use "Browse Libraries" to view the set of small
+        molecule and RNAi libraries available for use at the screening
+        facility. For each library, you can view descriptive information
+        on the Library Viewer page. From that page, you can navigate to
+        the Wells Browser page, to browse the contents of each library
+        well and reagent information including structures, SMILES strings,
+        and links to PubChem, ChemBank, and GenBank.</li>
         <t:htmlTag value="li" rendered="#{menu.screener}">
       Use "Find Wells" or "Find Reagents" to search for information on library reagents,
-      using ICCB-L library plate/well designations or vendor reagent identifiers,
+      using library plate/well designations or vendor-assigned reagent identifiers,
       respectively.
 			</t:htmlTag>
         <t:htmlTag value="li"

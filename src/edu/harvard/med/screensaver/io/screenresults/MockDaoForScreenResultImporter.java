@@ -17,10 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -393,16 +392,14 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   }
 
   @Override
-  public Set<ScreenType> findScreenTypesForReagents(Set<ReagentVendorIdentifier> reagentIds)
+  public Set<ScreenType> findScreenTypesForReagents(Set<String> reagentIds)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public Set<ScreenType> findScreenTypesForWells(Set<WellKey> wellKeys)
   {
-    // TODO Auto-generated method stub
     return null;
   }
 }

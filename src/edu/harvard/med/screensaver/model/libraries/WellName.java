@@ -23,7 +23,7 @@ public class WellName implements Comparable<WellName>
 {
   // static members
 
-  Pattern WELL_NAME_PATTERN = Pattern.compile("([A-Z]+)([0-9]+)");
+  Pattern WELL_NAME_PATTERN = Pattern.compile("([A-Z]+)([0-9]+)", Pattern.CASE_INSENSITIVE);
 
   public static String toString(int rowIndex, int columnIndex)
   {
@@ -139,7 +139,7 @@ public class WellName implements Comparable<WellName>
 
   public static int parseRowLabel(String rowLabel)
   {
-    return AlphabeticCounter.toIndex(rowLabel);
+    return AlphabeticCounter.toIndex(rowLabel.toUpperCase());
   }
 
   // TODO: length only works up to 384 well plates; increase length to accommodate labels for max plate size

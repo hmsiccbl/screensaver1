@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 /**
  * JSF backing bean for data tables. Provides the following functionality:
@@ -58,7 +59,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   private Integer _pendingFirstRow;
   private TableColumnManager<R> _columnManager;
   private UIInput _rowsPerPageUIComponent;
-  private RowsPerPageSelector _rowsPerPageSelector = new RowsPerPageSelector(Collections.<Integer>emptyList());
+  private UISelectOneBean<Integer> _rowsPerPageSelector = new UISelectOneBean<Integer>(Collections.<Integer>emptyList());
   private boolean _isTableFilterMode;
   /**
    * @motivation for unit tests
@@ -87,7 +88,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
    */
   public void initialize(DataTableModel<R> dataTableModel,
                          List<? extends TableColumn<R,?>> columns,
-                         RowsPerPageSelector rowsPerPageSelector,
+                         UISelectOneBean<Integer> rowsPerPageSelector,
                          boolean useReorderListWidget)
   {
     _columnManager = new TableColumnManager<R>(columns, getCurrentScreensaverUser(), useReorderListWidget);
@@ -206,7 +207,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     return getRowsPerPageSelector().getSelection();
   }
 
-  public RowsPerPageSelector getRowsPerPageSelector()
+  public UISelectOneBean<Integer> getRowsPerPageSelector()
   {
     verifyIsInitialized();
     return _rowsPerPageSelector;

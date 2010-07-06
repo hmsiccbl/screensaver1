@@ -15,19 +15,13 @@ import java.util.Locale;
 
 import org.apache.log4j.Logger;
 
-// TODO: implement quoting of string values
 public class CSVPrintWriter extends CustomNewlinePrintWriter
 {
-  // static members
-
   private static Logger log = Logger.getLogger(CSVPrintWriter.class);
+
+  private static final String DOUBLE_QUOTE = "\"";
   private String _delimiter = ",";
   private boolean _isLineEmpty = true;
-
-
-  // instance data members
-
-  // public constructors and methods
 
   public CSVPrintWriter(Writer out, String newline)
   {
@@ -87,7 +81,7 @@ public class CSVPrintWriter extends CustomNewlinePrintWriter
   @Override
   public void print(Object o)
   {
-    print(o.toString());
+    print(o == null ? "" : o.toString());
   }
   
   @Override
@@ -197,14 +191,11 @@ public class CSVPrintWriter extends CustomNewlinePrintWriter
     throw new UnsupportedOperationException();
   }
 
-
-  
-  // private methods
-
   private String escape(String s)
   {
-//    s = s.replaceAll("\\", "\\\\");
-//    s = s.replaceAll(",", "\\,");
+    if (s.matches(".*(" + _delimiter + "|" + _newline + "|" + DOUBLE_QUOTE + ").*")) {
+      s = DOUBLE_QUOTE + s.replaceAll(DOUBLE_QUOTE, DOUBLE_QUOTE + DOUBLE_QUOTE) + DOUBLE_QUOTE;
+    }
     return s;
   }
 

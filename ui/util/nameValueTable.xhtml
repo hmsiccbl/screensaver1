@@ -9,22 +9,21 @@
   <!-- 
     facelets params:
     - id
-    - nameValueTable: NameValueTable 
+    - value: a DataTableModel wrapping a List of SimpleCells
    -->
 
 <ui:composition>
 
 	<h:form id="#{id}NameValueTableForm">
     <t:dataTable id="#{id}NameValueTable"
-      value="#{value.dataModel}" var="rowValue"
-      rows="#{value.numRows}" rendered="true"
+      value="#{value}" var="rowValue"
       styleClass="standardTable"
       columnClasses="propertyLabelColumn, greedyColumn" width="100%">
-      <t:column styleClass=".hiddenColumn" groupBy="true" rendered="#{value.hasGroupingInfo}" >
-        <h:outputText value="#{value.groupId}"
+      <t:column styleClass=".hiddenColumn" groupBy="true" rendered="#{rowValue.metaInformationAvailable}" >
+        <h:outputText value="#{rowValue.groupId}"
           styleClass="propertyLabel" escape="false" />
 		    <t:dataTable id="#{id}NameValueTableHeader"
-		      value="#{value.groupingValueTable}" var="summaryRowValue"
+		      value="#{rowValue.metaInformation}" var="summaryRowValue"
 		      styleClass="standardTable, greedyTable"
 		      columnClasses="propertyLabelColumn, greedyColumn">
 		      <t:column >
@@ -39,39 +38,41 @@
 						    styleClass="dataText" />
 						</t:commandLink>  
 		      </t:column>
-		       <f:facet name="footer"><!-- Note, this footer is a proposed way of showing the summary info (left out for now) -->
-               <t:outputText value="#{value.groupingFooter}"/>
-          </f:facet>
 		    </t:dataTable>
       </t:column>
-      <!-- note, inserting a hidden, empty column so that the column shading scheme is not altered
+       <!-- note, inserting a hidden, empty column so that the column shading scheme is not altered
            by the grouping info column  (even: shaded, odd: no shading) -->
-      <t:column width="0" styleClass="hiddenColumn" rendered="#{value.hasGroupingInfo}" ></t:column>
+       <t:column width="0" styleClass="hiddenColumn" rendered="#{rowValue.metaInformationAvailable}" ></t:column>
       <t:column >
-        <h:outputText value="#{value.label}"
-          title="#{value.nameDescription}"
+        <t:outputText value="#{rowValue.title}"
+          
           styleClass="propertyLabel" escape="false" />
       </t:column>
       <t:column >
-        <h:outputText value="#{rowValue}"
-          rendered="#{value.isTextValue}"
+        <h:outputText value="#{rowValue.value}"
+          rendered="true"
           styleClass="propertyValue dataText" />
+<!-- 
         <h:outputText value="#{rowValue}"
           rendered="#{value.isUnescapedTextValue}"
           escape="false" styleClass="propertyValue dataText" />
+
         <h:commandLink action="#{value.action}"
           value="#{rowValue}" rendered="#{value.isCommandValue}"
           styleClass="propertyValue dataText">
           <f:param name="actionValue" value="#{rowValue}" />
         </h:commandLink>
+
         <h:outputLink value="#{value.link[rowValue]}"
           rendered="#{value.isLinkValue}" target="_blank"
           styleClass="propertyValue dataText">
           <h:outputText value="#{rowValue}" />
         </h:outputLink>
+
         <t:graphicImage url="#{rowValue}"
           rendered="#{value.isImageValue}" style="float: left;">
         </t:graphicImage>
+
         <t:dataList id="textList" var="eltValue" value="#{rowValue}"
           layout="simple" rendered="#{value.isTextListValue}"
           rowIndexVar="eltIndex" rowCountVar="eltCount">
@@ -81,6 +82,7 @@
             rendered="#{eltIndex &lt; eltCount - 1}"
             styleClass="propertyValue dataText" />
         </t:dataList>
+        
         <t:dataList id="linkList" var="eltValue" value="#{rowValue}"
           layout="simple" rendered="#{value.isLinkListValue}"
           rowIndexVar="eltIndex" rowCountVar="eltCount">
@@ -93,6 +95,7 @@
             rendered="#{eltIndex &lt; eltCount - 1}"
             styleClass="propertyValue dataText" />
         </t:dataList>
+-->        
       </t:column>
     </t:dataTable>
 

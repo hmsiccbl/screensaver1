@@ -56,7 +56,7 @@ public abstract class Activity extends AuditedAbstractEntity<Integer> implements
   private static final Logger log = Logger.getLogger(Activity.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<Activity> performedBy = new RelationshipPath<Activity>(Activity.class, "performedBy", Cardinality.TO_ONE);
+  public static final RelationshipPath<Activity> performedBy = RelationshipPath.from(Activity.class).to("performedBy", Cardinality.TO_ONE);
 
 
   // instance fields

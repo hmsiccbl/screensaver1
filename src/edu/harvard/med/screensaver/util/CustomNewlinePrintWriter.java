@@ -15,7 +15,7 @@ import java.io.Writer;
 
 public class CustomNewlinePrintWriter extends PrintWriter
 {
-  private String _newline;
+  protected String _newline;
 
   public CustomNewlinePrintWriter(Writer out, String newline)
   {

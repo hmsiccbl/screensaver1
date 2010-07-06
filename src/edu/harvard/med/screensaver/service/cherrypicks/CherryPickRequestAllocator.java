@@ -20,6 +20,19 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
+import com.google.common.base.Function;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -33,19 +46,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.util.PowerSet;
-
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Function;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 
 /**
  * For a cherry pick request, selects source plate copies to draw from, and
@@ -303,7 +303,7 @@ public class CherryPickRequestAllocator
     }
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.MANDATORY)
   public void deallocateAssayPlates(Set<CherryPickAssayPlate> assayPlates)
   {
     if (assayPlates.isEmpty()) {
@@ -316,7 +316,6 @@ public class CherryPickRequestAllocator
           // picks that are unallocated
           if (labCherryPick.isAllocated()) {
             labCherryPick.setAllocated(null);
-            _dao.saveOrUpdateEntity(labCherryPick);
           }
         }
       }
@@ -336,8 +335,7 @@ public class CherryPickRequestAllocator
   {
     Set<LabCherryPick> unfullfilable = Sets.newHashSet();
     for (CherryPickAssayPlate assayPlate : assayPlates) {
-      _dao.reattachEntity(assayPlate);
-
+      assayPlate = _dao.reloadEntity(assayPlate);
       // TODO: protect against race condition (should enforce at schema level)
       CherryPickAssayPlate newAssayPlate = (CherryPickAssayPlate) assayPlate.clone();
       Map<LabCherryPick,LabCherryPick> newLabCherryPicks = new HashMap<LabCherryPick,LabCherryPick>();
@@ -346,11 +344,10 @@ public class CherryPickRequestAllocator
           log.warn("cannot create new lab cherry pick because original does not have a reagent");
         }
         else {
-          _dao.reattachEntity(labCherryPick.getScreenerCherryPick());
           LabCherryPick newLabCherryPick =
             labCherryPick.getScreenerCherryPick().createLabCherryPick(labCherryPick.getSourceWell());
-          //_dao.saveOrUpdateEntity(newLabCherryPick);
           newLabCherryPicks.put(newLabCherryPick, labCherryPick);
+          _dao.persistEntity(newLabCherryPick);
         }
       }
       unfullfilable.addAll(allocate(newLabCherryPicks.keySet()));
@@ -362,6 +359,7 @@ public class CherryPickRequestAllocator
                                      originalLabCherryPick.getAssayPlateColumn());
         }
       }
+      _dao.persistEntity(newAssayPlate);
     }
     return unfullfilable;
   }

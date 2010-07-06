@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.ui.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -78,8 +77,7 @@ public class Messages extends AbstractBackingBean implements PhaseListener
     String clientId,
     Object... args)
   {
-    HttpSession session = (HttpSession) getFacesContext().getExternalContext().getSession(false);
-    return setFacesMessageForComponent(session, messageKey, clientId, args);
+    return setFacesMessageForComponent(getHttpSession(), messageKey, clientId, args);
   }
 
 
@@ -141,7 +139,7 @@ public class Messages extends AbstractBackingBean implements PhaseListener
    */
   public void renderResponse() 
   {
-    FacesContext.getCurrentInstance().renderResponse();
+    getFacesContext().renderResponse();
   }
 
   
@@ -168,12 +166,13 @@ public class Messages extends AbstractBackingBean implements PhaseListener
   @SuppressWarnings("unchecked")
   public void beforePhase(PhaseEvent event)
   {
-    Map sessionMap = getFacesContext().getExternalContext().getSessionMap();
+    HttpSession session = getHttpSession();
     List<Pair<String,FacesMessage>> queuedFacesMessages = 
-      (List<Pair<String,FacesMessage>>) sessionMap.remove(QUEUED_FACES_MESSAGES_PARAM);
+      (List<Pair<String,FacesMessage>>) session.getAttribute(QUEUED_FACES_MESSAGES_PARAM);
     if (queuedFacesMessages == null) {
       return;
     }
+    session.removeAttribute(QUEUED_FACES_MESSAGES_PARAM);
     
     FacesContext facesContext = getFacesContext();
     for (Pair<String,FacesMessage> queuedFacesMessage : queuedFacesMessages) {

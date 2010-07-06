@@ -77,7 +77,7 @@ public class NaturalProductsLibraryContentsParser extends WorkbookLibraryContent
     NaturalProductReagent reagent = null;
     if (vendorId != null) {
       well.setLibraryWellType(LibraryWellType.EXPERIMENTAL);
-      reagent = well.createNaturalProductReagent(new ReagentVendorIdentifier(well.getLibrary().getVendor(), vendorId));
+      reagent = well.createNaturalProductReagent(new ReagentVendorIdentifier(well.getLibrary().getProvider(), vendorId));
     }
     else {
       well.setLibraryWellType(LibraryWellType.EMPTY);

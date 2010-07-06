@@ -9,6 +9,11 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.util.List;
+
+import javax.faces.model.DataModel;
+import javax.faces.model.ListDataModel;
+
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 /**
@@ -20,13 +25,20 @@ public class SimpleCell
   private String _title;
   private String _value;
   private String _description;
-  private Object _groupId;
+  private String _groupId;
+  private List<SimpleCell> _metaInformation;
   
-  public SimpleCell(String title, String value, String description)
+  public SimpleCell(String title, String value, String description, List<SimpleCell> metaInformation)
   {
     _title = title;
     _value = value;
     _description = description;
+    _metaInformation = metaInformation;
+  }
+
+  public SimpleCell(String title, String value, String description)
+  {
+    this(title, value, description, (List<SimpleCell>) null);
   }
   
   public String getTitle()
@@ -51,16 +63,26 @@ public class SimpleCell
     return _description;
   }
   
-  public Object getGroupId()
+  public String getGroupId()
   {
     return _groupId;
   }
   
-  public SimpleCell setGroupId(Object groupId)
+  public SimpleCell setGroupId(String groupId)
   {
     _groupId = groupId;
     return this;
   }
   
+  public DataModel getMetaInformation()
+  {
+    return new ListDataModel(_metaInformation);
+  }
+
+  public boolean isMetaInformationAvailable()
+  {
+    return _metaInformation != null && !_metaInformation.isEmpty();
+  }
+
   public String toString() { return getValue(); }
 }

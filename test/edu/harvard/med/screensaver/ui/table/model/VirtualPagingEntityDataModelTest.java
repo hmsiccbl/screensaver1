@@ -10,12 +10,14 @@
 package edu.harvard.med.screensaver.ui.table.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 
@@ -26,7 +28,7 @@ import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextTupleColumn;
 import edu.harvard.med.screensaver.ui.util.ValueReference;
@@ -41,14 +43,14 @@ public class VirtualPagingEntityDataModelTest extends TestCase
     public int _findAllKeysCount;
     public int _fetchAllDataCount;
     public int _fetchDataCount;
-    private Library _library;
-    private Map<String,Tuple<String>> _wells = Maps.newHashMap();
+    public Library _library;
+    public Map<String,Tuple<String>> _wells = Maps.newHashMap();
     
 
-    MockEntityDataFetcher()
+    MockEntityDataFetcher(int libraryPlates)
     {
       super(Well.class, null);
-      _library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
+      _library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, libraryPlates);
       for (Well well : _library.getWells()) {
         _wells.put(well.getWellKey().toString(), new Tuple<String>(well.getWellKey().toString()));
       }
@@ -88,9 +90,9 @@ public class VirtualPagingEntityDataModelTest extends TestCase
   @SuppressWarnings("unchecked")
   public void testNoQueryOnOnlySortDirectionChange()
   {
-    MockEntityDataFetcher fetcher = new MockEntityDataFetcher();
+    MockEntityDataFetcher fetcher = new MockEntityDataFetcher(1);
     
-    TextTupleColumn<Well,String> column1 = new TextTupleColumn<Well,String>(new PropertyPath<Well>(Well.class, "id"), "column1", "", "");
+    TextTupleColumn<Well,String> column1 = new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("id"), "column1", "", "");
     TextTupleColumn<Well,String> column2 = new TextTupleColumn<Well,String>(Well.latestReleasedReagent.toProperty("smiles"), "column2", "", "");
 
     ValueReference<Integer> rowsToFetch = new ValueReference<Integer>() { public Integer value() { return 10; } };
@@ -107,6 +109,26 @@ public class VirtualPagingEntityDataModelTest extends TestCase
     model.sort(Lists.newArrayList(column2), SortDirection.DESCENDING);
     model.setRowIndex(0); model.getRowData();
     assertEquals("no query on only sort direction changed", prevFetchAllKeysCount + 2, fetcher._findAllKeysCount);
+  }
+
+  public void testIterator()
+  {
+    MockEntityDataFetcher fetcher = new MockEntityDataFetcher(10);
+    ValueReference<Integer> rowsToFetch = new ValueReference<Integer>() {
+      public Integer value()
+      {
+        return 10;
+      }
+    };
+    VirtualPagingEntityDataModel<String,Well,Tuple<String>> model = new VirtualPagingEntityDataModel<String,Well,Tuple<String>>(fetcher, rowsToFetch);
+    model.getRowCount(); // initialize
+    Iterator<Tuple<String>> iter = model.iterator();
+    Set<String> result = Sets.newHashSet();
+    while (iter.hasNext()) {
+      result.add(iter.next().getKey());
+    }
+    log.info("consumed all iterator elements");
+    assertEquals(fetcher._wells.keySet(), result);
   }
 
 }

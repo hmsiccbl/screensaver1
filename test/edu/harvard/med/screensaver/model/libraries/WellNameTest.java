@@ -29,6 +29,13 @@ public class WellNameTest extends TestCase
     assertEquals("01", wellName.getColumnLabel());
     assertEquals(new WellName(0, 0), wellName);
     
+    wellName = new WellName("a1");
+    assertEquals(0, wellName.getRowIndex());
+    assertEquals(0, wellName.getColumnIndex());
+    assertEquals("A", wellName.getRowLabel());
+    assertEquals("01", wellName.getColumnLabel());
+    assertEquals(new WellName(0, 0), wellName);
+
     wellName = new WellName("P24");
     assertEquals(15, wellName.getRowIndex());
     assertEquals(23, wellName.getColumnIndex());

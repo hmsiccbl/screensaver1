@@ -15,9 +15,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
@@ -187,40 +188,70 @@ public abstract class VirtualPagingDataModel<K,R> extends DataTableModel<R>
     assert _fetchedRows.size() <= MAX_CACHE_SIZE_ROWS;
   }
 
+  private static final Logger iterLog = Logger.getLogger(VirtualPagingDataModel.VirtualPagingIterator.class);
+
   private final class VirtualPagingIterator implements Iterator<R>
   {
-    private Iterator<List<K>> _keyBatchIterator;
-    private Iterator<R> _buffer = Lists.<R>newArrayList().iterator();
+    private static final int FETCH_SIZE = MAX_CACHE_SIZE_ROWS;
+
+    private BlockingQueue<R> _queue;
+    private Thread _fetcherThread;
+    private int _remaining;
+
+    private class DataFetcherTask implements Runnable
+    {
+      @Override
+      public void run()
+      {
+        Iterator<List<K>> keyBatchIterator = Iterators.partition(_sortedKeys.iterator(), FETCH_SIZE);
+        while (keyBatchIterator.hasNext()) {
+          List<K> keyBatch = keyBatchIterator.next();
+          iterLog.debug("fetching next batch");
+          Map<K,R> data = _dataFetcher.fetchData(Sets.newHashSet(keyBatch));
+          for (K k : keyBatch) {
+            try {
+              _queue.put(data.get(k));
+            }
+            catch (InterruptedException e) {
+              iterLog.error("fetcher thread interrupted: " + e);
+              return;
+            }
+          }
+          iterLog.debug("done fetching next batch");
+        }
+        iterLog.debug("data fetcher task is done");
+      }
+    }
 
     protected VirtualPagingIterator()
     {
-      _keyBatchIterator = Iterators.partition(_sortedKeys.iterator(), MAX_CACHE_SIZE_ROWS);
+      _queue = new LinkedBlockingQueue<R>(FETCH_SIZE);
+      _remaining = _sortedKeys.size();
+      _fetcherThread = new Thread(new DataFetcherTask());
+      _fetcherThread.start();
     }
 
     @Override
     public boolean hasNext()
     {
-      if (!_buffer.hasNext()) {
-        if (_keyBatchIterator.hasNext()) {
-          List<K> keyBatch = _keyBatchIterator.next();
-          Map<K,R> data = _dataFetcher.fetchData(Sets.newHashSet(keyBatch));
-          List<R> rows = Lists.newArrayList();
-          for (K k : keyBatch) {
-            rows.add(data.get(k));
-          }
-          _buffer = rows.iterator();
-          assert _buffer.hasNext();
-          return true;
-        }
-        return false;
-      }
-      return true;
+      return _remaining > 0;
     }
 
     @Override
     public R next()
     {
-      return _buffer.next();
+      try {
+        if (!hasNext()) {
+          return null; // note: this avoids the possibility of this method never returning, due to an exhausted queue
+        }
+        R element = _queue.take();
+        --_remaining;
+        return element;
+      }
+      catch (InterruptedException e) {
+        log.error("iterator.next() interrupted: " + e);
+        return null;
+      }
     }
 
     @Override

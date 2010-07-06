@@ -197,7 +197,7 @@ public class MakeDummyEntities
       throw new IllegalArgumentException("violated: 0 <= id < 100");
     }
     int startPlate = id * 1000;
-    int endPlate = startPlate + nPlates;
+    int endPlate = startPlate + nPlates - 1;
     if (nPlates > 1000) {
       throw new IllegalArgumentException("too many plates requested");
     }
@@ -218,7 +218,7 @@ public class MakeDummyEntities
       Well well = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
       if (library.getScreenType() == ScreenType.RNAI) {
         SilencingReagent reagent = 
-          well.createSilencingReagent(new ReagentVendorIdentifier("Vendor" + id, "" + i),
+          well.createSilencingReagent(new ReagentVendorIdentifier("Vendor" + id, "rnai" + i),
                                       SilencingReagentType.SIRNA,
                                       "ACTG");
         reagent.getFacilityGene()
@@ -227,7 +227,7 @@ public class MakeDummyEntities
       }
       else {
         SmallMoleculeReagent smallMolecule = 
-          well.createSmallMoleculeReagent(new ReagentVendorIdentifier("Vendor" + id, "" + i),
+          well.createSmallMoleculeReagent(new ReagentVendorIdentifier("Vendor" + id, "sm" + i),
                                           "molfileContents",
                                           "smiles" + wellKey, 
                                           "inchi" + wellKey, 

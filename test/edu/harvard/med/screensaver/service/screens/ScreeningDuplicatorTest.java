@@ -9,6 +9,9 @@
 
 package edu.harvard.med.screensaver.service.screens;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.Concentration;
@@ -18,14 +21,11 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.AssayProtocolType;
-import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
 {
@@ -80,7 +80,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertEquals("assay protocol", libraryScreening2.getAssayProtocol()); 
         assertEquals(new LocalDate(2009, 1, 1), libraryScreening2.getAssayProtocolLastModifiedDate()); 
         assertEquals(AssayProtocolType.ESTABLISHED, libraryScreening2.getAssayProtocolType()); 
-        assertEquals(new Integer(1), libraryScreening2.getNumberOfReplicates()); 
+        assertEquals(Integer.valueOf(1), libraryScreening2.getNumberOfReplicates());
         assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), libraryScreening2.getVolumeTransferredPerWell()); 
         assertEquals(new Concentration("2.00", ConcentrationUnit.MILLIMOLAR), libraryScreening2.getConcentration()); 
         assertEquals(_screen.getLabHead(), libraryScreening2.getPerformedBy());
@@ -103,7 +103,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) _screen.getCherryPickRequests().iterator().next();
     
         CherryPickScreening rnaiCpScreening1 = 
-          screeningDuplicator.addCherryPickScreening(_screen, cpr, (AdministratorUser) _screen.getCreatedBy());
+          screeningDuplicator.addCherryPickScreening(_screen, cpr.getRequestedBy(), (AdministratorUser) _screen.getCreatedBy(), cpr);
         assertEquals(1, _screen.getLabActivities().size());
         assertNull(rnaiCpScreening1.getAssayProtocol()); 
         assertNull(rnaiCpScreening1.getAssayProtocolLastModifiedDate()); 
@@ -130,12 +130,12 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         genericEntityDao.reattachEntity(_screen);
         RNAiCherryPickRequest cpr = (RNAiCherryPickRequest) _screen.getCherryPickRequests().iterator().next();
         CherryPickScreening rnaiCpScreening2 = 
-          screeningDuplicator.addCherryPickScreening(_screen, cpr, (AdministratorUser) _screen.getCreatedBy());
+          screeningDuplicator.addCherryPickScreening(_screen, cpr.getRequestedBy(), (AdministratorUser) _screen.getCreatedBy(), cpr);
         assertEquals(2, _screen.getLabActivities().size());
         assertEquals("assay protocol", rnaiCpScreening2.getAssayProtocol()); 
         assertEquals(new LocalDate(2009, 1, 1), rnaiCpScreening2.getAssayProtocolLastModifiedDate()); 
         assertEquals(AssayProtocolType.ESTABLISHED, rnaiCpScreening2.getAssayProtocolType()); 
-        assertEquals(new Integer(1), rnaiCpScreening2.getNumberOfReplicates()); 
+        assertEquals(Integer.valueOf(1), rnaiCpScreening2.getNumberOfReplicates());
         assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), rnaiCpScreening2.getVolumeTransferredPerWell()); 
         assertEquals(new Concentration("2.00", ConcentrationUnit.MILLIMOLAR), rnaiCpScreening2.getConcentration()); 
         assertEquals(_screen.getLabHead(), rnaiCpScreening2.getPerformedBy());

@@ -25,55 +25,37 @@ import edu.harvard.med.screensaver.util.StringUtils;
  */
 public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
 {
-  // static members
-
   private static Logger log = Logger.getLogger(PropertyPath.class);
   
-  /**
-   * Use to communicate the intent of the 'propertyName' constructor argument,
-   * when the property path represents a collection of values, which have no
-   * particular property name other than the collection element itself.
-   */
-  public final static String COLLECTION_OF_VALUES = "";
   public final static String FULL_ENTITY = "*";
 
-
-  // instance data members
-
   private String _propertyName;
+  private boolean _isCollectionOfValues;
 
 
-  // public constructors and methods
-
-  /**
-   * @param propertyName the name of the property. Can be COLLECTION_OF_VALUES
-   *          if the leaf of the path is a collection of values (which have no
-   *          further properties except the values themselves)
-   */
-  public PropertyPath(Class<E> rootEntityClass, String propertyName)
-  {
-    super(rootEntityClass, "");
-    _propertyName = propertyName;
-    _asFormattedPath = _asString = null; // force init by PropertyPath, not RelatioshipPath
-  }
-
-  PropertyPath(RelationshipPath<E> relationshipPath, String propertyName)
+  PropertyPath(RelationshipPath<E> relationshipPath, String propertyName, boolean isCollectionOfValues)
   {
     super(relationshipPath.getRootEntityClass(),
+          relationshipPath._entityClasses,
           relationshipPath._path,
+          relationshipPath._inversePath,
           relationshipPath._restrictions,
           relationshipPath._cardinality);
     _propertyName = propertyName;
+    _isCollectionOfValues = isCollectionOfValues;
     _asFormattedPath = _asString = null; // force init by PropertyPath, not RelatioshipPath
   }
 
-  public RelationshipPath<E> getRelationshipPath()
+  @Override
+  public PropertyPath<E> getUnrestrictedPath()
   {
-    return new RelationshipPath<E>(
-      getRootEntityClass(),
-      _path,
-                                   _restrictions,
-                                   _cardinality);
+    return new PropertyPath<E>(super.getUnrestrictedPath(), _propertyName, _isCollectionOfValues);
+  }
+
+  @Override
+  public RelationshipPath<E> getAncestryPath()
+  {
+    return new RelationshipPath<E>(getRootEntityClass(), _entityClasses, _path, _inversePath, _restrictions, _cardinality);
   }
 
   public String getPropertyName()
@@ -111,5 +93,19 @@ public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
   public int hashCode()
   {
     return super.hashCode() + _propertyName.hashCode() * 17;
+  }
+
+  public boolean isCollectionOfValues()
+  {
+    return _isCollectionOfValues;
+  }
+
+  @Override
+  public Cardinality getCardinality()
+  {
+    if (isCollectionOfValues()) {
+      return Cardinality.TO_MANY;
+    }
+    return super.getCardinality();
   }
 }

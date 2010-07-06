@@ -9,8 +9,173 @@
   xmlns:ss="http://screensaver.med.harvard.edu/ui">
 
 <ui:composition>
-
+<!-- 
   <ss:nameValueTable id="wellInfo" value="#{wellViewer.nameValueTable}" />
+-->
+  <h:form>
+     <t:panelGrid id="wellInfoPropertiesPanel" columns="2"
+      columnClasses="propertyLabelColumn,column"
+      styleClass="layoutPanel">
+
+       <ss:property id="plateNumber" label="Plate" 
+         type="Text" 
+         description="The number of the plate the well is located on" 
+         value="#{wellViewer.entity.plateNumber}">
+       </ss:property>
+   
+       <ss:property id="well" label="Well" 
+         type="Text" 
+         description="The plate coordinates of the well" 
+         value="#{wellViewer.entity.wellName}">
+       </ss:property>
+   
+       <ss:property id="library" label="Library"
+         description="The library containing the well" >
+         <ui:define name="data">
+           <ss:entityLink
+             entity="#{wellViewer.entity.library}"
+             property="libraryName"
+             viewer="#{libraryViewer}" />
+         </ui:define>
+       </ss:property>
+       
+       <ss:property id="screenType" label="Screen Type" 
+         type="Text" 
+         description="The library screen type" 
+         value="#{wellViewer.entity.library.screenType}">
+       </ss:property>
+
+       <ss:property id="libraryWellType" label="Library Well Type" 
+         type="Text" 
+         description="The type of well, e.g., 'Experimental', 'Control', 'Empty', etc." 
+         value="#{wellViewer.entity.libraryWellType}">
+       </ss:property>
+
+       <ss:property id="facilityId" label="Facility Identifier" 
+         type="Text" 
+         description="An alternate identifier assigned by the facility to identify this well" 
+         value="#{wellViewer.entity.facilityId}">
+       </ss:property>
+
+       <ss:property id="vendorReagentId" label="Vendor Reagent Identifier" 
+         type="Text" rendered="#{! empty wellViewer.versionedReagent}" 
+         description="The vendor-assigned reagent identifier provided (e.g., catalog number; reorder number)" 
+         value="#{wellViewer.versionedReagent.vendorId}">
+       </ss:property>
+
+       <ss:property id="deprecated" label="Deprecated" 
+         type="Text" rendered="#{wellViewer.entity.deprecated}" 
+         description="Why the well is deprecated" 
+         value="#{wellViewer.entity.deprecationActivity.comments}">
+       </ss:property>
+       
+       <ss:property id="libraryContentsVersion" label="Library Contents Version" 
+         type="Text" rendered="#{wellViewer.unrestrictedReagent}"
+         description="The reagent's library contents version" 
+         value="#{wellViewer.versionedReagent.libraryContentsVersion.versionNumber}">
+       </ss:property>
+
+       <ss:property id="sequence" label="Sequence" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}"
+         description="The nucleotide sequence of the silencing reagent" 
+         value="#{wellViewer.versionedReagent.sequence}">
+       </ss:property>
+
+       <ss:property id="geneName" label="Gene Name" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+         description="The name of the gene, as labelled in EntrezGene" 
+         value="#{wellViewer.versionedReagent.facilityGene.geneName}">
+       </ss:property>
+
+       <ss:property id="entrezGeneId" label="EntrezGene ID" 
+         type="Link" rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+         description="The EntrezGene ID, a.k.a. Locus ID" 
+         value="#{wellViewer.versionedReagent.facilityGene.entrezgeneId}"
+         linkValue="#{wellViewer.entrezgeneIdUrlPrefix}#{wellViewer.versionedReagent.facilityGene.entrezgeneId}">
+       </ss:property>
+       
+       <ss:property id="entrezGeneSymbols" label="EntrezGene Symbol" 
+         type="List" rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+         description="The EntrezGene Gene Symbols" 
+         value="#{wellViewer.versionedReagent.facilityGene.entrezgeneSymbols}">
+       </ss:property>
+       
+       <ss:property id="genBankAccessionNumbers" label="GenBank Accession Numbers" 
+         type="ListOfLinks" rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+         description="The GenBank Accession Numbers for the gene" 
+         value="#{wellViewer.versionedReagent.facilityGene.genbankAccessionNumbers}"
+         linkPrefix="#{wellViewer.genbankAccessionNumberUrlPrefix}" >
+       </ss:property>
+       
+       <ss:property id="speciesName" label="Species Name" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSilencingReagent}"
+         description="The species this gene is found in" 
+         value="#{wellViewer.versionedReagent.facilityGene.speciesName}">
+       </ss:property>
+        
+       <!-- Small Molecule Reagent stuff -->
+       <ss:property id="compoundImage" label="Structure"
+         description="A 2D structure image of the compound"
+         rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}" >
+         <ui:define name="data">
+           <t:graphicImage url="#{wellViewer.compoundImageUrl}"
+             rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}" style="float: left;">
+           </t:graphicImage>
+         </ui:define>
+       </ss:property>
+              
+       <ss:property id="smiles" label="Smiles" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The SMILES string for the compound" 
+         value="#{wellViewer.versionedReagent.smiles}">
+       </ss:property>
+              
+       <ss:property id="inchi" label="Inchi" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The InChI string for the compound" 
+         value="#{wellViewer.versionedReagent.inchi}">
+       </ss:property>
+
+       <ss:property id="compoundNames" label="Compound Names" 
+         type="List" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The various names the compound goes by" 
+         value="#{wellViewer.versionedReagent.compoundNames}">
+       </ss:property>       
+
+       <ss:property id="molecularMass" label="Molecular Mass" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The molecular mass for the compound" 
+         value="#{wellViewer.versionedReagent.molecularMass}">
+       </ss:property>
+       
+       <ss:property id="molecularWeight" label="Molecular Weight" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The molecular weight for the compound" 
+         value="#{wellViewer.versionedReagent.molecularWeight}" >
+       </ss:property>    
+  
+       <ss:property id="molecularFormula" label="Molecular Formula" 
+         type="Text" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The molecular formula for the compound" 
+         value="#{wellViewer.compoundMolecularFormula}" escape="false">
+       </ss:property>
+
+       <ss:property id="pubchemCids" label="PubChem CIDs" 
+         type="ListOfLinks" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The PubChem Compound Identifiers" 
+         value="#{wellViewer.versionedReagent.pubchemCids}"
+         linkPrefix="#{wellViewer.pubchemCidUrlPrefix}" >
+       </ss:property>
+       
+       <ss:property id="chembankIds" label="ChemBank IDs" 
+         type="ListOfLinks" rendered="#{wellViewer.allowedAccessToSmallMoleculeReagent}"
+         description="The ChemBank IDs for the compound" 
+         value="#{wellViewer.versionedReagent.chembankIds}"
+         linkPrefix="#{wellViewer.chembankIdUrlPrefix}" >
+       </ss:property>
+       
+       </t:panelGrid>  
+     </h:form>
 
   <t:panelGrid style="margin-top: 10px;">
     <t:panelGroup
@@ -53,7 +218,7 @@
           </t:column>
           <t:column>
             <f:facet name="header">
-              <t:outputText value="Reagent Vendor ID" />
+              <t:outputText value="Vendor Reagent Identifier" />
             </f:facet>
             <t:outputText value="#{well.latestReleasedReagent.vendorId}" />
           </t:column>
@@ -111,11 +276,11 @@
       <ui:define name="content">
 
         <t:outputText value="No annotations exist" styleClass="label"
-          rendered="#{wellViewer.annotationNameValueTable.numRows == 0}" />
+          rendered="#{! wellViewer.annotationListAvailable}" />
 
         <t:div style="margin-top: 15px; margin-left: 20px;"
           styleClass="annotationTable"
-          rendered="#{wellViewer.annotationNameValueTable.numRows > 0}">
+          rendered="#{wellViewer.annotationListAvailable}">
           <ss:nameValueTable id="annotationInfo"
             value="#{wellViewer.annotationNameValueTable}" />
         </t:div>

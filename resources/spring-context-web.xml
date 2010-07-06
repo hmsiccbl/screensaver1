@@ -22,6 +22,18 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
                       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
+  <!--  user authentication -->
+
+  <bean
+    id="currentScreensaverUser"
+    class="edu.harvard.med.screensaver.ui.WebCurrentScreensaverUser"
+    scope="session">
+    <property
+      name="dao"
+      ref="genericEntityDao" />
+    <aop:scoped-proxy />
+  </bean>
+
   <!--  Policy & Service configuration section for web application-->
 
   <import resource="spring-context-config.xml"/>

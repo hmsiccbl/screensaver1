@@ -26,12 +26,13 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
+    addTestSuite(AlphabeticCounterTest.class);
     addTestSuite(BeanUtilsTest.class);
     addTestSuite(CollectionUtilsTest.class);
     addTestSuite(CryptoUtilsTest.class);
+    addTestSuite(CSVPrinterWriterTest.class);
     addTestSuite(FileUtilsTest.class);
     addTestSuite(PowerSetTest.class);
-    addTestSuite(AlphabeticCounterTest.class);
     addTest(edu.harvard.med.screensaver.util.eutils.PackageTestSuite.suite());
   }
 }

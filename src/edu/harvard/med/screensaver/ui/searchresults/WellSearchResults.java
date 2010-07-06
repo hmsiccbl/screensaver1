@@ -41,7 +41,6 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
-import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
@@ -81,6 +80,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.TextTupleColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.ui.table.model.VirtualPagingEntityDataModel;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.ValueReference;
 import edu.harvard.med.screensaver.util.Triple;
 
@@ -204,7 +204,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
-        DataFetcherUtil.addDomainRestrictions(hql, Well.library, library, getRootEntityAlias());
+        DataFetcherUtil.addDomainRestrictions(hql, Well.library, library, getRootAlias());
       }
     };
     initialize(dataFetcher);
@@ -222,7 +222,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
-        DataFetcherUtil.addDomainRestrictions(hql, Well.library, lcv.getLibrary(), getRootEntityAlias());
+        DataFetcherUtil.addDomainRestrictions(hql, Well.library, lcv.getLibrary(), getRootAlias());
       }
     };
     initialize(dataFetcher);
@@ -251,7 +251,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
           public void addDomainRestrictions(HqlBuilder hql)
           {
             hql.from(AssayWell.class, "aw");
-            hql.where(getRootEntityAlias(), "wellId", Operator.EQUAL, "aw", "libraryWell");
+            hql.where(getRootAlias(), "wellId", Operator.EQUAL, "aw", "libraryWell");
             hql.where("aw", "screenResult", Operator.EQUAL, _screenResult);
             if (filterPositives) {
               hql.where("aw", "positive", Operator.EQUAL, Boolean.TRUE);
@@ -286,7 +286,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
-          DataFetcherUtil.addDomainRestrictions(hql, getRootEntityAlias(), wellKeyStrings);
+          DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), wellKeyStrings);
         }
       };
     initialize(dataFetcher);
@@ -309,20 +309,20 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         {
           DataFetcherUtil.addDomainRestrictions(hql,
                                                 Well.reagents.to(Reagent.studies),
-                                                study, getRootEntityAlias());
+                                                study, getRootAlias());
         }
       };
     initialize(dataFetcher);
 
-    getColumnManager().getColumn("Vendor").setVisible(true);
-    getColumnManager().getColumn("Vendor ID").setVisible(true);
+    getColumnManager().getColumn("Reagent Vendor").setVisible(true);
+    getColumnManager().getColumn("Reagent ID").setVisible(true);
     // show columns for this screenResult's data columns
     for (AnnotationType at : study.getAnnotationTypes()) {
       getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getStudyNumber())).setVisible(true);
     }
   }
 
-  public void searchReagents(final Set<ReagentVendorIdentifier> reagentIds)
+  public void searchReagents(final Set<String> reagentIds)
   {
     setMode(WellSearchResultMode.SET_OF_REAGENT_WELLS);
     _screenTypes = _librariesDao.findScreenTypesForReagents(reagentIds);
@@ -331,12 +331,12 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
-          hql.from(getRootEntityAlias(), "reagents", "r").whereIn("r", "vendorId", reagentIds);
+          hql.from(getRootAlias(), "reagents", "r").whereIn("r", Reagent.vendorIdentifier.getPropertyName(), reagentIds);
         }
       };
     initialize(dataFetcher);
-    getColumnManager().getColumn("Vendor").setVisible(true);
-    getColumnManager().getColumn("Vendor ID").setVisible(true);
+    getColumnManager().getColumn("Reagent Vendor").setVisible(true);
+    getColumnManager().getColumn("Reagent ID").setVisible(true);
 
     // TODO: should report # of reagent identifiers not found
   }
@@ -368,6 +368,17 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     DataTableModel<Tuple<String>> dataModel =
       new VirtualPagingEntityDataModel<String,Well,Tuple<String>>(dataFetcher, new RowsToFetchReference());
     initialize(dataModel, columns);
+  }
+
+  @Override
+  protected UISelectOneBean<Integer> buildRowsPerPageSelector()
+  {
+    UISelectOneBean<Integer> rowsPerPageSelector = super.buildRowsPerPageSelector();
+    rowsPerPageSelector.deleteObserver(_rowsPerPageSelectorObserver);
+    rowsPerPageSelector.setDomain(Lists.newArrayList(1, 12, 24, 48, 96, 384));
+    rowsPerPageSelector.setSelectionIndex(1);
+    rowsPerPageSelector.addObserver(_rowsPerPageSelectorObserver);
+    return rowsPerPageSelector;
   }
 
   @Override
@@ -425,13 +436,13 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       SilencingReagentType.values()));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols).toCollectionOfValues(),
+    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGene).to(Gene.entrezgeneSymbols),
                                                     "Entrez Gene Symbol",
                                                     "The Entrez gene symbol for the gene targeted by silencing reagent in the well",
                                                     SILENCING_REAGENT_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).toCollectionOfValues(),
+    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers),
                                                     "Genbank Accession Numbers",
                                                     "The Genbank Accession Numbers for the gene targeted by silencing reagent in the well",
                                                     SILENCING_REAGENT_COLUMNS_GROUP));
@@ -520,19 +531,19 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       COMPOUND_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.compoundNames).toCollectionOfValues(),
+    columns.add(new TextSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.compoundNames),
                                                     "Compound Names",
                                                     "The names of the compound in the well",
                                                     COMPOUND_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids).toCollectionOfValues(),
+    columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.pubchemCids),
       "PubChem CIDs",
       "The PubChem CIDs of the compound in the well",
       COMPOUND_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.chembankIds).toCollectionOfValues(),
+    columns.add(new IntegerSetTupleColumn<Well,String>(relPath.to(SmallMoleculeReagent.chembankIds),
       "ChemBank IDs",
       "The ChemBank IDs of the primary compound in the well",
       COMPOUND_COLUMNS_GROUP));
@@ -544,29 +555,28 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     RelationshipPath<Well> relPath = getWellToReagentRelationshipPath();
 
     columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorName),
-      "Vendor",
+                                                 "Reagent Vendor",
       "The vendor of the reagent in this well.",
       WELL_COLUMNS_GROUP));
     columns.add(new TextTupleColumn<Well,String>(relPath.to(Reagent.vendorIdentifier),
-      "Vendor ID",
+      "Reagent ID",
       "The vendor-assigned identifier for the reagent in this well.",
       WELL_COLUMNS_GROUP));
     columns.add(new IntegerTupleColumn<Well,String>(relPath.to(Reagent.libraryContentsVersion).toProperty("versionNumber"),
-      "Library Contents Version",
-      "The reagent's library contents version",
+                                                    "Library Contents Version",
+                                                    "The reagent's library contents version",
                                                     WELL_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
   }
 
   private void buildWellPropertyColumns(List<TableColumn<Tuple<String>,?>> columns)
   {
-    columns.add(new IntegerTupleColumn<Well,String>(
-      new PropertyPath<Well>(Well.class, "plateNumber"),
+    columns.add(new IntegerTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("plateNumber"),
       "Plate",
       "The number of the plate the well is located on",
       WELL_COLUMNS_GROUP));
 
-    columns.add(new TextTupleColumn<Well,String>(new PropertyPath<Well>(Well.class, "wellName"),
+    columns.add(new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("wellName"),
       "Well",
       "The plate coordinates of the well",
       WELL_COLUMNS_GROUP) {
@@ -601,24 +611,30 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       }
     });
 
+    columns.add(new TextTupleColumn<Well,String>(Well.library.toProperty("provider"),
+                                                 "Provider",
+                                                 "The vendor or source that provided the library",
+                                                 WELL_COLUMNS_GROUP));
+    columns.get(columns.size() - 1).setVisible(false);
+
     columns.add(new EnumTupleColumn<Well,String,ScreenType>(Well.library.toProperty("screenType"),
                                                             "Screen Type",
                                                             "The library screen type",
                                                             WELL_COLUMNS_GROUP,
                                                             ScreenType.values()));
-    columns.add(new EnumTupleColumn<Well,String,LibraryWellType>(new PropertyPath<Well>(Well.class, "libraryWellType"),
+    columns.add(new EnumTupleColumn<Well,String,LibraryWellType>(RelationshipPath.from(Well.class).toProperty("libraryWellType"),
                                                                  "Library Well Type",
                                                                  "The type of well, e.g., 'Experimental', 'Control', 'Empty', etc.",
                                                                  WELL_COLUMNS_GROUP,
                                                                  LibraryWellType.values()));
 
-    columns.add(new TextTupleColumn<Well,String>(new PropertyPath<Well>(Well.class, "facilityId"),
+    columns.add(new TextTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("facilityId"),
       "Facility ID",
       "An alternate identifier assigned by the facility to identify this well",
       WELL_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
-    columns.add(new BooleanTupleColumn<Well,String>(new PropertyPath<Well>(Well.class, "deprecated"),
+    columns.add(new BooleanTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("deprecated"),
                                                     "Deprecated",
                                                     "Whether the well has been deprecated",
                                                     TableColumn.UNGROUPED));
@@ -695,7 +711,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         protected void initialize()
         {
           if (_entityViewPolicy.isAllowedAccessToDataColumnDueToMutualPositives(dataColumn)) {
-            PropertyPath<ResultValue> positiveProperty = getPropertyPath().getRelationshipPath().toProperty("positive");
+            PropertyPath<ResultValue> positiveProperty = getPropertyPath().getAncestryPath().toProperty("positive");
             _positivePropertyKey = TupleDataFetcher.makePropertyKey(positiveProperty);
             addRelationshipPath(positiveProperty);
             if (log.isDebugEnabled()) {
@@ -861,7 +877,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
-          hql.from(getRootEntityAlias(), "library", "l");
+          hql.from(getRootAlias(), "library", "l");
           hql.whereIn("l", "libraryType", LibrarySearchResults.LIBRARY_TYPES_TO_DISPLAY);
         }
         };

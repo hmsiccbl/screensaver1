@@ -11,11 +11,13 @@
 	   facelets parameters:
 	     - id
 	     - label
-	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'Currency', 'Volume', 'Concentration'
-	     - description
+	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'ListOfLinks', 'Link', 'Currency', 'Volume', 'Concentration'
+	     - description: used for popup
 	     - value
+       - linkValue: required for the type 'Link' (in this case, 'value' is the text of the link
+       - linkPrefix: required if type=='ListOfLinks' - this is the uri value to precedes the link value
 	     - unitsSelector: required if type=='Volume' || type=='Concentration', must be instance of edu.harvard.med.screensaver.ui.util.UiSelectOneBean
-	     - editable: boolean, (optional, defaults to false)
+	     - editable: boolean, (optional, defaults to false - not available for ListOfLinks, Link)
 	     - rendered: boolean, (optional, defaults to true)
        - adminOnly: boolean (optional, defaults to false)
        - primary: boolean (optional, defaults to false)
@@ -24,6 +26,7 @@
 	     - editHeight ('Textarea' type only)
 	     - converter (optional)
 	     - submitOnChange (optional, 'Boolean' type only)
+       - escape: boolean, (optional, sets the t:outputText escape value, defaults to true)
 	 -->
 
 <ui:composition>
@@ -45,17 +48,35 @@
     <t:div rendered="#{!editable}"
       styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}">
       <ui:insert name="data">
-        <t:outputText id="#{id}#{type}Value" value="#{value}"
-          rendered="#{!(type == 'Textarea' || type == 'Volume' || type == 'Concentration')}"
+        <t:outputText id="#{id}#{type}Value" value="#{value}" escape="(empty escape ? true : escape)"
+          rendered="#{!(type == 'Textarea' || type == 'Volume' || type == 'Concentration' || type == 'ListOfLinks' || type == 'Link')}"
           converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Concentration' ? concentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
         <!-- TODO: not sure why we need to repeat styleClass attribute here to make it take effect... -->
         <t:inputTextarea id="#{id}#{type}Value1"
           rendered="#{type == 'Textarea'}" value="#{value}"
-          readonly="true" cols="#{editWidth}" rows="#{editHeight}"
+          readonly="true" cols="#{editWidth}" rows="#{editHeight}" displayValueOnly="#{true}"
           styleClass="#{primary ? 'primaryPropertyValue' : 'propertyValue'}" />
 				<t:outputText id="#{id}#{type}Value2"
 					rendered="#{(type == 'Volume' || type == 'Concentration') &amp;&amp; !empty value }"
 					value="#{value} #{unitsSelector.selection}" />
+        <t:dataList id="#{id}#{type}DataLinkList" 
+          var="eltValue" value="#{value}"
+          layout="simple" rendered="#{type == 'ListOfLinks' &amp;&amp; !empty value }"
+          rowIndexVar="eltIndex" rowCountVar="eltCount" >
+          <h:outputLink value="#{linkPrefix}#{eltValue}"
+            target="_blank">
+            <h:outputText value="#{eltValue}"
+              styleClass="propertyValue dataText" />
+          </h:outputLink>
+          <h:outputText value=";"
+            rendered="#{eltIndex &lt; eltCount - 1}"
+            styleClass="propertyValue dataText" />
+        </t:dataList>
+        <h:outputLink value="#{linkValue}"
+          rendered="#{(type == 'Link') &amp;&amp; !empty value }" target="_blank"
+          styleClass="propertyValue dataText">
+          <h:outputText value="#{value}" />
+        </h:outputLink>        
       </ui:insert>
     </t:div>
 

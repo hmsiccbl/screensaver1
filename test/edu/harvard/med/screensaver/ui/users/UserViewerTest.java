@@ -14,8 +14,10 @@ import java.util.Map;
 
 import javax.faces.model.DataModel;
 
-import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
-import edu.harvard.med.screensaver.db.DAOTransaction;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.test.AbstractTransactionalSpringContextTests;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.db.UsersDAO;
@@ -25,15 +27,7 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
-import edu.harvard.med.screensaver.ui.util.AttachedFiles;
-import edu.harvard.med.screensaver.ui.util.ChecklistItems;
 import edu.harvard.med.screensaver.ui.util.Messages;
-
-import org.apache.log4j.Logger;
-import org.apache.poi.hssf.record.BeginRecord;
-import org.joda.time.LocalDate;
-import org.springframework.test.AbstractTransactionalSpringContextTests;
 
 public class UserViewerTest extends AbstractTransactionalSpringContextTests
 {
@@ -41,16 +35,12 @@ public class UserViewerTest extends AbstractTransactionalSpringContextTests
   
 
   private AdministratorUser _admin;
-  private CurrentScreensaverUser _currentScreensaverUser;
-  
+  protected CurrentScreensaverUser currentScreensaverUser;
   protected UsersDAO usersDao;
   protected GenericEntityDAO genericEntityDao;
   protected SchemaUtil schemaUtil;
   protected Messages messages;
-
-
-  private UserViewer _userViewer;
-
+  protected UserViewer userViewer;
 
   @Override
   protected String[] getConfigLocations()
@@ -58,7 +48,7 @@ public class UserViewerTest extends AbstractTransactionalSpringContextTests
     return new String[] { "spring-context-test.xml" };
   }
 
-  public UserViewerTest() 
+  public UserViewerTest()
   {
     setPopulateProtectedVariables(true);
   }
@@ -73,12 +63,7 @@ public class UserViewerTest extends AbstractTransactionalSpringContextTests
   {
     _admin = new AdministratorUser("Admin", "User", "admin_user@hms.harvard.edu", "", "", "", "", "");
     genericEntityDao.persistEntity(_admin);
-    _currentScreensaverUser = new CurrentScreensaverUser();
-    _currentScreensaverUser.setScreensaverUser(_admin);
-
-    _userViewer = new UserViewer(null, null, genericEntityDao, usersDao, null, null, null, new AttachedFiles(genericEntityDao), new ChecklistItems(null, null, genericEntityDao));
-    _userViewer.setCurrentScreensaverUser(_currentScreensaverUser);
-    _userViewer.getChecklistItems().setCurrentScreensaverUser(_currentScreensaverUser);
+    currentScreensaverUser.setScreensaverUser(_admin);
   }
   
   public void testVirginChecklistItemsDataModel()
@@ -95,8 +80,8 @@ public class UserViewerTest extends AbstractTransactionalSpringContextTests
 
     startNewTransaction();
     user = genericEntityDao.reloadEntity(user);
-    _userViewer.setEntity(user);
-    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = _userViewer.getChecklistItems().getChecklistItemsDataModelMap();
+    userViewer.setEntity(user);
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItems().getChecklistItemsDataModelMap();
     assertEquals(4, checklistItemDataModels.size());
     assertFalse(checklistItemDataModels.containsKey(ChecklistItemGroup.LEGACY));
     final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group1 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels.get(ChecklistItemGroup.FORMS).getWrappedData();
@@ -130,9 +115,9 @@ public class UserViewerTest extends AbstractTransactionalSpringContextTests
 
     startNewTransaction();
     user = genericEntityDao.reloadEntity(user);
-    _userViewer.setEntity(user);
+    userViewer.setEntity(user);
 
-    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = _userViewer.getChecklistItems().getChecklistItemsDataModelMap();
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels = userViewer.getChecklistItems().getChecklistItemsDataModelMap();
     final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels.get(ChecklistItemGroup.NON_HARVARD_SCREENERS).getWrappedData();
     assertEquals("trained", group.get(0).getKey().getItemName());
     assertNull("trained", group.get(0).getValue());
@@ -150,9 +135,9 @@ public class UserViewerTest extends AbstractTransactionalSpringContextTests
     ChecklistItemEvent expirationEvent = activation.createChecklistItemExpirationEvent(today, _admin); 
     genericEntityDao.saveOrUpdateEntity(expirationEvent);
     genericEntityDao.flush();
-    _userViewer.setEntity(activation.getScreeningRoomUser());
+    userViewer.setEntity(activation.getScreeningRoomUser());
 
-    Map<ChecklistItemGroup,DataModel> checklistItemDataModels2 = _userViewer.getChecklistItems().getChecklistItemsDataModelMap();
+    Map<ChecklistItemGroup,DataModel> checklistItemDataModels2 = userViewer.getChecklistItems().getChecklistItemsDataModelMap();
     final List<Map.Entry<ChecklistItem,ChecklistItemEvent>> group2 = (List<Map.Entry<ChecklistItem,ChecklistItemEvent>>) checklistItemDataModels2.get(ChecklistItemGroup.NON_HARVARD_SCREENERS).getWrappedData();
     assertEquals("ID assigned", group2.get(1).getKey().getItemName());
     assertEquals(today, group2.get(1).getValue().getDatePerformed());

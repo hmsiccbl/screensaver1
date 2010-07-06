@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
@@ -25,6 +26,7 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -33,8 +35,10 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -122,14 +126,14 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
         _rnaiScreen = genericEntityDao.reloadEntity(_rnaiScreen, true);
         _screenResult = _rnaiScreen.getScreenResult();
         genericEntityDao.needReadOnly(_screenResult, "dataColumns.resultValues");
-        genericEntityDao.needReadOnly(_screenResult, "wells");
+        genericEntityDao.needReadOnly(_screenResult, "assayWells");
         _study = genericEntityDao.reloadEntity(_study, true, "annotationTypes.annotationValues");
         _rnaiLibrary = genericEntityDao.reloadEntity(_rnaiLibrary, true, "wells");
       }
     });
 
-    _plateNumberPropPath = new PropertyPath<Well>(Well.class, "plateNumber");
-    _wellNamePropPath = new PropertyPath<Well>(Well.class, "wellName");
+    _plateNumberPropPath = RelationshipPath.from(Well.class).toProperty("plateNumber");
+    _wellNamePropPath = RelationshipPath.from(Well.class).toProperty("wellName");
     _sortProperties.add(_plateNumberPropPath);
     _sortProperties.add(_wellNamePropPath);
     _pathsToFetch.add(_plateNumberPropPath);
@@ -139,7 +143,9 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
-        DataFetcherUtil.addDomainRestrictions(hql, Well.screenResults, _screenResult, getRootAlias());
+        hql.from(AssayWell.class, "aw");
+        hql.where(getRootAlias(), "wellId", Operator.EQUAL, "aw", "libraryWell");
+        hql.where("aw", "screenResult", Operator.EQUAL, _screenResult);
       }
     };
     final Set<String> wellKeys = Sets.newHashSet("02000:A01", "02001:P24");
@@ -179,23 +185,19 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     _screenResultWellFetcher.setPropertiesToFetch(_pathsToFetch);
     _screenResultWellFetcher.setOrderBy(_sortProperties);
 
-    Well[] wellsArray = _screenResult.getWells().toArray(new Well[] {});
-    Set<String> wellKeys = new HashSet<String>();
+    AssayWell[] assayWells = Iterables.toArray(_screenResult.getAssayWells(), AssayWell.class);
+    Set<String> wellIds = Sets.newHashSet();
     for (int i = 24; i < 48; i++) {
-      wellKeys.add(wellsArray[i].getWellKey().toString());
+      wellIds.add(assayWells[i].getLibraryWell().getWellId());
     }
 
     List<String> foundKeys = _screenResultWellFetcher.findAllKeys();
     assertEquals("size", 384 * _plates, foundKeys.size());
     isSorted(foundKeys);
 
-    Map<String,Well> data = _screenResultWellFetcher.fetchData(wellKeys);
-    assertEquals("size", 48 - 24, data.size());
-    for (int i = 24; i < 48; i++) {
-      assertTrue(data.containsKey(wellsArray[i].getWellKey().toString()));
-      assertEquals(wellsArray[i].getWellKey(),
-                   data.get(wellsArray[i].getWellKey().toString()).getWellKey());
-    }
+    Map<String,Well> data = _screenResultWellFetcher.fetchData(wellIds);
+    assertEquals(wellIds, data.keySet());
+    assertEquals(wellIds, Sets.newHashSet(Iterables.transform(data.values(), Entity.ToEntityId)));
   }
 
   /**
@@ -252,26 +254,28 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     _screenResultWellFetcher.setPropertiesToFetch(_pathsToFetch);
     _screenResultWellFetcher.setFilteringCriteria(_criteria);
 
-    List<String> expectedWellKeys = new ArrayList<String>();
-    for (Well well : _screenResult.getWells()) {
-      if (col3.getWellKeyToResultValueMap().get(well.getWellKey()).isPositive() &&
-        col4.getWellKeyToResultValueMap().get(well.getWellKey()) != null &&
-        col4.getWellKeyToResultValueMap().get(well.getWellKey()).getValue().length() > 0) {
-        expectedWellKeys.add(well.getWellKey().toString());
+    Set<String> expectedWellIds = Sets.newHashSet();
+    for (ResultValue rv : col3.getResultValues()) {
+      if (rv.isPositive()) {
+        expectedWellIds.add(rv.getWell().getWellId());
       }
     }
-    Collections.sort(expectedWellKeys);
+    for (ResultValue rv : col4.getResultValues()) {
+      if (rv.isNull() || rv.getValue().isEmpty()) {
+        expectedWellIds.remove(rv.getWell().getWellId());
+      }
+    }
 
-    List<String> foundWellKeys = _screenResultWellFetcher.findAllKeys();
-    Collections.sort(foundWellKeys);
-    assertEquals("keys", expectedWellKeys, foundWellKeys);
+    Set<String> foundWellIds = Sets.newHashSet(_screenResultWellFetcher.findAllKeys());
+    log.debug("not found: " + Sets.difference(expectedWellIds, foundWellIds));
+    log.debug("found unexpectedly: " + Sets.difference(foundWellIds, expectedWellIds));
+    assertEquals("findAllKeys", expectedWellIds, foundWellIds);
 
-    Map<String,Well> data = _screenResultWellFetcher.fetchData(new HashSet<String>(expectedWellKeys));
-    assertEquals("size", expectedWellKeys.size(), data.size());
-    for (String expectedWellKey : expectedWellKeys) {
-      assertTrue(data.containsKey(expectedWellKey));
-      assertEquals(expectedWellKey,
-                   data.get(expectedWellKey).getWellKey().toString());
+    Map<String,Well> data = _screenResultWellFetcher.fetchData(new HashSet<String>(expectedWellIds));
+    assertEquals("fetchData", expectedWellIds.size(), data.size());
+    for (String expectedWellKey : expectedWellIds) {
+      assertTrue("fetchData", data.containsKey(expectedWellKey));
+      assertEquals("fetchData", expectedWellKey, data.get(expectedWellKey).getWellKey().toString());
     }
   }
 
@@ -288,7 +292,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     EntityDataFetcher<Library,Integer> librariesDataFetcher =
       new EntityDataFetcher<Library,Integer>(Library.class, genericEntityDao);
     List<PropertyPath<Library>> properties = Lists.newArrayList();
-    properties.add(Library.wells.to(Well.latestReleasedReagent).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).toFullEntity());
+    properties.add(Library.wells.to(Well.latestReleasedReagent).to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers));
     properties.add(Library.contentsVersions.toFullEntity());
     librariesDataFetcher.setPropertiesToFetch(properties);
     List<Library> libraries = librariesDataFetcher.fetchAllData();
@@ -418,7 +422,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     Collections.sort(allData);
 
     assertEquals("full data size",
-                 _screenResult.getWells().size(),
+                 _screenResult.getAssayWells().size(),
                  allData.size());
 
     // NOTE: In below asserts, for restricted collections expected size is
@@ -483,7 +487,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
     _allWellsFetcher.setPropertiesToFetch(_pathsToFetch);
 
     List<Well> allData = _allWellsFetcher.fetchAllData();
-    assertEquals("sanity check that we're testing filtering against full data set", _screenResult.getWells().size(), allData.size());
+    assertEquals("sanity check that we're testing filtering against full data set", _screenResult.getAssayWells().size(), allData.size());
     Getter<Well,String> wellNameGetter = new Getter<Well,String>() { public String get(Well well) { return well.getWellName(); } };
     Getter<Well,Double> rvNumericValueGetter = new Getter<Well,Double>() { public Double get(Well well) { return well.getResultValues().get(numericCol).getNumericValue(); } };
     Getter<Well,String> ColextValueGetter = new Getter<Well,String>() { public String get(Well well) { return well.getResultValues().get(textCol).getValue(); } };
@@ -495,7 +499,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
       }
     };
     for (Operator operator : Operator.ALL_OPERATORS) {
-      doTestFilterOperator(new PropertyPath<Well>(Well.class, "wellName"), new Criterion<String>(operator, "B18"), wellNameGetter, allData);
+      doTestFilterOperator(RelationshipPath.from(Well.class).toProperty("wellName"), new Criterion<String>(operator, "B18"), wellNameGetter, allData);
       if (operator.getOperatorClass() == OperatorClass.EQUALITY ||
         operator.getOperatorClass() == OperatorClass.RANKING) {
         doTestFilterOperator(numericColPropPath, new Criterion<Double>(operator, new Double(1.0)), rvNumericValueGetter, allData);
@@ -526,7 +530,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testFetchCollectionOfElements()
   {
-    _wellSetFetcher.setPropertiesToFetch(Lists.newArrayList(Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).toFullEntity(),
+    _wellSetFetcher.setPropertiesToFetch(Lists.newArrayList(Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers),
                                                             Well.library.to(Library.contentsVersions).toFullEntity()));
     List<Well> data = _wellSetFetcher.fetchAllData();
     assertEquals("well.reagents.facilityGene.genbankAccessionNumbers size", 1, data.get(0).<SilencingReagent>getLatestReleasedReagent().getFacilityGene().getGenbankAccessionNumbers().size());
@@ -539,10 +543,10 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
    */
   public void testFilterCollectionOfElements()
   {
-    PropertyPath<Well> propPath = Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).toFullEntity();
+    PropertyPath<Well> propPath = Well.latestReleasedReagent.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers);
     _wellSetFetcher.setPropertiesToFetch(Collections.singletonList(propPath));
     Map<PropertyPath<Well>,List<? extends Criterion<?>>> filteringCriteria = new HashMap<PropertyPath<Well>,List<? extends Criterion<?>>>();
-    filteringCriteria.put(propPath.toCollectionOfValues(), Collections.singletonList(new Criterion<String>(Operator.EQUAL, "GB3074279")));
+    filteringCriteria.put(propPath, Collections.singletonList(new Criterion<String>(Operator.EQUAL, "GB3074279")));
     _wellSetFetcher.setFilteringCriteria(filteringCriteria);
     List<String> keys = _wellSetFetcher.findAllKeys();
     assertEquals("result size", 1, keys.size());

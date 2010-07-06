@@ -148,11 +148,11 @@ public class LabCherryPick extends AbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(LabCherryPick.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<LabCherryPick> cherryPickRequest = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "cherryPickRequest", Cardinality.TO_ONE);
-  public static final RelationshipPath<LabCherryPick> screenerCherryPick = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "screenerCherryPick", Cardinality.TO_ONE);
-  public static final RelationshipPath<LabCherryPick> sourceWell = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "sourceWell", Cardinality.TO_ONE);
-  public static final RelationshipPath<LabCherryPick> wellVolumeAdjustments = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "wellVolumeAdjustments");
-  public static final RelationshipPath<LabCherryPick> assayPlate = new RelationshipPath<LabCherryPick>(LabCherryPick.class, "assayPlate", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabCherryPick> cherryPickRequest = RelationshipPath.from(LabCherryPick.class).to("cherryPickRequest", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabCherryPick> screenerCherryPick = RelationshipPath.from(LabCherryPick.class).to("screenerCherryPick", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabCherryPick> sourceWell = RelationshipPath.from(LabCherryPick.class).to("sourceWell", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabCherryPick> wellVolumeAdjustments = RelationshipPath.from(LabCherryPick.class).to("wellVolumeAdjustments");
+  public static final RelationshipPath<LabCherryPick> assayPlate = RelationshipPath.from(LabCherryPick.class).to("assayPlate", Cardinality.TO_ONE);
   
   // private instance data
 

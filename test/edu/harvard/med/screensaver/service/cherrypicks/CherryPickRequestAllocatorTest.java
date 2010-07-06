@@ -14,6 +14,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -49,11 +53,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTest
 {
@@ -441,12 +440,15 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     });
 
     // note: we want detached assay plate entity instances, as the methods being tested need to handle this
-    final HashSet<CherryPickAssayPlate> assayPlatesToCancel = 
-      new HashSet<CherryPickAssayPlate>(genericEntityDao.reloadEntity(cpr, false, "cherryPickAssayPlates.labCherryPicks.wellVolumeAdjustments").getActiveCherryPickAssayPlates());
-    assertEquals("assay plates to cancel count", 1, assayPlatesToCancel.size());
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        CherryPickLiquidTransfer cplt = cpr.getScreen().createCherryPickLiquidTransfer(adminUser, adminUser, new LocalDate(), CherryPickLiquidTransferStatus.CANCELED);
+        CherryPickRequest cpr2 = genericEntityDao.reloadEntity(cpr/*
+                                                                   * , false,
+                                                                   * "cherryPickAssayPlates.labCherryPicks.wellVolumeAdjustments"
+                                                                   */);
+        HashSet<CherryPickAssayPlate> assayPlatesToCancel = Sets.newHashSet(cpr2.getActiveCherryPickAssayPlates());
+        assertEquals("assay plates to cancel count", 1, assayPlatesToCancel.size());
+        CherryPickLiquidTransfer cplt = cpr2.getScreen().createCherryPickLiquidTransfer(adminUser, adminUser, new LocalDate(), CherryPickLiquidTransferStatus.CANCELED);
         cplt.addCherryPickAssayPlate(assayPlatesToCancel.iterator().next());
         genericEntityDao.saveOrUpdateEntity(cplt);
         cherryPickRequestAllocator.deallocateAssayPlates(assayPlatesToCancel);

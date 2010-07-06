@@ -99,8 +99,8 @@ public class SimplePredicate extends Predicate
     else if (operator == Operator.NOT_EMPTY) {
       return "(" + lhs + " is not null and length(cast(" + lhs + " as text)) > 0)";
     }
-    else if (operator == Operator.EQUAL) {
-      return lhs + '=' + argName;
+    else if (operator.getOperatorClass() == OperatorClass.TEXT) {
+      return String.format("lower(%s)%slower(%s)", lhs, toHqlOperator(operator), argName);
     }
     else {
       return String.format("%s%s%s", lhs, toHqlOperator(operator), argName);

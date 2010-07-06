@@ -63,9 +63,9 @@ public class AttachedFile extends AuditedAbstractEntity<Integer> implements Comp
   private static final Logger log = Logger.getLogger(AttachedFile.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<AttachedFile> fileType = new RelationshipPath<AttachedFile>(AttachedFile.class, "fileType", Cardinality.TO_ONE);
-  public static final RelationshipPath<AttachedFile> screen = new RelationshipPath<AttachedFile>(AttachedFile.class, "screen", Cardinality.TO_ONE);
-  public static final RelationshipPath<AttachedFile> screeningRoomUser = new RelationshipPath<AttachedFile>(AttachedFile.class, "screeningRoomUser", Cardinality.TO_ONE);
+  public static final RelationshipPath<AttachedFile> fileType = RelationshipPath.from(AttachedFile.class).to("fileType", Cardinality.TO_ONE);
+  public static final RelationshipPath<AttachedFile> screen = RelationshipPath.from(AttachedFile.class).to("screen", Cardinality.TO_ONE);
+  public static final RelationshipPath<AttachedFile> screeningRoomUser = RelationshipPath.from(AttachedFile.class).to("screeningRoomUser", Cardinality.TO_ONE);
 
 
   // instance fields

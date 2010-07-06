@@ -34,6 +34,7 @@ import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 /**
@@ -66,11 +67,11 @@ public class WellVolumeAdjustment extends AbstractEntity<Integer>
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(WellVolumeAdjustment.class);
     
-  public static final RelationshipPath<WellVolumeAdjustment> copy = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "copy", Cardinality.TO_ONE);
-  public static final RelationshipPath<WellVolumeAdjustment> well = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "well", Cardinality.TO_ONE);
-  public static final RelationshipPath<WellVolumeAdjustment> labCherryPick = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "labCherryPick", Cardinality.TO_ONE);
-  public static final RelationshipPath<WellVolumeAdjustment> wellVolumeorrectionActivity = new RelationshipPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "wellVolumeorrectionActivity", Cardinality.TO_ONE);
-
+  public static final RelationshipPath<WellVolumeAdjustment> copy = RelationshipPath.from(WellVolumeAdjustment.class).to("copy", Cardinality.TO_ONE);
+  public static final RelationshipPath<WellVolumeAdjustment> well = RelationshipPath.from(WellVolumeAdjustment.class).to("well", Cardinality.TO_ONE);
+  public static final RelationshipPath<WellVolumeAdjustment> labCherryPick = RelationshipPath.from(WellVolumeAdjustment.class).to("labCherryPick", Cardinality.TO_ONE);
+  public static final RelationshipPath<WellVolumeAdjustment> wellVolumeorrectionActivity = RelationshipPath.from(WellVolumeAdjustment.class).to("wellVolumeorrectionActivity", Cardinality.TO_ONE);
+  public static final PropertyPath<WellVolumeAdjustment> volume = RelationshipPath.from(WellVolumeAdjustment.class).toProperty("volume");
 
   // private instance data
 

@@ -25,6 +25,10 @@
    class="edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityViewPolicy">
   </bean>
 
+  <bean id="entityEditPolicy"
+   class="edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityEditPolicy">
+  </bean>
+
   <bean id="smallMoleculeCherryPickRequestAllowancePolicy"
    class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy">
     <constructor-arg ref="genericEntityDao"/>
@@ -35,20 +39,30 @@
     <constructor-arg ref="genericEntityDao"/>
    </bean>
 
-  <!-- needed for now, since we test SearchResults, which are currently (and unfortunately) backing beans, and in some cases depend upon the 'messages' property being initialized -->
   <bean
-    id="messages"
-    class="edu.harvard.med.screensaver.ui.util.Messages">
-    <property name="messageSource">
-      <bean
-        class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-        <property name="basename" value="classpath:messages" />
-      </bean>
-    </property>
+    id="currentScreensaverUser"
+    class="edu.harvard.med.screensaver.ui.CurrentScreensaverUser"
+    scope="session">
+  </bean>
+
+  <bean id="structureImageProvider"
+        class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
+    <constructor-arg value="http://localhost:8080/" />
   </bean>
 
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-logging.xml"/>
+  <import resource="spring-context-ui.xml"/>
+  
+      <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+        <property name="scopes">
+            <map>
+                <entry key="session">
+                    <bean class="edu.harvard.med.screensaver.ui.MockSessionScope"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
 
 </beans>

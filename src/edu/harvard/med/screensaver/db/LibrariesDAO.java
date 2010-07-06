@@ -75,6 +75,6 @@ public interface LibrariesDAO
 
   public Set<ScreenType> findScreenTypesForWells(Set<WellKey> wellKeys);
 
-  public Set<ScreenType> findScreenTypesForReagents(Set<ReagentVendorIdentifier> reagentIds);
+  public Set<ScreenType> findScreenTypesForReagents(Set<String> reagentIds);
 
 }

@@ -22,7 +22,7 @@ import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -111,8 +111,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
   {
     List<TableColumn<CherryPickRequest,?>> columns = Lists.newArrayList();
 
-    columns.add(new IntegerEntityColumn<CherryPickRequest>(
-      new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "cherryPickRequestId"),
+    columns.add(new IntegerEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class).toProperty("cherryPickRequestId"),
       "CPR #", 
       "The cherry pick request number", 
       TableColumn.UNGROUPED) {
@@ -143,8 +142,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
       public boolean isCommandLink() { return true; }
     });
 
-    columns.add(new DateEntityColumn<CherryPickRequest>(
-      new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "dateRequested"),
+    columns.add(new DateEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class).toProperty("dateRequested"),
       "Date Requested", "The date of the cherry pick request", TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(CherryPickRequest cpr) { return cpr.getDateRequested(); }
@@ -187,8 +185,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
       @Override
       public Integer getCellValue(CherryPickRequest cpr) { return cpr.getCompletedCherryPickAssayPlates().size(); }
     });
-    columns.add(new IntegerEntityColumn<CherryPickRequest>(
-      new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "numberUnfulfilledLabCherryPicks"),
+    columns.add(new IntegerEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class).toProperty("numberUnfulfilledLabCherryPicks"),
       "# Unfulfilled LCPs", 
       "The number of lab cherry picks that have are unfulfilled.", 
       TableColumn.UNGROUPED) {
@@ -213,8 +210,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     
-    columns.add(new VolumeEntityColumn<CherryPickRequest>(
-      new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "volumeApproved"),
+    columns.add(new VolumeEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class).toProperty("volumeApproved"),
       "Volume Approved", 
       "The approved volume of reagent to be used when creating the cherry pick plates",
       TableColumn.UNGROUPED) {
@@ -223,8 +219,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     
-    columns.add(new VolumeEntityColumn<CherryPickRequest>(
-      new PropertyPath<CherryPickRequest>(CherryPickRequest.class, "volumeRequested"),
+    columns.add(new VolumeEntityColumn<CherryPickRequest>(RelationshipPath.from(CherryPickRequest.class).toProperty("volumeRequested"),
       "Volume Requested", 
       "The screener-requested volume of reagent to be used when creating the cherry pick plates",
       TableColumn.UNGROUPED) {

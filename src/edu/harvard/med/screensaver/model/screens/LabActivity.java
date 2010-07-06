@@ -54,7 +54,7 @@ public abstract class LabActivity extends Activity
   private static final Logger log = Logger.getLogger(LabActivity.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<LabActivity> Screen = new RelationshipPath<LabActivity>(LabActivity.class, "screen", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabActivity> Screen = RelationshipPath.from(LabActivity.class).to("screen", Cardinality.TO_ONE);
 
   // private instance fields
 

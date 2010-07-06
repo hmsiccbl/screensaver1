@@ -91,6 +91,11 @@
     </tag>
     
     <tag>
+      <tag-name>studySummaryProperties</tag-name>
+      <source>../studies/studySummaryProperties.xhtml</source>
+    </tag>
+    
+    <tag>
       <tag-name>collectionTable</tag-name>
       <source>../util/collectionTable.xhtml</source>
     </tag>

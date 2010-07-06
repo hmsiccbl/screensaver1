@@ -131,4 +131,19 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     Long count = (Long) getHibernateTemplate().find(hql, screen).get(0);
     return count.intValue();
   }
+
+  @Override
+  public int countFulfilledLabCherryPicks(Screen screen)
+  {
+    String hql = "select count(*) " +
+      "from Screen s " +
+      "join s.cherryPickRequests cpr " +
+      "join cpr.labCherryPicks lcp " +
+      "join lcp.assayPlate cpap " +
+      "join cpap.cherryPickLiquidTransfer cplt " +
+      "where s = ? and cplt.status = 'Successful'";
+    Long count = (Long) getHibernateTemplate().find(hql,screen).get(0);
+    log.error("hql: " + hql + ", screen: " + screen + ", returns: " + count);
+    return count.intValue();
+  }
 }

@@ -33,9 +33,9 @@ import edu.harvard.med.screensaver.ui.table.column.ColumnType;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 
-public class GenericDataExporter<T> implements TableDataExporter<T> 
+public class ExcelWorkbookDataExporter<T> implements TableDataExporter<T> 
 {
-  private static Logger log = Logger.getLogger(GenericDataExporter.class);
+  private static Logger log = Logger.getLogger(ExcelWorkbookDataExporter.class);
 
   public static final String FORMAT_NAME = "Excel Workbook";
   public static final String FORMAT_MIME_TYPE = "application/excel";
@@ -51,7 +51,7 @@ public class GenericDataExporter<T> implements TableDataExporter<T>
   private StructureImageProvider _structureImageProvider;
 
 
-  public GenericDataExporter(String dataTypeName)
+  public ExcelWorkbookDataExporter(String dataTypeName)
   {
     _dataTypeName = dataTypeName;
   }

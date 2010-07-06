@@ -49,9 +49,9 @@ public class LabHead extends ScreeningRoomUser
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(LabHead.class);
   
-  public static final RelationshipPath<LabHead> screensHeaded = new RelationshipPath<LabHead>(LabHead.class, "screensHeaded");
-  public static final RelationshipPath<LabHead> labMembers = new RelationshipPath<LabHead>(LabHead.class, "labMembers");
-  public static final RelationshipPath<LabHead> labAffiliation = new RelationshipPath<LabHead>(LabHead.class, "labAffiliation", Cardinality.TO_ONE);
+  public static final RelationshipPath<LabHead> screensHeaded = RelationshipPath.from(LabHead.class).to("screensHeaded");
+  public static final RelationshipPath<LabHead> labMembers = RelationshipPath.from(LabHead.class).to("labMembers");
+  public static final RelationshipPath<LabHead> labAffiliation = RelationshipPath.from(LabHead.class).to("labAffiliation", Cardinality.TO_ONE);
 
 
   // instance data members

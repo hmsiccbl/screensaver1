@@ -58,8 +58,8 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
   private static final long serialVersionUID = 1L;
   private static Logger log = Logger.getLogger(AnnotationType.class);
   
-  public static final RelationshipPath<AnnotationType> study = new RelationshipPath<AnnotationType>(AnnotationType.class, "study", Cardinality.TO_ONE);
-  public static final RelationshipPath<AnnotationType> annotationValues = new RelationshipPath<AnnotationType>(AnnotationType.class, "annotationValues");
+  public static final RelationshipPath<AnnotationType> study = RelationshipPath.from(AnnotationType.class).to("study", Cardinality.TO_ONE);
+  public static final RelationshipPath<AnnotationType> annotationValues = RelationshipPath.from(AnnotationType.class).to("annotationValues");
 
 
   // private instance data
@@ -177,7 +177,8 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
 
   /**
    * Create and return an annotation value for the annotation type.
-   * @param reagent the reagent vendor identifier
+   * 
+   * @param reagent the reagent
    * @param value the value
    * @return the new annotation value
    */

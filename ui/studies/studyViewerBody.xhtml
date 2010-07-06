@@ -11,7 +11,26 @@
 <ui:composition>
 
 	<t:panelGrid columns="1" width="100%">
-		<ui:include src="studyDetailViewer.xhtml" />
+
+    <h:form id="studyDetailPanelForm">
+      <ss:collapsiblePanel id="studyDetail"
+        isCollapsed="#{studyDetailViewer.isPanelCollapsedMap['studyDetail']}" label="Study">
+        <ui:define name="closedContent">
+          <f:subview id="studySummary">
+            <t:panelGrid columns="4" columnClasses="column,fixedColumn300,column,column">
+              <ss:studySummaryProperties study="#{studyDetailViewer.entity}" />
+            </t:panelGrid>
+          </f:subview>
+        </ui:define>
+        <ui:define name="content">
+          <ui:include src="studyDetailViewerBody.xhtml" />
+        </ui:define>
+      </ss:collapsiblePanel>
+    </h:form>
+
+		<!--  old: 
+  ui:include src="studyDetailViewer.xhtml" 
+  -->
 
 		<h:form id="studyAnnotationsPanelForm">
 			<t:collapsiblePanel id="annotationTypesPanel"
@@ -21,10 +40,10 @@
           <ss:roundedDiv>
             <t:headerLink immediate="true"
               styleClass="transparentSubsectionHeader">
-              <h:graphicImage
+              <t:graphicImage
                 value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
                 styleClass="icon" />
-              <h:outputText value="#{title}"
+              <t:outputText value="#{title}"
                 styleClass="transparentSubsectionHeader" />
             </t:headerLink>
           </ss:roundedDiv>
@@ -60,10 +79,10 @@
           <ss:roundedDiv>
             <t:headerLink immediate="true"
               styleClass="transparentSubsectionHeader">
-              <h:graphicImage
+              <t:graphicImage
                 value="#{isCollapsed ? &quot;/images/collapsed.png&quot; : &quot;/images/expanded.png&quot;}"
                 styleClass="icon" />
-              <h:outputText value="#{title}"
+              <t:outputText value="#{title}"
                 styleClass="transparentSubsectionHeader" />
             </t:headerLink>
           </ss:roundedDiv>

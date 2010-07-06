@@ -30,6 +30,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.MapKeyManyToMany;
 import org.hibernate.annotations.Type;
 
@@ -54,6 +55,8 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 @Entity
 @Immutable
 @Table(uniqueConstraints={@UniqueConstraint(columnNames={"wellId", "libraryContentsVersionId"})})
+@org.hibernate.annotations.Table(appliesTo = "reagent", indexes = {
+ @Index(name = "reagent_vendor_identifier_index", columnNames = { "vendorIdentifier" }) })
 @org.hibernate.annotations.Proxy(lazy=false) // proxying causes problems with casts of getLatestReleasedReagent() return value
 @Inheritance(strategy=InheritanceType.JOINED)
 @ContainedEntity(containingEntityClass=Well.class)
@@ -61,12 +64,13 @@ public abstract class Reagent extends AbstractEntity<Integer> implements Compara
 {
   private static final long serialVersionUID = 1;
 
-  public static final RelationshipPath<Reagent> libraryContentsVersion = new RelationshipPath<Reagent>(Reagent.class, "libraryContentsVersion", Cardinality.TO_ONE);
-  public static final RelationshipPath<Reagent> well = new RelationshipPath<Reagent>(Reagent.class, "well", Cardinality.TO_ONE);
-  public static final RelationshipPath<Reagent> annotationValues = new RelationshipPath<Reagent>(Reagent.class, "annotationValues");
-  public static final RelationshipPath<Reagent> studies = new RelationshipPath<Reagent>(Reagent.class, "studies");
-  public static final PropertyPath<Reagent> vendorName = new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorName");
-  public static final PropertyPath<Reagent> vendorIdentifier = new PropertyPath<Reagent>(Reagent.class, "vendorId.vendorIdentifier");
+
+  public static final RelationshipPath<Reagent> libraryContentsVersion = RelationshipPath.from(Reagent.class).to("libraryContentsVersion", Cardinality.TO_ONE);
+  public static final RelationshipPath<Reagent> well = RelationshipPath.from(Reagent.class).to("well", Cardinality.TO_ONE);
+  public static final RelationshipPath<Reagent> annotationValues = RelationshipPath.from(Reagent.class).to("annotationValues");
+  public static final RelationshipPath<Reagent> studies = RelationshipPath.from(Reagent.class).to("studies");
+  public static final PropertyPath<Reagent> vendorName = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorName");
+  public static final PropertyPath<Reagent> vendorIdentifier = RelationshipPath.from(Reagent.class).toProperty("vendorId.vendorIdentifier");
 
   private LibraryContentsVersion _libraryContentsVersion;
   private Well _well;

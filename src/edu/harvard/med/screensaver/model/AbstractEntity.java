@@ -65,7 +65,6 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
   private Integer _hashCode;
   private boolean _needsUpdate;
 
-
   @Transient
   public K getEntityId()
   {

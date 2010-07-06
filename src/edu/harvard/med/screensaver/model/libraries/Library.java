@@ -101,12 +101,12 @@ public class Library extends AuditedAbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(Library.class);
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<Library> contentsVersions = new RelationshipPath<Library>(Library.class, "contentsVersions");
-  public static final RelationshipPath<Library> latestReleasedContentsVersion = new RelationshipPath<Library>(Library.class, "latestReleasedContentsVersion", Cardinality.TO_ONE);
-  public static final RelationshipPath<Library> wells = new RelationshipPath<Library>(Library.class, "wells");
-  public static final RelationshipPath<Library> copies = new RelationshipPath<Library>(Library.class, "copies");
-  public static final PropertyPath<Library> startPlate = new PropertyPath<Library>(Library.class, "startPlate");
-  public static final PropertyPath<Library> endPlate = new PropertyPath<Library>(Library.class, "endPlate");
+  public static final RelationshipPath<Library> contentsVersions = RelationshipPath.from(Library.class).to("contentsVersions");
+  public static final RelationshipPath<Library> latestReleasedContentsVersion = RelationshipPath.from(Library.class).to("latestReleasedContentsVersion", Cardinality.TO_ONE);
+  public static final RelationshipPath<Library> wells = RelationshipPath.from(Library.class).to("wells");
+  public static final RelationshipPath<Library> copies = RelationshipPath.from(Library.class).to("copies");
+  public static final PropertyPath<Library> startPlate = RelationshipPath.from(Library.class).toProperty("startPlate");
+  public static final PropertyPath<Library> endPlate = RelationshipPath.from(Library.class).toProperty("endPlate");
 
 
   // private instance data
@@ -117,7 +117,7 @@ public class Library extends AuditedAbstractEntity<Integer>
   private String _libraryName;
   private String _shortName;
   private String _description;
-  private String _vendor;
+  private String _provider;
   private ScreenType _screenType;
   private LibraryType _libraryType;
   private boolean _isPool;
@@ -395,24 +395,21 @@ public class Library extends AuditedAbstractEntity<Integer>
   }
 
   /**
-   * Get the vendor.
-   *
-   * @return the vendor
+   * Get the provider of the library. The provider may be a commercial vendor, an academic lab, etc. Note that a library
+   * may be comprised of reagents from multiple {@link Reagent#getVendorId() vendors}, and these vendor(s) are not
+   * necessarily the same as the library's provider.
+   * 
+   * @return
    */
   @org.hibernate.annotations.Type(type = "text")
-  public String getVendor()
+  public String getProvider()
   {
-    return _vendor;
+    return _provider;
   }
 
-  /**
-   * Set the vendor.
-   *
-   * @param vendor the new vendor
-   */
-  public void setVendor(String vendor)
+  public void setProvider(String provider)
   {
-    _vendor = vendor;
+    _provider = provider;
   }
 
   /**

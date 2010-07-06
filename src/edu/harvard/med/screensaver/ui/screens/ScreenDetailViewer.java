@@ -23,8 +23,18 @@ import java.util.SortedSet;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
-import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
@@ -65,19 +75,9 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
+import edu.harvard.med.screensaver.util.StringUtils;
 import edu.harvard.med.screensaver.util.eutils.EutilsException;
 import edu.harvard.med.screensaver.util.eutils.PublicationInfoProvider;
-
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 {
@@ -538,6 +538,9 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                                     _pinTransferApprovedBy.getSelection(),
                                     _pinTransferApprovalDate,
                                     _pinTransferApprovalComments);
+    }
+    else if (!StringUtils.isEmpty(_pinTransferApprovalComments) && screen.getPinTransferApprovalActivity() != null) {
+      screen.getPinTransferApprovalActivity().setComments(_pinTransferApprovalComments);
     }
   }
   

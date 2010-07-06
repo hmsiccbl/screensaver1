@@ -19,10 +19,10 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
 import edu.harvard.med.screensaver.ui.table.EditableDataTable;
-import edu.harvard.med.screensaver.ui.table.RowsPerPageSelector;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 
 /**
@@ -37,23 +37,14 @@ import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
  */
 abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
 {
-
-  // public static final data
-
   private static final Logger log = Logger.getLogger(SearchResults.class);
 
   public static final List<Integer> DEFAULT_ROWS_PER_PAGE_SELECTIONS = Arrays.asList(10,
                                                                                      20,
                                                                                      50,
-                                                                                     100,
-                                                                                     RowsPerPageSelector.SHOW_ALL_VALUE);
-
-  // private instance data
+                                                                                     100);
 
   private Map<String,Boolean> _capabilities = new HashMap<String,Boolean>();
-
-
-  // public constructor
 
   /**
    * @motivation for CGLIB2
@@ -71,7 +62,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     // initialize to do nothing
     initialize(new InMemoryDataModel<R>(new NoOpDataFetcher<R,K,P>()),
                new ArrayList<TableColumn<R,?>>(),
-               new RowsPerPageSelector(Arrays.asList(0)),
+               new UISelectOneBean<Integer>(Arrays.asList(0)),
                false);
   }
 
@@ -126,16 +117,10 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
    *         DataTableRowsPerPageUISelectOneBean, as built by DataTable, is
    *         acceptable.
    */
-  protected RowsPerPageSelector buildRowsPerPageSelector()
+  protected UISelectOneBean<Integer> buildRowsPerPageSelector()
   {
-    RowsPerPageSelector rowsPerPageSelector = new RowsPerPageSelector(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
-                                                                      DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1)) {
-      @Override
-      protected Integer getAllRowsValue()
-      {
-        return getRowCount();
-      }
-    };
+    UISelectOneBean<Integer> rowsPerPageSelector = new UISelectOneBean<Integer>(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
+                                                                                DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1));
     return rowsPerPageSelector;
   }
 

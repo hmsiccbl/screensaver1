@@ -76,12 +76,12 @@ public class CherryPickRequestExporter
       "Gene Name",
       "Sequence",
       "Vendor Name",
-      "Vendor ID"
+      "Reagent ID"
     };
     SCREENER_CHERRY_PICK_HEADERS[ScreenType.SMALL_MOLECULE.ordinal()] = new String[] {
       "ICCB Number",
       "Vendor Name",
-      "Vendor ID"
+      "Reagent ID"
     };
   };
   private static final String[][] LAB_CHERRY_PICK_HEADERS = new String[2][];
@@ -95,14 +95,14 @@ public class CherryPickRequestExporter
       "Gene Name",
       "Sequence",
       "Vendor Name",
-      "Vendor ID" 
+      "Reagent ID" 
     };
     LAB_CHERRY_PICK_HEADERS[ScreenType.SMALL_MOLECULE.ordinal()] = new String[] { 
       "Cherry Pick Plate #",
       "Cherry Pick Plate Well",
       "ICCB Number",
       "Vendor Name",
-      "Vendor ID"
+      "Reagent ID"
     }; 
   }
 

@@ -70,7 +70,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private static final Logger log = Logger.getLogger(DataColumn.class);
   private static final long serialVersionUID = -2325466055774432202L;
 
-  public static final RelationshipPath<DataColumn> ScreenResult = new RelationshipPath<DataColumn>(DataColumn.class, "screenResult", Cardinality.TO_ONE);
+  public static final RelationshipPath<DataColumn> ScreenResult = RelationshipPath.from(DataColumn.class).to("screenResult", Cardinality.TO_ONE);
   
   private static final DataType DEFAULT_DATA_TYPE = DataType.NUMERIC; 
   private static final int DEFAULT_DECIMAL_PLACES = 3;

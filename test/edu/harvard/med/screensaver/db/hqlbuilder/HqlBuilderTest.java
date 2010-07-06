@@ -14,10 +14,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import edu.harvard.med.screensaver.db.hqlbuilder.Conjunction;
-import edu.harvard.med.screensaver.db.hqlbuilder.Disjunction;
-import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
@@ -32,9 +28,9 @@ public class HqlBuilderTest extends TestCase
     from("s", "screenResult", "sr", JoinType.INNER).
     from("sr", "dataColumns", "col", JoinType.INNER).
     where("col", "numeric", Operator.EQUAL, true).
-    where("col", "name", Operator.EQUAL, "Positive").
+      where("col", "name", Operator.TEXT_LIKE, "Positive").
     orderBy("s", "screenNumber");
-    assertEquals("hql text", "select s.screenNumber from Screen s join s.screenResult sr join sr.dataColumns col where col.numeric=:arg0 and col.name=:arg1 order by s.screenNumber",
+    assertEquals("hql text", "select s.screenNumber from Screen s join s.screenResult sr join sr.dataColumns col where col.numeric=:arg0 and lower(col.name) like lower(:arg1) order by s.screenNumber",
                  hb.toHql());
     Map<String,Object> expectedArgs = new HashMap<String,Object>();
     expectedArgs.put("arg0", Boolean.TRUE);

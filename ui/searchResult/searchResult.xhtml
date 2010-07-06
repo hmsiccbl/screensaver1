@@ -226,6 +226,7 @@
 
 			<t:outputText value="#{dataTableBuffer}" escape="false"
 				rendered="#{!searchResults.capabilities['viewEntity'] || !searchResults.entityView}" />
+      <t:outputText value="&lt;no results&gt;" rendered="#{searchResults.dataTableModel.rowCount == 0}"/>
 		</h:form>
 
 		<t:panelGroup

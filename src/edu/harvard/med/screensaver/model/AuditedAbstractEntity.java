@@ -55,9 +55,9 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
 {
   private static final long serialVersionUID = 1L;
 
-  public static final RelationshipPath<AuditedAbstractEntity> dateCreated = new RelationshipPath<AuditedAbstractEntity>(AuditedAbstractEntity.class, "dateCreated");
-  public static final RelationshipPath<AuditedAbstractEntity> createdBy = new RelationshipPath<AuditedAbstractEntity>(AuditedAbstractEntity.class, "createdBy", Cardinality.TO_ONE);
-  public static final RelationshipPath<AuditedAbstractEntity> updateActivities = new RelationshipPath<AuditedAbstractEntity>(AuditedAbstractEntity.class, "updateActivities");
+  public static final RelationshipPath<AuditedAbstractEntity> dateCreated = RelationshipPath.from(AuditedAbstractEntity.class).to("dateCreated");
+  public static final RelationshipPath<AuditedAbstractEntity> createdBy = RelationshipPath.from(AuditedAbstractEntity.class).to("createdBy", Cardinality.TO_ONE);
+  public static final RelationshipPath<AuditedAbstractEntity> updateActivities = RelationshipPath.from(AuditedAbstractEntity.class).to("updateActivities");
   
   protected SortedSet<AdministrativeActivity> _updateActivities = Sets.newTreeSet();
   

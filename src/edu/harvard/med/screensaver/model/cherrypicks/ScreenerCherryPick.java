@@ -62,9 +62,9 @@ public class ScreenerCherryPick extends AbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(ScreenerCherryPick.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<ScreenerCherryPick> cherryPickRequest = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "cherryPickRequest", Cardinality.TO_ONE);
-  public static final RelationshipPath<ScreenerCherryPick> screenedWell = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "screenedWell", Cardinality.TO_ONE);
-  public static final RelationshipPath<ScreenerCherryPick> labCherryPicks = new RelationshipPath<ScreenerCherryPick>(ScreenerCherryPick.class, "labCherryPicks");
+  public static final RelationshipPath<ScreenerCherryPick> cherryPickRequest = RelationshipPath.from(ScreenerCherryPick.class).to("cherryPickRequest", Cardinality.TO_ONE);
+  public static final RelationshipPath<ScreenerCherryPick> screenedWell = RelationshipPath.from(ScreenerCherryPick.class).to("screenedWell", Cardinality.TO_ONE);
+  public static final RelationshipPath<ScreenerCherryPick> labCherryPicks = RelationshipPath.from(ScreenerCherryPick.class).to("labCherryPicks");
 
 
   // private instance data

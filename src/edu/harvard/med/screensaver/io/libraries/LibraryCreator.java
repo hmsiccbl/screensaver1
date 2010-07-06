@@ -11,6 +11,12 @@ package edu.harvard.med.screensaver.io.libraries;
 
 import java.util.Arrays;
 
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -18,12 +24,6 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Command-line application that creates a new library and its wells and imports
@@ -71,7 +71,7 @@ public class LibraryCreator
       
       app.addCommandLineOption(
           OptionBuilder.hasArg()
-          .withArgName("name").withLongOpt("vendor").create("v"));
+            .withArgName("name").withLongOpt("provider").create("lp"));
       app.addCommandLineOption(
           OptionBuilder.hasArg()
           .withArgName("text").withLongOpt("description").create("d"));
@@ -101,7 +101,7 @@ public class LibraryCreator
       int startPlate = app.getCommandLineOptionValue("sp", Integer.class);
       int endPlate = app.getCommandLineOptionValue("ep", Integer.class);
       String vendor = 
-        app.isCommandLineFlagSet("v") ? app.getCommandLineOptionValue("v") : null;
+        app.isCommandLineFlagSet("lp") ? app.getCommandLineOptionValue("lp") : null;
       String description = 
         app.isCommandLineFlagSet("d") ? app.getCommandLineOptionValue("d") : null;
       LocalDate dateReceived = 
@@ -118,7 +118,7 @@ public class LibraryCreator
         new Library(libraryName, shortName, screenType, libraryType, startPlate, endPlate, plateSize);
       library.setPool(isPool);
       library.setDescription(description);
-      library.setVendor(vendor);
+      library.setProvider(vendor);
       library.setDateReceived(dateReceived);
       library.setDateScreenable(dateScreenable);
 

@@ -112,6 +112,13 @@
           </t:selectOneMenu>
         </ui:define>
       </ss:property>
+      
+      <ss:property id="keepSourcePlateCherryPicksTogether" label="Keep Source Plate Cherry Picks Together"
+        type="Boolean"
+        description="True when cherry picks from the same source plate should always be mapped to the same cherry pick plate"
+        value="#{cherryPickRequestDetailViewer.entity.keepSourcePlateCherryPicksTogether}"
+        editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
+        styleClass="command" displayValueOnlyStyleClass="dataText" />
 
       <ss:property id="randomLayout" label="Random plate well layout"
         type="Boolean"
@@ -119,7 +126,7 @@
         value="#{cherryPickRequestDetailViewer.entity.randomizedAssayPlateLayout}"
         editable="#{cherryPickRequestDetailViewer.editMode &amp;&amp; !cherryPickRequestDetailViewer.entity.mapped}"
         styleClass="command" displayValueOnlyStyleClass="dataText" />
-
+        
       <ss:property id="emptyWells" label="Wells to leave empty"
         description="The wells that should be left empty on the cherry pick plates. (e.g. 'Col:3, Row:H, B2, N18')"
         value="#{cherryPickRequestDetailViewer.emptyWellsOnAssayPlate}"

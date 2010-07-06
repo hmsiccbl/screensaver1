@@ -9,9 +9,9 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 /**
  * Maintains the "current" ScreensaverUser entity and provides a single-method
@@ -38,9 +38,9 @@ public class CurrentScreensaverUser
   
   public void setScreensaverUser(ScreensaverUser user)
   {
-    if (_user != null) {
-      throw new IllegalStateException("cannot change screensaver user after it has been set");
-    }
+    //if (_user != null) {
+    //  throw new IllegalStateException("cannot change screensaver user after it has been set");
+    //}
     _user = user;
   }
 

@@ -16,8 +16,6 @@ import com.google.common.collect.Lists;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -93,7 +91,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
     columns.add(new IntegerEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "screenNumber"),
+                                                Screen.thisEntity.toProperty("screenNumber"),
       "Study Number", "The study number", TableColumn.UNGROUPED) {
       @Override
       public Integer getCellValue(Screen study) { return study.getStudyNumber(); }
@@ -104,33 +102,28 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
       @Override
       public boolean isCommandLink() { return true; }
     });
-    columns.add(new TextEntityColumn<Screen>(
-      new PropertyPath(Screen.class, "title"),
+    columns.add(new TextEntityColumn<Screen>(Screen.thisEntity.toProperty("title"),
       "Title", "The title of the study", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Screen study) { return study.getTitle(); }
     });
-    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(
-      new RelationshipPath(Screen.class, "labHead"),
+    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(Screen.labHead,
       "Lab Head", "The head of the lab performing the study", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreeningRoomUser getUser(Screen study) { return study.getLabHead(); }
     });
-    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(
-      new RelationshipPath(Screen.class, "leadScreener"),
+    columns.add(new UserNameColumn<Screen,ScreeningRoomUser>(Screen.leadScreener,
       "Study Head", "The scientist primarily responsible for running the study", TableColumn.UNGROUPED, _userViewer) {
       @Override
       public ScreeningRoomUser getUser(Screen study) { return study.getLeadScreener(); }
     });
-    columns.add(new EnumEntityColumn<Screen,StudyType>(
-      new PropertyPath(Screen.class, "studyType"),
+    columns.add(new EnumEntityColumn<Screen,StudyType>(Screen.thisEntity.toProperty("studyType"),
       "Study Type", "'" + StudyType.IN_SILICO + "'' or '" + StudyType.IN_VITRO +"'",
       TableColumn.UNGROUPED, StudyType.values()) {
       @Override
       public StudyType getCellValue(Screen study) { return study.getStudyType(); }
     });
-    columns.add(new EnumEntityColumn<Screen,ScreenType>(
-      new PropertyPath(Screen.class, "screenType"),
+    columns.add(new EnumEntityColumn<Screen,ScreenType>(Screen.thisEntity.toProperty("screenType"),
       "Library Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
       @Override
       public ScreenType getCellValue(Screen study) { return study.getScreenType(); }

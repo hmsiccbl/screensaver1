@@ -19,18 +19,17 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OrderBy;
-import javax.persistence.Transient;
+
+import com.google.common.collect.Sets;
+import org.hibernate.annotations.Immutable;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
-import org.hibernate.annotations.Immutable;
-
-import com.google.common.collect.Sets;
 
 
 /**
@@ -47,8 +46,8 @@ public class Gene extends AbstractEntity<Integer>
 {
   private static final long serialVersionUID = 0L;
 
-  public static final RelationshipPath<Gene> genbankAccessionNumbers = new RelationshipPath<Gene>(Gene.class, "genbankAccessionNumbers");
-  public static final RelationshipPath<Gene> entrezgeneSymbols = new RelationshipPath<Gene>(Gene.class, "entrezgeneSymbols");
+  public static final PropertyPath<Gene> genbankAccessionNumbers = RelationshipPath.from(Gene.class).toCollectionOfValues("genbankAccessionNumbers");
+  public static final PropertyPath<Gene> entrezgeneSymbols = RelationshipPath.from(Gene.class).toCollectionOfValues("entrezgeneSymbols");
 
   public static final Gene NullGene = new Gene();
 

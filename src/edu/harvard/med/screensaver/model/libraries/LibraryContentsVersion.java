@@ -67,9 +67,9 @@ public class LibraryContentsVersion extends AbstractEntity<Integer> implements C
 
   public static final int FIRST_VERSION_NUMBER = 1;
   
-  public static final RelationshipPath<LibraryContentsVersion> library = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "library", Cardinality.TO_ONE);
-  public static final RelationshipPath<LibraryContentsVersion> loadingActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "loadingActivity", Cardinality.TO_ONE);
-  public static final RelationshipPath<LibraryContentsVersion> releaseActivity = new RelationshipPath<LibraryContentsVersion>(LibraryContentsVersion.class, "releaseActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<LibraryContentsVersion> library = RelationshipPath.from(LibraryContentsVersion.class).to("library", Cardinality.TO_ONE);
+  public static final RelationshipPath<LibraryContentsVersion> loadingActivity = RelationshipPath.from(LibraryContentsVersion.class).to("loadingActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<LibraryContentsVersion> releaseActivity = RelationshipPath.from(LibraryContentsVersion.class).to("releaseActivity", Cardinality.TO_ONE);
 
   private Integer _version; /* for Hibernate optimistic locking */ 
   private Integer _versionNumber; /* for domain model */

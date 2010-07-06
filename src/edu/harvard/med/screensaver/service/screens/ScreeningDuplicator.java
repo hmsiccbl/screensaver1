@@ -11,6 +11,10 @@ package edu.harvard.med.screensaver.service.screens;
 
 import java.util.SortedSet;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -21,11 +25,8 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 /**
  * Adds a new {@link Screening} to a {@link Screen}, copying the following properties from a
@@ -77,18 +78,22 @@ public class ScreeningDuplicator
   }
   
   @Transactional
-  // TODO: can we only pass in cpr
-  public CherryPickScreening addCherryPickScreening(Screen screen, CherryPickRequest cpr, AdministratorUser recordedBy)
+  public CherryPickScreening addCherryPickScreening(Screen screen,
+                                                    ScreeningRoomUser requestedBy,
+                                                    AdministratorUser recordedBy,
+                                                    CherryPickRequest cpr)
   {
     screen = _dao.reloadEntity(screen);
-    cpr = _dao.reloadEntity(cpr, true, CherryPickRequest.requestedBy.getPath());
+    cpr = _dao.reloadEntity(cpr);
+    recordedBy = _dao.reloadEntity(recordedBy);
+    requestedBy = _dao.reloadEntity(requestedBy);
     SortedSet<CherryPickScreening> activities = screen.getLabActivitiesOfType(CherryPickScreening.class);
     CherryPickScreening lastScreening = null;
     if (!activities.isEmpty()) {
       lastScreening = activities.last();
     }
     CherryPickScreening newScreening = screen.createCherryPickScreening(recordedBy,
-                                                                        cpr.getRequestedBy(),
+                                                                        requestedBy,
                                                                         new LocalDate(),
                                                                         cpr);
     
@@ -99,24 +104,23 @@ public class ScreeningDuplicator
   }
   
   @Transactional
-  // TODO: can we only pass in cpr
-  public CherryPickLiquidTransfer addCherryPickLiquidTransfer(Screen screen, 
-                                                              CherryPickRequest cpr, 
+  public CherryPickLiquidTransfer addCherryPickLiquidTransfer(Screen screen,
+                                                              ScreensaverUser requestedBy,
                                                               AdministratorUser recordedBy, 
                                                               CherryPickLiquidTransferStatus status)
   {
     screen = _dao.reloadEntity(screen);
-    cpr = _dao.reloadEntity(cpr, true, CherryPickRequest.requestedBy.getPath());
-    SortedSet<CherryPickLiquidTransfer> activities = screen.getLabActivitiesOfType(CherryPickLiquidTransfer.class);
+    recordedBy = _dao.reloadEntity(recordedBy);
+    requestedBy = _dao.reloadEntity(requestedBy);
+    CherryPickLiquidTransfer newCplt = screen.createCherryPickLiquidTransfer(recordedBy,
+                                                                             requestedBy,
+                                                                             new LocalDate(),
+                                                                             status);
     CherryPickLiquidTransfer lastCplt = null;
+    SortedSet<CherryPickLiquidTransfer> activities = screen.getLabActivitiesOfType(CherryPickLiquidTransfer.class);
     if (!activities.isEmpty()) {
       lastCplt = activities.last();
     }
-    CherryPickLiquidTransfer newCplt = screen.createCherryPickLiquidTransfer(recordedBy,
-                                                                             cpr.getRequestedBy(),
-                                                                             new LocalDate(),
-                                                                             status);
-    
     if (lastCplt != null) {
       copyActivityProperties(lastCplt, newCplt);
     }

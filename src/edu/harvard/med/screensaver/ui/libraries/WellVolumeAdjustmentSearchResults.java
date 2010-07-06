@@ -98,7 +98,7 @@ public class WellVolumeAdjustmentSearchResults extends EntityBasedEntitySearchRe
       public String getCellValue(WellVolumeAdjustment wva) { return wva.getCopy().getName(); }
     });
     columns.add(new FixedDecimalEntityColumn<WellVolumeAdjustment>(
-      new PropertyPath<WellVolumeAdjustment>(WellVolumeAdjustment.class, "volume"),
+                                                                   WellVolumeAdjustment.volume,
       "Volume", "The volume adjustment amount", TableColumn.UNGROUPED) {
       @Override
       public BigDecimal getCellValue(WellVolumeAdjustment wva) { return wva.getVolume().getValue(VolumeUnit.MICROLITERS); }

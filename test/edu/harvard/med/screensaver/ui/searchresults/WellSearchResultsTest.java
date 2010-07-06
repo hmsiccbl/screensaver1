@@ -385,8 +385,8 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     
     // tests the well-to-reagent relationship
     columnNameToExpectedValue.clear();
-    columnNameToExpectedValue.put("Vendor ID", "179");
-    doTestFilterOnColumns(wsr, columnNameToExpectedValue, 3);
+    columnNameToExpectedValue.put("Reagent ID", "sm179");
+    doTestFilterOnColumns(wsr, columnNameToExpectedValue, 2);
 
     // tests the well-to-reagent-to-annotationValue relationship
     columnNameToExpectedValue.clear();
@@ -526,8 +526,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     genericEntityDao.runQuery(new Query() {
       public List execute(Session session) {
         Library library = genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary,
-                                                        true,
-                                                        "wells.screenResults");
+                                                        true);
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
         MakeDummyEntities.makeDummyScreenResult(screen, library);
         genericEntityDao.persistEntity(screen.getLeadScreener());

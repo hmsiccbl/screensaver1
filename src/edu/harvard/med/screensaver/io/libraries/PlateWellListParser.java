@@ -15,20 +15,13 @@ import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.LibrariesDAO;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.util.StringUtils;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.model.libraries.WellKey;
 
 public class PlateWellListParser
 {
-  // static members
-
   private static Logger log = Logger.getLogger(PlateWellListParser.class);
-
 
   // TODO: consider moving these to WellKey
   private static final Pattern _plateWellHeaderLinePattern = Pattern.compile(
@@ -37,27 +30,9 @@ public class PlateWellListParser
   private static final Pattern _plateWellPattern = Pattern.compile(
     "^\\s*((PL[-_]?)?(\\d+))([:;,])?[A-P](0?[1-9]|1[0-9]|2[0-4]).*",
     Pattern.CASE_INSENSITIVE);
-  private static final Pattern _plateNumberPattern = Pattern.compile(
-    "^\\s*(PL[-_]?)?(\\d+)\\s*$",
-    Pattern.CASE_INSENSITIVE);
-  private static final Pattern _wellNamePattern = Pattern.compile(
-    "^\\s*([A-P](0?[1-9]|1[0-9]|2[0-4]))\\s*$",
-    Pattern.CASE_INSENSITIVE);
 
-
-  // instance data members
-
-  private GenericEntityDAO _dao;
-  private LibrariesDAO _librariesDao;
-
-  // public constructors and methods
-
-  public PlateWellListParser(GenericEntityDAO dao,
-                             LibrariesDAO librariesDao)
-  {
-    _dao = dao;
-    _librariesDao = librariesDao;
-  }
+  public PlateWellListParser()
+  {}
 
   /**
    * Parse and return the list of well keys from the plate-well list.
@@ -65,7 +40,7 @@ public class PlateWellListParser
    * @throws IOException
    * @return the list of wells
    */
-  public PlateWellListParserResult parseWellsFromPlateWellList(String plateWellList)
+  public static PlateWellListParserResult parseWellsFromPlateWellList(String plateWellList)
   {
     PlateWellListParserResult result = new PlateWellListParserResult();
     BufferedReader plateWellListReader = new BufferedReader(new StringReader(plateWellList));
@@ -99,18 +74,22 @@ public class PlateWellListParser
           continue;
         }
 
-        Integer plateNumber = parsePlateNumber(tokens[0]);
-        if (plateNumber == null) {
+        Integer plateNumber;
+        try {
+          plateNumber = Integer.valueOf(tokens[0]);
+        }
+        catch (NumberFormatException e) {
           result.addError(lineNumber, "invalid plate number " + tokens[0]);
           continue;
         }
         for (int i = 1; i < tokens.length; i ++) {
-          String wellName = parseWellName(tokens[i]);
-          if (wellName == null) {
+          try {
+            result.addParsedWellKey(new WellKey(plateNumber, tokens[i]));
+          }
+          catch (IllegalArgumentException e) {
             result.addError(lineNumber, "invalid well name " + tokens[i] + " (plate " + plateNumber + ")");
             continue;
           }
-          result.addParsedWellKey(new WellKey(plateNumber, wellName));
         }
       }
     }
@@ -120,34 +99,13 @@ public class PlateWellListParser
     return result;
   }
 
-
-  /**
-   * Parse and return the well for the plate number and well name.
-   * @param plateNumberString the unparsed plate number
-   * @param wellName the unparsed well name
-   * @return the well
-   */
-  // TODO: this method doesn't belong in the parser class (move to calling class)
-  public Well lookupWell(String plateNumberString, String wellName)
-  {
-    Integer plateNumber = parsePlateNumber(plateNumberString);
-    wellName = parseWellName(wellName);
-    if (plateNumber == null || wellName == null) {
-      return null;
-    }
-    return _librariesDao.findWell(new WellKey(plateNumber, wellName));
-  }
-
-
-  // private methods
-
   /**
    * Insert a space between the first plate number and well name if there is no
    * space there already.
    * @param line the line to patch up
    * @return the patched up line
    */
-  private String splitInitialPlateWell(String line)
+  private static String splitInitialPlateWell(String line)
   {
     Matcher matcher = _plateWellPattern.matcher(line);
     if (matcher.matches()) {
@@ -157,45 +115,11 @@ public class PlateWellListParser
         spliceEndIndex ++;
       }
       line = line.substring(0, spliceStartIndex) + " " + line.substring(spliceEndIndex);
-      log.info("spliced line = " + line);
+      if (log.isDebugEnabled()) {
+        log.debug("spliced line = " + line);
+      }
     }
     return line;
-  }
-
-  /**
-   * Parse the plate number.
-   */
-  private Integer parsePlateNumber(String plateNumber)
-  {
-    Matcher matcher = _plateNumberPattern.matcher(plateNumber);
-    if (matcher.matches()) {
-      plateNumber = matcher.group(2);
-      try {
-        return Integer.parseInt(plateNumber);
-      }
-      catch (NumberFormatException e) {
-        // this seems unlikely given the _plateNumberPattern match, but it's actually possible
-        // to match that pattern and still get a NFE, if the number is larger than MAXINT
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Parse the well name.
-   */
-  private String parseWellName(String wellName)
-  {
-    Matcher matcher = _wellNamePattern.matcher(wellName);
-    if (matcher.matches()) {
-      wellName = matcher.group(1);
-      if (wellName.length() == 2) {
-        wellName = wellName.charAt(0) + "0" + wellName.charAt(1);
-      }
-      wellName = StringUtils.capitalize(wellName);
-      return wellName;
-    }
-    return null;
   }
 }
 

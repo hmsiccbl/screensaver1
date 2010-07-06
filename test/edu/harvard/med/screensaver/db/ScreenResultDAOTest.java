@@ -118,7 +118,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
 
     rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENS);
     smallMoleculeUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
-    smallMoleculeLevel3User = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
     smallMoleculeRnaiUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS,
                                               ScreensaverUserRole.RNAI_SCREENS);
 
@@ -190,7 +189,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     Screen screen3 = MakeDummyEntities.makeDummyScreen(screenNumber++, ScreenType.SMALL_MOLECULE);
     screen3.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
     //screen3.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
-    screen3.setLeadScreener(smallMoleculeLevel3User);
+    screen3.setLeadScreener(smallMoleculeUser);
 
     screenResult = screen3.createScreenResult();
     col = screenResult.createDataColumn("col1").forReplicate(1);
@@ -372,10 +371,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     //verify that the SM user can see it
     setCurrentUser(smallMoleculeUser);
     assertTrue("SM user should not be restricted from SM Study", entityViewPolicy.visit(smStudy));
-    
-    //test for users with level 1,2: can see this study, 3 cannot see any
-    setCurrentUser(smallMoleculeLevel3User);
-    assertFalse("smallMoleculeLevel3User user should be restricted from SM Study", entityViewPolicy.visit(smStudy));
     
     setCurrentUser(rnaiUser);
     assertFalse("rnai user should be restricted from SM Study", entityViewPolicy.visit(smStudy));

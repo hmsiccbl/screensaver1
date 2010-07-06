@@ -83,11 +83,11 @@ public class WellsSdfDataExporter implements DataExporter<String>
         toReagentPath = Well.reagents.restrict("libraryContentsVersion", getLibraryContentsVersion());
       }
       relationships.add(toReagentPath.to(Reagent.libraryContentsVersion).toFullEntity());
-      relationships.add(toReagentPath.to(SmallMoleculeReagent.compoundNames).toFullEntity());
-      relationships.add(toReagentPath.to(SmallMoleculeReagent.pubchemCids).toFullEntity());
-      relationships.add(toReagentPath.to(SmallMoleculeReagent.chembankIds).toFullEntity());
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.compoundNames));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.pubchemCids));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.chembankIds));
+      relationships.add(toReagentPath.to(SmallMoleculeReagent.molfileList));
       relationships.add(toReagentPath.to(SilencingReagent.facilityGene).to(Gene.genbankAccessionNumbers).toFullEntity());
-      relationships.add(toReagentPath.to(SmallMoleculeReagent.molfileList).toFullEntity());
       dataFetcher.setPropertiesToFetch(relationships);
 
       writeSDFileSearchResults(writer, Lists.newArrayList(wellKeyStrs), dataFetcher);

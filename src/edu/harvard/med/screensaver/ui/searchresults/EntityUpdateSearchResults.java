@@ -26,7 +26,6 @@ import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
@@ -78,8 +77,7 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity,K extend
   protected List<? extends TableColumn<AdministrativeActivity,?>> buildColumns()
   {
     List<TableColumn<AdministrativeActivity,?>> columns = Lists.newArrayList();
-    columns.add(new DateTimeEntityColumn<AdministrativeActivity>(
-      new PropertyPath<AdministrativeActivity>(AdministrativeActivity.class, "dateCreated"),
+    columns.add(new DateTimeEntityColumn<AdministrativeActivity>(RelationshipPath.from(AdministrativeActivity.class).toProperty("dateCreated"),
       "Date", "The date the update was made",
       TableColumn.UNGROUPED) {
       @Override
@@ -87,15 +85,14 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity,K extend
     });
     
     columns.add(new UserNameColumn<AdministrativeActivity,AdministratorUser>(
-      new RelationshipPath<AdministrativeActivity>(AdministrativeActivity.class, "performedBy"),
+      RelationshipPath.from(AdministrativeActivity.class).to("performedBy"),
       "Updated By", "The person who made the update",
       TableColumn.UNGROUPED, 
       null) {
       @Override protected AdministratorUser getUser(AdministrativeActivity a) { return (AdministratorUser) a.getPerformedBy(); }
     });
 
-    columns.add(new TextEntityColumn<AdministrativeActivity>(
-      new PropertyPath<AdministrativeActivity>(AdministrativeActivity.class, "comments"),
+    columns.add(new TextEntityColumn<AdministrativeActivity>(RelationshipPath.from(AdministrativeActivity.class).toProperty("comments"),
       "Change", "Description of the change",
       TableColumn.UNGROUPED) {
       @Override

@@ -21,17 +21,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
-import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
-import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
+import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.IndexColumn;
 import org.hibernate.annotations.Type;
 
-import com.google.common.collect.Sets;
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.annotations.CollectionOfElements;
+import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 
 /**
@@ -47,10 +47,10 @@ public class SmallMoleculeReagent extends Reagent
 {
   private static final long serialVersionUID = 1L;
 
-  public static final RelationshipPath<SmallMoleculeReagent> compoundNames = new RelationshipPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "compoundNames");
-  public static final RelationshipPath<SmallMoleculeReagent> pubchemCids = new RelationshipPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "pubchemCids");
-  public static final RelationshipPath<SmallMoleculeReagent> chembankIds = new RelationshipPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "chembankIds");
-  public static final RelationshipPath<SmallMoleculeReagent> molfileList = new RelationshipPath<SmallMoleculeReagent>(SmallMoleculeReagent.class, "molfileList");
+  public static final PropertyPath<SmallMoleculeReagent> compoundNames = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("compoundNames");
+  public static final PropertyPath<SmallMoleculeReagent> pubchemCids = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("pubchemCids");
+  public static final PropertyPath<SmallMoleculeReagent> chembankIds = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("chembankIds");
+  public static final PropertyPath<SmallMoleculeReagent> molfileList = RelationshipPath.from(SmallMoleculeReagent.class).toCollectionOfValues("molfileList");
   
   public static final SmallMoleculeReagent NullSmallMoleculeReagent = 
     new SmallMoleculeReagent(new ReagentVendorIdentifier("", ""),
