@@ -1,17 +1,25 @@
-// $HeadURL:$
+// $HeadURL: svn+ssh://js163@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/.eclipse.prefs/codetemplates.xml $
 // $Id: codetemplates.xml 169 2006-06-14 21:57:49Z js163 $
 //
-// Copyright © 2006, 2010 by the President and Fellows of Harvard College.
+// Copyright 2006 by the President and Fellows of Harvard College.
 // 
 // Screensaver is an open-source project developed by the ICCB-L and NSRB labs
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.iccbl.screensaver.pipelinepilot;
+package edu.harvard.med.iccbl.screensaver.soaputils;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
+
+import edu.mit.broad.chembank.shared.mda.webservices.service.FindBySimilarity1Fault1;
+import edu.mit.broad.chembank.shared.mda.webservices.service.MoleculeWebServiceStub.ArrayOfMolecule;
+import edu.mit.broad.chembank.shared.mda.webservices.service.MoleculeWebServiceStub.Molecule;
 
 /**
  * WARNING: this test requires an internet connection.
@@ -22,42 +30,39 @@ import org.apache.log4j.Logger;
 public class ChembankComponentTest extends TestCase
 {
   private static Logger log = Logger.getLogger(ChembankComponentTest.class);
-  private ChembankIDForSmilesComponent _chembankComponent = new ChembankIDForSmilesComponent();
 
   @Override
   protected void setUp() throws Exception
   {
-//    _chembankComponent.onInitialize(null);
-    
     super.setUp();
   }
-  
-//  public void testGetChembankIDsForSmiles1()
-//  {
-//    String smiles = "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1";
-//    try {
-//      long before = System.currentTimeMillis();
-//      List<String> chembankIDs = _chembankComponent.getChembankIdsForSmiles(smiles);
-//      log.info("query time: " + (System.currentTimeMillis()-before) + 
-//          ", smiles:  " + smiles  + ": " + chembankIDs);
-//      assertEquals(1, chembankIDs.size());
-//      assertTrue(chembankIDs.contains("3081674"));
-//      
-//      smiles = "O=C1CC(C)(C)CC(=O)C1C(c1ccccc1)C1=C(O)CC(C)(C)CC1=O";
-//      before = System.currentTimeMillis();
-//      chembankIDs = _chembankComponent.getChembankIdsForSmiles(smiles);
-//      log.info("query time: " + (System.currentTimeMillis()-before) + 
-//          ", smiles:  " + smiles  + ": " + chembankIDs);
-//      assertEquals(1, chembankIDs.size());
-//      assertTrue(chembankIDs.contains("1665724"));
-//      
-//      
-//    } catch (FindBySimilarity1Fault1 e)
-//    {
-//      log.error("Failure: ", e);
-//      fail("Fail with fault: " + e);
-//    }
-//  }
+ 
+  public void testGetChembankIDsForSmiles1() throws RemoteException
+  {
+    String smiles = "Clc1ccc(\\C=C/c2c(C)n(C)n(c3ccccc3)c2=O)c(Cl)c1";
+    try {
+      long before = System.currentTimeMillis();
+      List<String> chembankIDs = PubchemChembankQueryUtility.getChembankIdsForSmiles(smiles);
+      log.info("query time: " + (System.currentTimeMillis()-before) + 
+          ", smiles:  " + smiles  + ": " + chembankIDs);
+      assertEquals(1, chembankIDs.size());
+      assertTrue(chembankIDs.contains("3081674"));
+      
+      smiles = "O=C1CC(C)(C)CC(=O)C1C(c1ccccc1)C1=C(O)CC(C)(C)CC1=O";
+      before = System.currentTimeMillis();
+      chembankIDs = PubchemChembankQueryUtility.getChembankIdsForSmiles(smiles);
+      log.info("query time: " + (System.currentTimeMillis()-before) + 
+          ", smiles:  " + smiles  + ": " + chembankIDs);
+      assertEquals(1, chembankIDs.size());
+      assertTrue(chembankIDs.contains("1665724"));
+      
+      
+    } catch (FindBySimilarity1Fault1 e)
+    {
+      log.error("Failure: ", e);
+      fail("Fail with fault: " + e);
+    }
+  }
 
 //  public void testGetPubchemCidsForSmiles2()
 //  {

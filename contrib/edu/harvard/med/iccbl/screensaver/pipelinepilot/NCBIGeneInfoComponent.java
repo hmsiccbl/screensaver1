@@ -14,6 +14,14 @@ import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfo;
 import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProvider;
 import edu.harvard.med.screensaver.util.eutils.NCBIGeneInfoProviderImpl;
 
+/**
+ * TODO: place this code in a command line utility, i.e. PubchemChembankQueryUtility, however;
+ * TODO: rework code using SOAP; see note - sde4
+ * NOTE:    As noted at: http://eutils.ncbi.nlm.nih.gov/entrez/eutils/soap/v2.0/DOC/esoap_help.html  
+    WSDL2Java from Axis2 generates for efetch_gene.xsd a source code which could not be compiled. This can be fixed if you add some prefix to local variables names in Value_type47 declaration. For example, add "x" as a prefix, so _fun variable become x_fun and fun variable become xfun, etc. There 34 variable names to change: _fun, _inv, _mam, _org, _phg, _pln, _pri, _pro, _rod, _syn, _una, _vrl, _vrt, _pat, _est, _sts, _other, fun, inv, mam, org, phg, pln, pri, pro, rod, syn, una, vrl, vrt, pat, est, sts, other.
+
+ * @author sde4
+ */
 public class NCBIGeneInfoComponent implements com.scitegic.pilot.Component, ScreensaverComponent
 {
   private static Logger log = Logger.getLogger(NCBIGeneInfoComponent.class);
