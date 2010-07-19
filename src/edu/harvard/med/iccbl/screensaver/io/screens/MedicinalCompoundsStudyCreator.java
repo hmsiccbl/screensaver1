@@ -11,6 +11,7 @@ package edu.harvard.med.iccbl.screensaver.io.screens;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -22,6 +23,7 @@ import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.io.FatalParseException;
 import edu.harvard.med.screensaver.io.screens.ScreenCreator;
@@ -42,7 +44,7 @@ import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
-public class MedicinalCompoundsStudyCreator
+public class MedicinalCompoundsStudyCreator extends CommandLineApplication
 {
 
   // static members
@@ -79,32 +81,51 @@ public class MedicinalCompoundsStudyCreator
   private static final String WELL_COLUMN_HEADER = "Well";
   private static final String LAB_AFFILIATION_NAME = "Brigham and Women's Hospital";
 
+  private GenericEntityDAO _dao = null;
+  private ScreenDAO _screenDao = null;
+  private LibrariesDAO _librariesDao = null;
+
+  public MedicinalCompoundsStudyCreator(String[] args)
+  {
+    super(args);
+    _dao = (GenericEntityDAO) getSpringBean("genericEntityDao");
+    _screenDao = (ScreenDAO) getSpringBean("screenDao");
+    _librariesDao = (LibrariesDAO) getSpringBean("librariesDao");
+  }
+
   public static void main(String[] args)
   {
-    final CommandLineApplication app = new CommandLineApplication(args);
+    final MedicinalCompoundsStudyCreator app = new MedicinalCompoundsStudyCreator(args);
     app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("workbook file").withLongOpt("input-file").create("f"));
     try {
-      app.processOptions(true, true);
+      if (!app.processOptions(true, true)) {
+        return;
+      }
     }
     catch (ParseException e1) {
       System.exit(1);
     }
-    final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
-    final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
-    dao.doInTransaction(new DAOTransaction() {
+
+    app.run();
+
+  }
+
+  public void run()
+  {
+    _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         try {
-          Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
+          Screen study = _dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
           if (study != null) {
-            screenDao.deleteStudy(study);
+            _screenDao.deleteStudy(study);
           }
 
-          LabAffiliation labAffiliation = dao.findEntityByProperty(LabAffiliation.class, "affiliationName", LAB_AFFILIATION_NAME);
+          LabAffiliation labAffiliation = _dao.findEntityByProperty(LabAffiliation.class, "affiliationName", LAB_AFFILIATION_NAME);
           if (labAffiliation == null) {
             throw new RuntimeException("expected lab affiliation " + LAB_AFFILIATION_NAME + " to exist");
           }
-          LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu", true, labAffiliation);
-          ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu", false, null);
+          LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(_dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu", true, labAffiliation);
+          ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(_dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu", false, null);
 
           study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO, TITLE);
           study.setSummary(SUMMARY);
@@ -115,8 +136,8 @@ public class MedicinalCompoundsStudyCreator
                                                                C_SUBSTANTIAL_LIABILITY + ". " +
                                                                "No value indicates the compound has not yet been reviewed by this study.",
                                                                false);
-          int n = loadAndCreateReagents(app.getCommandLineOptionValue("f", File.class), dao, annotType);
-          dao.saveOrUpdateEntity(study);
+          int n = loadAndCreateReagents(getCommandLineOptionValue("f", File.class), annotType);
+          _dao.saveOrUpdateEntity(study);
           log.info("created " + n + " annotations");
         }
         catch (Exception e) {
@@ -127,9 +148,7 @@ public class MedicinalCompoundsStudyCreator
     log.info("study successfully added to database");
   }
 
-  protected static int loadAndCreateReagents(File workbookFile,
-                                             GenericEntityDAO dao,
-                                             AnnotationType annotType)
+  protected int loadAndCreateReagents(File workbookFile, AnnotationType annotType)
     throws FileNotFoundException
   {
     int n = 0;
@@ -137,7 +156,7 @@ public class MedicinalCompoundsStudyCreator
 
     for (int iSheet = 0; iSheet < workbook.getWorkbook().getNumberOfSheets(); ++iSheet) {
       Worksheet sheet = workbook.getWorksheet(iSheet);
-      n += loadAndCreateReagentsFromSheet(sheet, dao, annotType);
+      n += loadAndCreateReagentsFromSheet(sheet, annotType);
     }
     if (workbook.getHasErrors()) {
       log.error("Encountered " + workbook.getErrors().size() + " error(s).");
@@ -148,7 +167,7 @@ public class MedicinalCompoundsStudyCreator
     return n;
   }
 
-  private static int loadAndCreateReagentsFromSheet(Worksheet sheet, GenericEntityDAO dao, AnnotationType annotType)
+  private int loadAndCreateReagentsFromSheet(Worksheet sheet, AnnotationType annotType)
   {
     int n = 0;
     try {
@@ -162,8 +181,7 @@ public class MedicinalCompoundsStudyCreator
           if( !sheet.getCell(iVendorColumn, iRow, true).isEmpty()
             && !sheet.getCell(iVendorIdColumn, iRow, true).isEmpty())
           {
-            Reagent reagent = findReagent(dao,
-                                          sheet.getCell(iPlateColumn, iRow, true).getInteger(),
+            Reagent reagent = findReagent(sheet.getCell(iPlateColumn, iRow, true).getInteger(),
                                           sheet.getCell(iWellColumn, iRow, true).getString(),
                                           sheet.getCell(iVendorIdColumn, iRow, true).getAsString(),
                                           sheet.getCell(iVendorIdColumn, iRow, true).getAsString());
@@ -186,18 +204,29 @@ public class MedicinalCompoundsStudyCreator
     }
   }
 
-  private static Reagent findReagent(GenericEntityDAO dao,
-                                     Integer plateNumber,
-                                     String wellName,
-                                     String vendorName, 
-                                     String reagentIdentifier)
+  private Reagent findReagent(Integer plateNumber,
+                              String wellName,
+                              String vendorName,
+                              String reagentIdentifier)
   {
     ReagentVendorIdentifier rvi = new ReagentVendorIdentifier(vendorName, reagentIdentifier);
-    Reagent reagent = dao.findEntityById(Reagent.class, rvi);
+    Set<Reagent> set = _librariesDao.findReagents(rvi, false);
+    Reagent reagent = null;
+    //Reagent reagent = _dao.findEntityById(Reagent.class, rvi);
+    if (set.isEmpty()) {
+      log.warn("no library contains reagent " + rvi);
+    }
+    else if (set.size() > 1) {
+      throw new RuntimeException("more than one reagent found for RVI: " + rvi + ", reagents: " + set);
+    }
+    else {
+      reagent = set.iterator().next();
+    }
+
     if (reagent == null) {
       WellKey wellKey = new WellKey(plateNumber, wellName);
       //log.warn("reagent does not exist with ID " + rvi);
-      Well well = dao.findEntityById(Well.class, wellKey.toString());
+      Well well = _dao.findEntityById(Well.class, wellKey.toString());
       if (well == null) { 
         log.error("unknown reagent " + rvi + "; looking for reagent in well, but no such well " + wellKey);
       }

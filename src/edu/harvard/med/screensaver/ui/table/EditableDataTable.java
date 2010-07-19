@@ -111,6 +111,7 @@ public abstract class EditableDataTable<R> extends DataTable<R>
 
   private void initializeHasEditableColumns(List<? extends TableColumn<R,?>> columns)
   {
+    _hasEditableColumns = false;
     for (TableColumn<R,?> column : columns) {
       if (column.isEditable()) {
         _hasEditableColumns = true;

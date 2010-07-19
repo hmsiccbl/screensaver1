@@ -63,9 +63,19 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
   public static int DEFAULT_RNAI_SCREEN_NUMBER = 200002;
   
   public static final String DEFAULT_SM_STUDY_TITLE = "Reagent Counts for Small Molecule Screens";
-  public static final String DEFAULT_SM_STUDY_SUMMARY = "Annotates Reagents with the number of times screened and the count of positive hits per Reagent (Library Well) across all Small Molecule Screens";
+  public static final String DEFAULT_SM_STUDY_SUMMARY =
+    "Annotates each small molecule reagent with the number of times " +
+    "it has been screened, and the count of positive hits per reagent (library well) " +
+    "across all small molecule screens. This data is based on primary screening data " +
+    "only and the \"positive\" designations were determined by the " +
+    "investigator(s) responsible for each screen.";
   public static final String DEFAULT_RNAi_STUDY_TITLE = "Reagent Counts for RNAi Screens";
-  public static final String DEFAULT_RNAi_STUDY_SUMMARY = "Annotates Reagents with the number of times screened and the count of positive hits per Reagent (Library Well) across all RNAi Screens";
+  public static final String DEFAULT_RNAi_STUDY_SUMMARY =
+    "Annotates each RNAi reagent with the number of times it has " +
+    "been screened, and the count of positive hits per reagent (library well) across " +
+    "all RNAi Screens. This data is based on primary screening data only and the " +
+    "\"positive\" designations were determined by the investigator(s) " +
+    "responsible for each screen.";
 
   public static final String DEFAULT_POSITIVES_ANNOTATION_NAME = "Screen Positives Count";
   public static final String DEFAULT_SM_POSITIVES_ANNOTATION_DESC = "Number of times scored as positive across all Small Molecule Screens";

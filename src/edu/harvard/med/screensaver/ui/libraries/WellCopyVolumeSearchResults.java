@@ -131,15 +131,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
         return aggregateWellVolumeAdjustments(result, nonAggregatedData);
       }
     };
-    DataFetcher<WellVolume,WellKey,Object> wellVolumeDataFetcher =
-      new AggregateDataFetcher<WellVolume,WellKey,WellCopy,Pair<WellKey,String>>(wellCopyDataFetcher) {
-      @Override
-      protected SortedSet<WellVolume> aggregateData(List<WellCopy> nonAggregatedData)
-      {
-        return aggregateWellCopies(nonAggregatedData);
-      }
-      };
-    _wellVolumeSearchResults.initialize(new InMemoryDataModel<WellVolume>(wellVolumeDataFetcher));
+    doInitialize(wellCopyDataFetcher);
   }
 
   public void searchWellsForLibrary(final Library library)
@@ -172,7 +164,13 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
                                               nonAggregatedData);
       }
       };
+    doInitialize(wellCopyDataFetcher);
+  }
+
+  private void doInitialize(DataFetcher<WellCopy,Pair<WellKey,String>,Object> wellCopyDataFetcher)
+  {
     initialize(new InMemoryDataModel<WellCopy>(wellCopyDataFetcher));
+
     DataFetcher<WellVolume,WellKey,Object> wellVolumeDataFetcher =
       new AggregateDataFetcher<WellVolume,WellKey,WellCopy,Pair<WellKey,String>>(wellCopyDataFetcher) {
         @Override

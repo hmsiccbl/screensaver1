@@ -9,10 +9,16 @@
 
 package edu.harvard.med.iccbl.screensaver.io.screens;
 
+import java.util.Set;
+
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.io.screens.ScreenCreator;
@@ -25,9 +31,6 @@ import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
 
 public class IccbCompoundsStudyCreator
 {
@@ -52,6 +55,7 @@ public class IccbCompoundsStudyCreator
       System.exit(1);
     }
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+    final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
     final ScreenDAO screenDao = (ScreenDAO) app.getSpringBean("screenDao");
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
@@ -74,7 +78,7 @@ public class IccbCompoundsStudyCreator
           AnnotationType unsuitableAnnotType = study.createAnnotationType("Unsuitable", "Flag indicating whether compound is unsuitable for screening.", false);
           AnnotationType commentAnnotType = study.createAnnotationType("Notes on Suitability", "Explanation of why compound may be undesirable for screening.", false);
 
-          Reagent reagent = find(dao);
+          Reagent reagent = find(librariesDao);
           unsuitableAnnotType.createAnnotationValue(reagent, "true");
           commentAnnotType.createAnnotationValue(reagent, "Chelates metal and has shown up in a number of assays; from Rez Halese (Novartis), December 2007.");
             
@@ -85,14 +89,17 @@ public class IccbCompoundsStudyCreator
         }
       }
 
-      private Reagent find(final GenericEntityDAO dao) throws ExtantLibraryException
+      private Reagent find(final LibrariesDAO librariesDao) throws ExtantLibraryException
       {
         ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("Novartis", "NIBR1 K839-0057");
-        Reagent reagent = dao.findEntityById(Reagent.class, rvi);
-        if (reagent == null) {
+        Set<Reagent> set = librariesDao.findReagents(rvi, false);
+        if (set.isEmpty()) {
           throw new ExtantLibraryException("no library contains reagent " + rvi);
         }
-        return reagent;
+        else if (set.size() > 1) {
+          throw new ExtantLibraryException("more than one reagent found for RVI: " + rvi + ", reagents: " + set);
+        }
+        return set.iterator().next();
       }
     });
     log.info("study successfully added to database");

@@ -98,7 +98,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     });
 
     // TODO: reimplement this in the proper (performant) HQL!
-    log.info("delete the study: " + finalStudy.getScreenId());
+    log.info("delete the study: " + finalStudy.getScreenNumber());
     runQuery(new edu.harvard.med.screensaver.db.Query() {
       public List<?> execute(Session session)
       {
