@@ -28,8 +28,7 @@ public class PackageTestSuite extends TestSuite
   {
     // test entity model classes
     addTest(CopyTest.suite());
-    addTest(CopyActionTest.suite());
-    addTest(CopyInfoTest.suite());
+    addTest(PlateTest.suite());
     addTest(GeneTest.suite());
     addTest(LibraryTest.suite());
     addTest(LibraryContentsVersionTest.suite());

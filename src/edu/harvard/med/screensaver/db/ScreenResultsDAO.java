@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.db;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
@@ -28,8 +27,6 @@ public interface ScreenResultsDAO
 
   public void deleteScreenResult(ScreenResult screenResult);
   
-  public void populateScreenResultWellLinkTable(int screenResultId) throws DataModelViolationException;
-
   public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey);
 
   public List<DataColumn> findMutualPositiveColumns(ScreenResult sr);

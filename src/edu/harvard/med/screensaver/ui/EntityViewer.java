@@ -9,9 +9,11 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.io.Serializable;
+
 import edu.harvard.med.screensaver.model.Entity;
 
-public interface EntityViewer<E extends Entity>
+public interface EntityViewer<E extends Entity<? extends Serializable>>
 {
   /** Get the current entity */
   E getEntity();

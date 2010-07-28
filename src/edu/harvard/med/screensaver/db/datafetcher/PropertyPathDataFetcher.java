@@ -25,13 +25,14 @@ import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
 import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyNameAndValue;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
-public abstract class PropertyPathDataFetcher<R,E extends AbstractEntity,K> implements DataFetcher<R,K,PropertyPath<E>>
+public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements DataFetcher<R,K,PropertyPath<E>>
 {
   protected static Logger log = Logger.getLogger(EntityDataFetcher.class);
 

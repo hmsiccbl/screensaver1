@@ -23,19 +23,19 @@ import java.util.SortedSet;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.NoSuchEntityException;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -43,7 +43,6 @@ import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
-import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
@@ -67,9 +66,6 @@ import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestDetailViewer;
-import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
 import edu.harvard.med.screensaver.ui.util.AttachedFiles;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
@@ -91,11 +87,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private ActivityViewer _activityViewer;
   private CherryPickRequestDetailViewer _cherryPickRequestDetailViewer;
   private PublicationInfoProvider _publicationInfoProvider;
-  private LabActivitySearchResults _labActivitySearchResults;
-  private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
   private ScreeningDuplicator _screeningDuplicator;
   private AttachedFiles _attachedFiles;
-  private EntityUpdateSearchResults<Screen,Integer> _screenUpdateSearchResults; 
 
   private boolean _isAdminViewMode = false;
   private boolean _isPublishableProtocolDetailsCollapsed = true;
@@ -119,6 +112,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private LocalDate _lastMinAllowedDataPrivacyExpirationDate;
   private LocalDate _lastMaxAllowedDataPrivacyExpirationDate;
 
+  private AttachedFileType _publicationAttachedFileType;
 
   /**
    * @motivation for CGLIB2
@@ -136,11 +130,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                             ActivityViewer activityViewer,
                             CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                             PublicationInfoProvider publicationInfoProvider,
-                            LabActivitySearchResults labActivitiesBrowser,
-                            CherryPickRequestSearchResults cprsBrowser,
                             ScreeningDuplicator screeningDuplicator,
-                            AttachedFiles attachedFiles,
-                            EntityUpdateSearchResults<Screen,Integer> screenUpdateSearchResults)
+                            AttachedFiles attachedFiles)
   {
     super(thisProxy,
           dao,
@@ -152,11 +143,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _activityViewer = activityViewer;
     _cherryPickRequestDetailViewer = cherryPickRequestDetailViewer;
     _publicationInfoProvider = publicationInfoProvider;
-    _labActivitySearchResults = labActivitiesBrowser;
-    _cherryPickRequestSearchResults = cprsBrowser;
     _screeningDuplicator = screeningDuplicator;
     _attachedFiles = attachedFiles;
-    _screenUpdateSearchResults = screenUpdateSearchResults;
     getIsPanelCollapsedMap().put("screenDetail", false);
   }
 
@@ -187,9 +175,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _lastLabHead = screen.getLabHead();
     _lastLeadScreener = screen.getLeadScreener();
     initalizeAttachedFiles(screen);
-    _screenUpdateSearchResults.searchForParentEntity(screen);
-    _labActivitySearchResults.searchLabActivitiesForScreen(screen);
-    _cherryPickRequestSearchResults.searchForScreen(screen);
     _lastMinAllowedDataPrivacyExpirationDate = screen.getMinAllowedDataPrivacyExpirationDate();
     _lastMaxAllowedDataPrivacyExpirationDate = screen.getMaxAllowedDataPrivacyExpirationDate();
     
@@ -208,17 +193,16 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       public boolean apply(AttachedFile af) { return !!!af.getFileType().getValue().equals(Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE); }
     });
     _attachedFiles.setAttachedFilesEntity(screen);
+
+    _publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+    if (_publicationAttachedFileType == null) {
+      throw new NoSuchEntityException(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
+    }
   }
   
   public boolean isAdminViewMode()
   {
     return _isAdminViewMode;
-  }
-
-  @Override
-  public EntityUpdateSearchResults<Screen,Integer> getEntityUpdateSearchResults()
-  {
-    return _screenUpdateSearchResults;
   }
 
   public boolean isPublishableProtocolDetailsCollapsed()
@@ -295,12 +279,18 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   {
     return new ListDataModel(new ArrayList<StatusItem>(getEntity().getStatusItems()));
   }
-
-  public DataModel getLabActivitiesDataModel()
+  
+  public int getLabActivitiesCount()
   {
-    ArrayList<LabActivity> labActivities = new ArrayList<LabActivity>(getEntity().getLabActivities());
-    Collections.reverse(labActivities);
-    return new ListDataModel(labActivities.subList(0, Math.min(CHILD_ENTITY_TABLE_MAX_ROWS, getEntity().getLabActivities().size())));
+    return getEntity().getLabActivities().size();
+  }
+
+  public LabActivity getLastLabActivity()
+  {
+    if (getEntity().getLabActivities().isEmpty()) {
+      return null;
+    }
+    return getEntity().getLabActivities().last();
   }
 
   public DataModel getCherryPickRequestsDataModel()
@@ -355,11 +345,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   public DataModel getFundingSupportsDataModel()
   {
     return new ListDataModel(new ArrayList<FundingSupport>(getEntity().getFundingSupports()));
-  }
-
-  public DataModel getAssayReadoutTypesDataModel()
-  {
-    return new ListDataModel(new ArrayList<AssayReadoutType>(getEntity().getAssayReadoutTypes()));
   }
 
   public DataModel getBillingItemsDataModel()
@@ -612,12 +597,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
           return REDISPLAY_PAGE_ACTION_RESULT;
         }
         _uploadedPublicationAttachedFileContents = null;
-        AttachedFileType publicationAttachedFileType = getDao().findEntityByProperty(AttachedFileType.class, "value", Publication.PUBLICATION_ATTACHED_FILE_TYPE_VALUE);
-        if (publicationAttachedFileType == null) {
-          reportApplicationError("'publication' attached file type does not exist");
-          return REDISPLAY_PAGE_ACTION_RESULT;
-        }
-        publication.createAttachedFile(filename, contentsInputStream, publicationAttachedFileType);
+        publication.createAttachedFile(filename, contentsInputStream, _publicationAttachedFileType);
       }
     }
     catch (IOException e) {
@@ -743,20 +723,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     getEntity().getBillingItems().remove(getRequestMap().get("element"));
     _newBillingItem = null;
     return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UICommand
-  public String browseLabActivities()
-  {
-    _labActivitySearchResults.searchLabActivitiesForScreen(getEntity());
-    return BROWSE_ACTIVITIES;
-  }
-
-  @UICommand
-  public String browseCherryPickRequests()
-  {
-    _cherryPickRequestSearchResults.searchForScreen(getEntity());
-    return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
   @Override

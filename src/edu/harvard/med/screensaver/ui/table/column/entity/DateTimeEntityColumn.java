@@ -11,12 +11,12 @@ package edu.harvard.med.screensaver.ui.table.column.entity;
 
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.column.DateTimeColumn;
 
-public abstract class DateTimeEntityColumn<E extends AbstractEntity> extends DateTimeColumn<E> implements HasFetchPaths<E>
+public abstract class DateTimeEntityColumn<E extends Entity> extends DateTimeColumn<E> implements HasFetchPaths<E>
 {
   private FetchPaths<E,E> _fetchPaths;
   

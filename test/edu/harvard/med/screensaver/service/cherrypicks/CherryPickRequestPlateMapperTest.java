@@ -470,7 +470,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
   {
     Copy copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
     for (int plateNumber = library.getStartPlate(); plateNumber <= library.getEndPlate(); plateNumber++) {
-      copy.createCopyInfo(plateNumber, "<loc>", PlateType.EPPENDORF, new Volume(volume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+      copy.createPlate(plateNumber, "<loc>", PlateType.EPPENDORF, new Volume(volume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
     }
   }
 

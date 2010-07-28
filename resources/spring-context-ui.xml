@@ -181,6 +181,7 @@
         parent="uiBean"
         scope="session">
     <constructor-arg ref="userChecklistItems" />
+    <constructor-arg><value type="java.lang.Class">edu.harvard.med.screensaver.model.users.ScreeningRoomUser</value></constructor-arg>
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="userViewer" />
     <property
@@ -427,11 +428,15 @@
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />
     <constructor-arg ref="screenResultImporter" />
+    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="cherryPickRequestsBrowser" />
+    <constructor-arg ref="librariesBrowser" />
+    <constructor-arg ref="platesScreenedBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
   <bean
-    id="screenUpdateSearchResults"
+    id="entityUpdateHistoryBrowser"
     parent="uiBean"
     scope="session"
     class="edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults">
@@ -453,11 +458,11 @@
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="cherryPickRequestDetailViewer" />
     <constructor-arg ref="publicationInfoProvider" />
-    <constructor-arg ref="labActivitiesBrowser" />
-    <constructor-arg ref="cherryPickRequestsBrowser" />
     <constructor-arg ref="screeningDuplicator" />
     <constructor-arg ref="attachedFiles" />
-    <constructor-arg ref="screenUpdateSearchResults" />
+    <property
+      name="entityUpdateHistoryBrowser"
+      ref="entityUpdateHistoryBrowser" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />
@@ -472,6 +477,7 @@
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="screenResultsDao" />
+    <constructor-arg ref="screenResultDeleter" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg>
       <bean
@@ -495,6 +501,18 @@
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="screenResultLoader" />
+  </bean>
+
+  <bean
+    id="platesScreenedBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.PlateScreeningStatusSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="labActivitiesBrowser" />
+    <aop:scoped-proxy/>
   </bean>
 
   <bean
@@ -542,6 +560,9 @@
     <constructor-arg ref="cherryPickRequestExporter" />
     <constructor-arg ref="smallMoleculeCherryPickRequestAllowancePolicy" />
     <constructor-arg ref="rnaiCherryPickRequestAllowancePolicy" />
+    <property
+      name="entityUpdateHistoryBrowser"
+      ref="entityUpdateHistoryBrowser" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />
@@ -633,24 +654,17 @@
     <constructor-arg ref="usersDao" />
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="screensBrowser" />
-    <constructor-arg ref="userUpdateSearchResults" />
     <constructor-arg ref="attachedFiles"/>
     <constructor-arg ref="userChecklistItems"/>
+    <property
+      name="entityUpdateHistoryBrowser"
+      ref="entityUpdateHistoryBrowser" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />
     <aop:scoped-proxy/>
   </bean>
   
-  <bean
-    id="userUpdateSearchResults"
-    parent="uiBean"
-    scope="session"
-    class="edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults">
-    <constructor-arg ref="genericEntityDao" />
-    <aop:scoped-proxy/>
-  </bean>
-
   <bean
     id="userAgreementUpdaterUi"
     parent="uiBean"
@@ -690,6 +704,10 @@
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
     <constructor-arg ref="cherryPickRequestAllocator" />
+    <constructor-arg ref="librariesBrowser" />
+    <property
+      name="entityUpdateHistoryBrowser"
+      ref="entityUpdateHistoryBrowser" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />
@@ -705,6 +723,9 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="libraryCreator" />
     <constructor-arg ref="libraryViewer" />
+    <property
+      name="entityUpdateHistoryBrowser"
+      ref="entityUpdateHistoryBrowser" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />

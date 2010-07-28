@@ -17,21 +17,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import edu.harvard.med.screensaver.model.NonPersistentEntity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 
 import org.apache.log4j.Logger;
 
-public class WellVolume implements Comparable<WellVolume>
+public class WellVolume extends NonPersistentEntity<String> implements Comparable<WellVolume>
 {
-  // static members
-
   private static Logger log = Logger.getLogger(WellVolume.class);
-
-  // instance data members
   
   private Well _well;
   private AggregateWellInfo _activeWellInfo;
@@ -40,13 +37,14 @@ public class WellVolume implements Comparable<WellVolume>
   public WellVolume(Well well,
                     Collection<WellCopy> wellCopies)
   {
+    super(well.getEntityId());
     _well = well;
     
     List<WellCopy> activeVolumes = new ArrayList<WellCopy>();
     List<WellCopy> retiredVolumes = new ArrayList<WellCopy>();
     for(WellCopy wc:wellCopies)
     {
-      CopyInfo ci = wc.getCopy().getCopyInfo(_well.getPlateNumber());
+      Plate ci = wc.getCopy().getPlates().get(_well.getPlateNumber());
       if(ci == null || !ci.isRetired())
       {
         activeVolumes.add(wc);
@@ -66,31 +64,6 @@ public class WellVolume implements Comparable<WellVolume>
     return _well;
   }
   
-  
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj instanceof WellVolume) {
-      return _well.equals(((WellVolume) obj)._well);
-    }
-    return false;
-  }
-  
-  @Override
-  public int hashCode()
-  {
-    return _well.hashCode();
-  }
-  
-  @Override
-  public String toString()
-  {
-    return _well.getWellKey().toString(); 
-  }
-
   public int compareTo(WellVolume that)
   {
     return this.getWell().compareTo(that.getWell());
@@ -156,6 +129,7 @@ public class WellVolume implements Comparable<WellVolume>
       
       _copyNames = makeCopyNames(_wellCopyVolumes);
     }
+
     public Volume getTotalInitialVolume()
     {
       return _totalInitialVolume;
@@ -195,9 +169,9 @@ public class WellVolume implements Comparable<WellVolume>
       Volume totalInitialVolume = new Volume(0);
       if (wellCopies.size() > 0) {
         for (WellCopy wellCopy : wellCopies) {
-          CopyInfo copyInfoForWell = wellCopy.getCopy().getCopyInfo(_well.getPlateNumber());
-          if (copyInfoForWell != null) {
-             totalInitialVolume = totalInitialVolume.add(copyInfoForWell.getWellVolume());
+          Plate plateForWellCopy = wellCopy.getCopy().getPlates().get(_well.getPlateNumber());
+          if (plateForWellCopy != null) {
+             totalInitialVolume = totalInitialVolume.add(plateForWellCopy.getWellVolume());
           }
         }
       }
@@ -212,6 +186,11 @@ public class WellVolume implements Comparable<WellVolume>
       }
       return new ArrayList<String>(names);
     }    
-  };
-  
+  }
+
+  @Override
+  public boolean isRestricted()
+  {
+    return getWell().isRestricted();
+  }
 }

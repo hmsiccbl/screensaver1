@@ -31,6 +31,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.OptimisticLock;
@@ -71,9 +73,18 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private static final long serialVersionUID = -2325466055774432202L;
 
   public static final RelationshipPath<DataColumn> ScreenResult = RelationshipPath.from(DataColumn.class).to("screenResult", Cardinality.TO_ONE);
+  public static final RelationshipPath<DataColumn> typesDerivedFrom = RelationshipPath.from(DataColumn.class).to("typesDerivedFrom");
+  public static final RelationshipPath<DataColumn> derivedTypes = RelationshipPath.from(DataColumn.class).to("derivedTypes");
   
   private static final DataType DEFAULT_DATA_TYPE = DataType.NUMERIC; 
   private static final int DEFAULT_DECIMAL_PLACES = 3;
+  public static Predicate<DataColumn> isPositiveIndicator = new Predicate<DataColumn>() {
+    @Override
+    public boolean apply(DataColumn dc)
+    {
+      return dc.isPositiveIndicator();
+    }
+  };
   
   private Integer _version;
   private ScreenResult _screenResult;
@@ -94,6 +105,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   private String _assayPhenotype;
   private String _comments;
   private Integer _positivesCount;
+  private Map<PartitionedValue,Integer> _partitionPositivesCounts = Maps.newHashMap();
   private Integer channel;
   private Integer timePointOrdinal;
   private Integer zdepthOrdinal;
@@ -253,12 +265,22 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
 
   private void setDataType(DataType dataType)
   {
+    if (isHibernateCaller()) {
+      _dataType = dataType;
+      return;
+    }
+    
     if (_dataType != null && _dataType != dataType) {
       throw new DataModelViolationException("data type is already set and cannot be changed");
     }
     _dataType = dataType;
     if (dataType.isPositiveIndicator()) {
       _positivesCount = Integer.valueOf(0);
+      if (dataType == DataType.POSITIVE_INDICATOR_PARTITION) {
+        _partitionPositivesCounts.put(PartitionedValue.STRONG, 0);
+        _partitionPositivesCounts.put(PartitionedValue.MEDIUM, 0);
+        _partitionPositivesCounts.put(PartitionedValue.WEAK, 0);
+      }
     }
   }
   
@@ -801,23 +823,16 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   }
 
   /**
-   * Get the number of ResultValues that are positives, if this is an
-   * ActivityIndicator DataColumn.
    * @return the number of ResultValues that are positives, if this is an
-   *         ActivityIndicator DataColumn; otherwise null
+   *         PositiveIndicator DataColumn; otherwise null
    */
-  @edu.harvard.med.screensaver.model.annotations.Column(
-    hasNonconventionalSetterMethod=true,
-    isNotEquivalenceProperty=true
-  )
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true, isNotEquivalenceProperty=true)
   public Integer getPositivesCount()
   {
     return _positivesCount;
   }
 
   /**
-   * Get the ratio of the number of positives to the total number of experimental wells in the
-   * screen result.
    * @return the ratio of the number of positives to the total number of experimental wells in the
    * screen result
    * @see #getPositivesCount()
@@ -832,14 +847,73 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     return null;
   }
 
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true, isNotEquivalenceProperty=true)
+  public Integer getStrongPositivesCount()
+  {
+    return _partitionPositivesCounts.get(PartitionedValue.STRONG);
+  }
+
+  private void setStrongPositivesCount(Integer count)
+  {
+    _partitionPositivesCounts.put(PartitionedValue.STRONG, count);
+  }
+
+  @Transient
+  public Double getStrongPositivesRatio()
+  {
+    if (getStrongPositivesCount() != null) {
+      return getStrongPositivesCount() / (double) getScreenResult().getExperimentalWellCount();
+    }
+    return null;
+  }
+
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true, isNotEquivalenceProperty=true)
+  public Integer getMediumPositivesCount()
+  {
+    return _partitionPositivesCounts.get(PartitionedValue.MEDIUM);
+  }
+  
+  private void setMediumPositivesCount(Integer count)
+  {
+    _partitionPositivesCounts.put(PartitionedValue.MEDIUM, count);
+  }
+
+  @Transient
+  public Double getMediumPositivesRatio()
+  {
+    if (getMediumPositivesCount() != null) {
+      return getMediumPositivesCount() / (double) getScreenResult().getExperimentalWellCount();
+    }
+    return null;
+  }
+
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod=true, isNotEquivalenceProperty=true)
+  public Integer getWeakPositivesCount()
+  {
+    return _partitionPositivesCounts.get(PartitionedValue.WEAK);
+  }
+
+  private void setWeakPositivesCount(Integer count)
+  {
+    _partitionPositivesCounts.put(PartitionedValue.WEAK, count);
+  }
+
+  @Transient
+  public Double getWeakPositivesRatio()
+  {
+    if (getWeakPositivesCount() != null) {
+      return getWeakPositivesCount() / (double) getScreenResult().getExperimentalWellCount();
+    }
+    return null;
+  }
+
   /**
    * Get the result values for this data column.
    * <p>
    * WARNING: obtaining an iterator on the returned collection will cause Hibernate
    * to load all of the ResultValues for this DataColumn, which may be very large!
    * <p>
-   * WARNING: removing an element from this map is not supported; doing so
-   * breaks ScreenResult.plateNumbers semantics.
+   * WARNING: removing an element from this map is not supported
    * @return a Collection of the result values for this data column
    * @motivation for hibernate
    */
@@ -954,11 +1028,9 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     }
 
     if (resultValue.isPositive()) {
-      incrementPositivesCount();
+      incrementPositivesCount(resultValue);
       assayWell.setPositive(true);
     }
-
-    getScreenResult().addWell(assayWell.getLibraryWell());
 
     _resultValues.add(resultValue);
     
@@ -1008,13 +1080,24 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   /**
    * Increment the positives count.
    */
-  private void incrementPositivesCount()
+  private void incrementPositivesCount(ResultValue resultValue)
   {
-    if (_positivesCount == null) {
-      _positivesCount = new Integer(1);
-    }
-    else {
-      ++_positivesCount;
+    if (resultValue.isPositive()) {
+      if (_positivesCount == null) {
+        _positivesCount = 1;
+      }
+      else {
+        ++_positivesCount;
+      }
+      if (getDataType() == DataType.POSITIVE_INDICATOR_PARTITION) {
+        PartitionedValue pv = (PartitionedValue) resultValue.getTypedValue();
+        if (_partitionPositivesCounts.get(pv) == null) {
+          _partitionPositivesCounts.put(pv, 1);
+        }
+        else {
+          _partitionPositivesCounts.put(pv, _partitionPositivesCounts.get(pv) + 1);
+        }
+      }
     }
   }
 

@@ -21,6 +21,7 @@ import edu.harvard.med.screensaver.policy.EntityViewPolicy;
  */
 public interface Entity<K extends Serializable>
 {
+
   public static final Function<Entity,Serializable> ToEntityId = new Function<Entity,Serializable>() {
     public Serializable apply(Entity entity)
     {

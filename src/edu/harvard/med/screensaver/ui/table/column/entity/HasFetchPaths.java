@@ -11,12 +11,12 @@ package edu.harvard.med.screensaver.ui.table.column.entity;
 
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 
-public interface HasFetchPaths<E extends AbstractEntity>
+public interface HasFetchPaths<E extends Entity>
 {
   Set<RelationshipPath<E>> getRelationshipPaths();
 

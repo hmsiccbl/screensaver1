@@ -20,21 +20,21 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyAction;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AbaseTestset;
 import edu.harvard.med.screensaver.model.screens.BillingInformation;
@@ -43,7 +43,6 @@ import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -113,6 +112,12 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
 
   @Override
   public boolean visit(AnnotationValue annotationValue)
+  {
+    return false;
+  }
+
+  @Override
+  public boolean visit(AssayPlate assayPlate)
   {
     return false;
   }
@@ -190,13 +195,7 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   }
 
   @Override
-  public boolean visit(CopyAction entity)
-  {
-    return visit(entity.getCopyInfo());
-  }
-
-  @Override
-  public boolean visit(CopyInfo entity)
+  public boolean visit(Plate entity)
   {
     return visit(entity.getCopy());
   }
@@ -259,12 +258,6 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   public boolean visit(NaturalProductReagent entity)
   {
     return false;
-  }
-
-  @Override
-  public boolean visit(PlatesUsed entity)
-  {
-    return visit(entity.getLibraryScreening());
   }
 
   @Override

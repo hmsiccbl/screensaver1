@@ -75,12 +75,12 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   @Override
   public void searchAll()
   {
-    initialize(new InMemoryEntityDataModel<A>(new EntityDataFetcher<A,Integer>(_type, _dao)));
+    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao)));
   }
 
   public void searchActivitiesForUser(final ScreensaverUser user)
   {
-    initialize(new InMemoryEntityDataModel<A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -89,9 +89,9 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
     }));
   }
 
-  public void searchActivities(final Set<Activity> activities)
+  public void searchActivities(final Set<A> activities)
   {
-    initialize(new InMemoryEntityDataModel<A>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {

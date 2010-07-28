@@ -28,8 +28,8 @@ import edu.harvard.med.screensaver.model.Entity;
  * 
  * @author atolopko
  */
-public interface EntityUpdater
+public interface EntityUpdater<E extends Entity> 
 {
-  Class<? extends Entity> getEntityClass();
-  void apply(Entity entity);
+  Class<E> getEntityClass();
+  void apply(E entity);
 }

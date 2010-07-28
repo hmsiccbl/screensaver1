@@ -9,14 +9,15 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import org.springframework.transaction.annotation.Transactional;
+import java.io.Serializable;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 
+import org.springframework.transaction.annotation.Transactional;
 
-public abstract class SearchResultContextEntityViewerBackingBean<E extends AbstractEntity,R> extends EntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E,R>
+public abstract class SearchResultContextEntityViewerBackingBean<E extends Entity<? extends Serializable>,R> extends EntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E,R>
 {
   private EntitySearchResults<E,R,?> _entitySearchResults;
   private String _browserActionResult;

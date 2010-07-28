@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,7 +31,6 @@ import org.apache.myfaces.custom.datascroller.ScrollerActionEvent;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.io.TableDataExporter;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.ui.EntityViewer;
@@ -49,7 +49,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class EntitySearchResults<E extends AbstractEntity, R, K> extends SearchResults<R,K,PropertyPath<E>>
+public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serializable> extends SearchResults<R,K,PropertyPath<E>>
 {
   private static Logger log = Logger.getLogger(EntitySearchResults.class);
   private static final String[] CAPABILITIES = { "viewEntity", "exportData", "filter" };

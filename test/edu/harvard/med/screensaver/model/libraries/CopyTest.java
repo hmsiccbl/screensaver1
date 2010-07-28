@@ -14,6 +14,7 @@ import java.beans.IntrospectionException;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
+import edu.harvard.med.screensaver.model.Volume;
 
 public class CopyTest extends AbstractEntityInstanceTest<Copy>
 {
@@ -25,6 +26,24 @@ public class CopyTest extends AbstractEntityInstanceTest<Copy>
   public CopyTest() throws IntrospectionException
   {
     super(Copy.class);
+  }
+  
+  @SuppressWarnings("deprecation")
+  public void testPlates()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+    
+    Copy copy = dataFactory.newInstance(Copy.class);
+    copy.getLibrary().setStartPlate(1);
+    copy.getLibrary().setStartPlate(1);
+    copy.createPlate(1, "fridge1", PlateType.EPPENDORF, new Volume(30));
+    persistEntityNetwork(copy);
+    //genericEntityDao.persistEntity(copy.getLibrary());
+    
+    Copy copy2 = genericEntityDao.findAllEntitiesOfType(Copy.class, true, Copy.plates.getPath()).get(0);
+    Plate plate2 = genericEntityDao.findAllEntitiesOfType(Plate.class, true, Plate.copy.getPath()).get(0);
+    assertEquals(copy2.getPlates().get(1), plate2);
+    assertEquals(plate2.getCopy(), copy2);
   }
 }
 

@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -321,7 +322,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   }
 
   public Collection<WellCopy> findWellCopyVolumes(CherryPickRequest cherryPickRequest,
-                                                        boolean forUnfufilledLabCherryPicksOnly)
+                                                  boolean forUnfufilledLabCherryPicksOnly)
   {
     return null;
   }
@@ -355,39 +356,36 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
-  public void populateScreenResultWellLinkTable(int screenResultId)
-  {
-    log.info("method not implemented: saveScreenResultWellLinkTable");
-  }
-  
   @Override
   public int countExperimentalWells(int startPlate, int endPlate)
   {
-    log.warn("method not implemented!");
     return 0;
+  }
+
+  @Override
+  public Plate findPlate(int plateNumber, String copyName)
+  {
+    return null;
   }
    
   @Override
   public List<DataColumn> findMutualPositiveColumns(ScreenResult sr)
   {
-    log.warn("method not implemented!");
     return null;
   }   
   
   @Override
-  public int createScreenedReagentCounts(final ScreenType screenType,
-                                          Screen study,
-                                          AnnotationType positiveAnnotationType,
-                                          AnnotationType overallAnnotationType)
+  public int createScreenedReagentCounts(ScreenType screenType,
+                                         Screen study,
+                                         AnnotationType positiveAnnotationType,
+                                         AnnotationType overallAnnotationType)
   {
-    log.warn("method not implemented!");
     return 0;
   }
 
   @Override
   public ScreenResult getLatestScreenResult()
   {
-    log.warn("method not implemented!");
     return null;
   }
 

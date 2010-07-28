@@ -9,10 +9,6 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -21,49 +17,47 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
+
+import com.google.common.base.Function;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
-
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
+import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 
 /**
- * A Hibernate entity bean representing a copy info.
+ * A plate for a particular {@link Library} {@link Copy}.
  *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "copyId", "plateNumber" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Copy.class)
-public class CopyInfo extends AbstractEntity<Integer>
+public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
 {
-
-  // static fields
-
-  private static final Logger log = Logger.getLogger(CopyInfo.class);
   private static final long serialVersionUID = 0L;
-
-
-  // private instance fields
+  
+  public static final RelationshipPath<Plate> copy = RelationshipPath.from(Plate.class).to("copy", Cardinality.TO_ONE);
+  
+  public static final Function<Plate,Integer> ToPlateNumber = new Function<Plate,Integer>() { public Integer apply(Plate p) { return p.getPlateNumber(); } };
+  public static final Function<Plate,Copy> ToCopy = new Function<Plate,Copy>() { public Copy apply(Plate p) { return p.getCopy(); } };
+    
 
   private Integer _version;
   private Copy _copy;
-  private Set<CopyAction> _copyActions = new HashSet<CopyAction>();
   private Integer _plateNumber;
   private String _location;
   private PlateType _plateType;
@@ -74,7 +68,33 @@ public class CopyInfo extends AbstractEntity<Integer>
   private LocalDate _dateRetired;
 
 
-  // public instance methods
+  /**
+   * Construct an initialized <code>Plate</code>. Intended only for use by {@link Copy}.
+   * @param copy the copy
+   * @param plateNumber the plate number
+   * @param location the location
+   * @param plateType the plate type
+   * @param volume the volume
+   * @motivation intended only for use by {@link Copy}
+   */
+  Plate(
+    Copy copy,
+    Integer plateNumber,
+    String location,
+    PlateType plateType,
+    Volume volume)
+  {
+    _copy = copy;
+    _plateNumber = plateNumber;
+    _location = location;
+    _plateType = plateType;
+    setWellVolume(volume);
+  }
+
+  /**
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected Plate() {}
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -88,12 +108,12 @@ public class CopyInfo extends AbstractEntity<Integer>
    */
   @Id
   @org.hibernate.annotations.GenericGenerator(
-    name="copy_info_id_seq",
+    name="plate_id_seq",
     strategy="sequence",
-    parameters = { @Parameter(name="sequence", value="copy_info_id_seq") }
+    parameters = { @Parameter(name="sequence", value="plate_id_seq") }
   )
-  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="copy_info_id_seq")
-  public Integer getCopyInfoId()
+  @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="plate_id_seq")
+  public Integer getPlateId()
   {
     return getEntityId();
   }
@@ -105,44 +125,16 @@ public class CopyInfo extends AbstractEntity<Integer>
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="copyId", nullable=false, updatable=false)
   @org.hibernate.annotations.Immutable
-  @org.hibernate.annotations.ForeignKey(name="fk_copy_info_to_copy")
+  @org.hibernate.annotations.ForeignKey(name="fk_plate_to_copy")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
   public Copy getCopy()
   {
     return _copy;
   }
 
-  /**
-   * Get the set of copy actions.
-   * @return the copy actions
-   */
-  @OneToMany(
-    mappedBy="copyInfo",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
-  @OrderBy("date")
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
-  public Set<CopyAction> getCopyActions()
+  private void setCopy(Copy copy)
   {
-    return _copyActions;
-  }
-
-  /**
-   * Create and return a new copy action for the copy info
-   * @param description the description
-   * @param date the date
-   * @return the newly created copy action for the copy info
-   */
-  public CopyAction createCopyAction(String description, LocalDate date)
-  {
-    CopyAction copyAction = new CopyAction(this, description, date);
-    // no need to check for duplicate entities here since copy actions are not SemanticID
-    _copyActions.add(copyAction);
-    return copyAction;
+    _copy = copy;
   }
 
   /**
@@ -151,9 +143,14 @@ public class CopyInfo extends AbstractEntity<Integer>
    */
   @org.hibernate.annotations.Immutable
   @Column(nullable=false)
-  public Integer getPlateNumber()
+  public int getPlateNumber()
   {
     return _plateNumber;
+  }
+
+  private void setPlateNumber(int plateNumber)
+  {
+    _plateNumber = plateNumber;
   }
 
   /**
@@ -210,6 +207,10 @@ public class CopyInfo extends AbstractEntity<Integer>
     return _wellVolume;
   }
 
+  private void setWellVolume(Volume volume)
+  {
+    _wellVolume = volume;
+  }
   /**
    * Get the comments.
    * @return the comments
@@ -278,56 +279,15 @@ public class CopyInfo extends AbstractEntity<Integer>
   }
 
 
-  // package constructor
-
   /**
-   * Construct an initialized <code>CopyInfo</code>. Intended only for use by {@link Copy}.
-   * @param copy the copy
-   * @param plateNumber the plate number
-   * @param location the location
-   * @param plateType the plate type
-   * @param volume the volume
-   * @motivation intended only for use by {@link Copy}
-   */
-  CopyInfo(
-    Copy copy,
-    Integer plateNumber,
-    String location,
-    PlateType plateType,
-    Volume volume)
-  {
-    _copy = copy;
-    _plateNumber = plateNumber;
-    _location = location;
-    _plateType = plateType;
-    setWellVolume(volume);
-  }
-
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>CopyInfo</code>.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected CopyInfo() {}
-
-
-  // private constructors and instance methods
-
-  /**
-   * Set the id for the copy info.
-   * @param copyInfoId the new id for the copy info
    * @motivation for hibernate
    */
-  private void setCopyInfoId(Integer copyInfoId)
+  private void setPlateId(Integer plateId)
   {
-    setEntityId(copyInfoId);
+    setEntityId(plateId);
   }
 
   /**
-   * Get the version for the copy info.
-   * @return the version for the copy info
    * @motivation for hibernate
    */
   @Version
@@ -336,53 +296,24 @@ public class CopyInfo extends AbstractEntity<Integer>
     return _version;
   }
 
-  /**
-   * Set the version for the copy info.
-   * @param version the new version for the copy info
-   * @motivation for hibernate
-   */
   private void setVersion(Integer version)
   {
     _version = version;
   }
-
-  /**
-   * Set the copy.
-   * @param copy the new copy
-   * @motivation for hibernate
-   */
-  private void setCopy(Copy copy)
+  
+  @Transient
+  public PlateSize getPlateSize()
   {
-    _copy = copy;
+    return _copy.getLibrary().getPlateSize();
   }
 
-  /**
-   * Set the copy actions.
-   * @param copyActions the new copy actions
-   * @motivation for hibernate
-   */
-  private void setCopyActions(Set<CopyAction> copyActions)
+  @Override
+  public int compareTo(Plate other)
   {
-    _copyActions = copyActions;
-  }
-
-  /**
-   * Set the plate number.
-   * @param plateNumber the new plate number
-   * @motivation for hibernate
-   */
-  private void setPlateNumber(Integer plateNumber)
-  {
-    _plateNumber = plateNumber;
-  }
-
-  /**
-   * Set the volume.
-   * @param volume the new volume
-   * @motivation for hibernate and package constructor
-   */
-  private void setWellVolume(Volume volume)
-  {
-    _wellVolume = volume;
+    int result = this.getPlateNumber() > other.getPlateNumber() ? 1 : this.getPlateNumber() < other.getPlateNumber() ? -1 : 0; 
+    if (result == 0) {
+      result = this.getCopy().compareTo(other.getCopy());
+    }
+    return result;
   }
 }

@@ -539,7 +539,6 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     genericEntityDao.runQuery(new Query() {
       public List execute(Session session) {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true);
-        genericEntityDao.needReadOnly(screen.getScreenResult(), "wells");
         genericEntityDao.needReadOnly(screen.getScreenResult(), "dataColumns.resultValues");
         return Arrays.asList(screen.getScreenResult());
       }
@@ -552,7 +551,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       public List execute(Session session) {
         Library library = genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary,
                                                         true,
-                                                        "wells");
+                                                        Library.wells.getPath());
         Study study = MakeDummyEntities.makeDummyStudy(library);
 
         

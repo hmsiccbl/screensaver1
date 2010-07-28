@@ -394,7 +394,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
   @JoinColumn(name="cherryPickScreeningId", nullable=true)
   @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_assay_plate_to_cherry_pick_screening")
   @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @ToOne(inverseProperty="assayPlatesScreened", hasNonconventionalSetterMethod=true /* has constraint that isPlated()==true */ )
+  @ToOne(inverseProperty="cherryPickAssayPlatesScreened", hasNonconventionalSetterMethod=true /* has constraint that isPlated()==true */ )
   public CherryPickScreening getCherryPickScreening()
   {
     return _cherryPickScreening;
@@ -407,14 +407,14 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
       return;
     }
     if (_cherryPickScreening != null && cherryPickScreening == null) {
-      _cherryPickScreening.getAssayPlatesScreened().remove(this);
+      _cherryPickScreening.getCherryPickAssayPlatesScreened().remove(this);
     }
     _cherryPickScreening = cherryPickScreening;
     if (_cherryPickScreening != null) {
       if (!isPlated()) {
         throw new DataModelViolationException("cannot mark assay plate as \"screened\" unless it has been \"plated\"");
       }
-      _cherryPickScreening.getAssayPlatesScreened().add(this);
+      _cherryPickScreening.getCherryPickAssayPlatesScreened().add(this);
     }
   }
 

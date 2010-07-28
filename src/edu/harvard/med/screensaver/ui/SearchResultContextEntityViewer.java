@@ -9,10 +9,12 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import java.io.Serializable;
+
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 
-public interface SearchResultContextEntityViewer<E extends AbstractEntity,R>
+public interface SearchResultContextEntityViewer<E extends Entity<? extends Serializable>,R>
 {
   EntitySearchResults<E,R,?> getContextualSearchResults();
 }

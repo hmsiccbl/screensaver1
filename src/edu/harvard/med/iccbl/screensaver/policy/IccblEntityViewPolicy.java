@@ -35,18 +35,18 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyAction;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -59,7 +59,6 @@ import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
@@ -148,6 +147,11 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return visit(annotationValue.getAnnotationType());
   }
 
+  public boolean visit(AssayPlate assayPlate)
+  {
+    return true;
+  }
+
   public boolean visit(AssayWell assayWell)
   {
     return true;
@@ -224,12 +228,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return true;
   }
 
-  public boolean visit(CopyAction entity)
-  {
-    return true;
-  }
-
-  public boolean visit(CopyInfo entity)
+  public boolean visit(Plate entity)
   {
     return true;
   }
@@ -269,11 +268,6 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   }
     
   public boolean visit(LibraryContentsVersion libraryContentsVersion)
-  {
-    return true;
-  }
-
-  public boolean visit(PlatesUsed entity)
   {
     return true;
   }
@@ -569,18 +563,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
 
   public boolean visit(ScreenResult screenResult)
   {
-    Screen screen = screenResult.getScreen();
-    if (!!!visit(screen)) {
-      return false;
-    }
-    if (isReadEverythingAdmin() || findMyScreens().contains(screen)) {
-      return true;
-    }
-    if (findPublicScreens().contains(screen) || 
-      findMutualSmallMoleculeScreens().contains(screen)) {
-      return true;
-    }
-    return false;
+    return isAllowedAccessToScreenDetails(screenResult.getScreen());
   }
 
   public boolean visit(ScreeningRoomUser screeningRoomUser)
@@ -655,6 +638,10 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return true;
   }
 
+  /**
+   * @return true if user should be allowed to view the Screen's summary,
+   *         publishable protocol, screening summary, and screen result data.
+   */
   public boolean isAllowedAccessToScreenDetails(Screen screen)
   {
     if (!!!visit(screen)) {

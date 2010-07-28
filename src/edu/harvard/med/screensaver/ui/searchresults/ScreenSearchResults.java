@@ -88,7 +88,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       showMessage("screens.noScreensForUser");
     }
     else {
-      initialize(new InMemoryEntityDataModel<Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+      initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
@@ -104,7 +104,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   @Override
   public void searchAll()
   {
-    initialize(new InMemoryEntityDataModel<Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -116,7 +116,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
 
   public void searchScreens(final Set<Screen> screens)
   {
-    initialize(new InMemoryEntityDataModel<Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -212,7 +212,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       @Override
       public Set<String> getCellValue(Screen screen)
       {
-        return Sets.newHashSet(Iterables.transform(screen.getAssayReadoutTypes(), Functions.toStringFunction())); 
+        return Sets.newHashSet(Iterables.transform(screen.getScreenResult().getAssayReadoutTypes(), Functions.toStringFunction())); 
       }
     });
     columns.get(columns.size() - 1).setAdministrative(true);

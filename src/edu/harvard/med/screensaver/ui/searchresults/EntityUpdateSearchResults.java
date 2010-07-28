@@ -34,14 +34,16 @@ import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 
-public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity,K extends Serializable> extends EntityBasedEntitySearchResults<AdministrativeActivity,K>
+public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity<K>, K extends Serializable> 
+  extends EntityBasedEntitySearchResults<AdministrativeActivity,Integer>
 {
   private static Logger log = Logger.getLogger(EntityUpdateSearchResults.class);
   
   private GenericEntityDAO _dao;
 
   private AE _auditedEntity;
-  
+
+    
   protected EntityUpdateSearchResults() {}
   
   public EntityUpdateSearchResults(GenericEntityDAO dao) 
@@ -49,7 +51,6 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity,K extend
     _dao = dao;
   }
   
-
   @Override
   public void searchAll()
   {
@@ -58,21 +59,26 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity,K extend
 
   public void searchForParentEntity(AE auditedEntity)
   {
-    _auditedEntity = auditedEntity;
+    _auditedEntity = _dao.reloadEntity(auditedEntity, true, AuditedAbstractEntity.updateActivities.getPath());
 
-    EntityDataFetcher<AdministrativeActivity,K> dataFetcher = 
-      new EntityDataFetcher<AdministrativeActivity,K>(AdministrativeActivity.class, _dao) {
+    EntityDataFetcher<AdministrativeActivity,Integer> dataFetcher =
+      new EntityDataFetcher<AdministrativeActivity,Integer>(AdministrativeActivity.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
         DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), Sets.newHashSet(Iterables.transform(_auditedEntity.getUpdateActivities(), Entity.ToEntityId)));
       }
       };
-    initialize(new InMemoryEntityDataModel<AdministrativeActivity>(dataFetcher));
+    initialize(new InMemoryEntityDataModel<AdministrativeActivity,Integer>(dataFetcher));
     getColumnManager().setSortColumnName("Date");
     getColumnManager().setSortDirection(SortDirection.DESCENDING);
   }
-
+  
+  public AE getAuditedEntity()
+  {
+    return _auditedEntity;
+  }
+  
   @Override
   protected List<? extends TableColumn<AdministrativeActivity,?>> buildColumns()
   {
@@ -89,7 +95,7 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity,K extend
       "Updated By", "The person who made the update",
       TableColumn.UNGROUPED, 
       null) {
-      @Override protected AdministratorUser getUser(AdministrativeActivity a) { return (AdministratorUser) a.getPerformedBy(); }
+      @Override public AdministratorUser getUser(AdministrativeActivity a) { return (AdministratorUser) a.getPerformedBy(); }
     });
 
     columns.add(new TextEntityColumn<AdministrativeActivity>(RelationshipPath.from(AdministrativeActivity.class).toProperty("comments"),

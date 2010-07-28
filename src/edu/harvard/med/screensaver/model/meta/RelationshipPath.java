@@ -19,7 +19,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.util.CollectionUtils;
 import edu.harvard.med.screensaver.util.ParallelIterator;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -39,7 +39,7 @@ import edu.harvard.med.screensaver.util.StringUtils;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class RelationshipPath<E extends AbstractEntity/* ,L */>
+public class RelationshipPath<E extends Entity/* ,L */>
 {
   private static Logger log = Logger.getLogger(RelationshipPath.class);
   private static Pattern collectionIndexPattern = Pattern.compile("(.+)\\[(.+)\\]");
@@ -48,7 +48,7 @@ public class RelationshipPath<E extends AbstractEntity/* ,L */>
 
   private Class<E> _rootEntityClass;
   protected List<String> _path = Lists.newArrayList();
-  protected List<Class<? extends AbstractEntity>> _entityClasses = Lists.newArrayList();
+  protected List<Class<? extends Entity>> _entityClasses = Lists.newArrayList();
   protected List<String> _inversePath = Lists.newArrayList();
   protected List<PropertyNameAndValue> _restrictions = Lists.newArrayList();
   protected List<Cardinality> _cardinality = Lists.newArrayList();
@@ -57,7 +57,7 @@ public class RelationshipPath<E extends AbstractEntity/* ,L */>
   protected String _asString;
 
 
-  public static <E extends AbstractEntity> RelationshipPath<E> from(Class<E> entityClass)
+  public static <E extends Entity> RelationshipPath<E> from(Class<E> entityClass)
   {
     return new RelationshipPath<E>(entityClass);
   }
@@ -86,9 +86,12 @@ public class RelationshipPath<E extends AbstractEntity/* ,L */>
     return to(relatedEntityName, null, null, cardinality);
   }
 
-  public RelationshipPath<E> to(String relatedEntityName, Class<? extends AbstractEntity> relatedEntityClass, String inverseEntityName, Cardinality cardinality)
+  public RelationshipPath<E> to(String relatedEntityName,
+                                Class<? extends Entity> relatedEntityClass,
+                                String inverseEntityName,
+                                Cardinality cardinality)
   {
-    List<Class<? extends AbstractEntity>> newEntityClasses = Lists.newArrayList(_entityClasses);
+    List<Class<? extends Entity>> newEntityClasses = Lists.newArrayList(_entityClasses);
     newEntityClasses.add(relatedEntityClass);
     List<String> newPath = Lists.newArrayList(_path);
     newPath.add(relatedEntityName);
@@ -101,10 +104,10 @@ public class RelationshipPath<E extends AbstractEntity/* ,L */>
     return new RelationshipPath<E>(_rootEntityClass, newEntityClasses, newPath, newInversePath, newRestrictions, newCardinality);
   }
 
-  public RelationshipPath<E> to(RelationshipPath<? extends AbstractEntity> relationship)
+  public RelationshipPath<E> to(RelationshipPath<? extends Entity> relationship)
   {
     assert !!!(this instanceof PropertyPath);
-    List<Class<? extends AbstractEntity>> newEntityClasses = Lists.newArrayList(Iterables.concat(_entityClasses, relationship._entityClasses));
+    List<Class<? extends Entity>> newEntityClasses = Lists.newArrayList(Iterables.concat(_entityClasses, relationship._entityClasses));
     List<String> newPath = Lists.newArrayList(Iterables.concat(_path, relationship._path));
     List<String> newInversePath = Lists.newArrayList(Iterables.concat(_inversePath, relationship._inversePath));
     List<PropertyNameAndValue> newRestrictions = Lists.newArrayList(Iterables.concat(_restrictions, relationship._restrictions));
@@ -112,7 +115,7 @@ public class RelationshipPath<E extends AbstractEntity/* ,L */>
     return new RelationshipPath<E>(_rootEntityClass, newEntityClasses, newPath, newInversePath, newRestrictions, newCardinality);
   }
 
-  public PropertyPath<E> to(PropertyPath<? extends AbstractEntity> path)
+  public PropertyPath<E> to(PropertyPath<? extends Entity> path)
   {
     RelationshipPath<E> relPath = to(path.getAncestryPath());
     if (path.isCollectionOfValues()) {
@@ -142,7 +145,7 @@ public class RelationshipPath<E extends AbstractEntity/* ,L */>
   }
 
   protected RelationshipPath(Class<E> rootEntityClass,
-                             List<Class<? extends AbstractEntity>> entityClasses,
+                             List<Class<? extends Entity>> entityClasses,
                              List<String> path,
                              List<String> inversePath,
                              List<PropertyNameAndValue> restrictions,
@@ -193,7 +196,7 @@ public class RelationshipPath<E extends AbstractEntity/* ,L */>
     return Iterators.unmodifiableIterator(_inversePath.iterator());
   }
 
-  public Iterator<Class<? extends AbstractEntity>> entityClassIterator()
+  public Iterator<Class<? extends Entity>> entityClassIterator()
   {
     return Iterators.unmodifiableIterator(_entityClasses.iterator());
   }

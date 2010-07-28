@@ -28,6 +28,8 @@ public class PackageTestSuite extends TestSuite
   {
     addTest(AnnotationTypeTest.suite());
     addTest(AnnotationValueTest.suite());
+    addTest(AssayPlateTest.suite());
+    addTest(AssayWellTest.suite());
     addTest(ResultValueTest.suite());
     addTest(DataColumnTest.suite());
     addTest(ScreenResultTest.suite());

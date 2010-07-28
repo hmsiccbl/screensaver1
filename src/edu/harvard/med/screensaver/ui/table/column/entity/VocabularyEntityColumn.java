@@ -16,12 +16,12 @@ import java.util.TreeSet;
 
 import javax.faces.convert.Converter;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.column.VocabularyColumn;
 
-public abstract class VocabularyEntityColumn<E extends AbstractEntity,V> extends VocabularyColumn<E,V> implements HasFetchPaths<E>
+public abstract class VocabularyEntityColumn<E extends Entity,V> extends VocabularyColumn<E,V> implements HasFetchPaths<E>
 {
   private Set<V> _items;
   private FetchPaths<E,E> _fetchPaths;

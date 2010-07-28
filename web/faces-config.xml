@@ -92,6 +92,13 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/dev/env</to-view-id>
       <redirect/>
     </navigation-case>
+    
+    <navigation-case>
+      <from-outcome>browseEntityUpdateHistory</from-outcome>
+      <to-view-id>/util/entityUpdateHistory</to-view-id>
+      <redirect/>
+    </navigation-case>
+    
 
     <!-- === libraries navigation rules === -->
     <navigation-case>
@@ -173,6 +180,11 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <to-view-id>/screens/screenDetailViewer</to-view-id>
       <redirect/>
     </navigation-case>
+    <navigation-case>
+      <from-outcome>browsePlatesScreened</from-outcome>
+      <to-view-id>/screens/platesScreenedBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
 
     <!--  === cherryPickRequests navigation rules === -->
 
@@ -195,14 +207,8 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     <!-- === screenresults navigation rules === -->
 
     <navigation-case>
-      <from-outcome>viewScreenResultImportErrors</from-outcome>
+      <from-outcome>importScreenResultData</from-outcome>
       <to-view-id>/screens/screenresults/admin/screenResultImporter</to-view-id>
-      <redirect/>
-    </navigation-case>
-    
-    <navigation-case>
-      <from-outcome>editScreenResult</from-outcome>
-      <to-view-id>/screens/screenresults/screenResultEditor</to-view-id>
       <redirect/>
     </navigation-case>
     

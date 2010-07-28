@@ -223,7 +223,7 @@ public class ScreenDataSharingLevelUpdater
         //for [#2285] - don't consider Library Screenings of user provided plates 
         for(Iterator<LibraryScreening> iter = libraryScreenings.iterator(); iter.hasNext();)
         {
-          if(iter.next().isForScreenerProvidedPlates()) iter.remove();
+          if(iter.next().isForExternalLibraryPlates()) iter.remove();
         }
         LibraryScreening libraryScreening = libraryScreenings.last();
         

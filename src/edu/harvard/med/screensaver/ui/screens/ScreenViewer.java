@@ -15,18 +15,27 @@ import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.PlateScreeningStatus;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
+import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.PlateScreeningStatusSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 import org.apache.log4j.Logger;
 
@@ -43,6 +52,10 @@ public class ScreenViewer extends StudyViewer<Screen>
   private HeatMapViewer _heatMapViewer;
   private ScreenResultImporter _screenResultImporter;
   private ScreenDetailViewer _screenDetailViewer;
+  private LabActivitySearchResults _labActivitySearchResults;
+  private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
+  private LibrarySearchResults _librarySearchResults;
+  private PlateScreeningStatusSearchResults _plateScreeningStatusSearchResults;
 
   
   // constructors
@@ -61,7 +74,11 @@ public class ScreenViewer extends StudyViewer<Screen>
                       WellSearchResults wellsBrowser,
                       ScreenResultViewer screenResultViewer,
                       HeatMapViewer heatMapViewer,
-                      ScreenResultImporter screenResultImporter)
+                      ScreenResultImporter screenResultImporter,
+                      LabActivitySearchResults labActivitiesBrowser,
+                      CherryPickRequestSearchResults cprsBrowser,
+                      LibrarySearchResults librarySearchResults,
+                      PlateScreeningStatusSearchResults plateScreeningStatusSearchResults)
   {
     super(Screen.class,
           thisProxy,
@@ -75,6 +92,10 @@ public class ScreenViewer extends StudyViewer<Screen>
     _screenResultViewer = screenResultViewer;
     _heatMapViewer = heatMapViewer;
     _screenResultImporter = screenResultImporter;
+    _labActivitySearchResults = labActivitiesBrowser;
+    _cherryPickRequestSearchResults = cprsBrowser;
+    _librarySearchResults = librarySearchResults;
+    _plateScreeningStatusSearchResults = plateScreeningStatusSearchResults;
   }
 
   public void initializeViewer(Screen screen)
@@ -88,7 +109,7 @@ public class ScreenViewer extends StudyViewer<Screen>
     }
     _screenResultViewer.setEntity(screenResult);
     _heatMapViewer.setScreenResult(screenResult);
-    
+
     warnAdminOnMismatchedDataSharingLevel(screen);
   }
   
@@ -110,14 +131,16 @@ public class ScreenViewer extends StudyViewer<Screen>
     getDao().needReadOnly(screen, Screen.statusItems.getPath());
     getDao().needReadOnly(screen, Screen.cherryPickRequests.to(CherryPickRequest.requestedBy).getPath());
     getDao().needReadOnly(screen, "annotationTypes.annotationValues");
-    getDao().needReadOnly(screen.getScreenResult(), "plateNumbers");
     getDao().needReadOnly(screen.getScreenResult(),
-                      "dataColumns.derivedTypes",
-                      "dataColumns.typesDerivedFrom");
+                          ScreenResult.dataColumns.to(DataColumn.derivedTypes).getPath());
+    getDao().needReadOnly(screen.getScreenResult(),
+                          ScreenResult.dataColumns.to(DataColumn.typesDerivedFrom).getPath());
+    // for screen result last data import date
+    getDao().needReadOnly(screen,
+                          AuditedAbstractEntity.updateActivities.getPath());
     getDao().needReadOnly(screen, 
                       Screen.pinTransferApprovalActivity.to(Activity.createdBy).getPath(),
                       Screen.pinTransferApprovalActivity.to(Activity.performedBy).getPath());
-    getDao().needReadOnly(screen, AuditedAbstractEntity.updateActivities.getPath());    
   }
 
 
@@ -144,5 +167,49 @@ public class ScreenViewer extends StudyViewer<Screen>
       }
     }
   }
+
+  @UICommand
+  public String browseLabActivities()
+  {
+    _labActivitySearchResults.searchLabActivitiesForScreen(getEntity());
+    return BROWSE_ACTIVITIES;
+  }
+
+  @UICommand
+  public String browseCherryPickRequests()
+  {
+    _cherryPickRequestSearchResults.searchForScreen(getEntity());
+    return BROWSE_CHERRY_PICK_REQUESTS;
+  }
+
+  public PlateScreeningStatusSearchResults getPlateSearchResults()
+  {
+    return _plateScreeningStatusSearchResults;
+  }
+
+  @UICommand 
+  public String browseLibrariesScreened()
+  {
+    _librarySearchResults.searchLibrariesScreened(getEntity());
+    return BROWSE_LIBRARIES;
+  }
+    
+  @UICommand
+  public String browsePlatesScreened()
+  {
+    _plateScreeningStatusSearchResults.searchPlatesScreenedByScreen(getEntity());
+    return BROWSE_PLATES_SCREENED;
+  }
+    
+  @UICommand
+  public String browsePlatesDataLoaded()
+  {
+    _plateScreeningStatusSearchResults.searchPlatesScreenedByScreen(getEntity());
+    TableColumn<PlateScreeningStatus,Boolean> isDataLoadedCcolumn = 
+      (TableColumn<PlateScreeningStatus,Boolean>) _plateScreeningStatusSearchResults.getColumnManager().getColumn("Data Loaded");
+    isDataLoadedCcolumn.getCriterion().setOperatorAndValue(Operator.EQUAL, Boolean.TRUE);
+    return BROWSE_PLATES_SCREENED;
+  }
+    
 }
 

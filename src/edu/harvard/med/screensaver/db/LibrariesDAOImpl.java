@@ -29,10 +29,12 @@ import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -272,13 +274,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
   {
     String hql = "select c, ci.wellVolume, " +
     		"(select sum(wva.volume) from WellVolumeAdjustment wva where wva.copy = c and wva.well.id=?) " +
-    		"from CopyInfo ci join ci.copy c " +
-    		"where ci.plateNumber=? and ci.dateRetired is null";
+    		"from Plate ci join ci.copy c " +
+        "where ci.plateNumber=? and ci.dateRetired is null and c.usageType = ?";
     
     
     List<Object[]> copyVolumes = 
       getHibernateTemplate().find(hql, 
-                                  new Object[] { well.getWellKey().toString(), well.getPlateNumber() });
+                                  new Object[] { well.getWellKey().toString(), well.getPlateNumber(),
+                                    CopyUsageType.FOR_CHERRY_PICK_SCREENING });
     Map<Copy,Volume> remainingVolumes = Maps.newHashMap();
     for (Object[] row : copyVolumes) {
       Volume remainingVolume = 
@@ -296,7 +299,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     String hql = "select count(*) from Well w where w.plateNumber between ? and ? and w.libraryWellType = 'experimental'";
     return ((Long) getHibernateTemplate().find(hql, Lists.newArrayList(startPlate, endPlate).toArray()).get(0)).intValue(); 
   }
-
+  
   @Override
   public Set<ScreenType> findScreenTypesForReagents(Set<String> reagentIds)
   {
@@ -331,5 +334,19 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
       }
     });
     return Sets.newTreeSet(screenTypes);
+  }
+  
+  @Override
+  public Plate findPlate(int plateNumber, String copyName)
+  {
+    String hql = "select p from Plate p left join fetch p.copy c left join fetch c.library where p.plateNumber = ? and c.name = ?";
+    List<Plate> plates = (List<Plate>) getHibernateTemplate().find(hql, new Object[] { Integer.valueOf(plateNumber), copyName });
+    if (plates.size() == 0) {
+      return null;
+    }
+    if (plates.size() > 1) {
+      throw new DuplicateEntityException(plates.get(0));
+    }
+    return plates.get(0);
   }
 }

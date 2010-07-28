@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.db;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 
@@ -38,7 +38,6 @@ import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -59,6 +58,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
 
   protected GenericEntityDAO genericEntityDao;
   protected ScreenResultsDAO screenResultsDao;
+  protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
   private IccblEntityViewPolicy entityViewPolicy;
 
@@ -563,101 +563,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     
   }
 
-  // TODO: what exactly is this unit test testing?
-  public void testScreenResults()
-  {
-    final int replicates = 2;
-
-    ScreenResult screenResult = ScreenResultParserTest.makeScreenResult();
-    DataColumn[] cols = new DataColumn[replicates];
-    for (int i = 0; i < replicates; i++) {
-      cols[i] = screenResult.createDataColumn("col" + i)
-                            .forReplicate(i + 1)
-                            .forPhenotype("human")
-                            .makeTextual();
-      cols[i].setAssayReadoutType(i % 2 == 0 ? AssayReadoutType.PHOTOMETRY
-                                            : AssayReadoutType.FLUORESCENCE_INTENSITY);
-    }
-
-    String libraryName = "library with results";
-    Library library = new Library(libraryName,
-                                  "lwr",
-                                  ScreenType.SMALL_MOLECULE,
-                                  LibraryType.COMMERCIAL,
-                                  1,
-                                  1);
-    Well[] wells = new Well[3];
-    for (int iWell = 0; iWell < wells.length; ++iWell) {
-      WellKey wellKey = new WellKey((iWell / 2) + 1,
-                                    (iWell / library.getPlateSize()
-                                                    .getRows()),
-                                    (iWell % library.getPlateSize()
-                                                    .getColumns()));
-      wells[iWell] = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
-      AssayWell assayWell = screenResult.createAssayWell(wells[iWell]);
-      for (int iResultValue = 0; iResultValue < cols.length; ++iResultValue) {
-        cols[iResultValue].createResultValue(assayWell,
-                                             "value " + iWell + "," +
-                                               iResultValue,
-                                             iWell % 2 == 1);
-      }
-    }
-    genericEntityDao.saveOrUpdateEntity(library);
-
-    // test the calculation of replicateCount from child DataColumns,
-    // before setReplicate() is called by anyone
-    assertEquals(replicates, screenResult.getReplicateCount().intValue());
-
-    SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
-    expectedPlateNumbers.add(1);
-    expectedPlateNumbers.add(2);
-    assertEquals(expectedPlateNumbers, screenResult.getPlateNumbers());
-
-    genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLeadScreener());
-    genericEntityDao.saveOrUpdateEntity(screenResult.getScreen().getLabHead());
-    genericEntityDao.saveOrUpdateEntity(screenResult.getScreen());
-
-    setComplete();
-    endTransaction();
-    startNewTransaction();
-
-    library = genericEntityDao.findEntityByProperty(Library.class,
-                                                    "libraryName",
-                                                    libraryName);
-    assertNotNull(library);
-    Set<Well> wellSet = library.getWells();
-    Set<WellKey> wellKeys = new HashSet<WellKey>();
-    for (Well well : wellSet) {
-      wellKeys.add(well.getWellKey());
-    }
-    screenResult = genericEntityDao.findAllEntitiesOfType(ScreenResult.class).get(0);
-    assertEquals(replicates, screenResult.getReplicateCount().intValue());
-    int iResultValue = 0;
-    SortedSet<DataColumn> dataColumns = screenResult.getDataColumns();
-    assertEquals(2, replicates);
-    for (DataColumn col : dataColumns) {
-      assertEquals(screenResult, col.getScreenResult());
-      assertEquals(iResultValue % 2 == 0 ? AssayReadoutType.PHOTOMETRY
-                                        : AssayReadoutType.FLUORESCENCE_INTENSITY,
-                   col.getAssayReadoutType());
-      assertEquals("human", col.getAssayPhenotype());
-
-      Map<WellKey,ResultValue> resultValues = col.getWellKeyToResultValueMap();
-      for (WellKey wellKey : resultValues.keySet()) {
-        assertTrue(wellKeys.contains(wellKey));
-        // note that our naming scheme is testing the ordering of the
-        // DataColumn and ResultValue entities (within their parent
-        // sets)
-        ResultValue rv = resultValues.get(wellKey);
-        assertEquals("value " + wellKey.getColumn() + "," + iResultValue,
-                     rv.getValue());
-        assertEquals(wellKey.getColumn() % 2 == 1, rv.isExclude());
-      }
-      iResultValue++;
-    }
-
-  }
-
   public void testDerivedScreenResults()
   {
     int replicates = 3;
@@ -706,28 +611,40 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     assertEquals(derivedColSet1, derivedFromSet);
   }
 
+  // TODO: this unit test has been superceded by ScreenResultLoadedAndDeleterTest; should verify that all assertions tested here are duplicated there, and then remove this test
   public void testDeleteScreenResult()
   {
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
     genericEntityDao.saveOrUpdateEntity(library);
     Screen screen1 = MakeDummyEntities.makeDummyScreen(1);
     MakeDummyEntities.makeDummyScreenResult(screen1, library);
+    screen1.setLibraryPlatesDataLoadedCount(1);
+    screen1.setMaxDataLoadedReplicateCount(2);
+    screen1.setMinDataLoadedReplicateCount(2);
     genericEntityDao.saveOrUpdateEntity(screen1);
-
     setComplete();
     endTransaction();
-    startNewTransaction();
-    
-    screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-    assertNotNull("screen1 has screen result initially", screen1.getScreenResult());
-    final Integer screenResultId = screen1.getScreenResult().getEntityId();
-    screenResultsDao.deleteScreenResult(screen1.getScreenResult());
-    assertNull("in-memory screen has no screen result after delete from screen, ", screen1.getScreenResult());
 
+    startNewTransaction();
     screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-    assertNull("screen1 has no screen result after delete and commit", screen1.getScreenResult());
-    ScreenResult screenResult1 = genericEntityDao.findEntityById(ScreenResult.class, screenResultId);
-    assertNull("screenResult1 was deleted from database", screenResult1);
+    screen1.invalidate();
+    screen1.update();
+    setComplete();
+    endTransaction();
+
+    startNewTransaction();
+    screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    assertNotNull(screen1.getScreenResult());
+    endTransaction();
+
+    screenResultsDao.deleteScreenResult(screen1.getScreenResult());
+
+    startNewTransaction();
+    screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true);
+    assertNull(screen1.getScreenResult());
+    assertEquals(0, screen1.getLibraryPlatesDataLoadedCount());
+    assertNull(screen1.getMaxDataLoadedReplicateCount());
+    assertNull(screen1.getMinDataLoadedReplicateCount());
   }
 
   /**
@@ -737,10 +654,9 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
    */
   public void testScreenResultDerivedPersistentValues()
   {
-    final SortedSet<Integer> expectedPlateNumbers = new TreeSet<Integer>();
-    final SortedSet<Well> expectedWells = new TreeSet<Well>();
-    final int[] expectedExperimentalWellCount = new int[1];
-    final int[] expectedPositives = new int[1];
+    SortedSet<AssayWell> expectedAssayWells = Sets.newTreeSet();
+    int expectedExperimentalWellCount = 0;
+    int expectedPositives = 0;
 
     Screen screen = MakeDummyEntities.makeDummyScreen(1);
     ScreenResult screenResult = screen.createScreenResult();
@@ -748,28 +664,26 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     col1.makePartitionPositiveIndicator();
     DataColumn col2 = screenResult.createDataColumn("DataColumn2");
     col2.makeBooleanPositiveIndicator();
-    Library library = new Library(
-      "library 1",
-      "lib1",
-      ScreenType.SMALL_MOLECULE,
-      LibraryType.COMMERCIAL,
-      1,
-      1);
+    Library library = new Library("library 1",
+                                  "lib1",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  1);
     for (int i = 1; i <= 10; ++i) {
       int plateNumber = i;
-      expectedPlateNumbers.add(i);
       Well well = library.createWell(new WellKey(plateNumber, "A01"), LibraryWellType.EXPERIMENTAL);
-      expectedWells.add(well);
       AssayWell assayWell = screenResult.createAssayWell(well);
+      expectedAssayWells.add(assayWell);
       boolean exclude = i % 8 == 0;
       PartitionedValue col1Value = PartitionedValue.values()[i % 4];
       col1.createPartitionedPositiveResultValue(assayWell, col1Value, exclude);
       col2.createBooleanPositiveResultValue(assayWell, false, false);
       if (well.getLibraryWellType() == LibraryWellType.EXPERIMENTAL) {
-        expectedExperimentalWellCount[0]++;
+        expectedExperimentalWellCount++;
         if (!exclude && col1Value != PartitionedValue.NOT_POSITIVE) {
           log.debug("result value " + col1Value + " is deemed a positive by this test");
-          ++expectedPositives[0];
+          ++expectedPositives;
         }
       }
     }
@@ -783,10 +697,9 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     startNewTransaction();
 
     screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-    assertEquals("plate numbers", expectedPlateNumbers, screen.getScreenResult().getPlateNumbers());
-    assertEquals("wells", expectedWells, screen.getScreenResult().getWells());
-    assertEquals("experimental well count", expectedExperimentalWellCount[0], screen.getScreenResult().getExperimentalWellCount().intValue());
-    assertEquals("positives", expectedPositives[0], screen.getScreenResult().getDataColumnsList().get(0).getPositivesCount().intValue());
+    assertEquals("wells", expectedAssayWells, screen.getScreenResult().getAssayWells());
+    assertEquals("experimental well count", expectedExperimentalWellCount, screen.getScreenResult().getExperimentalWellCount().intValue());
+    assertEquals("positives", expectedPositives, screen.getScreenResult().getDataColumnsList().get(0).getPositivesCount().intValue());
     assertEquals("0 positives (but not null)", 0, screen.getScreenResult().getDataColumnsList().get(1).getPositivesCount().intValue());
   }
 
@@ -817,11 +730,10 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     genericEntityDao.saveOrUpdateEntity(screen.getLeadScreener());
     genericEntityDao.saveOrUpdateEntity(screen.getLabHead());
     genericEntityDao.saveOrUpdateEntity(screen);
-
     setComplete();
     endTransaction();
-    startNewTransaction();
 
+    startNewTransaction();
     // test findResultValuesByPlate(Integer, DataColumn)
     Map<WellKey,ResultValue> resultValues1 = screenResultsDao.findResultValuesByPlate(2, col1);
     assertEquals("result values size", 10, resultValues1.size());

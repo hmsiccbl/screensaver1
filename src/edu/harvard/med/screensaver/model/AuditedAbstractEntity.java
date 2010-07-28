@@ -122,16 +122,25 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
   }
   
   public AdministrativeActivity createUpdateActivity(AdministratorUser recordedBy, String comments) {
+    return createUpdateActivity(AdministrativeActivityType.ENTITY_UPDATE, recordedBy, comments);
+  }
+  
+  public AdministrativeActivity createUpdateActivity(AdministrativeActivityType activityType,
+                                                     AdministratorUser recordedBy,
+                                                     String comments)
+  {
     AdministrativeActivity updateActivity = 
       new AdministrativeActivity(recordedBy, 
                                  new DateTime().toLocalDate(), 
-                                 AdministrativeActivityType.ENTITY_UPDATE);
+                                 activityType);
     updateActivity.setComments(comments);
     _updateActivities.add(updateActivity);
     return updateActivity;
   }
-  
-//  public DateTime getDateLastUpdated()
+
+
+
+  //  public DateTime getDateLastUpdated()
 //  {
 //    return null;
 //  }

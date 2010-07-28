@@ -148,7 +148,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
     screen2HasActivity.createLibraryScreening(admin, leadScreener, newActivityDate);
     // create a screeining for user provided plates
     LibraryScreening ls = screen2HasActivity.createLibraryScreening(admin, leadScreener, newActivityDate.plusDays(100));
-    ls.setForScreenerProvidedPlates(true);
+    ls.setForExternalLibraryPlates(true);
     // create a non-library-screening activity too
     screen2HasActivity.createCherryPickRequest(admin, leadScreener, newActivityDate.plusDays(100));
     

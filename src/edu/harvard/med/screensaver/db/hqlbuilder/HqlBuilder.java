@@ -24,6 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.transform.DistinctRootEntityResultTransformer;
 
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -184,7 +185,7 @@ public class HqlBuilder
    * Use when the rhs of where expression is an entity object, in which case
    * Hibernate will use the entity's ID.
    */
-  public HqlBuilder where(String alias, edu.harvard.med.screensaver.model.AbstractEntity entity)
+  public HqlBuilder where(String alias, Entity entity)
   {
     checkAliasExists(alias);
     _where.add(simplePredicate(alias, Operator.EQUAL, entity));

@@ -63,7 +63,7 @@ import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
 @PrimaryKeyJoinColumn(name="screensaverUserId")
 @org.hibernate.annotations.ForeignKey(name="fk_screening_room_user_to_screensaver_user")
 @org.hibernate.annotations.Proxy
-public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesEntity, ChecklistItemsEntity
+public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesEntity<Integer>, ChecklistItemsEntity<Integer>
 {
 
   // private static data

@@ -64,7 +64,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
       public void runTransaction() {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         ScreenResult screenResult = screen.getScreenResult();
-        Well well = genericEntityDao.findEntityById(Well.class, screen.getScreenResult().getWells().first().getWellId());
+        Well well = genericEntityDao.findEntityById(Well.class, screen.getScreenResult().getAssayWells().first().getLibraryWell().getWellId());
         assertEquals("well.resultValues size",
                      screenResult.getDataColumns().size(),
                      well.getResultValues().size());

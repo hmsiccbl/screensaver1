@@ -25,8 +25,7 @@
     <mapping class="edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick" />
 
     <mapping class="edu.harvard.med.screensaver.model.libraries.Copy" />
-    <mapping class="edu.harvard.med.screensaver.model.libraries.CopyAction" />
-    <mapping class="edu.harvard.med.screensaver.model.libraries.CopyInfo" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.Plate" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Gene" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Library" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion" />
@@ -45,7 +44,6 @@
     <mapping class="edu.harvard.med.screensaver.model.screens.FundingSupport" />
     <mapping class="edu.harvard.med.screensaver.model.screens.LabActivity" />
     <mapping class="edu.harvard.med.screensaver.model.screens.LibraryScreening" />
-    <mapping class="edu.harvard.med.screensaver.model.screens.PlatesUsed" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Publication" />
     <mapping class="edu.harvard.med.screensaver.model.screens.CherryPickScreening" />
     <mapping class="edu.harvard.med.screensaver.model.screens.Screen" />
@@ -55,6 +53,7 @@
 
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationType" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AnnotationValue" />
+    <mapping class="edu.harvard.med.screensaver.model.screenresults.AssayPlate" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.AssayWell" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.ResultValue" />
     <mapping class="edu.harvard.med.screensaver.model.screenresults.DataColumn" />

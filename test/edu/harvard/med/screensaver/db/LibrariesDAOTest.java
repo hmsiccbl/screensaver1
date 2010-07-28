@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/test/edu/harvard/med/screensaver/TestHibernate.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -31,6 +33,7 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
@@ -94,19 +97,21 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
       public void runTransaction() {
         Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
         Copy copyC = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-        copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
+        copyC.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyC.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyD = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
+        copyD.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyD.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyE = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
-        copyE.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyE.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
+        copyE.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyE.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
         Copy copyF = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
-        copyF.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyF.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
-        Copy copyG = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "G");
-        copyG.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10)).setDateRetired(new LocalDate());
+        copyF.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyF.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
+        Copy copyG = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "G"); // retired copies should be ignored
+        copyG.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10)).setDateRetired(new LocalDate());
+        Copy copyA = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A"); // library screening copies should be ignored
+        copyA.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
 
         genericEntityDao.saveOrUpdateEntity(library);
 
@@ -319,6 +324,37 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     Library resultLibrary = genericEntityDao.findEntityById(Library.class, Integer.valueOf(library.getLibraryId()));
     ScreeningRoomUser resultOwner = resultLibrary.getOwner();
     resultOwner.equals(owner);
+  }
+  
+  public void testFindPlate()
+  {
+    TestDataFactory dataFactory = new TestDataFactory();
+    Library library = dataFactory.newInstance(Library.class);
+    library.setStartPlate(100);
+    library.setEndPlate(102);
+    final Copy copyC = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "C");
+    final Copy copyD = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "D");
+    copyC.createPlate(100, "", PlateType.ABGENE, new Volume(0));
+    copyC.createPlate(101, "", PlateType.ABGENE, new Volume(0));
+    copyD.createPlate(100, "", PlateType.ABGENE, new Volume(0));
+    copyD.createPlate(102, "", PlateType.ABGENE, new Volume(0));
+    genericEntityDao.saveOrUpdateEntity(library);
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate plate = librariesDao.findPlate(100, copyC.getName());
+        assertEquals(100, plate.getPlateNumber());
+        assertEquals("C", plate.getCopy().getName());
+        
+        plate = librariesDao.findPlate(102, copyD.getName());
+        assertEquals(102, plate.getPlateNumber());
+        assertEquals("D", plate.getCopy().getName());
+        
+        assertNull(librariesDao.findPlate(101, copyD.getName()));
+      }
+    });
   }
 
   public void testScreenTypesForWellsAndReagents()

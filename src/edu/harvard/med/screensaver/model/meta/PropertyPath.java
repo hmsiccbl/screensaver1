@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.model.meta;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.util.StringUtils;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public class PropertyPath<E extends AbstractEntity> extends RelationshipPath<E>
+public class PropertyPath<E extends Entity> extends RelationshipPath<E>
 {
   private static Logger log = Logger.getLogger(PropertyPath.class);
   

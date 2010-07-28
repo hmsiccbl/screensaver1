@@ -20,7 +20,7 @@ import edu.harvard.med.screensaver.policy.EntityRestrictedException;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class EntityViewerBackingBean<E extends Entity> extends AbstractBackingBean implements EntityViewer<E>
+public abstract class EntityViewerBackingBean<E extends Entity<? extends Serializable>> extends AbstractBackingBean implements EntityViewer<E>
 {
   protected static Logger log = Logger.getLogger(EntityViewerBackingBean.class);
   

@@ -64,7 +64,7 @@ public interface ScreensaverConstants
   public static final String BROWSE_CHERRY_PICK_REQUESTS = "browseCherryPickRequests";
   public static final String VIEW_CHERRY_PICK_REQUEST = "viewCherryPickRequest";
   public static final String EDIT_CHERRY_PICK_REQUEST = "editCherryPickRequest";
-  public static final String VIEW_SCREEN_RESULT_IMPORT_ERRORS = "viewScreenResultImportErrors";
+  public static final String IMPORT_SCREEN_RESULT_DATA = "importScreenResultData";
   public static final String BROWSE_ACTIVITIES = "browseActivities";
   public static final String VIEW_ACTIVITY = "viewActivity";
   public static final String BROWSE_SCREENERS = "browseScreeners";
@@ -72,7 +72,10 @@ public interface ScreensaverConstants
   public static final String VIEW_USER = "viewUser";
   public static final String UPDATE_USER_AGREEMENT = "updateUserAgreement";
   public static final String RUN_CELLHTS2 = "runCellHTS2";
-  
+  public static final String BROWSE_PLATES_SCREENED = "browsePlatesScreened";
+  public static final String BROWSE_ENTITY_UPDATE_HISTORY = "browseEntityUpdateHistory";
+
+
   public static final String WEBAPP_ROOT = System.getProperty("webapp.root");
 
   /**

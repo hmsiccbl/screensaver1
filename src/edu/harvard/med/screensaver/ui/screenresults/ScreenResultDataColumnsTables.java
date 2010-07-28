@@ -9,14 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Joiner;
+
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
-
-import com.google.common.base.Joiner;
 
 public class ScreenResultDataColumnsTables extends MetaDataTable<DataColumn>
 {
@@ -33,7 +32,7 @@ public class ScreenResultDataColumnsTables extends MetaDataTable<DataColumn>
      new MetaDataTableRowDefinition<DataColumn>("timePointOrdinal", "Time Point Ordinal", "The ordinal of the time point the image was taken"),
      new MetaDataTableRowDefinition<DataColumn>("channel", "Channel", "The channel in which the readout was done"),
      new MetaDataTableRowDefinition<DataColumn>("zdepthOrdinal", "Zdepth Ordinal", "The depth or z-value the image was taken "),
-     
+
      new MetaDataTableRowDefinition<DataColumn>("assayReadoutType", "Assay Readout Type", "The type of readout used to calculate these values"),
      new MetaDataTableRowDefinition<DataColumn>("derived", "Derived", "True when this column is derived from other data columns"),
      new MetaDataTableRowDefinition<DataColumn>("howDerived", "How Derived", "How this column was derived from other data columns"),
@@ -54,20 +53,7 @@ public class ScreenResultDataColumnsTables extends MetaDataTable<DataColumn>
      },
      new MetaDataTableRowDefinition<DataColumn>("followUpData", "Follow Up Data", "Primary or follow up screen data"),
      new MetaDataTableRowDefinition<DataColumn>("assayPhenotype", "Assay Phenotype", "The phenotype being monitored"),
-     new MetaDataTableRowDefinition<DataColumn>("comments", "Comments", "Data column comments"),
-     new MetaDataTableRowDefinition<DataColumn>("positivesCount", "Positives", "The number of \"positives\", if this is a Positive Indicator"),
-     new MetaDataTableRowDefinition<DataColumn>("positivesPercentage", "Positive %", "The % of experimental wells in the results that have been deemed \"positive\"")
-     {
-       @Override
-       public String formatValue(DataColumn col)
-       {
-         if (col.getPositivesRatio() == null) {
-           return "";
-         }
-         return NumberFormat.getPercentInstance().format(col.getPositivesRatio());
-       }
-     }
-    );
+       new MetaDataTableRowDefinition<DataColumn>("comments", "Comments", "Data column comments"));
 
 
   @Override

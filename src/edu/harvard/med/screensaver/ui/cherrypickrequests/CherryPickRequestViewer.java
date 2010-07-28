@@ -12,7 +12,6 @@ package edu.harvard.med.screensaver.ui.cherrypickrequests;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -20,8 +19,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.faces.component.UIInput;
-import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
@@ -42,8 +39,8 @@ import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -75,10 +72,7 @@ import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResul
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LabCherryPickReagentEntityColumn;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerCherryPickReagentEntityColumn;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.VocabularyColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
@@ -115,6 +109,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   private LibrariesDAO _librariesDao;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
   private ActivityViewer _activityViewer;
+  private PlateWellListParser _plateWellListParser;
   private CherryPickRequestCherryPicksAdder _cherryPickRequestCherryPicksAdder;
   private CherryPickRequestAllocator _cherryPickRequestAllocator;
   private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
@@ -131,8 +126,6 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
   private DataModel _assayPlatesDataModel;
   private boolean _selectAllAssayPlates = true;
-  private boolean _showFailedAssayPlates;
-  private boolean _showFailedLabCherryPicks;
 
 
   /**
@@ -180,11 +173,12 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       @Override
       public void searchAll()
       {
-        initialize(buildCherryPicksDataTableModel(LabCherryPick.class, null));
+        initialize();
       }
       
       @Override
-      protected List<? extends TableColumn<LabCherryPick,?>> buildColumns() {
+      public List<? extends TableColumn<LabCherryPick,?>> buildColumns()
+      {
         List<TableColumn<LabCherryPick,?>> labCherryPicksTableColumns = buildLabCherryPicksTableColumns();
         _labCherryPicksSearchResult.getColumnManager().addAllCompoundSorts(buildLabCherryPicksTableCompoundSorts(labCherryPicksTableColumns));
         return labCherryPicksTableColumns;
@@ -193,13 +187,13 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
     _labCherryPicksSearchResult.setCurrentScreensaverUser(getCurrentScreensaverUser());
     _labCherryPicksSearchResult.setMessages(getMessages());
+    _labCherryPicksSearchResult.setApplicationProperties(getApplicationProperties());
     if (getEntity() != null) {
       _labCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(RNAI_COLUMNS_GROUP, getEntity().getScreen().getScreenType() == ScreenType.RNAI);
       _labCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(SMALL_MOLECULE_COLUMNS_GROUP, getEntity().getScreen().getScreenType() == ScreenType.SMALL_MOLECULE);
     }
     _labCherryPicksSearchResult.searchAll();
     
-    setShowFailedLabCherryPicks(_showFailedLabCherryPicks);
   }
 
   private void buildScreenerCherryPickSearchResult()
@@ -208,11 +202,12 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       @Override
       public void searchAll()
       {
-        initialize(buildCherryPicksDataTableModel(ScreenerCherryPick.class, null));
+        initialize();
       }
       
       @Override
-      protected List<? extends TableColumn<ScreenerCherryPick,?>> buildColumns() {
+      public List<? extends TableColumn<ScreenerCherryPick,?>> buildColumns()
+      {
         List<TableColumn<ScreenerCherryPick,?>> screenerCherryPicksTableColumns = buildScreenerCherryPicksTableColumns();
         _screenerCherryPicksSearchResult.getColumnManager().addAllCompoundSorts(buildScreenerCherryPicksTableCompoundSorts(screenerCherryPicksTableColumns));
         return screenerCherryPicksTableColumns;
@@ -220,6 +215,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     };
     _screenerCherryPicksSearchResult.setCurrentScreensaverUser(getCurrentScreensaverUser());
     _screenerCherryPicksSearchResult.setMessages(getMessages());
+    _screenerCherryPicksSearchResult.setApplicationProperties(getApplicationProperties());
     if (getEntity() != null) {
       _screenerCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(RNAI_COLUMNS_GROUP, getEntity().getScreen().getScreenType() == ScreenType.RNAI);
       _screenerCherryPicksSearchResult.getColumnManager().setVisibilityOfColumnsInGroup(SMALL_MOLECULE_COLUMNS_GROUP, getEntity().getScreen().getScreenType() == ScreenType.SMALL_MOLECULE);
@@ -334,9 +330,9 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       }));
     screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
                                                                                                            new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols),
-                                                                                                                                                  "Entrez Symbol",
-                                                                                                                                                  "The Entrez symbol of the gene targeted by the screened well",
-                                                                                                                                                  RNAI_COLUMNS_GROUP) {
+        "Entrez Symbol", 
+        "The Entrez symbol of the gene targeted by the screened well", 
+        RNAI_COLUMNS_GROUP) {
         @Override
         public String getCellValue(SilencingReagent r)
         {
@@ -347,9 +343,9 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       }));
     screenerCherryPicksTableColumns.add(new ScreenerCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
                                                                                                            new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers),
-                                                                                                                                                  "Genbank AccNo",
-                                                                                                                                                  "The Genbank accession number of the gene targeted by the screened well",
-                                                                                                                                                  RNAI_COLUMNS_GROUP) {
+        "Genbank AccNo", 
+        "The Genbank accession number of the gene targeted by the screened well",
+        RNAI_COLUMNS_GROUP) {
         @Override
         public String getCellValue(SilencingReagent r)
         {
@@ -480,9 +476,9 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       }));
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
                                                                                                  new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.entrezgeneSymbols),
-                                                                                                                                        "Entrez Symbol",
-                                                                                                                                        "The Entrez symbol of the gene targeted by the screened well",
-                                                                                                                                        RNAI_COLUMNS_GROUP) {
+        "Entrez Symbol", 
+        "The Entrez symbol of the gene targeted by the screened well", 
+        RNAI_COLUMNS_GROUP) {
         @Override
         public String getCellValue(SilencingReagent r)
         {
@@ -493,9 +489,9 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       }));
     labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
                                                                                                  new TextEntityColumn<SilencingReagent>(SilencingReagent.facilityGene.to(Gene.genbankAccessionNumbers),
-                                                                                                                                        "Genbank AccNo",
-                                                                                                                                        "The Genbank accession number of the gene targeted by the screened well",
-                                                                                                                                        RNAI_COLUMNS_GROUP) {
+        "Genbank AccNo", 
+        "The Genbank accession number of the gene targeted by the screened well",
+        RNAI_COLUMNS_GROUP) {
         @Override
         public String getCellValue(SilencingReagent r)
         {
@@ -616,14 +612,14 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     return labCherryPicksTableCompoundSorts;
   }
 
-  private <T extends AbstractEntity> DataTableModel<T> buildCherryPicksDataTableModel(final Class<T> clazz,
-                                                                                      final CherryPickRequest cpr)
+  private <T extends Entity<Integer>> DataTableModel<T> buildCherryPicksDataTableModel(final Class<T> clazz,
+                                                                                       final CherryPickRequest cpr)
   {
     if (cpr == null) {
       return new InMemoryDataModel<T>(new NoOpDataFetcher<T,Integer,PropertyPath<T>>());
     }
     else {
-      return new InMemoryEntityDataModel<T>(new EntityDataFetcher<T,Integer>(clazz, getDao()) {
+      return new InMemoryEntityDataModel<T,Integer>(new EntityDataFetcher<T,Integer>(clazz, getDao()) {
         @Override
         public void addDomainRestrictions(HqlBuilder hql)
         {
@@ -724,10 +720,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
           // HACK: following reln is (only) needed by validateSelectedAssayPlates() in LIQUID_TRANSFER case 
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.labCherryPicks).getPath());
           List<AssayPlateRow> rows = new ArrayList<AssayPlateRow>();
-          Collection<CherryPickAssayPlate> assayPlates =
-            _showFailedAssayPlates ? cpr.getCherryPickAssayPlates() :
-              cpr.getActiveCherryPickAssayPlates();
-          for (CherryPickAssayPlate assayPlate : assayPlates) {
+          for (CherryPickAssayPlate assayPlate : cpr.getCherryPickAssayPlates()) {
             AssayPlateRow row = new AssayPlateRow(assayPlate);
             row.setSelected(_selectAllAssayPlates);
             rows.add(row);
@@ -748,63 +741,6 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   {
     _selectAllAssayPlates = selectAllAssayPlates;
   }
-
-  public boolean isShowFailedAssayPlates()
-  {
-    return _showFailedAssayPlates;
-  }
-
-  public void setShowFailedAssayPlates(boolean showFailedAssayPlates)
-  {
-    if (showFailedAssayPlates != _showFailedAssayPlates) {
-      _assayPlatesDataModel = null; // force regen
-    }
-    _showFailedAssayPlates = showFailedAssayPlates;
-  }
-
-  public boolean isShowFailedLabCherryPicks()
-  {
-    return _showFailedLabCherryPicks;
-  }
-
-  @SuppressWarnings("unchecked")
-  public void setShowFailedLabCherryPicks(boolean showFailedLabCherryPicks)
-  {
-    VocabularyColumn<LabCherryPick,LabCherryPickStatus> statusColumn = (VocabularyColumn<LabCherryPick,LabCherryPickStatus>) getLabCherryPicksSearchResult().getColumnManager().getColumn("Status");
-    
-    if (!showFailedLabCherryPicks) {
-      statusColumn.clearCriteria().addCriterion(new Criterion<LabCherryPickStatus>(Operator.NOT_EQUAL, LabCherryPickStatus.Failed));
-    }
-    else {
-      statusColumn.resetCriteria();
-    }
-    getLabCherryPicksSearchResult().refilter();
-    _showFailedLabCherryPicks = showFailedLabCherryPicks;
-
-  }
-
-
-  // JSF listeners
-
-  public void toggleShowFailedLabCherryPicks(ValueChangeEvent event)
-  {
-    Boolean showFailedLabCherryPicks = (Boolean) event.getNewValue();
-    if (showFailedLabCherryPicks.booleanValue() != _showFailedLabCherryPicks) {
-      setShowFailedLabCherryPicks(showFailedLabCherryPicks);
-    }
-    // avoid having JSF set backing bean property with the submitted value
-    ((UIInput) event.getComponent()).setLocalValueSet(false);
-  }
-
-  public void toggleShowFailedAssayPlates(ValueChangeEvent event)
-  {
-    _showFailedAssayPlates = (Boolean) event.getNewValue();
-    // avoid having JSF set backing bean property with the submitted value
-    ((UIInput) event.getComponent()).setLocalValueSet(false);
-    // force regen of data model
-    _assayPlatesDataModel = null;
-  }
-
 
   // JSF application methods
 
@@ -880,7 +816,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     if (!validateSelectedAssayPlates(AssayPlateValidationType.DEALLOCATION)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(),
+    CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(), 
                                                                                      getEntity().getRequestedBy(),
                                                                                      (AdministratorUser) getScreensaverUser(),
                                                                                      CherryPickLiquidTransferStatus.CANCELED);
@@ -888,7 +824,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       cplt.addCherryPickAssayPlate(getDao().reloadEntity(plate));
     }
     _cherryPickRequestAllocator.deallocateAssayPlates(cplt.getCherryPickAssayPlates());
-
+    
     return _activityViewer.editNewEntity(cplt);
   }
 
@@ -947,7 +883,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     if (!validateSelectedAssayPlates(AssayPlateValidationType.LIQUID_TRANSFER)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(),
+    CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(), 
                                                                                      getEntity().getRequestedBy(),
                                                                                      (AdministratorUser) getScreensaverUser(),
                                                                                      CherryPickLiquidTransferStatus.SUCCESSFUL);
@@ -965,12 +901,12 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     if (!validateSelectedAssayPlates(AssayPlateValidationType.SCREENING)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    CherryPickScreening screening = _screeningDuplicator.addCherryPickScreening(getEntity().getScreen(),
+    CherryPickScreening screening = _screeningDuplicator.addCherryPickScreening(getEntity().getScreen(), 
                                                                                 getEntity().getRequestedBy(),
                                                                                 (AdministratorUser) getScreensaverUser(),
                                                                                 getEntity());
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
-      screening.addAssayPlateScreened(getDao().reloadEntity(plate));
+      screening.addCherryPickAssayPlateScreened(getDao().reloadEntity(plate));
     }
     
     return _activityViewer.editNewEntity(screening);
@@ -983,7 +919,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     if (!validateSelectedAssayPlates(AssayPlateValidationType.LIQUID_TRANSFER)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(),
+    CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(), 
                                                                                      getEntity().getRequestedBy(),
                                                                                      (AdministratorUser) getScreensaverUser(),
                                                                                      CherryPickLiquidTransferStatus.FAILED);
@@ -999,7 +935,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     if (!validateSelectedAssayPlates(AssayPlateValidationType.RECREATE_FAILED)) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-
+    
     Set<LabCherryPick> unfulfillable = _cherryPickRequestAllocator.reallocateAssayPlates(getSelectedAssayPlates());
     if (!unfulfillable.isEmpty()) {
       showMessage("cherryPicks.someCherryPicksUnfulfillable");
@@ -1070,44 +1006,44 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     for (Iterator<CherryPickAssayPlate> iter = selectedAssayPlates.iterator(); iter.hasNext();) {
       CherryPickAssayPlate assayPlate = iter.next();
       switch (validationType) {
-        case DEALLOCATION: {
-          if (assayPlate.isFailed() || assayPlate.isPlated() || assayPlate.isCancelled()) {
-            showMessageForComponent("cherryPicks.deallocateActiveMappedPlatesOnly",
-                                    "assayPlatesTable",
-                                    assayPlate.getName());
-            iter.remove();
-            adjustSelection = true;
-          }
-          break;
+      case DEALLOCATION: {
+        if (assayPlate.isFailed() || assayPlate.isPlated() || assayPlate.isCancelled()) {
+          showMessageForComponent("cherryPicks.deallocateActiveMappedPlatesOnly",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          iter.remove();
+          adjustSelection = true;
         }
-        case DOWNLOAD: {
-          if (assayPlate.isFailed()) {
-            showMessageForComponent("cherryPicks.downloadActiveMappedPlatesOnly",
-                                    "assayPlatesTable",
-                                    assayPlate.getName());
-            iter.remove();
-            adjustSelection = true;
-          }
-          break;
+        break;
+      }
+      case DOWNLOAD: {
+        if (assayPlate.isFailed()) {
+          showMessageForComponent("cherryPicks.downloadActiveMappedPlatesOnly",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          iter.remove();
+          adjustSelection = true;
         }
-        case LIQUID_TRANSFER: {
-          if (assayPlate.getLabCherryPicks().size() == 0) {
-            // this can happen if an assay plate failed, was re-run, but no lab cherry picks could be allocated for the new plate
-            iter.remove();
-            showMessageForComponent("cherryPicks.assayPlateEmpty",
-                                    "assayPlatesTable",
-                                    assayPlate.getName());
-            adjustSelection = true;
-          }
-          else if (assayPlate.isPlated() || assayPlate.isFailed() || assayPlate.isCancelled()) {
-            iter.remove();
-            showMessageForComponent("cherryPicks.assayPlateAlreadyPlatedFailedCanceled",
-                                    "assayPlatesTable",
-                                    assayPlate.getName());
-            adjustSelection = true;
-          }
-          break;
+        break;
+      }
+      case LIQUID_TRANSFER: {
+        if (assayPlate.getLabCherryPicks().size() == 0) {
+          // this can happen if an assay plate failed, was re-run, but no lab cherry picks could be allocated for the new plate
+          iter.remove();
+          showMessageForComponent("cherryPicks.assayPlateEmpty",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          adjustSelection = true;
         }
+        else if (assayPlate.isPlated() || assayPlate.isFailed() || assayPlate.isCancelled()) {
+          iter.remove();
+          showMessageForComponent("cherryPicks.assayPlateAlreadyPlatedFailedCanceled",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          adjustSelection = true;
+        }
+        break;
+      }
         case RECREATE_FAILED: {
           if (!assayPlate.isFailed() || !getEntity().getActiveCherryPickAssayPlates().contains(assayPlate)) {
             iter.remove();
@@ -1119,16 +1055,16 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
           break;
         }
-        case SCREENING: {
-          if (!assayPlate.isPlated() && !assayPlate.isPlatedAndScreened()) {
-            iter.remove();
-            showMessageForComponent("cherryPicks.assayPlateNotScreenable",
-                                    "assayPlatesTable",
-                                    assayPlate.getName());
-            adjustSelection = true;
-          }
-          break;
+      case SCREENING: {
+        if (!assayPlate.isPlated() && !assayPlate.isPlatedAndScreened()) {
+          iter.remove();
+          showMessageForComponent("cherryPicks.assayPlateNotScreenable",
+                                  "assayPlatesTable",
+                                  assayPlate.getName());
+          adjustSelection = true;
         }
+        break;
+      }
       }
     }
 

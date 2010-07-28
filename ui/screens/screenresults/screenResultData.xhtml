@@ -45,34 +45,7 @@
     <ss:collapsiblePanel id="dataTablePanel"
       isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
       title="Data"
-      rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}" >
-      <ui:define name="content">
-         <t:selectBooleanCheckbox id="filterPositives"
-              value="#{screenResultViewer.filterPositives}"
-              valueChangeListener="#{screenResultViewer.toggleFilterPositives}"
-              onchange="javascript:document.getElementById('toggleFitlerPositivesCommand').click()"
-              immediate="true" styleClass="command"
-              title="Filter to show only positive rows" />
-         <t:outputLabel for="filterPositives"
-              value="Filter screen #{screenResultViewer.entity.screen.screenNumber} positives" styleClass="label"
-              title="Filter to show only positive rows for this screen" />
-         <t:commandButton id="toggleFitlerPositivesCommand"
-              immediate="true" forceId="true" style="display:none" 
-              action="#{screenResultViewer.filterPositivesCommand}"/>    
-         <t:selectBooleanCheckbox id="showMutualColumns"
-              value="#{screenResultViewer.showMutualColumns}"
-              valueChangeListener="#{screenResultViewer.toggleShowMutualColumns}"
-              onchange="javascript:document.getElementById('toggleMutualColumnsCommand').click()"
-              immediate="true" styleClass="command"
-              title="Display overlapping hit columns from other screens" />
-         <t:outputLabel for="showMutualColumns"
-              value="Show overlapping positives columns" styleClass="label"
-              title="Show the overlapping positive columns from other screens" />
-         <t:commandButton id="toggleMutualColumnsCommand"
-              immediate="true" forceId="true" style="display:none" 
-              action="#{screenResultViewer.showMutualColumnsCommand}"/>          
-      </ui:define>
-   </ss:collapsiblePanel>
+      rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}" />
   </h:form>
 
 
@@ -80,8 +53,8 @@
 	<t:div
 		rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
 		<ui:include src="/libraries/wellSearchResultsBody.xhtml">
-			<ui:param name="wellsBrowser"
-				value="#{screenResultViewer.resultValueTable}" />
+			<ui:param name="wellSearchResults"
+				value="#{screenResultViewer.wellSearchResults}" />
 		</ui:include>
 	</t:div>
 
@@ -95,16 +68,6 @@
       </ui:define>
     </ss:collapsiblePanel>
   </h:form>
-
-	<!-- Warning: screenResultUploader.xhtml must be included outside of h:form elements -->
-	<ss:roundedDiv rendered="#{empty screenResultViewer.entity}">
-		<t:outputText value="Screen result not available"
-			styleClass="transparentSectionHeader" />
-	</ss:roundedDiv>
-	<t:panelGroup
-		rendered="#{screenResultViewer.screensaverUser.isUserInRoleOfNameMap['screenResultsAdmin'] &amp;&amp; empty screenResultViewer.entity}">
-		<ui:include src="admin/screenResultUploader.xhtml" />
-	</t:panelGroup>
 
 </ui:composition>
 

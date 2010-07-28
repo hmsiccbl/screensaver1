@@ -11,12 +11,12 @@ package edu.harvard.med.screensaver.ui.table.column.entity;
 
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 
-public abstract class VolumeEntityColumn<E extends AbstractEntity> extends VolumeColumn<E> implements HasFetchPaths<E>
+public abstract class VolumeEntityColumn<E extends Entity> extends VolumeColumn<E> implements HasFetchPaths<E>
 {
   private FetchPaths<E,E> _fetchPaths;
   

@@ -44,14 +44,12 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 @Entity
 @org.hibernate.annotations.Entity
 @org.hibernate.annotations.Proxy
-// TODO @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=ScreenResult.class)
 // TODO: create index with "where is_positive", for performance
 @org.hibernate.annotations.Table(appliesTo = "assay_well", 
                                  indexes={ @Index(name = "assay_well_unique_index", columnNames={ "well_id", "screenResultId" })})
 @ContainedEntity(containingEntityClass=ScreenResult.class)                                 
 public class AssayWell extends AbstractEntity<Integer> implements Comparable<AssayWell>
 {
-
   private static final long serialVersionUID = 1L;
   private static final Logger log = Logger.getLogger(AssayWell.class);
   

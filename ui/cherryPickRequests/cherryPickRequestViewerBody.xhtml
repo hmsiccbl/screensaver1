@@ -135,17 +135,6 @@
               action="#{cherryPickRequestViewer.createNewCherryPickRequestForUnfulfilledCherryPicks}"
               styleClass="command"
               title="Create a new cherry pick request consisting of the unfulfilled cherry picks" />
-            <t:outputLabel for="showFailedLabCherryPicks"
-              value="Show failed:" styleClass="label"
-              title="Show or hide lab cherry picks on failed assay plate attempts" />
-            <t:selectBooleanCheckbox id="showFailedLabCherryPicks"
-              value="#{cherryPickRequestViewer.showFailedLabCherryPicks}"
-              valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedLabCherryPicks}"
-              onchange="javascript:document.getElementById('toggleShowFailedLabCherryPicksCommand').click()"
-              immediate="true" styleClass="command"
-              title="Show or hide failed lab cherry picks" />
-            <t:commandButton id="toggleShowFailedLabCherryPicksCommand"
-              immediate="true" forceId="true" style="display:none" />
 
           </t:panelGroup>
         </t:panelGrid>
@@ -179,17 +168,6 @@
               disabled="#{!cherryPickRequestViewer.entity.mapped}"
               styleClass="command"
               title="Download the input files for the liquid transfer equipment" />
-            <t:outputLabel for="showFailedAssayPlates"
-              value="Show all failed plate attempts:" styleClass="label"
-              title="Show or hide the assay plate attempts that failed" />
-            <t:selectBooleanCheckbox id="showFailedAssayPlates"
-              value="#{cherryPickRequestViewer.showFailedAssayPlates}"
-              valueChangeListener="#{cherryPickRequestViewer.toggleShowFailedAssayPlates}"
-              onchange="javascript:document.getElementById('toggleShowFailedAssayPlatesCommand').click()"
-              immediate="true" styleClass="command"
-              title="Show or hide the failed assay plates" />
-            <t:commandButton id="toggleShowFailedAssayPlatesCommand"
-              forceId="true" immediate="true" style="display:none" />
           </t:panelGroup>
 
           <t:outputText

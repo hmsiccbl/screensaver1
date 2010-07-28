@@ -90,12 +90,13 @@ public class ResultValue extends AbstractEntity<Integer>
    * 
    * @param dataColumn the parent DataColumn
    * @param assayWell the Assaywell of this ResultValue
-   * @param value the non-numerical value of the ResultValue
-   * @param numericValue the numeric value of the ResultValue
+   * @param value
+   * @param numericValue
+   * @param partitionPositiveIndicatorValue
+   * @param booleanPositiveIndicatorValue
    * @param exclude whether this ResultValue is to be (or was) ignored when performing analysis for the determination of
    *          positives
-   * @param isPositive whether this ResultValue is considered a 'positive' result
-  */
+   */
   ResultValue(DataColumn dataColumn,
               AssayWell assayWell,
               String value,
@@ -146,8 +147,7 @@ public class ResultValue extends AbstractEntity<Integer>
   /**
    * Constructs a numeric ResultValue object
    * Returns the value of this <code>ResultValue</code> as an appropriately
-   * typed object, depending upon {@link DataColumn#isPositiveIndicator()}, {@link DataColumn#isDerived()()}, and
-   * {@link DataColumn#getPositiveIndicatorType()}, as follows:
+   * typed object, depending upon the {@link DataColumn#getDataType() data column's data type}, as follows:
    * <ul>
    * <li>Well type is non-data-producer: returns <code>null</code>
    * <li>Not Derived (Raw): returns Double
@@ -349,7 +349,7 @@ public class ResultValue extends AbstractEntity<Integer>
 
   /**
    * Return true iff the assay well type is a control.
-   *
+   * 
    * @return true iff the assay well type is a control
    */
   @Transient

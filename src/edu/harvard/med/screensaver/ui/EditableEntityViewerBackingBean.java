@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import java.io.Serializable;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.Entity;
@@ -17,19 +19,21 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.policy.EntityEditPolicy;
 import edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableEntityViewer;
+import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class EditableEntityViewerBackingBean<E extends Entity> extends EntityViewerBackingBean<E> implements EditableEntityViewer<E>
+public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends Serializable>> extends EntityViewerBackingBean<E> implements EditableEntityViewer<E>
 {
   protected static Logger log = Logger.getLogger(EditableEntityViewerBackingBean.class);
   
   private EntityEditPolicy _entityEditPolicy;
+  private EntityUpdateSearchResults _entityUpdateHistoryBrowser;
+
   private boolean _isEditMode;
   private String _updateComments;
-
 
   
   public EditableEntityViewerBackingBean(EditableEntityViewerBackingBean<E> thisProxy,
@@ -98,11 +102,6 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity> extends 
     _updateComments = updateComments;
   }
   
-  public EntityUpdateSearchResults getEntityUpdateSearchResults()
-  {
-    return null;
-  }
-
   public boolean isEditMode()
   {
     return _isEditMode;
@@ -156,7 +155,10 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity> extends 
   @Transactional(/*TODO: this appears to be causing problems on entity reattachment in initializeNewEntity() method implementations: propagation=Propagation.REQUIRES_NEW,*/ readOnly=true) // be defensive: prevent saving entity before user invokes "save" command
   /*final*/ public String editNewEntity(E newEntity)
   {
-    if (_entityEditPolicy == null || newEntity == null ||
+    if (newEntity == null) {
+      throw new DevelopmentException("attempted to edit a null entity");
+    }
+    if (_entityEditPolicy == null || 
       !!!((Boolean) newEntity.acceptVisitor(_entityEditPolicy)).booleanValue()) {
       showMessage("restrictedOperation", "add new " + newEntity.getClass().getSimpleName());
       return REDISPLAY_PAGE_ACTION_RESULT;
@@ -221,6 +223,32 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity> extends 
    */
   protected void updateEntityProperties(E entity)
   {
+  }
+  
+  public EntityUpdateSearchResults getEntityUpdateSearchResults()
+  {
+    return _entityUpdateHistoryBrowser;
+  }
+
+  public void setEntityUpdateHistoryBrowser(EntityUpdateSearchResults entityUpdateHistoryBrowser)
+  {
+    _entityUpdateHistoryBrowser = entityUpdateHistoryBrowser;
+  }
+
+  @Override
+  public boolean isUpdateHistoryCapable()
+  {
+    return _entityUpdateHistoryBrowser != null && getEntity() instanceof AuditedAbstractEntity;
+  }
+  
+  @UICommand
+  public String viewUpdateHistory()
+  {
+    if (isUpdateHistoryCapable()) {
+      getEntityUpdateSearchResults().searchForParentEntity((AuditedAbstractEntity) getEntity());
+      return BROWSE_ENTITY_UPDATE_HISTORY;
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @UICommand

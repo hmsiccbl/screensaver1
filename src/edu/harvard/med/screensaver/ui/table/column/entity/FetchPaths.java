@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -56,7 +56,7 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
  * @param E the root entity type of this column
  * @author ant4
  */
-public class FetchPaths<E extends AbstractEntity, R> implements HasFetchPaths<E>
+public class FetchPaths<E extends Entity, R> implements HasFetchPaths<E>
 {
   private PropertyPath<E> _propertyPath;
   private Set<RelationshipPath<E>> _relationshipPaths = new HashSet<RelationshipPath<E>>(1);
@@ -96,7 +96,7 @@ public class FetchPaths<E extends AbstractEntity, R> implements HasFetchPaths<E>
     return getPropertyPath() != null;
   }
 
-  public static <E extends AbstractEntity, R> List<PropertyPath<E>> getPropertyPaths(List<? extends TableColumn<R,?>> columns)
+  public static <E extends Entity, R> List<PropertyPath<E>> getPropertyPaths(List<? extends TableColumn<R,?>> columns)
   {
     List<PropertyPath<E>> propertyPaths = new ArrayList<PropertyPath<E>>();
     for (TableColumn<R,?> column : columns) {
@@ -120,7 +120,7 @@ public class FetchPaths<E extends AbstractEntity, R> implements HasFetchPaths<E>
     return propertyPaths;
   }
 
-  public static <E extends AbstractEntity, R> Map<PropertyPath<E>,List<? extends Criterion<?>>> getFilteringCriteria(List<? extends TableColumn<R,?>> columns)
+  public static <E extends Entity, R> Map<PropertyPath<E>,List<? extends Criterion<?>>> getFilteringCriteria(List<? extends TableColumn<R,?>> columns)
   {
     Map<PropertyPath<E>,List<? extends Criterion<?>>> criteria = new HashMap<PropertyPath<E>,List<? extends Criterion<?>>>();
     for (TableColumn<R,?> column : columns) {
@@ -136,4 +136,5 @@ public class FetchPaths<E extends AbstractEntity, R> implements HasFetchPaths<E>
     }
     return criteria;
   }
+
 }

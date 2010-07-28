@@ -66,7 +66,7 @@ public class CherryPickRequestViewerTest extends AbstractSpringPersistenceTest
         _screener.setLastName("Head");
         genericEntityDao.persistEntity(_screener);
         _library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
-        _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A").createCopyInfo(1000, "", PlateType.ABGENE, new Volume(1000));
+        _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A").createPlate(1000, "", PlateType.ABGENE, new Volume(1000));
         genericEntityDao.persistEntity(_library);
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
         _cpr = screen.createCherryPickRequest(_admin, _screener, new LocalDate());

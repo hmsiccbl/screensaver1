@@ -41,6 +41,10 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
@@ -66,20 +70,21 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
-import edu.harvard.med.screensaver.util.StringUtils;
 
 
 
@@ -91,7 +96,7 @@ import edu.harvard.med.screensaver.util.StringUtils;
  */
 @Entity
 @org.hibernate.annotations.Proxy
-public class Screen extends Study implements AttachedFilesEntity
+public class Screen extends Study implements AttachedFilesEntity<Integer>
 {
 
   // private static data
@@ -115,6 +120,7 @@ public class Screen extends Study implements AttachedFilesEntity
   public static final PropertyPath<Screen> keywords = thisEntity.toCollectionOfValues("keywords");
   public static final RelationshipPath<Screen> pinTransferApprovalActivity = thisEntity.to("pinTransferApprovalActivity", Cardinality.TO_ONE);
   public static final RelationshipPath<Screen> reagents = thisEntity.to("reagents");
+  public static final RelationshipPath<Screen> assayPlates = thisEntity.to("assayPlates");
 
   public static final Function<Screen,Integer> ToScreenNumberFunction = new Function<Screen,Integer>() { public Integer apply(Screen s) { return s.getScreenNumber(); } };
 
@@ -144,6 +150,7 @@ public class Screen extends Study implements AttachedFilesEntity
   private SortedSet<String> _keywords = new TreeSet<String>();
   private String _publishableProtocol;
   private ScreenResult _screenResult;
+  private SortedSet<AssayPlate> _assayPlates = Sets.newTreeSet();
 
   // iccb screen
 
@@ -170,9 +177,19 @@ public class Screen extends Study implements AttachedFilesEntity
   private LocalDate _maxAllowedDataPrivacyExpirationDate;
   private LocalDate _dataPrivacyExpirationDate;
   private LocalDate _dataPrivacyExpirationNotifiedDate;
+  
+  private int _assayPlatesScreenedCount;
+  private int _librariesScreenedCount;
+  private int _libraryPlatesScreenedCount;
+  private int _libraryPlatesDataLoadedCount;
+  private int _libraryPlatesDataAnalyzedCount;
   private int _screenedExperimentalWellCount;
   private int _uniqueScreenedExperimentalWellCount;
   private int _fulfilledLabCherryPicksCount;
+  private Integer _minScreenedReplicateCount;
+  private Integer _maxScreenedReplicateCount;
+  private Integer _minDataLoadedReplicateCount;
+  private Integer _maxDataLoadedReplicateCount;
 
 
   // public constructors
@@ -469,6 +486,177 @@ public class Screen extends Study implements AttachedFilesEntity
     return _screenResult;
   }
   
+  AssayPlate createAssayPlate(Plate plateScreened, int replicateOrdinal, LibraryScreening libraryScreening)
+  {
+    AssayPlate assayPlate = new AssayPlate(this, plateScreened, replicateOrdinal);
+    assayPlate.setLibraryScreening(libraryScreening);
+    if (!_assayPlates.add(assayPlate)) {
+      throw new DuplicateEntityException(this, assayPlate);
+    }
+    return assayPlate;
+  }
+  
+  /**
+   * @motivation this alternate factory method is necessary for cases where
+   *             Screensaver has not been used to track library copies or
+   *             library screenings, so that the necessary Plate and/or
+   *             AssayPlate entities do not exist.
+   */
+  public AssayPlate createAssayPlate(int plateNumber, int replicateOrdinal) 
+  {
+    AssayPlate assayPlate = new AssayPlate(this, plateNumber, replicateOrdinal);
+    if (!_assayPlates.add(assayPlate)) {
+      throw new DuplicateEntityException(this, assayPlate);
+    }
+    return assayPlate;
+  }
+  
+  public SortedSet<AssayPlate> findAssayPlates(final int plateNumber)
+  {
+    return ImmutableSortedSet.copyOf(Iterables.filter(getAssayPlates(), new Predicate<AssayPlate>() {
+      public boolean apply(AssayPlate ap)
+      {
+        return ap.getPlateNumber() == plateNumber;
+      }
+    }));
+  }
+
+  /**
+   * The collection of {@link AssayPlate}s that have been created for this
+   * screen, which may contain multiple instances for a given library
+   * {@link Plate} and replicate (if it required re-screening).
+   * 
+   * @return Collection of {@link AssayPlate}s
+   */
+  @OneToMany(mappedBy="screen", fetch=FetchType.LAZY, cascade={ CascadeType.ALL } )
+  @org.hibernate.annotations.Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+  @Sort(type=SortType.NATURAL)
+  public SortedSet<AssayPlate> getAssayPlates()
+  {
+    return _assayPlates;
+  }
+  
+  private void setAssayPlates(SortedSet<AssayPlate> assayPlates)
+  {
+    _assayPlates = assayPlates;
+  }
+
+  public int getLibrariesScreenedCount()
+  {
+    return _librariesScreenedCount;
+  }
+
+  public void setLibrariesScreenedCount(int librariesScreenedCount)
+  {
+    _librariesScreenedCount = librariesScreenedCount;
+  }
+
+  @Transient
+  public SortedSet<Plate> getPlatesScreened()
+  {
+    return Sets.newTreeSet(Iterables.transform(Iterables.filter(getAssayPlates(), AssayPlate.HasLibraryScreening), AssayPlate.ToPlate));
+  }
+
+  @Transient
+  public SortedSet<AssayPlate> getAssayPlatesDataLoaded()
+  {
+    return Sets.newTreeSet(Iterables.filter(getAssayPlates(), AssayPlate.IsDataLoaded));
+  }
+
+  @Transient
+  public SortedSet<AssayPlate> getAssayPlatesScreened()
+  {
+    return Sets.newTreeSet(Iterables.filter(getAssayPlates(), AssayPlate.HasLibraryScreening));
+  }
+
+  @Derived
+  public int getAssayPlatesScreenedCount()
+  {
+    return _assayPlatesScreenedCount;
+  }
+
+  public void setAssayPlatesScreenedCount(int assayPlatesScreenedCount)
+  {
+    _assayPlatesScreenedCount = assayPlatesScreenedCount;
+  }
+
+  @Derived
+  public int getLibraryPlatesScreenedCount()
+  {
+    return _libraryPlatesScreenedCount;
+  }
+
+  public void setLibraryPlatesScreenedCount(int libraryPlatesScreenedCount)
+  {
+    _libraryPlatesScreenedCount = libraryPlatesScreenedCount;
+  }
+
+  @Derived
+  public int getLibraryPlatesDataLoadedCount()
+  {
+    return _libraryPlatesDataLoadedCount;
+  }
+
+  public void setLibraryPlatesDataLoadedCount(int libraryPlatesDataLoadedCount)
+  {
+    _libraryPlatesDataLoadedCount = libraryPlatesDataLoadedCount;
+  }
+
+  @Derived
+  public int getLibraryPlatesDataAnalyzedCount()
+  {
+    return _libraryPlatesDataAnalyzedCount;
+  }
+
+  public void setLibraryPlatesDataAnalyzedCount(int libraryPlatesDataAnalyzedCount)
+  {
+    _libraryPlatesDataAnalyzedCount = libraryPlatesDataAnalyzedCount;
+  }
+
+  @Derived
+  public Integer getMinScreenedReplicateCount()
+  {
+    return _minScreenedReplicateCount;
+  }
+
+  public void setMinScreenedReplicateCount(Integer minScreenedReplicateCount)
+  {
+    _minScreenedReplicateCount = minScreenedReplicateCount;
+  }
+
+  @Derived
+  public Integer getMaxScreenedReplicateCount()
+  {
+    return _maxScreenedReplicateCount;
+  }
+
+  public void setMaxScreenedReplicateCount(Integer maxScreenedReplicateCount)
+  {
+    _maxScreenedReplicateCount = maxScreenedReplicateCount;
+  }
+
+  @Derived
+  public Integer getMinDataLoadedReplicateCount()
+  {
+    return _minDataLoadedReplicateCount;
+  }
+
+  public void setMinDataLoadedReplicateCount(Integer minDataLoadedReplicateCount)
+  {
+    _minDataLoadedReplicateCount = minDataLoadedReplicateCount;
+  }
+
+  @Derived
+  public Integer getMaxDataLoadedReplicateCount()
+  {
+    return _maxDataLoadedReplicateCount;
+  }
+
+  public void setMaxDataLoadedReplicateCount(Integer maxDataLoadedReplicateCount)
+  {
+    _maxDataLoadedReplicateCount = maxDataLoadedReplicateCount;
+  }
+
   @Derived
   public int getScreenedExperimentalWellCount()
   {
@@ -514,11 +702,17 @@ public class Screen extends Study implements AttachedFilesEntity
   }
 
   /**
-   * Set the screen result to null.
+   * Clear the screen result (in memory only). Use
+   * {@link ScreenResultLoader#deleteScreenResult(ScreenResult)} to delete from
+   * persistent storage.
    */
   public void clearScreenResult()
   {
     _screenResult = null;
+    for (AssayPlate assayPlate : getAssayPlates()) {
+      assayPlate.setScreenResultDataLoading(null);
+    }
+    invalidate();
   }
 
   /**
@@ -1283,38 +1477,6 @@ public class Screen extends Study implements AttachedFilesEntity
     _comsApprovalDate = comsApprovalDate;
   }
 
-  /**
-   * Get the assay readout types.
-   * @return the assay readout types
-   */
-  @Transient
-  // TODO: this is really a property of the ScreenResult; should move into ScreenResult
-  public Set<AssayReadoutType> getAssayReadoutTypes()
-  {
-    Set<AssayReadoutType> assayReadoutTypes = new HashSet<AssayReadoutType>();
-    if (getScreenResult() != null) {
-      for (DataColumn col : getScreenResult().getDataColumns()) {
-        if (col.getAssayReadoutType() != null) {
-          assayReadoutTypes.add(col.getAssayReadoutType());
-        }
-      }
-    }
-    return assayReadoutTypes;
-  }
-
-  /**
-   * Get the assay readout types, as a formatted, comma-delimited string.
-   * @return the assay readout types, as a formatted, comma-delimited string
-   */
-  @Transient
-  public String getAssayReadoutTypesString()
-  {
-    if (getScreenResult() != null) {
-      return StringUtils.makeListString(getAssayReadoutTypes(), ", ");
-    }
-    return "";
-  }
-
   // TODO: extract PublishableProtocol value-typed collection
 
   /**
@@ -1495,11 +1657,11 @@ public class Screen extends Study implements AttachedFilesEntity
    * @motivation efficiently find all reagent-related data for a study (w/o reading annotationTypes.annotationValues.reagents)
    * @return the set of reagents associated with this screen result
    */
-  @ManyToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch=FetchType.LAZY)
   @JoinTable(name = "studyReagentLink", joinColumns = @JoinColumn(name = "studyId"), inverseJoinColumns = @JoinColumn(name = "reagentId"))
-  @org.hibernate.annotations.ForeignKey(name = "fk_reagent_link_to_study")
-  @org.hibernate.annotations.LazyCollection(value = org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty = "studies")
+  @org.hibernate.annotations.ForeignKey(name="fk_reagent_link_to_study")
+  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty="studies")
   public Set<Reagent> getReagents()
   {
     return _reagents;
@@ -1514,10 +1676,13 @@ public class Screen extends Study implements AttachedFilesEntity
   {
     return addReagent(reagent, true);
   }
+  
   public boolean addReagent(Reagent reagent, boolean createStudiesLink)
   {
     if (_reagents.add(reagent)) {
-      if(createStudiesLink) reagent.addStudy(this);
+      if (createStudiesLink) {
+        reagent.addStudy(this);
+      }
       return true;
     }
     return false;
@@ -1847,6 +2012,4 @@ public class Screen extends Study implements AttachedFilesEntity
   {
     return _dataPrivacyExpirationNotifiedDate;
   }
-  
-
 }

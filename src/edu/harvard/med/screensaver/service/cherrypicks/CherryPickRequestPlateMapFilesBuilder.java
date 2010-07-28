@@ -263,7 +263,7 @@ public class CherryPickRequestPlateMapFilesBuilder
 
     if (distinctSourcePlateTypes > 1) {
       fileName.append(' ');
-      fileName.append(cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().toString());
+      fileName.append(cherryPick.getSourceCopy().getPlates().get(cherryPick.getSourceWell().getPlateNumber()).getPlateType().toString());
     }
 
     int attempt = cherryPick.getAssayPlate().getAttemptOrdinal() + 1;
@@ -287,7 +287,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     for (LabCherryPick cherryPick : cherryPickRequest.getLabCherryPicks()) {
       if (cherryPick.isAllocated() && cherryPick.isMapped()) {
         assayPlateName2PlateTypes.put(cherryPick.getAssayPlate().getName(),
-                                      cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
+                                      cherryPick.getSourceCopy().getPlates().get(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
       }
     }
     return assayPlateName2PlateTypes;
@@ -299,7 +299,7 @@ public class CherryPickRequestPlateMapFilesBuilder
     out.print(cherryPick.getSourceWell().getPlateNumber());
     out.print(cherryPick.getSourceCopy().getName());
     out.print(cherryPick.getSourceWell().getWellName());
-    out.print(cherryPick.getSourceCopy().getCopyInfo(cherryPick.getSourceWell().getPlateNumber()).getPlateType().getFullName());
+    out.print(cherryPick.getSourceCopy().getPlates().get(cherryPick.getSourceWell().getPlateNumber()).getPlateType().getFullName());
     out.print(cherryPick.getAssayPlateWellName());
     out.print(cherryPick.getAssayPlate().getAssayPlateType().getFullName());
     out.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());

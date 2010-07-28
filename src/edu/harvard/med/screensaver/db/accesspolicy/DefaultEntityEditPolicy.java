@@ -20,12 +20,11 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyAction;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
@@ -33,6 +32,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -44,7 +44,6 @@ import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.EquipmentUsed;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
-import edu.harvard.med.screensaver.model.screens.PlatesUsed;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
@@ -79,6 +78,11 @@ public class DefaultEntityEditPolicy implements EntityEditPolicy
   }
 
   public boolean visit(AnnotationValue annotationValue)
+  {
+    return true;
+  }
+
+  public boolean visit(AssayPlate assayPlate)
   {
     return true;
   }
@@ -138,12 +142,7 @@ public class DefaultEntityEditPolicy implements EntityEditPolicy
     return true;
   }
 
-  public boolean visit(CopyAction entity)
-  {
-    return true;
-  }
-
-  public boolean visit(CopyInfo entity)
+  public boolean visit(Plate entity)
   {
     return true;
   }
@@ -171,11 +170,6 @@ public class DefaultEntityEditPolicy implements EntityEditPolicy
   public boolean visit(LibraryContentsVersion libraryContentsVersion)
   {
     return false;
-  }
-
-  public boolean visit(PlatesUsed entity)
-  {
-    return true;
   }
 
   public boolean visit(Publication entity)

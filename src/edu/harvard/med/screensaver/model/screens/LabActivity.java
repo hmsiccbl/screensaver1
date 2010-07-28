@@ -93,13 +93,6 @@ public abstract class LabActivity extends Activity
     return _volumeTransferredPerWell;
   }
   
-  @Transient
-  public String getVolumeTransferredPerWellValue()
-  {
-    return _volumeTransferredPerWell == null ? null : _volumeTransferredPerWell.getDisplayValue().toString();
-  }
-  
-
   /**
    * Set the volume transferred per well
    * @param volumeTransferredPerWell the new volume transferred per well

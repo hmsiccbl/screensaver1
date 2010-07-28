@@ -9,10 +9,13 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import java.io.Serializable;
+
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 
-public abstract class EntityBasedEntitySearchResults<E extends AbstractEntity,K> extends EntitySearchResults<E,E,K>
+public abstract class EntityBasedEntitySearchResults<E extends Entity<K>,K extends Serializable>
+  extends EntitySearchResults<E,E,K>
 {
   /**
    * @motivation for CGLIB2

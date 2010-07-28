@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/io/screenresults/ScreenResultParser.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -14,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 
 import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -168,7 +168,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   /**
    * @motivation runtime detection of duplicate wells in the input stream
    */
-  private Set<String> parsedWellKeys = new HashSet<String>();
+  private Set<String> parsedWellKeys = Sets.newHashSet();
+  private Map<Integer,Integer> _plateNumbersLoadedWithMaxReplicates = Maps.newHashMap();
   private Map<Integer,Integer> _dataColumnIndex2WorksheetColumnIndex;
   private boolean _ignoreDuplicateErrors = false;
   /**
@@ -176,6 +177,8 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * @motivation optimization for findLibraryWithPlate(); reduce db I/O
    */
   private Library _lastLibrary;
+
+
 
 
 
@@ -248,7 +251,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                IntRange plateNumberRange,
                                boolean incrementalFlush)
   {
-    _screenResult = null;
+    _screenResult = screen.getScreenResult();
     _lastLibrary = null;
     _assayReadoutTypeParser = new CellVocabularyParser<AssayReadoutType>(assayReadoutTypeMap);
     _worksheetColumnLabel2DataColumnObjectMap = new TreeMap<String,DataColumn>();
@@ -263,16 +266,13 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
 
     try {
       log.info("parsing " + _workbook.getName());
-      if (screen.getScreenResult() == null) {
+      if (_screenResult == null) {
         _screenResult = screen.createScreenResult();
+        log.info("created screen result");
         if (!parseDataColumnDefinitions(_screenResult, _workbook)) {
           log.info("errors found in data column definitions, will not attempt to parse data sheets");
           return _screenResult;
         }
-      }
-      else {
-        // incremental parsing of new data
-        _screenResult = screen.getScreenResult();
       }
 
       initializeDataColumnLocations(_screenResult, _workbook);
@@ -281,7 +281,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                 _screenResult,
                 plateNumberRange,
                 incrementalFlush);
-      _screenResult.setDateLastImported(new DateTime());
     }
     catch (UnrecoverableScreenResultParseException e) {
       _workbook.addError("serious parse error encountered (could not continue further parsing): " + e.getMessage());
@@ -312,6 +311,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   public List<WorkbookParseError> getErrors()
   {
     return _workbook.getErrors();
+  }
+
+  public Map<Integer,Integer> getPlateNumbersLoadedWithMaxReplicates()
+  {
+    return _plateNumbersLoadedWithMaxReplicates;
   }
 
   public ScreenResult getParsedScreenResult()
@@ -353,9 +357,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
    * This method returns error results by add them to the {@link Workbook}. 
    * Therefore check the workbook after running for errors.
    * @param workbook
+   * @throws UnrecoverableScreenResultParseException 
    * 
    */
-  private boolean parseDataColumnDefinitions(ScreenResult screenResult, Workbook workbook)
+  private boolean parseDataColumnDefinitions(ScreenResult screenResult, Workbook workbook) throws UnrecoverableScreenResultParseException
   {
     log.info("parse data columns sheet");
     
@@ -369,7 +374,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     int dataColumnCount = findDataColumnCount(dataColumnsSheet);
     for (int iDataColumn = 0; iDataColumn < dataColumnCount; ++iDataColumn) {
       if (!!!dataColumnPropertyRows.containsKey(DataColumnProperty.NAME)) {
-        _workbook.addError(DataColumnProperty.NAME + " data column property is required");
+        throw new UnrecoverableScreenResultParseException(DataColumnProperty.NAME + " data column property is required");
       }
       DataColumn dataColumn = 
         screenResult.createDataColumn(dataColumnPropertyRows.get(DataColumnProperty.NAME).getCell(iDataColumn, true).getString());
@@ -451,18 +456,6 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     return !!!_workbook.getHasErrors();
   }
 
-  private boolean validateRequiredDataPropertyDefined(DataColumnProperty requiredDataColumnProperty,
-                                                      DataColumnProperty parentDataColumnProperty,
-                                                      Map<DataColumnProperty,Row> dataColumnPropertyRows,
-                                                      int iDataColumn)
-  {
-    if (!!!dataColumnPropertyRows.containsKey(requiredDataColumnProperty)) {
-      dataColumnPropertyRows.get(parentDataColumnProperty).getCell(iDataColumn).addError(requiredDataColumnProperty + " data column property row must be defined when " + parentDataColumnProperty + " data column property row is defined");
-      return false;
-    }
-    return true;
-  }
-
   private Map<DataColumnProperty,Row> parseDataColumnPropertyNames(Worksheet dataColumnsSheet)
   {
     Map<DataColumnProperty,Row> result = Maps.newHashMap();
@@ -531,7 +524,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                          boolean incrementalFlush)
     throws ExtantLibraryException, IOException, UnrecoverableScreenResultParseException
   {
-    log.info("parseData: incrementalFlush:" + incrementalFlush);
+    log.info("incrementalFlush:" + incrementalFlush);
     long startTime = System.currentTimeMillis();
     long loopTime = startTime;
     
@@ -583,16 +576,15 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                 }
               } 
               else {
-                if (findLibraryWithPlate(wellKey.getPlateNumber()) == null) 
-                {
+                if (findLibraryWithPlate(wellKey.getPlateNumber()) == null) {
                   wellNameCell.addError(NO_SUCH_LIBRARY_WITH_PLATE);
                 } 
                 else {
                   Well well = _librariesDao.findWell(wellKey);
                   if (well == null) {
                     wellNameCell.addError(NO_SUCH_WELL + ": " + wellKey);
-                  } 
-                  else {
+                  }
+                  else if (findAssayWell(well) == null) {
                     readResultValues(screenResult, row, well, incrementalFlush);
                     ++wellsWithDataLoaded;
                     if (incrementalFlush && wellsWithDataLoaded % AbstractDAO.ROWS_TO_CACHE == 0) {
@@ -640,18 +632,15 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     for (DataColumn dataColumn : screenResult.getDataColumns()) {
       _genericEntityDao.saveOrUpdateEntity(dataColumn); 
       //TODO: this should not be required, but the writes to the DB were missing some of the RV's and this fixed it -sde4
-      for(ResultValue rv : dataColumn.getResultValues())
-      {
+      for (ResultValue rv : dataColumn.getResultValues()) {
         _genericEntityDao.saveOrUpdateEntity(rv);
       }
     }
-    if(incrementalFlush)
-    {
+    if (incrementalFlush) {
       for (DataColumn dataColumn : screenResult.getDataColumns()) {
         dataColumn.clearResultValues();
       }
-      for(AssayWell assayWell: screenResult.getAssayWells())
-      {
+      for (AssayWell assayWell: screenResult.getAssayWells()) {
         _genericEntityDao.saveOrUpdateEntity(assayWell);
       }
       screenResult.getAssayWells().clear();
@@ -665,9 +654,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     AssayWellControlType assayWellControlType = 
       _assayWellControlTypeParser.parse(row.getCell(WellInfoColumn.ASSAY_WELL_TYPE.ordinal()));
     try {
-      AssayWell assayWell = findOrCreateAssayWell(well, assayWellControlType);
+      AssayWell assayWell = createAssayWell(well, assayWellControlType);
       List<DataColumn> wellExcludes = _excludeParser.parseList(row.getCell(WellInfoColumn.EXCLUDE.ordinal()));
       int iDataColumn = 0;
+      int maxReplicateOrdinal = 0;
       for (DataColumn dataColumn : screenResult.getDataColumns()) {
         Cell cell = row.getCell(getDataColumn(iDataColumn));
         boolean isExclude = (wellExcludes != null && wellExcludes.contains(dataColumn));
@@ -677,7 +667,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           newResultValue =
             dataColumn.createBooleanPositiveResultValue(assayWell,
                                                         cell.isBoolean() ? cell.getBoolean() : _booleanParser.parse(cell),
-                                                        isExclude);
+                                                          isExclude);
         }
         else if (dataColumn.isPartitionPositiveIndicator()) {
           newResultValue =
@@ -697,45 +687,63 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
                                          cell.getString(),
                                          isExclude);
         }
+          
+        // update the maxReplicateOrdinal to track the actual number of
+        // replicates that have data loaded for a particular plate
+        // (this allows us to later calculate which how many replicates
+        // actually have associated data, in case some of the "extra" screened
+        // replicates were ignored by the screener)
+        if (!dataColumn.isDerived() && !newResultValue.isNull()) {
+          if (dataColumn.getReplicateOrdinal() != null) {
+            maxReplicateOrdinal = Math.max(maxReplicateOrdinal, dataColumn.getReplicateOrdinal());
+          }
+        }
         if (newResultValue == null) {
           cell.addError("duplicate well");
         }
 
         ++iDataColumn;
       }
-  
+
+      recordAssayPlatesDataLoaded(well, maxReplicateOrdinal);
+
       if (incrementalFlush) {
         // [#2119] Optimize ScreenResultParser for scalability:
         // - in memory RV's must be reloaded as needed
-        // - many-to-many relationship screen_result_well_link will be populated manually see ScreenResultsDao.saveScreenResultWellLinkTable()
         assayWell.getLibraryWell().getResultValues().clear();
-        
-        // TODO (once implemented): assayWell.getResultValues().clear();
-        screenResult.getWells().clear();
-        //screenResult.getAssayWells().clear();
       }
     }
-    catch (DataModelViolationException e) 
-    {
+    catch (DataModelViolationException e) {
       row.getCell(WellInfoColumn.ASSAY_WELL_TYPE.ordinal()).addError(e.getMessage());
     }
   }
 
-  private AssayWell findOrCreateAssayWell(Well well, AssayWellControlType assayWellControlType)
+  private AssayWell createAssayWell(Well well, AssayWellControlType assayWellControlType)
     throws DataModelViolationException
   {
-    // TODO: assay well should not already exist, unless we start supporting the appending of new data columns to existing assay well data  
-//    AssayWell assayWell = _screenResultsDao.findAssayWell(_screenResult, wellKey);
-//    if (assayWell != null) {
-//      if (assayWell.getAssayWellType() != assayWellType) {
-//        _workbook.addError(ASSAY_WELL_TYPE_INCONSISTENCY + ": " + wellKey);
-//        return null;
-//      }
-//      return assayWell;
-//    }
     AssayWell assayWell = _screenResult.createAssayWell(well);
     assayWell.setAssayWellControlType(assayWellControlType);
     return assayWell;
+  }
+
+  private AssayWell findAssayWell(Well well)
+  {
+    AssayWell assayWell = _screenResultsDao.findAssayWell(_screenResult, well.getWellKey());
+//    if (assayWell != null) {
+//      if (assayWell.getAssayWellControlType() != assayWellControlType) {
+//        _workbook.addError(ASSAY_WELL_TYPE_INCONSISTENCY + ": " + well);
+//        return null;
+//      }
+//    }
+    return assayWell;
+  }
+
+  private void recordAssayPlatesDataLoaded(Well well, int replicateCount)
+  {
+    Integer maxReplicateCount = _plateNumbersLoadedWithMaxReplicates.get(well.getPlateNumber());
+    if (maxReplicateCount == null || maxReplicateCount.compareTo(replicateCount) < 0) {
+      _plateNumbersLoadedWithMaxReplicates.put(well.getPlateNumber(), replicateCount);
+    }
   }  
   
   /**
@@ -837,5 +845,4 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       return super.parseList(cell);
     }
   }
-
 }

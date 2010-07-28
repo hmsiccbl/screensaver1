@@ -20,11 +20,11 @@ TODO:
   <ui:param name="hideId" value="#{true}" />
 
   <ui:define name="entityCommands">
-    <h:commandLink id="viewAdminOnlyFieldsCommand"
+    <h:commandButton id="viewAdminOnlyFieldsCommand"
       value="#{screenDetailViewer.adminViewMode ? 'Admin &lt;&lt;' : 'Admin &gt;&gt;'}"
       rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) &amp;&amp; !screenDetailViewer.editMode}"
       action="#{screenDetailViewer.toggleAdminViewMode}"
-      styleClass="dataText adminOnly"
+      styleClass="adminOnly"
       title="Show or hide administrative fields for the screen" />
   </ui:define>
 
@@ -365,38 +365,11 @@ TODO:
       editable="#{screenDetailViewer.editMode}" adminOnly="true"
       description="the date of approval by COMS or the date on which we determine that our existing approval already covers the proposed experiments" />
 
-    <ss:property id="assayReadoutTypes" label="Assay Readout Types"
-      value="#{screenDetailViewer.entity.comsApprovalDate}"
-      rendered="#{screenDetailViewer.allowedAccessToScreenDetails}"
-      description="The assay readout types used">
-      <ui:define name="data">
-        <t:outputText id="assayReadoutTypes"
-          value="#{empty screenDetailViewer.entity.assayReadoutTypes ? '&lt;none&gt;' : screenDetailViewer.entity.assayReadoutTypesString}"
-          styleClass="dataText"
-          rendered="#{screenDetailViewer.allowedAccessToScreenDetails}" />
-      </ui:define>
-    </ss:property>
-
-    <ss:propertyGroup id="screenedExperimentalWellCountGroup"
-      label="# Experimental Wells Screened"
-      description="The number of experimental library wells that have been screened (ignoring replicates)"
-      rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}">
-      <ss:property id="screenedExperimentalWellCount" label="Non-unique"
-        value="#{screenDetailViewer.entity.screenedExperimentalWellCount}"
-        description="The number of experimental library wells that have been screened (counting duplicate wells multiple times, ignoring replicates)">
-      </ss:property>
-      <ss:property id="screenedExperimentalWellCountUnique"
-        label="Unique"
-        value="#{screenDetailViewer.entity.uniqueScreenedExperimentalWellCount}"
-        description="The number of experimental library wells that have been screened (counting duplicate wells once, ignoring replicates)">
-      </ss:property>
-    </ss:propertyGroup>
-
     <ss:property id="fulfilledLabCherryPicksCount"
-      label="Total Fulfilled Duplex Cherry Picks to Date"
+      label="Total Plated Cherry Picks"
       value="#{screenDetailViewer.entity.fulfilledLabCherryPicksCount}"
       rendered="#{screenDetailViewer.allowedAccessToScreenDetails &amp;&amp; !screenDetailViewer.editMode}"
-      description="Total Fulfilled Duplex Cherry Picks to Date" />
+      description="The number of lab cherry picks that have been plated to date, for all cherry pick requests" />
       
     <ss:property id="keywords"
         label="#{screenDetailViewer.editMode ? 'Keywords (comma-separated)' : 'Keywords'}"
@@ -623,63 +596,37 @@ TODO:
       </ui:define>
     </ss:property>
 
-    <ss:property id="labActivities" label="Recent Lab Activities"
+    <ss:property id="labActivities" label="Lab Activities Summary"
       rendered="#{screenDetailViewer.allowedAccessToScreenActivity &amp;&amp; !screenDetailViewer.editMode}"
       description="Activities carried out in the lab (e.g., screening a library, creating an assay plate, etc.)">
       <ui:define name="data">
-        <t:panelGrid columns="1">
-          <t:outputText value="&lt;none&gt;" styleClass="dataText"
-            rendered="#{empty screenDetailViewer.entity.labActivities}" />
-          <t:dataTable id="activityItems" var="activityItem"
-            value="#{screenDetailViewer.labActivitiesDataModel}"
-            preserveDataModel="false"
-            rendered="#{!empty screenDetailViewer.entity.labActivities}"
-            styleClass="standardTable" rowClasses="row1,row2"
-            columnClasses="numericColumn,fixedColumn100,fixedColumn100,fixedColumn200" headerClass="tableHeader">
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="#" />
-              </f:facet>
-              <ss:entityLink entity="#{activityItem}"
-                viewer="#{activityViewer}" />
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="Date" />
-              </f:facet>
-              <t:outputText id="labActivityDate"
-                value="#{activityItem.dateOfActivity}"
-                converter="#{dateConverter}" styleClass="dataText" />
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="Type" />
-              </f:facet>
-              <t:outputText id="activityType"
-                value="#{activityItem.activityTypeName}"
-                styleClass="dataText" />
-            </t:column>
-            <t:column>
-              <f:facet name="header">
-                <t:outputText value="Performed By" />
-              </f:facet>
-              <t:outputText id="performedBy"
-                value="#{activityItem.performedBy.fullNameLastFirst}"
-                styleClass="dataText" />
-            </t:column>
-          </t:dataTable>
-          <t:panelGroup styleClass="commandPanel">
-            <t:commandButton id="browseLabActivities"
-              value="Browse All..."
-              action="#{screenDetailViewer.browseLabActivities}"
-              disabled="#{screenDetailViewer.labActivitiesDataModel.rowCount == 0}"
-              styleClass="command" />
-            <t:commandButton id="addLibraryScreeningCommand"
-              value="Add Library Screening..."
-              action="#{screenDetailViewer.addLibraryScreening}"
-              rendered="#{screenDetailViewer.editable}"
-              styleClass="command" />
-          </t:panelGroup>
+        <t:panelGrid columns="2"
+          columnClasses="propertyLabelColumn,column"
+          styleClass="layoutPanel" style="width: 100%">
+          <ss:property id="activityCount" label="Activities">
+            <ui:define name="data">
+              <t:commandLink
+                value="#{screenDetailViewer.labActivitiesCount}"
+                action="#{screenViewer.browseLabActivities}" />
+            </ui:define>
+          </ss:property>
+          <ss:propertyGroup label="Last Activity">
+            <t:outputText value="&lt;none&gt;" styleClass="dataText"
+              rendered="#{empty screenDetailViewer.lastLabActivity}" />
+            <ss:property id="lastLabActivityDate" label="Date"
+              value="#{screenDetailViewer.lastLabActivity.dateOfActivity}"
+              type="Date"
+              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
+            <ss:property id="lastLabActivityType" label="Activity Type"
+              value="#{screenDetailViewer.lastLabActivity.activityTypeName}"
+              type="Text"
+              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
+            <ss:property id="lastLabActivityPerformedBy"
+              label="Performed By"
+              value="#{screenDetailViewer.lastLabActivity.performedBy.fullNameLastFirst}"
+              type="Text"
+              rendered="#{!empty screenDetailViewer.lastLabActivity}" />
+          </ss:propertyGroup>
         </t:panelGrid>
       </ui:define>
     </ss:property>

@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.AggregateDataFetcher;
-import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -38,8 +37,8 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
@@ -48,25 +47,19 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.column.BooleanColumn;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TextColumn;
 import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-import edu.harvard.med.screensaver.util.Pair;
 
-public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy,Pair<WellKey,String>>
+public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<WellCopy,String>
 {
-  // static members
-
   private static Logger log = Logger.getLogger(WellCopyVolumeSearchResults.class);
 
-
-  // instance data members
 
   private GenericEntityDAO _dao;
   private LibraryViewer _libraryViewer;
@@ -79,14 +72,11 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
   private TableColumn<WellCopy,?> _withdrawalsAdjustmentsColumn;
 
 
-  // constructors
-
   /**
    * @motivation for CGLIB2
    */
   protected WellCopyVolumeSearchResults()
   {
-    super(new String[] { "editable" });
   }
 
   public WellCopyVolumeSearchResults(GenericEntityDAO dao,
@@ -94,14 +84,11 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
                                      WellViewer wellViewer,
                                      WellVolumeSearchResults wellVolumeSearchResults)
   {
-    this();
     _dao = dao;
     _wellVolumeSearchResults = wellVolumeSearchResults;
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
   }
-
-  // public methods
 
   public void searchWells(final Set<WellKey> wellKeys)
   {
@@ -118,14 +105,15 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
       }
     };
     addRelationshipsToFetch(wvaFetcher);
-    DataFetcher<WellCopy,Pair<WellKey,String>,Object> wellCopyDataFetcher =
-      new AggregateDataFetcher<WellCopy,Pair<WellKey,String>,WellVolumeAdjustment,Integer>(wvaFetcher) {
+
+    EntityDataFetcher<WellCopy,String> wellCopyDataFetcher =
+      new AggregateDataFetcher<WellCopy,String,WellVolumeAdjustment,Integer>(WellCopy.class, _dao, wvaFetcher) {
       @Override
       protected SortedSet<WellCopy> aggregateData(List<WellVolumeAdjustment> nonAggregatedData)
       {
         SortedSet<WellCopy> result = new TreeSet<WellCopy>();
         for (WellKey wellKey : wellKeys) {
-          Well well = _dao.findEntityById(Well.class, wellKey.toString(), true, "library.copies.copyInfos");
+          Well well = _dao.findEntityById(Well.class, wellKey.toString(), true, Well.library.to(Library.copies).to(Copy.plates).getPath());
           makeWellCopyVolumes(well, result);
         }
         return aggregateWellVolumeAdjustments(result, nonAggregatedData);
@@ -146,8 +134,8 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
       };
     addRelationshipsToFetch(wvaFetcher);
 
-    DataFetcher<WellCopy,Pair<WellKey,String>,Object> wellCopyDataFetcher =
-      new AggregateDataFetcher<WellCopy,Pair<WellKey,String>,WellVolumeAdjustment,Integer>(wvaFetcher) {
+    EntityDataFetcher<WellCopy,String> wellCopyDataFetcher =
+      new AggregateDataFetcher<WellCopy,String,WellVolumeAdjustment,Integer>(WellCopy.class, _dao, wvaFetcher) {
       @Override
       @Transactional
       protected SortedSet<WellCopy> aggregateData(List<WellVolumeAdjustment> nonAggregatedData)
@@ -157,7 +145,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
         _dao.doInTransaction(new DAOTransaction() {
           public void runTransaction() {
             library2[0] = _dao.reloadEntity(library, true, "wells");
-            _dao.needReadOnly(library2[0], "copies.copyInfos");
+            _dao.needReadOnly(library2[0], Library.copies.to(Copy.plates).getPath());
           }
         });
         return aggregateWellVolumeAdjustments(makeWellCopyVolumes(library2[0], new TreeSet<WellCopy>()),
@@ -167,12 +155,11 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
     doInitialize(wellCopyDataFetcher);
   }
 
-  private void doInitialize(DataFetcher<WellCopy,Pair<WellKey,String>,Object> wellCopyDataFetcher)
+  private void doInitialize(EntityDataFetcher<WellCopy,String> wellCopyDataFetcher)
   {
     initialize(new InMemoryDataModel<WellCopy>(wellCopyDataFetcher));
-
-    DataFetcher<WellVolume,WellKey,Object> wellVolumeDataFetcher =
-      new AggregateDataFetcher<WellVolume,WellKey,WellCopy,Pair<WellKey,String>>(wellCopyDataFetcher) {
+    EntityDataFetcher<WellVolume,String> wellVolumeDataFetcher =
+      new AggregateDataFetcher<WellVolume,String,WellCopy,String>(WellVolume.class, _dao, wellCopyDataFetcher) {
         @Override
         protected SortedSet<WellVolume> aggregateData(List<WellCopy> nonAggregatedData)
       {
@@ -198,13 +185,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
     searchWells(wellKeys);
   }
 
-  @Override
-  public void initialize(DataTableModel<WellCopy> dataTableModel)
-  {
-    super.initialize(dataTableModel);
-  }
-
-  //  public WellVolumeSearchResults getWellVolumeSearchResults()
+//  public WellVolumeSearchResults getWellVolumeSearchResults()
 //  {
 //    return _wellVolumeSearchResults;
 //  }
@@ -260,7 +241,7 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
         @Override
         public Boolean getCellValue(WellCopy wc) 
         {
-          CopyInfo ci = wc.getCopy().getCopyInfo(wc.getWell().getPlateNumber());
+          Plate ci = wc.getCopy().getPlates().get(wc.getWell().getPlateNumber());
           if(ci != null && ci.isRetired())
           {
             return true;
@@ -533,7 +514,14 @@ public class WellCopyVolumeSearchResults extends AggregateSearchResults<WellCopy
   {
     List<PropertyPath<WellVolumeAdjustment>> relationships = Lists.newArrayList();
     relationships.add(WellVolumeAdjustment.well.to(Well.library).toFullEntity());
-    relationships.add(WellVolumeAdjustment.copy.to(Copy.copyInfos).toFullEntity());
+    relationships.add(WellVolumeAdjustment.copy.to(Copy.plates).toFullEntity());
     wvaFetcher.setPropertiesToFetch(relationships);
+  }
+
+  @Override
+  public void searchAll()
+  {
+    // TODO Auto-generated method stub
+    
   }
 }

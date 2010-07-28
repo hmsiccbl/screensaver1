@@ -22,7 +22,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
@@ -34,7 +34,7 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
  * additional, implicit filtering constraints on the data set to be fetched via
  * {@link #addDomainRestrictions(HqlBuilder)}.
  */
-public class EntityDataFetcher<E extends AbstractEntity,K> extends PropertyPathDataFetcher<E,E,K>
+public class EntityDataFetcher<E extends Entity,K> extends PropertyPathDataFetcher<E,E,K>
 {
   private static final Logger log = Logger.getLogger(EntityDataFetcher.class);
 

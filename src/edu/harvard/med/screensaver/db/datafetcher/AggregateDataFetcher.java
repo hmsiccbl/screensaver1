@@ -9,57 +9,50 @@
 
 package edu.harvard.med.screensaver.db.datafetcher;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.apache.log4j.Logger;
-
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 
-// TODO: Probably need an AggregatePropertyPath class.  
 /**
  * @param AT aggregate type
  * @param AK aggregate key
  * @param BT base type: the type being aggregated into an object of type AT
  * @param BK base key
  */
-public abstract class AggregateDataFetcher<AT extends Comparable<AT>,AK,BT,BK> implements DataFetcher<AT,AK,Object>
+public abstract class AggregateDataFetcher<AT extends Entity<AK>,AK extends Serializable,BT extends Entity<BK>,BK extends Serializable> 
+  extends EntityDataFetcher<AT,AK>
 {
-
-  // static members
-
-  private static Logger log = Logger.getLogger(AggregateDataFetcher.class);
-
-
-  // instance data members
-  
   /**
    * DataFetcher that is used to fetch the underlying, non-aggregated entity data.
    */
-  private DataFetcher<BT,BK,?> _baseDataFetcher;
-  
-  // abstract methods
+  private EntityDataFetcher<BT,BK> _baseDataFetcher;
   
   abstract protected SortedSet<AT> aggregateData(List<BT> nonAggregatedData);
 
   
-  // public constructors and methods
-  
-  public AggregateDataFetcher(DataFetcher<BT,BK,?> baseDataFetcher)
+  public AggregateDataFetcher(Class<AT> entityClass, GenericEntityDAO dao, EntityDataFetcher<BT,BK> dataFetcher)
   {
-    _baseDataFetcher = baseDataFetcher; 
+    super(entityClass, dao);
+    _baseDataFetcher = dataFetcher; 
   }
   
   @Override
   public void addDomainRestrictions(HqlBuilder hql)
-  {}
+  {
+    throw new UnsupportedOperationException("use setRelationshipsToFetch() on base data fetcher");
+  }
 
   @Override
-  public void setPropertiesToFetch(List<Object> properties)
+  public void setPropertiesToFetch(List<PropertyPath<AT>> properties)
   {
     throw new UnsupportedOperationException("AggregateDataFetcher expects data to be fetched by base data fetcher");
   }
@@ -70,12 +63,13 @@ public abstract class AggregateDataFetcher<AT extends Comparable<AT>,AK,BT,BK> i
     return new ArrayList<AT>(aggregateData(nonAggregatedData));
   }
 
-  public void setFilteringCriteria(Map<Object,List<? extends Criterion<?>>> criteria)
+  @Override
+  public void setFilteringCriteria(Map<PropertyPath<AT>,List<? extends Criterion<?>>> criteria)
   {
     throw new UnsupportedOperationException("AggregateDataFetcher can only be used to fetch all data at once, and filtering should be done in memory");
   }
 
-  public void setOrderBy(List<Object> orderByProperties)
+  public void setOrderBy(List<PropertyPath<AT>> orderByProperties)
   {
     throw new UnsupportedOperationException("AggregateDataFetcher can only be used to fetch all data at once, and ordering should be done in memory");
   }
@@ -85,12 +79,8 @@ public abstract class AggregateDataFetcher<AT extends Comparable<AT>,AK,BT,BK> i
     throw new UnsupportedOperationException("AggregateDataFetcher can only be used to fetch all data at once");
   }
 
-
   public List<AK> findAllKeys()
   {
     throw new UnsupportedOperationException("AggregateDataFetcher can only be used to fetch all data at once");
   }
-  
-  // private methods
-  
 }

@@ -27,7 +27,11 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -86,7 +90,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   @SuppressWarnings("unchecked")
   public void searchLibraryScreenType(ScreenType screenType)
   {
-    initialize(new InMemoryEntityDataModel<Library>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Library,Integer>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {
@@ -201,5 +205,45 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
 //                                         columnManager.getColumn("Short HName"));
 
     return columns;
+  }
+
+  public void searchLibrariesScreened(final Screen screen)
+  {
+    EntityDataFetcher<Library,Integer> dataFetcher = new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        hql.
+          from(Screen.class, "s").
+          from("s", Screen.assayPlates.getPath(), "ap").
+          from("ap", AssayPlate.plateScreened.getPath(), "p").
+          from("p", Plate.copy.getPath(), "c").
+          from("c", Copy.library.getPath(), "l").
+          where("s", screen).
+          where("l", Operator.EQUAL, getRootAlias());
+      }
+    };
+    initialize(new InMemoryEntityDataModel<Library,Integer>(dataFetcher));
+    getColumnManager().getColumn("Copies").setVisible(false);
+  }
+
+  public void searchLibrariesScreened(final LibraryScreening libraryScreening)
+  {
+    EntityDataFetcher<Library,Integer> dataFetcher = new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        hql.
+          from(LibraryScreening.class, "ls").
+          from("ls", LibraryScreening.assayPlatesScreened.getPath(), "ap").
+          from("ap", AssayPlate.plateScreened.getPath(), "p").
+          from("p", Plate.copy.getPath(), "c").
+          from("c", Copy.library.getPath(), "l").
+          where("ls", libraryScreening).
+          where("l", Operator.EQUAL, getRootAlias());
+      }
+    };
+    initialize(new InMemoryEntityDataModel<Library,Integer>(dataFetcher));
+    getColumnManager().getColumn("Copies").setVisible(false);
   }
 }

@@ -23,7 +23,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
@@ -69,21 +69,21 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
 
     List<Integer> plateNumbers = Arrays.asList(2, 3, 5);
     List<String> copyNames = Arrays.asList("A", "B");
-    List<CopyInfo> copyInfos = libraryCopyGenerator.createPlateCopies(plateNumbers, copyNames, volume, PlateType.EPPENDORF, today);
-    assertEquals("copyInfos size", plateNumbers.size() * copyNames.size(), copyInfos.size());
-    Iterator<CopyInfo> copyInfoIter = copyInfos.iterator();
-    for (Integer expectedPlateNumber : plateNumbers) {
+    List<Plate> plates = libraryCopyGenerator.createPlateCopies(plateNumbers, copyNames, volume, PlateType.EPPENDORF, today);
+    assertEquals("plates size", plateNumbers.size() * copyNames.size(), plates.size());
+    Iterator<Plate> plateIter = plates.iterator();
+    for (int expectedPlateNumber : plateNumbers) {
       for (String expectedCopyName : copyNames) {
-        CopyInfo copyInfo = copyInfoIter.next();
-        assertEquals(expectedPlateNumber, copyInfo.getPlateNumber());
-        assertEquals(expectedCopyName, copyInfo.getCopy().getName());
-        assertEquals(volume, copyInfo.getWellVolume());
-        assertEquals(PlateType.EPPENDORF, copyInfo.getPlateType());
-        assertEquals(today, copyInfo.getDatePlated());
+        Plate plate = plateIter.next();
+        assertEquals(expectedPlateNumber, plate.getPlateNumber());
+        assertEquals(expectedCopyName, plate.getCopy().getName());
+        assertEquals(volume, plate.getWellVolume());
+        assertEquals(PlateType.EPPENDORF, plate.getPlateType());
+        assertEquals(today, plate.getDatePlated());
       }
     }
     
-    Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library", true, "copies.copyInfos");
+    Library library = genericEntityDao.findEntityByProperty(Library.class, "libraryName", "library", true, Library.copies.to(Copy.plates).getPath());
     Set<Copy> libraryCopies = library.getCopies();
     assertEquals("persisted library copies count", copyNames.size(), libraryCopies.size());
     

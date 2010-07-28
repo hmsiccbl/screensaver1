@@ -15,16 +15,16 @@ import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
 
-public class CopyActionTest extends AbstractEntityInstanceTest<CopyAction>
+public class PlateTest extends AbstractEntityInstanceTest<Plate>
 {
   public static TestSuite suite()
   {
-    return buildTestSuite(CopyActionTest.class, CopyAction.class);
+    return buildTestSuite(PlateTest.class, Plate.class);
   }
 
-  public CopyActionTest() throws IntrospectionException
+  public PlateTest() throws IntrospectionException
   {
-    super(CopyAction.class);
+    super(Plate.class);
   }
 }
 

@@ -29,6 +29,5 @@ public class PackageTestSuite extends TestSuite
     addTest(edu.harvard.med.screensaver.io.screens.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.io.screenresults.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.io.libraries.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.io.cherrypicks.PackageTestSuite.suite());
   }
 }

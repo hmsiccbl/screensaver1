@@ -59,11 +59,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
         _capabilities.put(capability, true);
       }
     }
-    // initialize to do nothing
-    initialize(new InMemoryDataModel<R>(new NoOpDataFetcher<R,K,P>()),
-               new ArrayList<TableColumn<R,?>>(),
-               new UISelectOneBean<Integer>(Arrays.asList(0)),
-               false);
+    initialize();
   }
 
   /**
@@ -84,7 +80,26 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
                buildRowsPerPageSelector(),
                !isFeatureEnabled("data_table_tree_column_selector"));               
   }
+  
+  /** 
+   * Initialize with empty search result and no columns 
+   */
+  public void initialize()
+  {
+    initialize(new ArrayList<TableColumn<R,?>>());
+  }
 
+  /** 
+   * Initialize with empty search result, but with columns 
+   */
+  public void initialize(List<? extends TableColumn<R,?>> columns)
+  {
+    initialize(new InMemoryDataModel<R>(new NoOpDataFetcher<R,K,P>()),
+               columns,
+               new UISelectOneBean<Integer>(Arrays.asList(0)),
+               false);  
+  }
+  
   // abstract methods
 
   abstract protected List<? extends TableColumn<R,?>> buildColumns();
@@ -119,9 +134,8 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
    */
   protected UISelectOneBean<Integer> buildRowsPerPageSelector()
   {
-    UISelectOneBean<Integer> rowsPerPageSelector = new UISelectOneBean<Integer>(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
-                                                                                DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1));
-    return rowsPerPageSelector;
+    return new UISelectOneBean<Integer>(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
+                                        DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1));
   }
 
 

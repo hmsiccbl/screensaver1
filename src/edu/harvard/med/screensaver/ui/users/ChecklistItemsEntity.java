@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.users;
 
+import java.io.Serializable;
 import java.util.SortedSet;
 
 import edu.harvard.med.screensaver.model.Entity;
@@ -18,7 +19,7 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 
 import org.joda.time.LocalDate;
 
-public interface ChecklistItemsEntity extends Entity
+public interface ChecklistItemsEntity<K extends Serializable> extends Entity<K>
 {
 
   SortedSet<ChecklistItemEvent> getChecklistItemEvents();

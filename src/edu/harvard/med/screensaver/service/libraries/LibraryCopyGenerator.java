@@ -18,7 +18,7 @@ import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
@@ -50,14 +50,14 @@ public class LibraryCopyGenerator
   }
                                    
   @Transactional
-  public List<CopyInfo> createPlateCopies(List<Integer> plateNumbers,
+  public List<Plate> createPlateCopies(List<Integer> plateNumbers,
                                           List<String> copyNames,
                                           Volume volume,
                                           PlateType plateType,
                                           LocalDate datePlated) 
     throws ExtantLibraryException
   {
-    List<CopyInfo> result = new ArrayList<CopyInfo>(copyNames.size());
+    List<Plate> result = new ArrayList<Plate>(copyNames.size());
     for (Integer plateNumber : plateNumbers) {
       result.addAll(createPlateCopies(plateNumber, copyNames, volume, plateType, datePlated));
     }
@@ -65,14 +65,14 @@ public class LibraryCopyGenerator
   }
   
   @Transactional
-  public List<CopyInfo> createPlateCopies(Integer plateNumber,
+  public List<Plate> createPlateCopies(Integer plateNumber,
                                           List<String> copyNames,
                                           Volume volume,
                                           PlateType plateType,
                                           LocalDate datePlated) 
     throws ExtantLibraryException
   {
-    List<CopyInfo> result = new ArrayList<CopyInfo>(copyNames.size());
+    List<Plate> result = new ArrayList<Plate>(copyNames.size());
     Library library = _librariesDao.findLibraryWithPlate(plateNumber);
     if (library == null) {
       throw new ExtantLibraryException("no library for plate " + plateNumber);
@@ -83,9 +83,9 @@ public class LibraryCopyGenerator
         copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
         log.info("created " + copy + " for library " + library.getLibraryName());
       }
-      CopyInfo copyInfo = createPlateCopy(copy, plateNumber, volume, plateType, datePlated);
-      if (copyInfo != null) {
-        result.add(copyInfo);
+      Plate plate = createPlateCopy(copy, plateNumber, volume, plateType, datePlated);
+      if (plate != null) {
+        result.add(plate);
       }
     }
     return result;
@@ -95,22 +95,22 @@ public class LibraryCopyGenerator
    * Create a new plate copy for the specified copy and plate number
    */
   @Transactional
-  public CopyInfo createPlateCopy(Copy copy,
-                                  Integer plateNumber,
-                                  Volume volume,
-                                  PlateType plateType,
-                                  LocalDate datePlated)
+  public Plate createPlateCopy(Copy copy,
+                               Integer plateNumber,
+                               Volume volume,
+                               PlateType plateType,
+                               LocalDate datePlated)
   {
-    CopyInfo copyInfo = copy.getCopyInfo(plateNumber);
-    if (copyInfo == null) {
-      copyInfo = copy.createCopyInfo(plateNumber, "<unknown>", plateType, volume);
-      copyInfo.setDatePlated(datePlated);
-      log.info("created " + copyInfo + " for " + copy);
-      return copyInfo;
+    Plate plate = copy.getPlates().get(plateNumber);
+    if (plate == null) {
+      plate = copy.createPlate(plateNumber, "<unknown>", plateType, volume);
+      plate.setDatePlated(datePlated);
+      log.info("created " + plate + " for " + copy);
+      return plate;
     }
     else {
-      if (!(copyInfo.getWellVolume().equals(volume) &&
-        copyInfo.getPlateType().equals(plateType))) {
+      if (!(plate.getWellVolume().equals(volume) &&
+        plate.getPlateType().equals(plateType))) {
         throw new DataModelViolationException("attempted to create a new plate copy that already exists (and that has different values for plate type and/or initial volume)"); 
       }
       return null;

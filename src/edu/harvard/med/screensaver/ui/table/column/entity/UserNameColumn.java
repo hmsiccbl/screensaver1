@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -22,7 +22,7 @@ import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
-public abstract class UserNameColumn<E extends AbstractEntity,U extends ScreensaverUser> extends TextEntityColumn<E>/*MultiPropertyColumn<T,String>*/
+public abstract class UserNameColumn<E extends Entity,U extends ScreensaverUser> extends TextEntityColumn<E>/*MultiPropertyColumn<T,String>*/
 {
   private UserViewer _userViewer;
 
@@ -42,7 +42,7 @@ public abstract class UserNameColumn<E extends AbstractEntity,U extends Screensa
     //new AbstractEntityConverter<ScreensaverUser>(ScreensaverUser.class, dao));
   }
 
-  private static <E2 extends AbstractEntity> List<PropertyPath<E2>> makePropertyPaths(RelationshipPath<E2> userEntityPath)
+  private static <E2 extends Entity> List<PropertyPath<E2>> makePropertyPaths(RelationshipPath<E2> userEntityPath)
   {
     List<PropertyPath<E2>> propertyPaths = new ArrayList<PropertyPath<E2>>();
     if (userEntityPath != null) {

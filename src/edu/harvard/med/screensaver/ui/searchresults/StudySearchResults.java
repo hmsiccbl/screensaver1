@@ -72,7 +72,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
   @Override
   public void searchAll()
   {
-    initialize(new InMemoryEntityDataModel<Screen>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+    initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {

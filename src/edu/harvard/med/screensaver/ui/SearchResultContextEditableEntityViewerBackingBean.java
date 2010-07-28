@@ -9,18 +9,20 @@
 
 package edu.harvard.med.screensaver.ui;
 
-import org.springframework.transaction.annotation.Transactional;
+import java.io.Serializable;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
+
+import org.springframework.transaction.annotation.Transactional;
 
 
 // TODO: this class should be removed if/when we refactor the subclasses to have
 // "detail" viewers for the editable parts; since we never actually *edit*
 // within a search result context (we only view), this class doesn't really make
 // sense
-public abstract class SearchResultContextEditableEntityViewerBackingBean<E extends AbstractEntity,R> extends EditableEntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E,R>
+public abstract class SearchResultContextEditableEntityViewerBackingBean<E extends Entity<? extends Serializable>,R> extends EditableEntityViewerBackingBean<E> implements SearchResultContextEntityViewer<E,R>
 {
 
   private EntitySearchResults<E,R,?> _entitySearchResults;

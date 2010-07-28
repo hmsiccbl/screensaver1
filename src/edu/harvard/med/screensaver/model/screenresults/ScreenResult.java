@@ -14,9 +14,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,21 +34,30 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.ui.activities.PlateRange;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * A <code>ScreenResult</code> represents the data produced by machine-reading
@@ -73,34 +82,25 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 public class ScreenResult extends AuditedAbstractEntity<Integer>
 {
 
+  private static final String SCREEN_RESULT_DATA_LOADING_ACTIVITY_COMMENT_PREFIX = "Loaded screen result data.  ";
+
   private static final long serialVersionUID = 0;
 
-  public static final RelationshipPath<ScreenResult> screen = RelationshipPath.from(ScreenResult.class).to("screen", Cardinality.TO_ONE);
+  public static final RelationshipPath<ScreenResult> screen = RelationshipPath.from(ScreenResult.class).to("screen");
   public static final RelationshipPath<ScreenResult> dataColumns = RelationshipPath.from(ScreenResult.class).to("dataColumns");
+  public static final RelationshipPath<ScreenResult> assayWells = RelationshipPath.from(ScreenResult.class).to("assayWells");
+
 
   // private instance data
 
   private Integer _version;
   private Screen _screen;
-  private SortedSet<Well> _wells = new TreeSet<Well>();
-  private SortedSet<AssayWell> _assayWells = new TreeSet<AssayWell>();
-  private boolean _isShareable;
+  private SortedSet<AssayWell> _assayWells = Sets.newTreeSet(); 
   private Integer _replicateCount;
-  private SortedSet<DataColumn> _dataColumns = new TreeSet<DataColumn>();
-  private DateTime _dateLastImported;
+  private SortedSet<DataColumn> _dataColumns = Sets.newTreeSet();
 
-  /**
-   * @motivation optimization, to avoid loading inspecting all ResultValues when
-   *             determining the set of plate numbers associated with this
-   *             ScreenResult. Note that our data model does not represent
-   *             Plates as first-order entities, as an optimization; a plate
-   *             number is therefore stored along with each Well, but we have no
-   *             normalized Plate table.
-   */
-  private SortedSet<Integer> _plateNumbers = new TreeSet<Integer>();
   private Integer _experimentalWellCount = 0; // can't be null
   private String _comments;
-
 
 
   // public constructor
@@ -113,7 +113,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     super(null); /* TODO */
     setScreen(screen);
     setReplicateCount(replicateCount);
-    _dateLastImported = new DateTime();
   }
 
 
@@ -169,17 +168,111 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   {
     return _screen;
   }
+  
+  public AdministrativeActivity createScreenResultDataLoading(AdministratorUser performedBy,
+                                                              Map<Integer,Integer> plateNumbersLoadedWithMaxReplicates,
+                                                              String comments)
+  {
+    Set<AssayPlate> assayPlatesDataLoaded = findOrCreateAssayPlatesDataLoaded(plateNumbersLoadedWithMaxReplicates);
+    Set<Integer> plateNumbers = Sets.newHashSet(Iterables.transform(assayPlatesDataLoaded, AssayPlate.ToPlateNumber));
+    String mandatoryComments = "Loaded data for " + plateNumbers.size() + " plates " +
+    Joiner.on(",").join(PlateRange.splitIntoPlateRanges(Sets.newTreeSet(assayPlatesDataLoaded)));
+    
+    if (StringUtils.isEmpty(comments)) {
+      comments = "";
+    }
+    comments = Joiner.on(".  ").join(mandatoryComments, comments);
+
+    AdministrativeActivity screenResultDataLoading = 
+      getScreen().createUpdateActivity(AdministrativeActivityType.SCREEN_RESULT_DATA_LOADING,
+                                       performedBy, 
+                                       comments);
+    for (AssayPlate assayPlate : assayPlatesDataLoaded) {
+      assayPlate.setScreenResultDataLoading(screenResultDataLoading);
+    }
+    
+    getScreen().invalidate(); // to recalculate screening status counts
+    
+    return screenResultDataLoading;
+  }
+  
+  private Set<AssayPlate> findOrCreateAssayPlatesDataLoaded(Map<Integer,Integer> plateNumbersLoadedWithMaxReplicates)
+  {
+    SortedSet<AssayPlate> assayPlatesDataLoaded = Sets.newTreeSet();
+    for (Map.Entry<Integer,Integer> entry : plateNumbersLoadedWithMaxReplicates.entrySet()) {
+      assayPlatesDataLoaded.addAll(findOrCreateAssayPlatesDataLoaded(entry.getKey(), entry.getValue()));
+    }
+    return assayPlatesDataLoaded;
+  }
+  
+  private SortedSet<AssayPlate> findOrCreateAssayPlatesDataLoaded(int plateNumber, int replicatesDataLoaded) 
+  {
+    SortedSet<AssayPlate> mostRecentAssayPlatesForPlateNumber = Sets.newTreeSet();
+    SortedSet<AssayPlate> allAssayPlatesForPlateNumber = getScreen().findAssayPlates(plateNumber);
+    if (!allAssayPlatesForPlateNumber.isEmpty()) {
+      final LibraryScreening lastLibraryScreening =
+        ImmutableSortedSet.copyOf(Iterables.transform(allAssayPlatesForPlateNumber, AssayPlate.ToLibraryScreening)).last();
+      assert lastLibraryScreening != null;
+      mostRecentAssayPlatesForPlateNumber.addAll(Sets.filter(allAssayPlatesForPlateNumber, new Predicate<AssayPlate>() {
+        public boolean apply(AssayPlate ap)
+        {
+          return lastLibraryScreening.equals(ap.getLibraryScreening());
+        }
+      }));
+    }
+    SortedSet<AssayPlate> assayPlatesDataLoaded = Sets.newTreeSet();
+    // if there are fewer assay plates screened replicates than we have data
+    // for, then a library screening must not have been recorded for the assay
+    // plates that were used to generate this data, so we'll create them now
+    if (mostRecentAssayPlatesForPlateNumber.size() < replicatesDataLoaded) {
+      //log.warn("creating missing assay plate(s) for plate number " + plateNumber);
+      for (int r = 0; r < replicatesDataLoaded; r++) {
+        assayPlatesDataLoaded.add(getScreen().createAssayPlate(plateNumber, r));
+      }
+    }
+    else {
+      for (AssayPlate assayPlate : mostRecentAssayPlatesForPlateNumber) {
+        if (assayPlate.getReplicateOrdinal() < replicatesDataLoaded) {
+          assayPlatesDataLoaded.add(assayPlate);
+        }
+      }
+    }
+    return assayPlatesDataLoaded;
+  }
 
   /**
-   * Represents the last time that full or incremental data was imported for this ScreenResult.
-   * @return the date this <code>ScreenResult</code> was last imported into Screensaver
+   * The last {@link AdministrativeActivityType#SCREEN_RESULT_DATA_LOADING}
+   * screen result data loading activity that full or incremental data was
+   * loaded for this ScreenResult.
    */
-  @Column(nullable=false)
-  @Type(type="org.joda.time.contrib.hibernate.PersistentDateTime")
-  public DateTime getDateLastImported()
+  @Transient
+  public AdministrativeActivity getLastDataLoadingActivity()
   {
-    return _dateLastImported;
+    SortedSet<AdministrativeActivity> screenResultDataLoadings =
+      Sets.newTreeSet(Iterables.filter(getScreen().getUpdateActivities(), 
+                                       AdministrativeActivityType.SCREEN_RESULT_DATA_LOADING.isValuePredicate()));
+    if (screenResultDataLoadings.isEmpty()) {
+      return null;
+    }
+    return screenResultDataLoadings.last();
   }
+
+  /**
+   * Get the assay readout types.
+   * @return the assay readout types
+   */
+  @Transient
+  public Set<AssayReadoutType> getAssayReadoutTypes()
+  {
+    Set<AssayReadoutType> assayReadoutTypes = new HashSet<AssayReadoutType>();
+    for (DataColumn col : getDataColumns()) {
+      if (col.getAssayReadoutType() != null) {
+        assayReadoutTypes.add(col.getAssayReadoutType());
+      }
+    }
+    return assayReadoutTypes;
+  }
+
 
   /**
    * Get the ordered set of all {@link DataColumn}s for this screen result.
@@ -286,55 +379,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     _replicateCount = replicateCount;
   }
 
-  /**
-   * Get the set of plate numbers associated with this screen result (via ResultValue Wells).
-   * @return the set of plate numbers associated with this screen result
-   */
-  @org.hibernate.annotations.CollectionOfElements
-  @Column(name="plateNumber", nullable=false)
-  @JoinTable(
-    name="screenResultPlateNumber",
-    joinColumns=@JoinColumn(name="screenResultId")
-  )
-  @OrderBy("plateNumber")
-  @org.hibernate.annotations.ForeignKey(name="fk_screen_result_plate_number_to_screen_result")
-  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
-  @edu.harvard.med.screensaver.model.annotations.CollectionOfElements(hasNonconventionalMutation=true)
-  public SortedSet<Integer> getPlateNumbers()
-  {
-    return _plateNumbers;
-  }
-
-  /**
-   * Get the number of plate numbers associated with this screen result.
-   * @return the number of plate numbers associated with this screen result
-   * @motivation JSF EL 1.1 does not provide a size/length operator for collections.
-   */
-  @Transient
-  public int getPlateNumberCount()
-  {
-    return _plateNumbers.size();
-  }
-
-  /**
-   * Get the set of wells associated with this screen result. <i>Do not modify
-   * the returned collection.</i> To add a well, call {@link #addWell}.
-   * @return the set of wells associated with this screen result
-   */
-  @ManyToMany(fetch=FetchType.LAZY)
-  @JoinTable(
-    name="screenResultWellLink",
-    joinColumns=@JoinColumn(name="screenResultId"),
-    inverseJoinColumns=@JoinColumn(name="wellId")
-  )
-  @org.hibernate.annotations.ForeignKey(name="fk_screen_result_well_link_to_screen_result")
-  @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
-  @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
-  public SortedSet<Well> getWells()
-  {
-    return _wells;
-  }
-
   @OneToMany(mappedBy="screenResult",
              fetch=FetchType.LAZY)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
@@ -360,39 +404,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   }
 
   /**
-   * Get the number of wells associated with this screen result.
-   * @return the number of wells associated with this screen result
-   * @motivation JSF EL 1.1 does not provide a size/length operator for collections.
-   */
-  @Transient
-  public int getWellCount()
-  {
-    return _wells.size();
-  }
-
-  /**
-   * Add a well that is associated with this ScreenResult.
-   * @param well the well to add
-   * @return true iff the well was added successfully
-   */
-  public boolean addWell(Well well)
-  {
-    _plateNumbers.add(well.getPlateNumber());
-    return _wells.add(well);
-  }
-
-  /**
-   * Remove the well.
-   * @param well the well to remove
-   * @return true iff the screen previously had the well
-   */
-  public boolean removeWell(Well well)
-  {
-    // TODO: remove plateNumber if a plate's well count becomes zero
-    return _wells.remove(well);
-  }
-
-  /**
    * Get the number of experimental wells that have data in this screen result.
    * @return the number of experimental wells that have data in this screen result
    * @motivation optimization
@@ -405,6 +416,15 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   }
 
   /**
+   * @motivation for Hibernate
+   * @param experimentalWellCount
+   */
+  private void setExperimentalWellCount(Integer experimentalWellCount)
+  {
+    _experimentalWellCount = experimentalWellCount;
+  }
+
+  /**
    * Return a list of DataColumns
    * @return an ordered list of DataColumns
    * @motivation random access to DataColumns by ordinal
@@ -412,7 +432,13 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   @Transient
   public List<DataColumn> getDataColumnsList()
   {
-    return new ArrayList<DataColumn>(_dataColumns);
+    return Lists.newArrayList(_dataColumns);
+  }
+
+  @Transient
+  public List<DataColumn> getPartitionedPositivesDataColumns()
+  {
+    return Lists.newArrayList(Iterables.filter(_dataColumns, DataColumn.isPositiveIndicator));
   }
 
   /**
@@ -447,18 +473,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     return rawNumericDataColumns;
   }
   
-  @Column
-  public String getComments()
-  {
-    return _comments;
-  }
-
-
-  public void setComments(String comments)
-  {
-    _comments = comments;
-  }
-
   // package instance method
 
   /**
@@ -513,14 +527,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   {
     _version = version;
   }
-
-  /**
-   * Set the date this <code>ScreenResult</code> was last imported into Screensaver.
-   */
-  public void setDateLastImported(DateTime date)
-  {
-    _dateLastImported = date;
-  }
   
   /**
    * Set the screen.
@@ -541,35 +547,6 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   private void setDataColumns(SortedSet<DataColumn> dataColumns)
   {
     _dataColumns = dataColumns;
-  }
-
-  /**
-   * Set the set of plate numbers associated with this screen result (via ResultValue Wells).
-   * @param plateNumbers the new set of plate numbers
-   * @motivation for Hibernate
-   */
-  private void setPlateNumbers(SortedSet<Integer> plateNumbers)
-  {
-    _plateNumbers = plateNumbers;
-  }
-
-  /**
-   * Set the set of wells associated with this ScreenResult.
-   * @param well the set of wells
-   * @motivation for Hibernate
-   */
-  private void setWells(SortedSet<Well> wells)
-  {
-    _wells = wells;
-  }
-
-  /**
-   * @motivation for Hibernate
-   * @param experimentalWellCount
-   */
-  private void setExperimentalWellCount(Integer experimentalWellCount)
-  {
-    _experimentalWellCount = experimentalWellCount;
   }
 
   private void verifyNameIsUnique(String name)

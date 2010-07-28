@@ -34,7 +34,6 @@ import jxl.read.biff.BiffException;
 import jxl.write.WriteException;
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.ParseError;
@@ -94,12 +93,6 @@ public class ScreenResultParserTest extends AbstractSpringTest
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
 
     doTestScreenResult115ParseResult(screenResult);
-    
-    // also test that the parse time is correct
-    assertTrue("Screen parse time is incorrect: " + screenResult.getDateLastImported() +
-               ", should be after: " + now,
-               screenResult.getDateLastImported().getMillis() > now.getTime() );
-    
   }
   
   /**
@@ -327,26 +320,21 @@ public class ScreenResultParserTest extends AbstractSpringTest
   {
     File workbookFile = new File(TEST_INPUT_FILE_DIR, SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
-    ScreenResult screenResult = mockScreenResultParser.parse(screen,
+    mockScreenResultParser.parse(screen,
                                  workbookFile,
                                  new IntRange(1, 2), 
                                  false);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
-    DateTime firstParseTime = screenResult.getDateLastImported();
-
-    screenResult = mockScreenResultParser.parse(screen,
+    assertEquals(640, screen.getScreenResult().getAssayWells().size());
+    mockScreenResultParser.parse(screen,
                                  workbookFile,
                                  new IntRange(3, 3),
                                  false);
     assertEquals(Collections.EMPTY_LIST, mockScreenResultParser.getErrors());
+    assertEquals(960, screen.getScreenResult().getAssayWells().size());
     
     doTestScreenResult115ParseResult(screen.getScreenResult());
-    
-    // also test that the parse time has been updated
-    assertTrue("Screen parse time is incorrect: " + screenResult.getDateLastImported() +
-               ", should be after: " + firstParseTime,
-               screenResult.getDateLastImported().getMillis() > firstParseTime.getMillis() );
-    
+    assertEquals(960, screen.getScreenResult().getAssayWells().size());
   }
 
   public void testPositivesCount() throws Exception

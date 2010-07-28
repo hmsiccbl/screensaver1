@@ -11,11 +11,12 @@ package edu.harvard.med.screensaver.ui.table.model;
 
 
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
@@ -32,7 +33,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
  * 
  * @author drew
  */
-public class InMemoryEntityDataModel<E extends AbstractEntity> extends InMemoryDataModel<E>
+public class InMemoryEntityDataModel<E extends Entity<K>, K extends Serializable> extends InMemoryDataModel<E>
 {
   public InMemoryEntityDataModel(EntityDataFetcher<E,?> dataFetcher)
   {

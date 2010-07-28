@@ -9,10 +9,9 @@
 
 package edu.harvard.med.screensaver.model.screens;
 
+import java.util.Iterator;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -20,27 +19,31 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.annotations.Derived;
-import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.annotations.Derived;
+import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+
 
 /**
- * A Hibernate entity bean representing a library screening. This is screening
- * that is performed against <i>full copies</i> of the plates of one or more
- * libraries. (Consider that a screening could also be performed against a
- * selected subset of the wells from a library, as is the case with
- * {@link CherryPickScreening}.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
+ * Records the activity of screening a {@link #getAssayPlatesScreened() set} of
+ * {@link Plate}s. The screening of a plate implies it was removed from freezer
+ * storage and reagent volume was withdrawn and transferred to assay plates.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @PrimaryKeyJoinColumn(name="activityId")
@@ -49,25 +52,42 @@ import org.joda.time.LocalDate;
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)
 public class LibraryScreening extends Screening
 {
-
-  // private static data
-
   private static final long serialVersionUID = 0L;
   private static final Logger log = Logger.getLogger(LibraryScreening.class);
+  
+  public static final RelationshipPath<LibraryScreening> assayPlatesScreened = RelationshipPath.from(LibraryScreening.class).to("assayPlatesScreened");
 
   public static final String ACTIVITY_TYPE_NAME = "Library Screening";
-  private static final String SPECIAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME = ACTIVITY_TYPE_NAME + " (screener-provided plates)";
+  private static final String EXTERNAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME = "External " + ACTIVITY_TYPE_NAME;
 
-  
-  // private instance data
 
-  private SortedSet<PlatesUsed> _platesUsed = new TreeSet<PlatesUsed>();
+  private SortedSet<AssayPlate> _assayPlatesScreened = Sets.newTreeSet();
   private String _abaseTestsetId;
-  private boolean _isForScreenerProvidedPlates;
+  private boolean _isForExternalLibraryPlates;
+  private int _librariesScreenedCount;
+  private int _libraryPlatesScreenedCount;
   private int _screenedExperimentalWellCount;
 
 
-  // public instance methods
+  /**
+   * Construct an initialized <code>LibraryScreening</code>. Intended only for use by {@link Screen}.
+   * @param screen the screen
+   * @param performedBy the user that performed the library assay
+   * @param dateOfActivity
+   */
+  LibraryScreening(Screen screen,
+                   AdministratorUser recordedBy,
+                   ScreeningRoomUser performedBy,
+                   LocalDate dateOfActivity)
+  {
+    super(screen, recordedBy, performedBy, dateOfActivity);
+  }
+
+  /**
+   * Construct an uninitialized <code>LibraryScreening</code> object.
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected LibraryScreening() {}
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -79,32 +99,63 @@ public class LibraryScreening extends Screening
   @Transient
   public String getActivityTypeName()
   {
-    if (isForScreenerProvidedPlates()) {
-      return SPECIAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME;
+    if (isForExternalLibraryPlates()) {
+      return EXTERNAL_LIBRARY_SCREENING_ACTIVITY_TYPE_NAME;
     }
     return ACTIVITY_TYPE_NAME;
   }
 
   /**
-   * Get the plates used.
-   * @return the plates used
+   * Get the plates screened during this library screening. Note that it is
+   * possible for the same plate (plate number and copy) to be screened multiple times within the same
+   * visit.
+   * 
+   * @return the plates screened
    */
-  @OneToMany(
-    mappedBy="libraryScreening",
-    cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-    fetch=FetchType.LAZY
-  )
+  @OneToMany(mappedBy="libraryScreening", cascade={}, fetch=FetchType.LAZY)
+  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="assayPlateScreened", hasNonconventionalMutation=true /*add/remove methods operator on replicate groups, not individual assay plates*/)
   @Sort(type=SortType.NATURAL)
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE_ORPHAN
-  })
-  @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="platesUsed")
-  public SortedSet<PlatesUsed> getPlatesUsed()
+  public SortedSet<AssayPlate> getAssayPlatesScreened()
   {
-    return _platesUsed;
+    return _assayPlatesScreened;
   }
   
+  /**
+   * @motivation for hibernate
+   */
+  private void setAssayPlatesScreened(SortedSet<AssayPlate> assayPlatesScreened)
+  {
+    _assayPlatesScreened = assayPlatesScreened;
+  }
+
+  @Transient
+  public int getAssayPlatesScreenedCount()
+  {
+    return _assayPlatesScreened.size();
+  }
+  
+  public void setLibrariesScreenedCount(int librariesScreenedCount)
+  {
+    _librariesScreenedCount = librariesScreenedCount;
+  }
+
+  @Derived
+  public int getLibrariesScreenedCount()
+  {
+    return _librariesScreenedCount;
+  }
+
+  @Derived
+  public int getLibraryPlatesScreenedCount()
+  {
+    return _libraryPlatesScreenedCount;
+  }
+
+  public void setLibraryPlatesScreenedCount(int libraryPlatesScreenedCount)
+  {
+    _libraryPlatesScreenedCount = libraryPlatesScreenedCount;
+  }
+
   @Derived
   public int getScreenedExperimentalWellCount()
   {
@@ -114,32 +165,6 @@ public class LibraryScreening extends Screening
   public void setScreenedExperimentalWellCount(int n)
   {
     _screenedExperimentalWellCount = n;
-  }
-
-  /**
-   * Create and return a new plates used for the library screening.
-   * @param startPlate the start plate
-   * @param endPlate the end plate
-   * @param copy the copy
-   * @return a new plates used for the library screening
-   */
-  public PlatesUsed createPlatesUsed(Integer startPlate, Integer endPlate, Copy copy)
-  {
-    PlatesUsed platesUsed = new PlatesUsed(this, startPlate, endPlate, copy);
-    _platesUsed.add(platesUsed);
-    invalidate();
-    getScreen().invalidate();
-    return platesUsed;
-  }
-
-  public boolean deletePlatesUsed(PlatesUsed platesUsed)
-  {
-    if (_platesUsed.remove(platesUsed)) {
-      invalidate();
-      getScreen().invalidate();
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -162,57 +187,61 @@ public class LibraryScreening extends Screening
   }
 
   /**
-   * Get whether the screener-provided plates are being screened, in which case there will be no library plates associated with this activity.
-   * @return the is special boolean flag
+   * Get whether the plates being screened are not based upon libraries
+   * maintained at the facility, in which case there will be no library plates
+   * associated with this activity.
    */
-  @Column(name="isForScreenerProvidedPlates", nullable=false)
-  // TODO: rename property to isScreenerProvidedPlates
-  public boolean isForScreenerProvidedPlates()
+  @Column(name="isForExternalLibraryPlates", nullable=false)
+  public boolean isForExternalLibraryPlates()
   {
-    return _isForScreenerProvidedPlates;
+    return _isForExternalLibraryPlates;
   }
 
-  public void setForScreenerProvidedPlates(boolean isForScreenerProvidedPlates)
+  public void setForExternalLibraryPlates(boolean isForExternalLibraryPlates)
   {
-    _isForScreenerProvidedPlates = isForScreenerProvidedPlates;
+    _isForExternalLibraryPlates = isForExternalLibraryPlates;
   }
 
-
-  // package constructor
-
-  /**
-   * Construct an initialized <code>LibraryScreening</code>. Intended only for use by {@link Screen}.
-   * @param screen the screen
-   * @param performedBy the user that performed the library assay
-   * @param dateOfActivity
-   */
-  LibraryScreening(Screen screen,
-                   AdministratorUser recordedBy,
-                   ScreeningRoomUser performedBy,
-                   LocalDate dateOfActivity)
+  public boolean addAssayPlatesScreened(Plate plate)
   {
-    super(screen, recordedBy, performedBy, dateOfActivity);
+    if (Sets.newHashSet(Iterables.transform(getAssayPlatesScreened(), AssayPlate.ToPlateNumber)).contains(plate.getPlateNumber())) {  
+      throw new DuplicateEntityException(this, "plateNumber", plate.getPlateNumber());
+    }
+    if (getNumberOfReplicates() == null || getNumberOfReplicates() < 1) {
+      throw new DataModelViolationException("replicates must specified as a positive number");
+    }
+      
+    for (int r = 0; r < getNumberOfReplicates(); ++r) {
+      AssayPlate assayPlate = getScreen().createAssayPlate(plate, r, this);
+      _assayPlatesScreened.add(assayPlate);
+    }
+    invalidate();
+    getScreen().invalidate();
+
+    return true;
   }
-
-
-  // protected constructor
-
-  /**
-   * Construct an uninitialized <code>LibraryScreening</code> object.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected LibraryScreening() {}
-
-
-  // private instance methods
-
-  /**
-   * Set the plates used.
-   * @param platesUsed the new plates used
-   * @motivation for hibernate
-   */
-  private void setPlatesUsed(SortedSet<PlatesUsed> platesUsed)
+  
+  public boolean removeAssayPlatesScreened(Plate plate)
   {
-    _platesUsed = platesUsed;
+    boolean changed = false;
+    Iterator<AssayPlate> iter = _assayPlatesScreened.iterator();
+    while (iter.hasNext()) {
+      AssayPlate ap = iter.next();
+      if (ap.getPlateScreened().equals(plate)) {
+        if (ap.getStatus().compareTo(AssayPlateStatus.SCREENED) > 0) {
+          throw new DataModelViolationException("assay plate has data and cannot be removed");
+        }
+        // TODO: currently, the act of removing an assay plate from a library screening is the same as deleting it altogether
+        // (if Screensaver later tracks the creation and screening of assay plates independently, then we need only mark
+        // the assay plate as unscreened here, rather than deleting it.
+        getScreen().getAssayPlates().remove(ap);
+        ap.setLibraryScreening(null);
+        changed = true;
+        iter.remove();
+        invalidate();
+        getScreen().invalidate();
+      }
+    }
+    return changed;
   }
 }

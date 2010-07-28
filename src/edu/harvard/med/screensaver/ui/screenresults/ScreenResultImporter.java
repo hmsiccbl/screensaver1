@@ -15,22 +15,23 @@ import java.util.List;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
+import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-
 /**
- * The JSF backing bean for both the screenResultImporter subview and
- * screenResultImportErrors view.
+ * The JSF backing bean for the screenResultImporter view.
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -51,6 +52,7 @@ public class ScreenResultImporter extends AbstractBackingBean
   private ScreenResultLoader _screenResultLoader;
 
   private UploadedFile _uploadedFile;
+  private String _comments;
   private List<? extends ParseError> _lastParseErrors;
 
 
@@ -87,6 +89,16 @@ public class ScreenResultImporter extends AbstractBackingBean
     return _uploadedFile;
   }
 
+  public String getComments()
+  {
+    return _comments;
+  }
+
+  public void setComments(String comments)
+  {
+    _comments = comments;
+  }
+
   public boolean getHasErrors()
   {
     return _lastParseErrors != null && ! _lastParseErrors.isEmpty();
@@ -111,23 +123,33 @@ public class ScreenResultImporter extends AbstractBackingBean
   {
     Screen screen = _screenViewer.getEntity();
     try {
-      _screenResultLoader.parseAndLoad(new Workbook("Input Stream for screen: " + screen, _uploadedFile.getInputStream()),
-                                       null, 
-                                       screen, 
-                                       true);
+      ScreenResult screenResult = 
+        _screenResultLoader.parseAndLoad(screen,
+                                         new Workbook("Input Stream for screen: " + screen, _uploadedFile.getInputStream()),
+                                         (AdministratorUser) getScreensaverUser(), 
+                                         _comments,
+                                         null,
+                                         true);
+      showMessage("screens.screenResultDataLoaded", 
+                  screenResult.getLastDataLoadingActivity().getComments());
+      // TODO: reinstate (throwing exceptions)
+      //      screen = _dao.reloadEntity(screen);
+      //      int assayPlatesCreated = Sets.difference(screen.getAssayPlatesDataLoaded(), screen.getAssayPlatesScreened()).size();
+      //      if (assayPlatesCreated > 0) {
+      //        showMessage("screens.assayPlatesCreatedForLoadedData", assayPlatesCreated);
+      //      }
     }
-    catch (ParseErrorsException e)
-    {
+    catch (ParseErrorsException e) {
       log.info("parse errors encountered during import of ScreenResult for Screen " + screen);
       _lastParseErrors = e.getErrors();
-      return viewScreenResultImportErrors();
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
     return _screenViewer.viewEntity(screen);
   }
 
   @UICommand
-  public String viewScreenResultImportErrors()
+  public String importScreenResultData()
   {
-    return VIEW_SCREEN_RESULT_IMPORT_ERRORS;
+    return IMPORT_SCREEN_RESULT_DATA;
   }
 }

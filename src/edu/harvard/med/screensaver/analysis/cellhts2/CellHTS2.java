@@ -26,8 +26,8 @@ import org.rosuda.REngine.Rserve.RserveException;
 
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
-import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -190,10 +190,9 @@ public class CellHTS2 {
     int nrColsPlate = 0;
     int row;
     int col;
-    WellKey wellKey;
 
-    for (Well well : screenResult.getWells()) {
-      wellKey = well.getWellKey();
+    for (AssayWell assayWell : screenResult.getAssayWells()) {
+      WellKey wellKey = assayWell.getLibraryWell().getWellKey();
       row = wellKey.getRow();
       if (row > nrRowsPlate) {
         nrRowsPlate = row;
@@ -211,7 +210,7 @@ public class CellHTS2 {
     result.setNrColsPlate(nrColsPlate);
 
     result.setNrWells(nrRowsPlate * nrColsPlate);
-    result.setNrPlates(screenResult.getPlateNumberCount());
+    result.setNrPlates(screenResult.getScreen().getLibraryPlatesDataLoadedCount());
     result.setNrReps(screenResult.getReplicateCount());
     result.setNrChannels(1);
 
@@ -820,11 +819,8 @@ public class CellHTS2 {
       ScreenResult screenResult) {
     BiMap<Integer, Integer> plateNumber2SequenceNumber = HashBiMap.create();
     int nextSequenceNumber = 1;
-    for (Well well : screenResult.getWells()) {
-      if (!plateNumber2SequenceNumber.containsKey(well.getPlateNumber())) {
-        plateNumber2SequenceNumber.put(well.getPlateNumber(),
-            nextSequenceNumber++);
-      }
+    for (AssayPlate assayPlate : screenResult.getScreen().getAssayPlatesDataLoaded()) {
+      plateNumber2SequenceNumber.put(assayPlate.getPlateNumber(), nextSequenceNumber++);
     }
     return plateNumber2SequenceNumber;
   }

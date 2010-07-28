@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,7 @@ import org.apache.log4j.Logger;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Embeddable
-public class WellKey implements Comparable/*, Serializable*/
+public class WellKey implements Comparable<WellKey>, Serializable
 {
   // static members
 
@@ -41,8 +42,7 @@ public class WellKey implements Comparable/*, Serializable*/
   private static final Pattern keyPattern = Pattern.compile("(\\d+):(.*)");
   private static final String plateNumberLabelFormat = "%0" + ScreensaverConstants.PLATE_NUMBER_LEN + "d";
   private static final String wellKeyFormat = plateNumberLabelFormat + ":%s";
-
-
+  
   // instance data members
 
   private int _plateNumber;
@@ -157,9 +157,8 @@ public class WellKey implements Comparable/*, Serializable*/
     return _asString;
   }
 
-  public int compareTo(Object o)
+  public int compareTo(WellKey other)
   {
-    WellKey other = (WellKey) o;
     int hashCode1 = hashCode();
     int hashCode2 = other.hashCode();
     return hashCode1 < hashCode2 ? -1 : hashCode1 > hashCode2 ? 1 : 0;

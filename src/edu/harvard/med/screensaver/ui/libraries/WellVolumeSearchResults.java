@@ -1,4 +1,6 @@
-// $HeadURL$
+// $HeadURL:
+// svn+ssh://ant4@orchestra.med.harvard.edu/svn/iccb/screensaver/trunk/src/edu/harvard/med/screensaver/ui/libraries/WellVolumeSearchResults.java
+// $
 // $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -18,9 +20,8 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.searchresults.AggregateSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.table.column.ColumnType;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.table.column.SetColumn;
@@ -35,15 +36,9 @@ import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
  *
  * @see WellCopyVolumeSearchResults
  */
-public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,WellKey>
+public class WellVolumeSearchResults extends EntityBasedEntitySearchResults<WellVolume,String>
 {
-
-  // static members
-
   private static Logger log = Logger.getLogger(WellVolumeSearchResults.class);
-
-
-  // instance data members
 
   private GenericEntityDAO _dao;
   private LibraryViewer _libraryViewer;
@@ -51,8 +46,6 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
   private CherryPickRequestViewer _cherryPickRequestViewer;
   //private TextColumn<Well> _maxRemainingVolumeColumn;
 
-
-  // constructors
 
   /**
    * @motivation for CGLIB2
@@ -310,6 +303,13 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
     return columns;
   }
 
+  @Override
+  public void searchAll()
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
 // @Override
 // protected void makeRowDetail(WellVolume wv)
 // {
@@ -329,8 +329,4 @@ public class WellVolumeSearchResults extends AggregateSearchResults<WellVolume,W
 // getRowDetail().setContents(wvas);
 //
 // }
-
-
-  // private methods
-
 }

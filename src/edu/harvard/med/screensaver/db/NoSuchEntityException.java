@@ -17,23 +17,13 @@ public class NoSuchEntityException extends RuntimeException
 {
   private static final long serialVersionUID = 1L;
   
-  private Class<? extends Entity> _entityClass;
-  private Serializable _entityId;
-
   public NoSuchEntityException(Class<? extends Entity> entityClass, Serializable entityId)
   {
-    this("no such entity", entityClass, entityId);
+    this(entityClass, "id", entityId);
   }
   
-  public NoSuchEntityException(String message, Class<? extends Entity> entityClass, Serializable entityId)
+  public NoSuchEntityException(Class<? extends Entity> entityClass, String propertyName, Object propertyValue)
   {
-    super(message + "( " + entityClass.getName() + ", id=" + entityId + ")");
-    _entityClass = entityClass;
-    _entityId = entityId;
-  }
-
-  public Class<? extends Entity> getEntityClass()
-  {
-    return _entityClass;
+    super("no such entity" + " (" + entityClass.getName() + "." + propertyName + "=" + propertyValue + ")");
   }
 }

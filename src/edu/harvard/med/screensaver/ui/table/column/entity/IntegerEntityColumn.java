@@ -11,12 +11,12 @@ package edu.harvard.med.screensaver.ui.table.column.entity;
 
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
 
-public abstract class IntegerEntityColumn<E extends AbstractEntity> extends IntegerColumn<E> implements HasFetchPaths<E>
+public abstract class IntegerEntityColumn<E extends Entity> extends IntegerColumn<E> implements HasFetchPaths<E>
 {
   private FetchPaths<E,E> _fetchPaths;
   

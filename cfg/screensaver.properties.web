@@ -25,7 +25,7 @@ debug=false
 ### run-time properties
 
 screensaver.ui.application_name=Screensaver
-screensaver.ui.version=1.9.4
+screensaver.ui.version=2.0.0
 # build number placeholder value, below, will be replaced by Ant "build" target at build/deploy time, using the build.number property
 screensaver.ui.build_number=BUILD_NUMBER
 

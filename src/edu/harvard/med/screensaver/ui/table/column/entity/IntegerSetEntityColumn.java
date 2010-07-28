@@ -11,19 +11,18 @@ package edu.harvard.med.screensaver.ui.table.column.entity;
 
 import java.util.Set;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.ui.table.column.ColumnType;
-import edu.harvard.med.screensaver.ui.table.column.SetColumn;
+import edu.harvard.med.screensaver.ui.table.column.IntegerSetColumn;
 
-public abstract class IntegerSetEntityColumn<E extends AbstractEntity> extends SetColumn<E,Integer> implements HasFetchPaths<E>
+public abstract class IntegerSetEntityColumn<E extends Entity> extends IntegerSetColumn<E> implements HasFetchPaths<E>
 {
   private FetchPaths<E,E> _fetchPaths;
   
   public IntegerSetEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
-    super(name, description, group, ColumnType.INTEGER_SET);
+    super(name, description, group);
     _fetchPaths = new FetchPaths<E,E>(relationshipPath);
   }
 

@@ -12,29 +12,23 @@ package edu.harvard.med.screensaver.ui.libraries;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
+import edu.harvard.med.screensaver.model.NonPersistentEntity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
-import edu.harvard.med.screensaver.util.Pair;
 
-public class WellCopy implements Comparable<WellCopy>
+import org.apache.log4j.Logger;
+
+public class WellCopy extends NonPersistentEntity<String> implements Comparable<WellCopy>
 {
-  // static members
-
   private static final long serialVersionUID = 1L;
 
   private static Logger log = Logger.getLogger(WellCopy.class);
 
 
-  // instance data members
-
-  private Pair<WellKey,String> _key;
   private Well _well;
   private Copy _copy;
   private Volume _initialVolume;
@@ -43,22 +37,21 @@ public class WellCopy implements Comparable<WellCopy>
   private List<WellVolumeAdjustment> _wellVolumeAdjustments;
 
 
-  // public constructors and methods
 
   public WellCopy(Well well, Copy copy)
   {
+    super(well.getEntityId() + ":" + copy.getName());
     _well = well;
     _copy = copy;
-    CopyInfo copyInfo = _copy.getCopyInfo(_well.getPlateNumber());
-    if (copyInfo == null) {
+    Plate plate = _copy.getPlates().get(_well.getPlateNumber());
+    if (plate == null) {
       _initialVolume = VolumeUnit.ZERO;
     }
     else {
-      _initialVolume = copyInfo.getWellVolume();
+      _initialVolume = plate.getWellVolume();
     }
     _remainingVolume = _initialVolume;
     _wellVolumeAdjustments = new ArrayList<WellVolumeAdjustment>();
-    _key = new Pair<WellKey,String>(_well.getWellKey(), copy.getName());
   }
 
   public void addWellVolumeAdjustment(WellVolumeAdjustment wellVolumeAdjustment)
@@ -104,43 +97,19 @@ public class WellCopy implements Comparable<WellCopy>
   }
 
   @Override
-  public boolean equals(Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj instanceof WellCopy) {
-      return _key.equals(((WellCopy) obj)._key);
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return _key.hashCode();
-  }
-
-  @Override
   public String toString()
   {
-    return _key + "=" + _remainingVolume;
-  }
-
-  public Pair<WellKey,String> getKey()
-  {
-    return _key;
+    return getEntityId() + "=" + _remainingVolume;
   }
 
   public int compareTo(WellCopy that)
   {
-    int result = this.getWell().compareTo(that.getWell());
-    if (result == 0) {
-      result = this.getCopy().getName().compareTo(that.getCopy().getName());
-    }
-    return result;
+    return this.getEntityId().compareTo(that.getEntityId());
   }
 
-  // private methods
-
+  @Override
+  public boolean isRestricted()
+  {
+    return _well.isRestricted() || _copy.isRestricted();
+  }
 }

@@ -15,10 +15,12 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import junit.framework.TestSuite;
@@ -43,6 +45,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
@@ -58,8 +61,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
   protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
   protected CherryPickRequestCherryPicksAdder cherryPickRequestCherryPicksAdder;
-  
-  
+
   public static TestSuite suite()
   {
     return buildTestSuite(ScreenTest.class, Screen.class);
@@ -309,7 +311,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
                  screen3.getBillingItems());
   }
   
-  public void testScreenedExperimentalWellCount()
+  public void testScreeningStatusCounts()
   {
     schemaUtil.truncateTablesOrCreateSchema();
 
@@ -333,13 +335,29 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
         AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", ""); 
         ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 4);
-        LibraryScreening libraryScreening = screen1.createLibraryScreening(admin, screener, new LocalDate());
-        libraryScreening.createPlatesUsed(1000, 1000, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
-        libraryScreening.createPlatesUsed(1001, 1002, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
+        
+        Copy copy = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A");
+        Plate plate1000 = copy.createPlate(1000, "", PlateType.ABGENE, new Volume(0));
+        Plate plate1001 = copy.createPlate(1001, "", PlateType.ABGENE, new Volume(0));
+        Plate plate1002 = copy.createPlate(1002, "", PlateType.ABGENE, new Volume(0));
+        Plate plate1003 = copy.createPlate(1003, "", PlateType.ABGENE, new Volume(0));
+
+        LibraryScreening libraryScreening;
         libraryScreening = screen1.createLibraryScreening(admin, screener, new LocalDate());
-        libraryScreening.createPlatesUsed(1001, 1002, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
+        libraryScreening.setNumberOfReplicates(1);
+        libraryScreening.addAssayPlatesScreened(plate1000);
+        libraryScreening.addAssayPlatesScreened(plate1001);
+        libraryScreening.addAssayPlatesScreened(plate1002);
+        libraryScreening = screen1.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.setNumberOfReplicates(1);
+        libraryScreening.addAssayPlatesScreened(plate1001);
+        libraryScreening.addAssayPlatesScreened(plate1002);
         libraryScreening = screen2.createLibraryScreening(admin, screener, new LocalDate());
-        libraryScreening.createPlatesUsed(1000, 1003, new Copy(library, CopyUsageType.FOR_LIBRARY_SCREENING, "A"));
+        libraryScreening.setNumberOfReplicates(1);
+        libraryScreening.addAssayPlatesScreened(plate1000);
+        libraryScreening.addAssayPlatesScreened(plate1001);
+        libraryScreening.addAssayPlatesScreened(plate1002);
+        libraryScreening.addAssayPlatesScreened(plate1003);
         genericEntityDao.persistEntity(library);
         screen1.update();
       }
@@ -348,6 +366,16 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
     assertEquals(384 * 5, screen.getScreenedExperimentalWellCount());
     assertEquals(384 * 3, screen.getUniqueScreenedExperimentalWellCount());
+    assertEquals(5, screen.getAssayPlatesScreenedCount());
+    assertEquals(3, screen.getLibraryPlatesScreenedCount());
+    // TODO (test in screen result loader test)
+    assertEquals(0, screen.getLibraryPlatesDataLoadedCount());
+    assertEquals(0, screen.getLibraryPlatesDataAnalyzedCount());
+    assertEquals(1, screen.getLibrariesScreenedCount());
+    assertEquals(Integer.valueOf(1), screen.getMinScreenedReplicateCount());
+    assertEquals(Integer.valueOf(1), screen.getMaxScreenedReplicateCount());
+    assertEquals(null, screen.getMinDataLoadedReplicateCount());
+    assertEquals(null, screen.getMaxDataLoadedReplicateCount());
     
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
@@ -355,12 +383,75 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
         LibraryScreening libraryScreening = screen.getLabActivitiesOfType(LibraryScreening.class).first();
-        libraryScreening.deletePlatesUsed(libraryScreening.getPlatesUsed().first());
+        assertTrue(libraryScreening.removeAssayPlatesScreened(libraryScreening.getAssayPlatesScreened().first().getPlateScreened()));
         screen.update();
         assertEquals(384 * 4, screen.getScreenedExperimentalWellCount());
         assertEquals(384 * 2, screen.getUniqueScreenedExperimentalWellCount());
+        assertEquals(4, screen.getAssayPlatesScreenedCount());
+        assertEquals(2, screen.getLibraryPlatesScreenedCount());
+        assertEquals(Integer.valueOf(1), screen.getMinScreenedReplicateCount());
+        assertEquals(Integer.valueOf(1), screen.getMaxScreenedReplicateCount());
+        assertEquals(null, screen.getMinDataLoadedReplicateCount());
+        assertEquals(null, screen.getMaxDataLoadedReplicateCount());
       }
     });
+  }
+  
+  public void testMinMaxReplicateCounts()
+  {
+    schemaUtil.truncateTablesOrCreateSchema();
+
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
+        genericEntityDao.persistEntity(screen);
+        genericEntityDao.flush();
+        genericEntityDao.clear();
+        screen = genericEntityDao.reloadEntity(screen);
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", ""); 
+        ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
+
+        Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 4);
+        Copy copy = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A");
+        Plate plate1000 = copy.createPlate(1000, "", PlateType.ABGENE, new Volume(0));
+        Plate plate1001 = copy.createPlate(1001, "", PlateType.ABGENE, new Volume(0));
+        Plate plate1002 = copy.createPlate(1002, "", PlateType.ABGENE, new Volume(0));
+        Plate plate1003 = copy.createPlate(1003, "", PlateType.ABGENE, new Volume(0));
+        genericEntityDao.persistEntity(library);
+
+        LibraryScreening libraryScreening;
+        libraryScreening = screen.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.setNumberOfReplicates(1);
+        libraryScreening.addAssayPlatesScreened(plate1000);
+        libraryScreening = screen.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.setNumberOfReplicates(2);
+        libraryScreening.addAssayPlatesScreened(plate1001);
+        libraryScreening = screen.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.setNumberOfReplicates(2);
+        libraryScreening.addAssayPlatesScreened(plate1001);
+        libraryScreening = screen.createLibraryScreening(admin, screener, new LocalDate());
+        libraryScreening.setNumberOfReplicates(3);
+        libraryScreening.addAssayPlatesScreened(plate1002);
+        
+        ScreenResult screenResult = screen.createScreenResult();
+        Map<Integer,Integer> plateNumbersLoadedWithMaxReplicates = ImmutableMap.of(1000, 2, 1001, 2, 1002, 3, 1003, 4);
+        screenResult.createScreenResultDataLoading(admin, plateNumbersLoadedWithMaxReplicates, "comments");
+        screen.update();
+      }
+    });
+    
+    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true, Screen.assayPlates.getPath());
+    assertEquals(8, screen.getAssayPlatesScreenedCount());
+    assertEquals(11, screen.getAssayPlatesDataLoaded().size());
+    assertEquals(3, screen.getLibraryPlatesScreenedCount());
+    assertEquals(4, screen.getLibraryPlatesDataLoadedCount());
+    assertEquals(1, screen.getLibrariesScreenedCount());
+    assertEquals(Integer.valueOf(1), screen.getMinScreenedReplicateCount());
+    assertEquals(Integer.valueOf(3), screen.getMaxScreenedReplicateCount());
+    assertEquals(Integer.valueOf(2), screen.getMinDataLoadedReplicateCount());
+    assertEquals(Integer.valueOf(4), screen.getMaxDataLoadedReplicateCount());
   }
   
   public void testFulfilledLabCherryPicksCount()
@@ -381,7 +472,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
-        library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A").createCopyInfo(1000, "", PlateType.ABGENE, new Volume(1000));
+        library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A").createPlate(1000, "", PlateType.ABGENE, new Volume(1000));
         AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
         ScreeningRoomUser screener = new LabHead(admin);
         

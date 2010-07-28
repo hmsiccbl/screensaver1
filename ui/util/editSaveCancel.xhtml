@@ -31,6 +31,12 @@
 	  styleClass="command"
 	  onclick="javascript: return confirm('Are you sure you want to delete this item?');"
 	  title="Delete" />
+  <h:commandButton id="historyCommand" value="History..."
+    rendered="#{viewer.updateHistoryCapable &amp;&amp; viewer.editable &amp;&amp; !viewer.editMode}"
+    action="#{viewer.viewUpdateHistory}" 
+    styleClass="command"
+    title="View entity's update history" />
+
 
   <ss:property id="updateComments" label="Update comments" type="Text" editWidth="60"
     value="#{viewer.updateComments}"

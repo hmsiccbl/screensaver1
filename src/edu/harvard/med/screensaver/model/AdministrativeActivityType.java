@@ -13,6 +13,8 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
+import com.google.common.base.Predicate;
+
 /**
  * The vocabulary of values for AdministrativeActivity types.
  *
@@ -28,10 +30,22 @@ public enum AdministrativeActivityType implements VocabularyTerm
   PIN_TRANSFER_APPROVAL("Pin Transfer Approval", ScreensaverUserRole.SCREENS_ADMIN),
   LIBRARY_CONTENTS_LOADING("Library Contents Loading", ScreensaverUserRole.LAB_HEADS_ADMIN),
   LIBRARY_CONTENTS_VERSION_RELEASE("Library Contents Version Release", ScreensaverUserRole.LAB_HEADS_ADMIN),
+  SCREEN_RESULT_DATA_LOADING("Screen Result Data Loading", ScreensaverUserRole.SCREEN_RESULTS_ADMIN),
+  SCREEN_RESULT_DATA_DELETION("Screen Result Data Deletion", ScreensaverUserRole.SCREEN_RESULTS_ADMIN),
   /** For general recording of changes made to the data in an entity (audit log) */
   ENTITY_UPDATE("Entity Update", ScreensaverUserRole.READ_EVERYTHING_ADMIN),
   ;
 
+  public Predicate<AdministrativeActivity> isValuePredicate()
+  {
+    return new Predicate<AdministrativeActivity>() { 
+      @Override
+      public boolean apply(AdministrativeActivity activity)
+      {
+        return activity.getType() == AdministrativeActivityType.this;
+      }
+    };
+  }
 
   // static inner class
 

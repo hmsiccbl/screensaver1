@@ -10,8 +10,6 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +25,6 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
-import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -43,32 +40,25 @@ import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.util.Pair;
-import edu.harvard.med.screensaver.util.Pair.PairComparator;
 
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 {
-  // static members
-
   private static Logger log = Logger.getLogger(WellVolumeSearchResultsTest.class);
-
-
-  // instance data members
 
   protected LibrariesDAO librariesDao;
   private WellVolumeSearchResults _wellVolumeSearchResults;
   private WellCopyVolumeSearchResults _wellCopyVolumeSearchResults;
   private Library _library;
-  private RNAiCherryPickRequest _cherryPickRequest;
-  private Map<Pair<WellKey,String>,Volume> _expectedRemainingWellCopyVolume = new HashMap<Pair<WellKey,String>,Volume>();
-  private Map<WellKey,Volume> _expectedRemainingWellVolume = new HashMap<WellKey,Volume>();
+  private CherryPickRequest _cherryPickRequest;
+  private Map<WellCopy,Volume> _expectedRemainingWellCopyVolume = Maps.newHashMap();
+  private Map<WellKey,Volume> _expectedRemainingWellVolume = Maps.newHashMap();
 
-
-  // public constructors and methods
 
   @Override
   protected void onSetUp() throws Exception
@@ -83,62 +73,60 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
   public void testWellVolumeSearchResults()
   {
     _wellCopyVolumeSearchResults.searchWellsForLibrary(_library);
-    doTestWellCopyVolumeSearchResult(makeWellCopyKeys(_library));
-    doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopyKeys(_library)));
+    doTestWellCopyVolumeSearchResult(makeWellCopies(_library));
+    doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopies(_library)));
 
     List<Well> wells = new ArrayList<Well>(_library.getWells()).subList(24, 96);
     _wellCopyVolumeSearchResults.searchWells(makeWellKeys(wells));
-    doTestWellCopyVolumeSearchResult(makeWellCopyKeys(wells));
-    doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopyKeys(wells)));
+    doTestWellCopyVolumeSearchResult(makeWellCopies(wells));
+    doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopies(wells)));
 
     _wellCopyVolumeSearchResults.searchWellsForCherryPickRequest(_cherryPickRequest, false);
-    doTestWellCopyVolumeSearchResult(makeWellCopyKeys(_cherryPickRequest));
-    doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopyKeys(_cherryPickRequest)));
+    doTestWellCopyVolumeSearchResult(makeWellCopies(_cherryPickRequest));
+    doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopies(_cherryPickRequest)));
   }
 
-  private void doTestWellCopyVolumeSearchResult(SortedSet<Pair<WellKey,String>> expectedWellCopyKeys)
+  private void doTestWellCopyVolumeSearchResult(SortedSet<WellCopy> expectedWellCopies)
   {
     DataModel model = _wellCopyVolumeSearchResults.getDataTableModel();
-    assertEquals("row count", expectedWellCopyKeys.size(), model.getRowCount());
+    assertEquals("row count", expectedWellCopies.size(), model.getRowCount());
     int j = 0;
-    for (Pair<WellKey,String> expectedKey : expectedWellCopyKeys) {
+    for (WellCopy expectedWellCopy : expectedWellCopies) {
       model.setRowIndex(j++);
-      assertEquals("row data " + j,
-                   expectedKey,
-                   ((WellCopy) model.getRowData()).getKey());
+      //assertEquals("row data " + j, expectedWellCopy, ((WellCopy) model.getRowData()));
       int columnsTested = 0;
       WellCopy rowData = (WellCopy) model.getRowData();
       for (TableColumn<WellCopy,?> column : _wellCopyVolumeSearchResults.getColumnManager().getAllColumns()) {
         if (column.isVisible()) {
           Object cellValue = column.getCellValue(rowData);
           if (column.getName().equals("Library")) {
-            assertEquals("row " + j + ", " + expectedKey + ":Library",
-                         librariesDao.findLibraryWithPlate(expectedKey.getFirst().getPlateNumber()).getLibraryName(),
+            assertEquals("row " + j + ", " + expectedWellCopy + ":Library",
+                         librariesDao.findLibraryWithPlate(expectedWellCopy.getWell().getPlateNumber()).getLibraryName(),
                          (String) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Plate")) {
-            assertEquals("row " + j + ", " + expectedKey + ":Plate",
-                         (Integer) expectedKey.getFirst().getPlateNumber(),
+            assertEquals("row " + j + ", " + expectedWellCopy.getEntityId() + ":Plate",
+                         (Integer) expectedWellCopy.getWell().getPlateNumber(),
                          (Integer) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Well")) {
-            assertEquals("row " + j + ", " + expectedKey  + ":Well",
-                         expectedKey.getFirst().getWellName(),
+            assertEquals("row " + j + ", " + expectedWellCopy.getEntityId() + ":Well",
+                         expectedWellCopy.getWell().getWellKey().getWellName().toString(),
                          (String) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Initial Volume")) {
-            assertEquals("row " + j + ", " + expectedKey  + ":Initial Volume",
-                         expectedKey.getSecond().equals("C") ? new Volume(10) : new Volume(20),
+            assertEquals("row " + j + ", " + expectedWellCopy + ":Initial Volume",
+                         expectedWellCopy.getCopy().getName().equals("C") ? new Volume(10) : new Volume(20),
                          (Volume) cellValue);
             ++columnsTested;
           }
           else if (column.getName().equals("Remaining Volume")) {
             // this tests aggregation of WVAs
-            assertEquals("row " + j + ", " + expectedKey  + ":Remaining Volume",
-                         _expectedRemainingWellCopyVolume.get(expectedKey),
+            assertEquals("row " + j + ", " + expectedWellCopy  + ":Remaining Volume",
+                         _expectedRemainingWellCopyVolume.get(expectedWellCopy),
                          (Volume) cellValue);
             ++columnsTested;
           }
@@ -231,10 +219,10 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         _library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
         Copy copyC = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
         Copy copyD = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        copyC.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyC.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyD.createCopyInfo(1, "loc1", PlateType.EPPENDORF, new Volume(20));
-        copyD.createCopyInfo(2, "loc1", PlateType.EPPENDORF, new Volume(20));
+        copyC.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyC.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(10));
+        copyD.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(20));
+        copyD.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(20));
         genericEntityDao.saveOrUpdateEntity(_library);
 
         Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
@@ -263,25 +251,25 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate1WellB02, new Volume(-1), null));
         genericEntityDao.persistEntity(new WellVolumeAdjustment(copyD, plate2WellB01, new Volume(-1), null));
 
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "C"), new Volume(7));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellA01.getWellKey(), "D"), new Volume(17));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB01.getWellKey(), "C"), new Volume(8));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB02.getWellKey(), "C"), new Volume(9));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate1WellB02.getWellKey(), "D"), new Volume(19));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellA01.getWellKey(), "C"), new Volume(7));
-        _expectedRemainingWellCopyVolume.put(new Pair<WellKey,String>(plate2WellB01.getWellKey(), "D"), new Volume(16));
+        _expectedRemainingWellCopyVolume.put(new WellCopy(plate1WellA01, copyC), new Volume(7));
+        _expectedRemainingWellCopyVolume.put(new WellCopy(plate1WellA01, copyD), new Volume(17));
+        _expectedRemainingWellCopyVolume.put(new WellCopy(plate1WellB01, copyC), new Volume(8));
+        _expectedRemainingWellCopyVolume.put(new WellCopy(plate1WellB02, copyC), new Volume(9));
+        _expectedRemainingWellCopyVolume.put(new WellCopy(plate1WellB02, copyD), new Volume(19));
+        _expectedRemainingWellCopyVolume.put(new WellCopy(plate2WellA01, copyC), new Volume(7));
+        _expectedRemainingWellCopyVolume.put(new WellCopy(plate2WellB01, copyD), new Volume(16));
 
         for (Well well : _library.getWells()) {
           Volume expectedRemainingWellVolume = new Volume(0);
           for (Copy copy : _library.getCopies()) {
-            Pair<WellKey,String> wellCopyKey = new Pair<WellKey,String>(well.getWellKey(), copy.getName());
-            if (!_expectedRemainingWellCopyVolume.containsKey(wellCopyKey)) {
-              Volume expectedRemainingWellCopyVolume = copy.getCopyInfos().iterator().next().getWellVolume();
-              _expectedRemainingWellCopyVolume.put(wellCopyKey, expectedRemainingWellCopyVolume);
+            WellCopy wellCopy = new WellCopy(well, copy);
+            if (!_expectedRemainingWellCopyVolume.containsKey(wellCopy)) {
+              Volume expectedRemainingWellCopyVolume = copy.getPlates().values().iterator().next().getWellVolume();
+              _expectedRemainingWellCopyVolume.put(wellCopy, expectedRemainingWellCopyVolume);
               expectedRemainingWellVolume = expectedRemainingWellVolume.add(expectedRemainingWellCopyVolume);
             }
             else {
-              expectedRemainingWellVolume = expectedRemainingWellVolume.add(_expectedRemainingWellCopyVolume.get(wellCopyKey));
+              expectedRemainingWellVolume = expectedRemainingWellVolume.add(_expectedRemainingWellCopyVolume.get(wellCopy));
             }
           }
           _expectedRemainingWellVolume.put(well.getWellKey(), expectedRemainingWellVolume);
@@ -299,47 +287,45 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     return wellKeys;
   }
 
-  private static SortedSet<Pair<WellKey,String>> makeWellCopyKeys(Library library)
+  private static SortedSet<WellCopy> makeWellCopies(Library library)
   {
-    SortedSet<Pair<WellKey,String>> expectedKeys = new TreeSet<Pair<WellKey,String>>(new PairComparator<WellKey,String>());
+    SortedSet<WellCopy> wellCopies = Sets.newTreeSet();
     for (Well well : library.getWells()) {
       for (Copy copy : library.getCopies()) {
-        expectedKeys.add(new Pair<WellKey,String>(well.getWellKey(), copy.getName()));
+        wellCopies.add(new WellCopy(well, copy));
       }
     }
-    return expectedKeys;
+    return wellCopies;
   }
 
-  private static SortedSet<Pair<WellKey,String>> makeWellCopyKeys(List<Well> wells)
+  private static SortedSet<WellCopy> makeWellCopies(List<Well> wells)
   {
-    SortedSet<Pair<WellKey,String>> wellCopyKeys = new TreeSet<Pair<WellKey,String>>(new Pair.PairComparator<WellKey,String>());
+    SortedSet<WellCopy> wellCopies = Sets.newTreeSet();
     for (Well well : wells) {
       for (Copy copy : well.getLibrary().getCopies()) {
-        wellCopyKeys.add(new Pair<WellKey,String>(well.getWellKey(), copy.getName()));
+        wellCopies.add(new WellCopy(well, copy));
       }
     }
-    return wellCopyKeys;
+    return wellCopies;
   }
 
-  private static SortedSet<Pair<WellKey,String>> makeWellCopyKeys(RNAiCherryPickRequest cherryPickRequest)
+  private static SortedSet<WellCopy> makeWellCopies(CherryPickRequest cherryPickRequest)
   {
-    SortedSet<Pair<WellKey,String>> expectedKeys = new TreeSet<Pair<WellKey,String>>(new PairComparator<WellKey,String>());
+    SortedSet<WellCopy> wellCopies = Sets.newTreeSet();
     for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
       Well well = labCherryPick.getSourceWell();
-        //if (labCherryPick.getWellVolumeAdjustments().size() > 0) {
-        //Copy copy = labCherryPick.getWellVolumeAdjustments().iterator().next().getCopy()
       for (Copy copy : well.getLibrary().getCopies()) {
-        expectedKeys.add(new Pair<WellKey,String>(well.getWellKey(), copy.getName()));
+        wellCopies.add(new WellCopy(well, copy));
       }
     }
-    return expectedKeys;
+    return wellCopies;
   }
 
-  private SortedSet<WellKey> makeWellVolumeKeys(SortedSet<Pair<WellKey,String>> wellCopyKeys)
+  private SortedSet<WellKey> makeWellVolumeKeys(SortedSet<WellCopy> wellCopies)
   {
     SortedSet<WellKey> wellKeys = new TreeSet<WellKey>();
-    for (Pair<WellKey,String> wellCopyKey : wellCopyKeys) {
-      wellKeys.add(wellCopyKey.getFirst());
+    for (WellCopy wellCopy : wellCopies) {
+      wellKeys.add(wellCopy.getWell().getWellKey());
     }
     return wellKeys;
   }

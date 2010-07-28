@@ -9,8 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -19,23 +18,22 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import com.google.common.base.Function;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.log4j.Logger;
+import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
@@ -50,8 +48,8 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
  * set plates.  Therefore, even if a facility decided to work with a single, master set of library 
  * plates, in Screensaver one would still have to define a single Copy for this master set of plates. 
  * 
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
+ * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "libraryId", "name" }) })
@@ -59,28 +57,21 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 @ContainedEntity(containingEntityClass=Library.class)
 public class Copy extends SemanticIDAbstractEntity<String> implements Comparable<Copy>
 {
-
-  // static fields
-
-  private static final Logger log = Logger.getLogger(Copy.class);
   private static final long serialVersionUID = 0L;
   
-  public static final RelationshipPath<Copy> copyInfos = RelationshipPath.from(Copy.class).to("copyInfos");
+  public static final RelationshipPath<Copy> plates = RelationshipPath.from(Copy.class).to("plates");
   public static final RelationshipPath<Copy> library = RelationshipPath.from(Copy.class).to("library", Cardinality.TO_ONE);
 
   public static final Function<Copy,String> ToName = new Function<Copy,String>() { public String apply(Copy c) { return c.getName(); } };
+  public static final Function<Copy,Library> ToLibrary = new Function<Copy,Library>() { public Library apply(Copy c) { return c.getLibrary(); } };
 
-
-  // instance fields
 
   private Integer _version;
   private Library _library;
-  private Set<CopyInfo> _copyInfos = new HashSet<CopyInfo>();
   private String _name;
   private CopyUsageType _usageType;
+  private Map<Integer,Plate> _plates = Maps.newHashMap();
 
-
-  // public instance methods
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -119,65 +110,53 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
     return _library;
   }
 
+
   /**
-   * Get the set of copy infos.
-   * @return the set of copy infos
+   * @motivation for hibernate
    */
+  private void setLibrary(Library library)
+  {
+    _library = library;
+  }
+
   @OneToMany(
     mappedBy="copy",
     cascade={ CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
     fetch=FetchType.LAZY
   )
-  @OrderBy("copyInfoId")
-  @org.hibernate.annotations.Cascade(value={
-    org.hibernate.annotations.CascadeType.SAVE_UPDATE,
-    org.hibernate.annotations.CascadeType.DELETE
-  })
-  public Set<CopyInfo> getCopyInfos()
+  @MapKey(name="plateNumber")
+  @ToMany(hasNonconventionalMutation=true /*Maps not yet supported by automated model testing framework*/)
+  @org.hibernate.annotations.Cascade(value={org.hibernate.annotations.CascadeType.SAVE_UPDATE, 
+                                            org.hibernate.annotations.CascadeType.DELETE})
+  public Map<Integer,Plate> getPlates()
   {
-    return _copyInfos;
+    return _plates;
   }
 
-  /**
-   * Get the copy info with the given plate number
-   * @param plateNumber the plate number to get the copy info for
-   * @return the copy info with the given plate number
-   */
-  @Transient
-  public CopyInfo getCopyInfo(final Integer plateNumber)
+  private void setPlates(Map<Integer,Plate> plates)
   {
-    // TODO: use a map instead of a set for Copy=>CopyInfo
-    return (CopyInfo) CollectionUtils.find(_copyInfos, new Predicate()
-    {
-      public boolean evaluate(Object e) { return ((CopyInfo) e).getPlateNumber().equals(plateNumber); };
-    });
+    _plates = plates;
   }
 
-  /**
-   * Create a new copy info for the copy.
-   * @param plateNumber the plate number
-   * @param location the location
-   * @param plateType the plate type
-   * @param volume the volume
-   * @return the new copy info for the copy
-   */
-  public CopyInfo createCopyInfo(
+  public Plate createPlate(
     Integer plateNumber,
     String location,
     PlateType plateType,
     Volume volume)
   {
-    CopyInfo copyInfo = new CopyInfo(this, plateNumber, location, plateType, volume);
-    if (! _copyInfos.add(copyInfo)) {
-      throw new DuplicateEntityException(this, copyInfo);
+    Plate plate = new Plate(this, plateNumber, location, plateType, volume);
+    if (getLibrary().getStartPlate() > plateNumber || getLibrary().getEndPlate() < plateNumber) {
+      throw new DataModelViolationException("plate number " + plateNumber + 
+                                            " is outside of library plate range (" + 
+                                            getLibrary().getStartPlate() + ".." + getLibrary().getEndPlate() + ")");
     }
-    return copyInfo;
+    if (_plates.containsKey(plateNumber)) {
+      throw new DuplicateEntityException(this, plate);
+    }
+    _plates.put(plateNumber, plate);
+    return plate;
   }
 
-  /**
-   * Get the name.
-   * @return the name
-   */
   @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
   @org.hibernate.annotations.Immutable
@@ -186,10 +165,11 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
     return _name;
   }
 
-  /**
-   * Get this copy's usage type.
-   * @return the copy's usage type.
-   */
+  private void setName(String name)
+  {
+    _name = name;
+  }
+
   @Column(nullable=false)
   @org.hibernate.annotations.Type(
     type="edu.harvard.med.screensaver.model.libraries.CopyUsageType$UserType"
@@ -200,14 +180,15 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
     return _usageType;
   }
 
+  private void setUsageType(CopyUsageType copyUsageType)
+  {
+    _usageType = copyUsageType;
+  }
+
   /**
-   * Construct an initialized <code>Copy</code>.
-   * @param library the library
-   * @param usageType the copy usage type
-   * @param name the name
    * @motivation intended for use by {@link Library#createCopy} only.
    */
-  public Copy(Library library, CopyUsageType usageType, String name)
+  Copy(Library library, CopyUsageType usageType, String name)
   {
     setEntityId(library.getShortName() + ":" + name);
     _library = library;
@@ -216,20 +197,12 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
   }
 
 
-  // protected constructor
-
   /**
-   * Construct an uninitialized <code>Copy</code>.
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected Copy() {}
 
-
-  // private instance methods
-
   /**
-   * Set the id for the copy.
-   * @param copyId the new id for the copy
    * @motivation for hibernate
    */
   private void setCopyId(String copyId)
@@ -250,51 +223,10 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
   }
 
   /**
-   * Set the version for the copy.
-   * @param version the new version for the copy
    * @motivation for hibernate
    */
   private void setVersion(Integer version)
   {
     _version = version;
-  }
-
-  /**
-   * Set the library the well is in.
-   * @param library the new library for the well
-   * @motivation for hibernate
-   */
-  private void setLibrary(Library library)
-  {
-    _library = library;
-  }
-
-  /**
-   * Set the copy infos.
-   * @param copyInfos the new copy infos
-   * @motivation for hibernate
-   */
-  private void setCopyInfos(Set<CopyInfo> copyInfos)
-  {
-    _copyInfos = copyInfos;
-  }
-
-  /**
-   * Set this copy's usage type.
-   * @param copyUsageType
-   */
-  private void setUsageType(CopyUsageType copyUsageType)
-  {
-    _usageType = copyUsageType;
-  }
-
-  /**
-   * Set the name.
-   * @param name the new name
-   * @motivation for hibernate
-   */
-  private void setName(String name)
-  {
-    _name = name;
   }
 }

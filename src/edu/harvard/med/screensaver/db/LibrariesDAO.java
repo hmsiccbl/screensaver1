@@ -17,6 +17,7 @@ import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -77,4 +78,5 @@ public interface LibrariesDAO
 
   public Set<ScreenType> findScreenTypesForReagents(Set<String> reagentIds);
 
+  public Plate findPlate(int plateNumber, String copyName);
 }

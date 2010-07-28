@@ -51,10 +51,10 @@ public class CherryPickScreening extends Screening
   public static final String ACTIVITY_TYPE_NAME = "Cherry Pick Screening";
 
   public static final RelationshipPath<CherryPickScreening> cherryPickRequest = RelationshipPath.from(CherryPickScreening.class).to("cherryPickRequest", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickScreening> assayPlatesScreened = RelationshipPath.from(CherryPickScreening.class).to("assayPlatesScreened");
+  public static final RelationshipPath<CherryPickScreening> cherryPickAssayPlatesScreened = RelationshipPath.from(CherryPickScreening.class).to("cherryPickAssayPlatesScreened");
 
   private CherryPickRequest _cherryPickRequest;
-  private SortedSet<CherryPickAssayPlate> _assayPlatesScreened = Sets.newTreeSet();
+  private SortedSet<CherryPickAssayPlate> _cherryPickAssayPlatesScreened = Sets.newTreeSet();
 
   
   /**
@@ -127,32 +127,32 @@ public class CherryPickScreening extends Screening
   @OneToMany(mappedBy="cherryPickScreening", cascade={}, fetch=FetchType.LAZY) /* note: no cascades, since CherryPickAssayPlate is managed by CherryPickRequest, not CherryPickScreeing */
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @ToMany(singularPropertyName="assayPlateScreened", hasNonconventionalMutation=true /* has constraint that CPAP.isPlated()==true */ )
-  public SortedSet<CherryPickAssayPlate> getAssayPlatesScreened()
+  public SortedSet<CherryPickAssayPlate> getCherryPickAssayPlatesScreened()
   {
-    return _assayPlatesScreened;
+    return _cherryPickAssayPlatesScreened;
   }
 
-  private void setAssayPlatesScreened(SortedSet<CherryPickAssayPlate> assayPlatesScreened)
+  private void setCherryPickAssayPlatesScreened(SortedSet<CherryPickAssayPlate> cherryPickAssayPlatesScreened)
   {
-    _assayPlatesScreened = assayPlatesScreened;
+    _cherryPickAssayPlatesScreened = cherryPickAssayPlatesScreened;
   }
   
-  public boolean addAssayPlateScreened(CherryPickAssayPlate assayPlateScreened)
+  public boolean addCherryPickAssayPlateScreened(CherryPickAssayPlate cherryPickAssayPlateScreened)
   {
-    if (assayPlateScreened.getCherryPickScreening() != null && assayPlateScreened.getCherryPickScreening() != this) {
-      throw new DataModelViolationException(assayPlateScreened + " has already been assigned to " + assayPlateScreened.getCherryPickScreening());
+    if (cherryPickAssayPlateScreened.getCherryPickScreening() != null && cherryPickAssayPlateScreened.getCherryPickScreening() != this) {
+      throw new DataModelViolationException(cherryPickAssayPlateScreened + " has already been assigned to " + cherryPickAssayPlateScreened.getCherryPickScreening());
     }
-    if (_assayPlatesScreened.add(assayPlateScreened)) {
-      assayPlateScreened.setCherryPickScreening(this);
+    if (_cherryPickAssayPlatesScreened.add(cherryPickAssayPlateScreened)) {
+      cherryPickAssayPlateScreened.setCherryPickScreening(this);
       return true;
     }
     return false;
   }
 
-  public boolean removeAssayPlateScreened(CherryPickAssayPlate assayPlateScreened)
+  public boolean removeCherryPickAssayPlateScreened(CherryPickAssayPlate cherryPickAssayPlateScreened)
   {
-    if (_assayPlatesScreened.remove(assayPlateScreened)) {
-      assayPlateScreened.setCherryPickScreening(null);
+    if (_cherryPickAssayPlatesScreened.remove(cherryPickAssayPlateScreened)) {
+      cherryPickAssayPlateScreened.setCherryPickScreening(null);
       return true;
     }
     return false;

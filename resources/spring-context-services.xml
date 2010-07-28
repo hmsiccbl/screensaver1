@@ -33,6 +33,14 @@
     <lookup-method name="createScreenResultParser" bean="screenResultParser"/>
   </bean>
 
+  <bean
+    id="screenResultDeleter"
+    class="edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter"
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="screenResultsDao"/>
+  </bean>
+
   <!-- TODO: place this in a spring-context-testing.xml file, or something similar -->
   <bean
     id="mockScreenResultParser"

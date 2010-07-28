@@ -36,7 +36,7 @@ import org.joda.time.format.DateTimeFormatter;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
-import edu.harvard.med.screensaver.model.libraries.CopyInfo;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.util.StringUtils;
 
@@ -88,7 +88,7 @@ public class LibraryCopyGenerator
 
       edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator libraryCopyGenerator =
         (edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator) app.getSpringBean("libraryCopyGenerator");
-      List<CopyInfo> plateCopiesCreated = libraryCopyGenerator.createPlateCopies(new ArrayList<Integer>(plateNumbers),
+      List<Plate> plateCopiesCreated = libraryCopyGenerator.createPlateCopies(new ArrayList<Integer>(plateNumbers),
                                                                                  Arrays.asList(copyName),
                                                                                  volume,
                                                                                  plateType,

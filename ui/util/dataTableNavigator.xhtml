@@ -25,7 +25,9 @@
   <ss:roundedDiv style="height: 100%">
     <t:panelGrid id="dataTableNavPanel" columns="9" width="100%">
 
-      <ui:insert name="custom0" />
+      <ui:insert name="custom0">
+        <t:div/>
+      </ui:insert>
 
       <!-- note: immediate="false" is necessary to support user-edited field values between page scrolls; e.g. see [#1361] -->
       <t:dataScroller id="dataTableScroller"
@@ -59,8 +61,10 @@
             title="Back 10 pages" />
         </f:facet>
       </t:dataScroller>
-
-      <ui:insert name="custom1" />
+      
+      <ui:insert name="m1">
+        <t:div/>
+      </ui:insert>
 
       <t:dataScroller id="dataTableScroller2"
         for=":#{dataTable.clientId}" pageCountVar="pages"
@@ -74,7 +78,9 @@
         </t:div>
       </t:dataScroller>
 
-      <ui:insert name="custom2" />
+      <ui:insert name="custom2">
+        <t:div/>
+      </ui:insert>
 
       <t:panelGroup id="rowsPerPagePanel" styleClass="commandPanel">
         <t:div styleClass="inverseLabel">
@@ -93,7 +99,9 @@
           styleClass="hiddenCommand" />
       </t:panelGroup>
 
-      <ui:insert name="custom3" />
+      <ui:insert name="custom3">
+        <t:div/>
+      </ui:insert>
 
       <t:panelGrid columns="2" title="The sort column and direction">
         <t:outputLabel for="sortColumnMenu" value="Sort by"
@@ -118,7 +126,9 @@
         </t:panelGroup>
       </t:panelGrid>
 
-      <ui:insert name="custom4" />
+      <ui:insert name="custom4">
+        <t:div/>
+      </ui:insert>
 
     </t:panelGrid>
   </ss:roundedDiv>

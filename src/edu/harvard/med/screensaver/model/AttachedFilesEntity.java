@@ -11,10 +11,11 @@ package edu.harvard.med.screensaver.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Set;
 
 
-public interface AttachedFilesEntity extends Entity
+public interface AttachedFilesEntity<K extends Serializable> extends Entity<K>
 {
 
   Set<AttachedFile> getAttachedFiles();

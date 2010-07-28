@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -40,7 +41,7 @@ import com.google.common.collect.Lists;
  *
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
-public class ChecklistItems extends EditableEntityViewerBackingBean<ChecklistItemsEntity>
+public class ChecklistItems<CIE extends ChecklistItemsEntity<Integer>> extends EditableEntityViewerBackingBean<CIE>
 {
   private static Logger log = Logger.getLogger(ChecklistItems.class);
   
@@ -53,11 +54,12 @@ public class ChecklistItems extends EditableEntityViewerBackingBean<ChecklistIte
   
   protected ChecklistItems() {}
   
-  public ChecklistItems(ChecklistItems thisProxy, 
+  public ChecklistItems(ChecklistItems thisProxy,
+                        Class<CIE> entityClass,
                         UserViewer userViewer,
                         GenericEntityDAO dao)
   {
-    super(thisProxy, ChecklistItemsEntity.class, VIEW_USER, dao);
+    super(thisProxy, entityClass, VIEW_USER, dao);
     _userViewer = userViewer;
     getIsPanelCollapsedMap().put("checklistItems", true);
   }
@@ -112,7 +114,9 @@ public class ChecklistItems extends EditableEntityViewerBackingBean<ChecklistIte
         for (ChecklistItem type : checklistItems) {
           checklistItemsMap.put(type, null);
         }
-        for (ChecklistItemEvent checklistItemEvent : getEntity().getChecklistItemEvents()) {
+        ChecklistItemsEntity<?> entity = getEntity();
+        SortedSet<ChecklistItemEvent> checklistItemEvents = entity.getChecklistItemEvents();
+        for (ChecklistItemEvent checklistItemEvent : checklistItemEvents) {
           if (checklistItemEvent.getChecklistItem().getChecklistItemGroup() == group) {
             checklistItemsMap.put(checklistItemEvent.getChecklistItem(), checklistItemEvent);
           }

@@ -1,6 +1,4 @@
-// $HeadURL:
-// http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/cross-screen-cmp/src/edu/harvard/med/screensaver/db/ScreenResultsDAOImpl.java
-// $
+// $HeadURL$
 // $Id$
 
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
@@ -14,6 +12,8 @@ package edu.harvard.med.screensaver.db;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.hibernate.CacheMode;
@@ -21,9 +21,6 @@ import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
@@ -65,7 +62,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
   {
     List<ResultValue> result = runQuery(new edu.harvard.med.screensaver.db.Query() {
       public List<?> execute(Session session)
-            {
+      {
         String hql = "select r from ResultValue r " +
           "left join fetch r.well w " +
           "where r.dataColumn.id = :colId and w.id >= :firstWellInclusive " +
@@ -79,8 +76,8 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     });
     Map<WellKey,ResultValue> result2 =
       CollectionUtils.indexCollection(result,
-                                          // note: calling rv.getWell().getWellId() does *not* require a db hit, since a proxy can return its ID w/o forcing Hibernate to access the db;
-    // so we use the id to instantiate the WellKey
+                                      // note: calling rv.getWell().getWellId() does *not* require a db hit, since a proxy can return its ID w/o forcing Hibernate to access the db;
+                                      // so we use the id to instantiate the WellKey
     new Transformer() {
       public Object transform(Object rv)
                                             {
@@ -127,26 +124,26 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
 
   public void deleteScreenResult(final ScreenResult screenResultIn)
   {
-    screenResultIn.getScreen().clearScreenResult();
-    runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List<?> execute(Session session)
+    runQuery(new edu.harvard.med.screensaver.db.Query() 
+    {
+      public List execute(Session session)
       {
-        ScreenResult screenResult = (ScreenResult) getHibernateTemplate().get(ScreenResult.class,
-                                                                              screenResultIn.getEntityId());
-
-        log.info("delete from screen_result_well_link");
-        Query query = session.createSQLQuery("delete from screen_result_well_link where screen_result_id = :screenResultId");
-        query.setParameter("screenResultId", screenResult.getScreenResultId());
-        int rows = query.executeUpdate();
-        log.info("deleted " + rows + " rows from screen_result_well_link");
-
+        ScreenResult screenResult = (ScreenResult) getHibernateTemplate().get(ScreenResult.class, screenResultIn.getEntityId());
+        Query query;
+        int rows;
+        
         log.info("delete Assay Wells");
         query = session.createQuery("delete AssayWell a where a.screenResult.id = :screenResultId");
         query.setParameter("screenResultId", screenResult.getScreenResultId());
         rows = query.executeUpdate();
         log.info("deleted " + rows + " AssayWells for " + screenResult);
-        screenResult.getAssayWells()
-          .clear();
+        screenResult.getAssayWells().clear();
+        
+        log.info("delete Assay Plates to be orphaned (i.e., without library screenings)");
+        query = session.createQuery("delete AssayPlate ap where ap.screen.id = :screenId and ap.libraryScreening is null");
+        query.setParameter("screenId", screenResult.getScreen().getScreenId());
+        rows = query.executeUpdate();
+        log.info("deleted " + rows + " AssayPlates for " + screenResult);
 
         log.info("delete ResultValues");
         int cumRows = 0;
@@ -156,20 +153,20 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
           rows = query.executeUpdate();
           cumRows += rows;
           log.debug("deleted " + rows + " result values for " + col);
-          col.getResultValues()
-            .clear();
+          col.getResultValues().clear();
         }
         log.info("deleted a total of " + cumRows + " result values");
-        // screenResult.getPlateNumbers().clear();
+        //screenResult.getPlateNumbers().clear();
         // dissociate ScreenResult from Screen
         screenResult.getScreen().clearScreenResult();
         getHibernateTemplate().delete(screenResult);
+        flush();
         log.info("deleted " + screenResult);
         return null;
       }
     });
   }
-
+  
   public int createScreenedReagentCounts(final ScreenType screenType,
                                           Screen study,
                                           AnnotationType positiveAnnotationType,
@@ -291,9 +288,17 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
 
   public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey)
   {
-    // TODO
-    return null;
-  }
+    
+    List result = getHibernateTemplate().find("select a from AssayWell a where a.screenResult.id = ? and a.libraryWell.id = ?",
+                                              new Object[] { screenResult.getEntityId(), wellKey.toString() });
+    if (result.size() == 0) {
+      return null;
+    }
+    if (result.size() > 1) {
+      throw new DataModelViolationException("multiple assay wells found");
+    }
+    return (AssayWell) result.get(0); 
+  }      
 
   private int populateStudyReagentLinkTable(final int screenId)
   {
@@ -349,7 +354,7 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
         if (rows == 0) {
           throw new DataModelViolationException("No rows were updated: " +
             query.getQueryString());
-        }
+    }
         log.info("screen_result_well_link updated: " + rows);
         return null;
       }

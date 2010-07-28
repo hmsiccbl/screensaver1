@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.util;
 
+import java.io.Serializable;
+
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -17,7 +19,7 @@ import edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults;
 
 import org.springframework.transaction.annotation.Transactional;
 
-public interface EditableEntityViewer<E extends Entity> /*extends EntityViewer<E>*/
+public interface EditableEntityViewer<E extends Entity<? extends Serializable>> /*extends EntityViewer<E>*/
 {
   /**
    * Determine whether this viewer is currently in edit mode. This method should
@@ -71,4 +73,7 @@ public interface EditableEntityViewer<E extends Entity> /*extends EntityViewer<E
   boolean isEditable();
 
   EntityUpdateSearchResults getEntityUpdateSearchResults();
+  
+  boolean isUpdateHistoryCapable();
+  String viewUpdateHistory();
 }

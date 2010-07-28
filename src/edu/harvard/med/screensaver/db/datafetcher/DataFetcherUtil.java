@@ -14,15 +14,15 @@ import java.util.Iterator;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 public class DataFetcherUtil
 {
-  static public <P extends AbstractEntity,R extends AbstractEntity> void addDomainRestrictions(HqlBuilder hql,
-                                                                                               RelationshipPath<R> _parentEntityPath,
-                                                                                               P _parentEntity,
-                                                                                               String rootAlias)
+  static public <P extends Entity,R extends Entity> void addDomainRestrictions(HqlBuilder hql,
+                                                                               RelationshipPath<R> _parentEntityPath,
+                                                                               P parentEntity,
+                                                                               String rootAlias)
   {
     if (_parentEntityPath.hasRestrictions()) {
       throw new IllegalArgumentException("path to parent entity cannot have restrictions " +
@@ -37,7 +37,7 @@ public class DataFetcherUtil
       hql.from(alias, iter.next(), nextAlias);
       alias = nextAlias;
     }
-    hql.where(alias, _parentEntity);
+    hql.where(alias, parentEntity);
   }
 
   static public <K> void addDomainRestrictions(HqlBuilder hql, String rootAlias, Set<K> entityKeys)

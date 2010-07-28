@@ -78,7 +78,6 @@ import edu.harvard.med.screensaver.ui.table.column.entity.RealTupleColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextSetTupleColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextTupleColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.ui.table.model.VirtualPagingEntityDataModel;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.ValueReference;
@@ -189,8 +188,8 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   public void searchAll()
   {
     setMode(WellSearchResultMode.ALL_WELLS);
-    // initially, show an empty search result
-    initialize();
+    // initially, show an empty search result, but with all columns available
+    initialize(buildColumns());
 
     // start with search panel open
     setTableFilterMode(true);
@@ -348,11 +347,6 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     _screenResult = null;
     _libraryContentsVersionRef.setValue(null);
     _screenTypes = Sets.newHashSet(ScreenType.values());
-  }
-
-  private void initialize()
-  {
-    initialize(new InMemoryDataModel<Tuple<String>>(new NoOpDataFetcher<Tuple<String>,String,PropertyPath<Well>>()));
   }
 
   private void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher)

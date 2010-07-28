@@ -32,6 +32,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
 
   private GenericEntityDAO _dao;
 
+
   /**
    * @motivation for CGLIB dynamic proxy creation
    */
@@ -42,27 +43,27 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
   {
     _dao = dao;
   }
-
+  
   public Integer findNextScreenNumber()
   {
     _dao.flush(); // allow us to create multiple screens within the same Hibernate session
-    class NextScreenNumberQuery implements edu.harvard.med.screensaver.db.Query
+    class NextScreenNumberQuery implements edu.harvard.med.screensaver.db.Query 
     {
-      public List execute(Session session)
+     public List execute(Session session)
       {
         Query hqlQuery = session.createQuery("select max(screenNumber) + 1 from Screen where screenNumber < " +
           Study.MIN_STUDY_NUMBER);
-        return (List) hqlQuery.list();
-      }
+         return (List) hqlQuery.list();
+      } 
     }
     List<Integer> result = _dao.runQuery(new NextScreenNumberQuery());
     Integer nextScreenNumber = result.get(0);
     if (nextScreenNumber == null) {
       nextScreenNumber = FIRST_SCREEN_NUMBER;
     }
-    return nextScreenNumber;
+    return  nextScreenNumber;
   }
-
+    
   /**
    * Quickly delete the study by first removing all of the AnnotationTypes and AnnotationValues manually.
    * Uses HQL.
@@ -77,7 +78,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     // TODO: see if we can delete these using the entity delete
     getHibernateTemplate().execute(new HibernateCallback() {
       public Object doInHibernate(Session session) throws HibernateException, SQLException
-                                         {
+  {
         String hqlStatement = "delete from AnnotationValue av " +
           "where av.annotationType in (select at from AnnotationType at where at.study = ?)";
         Query query = session.createQuery(hqlStatement);
@@ -94,7 +95,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
 
 
         return count;
-      }
+            }
     });
 
     // TODO: reimplement this in the proper (performant) HQL!
@@ -110,24 +111,25 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
         if (rows == 0) {
           log.info("No rows were updated: " +
             query.getQueryString());
-        }
+          }
         log.info("study_reagent_link updated: " + rows);
         return null;
-      }
+            }
     });
     //study.getReagents().clear();
     //_dao.flush();
     _dao.deleteEntity(finalStudy);
-    _dao.flush();
+      _dao.flush();
     log.info("study deleted");
-  }
+    }
 
   @Override
   public int countScreenedExperimentalWells(Screen screen, boolean distinct)
   {
     String hql = "select count(" + (distinct ? "distinct " : "") + "w.id) " +
-      "from Well w, LibraryScreening ls join ls.platesUsed pu " +
-      "where w.plateNumber between pu.startPlate and pu.endPlate and ls.screen = ? and w.libraryWellType = 'experimental'";
+    		"from Well w, Screen s join s.assayPlates ap join ap.plateScreened p join ap.libraryScreening ls " +
+    		"where s = ? and ap.replicateOrdinal = 0 " +
+    		"and w.plateNumber = p.plateNumber and w.libraryWellType = 'experimental'";
     Long count = (Long) getHibernateTemplate().find(hql, screen).get(0);
     return count.intValue();
   }
@@ -143,7 +145,9 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
       "join cpap.cherryPickLiquidTransfer cplt " +
       "where s = ? and cplt.status = 'Successful'";
     Long count = (Long) getHibernateTemplate().find(hql,screen).get(0);
-    log.error("hql: " + hql + ", screen: " + screen + ", returns: " + count);
+    if (log.isDebugEnabled()) {
+      log.debug("hql: " + hql + ", screen: " + screen + ", returns: " + count);
+    }
     return count.intValue();
   }
 }

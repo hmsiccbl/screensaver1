@@ -11,6 +11,12 @@ package edu.harvard.med.screensaver.service.screenresult;
 
 import javax.persistence.EntityExistsException;
 
+import com.google.common.collect.Sets;
+import org.apache.commons.lang.math.IntRange;
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
@@ -18,13 +24,8 @@ import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.EntityNotFoundException;
-
-import org.apache.commons.lang.math.IntRange;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -38,13 +39,6 @@ public abstract class ScreenResultLoader
 
   private GenericEntityDAO _dao;
   private ScreenResultsDAO _screenResultsDao;
-
-  public static enum MODE
-  {
-    APPEND_IF_EXISTS,
-    DELETE_IF_EXISTS,
-    ERROR_IF_EXISTS
-  };
 
   
   private boolean _ignoreDuplicateErrors;
@@ -77,9 +71,8 @@ public abstract class ScreenResultLoader
   /**
    * Load the screen results from a workbook into the database.
    * @param workbook 
+   * @param admin 
    * @param finalPlateNumberRange
-   * @param mode determines action on finding an already existent ScreenResult: delete, append, or throw an exception
-   * @param screenNumber
    * @param incrementalFlush force the loader to periodically flush cached ResultValues and other Entities being held by the 
    *        Hibernate session.  Use this value to limit memory requirements for large datasets.  
    * @throws ParseErrorsException
@@ -88,79 +81,40 @@ public abstract class ScreenResultLoader
    */
   @Transactional(propagation=Propagation.REQUIRES_NEW /* to ensure that errors cause rollback */, 
                  rollbackFor={ParseErrorsException.class, EntityNotFoundException.class, EntityExistsException.class})
-  public ScreenResult parseAndLoad(final Workbook workbook,
-                                   final IntRange finalPlateNumberRange,
-                                   MODE mode,
-                                   final Integer screenNumber,
+  public ScreenResult parseAndLoad(Screen screen, 
+                                   Workbook workbook,
+                                   AdministratorUser admin,
+                                   String comments,
+                                   IntRange finalPlateNumberRange,
                                    boolean incrementalFlush)
-  throws ParseErrorsException, EntityNotFoundException, EntityExistsException
-  {
-    Screen screen = _dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
-    
-    if(screen == null)
-    {
-      throw new EntityNotFoundException(Screen.class, screenNumber);
-    }
-
-    if (screen.getScreenResult() != null) {
-      if(mode == MODE.ERROR_IF_EXISTS)
-      {
-        throw new EntityExistsException(ScreenResult.class.getName() + ": " + screenNumber + " exists.");
-      }
-      else if(mode == MODE.APPEND_IF_EXISTS){
-        log.info("appending existing screen result (loading existing screen result data)");
-        _dao.need(screen.getScreenResult(), "dataColumns");//.resultValues");
-      }
-      else{ //(mode == MODE.DELETE_IF_EXISTS){
-        log.info("deleting existing screen result for " + screen);
-        _screenResultsDao.deleteScreenResult(screen.getScreenResult());
-      }
-    }
-    
-    return parseAndLoad(workbook, finalPlateNumberRange, screen, incrementalFlush);
-  }
-
-  /**
-   * Load the screen results from a workbook into the database.
-   * @param workbook 
-   * @param finalPlateNumberRange
-   * @param incrementalFlush force the loader to periodically flush cached ResultValues and other Entities being held by the 
-   *        Hibernate session.  Use this value to limit memory requirements for large datasets.  
-   * @throws ParseErrorsException
-   * @throws EntityNotFoundException
-   * @throws EntityExistsException
-   */
-  @Transactional(propagation=Propagation.REQUIRES_NEW /* to ensure that errors cause rollback */, 
-                 rollbackFor={ParseErrorsException.class, EntityNotFoundException.class, EntityExistsException.class})
-  public ScreenResult parseAndLoad(final Workbook workbook,
-                                        final IntRange finalPlateNumberRange,
-                                        Screen screen,
-                                        boolean incrementalFlush)
     throws ParseErrorsException
   {
     screen = _dao.reloadEntity(screen);
+    admin = _dao.reloadEntity(admin);
     ScreenResultParser screenResultParser = createScreenResultParser();
     screenResultParser.setIgnoreDuplicateErrors(_ignoreDuplicateErrors);
     ScreenResult screenResult = screenResultParser.parse(screen,
                                                          workbook,
                                                          finalPlateNumberRange,
                                                          incrementalFlush);
-    if (screenResultParser.getHasErrors())
-    {
-      // TODO: it _is_ rather silly to collect all the exceptions, store them, then get them again, and rethrow them - sde4
+    if (screenResultParser.getHasErrors()) {
+      // we communicate back any parse errors as a ParseErrorsException, as this
+      // serves to rollback the transaction, preventing persistence of invalid
+      // screen result entity
       throw new ParseErrorsException(screenResultParser.getErrors());
     }
-    _dao.saveOrUpdateEntity(screenResult);
-    
-    if(incrementalFlush)
-    {
-      log.info("populating screen_result_well_link table");
-      _screenResultsDao.populateScreenResultWellLinkTable(screenResult.getScreenResultId());
-    }
-    
+
     _dao.saveOrUpdateEntity(screen);
-    
-    log.info("Import completed successfully!");
+
+    screen.getScreenResult().createScreenResultDataLoading(admin, screenResultParser.getPlateNumbersLoadedWithMaxReplicates(), comments);
+    int assayPlatesCreated = Sets.difference(screen.getAssayPlatesDataLoaded(), screen.getAssayPlatesScreened()).size();
+    if (assayPlatesCreated > 0) {
+      log.info("created " + assayPlatesCreated + " assay plate(s) that were not previously recorded as having been screened");
+    }
+
+    screen.update();
+
+    log.info("Screen result data loading completed successfully!");
     return screenResult;
   }
 }

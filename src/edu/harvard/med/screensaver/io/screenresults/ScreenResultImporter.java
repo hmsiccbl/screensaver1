@@ -14,12 +14,16 @@ import java.io.FileNotFoundException;
 import java.util.Iterator;
 
 import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
-import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.service.EntityNotFoundException;
+import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
-import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader.MODE;
 
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
@@ -42,12 +46,13 @@ public class ScreenResultImporter extends CommandLineApplication
   static final String[] SCREEN_OPTION = { "s", "screen" };
   static final String[] IMPORT_OPTION = { "i", "import" };
   static final String[] WELLS_OPTION = { "w", "wells" };
-  static final String[] APPEND_OPTION = { "a", "append" };
   static final String[] PLATE_NUMBER_START_OPTION = { "sp", "start-plate" };
   static final String[] PLATE_NUMBER_END_OPTION = { "ep", "end-plate" };
-//  static final String[] IGNORE_WELLTYPE_ERRORS_OPTION = { "ignore", "ignore-well-type-errors" };
   static final String[] IGNORE_DUPLICATE_ERRORS_OPTION = { "ignoreDuplicates", "ignore-duplicate-well-errors" };
   static final String[] INCREMENTAL_FLUSH_OPTION = { "incrementalFlush", "incremental-flush" };
+  static final String[] ADMIN_USER_ECOMMONS_ID_OPTION = { "u", "ecommons-id", "the eCommons ID of the administrative user performing the load" };
+  static final String[] COMMENTS = { "c", "comments", "Comments to be recorded for this screen result data loading activity" };
+  static final String[] DELETE_EXISTING = { "d", "delete", "Delete existing screen result, if it exists" };
 
   private static final String ERROR_ANNOTATED_WORKBOOK_FILE_EXTENSION = "errors.xls";
 
@@ -71,11 +76,17 @@ public class ScreenResultImporter extends CommandLineApplication
                                           .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION])
                                           .create(INPUT_FILE_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("#")
-                                          .isRequired(false)
-                                          .withDescription("the number of wells to print out")
-                                          .withLongOpt(WELLS_OPTION[LONG_OPTION])
-                                          .create(WELLS_OPTION[SHORT_OPTION]));
+                             .withArgName("ecommonsId")
+                             .isRequired()
+                             .withDescription("the eCommons ID of the administrator performing the data loading")
+                             .withLongOpt(ADMIN_USER_ECOMMONS_ID_OPTION[LONG_OPTION])
+                             .create(ADMIN_USER_ECOMMONS_ID_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder.hasArg()
+                             .withArgName("comments")
+                             .isRequired(false)
+                             .withDescription("comments to associate with the data loading activity")
+                             .withLongOpt(COMMENTS[LONG_OPTION])
+                             .create(COMMENTS[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.withDescription("The first plate number to parse/import")
                                            .hasArg()
                                            .withArgName("#")
@@ -86,9 +97,6 @@ public class ScreenResultImporter extends CommandLineApplication
                                           .withArgName("#")
                                           .withLongOpt(PLATE_NUMBER_END_OPTION[LONG_OPTION])
                                           .create(PLATE_NUMBER_END_OPTION[SHORT_OPTION]));
-    app.addCommandLineOption(OptionBuilder.withDescription("Append the specified range of plate numbers to an existing screen result.")
-                                          .withLongOpt(APPEND_OPTION[LONG_OPTION])
-                                          .create(APPEND_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.withDescription("Import screen result into database if parsing is successful.  "
                                                            + "(By default, the parser only validates the input and then exits.)")
                                           .withLongOpt(IMPORT_OPTION[LONG_OPTION])
@@ -103,13 +111,20 @@ public class ScreenResultImporter extends CommandLineApplication
                              .withArgName("value")
                              .withLongOpt(INCREMENTAL_FLUSH_OPTION[LONG_OPTION])
                              .create(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION]));
+    app.addCommandLineOption(OptionBuilder.withDescription(DELETE_EXISTING[2])
+                             .hasArg(false)
+                             .withLongOpt(DELETE_EXISTING[LONG_OPTION])
+                             .create(DELETE_EXISTING[SHORT_OPTION]));
 
     File inputFile = null;
     try {
       if (!app.processOptions(/* acceptDatabaseOptions= */true,
                               /* showHelpOnError= */true)) {
         return;
+
       }
+      GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
+
       // if parse-only mode is requested, use a spring configuration that does not have a database dependency
       if (!app.isCommandLineFlagSet(IMPORT_OPTION[SHORT_OPTION])) {
         app.setSpringConfigurationResource(SCREEN_RESULT_IMPORTER_SPRING_CONFIGURATION);
@@ -117,8 +132,6 @@ public class ScreenResultImporter extends CommandLineApplication
 
       inputFile = app.getCommandLineOptionValue(INPUT_FILE_OPTION[SHORT_OPTION],
                                                            File.class);
-      final Integer wellsToPrint = app.getCommandLineOptionValue(WELLS_OPTION[SHORT_OPTION],
-                                                                 Integer.class);
 
       IntRange plateNumberRange = null;
       if (app.isCommandLineFlagSet(PLATE_NUMBER_START_OPTION[SHORT_OPTION]) &&
@@ -129,20 +142,20 @@ public class ScreenResultImporter extends CommandLineApplication
         log.info("will parse/load plates " + plateNumberRange);
       }
       final IntRange finalPlateNumberRange = plateNumberRange;
-      final boolean append = app.isCommandLineFlagSet(APPEND_OPTION[SHORT_OPTION]); 
 
       int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
+      Screen screen = dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+      if (screen == null) {
+        throw new EntityNotFoundException(Screen.class, screenNumber);
+      }
       
       Workbook workbook = new Workbook(inputFile);
 
-      try{
+      try {
         ScreenResultLoader screenResultLoader = (ScreenResultLoader) app.getSpringBean("screenResultLoader");
         
         screenResultLoader.setIgnoreDuplicateErrors(app.isCommandLineFlagSet(IGNORE_DUPLICATE_ERRORS_OPTION[SHORT_OPTION]));
         
-        ScreenResultLoader.MODE mode = MODE.DELETE_IF_EXISTS;
-        if(append) mode = MODE.APPEND_IF_EXISTS;
-
         boolean incrementalFlush = true;
         if(app.isCommandLineFlagSet(INCREMENTAL_FLUSH_OPTION[SHORT_OPTION])){
           log.info("get incrementalFlush value");
@@ -150,42 +163,28 @@ public class ScreenResultImporter extends CommandLineApplication
         }
         
         log.info("incrementalFlush: " + incrementalFlush);
-        
-        ScreenResult screenResult = screenResultLoader.parseAndLoad(
+
+        String ecommonsId = 
+          app.getCommandLineOptionValue(ADMIN_USER_ECOMMONS_ID_OPTION[SHORT_OPTION]);
+        AdministratorUser admin = findAdministratorUser(ecommonsId, dao);
+        deleteIfNecessary(app, screen, admin);
+        String comments = 
+          app.getCommandLineOptionValue(COMMENTS[SHORT_OPTION]);
+        screenResultLoader.parseAndLoad(screen,
                                         workbook,
+                                        admin,
+                                        comments,
                                         finalPlateNumberRange,
-                                        mode,
-                                        screenNumber,
                                         incrementalFlush);
-        if (wellsToPrint != null) {
-          new ScreenResultPrinter(screenResult).print(wellsToPrint);
-        }
-        else {
-          new ScreenResultPrinter(screenResult).print();
-        }
         System.exit(0);
       }
-      catch (ParseErrorsException e) 
-      {
-        if(e.getErrors().size() > 100 ) 
-        {
-          for(ParseError pe: e.getErrors())
-          {
-            log.warn("" + pe);
+      catch (ParseErrorsException e) {
+        if (!e.getErrors().isEmpty()) { 
+          for(ParseError pe: e.getErrors()) {
+            log.error("" + pe);
           }
-          log.warn("" + e.getErrors().size() + " errors found.");
+          log.error("" + e.getErrors().size() + " errors found.");
         }
-        
-        // Remove the error annotated workbook for now - sde4
-        //        if(e.getErrors().size() > 100)
-        //        { //NOTE: this is due to memory constraints
-        //          log.warn("Too many errors to write out the error annotated workbook.  See console output (above) for errors");
-        //        }else{
-        //          File errorsFile = FileUtils.modifyFileDirectoryAndExtension(inputFile, (File) null, "error.xls");
-        //          log.warn("Errors found in the input file, see ErrorAnnotatedWorkbook: " + errorsFile ); 
-        //          cleanErrorAnnotatedWorkbooks(inputFile.getAbsoluteFile().getParentFile());
-        //          workbook.writeErrorAnnotatedWorkbook(errorsFile);
-        //        }
       }    
       catch (Exception e) {
         log.error("application error: " + e.getMessage());
@@ -199,8 +198,30 @@ public class ScreenResultImporter extends CommandLineApplication
     catch (ParseException e) {
       log.error("error parsing command line options: " + e.getMessage());
     }
-    // If here then error;
+    catch (EntityNotFoundException e) {
+      log.error(e.getMessage());
+    }
+    // if here, then error
     System.exit(1);
+  }
+
+  private static void deleteIfNecessary(ScreenResultImporter app, Screen screen, AdministratorUser admin)
+    throws ParseException
+  {
+    boolean deleteExisting = app.isCommandLineFlagSet(DELETE_EXISTING[SHORT_OPTION]);
+    if  (deleteExisting && screen.getScreenResult() != null) {
+      ScreenResultDeleter screenResultDeleter = (ScreenResultDeleter) app.getSpringBean("screenResultDeleter");
+      screenResultDeleter.deleteScreenResult(screen.getScreenResult(), admin);
+    }
+  }
+
+  private static AdministratorUser findAdministratorUser(String ecommonsId, GenericEntityDAO dao)
+  {
+    AdministratorUser admin = dao.findEntityByProperty(AdministratorUser.class, "ECommonsId", ecommonsId);
+    if (admin == null) {
+      throw new IllegalArgumentException("no administrator user with eCommons ID: " + ecommonsId);
+    }
+    return admin;
   }
 
   @SuppressWarnings("unchecked")

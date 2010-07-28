@@ -55,10 +55,12 @@ import edu.harvard.med.screensaver.util.DevelopmentException;
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
-public abstract class AbstractEntity<K extends Serializable> implements Entity, Serializable
+public abstract class AbstractEntity<K extends Serializable> implements Entity<K>, Serializable
 {
-  private static Logger log = Logger.getLogger(AbstractEntity.class);
+  private static final long serialVersionUID = 1L;
 
+  private static Logger log = Logger.getLogger(AbstractEntity.class);
+  
   private EntityViewPolicy _entityViewPolicy;
   private List<EntityUpdater> _entityUpdaters;
   private K _entityId;
@@ -261,7 +263,7 @@ public abstract class AbstractEntity<K extends Serializable> implements Entity, 
 
   @SuppressWarnings("unchecked")
   @Transient
-  final public Class<? extends AbstractEntity> getEntityClass()
+  final public Class<Entity<K>> getEntityClass()
   {
     return HibernateProxyHelper.getClassWithoutInitializingProxy(this);
   }

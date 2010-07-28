@@ -60,7 +60,6 @@ import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.SearchResultContextEditableEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
-import edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -102,7 +101,6 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   private ScreenDetailViewer _screenDetailViewer;
   private UsersDAO _usersDao;
   private ScreenSearchResults _screensBrowser;
-  private EntityUpdateSearchResults<ScreeningRoomUser,Integer> _userUpdateSearchResults; 
   private AttachedFiles _attachedFiles;
   private ChecklistItems _checklistItems;
 
@@ -134,7 +132,6 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
                     UsersDAO usersDao,
                     UserSearchResults userSearchResults,
                     ScreenSearchResults screensBrowser,
-                    EntityUpdateSearchResults<ScreeningRoomUser,Integer> userUpdateSearchResults,
                     AttachedFiles attachedFiles,
                     ChecklistItems checklistItems)
   {
@@ -147,7 +144,6 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     _screenDetailViewer = screenDetailViewer;
     _usersDao = usersDao;
     _screensBrowser = screensBrowser;
-    _userUpdateSearchResults = userUpdateSearchResults;
     _attachedFiles = attachedFiles;
     _checklistItems = checklistItems;
     getIsPanelCollapsedMap().put("labMembers", true);
@@ -196,7 +192,6 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   protected void initializeEntity(ScreeningRoomUser user)
   {
     getDao().need(user, "screensaverUserRoles");
-    getDao().need(user, ScreensaverUser.updateActivities.getPath());
     // note: no cross-product problem with dual labMembers associations, since only one will have size > 0
     getDao().need(user,
                   "labHead.labAffiliation",
@@ -253,10 +248,6 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     _screensDataModel = null;
     _labMembersDataModel = null;
     _screenAssociatesDataModel = null;
-    if (_userUpdateSearchResults != null) {
-      _userUpdateSearchResults.searchForParentEntity(user);
-    }
-
     _attachedFiles.setAttachedFilesEntity(user);
     _attachedFiles.setAttachedFileTypes(Sets.<AttachedFileType>newTreeSet(getDao().findAllEntitiesOfType(UserAttachedFileType.class)));
     _checklistItems.setEntity(user);
@@ -496,12 +487,6 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   public ChecklistItems getChecklistItems()
   {
     return _checklistItems;
-  }
-
-  @Override
-  public EntityUpdateSearchResults<ScreeningRoomUser,Integer> getEntityUpdateSearchResults()
-  {
-    return _userUpdateSearchResults;
   }
 
   @Override

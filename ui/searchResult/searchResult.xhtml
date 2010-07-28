@@ -208,19 +208,23 @@
 						rendered="#{searchResults.capabilities['viewEntity'] &amp;&amp; searchResults.entityView}"
 						value="Back to Search Results"
 						action="#{searchResults.returnToSummaryList}" styleClass="command" />
+          <t:div rendered="#{!searchResults.capabilities['viewEntity'] || !searchResults.entityView}"/>
 				</ui:define>
 
 				<ui:define name="custom4">
-					<t:commandButton id="exportSearchResultsCommandButton"
-						rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 0}"
-						value="Export" action="#{searchResults.downloadSearchResults}" />
-          <t:selectOneMenu id="downloadFormat"
-            rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 1}"
-            value="#{searchResults.dataExporterSelector.value}">
-            <f:selectItems
-              value="#{searchResults.dataExporterSelector.selectItems}" />
-          </t:selectOneMenu>
-				</ui:define>
+          <t:panelGrid id="exportCommand" columns="2">
+            <t:commandButton id="exportSearchResultsCommandButton"
+              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 0}"
+              value="Export"
+              action="#{searchResults.downloadSearchResults}" />
+            <t:selectOneMenu id="downloadFormat"
+              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 1}"
+              value="#{searchResults.dataExporterSelector.value}">
+              <f:selectItems
+                value="#{searchResults.dataExporterSelector.selectItems}" />
+            </t:selectOneMenu>
+          </t:panelGrid>
+        </ui:define>
 
 			</ss:dataTableNavigator>
 

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.table.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,20 +18,21 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
-import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
 import edu.harvard.med.screensaver.ui.util.ValueReference;
 
-public class VirtualPagingEntityDataModel<K,E extends AbstractEntity,R> extends VirtualPagingDataModel<K,R>
+public class VirtualPagingEntityDataModel<K extends Serializable,E extends Entity<K>,R> extends VirtualPagingDataModel<K,R>
 {
   private static Logger log = Logger.getLogger(VirtualPagingEntityDataModel.class);
 
   private DataFetcher<R,K,PropertyPath<E>> _dataFetcher;
   private List<PropertyPath<E>> _lastOrderByProperties;
 
+  
   public VirtualPagingEntityDataModel(DataFetcher<R,K,PropertyPath<E>> dataFetcher,
                                       ValueReference<Integer> rowsToFetch)
   {
@@ -68,4 +70,5 @@ public class VirtualPagingEntityDataModel<K,E extends AbstractEntity,R> extends 
     log.debug("cleared filter (forces future re-query of sorted/filtered keys)");
     _rowIndex = -1;
   }
+
 }

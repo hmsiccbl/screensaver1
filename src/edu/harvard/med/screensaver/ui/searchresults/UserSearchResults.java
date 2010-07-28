@@ -72,14 +72,14 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
   public void searchAll()
   {
     setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchAll"));
-    initialize(new InMemoryEntityDataModel<E>(new EntityDataFetcher<E,Integer>(_type, _dao)));
+    initialize(new InMemoryEntityDataModel<E,Integer>(new EntityDataFetcher<E,Integer>(_type, _dao)));
     // default to descending sort order on user ID, to show last created first
     getColumnManager().setSortAscending(false);
   }
 
   public void searchUsers(final Set<ScreeningRoomUser> users)
   {
-    initialize(new InMemoryEntityDataModel<E>(new EntityDataFetcher<E,Integer>(_type, _dao) {
+    initialize(new InMemoryEntityDataModel<E,Integer>(new EntityDataFetcher<E,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
       {

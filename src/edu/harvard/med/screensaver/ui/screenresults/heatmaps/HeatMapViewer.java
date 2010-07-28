@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -31,11 +32,13 @@ import edu.harvard.med.screensaver.analysis.heatmaps.HeatMap;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
@@ -44,6 +47,10 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;
+
+import com.google.common.base.Functions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class HeatMapViewer extends AbstractBackingBean
@@ -135,7 +142,9 @@ public class HeatMapViewer extends AbstractBackingBean
     _screenResult = screenResult;
     if (_screenResult != null) {
       resetView();
-      _plateNumber.setDomain(_screenResult.getPlateNumbers());      
+      Set<Integer> distinctPlateNumbers = 
+        Sets.newHashSet(Iterables.transform(_screenResult.getScreen().getAssayPlates(), AssayPlate.ToPlateNumber));
+      _plateNumber.setDomain(distinctPlateNumbers);
       addHeatMap();
     }
   }

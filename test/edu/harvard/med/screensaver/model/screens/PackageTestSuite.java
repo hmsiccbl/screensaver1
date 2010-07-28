@@ -30,7 +30,6 @@ public class PackageTestSuite extends TestSuite
     addTest(AbaseTestsetTest.suite());
     addTest(EquipmentUsedTest.suite());
     addTest(LibraryScreeningTest.suite());
-    addTest(PlatesUsedTest.suite());
     addTest(PublicationTest.suite());
     addTest(CherryPickScreeningTest.suite());
     addTest(ScreenTest.suite());
