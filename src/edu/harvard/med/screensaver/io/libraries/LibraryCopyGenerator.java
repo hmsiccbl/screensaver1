@@ -25,7 +25,6 @@ import jxl.NumberCell;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
-
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
@@ -36,6 +35,7 @@ import org.joda.time.format.DateTimeFormatter;
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.util.StringUtils;
@@ -68,6 +68,7 @@ public class LibraryCopyGenerator
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName(CommandLineApplication.DEFAULT_DATE_PATTERN).withLongOpt("date-plated").create("d"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("name").withLongOpt("copy-name").create("c"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("plate type").withLongOpt("plate-type").withDescription(StringUtils.makeListString(Arrays.asList(PlateType.values()), "|")).create("p"));
+      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("copy usage type").withLongOpt("usage-type").withDescription(StringUtils.makeListString(Arrays.asList(CopyUsageType.values()), "|")).create("u"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("microliter volume").withLongOpt("volume").create("v"));
       app.addCommandLineOption(OptionBuilder.hasArgs().isRequired(false).withArgName("plate numbers").withLongOpt("plate-numbers").withDescription("The space-separated list of plate numbers or plate ranges.  Plate ranges are specified as #####-#####").create("n"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired(false).withArgName("xls file").withLongOpt("input-file").withDescription("Excel workbook containing plate numbers in the first column of the first worksheet").create("f"));
@@ -79,6 +80,7 @@ public class LibraryCopyGenerator
       DateTimeFormatter dateFormat = DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN);
       LocalDate datePlated = app.getCommandLineOptionValue("d", dateFormat).toLocalDate();
       PlateType plateType = PlateType.valueOf(app.getCommandLineOptionValue("p").toUpperCase());
+      CopyUsageType usageType = CopyUsageType.valueOf(app.getCommandLineOptionValue("u").toUpperCase());
       Set<Integer> plateNumbers = readPlateNumbers(app);
       log.info("creating RNAi cherry pick library copy " + copyName +
                " with volume " + volume +
@@ -89,10 +91,11 @@ public class LibraryCopyGenerator
       edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator libraryCopyGenerator =
         (edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator) app.getSpringBean("libraryCopyGenerator");
       List<Plate> plateCopiesCreated = libraryCopyGenerator.createPlateCopies(new ArrayList<Integer>(plateNumbers),
-                                                                                 Arrays.asList(copyName),
-                                                                                 volume,
-                                                                                 plateType,
-                                                                                 datePlated);
+                                                                              Arrays.asList(copyName),
+                                                                              volume,
+                                                                              plateType,
+                                                                              usageType,
+                                                                              datePlated);
       log.info("created " + plateCopiesCreated.size() + " plate copies: " + StringUtils.makeListString(plateCopiesCreated, ", "));
     }
     catch (Exception e) {

@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 
 /**
  * Delays the actual invocation of {@link #fetch}, {@link #sort} and
@@ -160,7 +159,7 @@ public class DataTableModelLazyUpdateDecorator<R> extends DataTableModel<R>
     // HACK: Arguably, InMemoryDataModel should handle this dependency, but it's 
     // actually more efficient to do so here, since we avoid the possibility 
     // of executing redundant filter and sort operations
-    if (_base instanceof InMemoryDataModel) {
+    if (_base.getModelType() == DataTableModelType.IN_MEMORY) {
       if (_fetchNeeded) {
         if (_filterColumns != null) {
           _filterNeeded = true;

@@ -12,13 +12,13 @@ package edu.harvard.med.screensaver.ui.searchresults;
 import java.text.DateFormat;
 import java.util.EnumSet;
 
+import org.joda.time.DateTime;
+
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-
-import org.joda.time.DateTime;
 
 public enum AnnotationHeaderColumn
 {
@@ -55,15 +55,6 @@ public enum AnnotationHeaderColumn
     {
       ScreeningRoomUser s = r.getAnnotationValues().get(type).getAnnotationType().getStudy().getLabHead();
       return s==null ? "" : s.getName();
-    }
-    
-  },
-  
-  COLLABORATORS("Collaborators", "Collaborators"/*, "annotationValues[annotationType].annotationType.study.collaborators", PropertyPath.COLLECTION_OF_VALUES*/)
-  {
-    public String getValueInternal(Reagent r, AnnotationType type)
-    {
-      return r.getAnnotationValues().get(type).getAnnotationType().getStudy().getCollaboratorsString();
     }
     
   },

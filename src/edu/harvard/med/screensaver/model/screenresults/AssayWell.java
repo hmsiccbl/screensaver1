@@ -20,10 +20,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.Index;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -44,9 +45,7 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 @Entity
 @org.hibernate.annotations.Entity
 @org.hibernate.annotations.Proxy
-// TODO: create index with "where is_positive", for performance
-@org.hibernate.annotations.Table(appliesTo = "assay_well", 
-                                 indexes={ @Index(name = "assay_well_unique_index", columnNames={ "well_id", "screenResultId" })})
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "screenResultId", "well_id" }) })
 @ContainedEntity(containingEntityClass=ScreenResult.class)                                 
 public class AssayWell extends AbstractEntity<Integer> implements Comparable<AssayWell>
 {

@@ -30,7 +30,7 @@ insert into replicate_ordinal (replicate_ordinal) values (1);
 insert into replicate_ordinal (replicate_ordinal) values (2);
 insert into replicate_ordinal (replicate_ordinal) values (3);
 
-/* this index apparently need by postgres 8.3 for the follwing insert/select statement, while 8.4 can create an efficient query plan without it  */
+/* this index apparently need by postgres 8.3 for the following insert/select statement, while 8.4 can create an efficient query plan without it  */
 create index assay_plate_screen_and_plate_number on assay_plate (screen_id, plate_number); 
 
 insert into assay_plate (assay_plate_id, screen_id, plate_number, replicate_ordinal, version)

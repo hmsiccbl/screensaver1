@@ -59,8 +59,6 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   
   private static final Logger log = Logger.getLogger(WellViewer.class);
 
-  // HACK: for special case message
-  private static final String SPECIAL_CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
   public static final String GENBANK_ACCESSION_NUMBER_LOOKUP_URL_PREFIX =
     "http://www.ncbi.nlm.nih.gov/entrez/viewer.fcgi?val=";
   public static final String ENTREZGENE_ID_LOOKUP_URL_PREFIX =
@@ -142,10 +140,6 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     // HACK: special case messages
     if (library.getLibraryType().equals(LibraryType.NATURAL_PRODUCTS)) {
       return "Structure information is unavailable for compounds in natural products libraries.";
-    }
-    if (library.getLibraryName().equals(SPECIAL_CHEMDIV6_LIBRARY_NAME)) {
-      return "Structure information for compounds in the " + SPECIAL_CHEMDIV6_LIBRARY_NAME +
-        " library are available via ICCB-L staff.";
     }
     return null;
   }

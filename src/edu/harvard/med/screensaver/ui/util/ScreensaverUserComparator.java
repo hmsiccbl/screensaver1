@@ -22,7 +22,11 @@ public class ScreensaverUserComparator<U extends ScreensaverUser> extends NullSa
   @Override
   protected int doCompare(U u1, U u2)
   {
-    return u1.getFullNameLastFirst().compareTo(u2.getFullNameLastFirst());
+    int result = u1.getFullNameLastFirst().compareTo(u2.getFullNameLastFirst());
+    if (result == 0) {
+      return u1.getEntityId().compareTo(u2.getEntityId());
+    }
+    return result;
   }
 }
 

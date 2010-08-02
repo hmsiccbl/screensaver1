@@ -260,6 +260,19 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     
     columns.add(new DateEntityColumn<Screen>(
       Screen.labActivities.toProperty("dateOfActivity"),
+                                             "Date of First Activity", "The date of the first lab activity performed for this screen",
+                                             TableColumn.UNGROUPED) {
+      @Override
+      protected LocalDate getDate(Screen screen)
+      {
+        return screen.getLabActivities().isEmpty() ? null : screen.getLabActivities().first().getDateOfActivity();
+      }
+    });
+    columns.get(columns.size() - 1).setAdministrative(true);
+    columns.get(columns.size() - 1).setVisible(false);
+
+    columns.add(new DateEntityColumn<Screen>(
+                                             Screen.labActivities.toProperty("dateOfActivity"),
       "Date Of Last Activity", "The date of the last lab activity performed for this screen",
       TableColumn.UNGROUPED) {
       @Override

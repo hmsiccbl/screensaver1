@@ -9,7 +9,6 @@
 
 package edu.harvard.med.iccbl.screensaver.policy;
 
-import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,11 +30,9 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
-import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
-import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
@@ -452,50 +449,6 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
     assertTrue("admin can access SilencingReagent.sequence", entityViewPolicy.isAllowedAccessToSilencingReagentSequence(reagent));
   }
   
-  public void testChemDiv6Restriction()
-  {
-    TestDataFactory dataFactory = new TestDataFactory();
-
-    Library chemDiv6Library = new Library("ChemDiv6",
-                                          "ChemDiv6",
-                                          ScreenType.SMALL_MOLECULE,
-                                          LibraryType.COMMERCIAL,
-                                          1,
-                                          1);
-    dataFactory.newInstance(LibraryContentsVersion.class, chemDiv6Library);
-    SmallMoleculeReagent chemDiv6Reagent = chemDiv6Library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL).createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", "Cdiv0001"), "molfile", "smiles", "inchi", new BigDecimal(1), new BigDecimal(1), new MolecularFormula("CCC")); 
-
-    Library notCDiv6Library = new Library("NotChemDiv6",
-                                          "NotChemDiv6",
-                                          ScreenType.SMALL_MOLECULE,
-                                          LibraryType.COMMERCIAL,
-                                          2,
-                                          2);
-    dataFactory.newInstance(LibraryContentsVersion.class, notCDiv6Library);
-    SmallMoleculeReagent notChemDiv6Reagent = notCDiv6Library.createWell(new WellKey(2, 0, 0), LibraryWellType.EXPERIMENTAL).createSmallMoleculeReagent(new ReagentVendorIdentifier("vendor", "notCdiv0001"), "molfile", "smiles", "inchi", new BigDecimal(1), new BigDecimal(1), new MolecularFormula("CCC")); 
-
-    AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
-    admin.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
-    admin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
-
-    ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
-    screener.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
-    screener.addScreensaverUserRole(ScreensaverUserRole.SM_DSL_LEVEL3_SHARED_SCREENS);
-    
-    genericEntityDao.persistEntity(chemDiv6Library);
-    genericEntityDao.persistEntity(notCDiv6Library);
-    setComplete();
-    endTransaction();
-    
-    startNewTransaction();
-    setCurrentUser(admin);
-    assertTrue("admin can access ChemDiv6 reagent", entityViewPolicy.visit(chemDiv6Reagent));
-    assertTrue("admin can access non-ChemDiv6 reagent", entityViewPolicy.visit(notChemDiv6Reagent));
-    setCurrentUser(screener);
-    assertFalse("screener cannot access ChemDiv6 reagent", entityViewPolicy.visit(chemDiv6Reagent));
-    assertTrue("screener can access non-ChemDiv6 reagent", entityViewPolicy.visit(notChemDiv6Reagent));
-  }
- 
   private ScreeningRoomUser makeUserWithRoles(boolean isLabHead, ScreensaverUserRole... roles)
   {
     

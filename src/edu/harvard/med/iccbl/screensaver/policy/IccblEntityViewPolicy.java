@@ -82,7 +82,6 @@ import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
  */
 public class IccblEntityViewPolicy implements EntityViewPolicy
 {
-  private static final String CHEMDIV6_LIBRARY_NAME = "ChemDiv6";
   public static final String MARCUS_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Marcus Library Screen";
   public static final String GRAY_LIBRARY_SCREEN_FUNDING_SUPPORT_NAME = "Gray Library Screen";
 
@@ -98,7 +97,6 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   private Set<Screen> _smallMoleculeLevel1AndLevel2Screens;
   private Set<Screen> _mutualSmallMoleculeScreens;
   private Set<String> _smallMoleculeMutualPositiveWellIds;
-  private Set<Integer> _restrictedReagentLibraryPlates;
   
   protected IccblEntityViewPolicy() {}
 
@@ -209,17 +207,11 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
 
   public boolean visit(SmallMoleculeReagent entity)
   {
-    if (findRestrictedReagentLibraryPlates().contains(entity.getWell().getPlateNumber())) {
-      return false;
-    }
     return true;
   }
 
   public boolean visit(NaturalProductReagent entity)
   {
-    if (findRestrictedReagentLibraryPlates().contains(entity.getWell().getPlateNumber())) {
-      return false;
-    }
     return true;
   }
 
@@ -545,22 +537,6 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return _screensForFundingSupport.get(fundingSupportName);
   }
 
-  private Set<Integer> findRestrictedReagentLibraryPlates()
-  {
-    if (_restrictedReagentLibraryPlates == null) {
-      _restrictedReagentLibraryPlates = Sets.newHashSet();
-      if (!!!isReadEverythingAdmin()) {
-        Library chemDiv6Library = _dao.findEntityByProperty(Library.class, "libraryName", CHEMDIV6_LIBRARY_NAME);
-        if (chemDiv6Library != null) {
-          for (int p = chemDiv6Library.getStartPlate(); p <= chemDiv6Library.getEndPlate(); ++p) {
-            _restrictedReagentLibraryPlates.add(p);
-          }
-        }
-      }
-    }
-    return _restrictedReagentLibraryPlates;
-  }
-
   public boolean visit(ScreenResult screenResult)
   {
     return isAllowedAccessToScreenDetails(screenResult.getScreen());
@@ -702,9 +678,5 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     _myScreens = null;
     _othersVisibleSmallMoleculeScreens = null;
     _publicScreens = null;
-    _restrictedReagentLibraryPlates = null;
   }
-
-  
-
 }

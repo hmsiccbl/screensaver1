@@ -12,20 +12,20 @@ package edu.harvard.med.screensaver.service.libraries;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 
 public class LibraryCopyGenerator
 {
@@ -54,22 +54,24 @@ public class LibraryCopyGenerator
                                           List<String> copyNames,
                                           Volume volume,
                                           PlateType plateType,
+                                          CopyUsageType usageType,
                                           LocalDate datePlated) 
     throws ExtantLibraryException
   {
     List<Plate> result = new ArrayList<Plate>(copyNames.size());
     for (Integer plateNumber : plateNumbers) {
-      result.addAll(createPlateCopies(plateNumber, copyNames, volume, plateType, datePlated));
+      result.addAll(createPlateCopies(plateNumber, copyNames, volume, plateType, usageType, datePlated));
     }
     return result;
   }
   
   @Transactional
   public List<Plate> createPlateCopies(Integer plateNumber,
-                                          List<String> copyNames,
-                                          Volume volume,
-                                          PlateType plateType,
-                                          LocalDate datePlated) 
+                                       List<String> copyNames,
+                                       Volume volume,
+                                       PlateType plateType,
+                                       CopyUsageType usageType,
+                                       LocalDate datePlated)
     throws ExtantLibraryException
   {
     List<Plate> result = new ArrayList<Plate>(copyNames.size());
@@ -80,7 +82,7 @@ public class LibraryCopyGenerator
     for (String copyName : copyNames) {
       Copy copy = library.getCopy(copyName);
       if (copy == null) {
-        copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
+        copy = library.createCopy(usageType, copyName);
         log.info("created " + copy + " for library " + library.getLibraryName());
       }
       Plate plate = createPlateCopy(copy, plateNumber, volume, plateType, datePlated);

@@ -18,8 +18,9 @@
         label="Screen">
         <ui:define name="closedContent">
           <f:subview id="screenSummary">
-            <t:panelGrid columns="4"
-              columnClasses="column,fixedColumn300,column,column">
+            <t:panelGrid id="propertiesPanel" columns="2"
+              columnClasses="propertyLabelColumn,column"
+              styleClass="layoutPanel">
               <ss:screenSummaryProperties
                 screen="#{screenViewer.entity}" />
             </t:panelGrid>

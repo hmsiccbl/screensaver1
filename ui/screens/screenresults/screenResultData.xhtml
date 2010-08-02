@@ -45,7 +45,34 @@
     <ss:collapsiblePanel id="dataTablePanel"
       isCollapsed="#{screenResultViewer.isPanelCollapsedMap['dataTable']}"
       title="Data"
-      rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}" />
+      rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted}">
+      <ui:define name="content">
+         <t:selectBooleanCheckbox id="filterPositives"
+              value="#{screenResultViewer.filterPositives}"
+              valueChangeListener="#{screenResultViewer.toggleFilterPositives}"
+              onchange="javascript:document.getElementById('toggleFitlerPositivesCommand').click()"
+              immediate="true" styleClass="command"
+              title="Filter to show only positive rows" />
+         <t:outputLabel for="filterPositives"
+              value="Filter screen #{screenResultViewer.entity.screen.screenNumber} positives" styleClass="label"
+              title="Filter to show only positive rows for this screen" />
+         <t:commandButton id="toggleFitlerPositivesCommand"
+              immediate="true" forceId="true" style="display:none" 
+              action="#{screenResultViewer.filterPositivesCommand}"/>    
+         <t:selectBooleanCheckbox id="showMutualColumns"
+              value="#{screenResultViewer.showMutualColumns}"
+              valueChangeListener="#{screenResultViewer.toggleShowMutualColumns}"
+              onchange="javascript:document.getElementById('toggleMutualColumnsCommand').click()"
+              immediate="true" styleClass="command"
+              title="Display overlapping hit columns from other screens" />
+         <t:outputLabel for="showMutualColumns"
+              value="Show overlapping positives columns" styleClass="label"
+              title="Show the overlapping positive columns from other screens" />
+         <t:commandButton id="toggleMutualColumnsCommand"
+              immediate="true" forceId="true" style="display:none" 
+              action="#{screenResultViewer.showMutualColumnsCommand}"/>          
+      </ui:define>
+    </ss:collapsiblePanel>      
   </h:form>
 
 
@@ -53,9 +80,9 @@
 	<t:div
 		rendered="#{!empty screenResultViewer.entity &amp;&amp; !screenResultViewer.entity.restricted &amp;&amp; ! screenResultViewer.isPanelCollapsedMap['dataTable']}">
 		<ui:include src="/libraries/wellSearchResultsBody.xhtml">
-			<ui:param name="wellSearchResults"
+			<ui:param name="wellsBrowser"
 				value="#{screenResultViewer.wellSearchResults}" />
-		</ui:include>
+    </ui:include>
 	</t:div>
 
 	<h:form id="heatMapsPanelForm">

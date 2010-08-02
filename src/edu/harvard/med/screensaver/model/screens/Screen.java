@@ -83,7 +83,6 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 
@@ -371,58 +370,6 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   public SortedSet<ScreeningRoomUser> getCollaborators()
   {
     return _collaborators;
-  }
-
-  /**
-   * Get a sorted list of the collaborators.
-   * @return a sorted list of the collaborators
-   * @motivation JSF EL binding
-   */
-  @Transient
-  public List<ScreeningRoomUser> getCollaboratorsList()
-  {
-    List<ScreeningRoomUser> collaboratorsList = new ArrayList<ScreeningRoomUser>(_collaborators);
-    Collections.<ScreeningRoomUser>sort(collaboratorsList, ScreensaverUserComparator.getInstance());
-    return collaboratorsList;
-  }
-
-  /**
-   * Get a comma-delimited list of the full names of the Screen's collaborators, first name
-   * first.
-   * @return a comma-delimited list of the full names of the Screen's collaborators
-   */
-  @Transient
-  public String getCollaboratorsString()
-  {
-    StringBuilder collaborators = new StringBuilder();
-    boolean first = true;
-    for (ScreeningRoomUser collaborator : getCollaborators()) {
-      if (first) {
-        first = false;
-      }
-      else {
-        collaborators.append(", ");
-      }
-      collaborators.append(collaborator.getFullNameFirstLast());
-    }
-    return collaborators.toString();
-  }
-
-  /**
-   * Replace the current set of collaborators with those screening room users in the provided
-   * list of collaborators
-   * @param collaborators a list of the new set of collaborators
-   * @motivation JSF EL binding
-   */
-  public void setCollaboratorsList(List<ScreeningRoomUser> collaborators)
-  {
-    List<ScreeningRoomUser> collaboratorsToRemove = new ArrayList<ScreeningRoomUser>(_collaborators);
-    for (ScreeningRoomUser collaborator : collaboratorsToRemove) {
-      removeCollaborator(collaborator);
-    }
-    for (ScreeningRoomUser collaborator : collaborators) {
-      addCollaborator(collaborator);
-    }
   }
 
   /**

@@ -79,21 +79,21 @@ public class ScreeningDuplicator
   
   @Transactional
   public CherryPickScreening addCherryPickScreening(Screen screen,
-                                                    ScreeningRoomUser requestedBy,
+                                                    ScreeningRoomUser performedBy,
                                                     AdministratorUser recordedBy,
                                                     CherryPickRequest cpr)
   {
     screen = _dao.reloadEntity(screen);
     cpr = _dao.reloadEntity(cpr);
     recordedBy = _dao.reloadEntity(recordedBy);
-    requestedBy = _dao.reloadEntity(requestedBy);
+    performedBy = _dao.reloadEntity(performedBy);
     SortedSet<CherryPickScreening> activities = screen.getLabActivitiesOfType(CherryPickScreening.class);
     CherryPickScreening lastScreening = null;
     if (!activities.isEmpty()) {
       lastScreening = activities.last();
     }
     CherryPickScreening newScreening = screen.createCherryPickScreening(recordedBy,
-                                                                        requestedBy,
+                                                                        performedBy,
                                                                         new LocalDate(),
                                                                         cpr);
     
@@ -105,15 +105,15 @@ public class ScreeningDuplicator
   
   @Transactional
   public CherryPickLiquidTransfer addCherryPickLiquidTransfer(Screen screen,
-                                                              ScreensaverUser requestedBy,
+                                                              ScreensaverUser performedBy,
                                                               AdministratorUser recordedBy, 
                                                               CherryPickLiquidTransferStatus status)
   {
     screen = _dao.reloadEntity(screen);
     recordedBy = _dao.reloadEntity(recordedBy);
-    requestedBy = _dao.reloadEntity(requestedBy);
+    performedBy = _dao.reloadEntity(performedBy);
     CherryPickLiquidTransfer newCplt = screen.createCherryPickLiquidTransfer(recordedBy,
-                                                                             requestedBy,
+                                                                             performedBy,
                                                                              new LocalDate(),
                                                                              status);
     CherryPickLiquidTransfer lastCplt = null;

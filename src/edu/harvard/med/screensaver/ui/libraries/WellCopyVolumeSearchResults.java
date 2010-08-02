@@ -177,6 +177,7 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
     // our model; instead we just find all the wells for CPR and delegate to the
     // searchWells() method
     Set<WellKey> wellKeys = new HashSet<WellKey>();
+    cherryPickRequest = _dao.reloadEntity(cherryPickRequest, true, CherryPickRequest.labCherryPicks.to(LabCherryPick.sourceWell).getPath());
     for (LabCherryPick labCherryPick : cherryPickRequest.getLabCherryPicks()) {
       if (!forUnfulfilledOnly || labCherryPick.isUnfulfilled()) {
         wellKeys.add(labCherryPick.getSourceWell().getWellKey());
@@ -184,11 +185,6 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
     }
     searchWells(wellKeys);
   }
-
-//  public WellVolumeSearchResults getWellVolumeSearchResults()
-//  {
-//    return _wellVolumeSearchResults;
-//  }
 
   @SuppressWarnings("unchecked")
   @Override

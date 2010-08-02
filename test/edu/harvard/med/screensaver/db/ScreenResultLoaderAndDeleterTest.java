@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
@@ -110,6 +111,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
                                                  Lists.newArrayList("C"),
                                                  new Volume(0),
                                                  PlateType.ABGENE,
+                                                 CopyUsageType.FOR_CHERRY_PICK_SCREENING,
                                                  new LocalDate());
         }
         catch (ExtantLibraryException e) {

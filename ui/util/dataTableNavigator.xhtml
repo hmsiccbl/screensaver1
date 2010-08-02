@@ -74,7 +74,7 @@
         paginatorColumnClass="scroller_inactivePage"
         paginatorActiveColumnClass="scroller_activePage">
         <t:div styleClass="inverseLabel bigLabel">
-          Page&#160;#{page}&#160;of&#160;#{pages} (#{rowCount}&#160;#{rowCount == 1 ? &quot;row&quot; : &quot;rows&quot;})
+          Page&#160;#{page}&#160;of&#160;#{rowCount == 0 ? 0 : pages} (#{rowCount}&#160;#{rowCount == 1 ? &quot;row&quot; : &quot;rows&quot;})
         </t:div>
       </t:dataScroller>
 

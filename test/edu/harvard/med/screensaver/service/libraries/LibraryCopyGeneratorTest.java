@@ -23,9 +23,10 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
@@ -62,14 +63,14 @@ public class LibraryCopyGeneratorTest extends AbstractSpringPersistenceTest
     Volume volume = new Volume(22);
 
     try {
-      libraryCopyGenerator.createPlateCopies(1, Arrays.asList("A"), volume, PlateType.EPPENDORF, today);
+      libraryCopyGenerator.createPlateCopies(1, Arrays.asList("A"), volume, PlateType.EPPENDORF, CopyUsageType.FOR_CHERRY_PICK_SCREENING, today);
       fail("expected ExtantLibraryException");
     }
     catch (ExtantLibraryException e) {}
 
     List<Integer> plateNumbers = Arrays.asList(2, 3, 5);
     List<String> copyNames = Arrays.asList("A", "B");
-    List<Plate> plates = libraryCopyGenerator.createPlateCopies(plateNumbers, copyNames, volume, PlateType.EPPENDORF, today);
+    List<Plate> plates = libraryCopyGenerator.createPlateCopies(plateNumbers, copyNames, volume, PlateType.EPPENDORF, CopyUsageType.FOR_CHERRY_PICK_SCREENING, today);
     assertEquals("plates size", plateNumbers.size() * copyNames.size(), plates.size());
     Iterator<Plate> plateIter = plates.iterator();
     for (int expectedPlateNumber : plateNumbers) {

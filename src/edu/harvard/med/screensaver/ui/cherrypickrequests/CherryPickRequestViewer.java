@@ -16,8 +16,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -58,7 +56,6 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPicksAdder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
@@ -82,7 +79,6 @@ import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 
 /**
  * Backing bean for Cherry Pick Request Viewer page.
@@ -646,9 +642,6 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
 
     _assayPlatesDataModel = null;
     
-    SortedSet<ScreensaverUser> candidatePreparers = new TreeSet<ScreensaverUser>(ScreensaverUserComparator.getInstance());
-    candidatePreparers.addAll(getDao().findAllEntitiesOfType(AdministratorUser.class));
-
     // set "Cherry Pick Plates" panel to initially expanded, if cherry pick plates have been created
     boolean hasCherryPickPlates = cherryPickRequest.getCherryPickAssayPlates().size() > 0;
     getIsPanelCollapsedMap().put("cherryPickPlates", !hasCherryPickPlates);
@@ -817,7 +810,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(), 
-                                                                                     getEntity().getRequestedBy(),
+                                                                                     getScreensaverUser(),
                                                                                      (AdministratorUser) getScreensaverUser(),
                                                                                      CherryPickLiquidTransferStatus.CANCELED);
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
@@ -884,7 +877,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(), 
-                                                                                     getEntity().getRequestedBy(),
+                                                                                     getScreensaverUser(),
                                                                                      (AdministratorUser) getScreensaverUser(),
                                                                                      CherryPickLiquidTransferStatus.SUCCESSFUL);
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
@@ -920,7 +913,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
     CherryPickLiquidTransfer cplt = _screeningDuplicator.addCherryPickLiquidTransfer(getEntity().getScreen(), 
-                                                                                     getEntity().getRequestedBy(),
+                                                                                     getScreensaverUser(),
                                                                                      (AdministratorUser) getScreensaverUser(),
                                                                                      CherryPickLiquidTransferStatus.FAILED);
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
