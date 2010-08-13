@@ -188,16 +188,16 @@
 
 				<t:panelGroup id="commandPanel">
 					<t:panelGroup id="editCommandsPanel"
-						rendered="#{searchResults.capabilities['editable']}">
+						rendered="#{searchResults.hasEditableColumns}">
 						<t:commandButton id="editCommand" value="Edit"
 							action="#{searchResults.edit}"
-							rendered="#{searchResults.capabilities['editable'] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; !searchResults.editMode}" />
+							rendered="#{!searchResults.editMode}" />
 						<t:commandButton id="saveCommand" value="Save"
 							action="#{searchResults.save}"
-							rendered="#{searchResults.capabilities['editable'] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; searchResults.editMode}" />
+							rendered="#{searchResults.editMode}" />
 						<t:commandButton id="cancelCommand" value="Cancel"
 							immediate="true" action="#{searchResults.cancel}"
-							rendered="#{searchResults.capabilities['editable'] &amp;&amp; searchResults.hasEditableColumns &amp;&amp; searchResults.editMode}" />
+							rendered="#{searchResults.editMode}" />
 					</t:panelGroup>
 				</t:panelGroup>
 			</t:buffer>

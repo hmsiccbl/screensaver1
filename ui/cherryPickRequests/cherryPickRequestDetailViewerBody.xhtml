@@ -22,12 +22,6 @@
       rendered="#{cherryPickRequestDetailViewer.readAdmin &amp;&amp; cherryPickRequestDetailViewer.screenerCherryPickCount > 0}"
       styleClass="command"
       description="Show administrative warnings for screener cherry picks" />
-    <t:commandButton id="downloadCherryPickRequestCommand"
-      value="Download"
-      action="#{cherryPickRequestDetailViewer.downloadCherryPickRequest}"
-      disabled="#{cherryPickRequestDetailViewer.screenerCherryPickCount == 0}"
-      styleClass="command"
-      title="Download the cherry pick request to a file" />
   </ui:define>
 
   <ui:define name="propertiesContent">

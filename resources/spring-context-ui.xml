@@ -557,7 +557,6 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="cherryPickRequestDao" />
     <constructor-arg ref="screenViewer" />
-    <constructor-arg ref="cherryPickRequestExporter" />
     <constructor-arg ref="smallMoleculeCherryPickRequestAllowancePolicy" />
     <constructor-arg ref="rnaiCherryPickRequestAllowancePolicy" />
     <property

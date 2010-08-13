@@ -12,15 +12,14 @@ package edu.harvard.med.iccbl.screensaver.policy.cherrypicks;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.policy.CherryPickRequestAllowancePolicy;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-
-import com.google.common.collect.Lists;
 
 /**
  * For small molecule screens, the cherry pick limit is 0.3% of the number of distinct
@@ -51,7 +50,9 @@ public class SmallMoleculeCherryPickRequestAllowancePolicy implements CherryPick
     Query query = new Query() {
       public List execute(Session session)
       {
-        org.hibernate.Query q = session.createQuery("select count(distinct r.smiles) from CherryPickRequest cpr join cpr.screen s join s.screenResult sr join sr.wells w join w.reagents r where cpr = ? and r.libraryContentsVersion = w.library.latestReleasedContentsVersion");
+        org.hibernate.Query q = session.createQuery("select count(distinct r.smiles) "
+          + "from CherryPickRequest cpr join cpr.screen s join s.screenResult sr join sr.assayWells aw join aw.libraryWell w join w.latestReleasedReagent r "
+          + "where cpr = ?");
         q.setEntity(0, cpr);
         Object result = q.uniqueResult();
         return Lists.newArrayList(result);

@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.cherrypickrequests;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -21,15 +20,17 @@ import java.util.TreeSet;
 
 import javax.faces.model.SelectItem;
 
-import jxl.write.WriteException;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.TreeMultimap;
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
-import edu.harvard.med.screensaver.io.workbook2.Workbook;
-import edu.harvard.med.screensaver.io.workbook2.Workbook2Utils;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.Volume;
@@ -49,7 +50,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.policy.CherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
@@ -60,15 +60,6 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.DevelopmentException;
-
-import org.apache.log4j.Logger;
-import org.hibernate.mapping.Join;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.TreeMultimap;
 
 /**
  * Backing bean for Cherry Pick Request Detail Viewer page.
@@ -82,7 +73,6 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
   private CherryPickRequestDAO _cherryPickRequestDao;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private ScreenViewer _screenViewer;
-  private CherryPickRequestExporter _cherryPickRequestExporter;
   private SmallMoleculeCherryPickRequestAllowancePolicy _smallMoleculeCherryPickRequestAllowancePolicy;
   private RNAiCherryPickRequestAllowancePolicy _rnaiCherryPickRequestAllowancePolicy;
 
@@ -108,7 +98,6 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
                                        GenericEntityDAO dao,
                                        CherryPickRequestDAO cherryPickRequestDao,
                                        ScreenViewer screenViewer,
-                                       CherryPickRequestExporter cherryPickRequestExporter,
                                        SmallMoleculeCherryPickRequestAllowancePolicy smallMoleculeCherryPickRequestAllowancePolicy,
                                        RNAiCherryPickRequestAllowancePolicy rnaiCherryPickRequestAllowancePolicy)
   {
@@ -119,7 +108,6 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
     _cherryPickRequestDao = cherryPickRequestDao;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     _screenViewer = screenViewer;
-    _cherryPickRequestExporter = cherryPickRequestExporter;
     _smallMoleculeCherryPickRequestAllowancePolicy = smallMoleculeCherryPickRequestAllowancePolicy;
     _rnaiCherryPickRequestAllowancePolicy = rnaiCherryPickRequestAllowancePolicy;
     getIsPanelCollapsedMap().put("cherryPickRequestDetails", false);
@@ -346,17 +334,6 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
   {
     _cherryPickRequestDao.deleteAllCherryPicks(getEntity());
     return _cherryPickRequestViewer.reload();
-  }
-
-  @UICommand
-  public String downloadCherryPickRequest() throws WriteException, IOException
-  {
-    jxl.Workbook workbook = _cherryPickRequestExporter.exportCherryPickRequest(getEntity());
-    JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                       Workbook2Utils.toInputStream(workbook),
-                                       getEntity().getClass().getSimpleName() + "-" + getEntity().getCherryPickRequestNumber() + ".xls",
-                                       Workbook.MIME_TYPE);
-    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   @Override

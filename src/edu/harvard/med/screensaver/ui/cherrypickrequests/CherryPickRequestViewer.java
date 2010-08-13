@@ -34,7 +34,6 @@ import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.io.cherrypicks.CherryPickRequestExporter;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
 import edu.harvard.med.screensaver.model.Activity;
@@ -44,8 +43,8 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
-import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick.LabCherryPickStatus;
+import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -111,7 +110,6 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   private CherryPickRequestPlateMapper _cherryPickRequestPlateMapper;
   private CherryPickRequestPlateMapFilesBuilder _cherryPickRequestPlateMapFilesBuilder;
   private ScreeningDuplicator _screeningDuplicator;
-  private CherryPickRequestExporter _cherryPickRequestExporter;
   private SmallMoleculeCherryPickRequestAllowancePolicy _smallMoleculeCherryPickRequestAllowancePolicy;
   private RNAiCherryPickRequestAllowancePolicy _rnaiCherryPickRequestAllowancePolicy;
 
@@ -496,6 +494,19 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
           return gene == null ? null : gene.getGenbankAccessionNumbers().isEmpty() ? null : gene.getGenbankAccessionNumbers().iterator().next();
         }
       }));
+
+    labCherryPicksTableColumns.add(new LabCherryPickReagentEntityColumn<SilencingReagent,String>(SilencingReagent.class,
+                                                                                                 new TextEntityColumn<SilencingReagent>(RelationshipPath.from(SilencingReagent.class).toProperty("sequence"),
+                                                                                                                                        "Sequence",
+                                                                                                                                        "The nucleotide sequence of this silencing reagent",
+                                                                                                                                        RNAI_COLUMNS_GROUP) {
+      @Override
+      public String getCellValue(SilencingReagent r)
+      {
+        // note: we do not need to check EntityViewPolicy.isAllowedAccessToSilencingReagentSequence, since screeners are allowed access to the sequences they have CP'd, and screeners can only see their own CPR LCPs
+        return r.getSequence();
+      }
+    }));
     
     
     labCherryPicksTableColumns.add(new BooleanEntityColumn<LabCherryPick>(LabCherryPick.sourceWell.toProperty("deprecated"),
