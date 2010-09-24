@@ -25,6 +25,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
+import org.hibernate.lob.ReaderInputStream;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -41,7 +48,6 @@ import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -67,14 +73,6 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-
-import org.apache.log4j.Logger;
-import org.hibernate.Hibernate;
-import org.hibernate.lob.ReaderInputStream;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 public class TestDataFactory
 {
@@ -440,7 +438,9 @@ public class TestDataFactory
       public AbstractEntity createEntity(AbstractEntity relatedEntity) throws DomainModelDefinitionException
       {
         Copy copy = newInstance(Copy.class);
-        return copy.createPlate(copy.getLibrary().getStartPlate(), "", PlateType.ABGENE, new Volume(10));
+        Plate plate = copy.findPlate(copy.getLibrary().getStartPlate());
+        plate.setWellVolume(new Volume(10));
+        return plate;
       }
     });
   }

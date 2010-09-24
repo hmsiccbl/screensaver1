@@ -151,6 +151,7 @@
     <constructor-arg ref="studiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
     <constructor-arg ref="librariesBrowser" />
+    <constructor-arg ref="libraryCopiesBrowser" />
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="staffBrowser" />
     <constructor-arg ref="labActivitiesBrowser" />
@@ -239,6 +240,18 @@
     <constructor-arg ref="libraryContentsImporter" />
     <constructor-arg ref="libraryDetailViewer" />
     <constructor-arg ref="libraryContentsVersionManager" />
+    <constructor-arg ref="libraryCopyDetail" />
+    <constructor-arg>
+      <bean parent="uiBean" 
+            class="edu.harvard.med.screensaver.ui.searchresults.LibraryCopySearchResults">
+        <constructor-arg ref="genericEntityDao" />
+        <constructor-arg ref="libraryCopyViewer" />
+        <constructor-arg ref="libraryViewer" />
+        <constructor-arg ref="labActivitiesBrowser" />
+        <constructor-arg ref="libraryCopyPlatesBrowser" />
+        <property name="nested" value="true" />
+      </bean>
+    </constructor-arg>
     <aop:scoped-proxy/>
   </bean>
 
@@ -355,6 +368,60 @@
   </bean>
 
 
+  <bean
+    id="libraryCopiesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.LibraryCopySearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryCopyViewer" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="libraryCopyPlatesBrowser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="libraryCopyViewer"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.LibraryCopyViewer">
+    <constructor-arg ref="libraryCopyViewer" />
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryCopiesBrowser" />
+    <constructor-arg ref="libraryCopyDetail" />
+    <constructor-arg>
+      <bean parent="uiBean" 
+            class="edu.harvard.med.screensaver.ui.searchresults.LibraryCopyPlateSearchResults">
+        <constructor-arg ref="genericEntityDao" />
+        <constructor-arg ref="librariesDao" />
+        <constructor-arg ref="libraryViewer" />
+        <constructor-arg ref="libraryCopyViewer" />
+        <constructor-arg ref="labActivitiesBrowser" />
+        <property name="nested" value="true" />
+      </bean>
+    </constructor-arg>
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="libraryCopyDetail"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.libraries.LibraryCopyDetail">
+    <constructor-arg ref="libraryCopyDetail" />
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="libraryCopyViewer" />
+    <constructor-arg ref="libraryViewer" />
+    <property
+      name="entityEditPolicy"
+      ref="entityEditPolicy" />
+    <aop:scoped-proxy/>
+    <property
+      name="entityUpdateHistoryBrowser"
+      ref="entityUpdateHistoryBrowser" />
+  </bean>
+
   <!-- === studies backing beans === -->
 
   <bean
@@ -431,7 +498,7 @@
     <constructor-arg ref="labActivitiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
     <constructor-arg ref="librariesBrowser" />
-    <constructor-arg ref="platesScreenedBrowser" />
+    <constructor-arg ref="libraryPlatesBrowser" />
     <aop:scoped-proxy/>
   </bean>
 
@@ -504,13 +571,27 @@
   </bean>
 
   <bean
-    id="platesScreenedBrowser"
+    id="libraryPlatesBrowser"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.searchresults.PlateScreeningStatusSearchResults">
+    class="edu.harvard.med.screensaver.ui.searchresults.LibraryPlateSearchResults">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
     <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="labActivitiesBrowser" />
+    <constructor-arg ref="libraryCopiesBrowser" />
+    <aop:scoped-proxy/>
+  </bean>
+
+  <bean
+    id="libraryCopyPlatesBrowser"
+    parent="uiBean"
+    scope="session"
+    class="edu.harvard.med.screensaver.ui.searchresults.LibraryCopyPlateSearchResults">
+    <constructor-arg ref="genericEntityDao" />
+    <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="libraryCopyViewer" />
     <constructor-arg ref="labActivitiesBrowser" />
     <aop:scoped-proxy/>
   </bean>
@@ -695,7 +776,7 @@
     id="activityViewer"
     parent="uiBean"
     scope="session"
-    class="edu.harvard.med.screensaver.ui.activities.ActivityViewer">
+    class="edu.harvard.med.screensaver.ui.activities.LabActivityViewer">
     <constructor-arg ref="activityViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
@@ -722,6 +803,7 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="libraryCreator" />
     <constructor-arg ref="libraryViewer" />
+    <constructor-arg ref="libraryPlatesBrowser" />
     <property
       name="entityUpdateHistoryBrowser"
       ref="entityUpdateHistoryBrowser" />
@@ -736,6 +818,10 @@
   <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.table.column.OperatorConverter" />
 
   <bean id="screenTypeConverter" class="edu.harvard.med.screensaver.ui.util.ScreenTypeConverter" />
+
+  <bean id="copyUsageTypeConverter" class="edu.harvard.med.screensaver.ui.util.CopyUsageTypeConverter" />
+
+  <bean id="plateTypeConverter" class="edu.harvard.med.screensaver.ui.util.PlateTypeConverter" />
 
   <bean id="stringConverter" class="edu.harvard.med.screensaver.ui.util.NoOpStringConverter" />
 

@@ -15,8 +15,6 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParser;
 import edu.harvard.med.screensaver.io.libraries.PlateWellListParserResult;
-import edu.harvard.med.screensaver.model.libraries.Well;
-import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
@@ -37,8 +35,6 @@ public class WellFinder extends AbstractBackingBean
   private WellViewer _wellViewer;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
 
-  private Integer _plateNumber;
-  private String _wellName;
   private String _plateWellList;
 
   /**
@@ -61,26 +57,6 @@ public class WellFinder extends AbstractBackingBean
     _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
   }
 
-  public Integer getPlateNumber()
-  {
-    return _plateNumber;
-  }
-
-  public void setPlateNumber(Integer plateNumber)
-  {
-    _plateNumber = plateNumber;
-  }
-
-  public String getWellName()
-  {
-    return _wellName;
-  }
-
-  public void setWellName(String wellName)
-  {
-    _wellName = wellName;
-  }
-
   public String getPlateWellList()
   {
     return _plateWellList;
@@ -92,19 +68,6 @@ public class WellFinder extends AbstractBackingBean
   }
 
   @UICommand
-  public String findWell()
-  {
-    Well well = _librariesDao.findWell(new WellKey(_plateNumber, _wellName));
-    if (well != null) {
-      resetSearchFields();
-      return _wellViewer.viewEntity(well);
-    } else {
-      showMessage("wells.plateWellNotFound", _plateNumber, _wellName);
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @UICommand
   public String findWells()
   {
     PlateWellListParserResult parseResult = PlateWellListParser.parseWellsFromPlateWellList(_plateWellList);
@@ -113,6 +76,10 @@ public class WellFinder extends AbstractBackingBean
       showMessage("libraries.plateWellListParseError", error.getSecond());
     }
     _wellsBrowser.searchWells(parseResult.getParsedWellKeys());
+    if (parseResult.getParsedWellKeys().size() == 1) {
+      _wellsBrowser.getRowsPerPageSelector().setSelection(1);
+    }
+    resetSearchFields();
     return BROWSE_WELLS;
   }
 
@@ -125,13 +92,12 @@ public class WellFinder extends AbstractBackingBean
       showMessage("libraries.plateWellListParseError", error.getSecond());
     }
     _wellCopyVolumesBrowser.searchWells(parseResult.getParsedWellKeys());
+    resetSearchFields();
     return BROWSE_WELL_VOLUMES;
   }
   
   private void resetSearchFields()
   {
-    _plateNumber = null;
-    _wellName = null;
     _plateWellList = null;
   }
 }

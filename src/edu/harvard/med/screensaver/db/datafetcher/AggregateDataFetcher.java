@@ -27,7 +27,9 @@ import edu.harvard.med.screensaver.ui.table.Criterion;
  * @param AK aggregate key
  * @param BT base type: the type being aggregated into an object of type AT
  * @param BK base key
+ * @deprecated use {@link SetBasedDataFetcher}
  */
+@Deprecated
 public abstract class AggregateDataFetcher<AT extends Entity<AK>,AK extends Serializable,BT extends Entity<BK>,BK extends Serializable> 
   extends EntityDataFetcher<AT,AK>
 {

@@ -22,6 +22,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.hibernate.Hibernate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -60,9 +61,9 @@ import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
-public class ActivityViewer extends SearchResultContextEditableEntityViewerBackingBean<Activity,Activity>
+public class LabActivityViewer extends SearchResultContextEditableEntityViewerBackingBean<LabActivity,LabActivity>
 {
-  private static Logger log = Logger.getLogger(ActivityViewer.class);
+  private static Logger log = Logger.getLogger(LabActivityViewer.class);
 
   private LibrariesDAO _librariesDao;
   private ScreenViewer _screenViewer;
@@ -71,6 +72,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   private LibrarySearchResults _librarySearchResults;
   private DataModel _platesScreenedDataModel;
 
+  private Screen _screen;
   private UISelectOneEntityBean<ScreensaverUser> _performedBy;
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
   private UISelectOneBean<ConcentrationUnit> _concentrationType;
@@ -93,11 +95,11 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   /**
    * @motivation for CGLIB2
    */
-  protected ActivityViewer()
+  protected LabActivityViewer()
   {
   }
 
-  public ActivityViewer(ActivityViewer thisProxy,
+  public LabActivityViewer(LabActivityViewer thisProxy,
                         GenericEntityDAO dao,
                         LibrariesDAO librariesDao,
                         ActivitySearchResults activitiesBrowser,
@@ -106,7 +108,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
                         CherryPickRequestAllocator cherryPickRequestAllocator,
                         LibrarySearchResults librarySearchResults)
   {
-    super(thisProxy, Activity.class, BROWSE_ACTIVITIES, VIEW_ACTIVITY, dao, activitiesBrowser);
+    super(thisProxy, LabActivity.class, BROWSE_ACTIVITIES, VIEW_ACTIVITY, dao, activitiesBrowser);
     _screenViewer = screenViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     _librariesDao = librariesDao;
@@ -115,42 +117,31 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   }
 
   @Override
-  protected void initializeEntity(Activity activity)
+  protected void initializeEntity(LabActivity activity)
   {
-    getDao().needReadOnly(activity,
-                          "screen.labHead",
-                          "screen.leadScreener",
-                          "screen.collaborators",
-                          "performedBy");
-    // HACK: performedBy is not being eager fetched when this method is called
-    // from viewActivity(); chalking this up to a Hibernate bug for now, since
-    // the relationships *are* being eager fetched; problem manifests in
-    // ActivityViewer.getPerformedBy() method
-    activity.getPerformedBy().getEntityId();
-
+    Hibernate.initialize(activity.getPerformedBy());
+    //getDao().needReadOnly(activity, Activity.performedBy.getPath());
+    getDao().needReadOnly(activity, LabActivity.Screen.getPath());
+    
     if (activity instanceof LibraryScreening) {
       getDao().needReadOnly(activity, LibraryScreening.Screen.to(Screen.assayPlates).getPath());
       getDao().needReadOnly(activity, LibraryScreening.assayPlatesScreened.to(AssayPlate.plateScreened).to(Plate.copy).to(Copy.library).getPath());
     }
     if (activity instanceof CherryPickScreening) {
+      getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.requestedBy).getPath());
       getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.cherryPickAssayPlates).to(CherryPickAssayPlate.cherryPickLiquidTransfer).getPath());
       getDao().needReadOnly(activity, CherryPickScreening.cherryPickAssayPlatesScreened.getPath());
     }
     if (activity instanceof CherryPickLiquidTransfer) {
+      getDao().needReadOnly(activity, CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy).getPath());
       getDao().needReadOnly(activity, CherryPickLiquidTransfer.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.cherryPickAssayPlates).to(CherryPickAssayPlate.cherryPickLiquidTransfer).getPath());
     }
     _editingNewEntity = false;
   }
   
   @Override
-  protected void initializeNewEntity(Activity activity)
+  protected void initializeNewEntity(LabActivity activity)
   {
-    if (activity instanceof LabActivity) {
-      // note: activity must be transient, while activity.screen must be managed
-      getDao().needReadOnly(((LabActivity) activity).getScreen(), Screen.labHead.getPath(), Screen.leadScreener.getPath());
-      getDao().needReadOnly(((LabActivity) activity).getScreen(), Screen.collaborators.getPath());
-    }
-
     if (activity instanceof CherryPickScreening) {
       getDao().needReadOnly(((CherryPickScreening) activity).getCherryPickRequest(), CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(Activity.performedBy).getPath());
     }
@@ -167,8 +158,9 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     _editingNewEntity = true;
   }
   
-  protected void initializeViewer(Activity activity)
+  protected void initializeViewer(LabActivity activity)
   {
+    _screen = null;
     _performedBy = null;
     _cherryPickPlatesDataModel = null;
     _newPlateRangeScreenedStartPlate = null;
@@ -182,11 +174,26 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     _volumeValue = null;
   }
   
+  /**
+   * @motivation hack to avoid Hibernate exceptions related to cases when the Activity.screen.{labHead,leadScreener} and
+   *             Activity.performedBy relationships are the same entity; this method returns an independently retrieved
+   *             Screen object from the LabActivity object, and so is not reattached when the Activity is saved/updated.
+   */
+  @Transactional
+  public Screen getScreen()
+  {
+    if (_screen == null) {
+      _screen = getDao().reloadEntity(getEntity().getScreen());
+      getDao().needReadOnly(_screen, Screen.labHead.getPath());
+      getDao().needReadOnly(_screen, Screen.leadScreener.getPath());
+    }
+    return _screen;
+  }
 
   public UISelectOneBean<ScreensaverUser> getPerformedBy()
   {
     if (_performedBy == null) {
-      Set<ScreensaverUser> performedByCandidates = getEntity().getPerformedByCandidates();
+      Set<ScreensaverUser> performedByCandidates = null; // TODO: reinstate: getEntity().getPerformedByCandidates();
       if (performedByCandidates == null) {
         performedByCandidates = Sets.newTreeSet();
         performedByCandidates.addAll(getDao().findAllEntitiesOfType(ScreensaverUser.class));
@@ -207,9 +214,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   {
     try {
       if (_volumeType == null) {
-        Volume v = (getEntity() instanceof LabActivity ?
-                                    ((LabActivity) getEntity()).getVolumeTransferredPerWell() :
-                                    null );
+        Volume v = getEntity().getVolumeTransferredPerWell();
         VolumeUnit unit = ( v == null ? VolumeUnit.NANOLITERS : v.getUnits());
 
         _volumeType = new UISelectOneBean<VolumeUnit>(VolumeUnit.DISPLAY_VALUES, unit )
@@ -235,11 +240,9 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   public String getVolumeTransferredPerWellValue()
   {
     if (_volumeValue == null) {
-      if (getEntity() instanceof LabActivity) {
-        Volume volumeTransferredPerWell = ((LabActivity) getEntity()).getVolumeTransferredPerWell();
-        if (volumeTransferredPerWell != null) {
-          _volumeValue = volumeTransferredPerWell.getDisplayValue().toString();
-        }
+      Volume volumeTransferredPerWell = ((LabActivity) getEntity()).getVolumeTransferredPerWell();
+      if (volumeTransferredPerWell != null) {
+        _volumeValue = volumeTransferredPerWell.getDisplayValue().toString();
       }
     }
     return _volumeValue;
@@ -254,19 +257,16 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
     _volumeValue = value;
   }
 
-  
   public Concentration getConcentration()
   {
-    return getEntity() instanceof LabActivity ? ((LabActivity) getEntity()).getConcentration(): null;
+    return getEntity().getConcentration();
   }
-
-
   
   public UISelectOneBean<ConcentrationUnit> getConcentrationType()
   {
     try {
       if (_concentrationType == null) {
-        setConcentrationType( getEntity() instanceof LabActivity ? ((LabActivity) getEntity()).getConcentrationUnits() : null);
+        setConcentrationType(getEntity().getConcentrationUnits());
       }
       return _concentrationType;
     } catch (Exception e) {
@@ -291,10 +291,8 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   */
   public String getConcentrationValue()
   {
-    if( _concentrationValue == null )
-    {
-      _concentrationValue =
-        getEntity() instanceof LabActivity ? ((LabActivity) getEntity()).getConcentrationValue(): null;
+    if (_concentrationValue == null) {
+      _concentrationValue = getEntity().getConcentrationValue();
     }
     return _concentrationValue;
   }
@@ -324,7 +322,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
 
   
   @Override
-  protected boolean validateEntity(Activity entity)
+  protected boolean validateEntity(LabActivity entity)
   {
     boolean valid = true;
     if (entity instanceof Screening) {
@@ -362,7 +360,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
 
   
   @Override
-  protected void updateEntityProperties(Activity entity) 
+  protected void updateEntityProperties(LabActivity entity)
   {
     if (entity instanceof Screening) {
       ((Screening) entity).setVolumeTransferredPerWell(Volume.makeVolume(_volumeValue, _volumeType.getSelection()));
@@ -517,7 +515,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
 //      platesUsed2.setStartPlate(startPlate);
 //      platesUsed2.setEndPlate(Math.min(libraryWithStartPlate.getEndPlate(), endPlate));
 //      platesUsed2.setCopy(new Copy(libraryWithStartPlate,
-//                                   CopyUsageType.FOR_LIBRARY_SCREENING,
+//                                   CopyUsageType.LIBRARY_SCREENING_PLATES,
 //                                   platesUsed.getCopyName()));
 //      result.add(platesUsed2);
 //      startPlate = libraryWithStartPlate.getEndPlate() + 1;
@@ -530,7 +528,7 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   {
     return getDao().findEntitiesByProperty(Copy.class, 
                                            "usageType", 
-                                           CopyUsageType.FOR_LIBRARY_SCREENING, 
+                                           CopyUsageType.LIBRARY_SCREENING_PLATES, 
                                            true, 
                                            Copy.library.getPath());
   }
@@ -665,11 +663,11 @@ public class ActivityViewer extends SearchResultContextEditableEntityViewerBacki
   }
     
   @UICommand
-  public String browsePlatesScreened()
+  public String browseLibraryPlatesScreened()
   {
     if (getEntity() instanceof LibraryScreening) {
-      _screenViewer.getPlateSearchResults().searchPlatesScreenedByLibraryScreening((LibraryScreening) getEntity());
-      return BROWSE_PLATES_SCREENED;
+      _screenViewer.getPlateSearchResults().searchLibraryPlatesScreenedByLibraryScreening((LibraryScreening) getEntity());
+      return BROWSE_LIBRARY_PLATES_SCREENED;
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }

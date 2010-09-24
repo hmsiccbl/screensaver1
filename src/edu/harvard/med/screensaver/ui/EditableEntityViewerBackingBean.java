@@ -11,6 +11,9 @@ package edu.harvard.med.screensaver.ui;
 
 import java.io.Serializable;
 
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.Entity;
@@ -21,9 +24,6 @@ import edu.harvard.med.screensaver.ui.searchresults.EntityUpdateSearchResults;
 import edu.harvard.med.screensaver.ui.util.EditableEntityViewer;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
 public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends Serializable>> extends EntityViewerBackingBean<E> implements EditableEntityViewer<E>
 {
@@ -51,6 +51,14 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
   protected EditableEntityViewerBackingBean()
   {
   }
+
+  @Transactional
+  @Override
+  public void setEntity(E entity)
+  {
+    _isEditMode = false;
+    super.setEntity(entity);
+  }
   
   abstract protected String postEditAction(EditResult editResult);
 
@@ -67,13 +75,6 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
   public void setEntityEditPolicy(EntityEditPolicy entityEditPolicy)
   {
     _entityEditPolicy = entityEditPolicy;
-  }
-
-  @Transactional
-  public void setEntity(E entity)
-  {
-    _isEditMode = false;
-    super.setEntity(entity);
   }
 
   protected void recordUpdateActivity(String updateMessage)
@@ -188,7 +189,10 @@ public abstract class EditableEntityViewerBackingBean<E extends Entity<? extends
     if (!validateEntity(getEntity())) {
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
-    setEditMode(false); // leave edit mode only after validation occurs, in order to remain in edit mode if validation failed 
+    setEditMode(false); // leave edit mode only after validation occurs, in order to remain in edit mode if validation failed
+    if (getEntity().isTransient()) {
+      // newly created entities may need to update non-nullable properties before persist
+    }
     getDao().saveOrUpdateEntity(getEntity());
     updateEntityProperties(getEntity());
     recordUpdateActivity();

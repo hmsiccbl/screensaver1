@@ -44,6 +44,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
@@ -70,6 +72,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.RNAiCherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.LibraryPlate;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
@@ -498,10 +501,33 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
     _librariesScreenedCount = librariesScreenedCount;
   }
 
+  /**
+   * @return a SortedSet of LibraryPlates. The library property will be null if the AssayPlate was not screened, but has
+   *         had data loaded.
+   */
   @Transient
-  public SortedSet<Plate> getPlatesScreened()
+  public SortedSet<LibraryPlate> getLibraryPlatesScreened()
   {
-    return Sets.newTreeSet(Iterables.transform(Iterables.filter(getAssayPlates(), AssayPlate.HasLibraryScreening), AssayPlate.ToPlate));
+    Multimap<Integer,AssayPlate> index = Multimaps.index(Iterables.filter(getAssayPlates(), AssayPlate.IsScreened),
+                                                         new Function<AssayPlate,Integer>() {
+                                                           @Override
+                                                           public Integer apply(AssayPlate p)
+                                                           {
+                                                             return p.getPlateNumber();
+                                                           }
+                                                         });
+    SortedSet<LibraryPlate> libraryPlates = Sets.newTreeSet();
+    for (Integer plateNumber : index.keySet()) {
+      AssayPlate firstAssayPlate = Iterables.get(index.get(plateNumber), 0);
+      Library library = null;
+      if (firstAssayPlate.getPlateScreened() != null) {
+        library = firstAssayPlate.getPlateScreened().getCopy().getLibrary();
+      }
+      libraryPlates.add(new LibraryPlate(plateNumber, 
+                                         library,
+                                         Sets.newHashSet(index.get(plateNumber))));
+    }
+    return libraryPlates;
   }
 
   @Transient

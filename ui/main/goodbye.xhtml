@@ -11,9 +11,9 @@
 
   <ui:param name="pageTitle" value="Thanks for using Screensaver!" />
 
-	<ui:insert name="menu" >
-		<ui:include src="/main/menu-for-unauthenticated.xhtml" />
-	</ui:insert>
+  <ui:define name="menu">
+    <ui:include src="/main/menu.xhtml" />
+  </ui:define>
 
 	<ui:define name="body">
 		<h:form id="loginAgainForm">

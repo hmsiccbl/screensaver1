@@ -44,6 +44,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
                                                                                      50,
                                                                                      100);
 
+  private String _title;
   private Map<String,Boolean> _capabilities = new HashMap<String,Boolean>();
 
   /**
@@ -105,6 +106,16 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
   abstract protected List<? extends TableColumn<R,?>> buildColumns();
 
   // public methods
+
+  public String getTitle()
+  {
+    return _title;
+  }
+
+  public void setTitle(String title)
+  {
+    _title = title;
+  }
 
   /**
    * @motivation to allow JSF pages to know what subclass methods are available;

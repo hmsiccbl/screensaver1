@@ -17,16 +17,17 @@ import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
 import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.searchresults.LibraryCopySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
@@ -44,6 +45,8 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
   private LibraryContentsVersionManager _libraryContentsVersionManager;
   private LibraryContentsImporter _libraryContentsImporter;
   private LibraryDetailViewer _libraryDetailViewer;
+  private LibraryCopySearchResults _libraryCopiesBrowser;
+  private LibraryCopyDetail _libraryCopyDetail;
 
   private DataModel _contentsVersionsDataModel;
 
@@ -63,7 +66,9 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
                        WellCopyVolumeSearchResults wellCopyVolumesBrowser,
                        LibraryContentsImporter libraryContentsImporter,
                        LibraryDetailViewer libraryDetailViewer,
-                       LibraryContentsVersionManager libraryContentsVersionManager)
+                       LibraryContentsVersionManager libraryContentsVersionManager,
+                       LibraryCopySearchResults libraryCopiesBrowser,
+                       LibraryCopyDetail libraryCopyDetail)
   {
     super(thisProxy,
           Library.class,
@@ -77,6 +82,8 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
     _libraryContentsImporter = libraryContentsImporter;
     _libraryDetailViewer = libraryDetailViewer;
     _libraryContentsVersionManager = libraryContentsVersionManager;
+    _libraryCopiesBrowser = libraryCopiesBrowser;
+    _libraryCopyDetail = libraryCopyDetail;
     getIsPanelCollapsedMap().put("contentsVersions", Boolean.TRUE);
   }
 
@@ -86,7 +93,8 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
   {
     getDao().needReadOnly(library, 
                           Library.contentsVersions.to(LibraryContentsVersion.loadingActivity).to(Activity.performedBy).getPath(),
-                          Library.contentsVersions.to(LibraryContentsVersion.releaseActivity).to(Activity.performedBy).getPath());
+                          Library.contentsVersions.to(LibraryContentsVersion.releaseActivity).to(Activity.performedBy).getPath(),
+                          Library.copies.getPath());
   }
   
   @Override
@@ -94,6 +102,7 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
   {
     _contentsVersionsDataModel = null;
     _libraryDetailViewer.setEntity(library);
+    _libraryCopiesBrowser.searchCopiesByLibrary(library);
   }
 
   public DataModel getContentsVersionsDataModel()
@@ -102,6 +111,11 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
       _contentsVersionsDataModel = new ListDataModel(Lists.newArrayList(Iterables.reverse(Lists.newArrayList(getEntity().getContentsVersions()))));
     }
     return _contentsVersionsDataModel;
+  }
+  
+  public LibraryCopySearchResults getCopiesBrowser()
+  {
+    return _libraryCopiesBrowser;
   }
   
   @UICommand
@@ -143,6 +157,13 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
   }
 
   @UICommand
+  public String addLibraryCopy()
+  {
+    return _libraryCopyDetail.editNewEntity(new Copy((AdministratorUser) getScreensaverUser(),
+                                                     getEntity()));
+  }
+
+  @UICommand
   public String viewLibraryContentsImporter()
   {
     if (getEntity() != null) {
@@ -151,31 +172,18 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
+  // TODO: move to LibraryDetailViewer.delete(), and can then eliminate explicit delete button in UI, since editSaveCancel.xhtml will provide it
   @UICommand
   public String deleteLibrary()
   {
     try {
-      getDao().doInTransaction(new DAOTransaction() {
-        public void runTransaction() {
-
-          getDao().deleteEntity(getEntity());
-          getDao().flush();
-
-        }
-      });
-      showMessage("libraries.deletedLibrary", "libraryViewer");
-      
+      getDao().deleteEntity(getEntity());
+      showMessage("deletedEntity", getEntity().getLibraryName());
       getContextualSearchResults().refetch();
       return BROWSE_LIBRARIES;
-    } catch (Exception e) {
-      if (e instanceof DataIntegrityViolationException) {
-        showMessage("libraries.libraryDeletionFailed", getEntity().getLibraryName(), "Please check that no screen results are associated with the library.");
-      }
-      else {
-        showMessage("libraries.libraryDeletionFailed", e.getClass().getName(), e.getMessage());
-      }
-      log.warn("library deletion: " + getEntity().getLibraryName() + e.getMessage() );
-      return VIEW_MAIN;
+    } catch (DataIntegrityViolationException e) {
+      showMessage("cannotDeleteEntityInUse", getEntity().getLibraryName());
+      return REDISPLAY_PAGE_ACTION_RESULT;
     }
   }
 }

@@ -275,7 +275,8 @@ public abstract class TableColumn<R,T> extends Observable implements Observer
    * @param row the row displayed in the current cell (the row index)
    * @param value the new value
    */
-  public void setCellValue(R row, Object value) {}
+  public void setCellValue(R row, T value)
+  {}
 
   /**
    * Get whether this table column is editable by the user. If it is, you must

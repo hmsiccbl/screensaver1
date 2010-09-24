@@ -22,11 +22,14 @@ import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Activity;
+import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.EntityViewer;
-import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
@@ -61,12 +64,12 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   {
   }
 
-  public ActivitySearchResults(ActivityViewer activityViewer,
+  public ActivitySearchResults(LabActivityViewer labActivityViewer,
                                Class<A> type,
                                GenericEntityDAO dao,
                                UserViewer userViewer)
   {
-    super((EntityViewer<A>) activityViewer);
+    super((EntityViewer<A>) labActivityViewer);
     _type = type;
     _dao = dao;
     _userViewer = userViewer;
@@ -75,11 +78,13 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
   @Override
   public void searchAll()
   {
+    setTitle("Lab Activities");
     initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao)));
   }
 
   public void searchActivitiesForUser(final ScreensaverUser user)
   {
+    setTitle("Lab Activities for " + user.getFullNameFirstLast());
     initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
@@ -89,8 +94,33 @@ public abstract class ActivitySearchResults<A extends Activity> extends EntityBa
     }));
   }
 
-  public void searchActivities(final Set<A> activities)
+  public void searchLibraryScreeningActivitiesForCopy(final Copy copy)
   {
+    setTitle("Library Screenings for library " + copy.getLibrary().getLibraryName() + ", copy " + copy.getName());
+    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, LibraryScreening.assayPlatesScreened.to("plateScreened").to("copy"), copy, getRootAlias());
+      }
+    }));
+  }
+
+  public void searchLibraryScreeningActivitiesForPlate(final Plate plate)
+  {
+    setTitle("Library Screenings for plate " + plate.getPlateNumber());
+    initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        DataFetcherUtil.addDomainRestrictions(hql, LibraryScreening.assayPlatesScreened.to("plateScreened"), plate, getRootAlias());
+      }
+    }));
+  }
+
+  public void searchActivities(final Set<A> activities, String title)
+  {
+    setTitle(title);
     initialize(new InMemoryEntityDataModel<A,Integer>(new EntityDataFetcher<A,Integer>(_type, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)

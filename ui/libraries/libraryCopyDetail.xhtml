@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition template="/util/entityViewerDetails.xhtml">
+
+  <ui:param name="entity" value="#{libraryCopyDetail.entity}" />
+  <ui:param name="viewer" value="#{libraryCopyDetail}" />
+  <ui:param name="hideId" value="#{true}" />
+
+  <ui:define name="entityCommands">
+    <t:commandButton id="deleteLibraryCopy" value="Delete"
+      action="#{libraryCopyDetail.delete}"
+      rendered="#{libraryCopyDetail.editable &amp;&amp; !libraryCopyDetail.editMode }"
+      onclick="javascript: return confirm('Are you sure you want to delete this library copy?');"
+      styleClass="command" description="Delete this copy" />
+  </ui:define>
+
+
+  <ui:define name="propertiesContent">
+    <ss:property id="copyName" label="Copy Name" rendered="true"
+      description="The name of the copy"
+      value="#{libraryCopyDetail.entity.name}" required="true"
+      editable="#{libraryCopyDetail.editMode}" editWidth="60" />
+
+    <ss:property id="library" label="Library"
+      description="The library that this copy represents">
+      <ui:define name="data">
+        <ss:entityLink entity="#{libraryCopyDetail.entity.library}"
+          property="libraryName" viewer="#{libraryViewer}" />
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="copyUsageType" label="Usage Type"
+      value="#{libraryCopyDetail.copyUsageType.selection}"
+      editable="#{libraryCopyDetail.editMode}">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="usageTypeMenu"
+          value="#{libraryCopyDetail.copyUsageType.value}"
+          required="true" styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{libraryCopyDetail.copyUsageType.selectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="copyComments" label="Comments" type="Textarea"
+      value="#{libraryCopyDetail.entity.comments}"
+      editable="#{libraryCopyDetail.editMode}" editWidth="80"
+      editHeight="3" />
+
+    <ss:propertyGroup id="platesBatchEditor" label="Plates"
+      rendered="#{libraryCopyDetail.editMode}">
+
+      <ss:propertyGroup id="plateRangeToUpdate"
+        label="Plate range to update">
+        <ss:property id="fromPlate" label="From plate #"
+          description="The first plate number of the range of plates to be updated"
+          value="#{libraryCopyDetail.startPlate}" editable="true" />
+
+        <ss:property id="toPlate" label="To plate #"
+          description="The last plate number of the range of plates to be updated"
+          value="#{libraryCopyDetail.endPlate}" editable="true" />
+      </ss:propertyGroup>
+
+      <ss:propertyGroup id="initialPlateValues"
+        label="#{libraryCopyDetail.entity.transient ? 'Create' : 'Update'} plates with these values (all optional#{libraryCopyDetail.entity.transient ? '' : '; specified values will override existing values'})">
+
+        <ss:property id="plateTypeLabel" label="Plate Type"
+          value="#{libraryCopyDetail.plateType.selection}"
+          editable="true">
+          <ui:define name="editableData">
+            <t:selectOneMenu id="plateType"
+              styleClass="inputText selectMenu"
+              value="#{libraryCopyDetail.plateType.value}">
+              <f:selectItems
+                value="#{libraryCopyDetail.plateType.selectItems}" />
+            </t:selectOneMenu>
+          </ui:define>
+        </ss:property>
+
+        <ss:property id="volume" label="Initial Well Volume"
+          value="#{libraryCopyDetail.volumeValue}" type="Volume"
+          unitsSelector="#{libraryCopyDetail.volumeType}"
+          description="The volume per copy well" editable="true"
+          editWidth="6" />
+
+        <ss:property id="location" label="Location" type="Text"
+          description="The storage location of the plate"
+          value="#{libraryCopyDetail.location}" editable="true" />
+
+        <ss:property id="barcode" label="Barcode" type="Text"
+          description="The barcode used by the facility to uniquely identify the plate"
+          value="#{libraryCopyDetail.barcode}" editable="true" />
+
+        <ss:property id="datePlated" label="Date Plated" type="Date"
+          description="The date plated"
+          value="#{libraryCopyDetail.datePlated}" editable="true" />
+
+        <ss:property id="dateRetired" label="Date Retired" type="Date"
+          description="The date retired"
+          value="#{libraryCopyDetail.dateRetired}" editable="true" />
+
+        <ss:property id="plateComments" label="Comments" type="Text"
+          description="Plate comments"
+          value="#{libraryCopyDetail.comments}" editable="true" />
+
+      </ss:propertyGroup>
+    </ss:propertyGroup>
+  </ui:define>
+
+</ui:composition>
+
+</html>
+

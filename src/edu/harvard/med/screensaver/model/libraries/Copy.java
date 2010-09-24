@@ -10,32 +10,42 @@
 package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
-import edu.harvard.med.screensaver.model.SemanticIDAbstractEntity;
-import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 
 /**
@@ -55,7 +65,7 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "libraryId", "name" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Library.class)
-public class Copy extends SemanticIDAbstractEntity<String> implements Comparable<Copy>
+public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<Copy>
 {
   private static final long serialVersionUID = 0L;
   
@@ -70,8 +80,11 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
   private Library _library;
   private String _name;
   private CopyUsageType _usageType;
+  private String _comments;
   private Map<Integer,Plate> _plates = Maps.newHashMap();
+  private ScreeningStatistics _screeningStatistics;
 
+  // TODO: [#2474] library copy well concentration
 
   @Override
   public Object acceptVisitor(AbstractEntityVisitor visitor)
@@ -81,7 +94,11 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
 
   public int compareTo(Copy other) 
   { 
-    return this.getCopyId().compareTo(other.getCopyId()); 
+    int result = getLibrary().getLibraryName().compareTo(other.getLibrary().getLibraryName());
+    if (result == 0) {
+      result = getName().compareTo(other.getName());
+    }
+    return result;
   }
   
   /**
@@ -89,10 +106,18 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
    * @return the id for the copy
    */
   @Id
-  @org.hibernate.annotations.Type(type="text")
-  public String getCopyId()
+  @org.hibernate.annotations.GenericGenerator(name = "copy_id_seq",
+                                              strategy = "sequence",
+                                              parameters = { @Parameter(name = "sequence", value = "copy_id_seq") })
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "copy_id_seq")
+  public Integer getCopyId()
   {
     return getEntityId();
+  }
+
+  private void setCopyId(Integer copyId)
+  {
+    setEntityId(copyId);
   }
 
   /**
@@ -138,18 +163,14 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
     _plates = plates;
   }
 
-  public Plate createPlate(
-    Integer plateNumber,
-    String location,
-    PlateType plateType,
-    Volume volume)
+  private Plate createPlate(Integer plateNumber)
   {
-    Plate plate = new Plate(this, plateNumber, location, plateType, volume);
     if (getLibrary().getStartPlate() > plateNumber || getLibrary().getEndPlate() < plateNumber) {
       throw new DataModelViolationException("plate number " + plateNumber + 
                                             " is outside of library plate range (" + 
                                             getLibrary().getStartPlate() + ".." + getLibrary().getEndPlate() + ")");
     }
+    Plate plate = new Plate(this, plateNumber);
     if (_plates.containsKey(plateNumber)) {
       throw new DuplicateEntityException(this, plate);
     }
@@ -157,15 +178,19 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
     return plate;
   }
 
+  public Plate findPlate(int plateNumber)
+  {
+    return _plates.get(plateNumber);
+  }
+
   @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
-  @org.hibernate.annotations.Immutable
   public String getName()
   {
     return _name;
   }
 
-  private void setName(String name)
+  public void setName(String name)
   {
     _name = name;
   }
@@ -174,41 +199,53 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
   @org.hibernate.annotations.Type(
     type="edu.harvard.med.screensaver.model.libraries.CopyUsageType$UserType"
   )
-  @org.hibernate.annotations.Immutable
   public CopyUsageType getUsageType()
   {
     return _usageType;
   }
 
-  private void setUsageType(CopyUsageType copyUsageType)
+  public void setUsageType(CopyUsageType copyUsageType)
   {
     _usageType = copyUsageType;
+  }
+
+  public String getComments()
+  {
+    return _comments;
+  }
+
+  public void setComments(String comments)
+  {
+    _comments = comments;
   }
 
   /**
    * @motivation intended for use by {@link Library#createCopy} only.
    */
-  Copy(Library library, CopyUsageType usageType, String name)
+  Copy(AdministratorUser createdBy, Library library, CopyUsageType usageType, String name)
   {
-    setEntityId(library.getShortName() + ":" + name);
+    this(createdBy, library);
     _library = library;
     _name = name;
     _usageType = usageType;
   }
 
+  /**
+   * @motivation UI DTO, for creating a new Copy
+   */
+  public Copy(AdministratorUser createdBy, Library library)
+  {
+    super(createdBy);
+    _library = library;
+    for (int p = library.getStartPlate(); p <= library.getEndPlate(); ++p) {
+      createPlate(p);
+    }
+  }
 
   /**
    * @motivation for hibernate and proxy/concrete subclass constructors
    */
   protected Copy() {}
-
-  /**
-   * @motivation for hibernate
-   */
-  private void setCopyId(String copyId)
-  {
-    setEntityId(copyId);
-  }
 
   /**
    * Get the version for the copy.
@@ -228,5 +265,37 @@ public class Copy extends SemanticIDAbstractEntity<String> implements Comparable
   private void setVersion(Integer version)
   {
     _version = version;
+  }
+  
+  @Transient
+  public ScreeningStatistics getScreeningStatistics()
+  {
+    if (_screeningStatistics == null) {
+      _screeningStatistics = new ScreeningStatistics();
+    }
+    return _screeningStatistics;
+  }
+
+  public void setScreeningStatistics(ScreeningStatistics screeningStatistics)
+  {
+    _screeningStatistics = screeningStatistics;
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name = "copyUpdateActivity",
+             joinColumns = @JoinColumn(name = "copyId", nullable = false, updatable = false),
+             inverseJoinColumns = @JoinColumn(name = "updateActivityId", nullable = false, updatable = false, unique = true))
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @Sort(type = SortType.NATURAL)
+  @ToMany(singularPropertyName = "updateActivity", hasNonconventionalMutation = true /*
+                                                                                      * model testing framework doesn't
+                                                                                      * understand this is a containment
+                                                                                      * relationship, and so requires
+                                                                                      * addUpdateActivity() method
+                                                                                      */)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
   }
 }

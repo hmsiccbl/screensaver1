@@ -13,8 +13,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 
 /**
@@ -28,38 +31,59 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 // TODO: replace implementation with AbstractEntitableBackingBean
 public abstract class EditableDataTable<R> extends DataTable<R>
 {
-
-  // public static final data
-
   private static final Logger log = Logger.getLogger(EditableDataTable.class);
 
-
-  // private instance data
-
+  private ScreensaverUserRole _editingRole;
   private boolean _editMode;
   private Boolean _hasEditableColumns;
 
+  public EditableDataTable()
+  {
+    super();
+  }
 
-  // public constructor
+  EditableDataTable(ScreensaverUserRole editingRole)
+  {
+    _editingRole = editingRole;
+  }
 
+  @Override
+  public void initialize(DataTableModel<R> dataTableModel,
+                         List<? extends TableColumn<R,?>> columns,
+                         UISelectOneBean<Integer> rowsPerPageSelector,
+                         boolean useReorderListWidget)
+  {
+    super.initialize(dataTableModel, columns, rowsPerPageSelector, useReorderListWidget);
+    _editMode = false;
+  }
 
-  // public methods
-
-
-  // public action command methods & action listeners
-
-  public void setCellValue(Object value)
+  public <T> void setCellValue(Object value)
   {
     if (log.isDebugEnabled()) {
       log.debug("setting value on " + getRowData() + " from column " +
                 getColumnManager().getCurrentColumn().getName() + ": " + value);
     }
-    getColumnManager().getCurrentColumn().setCellValue(getRowData(), value);
+    ((TableColumn<R,T>) getColumnManager().getCurrentColumn()).setCellValue(getRowData(), (T) value);
   }
 
   public boolean isEditMode()
   {
     return _editMode;
+  }
+
+  public ScreensaverUserRole getEditingRole()
+  {
+    return _editingRole;
+  }
+
+  public void setEditingRole(ScreensaverUserRole editingRole)
+  {
+    _editingRole = editingRole;
+  }
+
+  public boolean isEditable()
+  {
+    return getHasEditableColumns() && getScreensaverUser().isUserInRole(_editingRole);
   }
 
   public boolean getHasEditableColumns()
@@ -104,9 +128,6 @@ public abstract class EditableDataTable<R> extends DataTable<R>
 
   protected void doCancel()
   {}
-
-
-  // private instance methods
 
 
   private void initializeHasEditableColumns(List<? extends TableColumn<R,?>> columns)

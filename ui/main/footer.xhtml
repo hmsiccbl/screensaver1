@@ -13,6 +13,10 @@
 		<t:htmlTag value="hr" />
     <h:outputLink value="https://wiki.med.harvard.edu/ICCBL/Screensaver" target="_blank">
       <h:outputText value="#{appInfo.applicationTitle}" />
+      <t:outputText id="buildNumber"
+        value="&#160;(#{menu.applicationProperties['screensaver.ui.build_number']})"
+        styleClass="menuItem" visibleOnUserRole="developer"
+        title="The build number" />
     </h:outputLink>
     <h:outputText value=" | " />
 		<h:outputLink value="#{appInfo.applicationProperties['screensaver.ui.facility_url']}" target="_blank">
@@ -29,7 +33,10 @@
 			title="Let us know what you think!">
 			<h:outputText value="Feedback" />
 		</h:outputLink>
-	</t:div>
+    <h:outputText value=" | " />
+    <t:commandLink action="#{menu.viewHelp}" value="Help"
+      title="View the Screensaver help page" />
+  </t:div>
 
 </ui:composition>
 

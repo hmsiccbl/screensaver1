@@ -82,6 +82,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
 
   public void searchScreensForUser(ScreeningRoomUser screener)
   {
+    setTitle("Screens for screener " + screener.getFullNameFirstLast());
     final Set<Screen> screens = new HashSet<Screen>();
     screens.addAll(screener.getAllAssociatedScreens());
     if (screens.isEmpty()) {
@@ -104,6 +105,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   @Override
   public void searchAll()
   {
+    setTitle("Screens");
     initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
@@ -113,21 +115,6 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       }
     }));
   }
-
-  public void searchScreens(final Set<Screen> screens)
-  {
-    initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
-      @Override
-      public void addDomainRestrictions(HqlBuilder hql)
-      {
-        DataFetcherUtil.addDomainRestrictions(hql, getRootAlias(), Sets.newHashSet(Iterables.transform(screens, Entity.ToEntityId)));
-      }
-    }));
-
-    // default to descending sort order on screen number
-    getColumnManager().setSortAscending(false);
-  }
-
 
   // implementations of the SearchResults abstract methods
 

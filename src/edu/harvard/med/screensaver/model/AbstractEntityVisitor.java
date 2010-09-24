@@ -17,6 +17,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -50,7 +51,6 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.libraries.WellCopy;
 
 /**
  * A visitor interface for the Screensaver domain model entity classes.
@@ -85,6 +85,8 @@ public interface AbstractEntityVisitor
   public boolean visit(SmallMoleculeReagent entity);
   public boolean visit(SmallMoleculeCherryPickRequest entity);
   public boolean visit(Copy entity);
+
+  public boolean visit(CopyScreeningStatus entity);
   public boolean visit(Plate entity);
   public boolean visit(EquipmentUsed entity);
   public boolean visit(FundingSupport fundingSupport);

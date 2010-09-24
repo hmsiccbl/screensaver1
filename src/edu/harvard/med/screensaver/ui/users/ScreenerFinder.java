@@ -12,6 +12,9 @@ package edu.harvard.med.screensaver.ui.users;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Joiner;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
@@ -20,10 +23,6 @@ import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.util.StringUtils;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.base.Joiner;
 
 /**
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -95,7 +94,7 @@ public class ScreenerFinder extends AbstractBackingBean
   {
     String pattern = getFullNamePattern();
     if (!StringUtils.isEmpty(pattern)) {
-      _screenerSearchResults.searchAll(); // potentially poor performance, but "correct", as it always searches lastest additions and changes to users
+      _screenerSearchResults.searchAll("Screeners matching " + pattern); // potentially poor performance, but "correct", as it always searches latest additions and changes to users
       TableColumn<ScreeningRoomUser,String> column = (TableColumn<ScreeningRoomUser,String>) _screenerSearchResults.getColumnManager().getColumn("Name");
       //Note: the assumption is that alphabetic sort when searching on name is desired
       _screenerSearchResults.getColumnManager().setSortColumn(column);

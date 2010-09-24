@@ -34,6 +34,7 @@ import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.RequiredPropertyException;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
@@ -147,6 +148,7 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
   @JoinColumn(name="plateId", nullable=true, updatable=false)
   @Immutable
   @org.hibernate.annotations.ForeignKey(name="fk_assay_plate_to_plate")
+  @ToOne(hasNonconventionalSetterMethod = true)
   public Plate getPlateScreened()
   {
     return _plateScreened;

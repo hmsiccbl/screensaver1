@@ -203,6 +203,7 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
    */
   @Column(nullable=true)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screenresults.AssayWellControlType$UserType")
+  @edu.harvard.med.screensaver.model.annotations.Column(hasNonconventionalSetterMethod = true)
   public AssayWellControlType getAssayWellControlType()
   {
     return _assayWellControlType;

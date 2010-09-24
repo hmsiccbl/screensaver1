@@ -14,6 +14,9 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
@@ -25,13 +28,11 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.searchresults.LibraryPlateSearchResults;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Lists;
 
 /**
  * Backing class for the Library creation page.
@@ -46,10 +47,10 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
 
   private LibraryCreator _libraryCreator;
   private LibraryViewer _libraryViewer;
+  private LibraryPlateSearchResults _libraryPlatesBrowser;
 
-  
   private UISelectOneEntityBean<ScreeningRoomUser> owner;
-  
+
   
   /**
    * @motivation for CGLIB2
@@ -61,7 +62,8 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   public LibraryDetailViewer(LibraryDetailViewer thisProxy,
                              GenericEntityDAO dao,
                              LibraryCreator libraryCreator,
-                             LibraryViewer libraryViewer) 
+                             LibraryViewer libraryViewer,
+                             LibraryPlateSearchResults libraryPlatesBrowser)
   {
     super(thisProxy,
           Library.class,
@@ -69,6 +71,7 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
           dao);
     _libraryCreator = libraryCreator;
     _libraryViewer = libraryViewer;
+    _libraryPlatesBrowser = libraryPlatesBrowser;
   }
   
   public List<SelectItem> getLibraryScreeningStatusSelectItems()    
@@ -152,5 +155,12 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
       };
     }
     return owner;
+  }
+
+  @UICommand
+  public String browseLibraryPlates()
+  {
+    _libraryPlatesBrowser.searchLibraryPlatesByLibrary(getEntity());
+    return BROWSE_LIBRARY_PLATES_SCREENED;
   }
 }

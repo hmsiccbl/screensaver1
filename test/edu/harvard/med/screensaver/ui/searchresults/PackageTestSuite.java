@@ -27,7 +27,9 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(DataExportersTest.class);
-    addTestSuite(PlateScreeningStatusSearchResultsTest.class);
+    addTestSuite(LibraryCopySearchResultsTest.class);
+    addTestSuite(LibraryCopyPlateSearchResultsTest.class);
+    addTestSuite(LibraryPlateSearchResultsTest.class);
     addTestSuite(ScreenSearchResultsTest.class);
     addTestSuite(UserSearchResultsTest.class);
     addTestSuite(WellSearchResultsTest.class);

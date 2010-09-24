@@ -12,12 +12,13 @@ package edu.harvard.med.iccbl.screensaver.policy;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
@@ -35,6 +36,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -216,6 +218,11 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
   }
 
   public boolean visit(Copy entity)
+  {
+    return true;
+  }
+
+  public boolean visit(CopyScreeningStatus entity)
   {
     return true;
   }
@@ -679,4 +686,5 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     _othersVisibleSmallMoleculeScreens = null;
     _publicScreens = null;
   }
+
 }

@@ -14,6 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -38,13 +44,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
-import org.hibernate.LazyInitializationException;
-import org.hibernate.Session;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 
 public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
@@ -244,9 +243,9 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
 
         expectedLibrary[0].getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) expectedLibrary[0].getLatestContentsVersion().getLoadingActivity().getCreatedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
 
-        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy1");
-        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy2");
-        expectedLibrary[0].createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "copy3");
+        expectedLibrary[0].createCopy((AdministratorUser) expectedLibrary[0].getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "copy1");
+        expectedLibrary[0].createCopy((AdministratorUser) expectedLibrary[0].getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "copy2");
+        expectedLibrary[0].createCopy((AdministratorUser) expectedLibrary[0].getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "copy3");
         genericEntityDao.saveOrUpdateEntity(expectedLibrary[0]);
       }
     });

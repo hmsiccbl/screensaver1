@@ -698,9 +698,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   public String browseLabMembers()
   {
     HashSet<ScreeningRoomUser> labMembers = Sets.newHashSet((List<ScreeningRoomUser>) getLabMembersDataModel().getWrappedData());
-    ((UserSearchResults) getContextualSearchResults()).searchUsers(labMembers);
-    ((UserSearchResults) getContextualSearchResults()).
-            setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchLabMembers"));
+    ((UserSearchResults) getContextualSearchResults()).searchUsers(labMembers,
+                                                                   "Lab Members of lab " + getEntity().getLab().getLabName());
     return BROWSE_SCREENERS;
   }
 
@@ -709,9 +708,9 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   public String browseScreenAssociates()
   {
     HashSet<ScreeningRoomUser> associates = Sets.newHashSet((List<ScreeningRoomUser>) getScreenAssociatesDataModel().getWrappedData());
-    ((UserSearchResults) getContextualSearchResults()).searchUsers(associates);
-    ((UserSearchResults) getContextualSearchResults()).
-    setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchScreenAssociates"));
+    ((UserSearchResults) getContextualSearchResults()).searchUsers(associates,
+                                                                   "Screening Associates of screener " +
+                                                                     getEntity().getFullNameFirstLast());
     return BROWSE_SCREENERS;
   }
 

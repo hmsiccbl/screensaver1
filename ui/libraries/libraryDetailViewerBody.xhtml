@@ -13,7 +13,7 @@
   <ui:param name="entity" value="#{libraryDetailViewer.entity}" />
   <ui:param name="viewer" value="#{libraryDetailViewer}" />
   <ui:param name="hideId" value="#{true}" />
-  
+
   <ui:define name="entityCommands">
     <ui:remove> 
       Disabled, due to performance
@@ -96,17 +96,33 @@
       </ui:define>
     </ss:property>
 
-    <ss:property id="startPlate" label="Start Plate"
-			description="The plate number for the first plate in the library"
-			value="#{libraryDetailViewer.entity.startPlate}" required="true"
-			editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
+    <ss:propertyGroup label="Plates">
 
-		<ss:property id="endPlate" label="End Plate"
-			description="The plate number for the last plate in the library"
-			value="#{libraryDetailViewer.entity.endPlate}" required="true"
-			editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
+      <ss:property id="startPlate" label="Start Plate"
+        description="The plate number for the first plate in the library"
+        value="#{libraryDetailViewer.entity.startPlate}" required="true"
+        editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
 
-		<ss:property id="description" label="Description"
+      <ss:property id="endPlate" label="End Plate"
+        description="The plate number for the last plate in the library"
+        value="#{libraryDetailViewer.entity.endPlate}" required="true"
+        editable="#{libraryDetailViewer.editMode &amp;&amp; empty libraryDetailViewer.entity.libraryId}" />
+
+      <ss:property id="plateCount" label="Plate Count"
+        description="The number of plates in the library"
+        rendered="#{!libraryDetailViewer.editMode}">
+        <ui:define name="data">
+          <t:commandLink id="libraryPlatesBrowserLink"
+            value="#{(libraryDetailViewer.entity.endPlate - libraryDetailViewer.entity.startPlate) + 1}"
+            action="#{libraryDetailViewer.browseLibraryPlates}"
+            disabled="#{!libraryDetailViewer.readAdmin}"
+            styleClass="dataText" />
+        </ui:define>
+      </ss:property>
+
+    </ss:propertyGroup>
+
+    <ss:property id="description" label="Description"
 			description="A description of the library"
 			value="#{libraryDetailViewer.entity.description}"
 			editable="#{libraryDetailViewer.editMode}" type="Textarea"

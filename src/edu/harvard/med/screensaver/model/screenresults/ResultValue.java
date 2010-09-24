@@ -186,7 +186,7 @@ public class ResultValue extends AbstractEntity<Integer>
     return _partitionedPositiveValue;
   }
 
-  public void setPartitionedPositiveValue(PartitionedValue value)
+  private void setPartitionedPositiveValue(PartitionedValue value)
   {
     if (!isHibernateCaller()) {
       if (value == null) {
@@ -207,7 +207,7 @@ public class ResultValue extends AbstractEntity<Integer>
     return _booleanPositiveValue;
   }
 
-  public void setBooleanPositiveValue(Boolean value)
+  private void setBooleanPositiveValue(Boolean value)
   {
     if (!isHibernateCaller()) {
       if (value == null) {

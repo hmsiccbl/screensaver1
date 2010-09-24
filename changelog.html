@@ -2,11 +2,55 @@
 <body>
 <h1>Screensaver Release Notes</h1>
 
+  <h2>v2.1.0, 2010-09-27</h2>
+ 
+      Library copy management features: view, create, and edit library copies
+    and their constituent plates.  Report on screening statistics for library copies and plates.
+  
+    <h4>For Screeners:</h4>
+    <ul>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1243'>[#1243]</a> Redesign main menu to guide users to find & browse multiple wells</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2530'>[#2530]</a> Menu well quick finder as single field, accepting multiple wells</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2531'>[#2531]</a> "Browse Screens" menu sub-options for SM and RNAI filters</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2557'>[#2557]</a> Search result browsers need page titles that describe domain restriction</li>
+    </ul>
+
+    <h4>For Staff:</h4>
+    <ul>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1371'>[#1371]</a> Library freeze/thaw reporting</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2438'>[#2438]</a> Add CopySearchResults</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2528'>[#2528]</a> "Browse Copies" command</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2515'>[#2515]</a> Add Copies data table to Library Viewer </li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1288'>[#1288]</a> New Library Copy Viewer page</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2543'>[#2543]</a> Editable Copy </li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2527'>[#2527]</a> Delete Copy command</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2542'>[#2542]</a> Create and edit copy plate ranges</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2514'>[#2514]</a> Add libraryCopiesAdmin role</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2537'>[#2537]</a> Add "comment" field to Copy</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2491'>[#2491]</a> Add bar code field to Plate entity</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2455'>[#2455]</a> Add "master stock plate" CopyUsageType</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2555'>[#2555]</a> Add link to Library Plate Search Result in Library Viewer </li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2523'>[#2523]</a> Error adding new LibraryScreening when performedBy user is LabHead</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2572'>[#2572]</a> Remove LibraryCopyGenerator</li>
+    </ul>
+
+    <h4>For Developers:</h4>
+    <ul>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2524'>[#2524]</a> Copy should become an AuditedAbstractEntity</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2544'>[#2544]</a> Copy ID should be a generated ID</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2444'>[#2444]</a> DAO methods that take relationship strings should instead take RelationshipPath</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2556'>[#2556]</a> Library Plate Search Results should be capable of showing unscreened plates</li>
+      <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2572'>[#2572]</a> Remove LibraryCopyGenerator</li>
+      <li>Added SetBasedDataFetcher <a href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&path=%2F&view=rev&revision=4641">[rev 4641]</a></li>
+      <li>DataTable/SearchResult/EntitySearchResult class hierarchy updates <a href="http://forge.abcd.harvard.edu/gf/project/screensaver/scmsvn/?action=browse&path=%2F&view=rev&revision=4594">[rev 4594]</a></li>
+      <li>Renamed "plates" occurrences in UI code to "libraryPlates" to differentiate "library plate" (LibraryPlate entity) from "library copy plate" (Plate entity)</li>
+    </ul>
+
   <h2>v2.0.0, 2010-07-30</h2>
   
     Adds support for screening status information, allowing administrators and screeners to view the screening progress of library plates and the status of screen result data loading. 
   
-    <h4>For Users:</h4>
+    <h4>For Screeners:</h4>
     <ul>
       <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1516'>[#1516]</a> screen result plate status</li>
       <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1268'>[#1268]</a> show libraries screened</li>
@@ -19,7 +63,7 @@
       <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2407'>[#2407]</a> after adding new column to data table, sort column is no longer sorted or filtered</li>
     </ul>
     
-    <h4>For Administrators:</h4>
+    <h4>For Staff:</h4>
     <ul>
       <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2342'>[#2342]</a> screen result parser automatic incremental plate loading</li>
       <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2338'>[#2338]</a> replace Screen Result comments field with screen result loading activity comments</li>
@@ -50,7 +94,7 @@
 
   <h2 id="v195">v1.9.5, 2010-07-02</h2>
 
-    <h3>For Users</h3>
+    <h3>For Screeners</h3>
       <ul>
         <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2395'>[2395]</a> improve performance of well search results data export</li>
         <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1996'>[1996]</a> add CSV export option</li>
@@ -80,7 +124,7 @@
   
   Features to support cross-screen comparison of positives data.  Fixes and enhancements to data tables that present screen result data.
 
-    <h3>For Users</h3>
+    <h3>For Screeners</h3>
       <h4>New Features</h4>
         <ul>
           <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2266'>[#2266]</a> Command to auto-select data headers for positives from mutual positives screens</li>
@@ -144,7 +188,7 @@
     <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=1170'>[#1170]</a> Compound structure column in Well search results and exported workbook</li>
     </ul>
     
-    <h4>For Administrators:</h4>
+    <h4>For Staff:</h4>
     <ul>
     <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2175'>[#2175]</a> Screen Data Sharing And User Agreement Expiration Services</li>
     <li><a href='http://forge.abcd.harvard.edu/gf/project/screensaver/tracker/?action=TrackerItemEdit&amp;tracker_item_id=2227'>[#2227]</a> Compound totals per visit and per screen</li>

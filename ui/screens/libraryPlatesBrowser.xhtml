@@ -10,10 +10,10 @@
 
 <ui:composition template="/main/template.xhtml">
 
-	<ui:param name="pageTitle" value="Plates Screened Browser" />
+	<ui:param name="pageTitle" value="#{libraryPlatesBrowser.title}" />
 
 	<ui:define name="body">
-		<ss:searchResult searchResults="#{platesScreenedBrowser}">
+		<ss:searchResult searchResults="#{libraryPlatesBrowser}">
 			<ui:define name="entityViewer">
 			</ui:define>
 		</ss:searchResult>

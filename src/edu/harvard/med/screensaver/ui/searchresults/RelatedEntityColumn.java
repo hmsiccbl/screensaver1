@@ -106,7 +106,7 @@ public abstract class RelatedEntityColumn<F extends AbstractEntity, R extends Ab
   }
 
   @Override
-  public void setCellValue(F fromEntity, Object value)
+  public void setCellValue(F fromEntity, T value)
   {
     if (getRelatedEntity(fromEntity) != null) {
       _delegateEntityColumn.setCellValue(getRelatedEntity(fromEntity), value);

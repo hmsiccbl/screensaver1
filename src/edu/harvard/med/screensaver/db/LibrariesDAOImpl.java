@@ -281,7 +281,7 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     List<Object[]> copyVolumes = 
       getHibernateTemplate().find(hql, 
                                   new Object[] { well.getWellKey().toString(), well.getPlateNumber(),
-                                    CopyUsageType.FOR_CHERRY_PICK_SCREENING });
+                                    CopyUsageType.CHERRY_PICK_STOCK_PLATES });
     Map<Copy,Volume> remainingVolumes = Maps.newHashMap();
     for (Object[] row : copyVolumes) {
       Volume remainingVolume = 

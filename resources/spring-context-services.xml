@@ -95,14 +95,6 @@
   </bean>
  
   <bean
-    id="libraryCopyGenerator"
-    class="edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator"
-    scope="singleton">
-    <constructor-arg ref="genericEntityDao"/>
-    <constructor-arg ref="librariesDao"/>
-  </bean>
-
-  <bean
     id="libraryContentsVersionManager"
     class="edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager"
     scope="singleton">

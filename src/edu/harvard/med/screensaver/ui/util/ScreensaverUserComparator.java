@@ -10,10 +10,13 @@
 package edu.harvard.med.screensaver.ui.util;
 
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.util.ComparableNullSafeComparator;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 
 public class ScreensaverUserComparator<U extends ScreensaverUser> extends NullSafeComparator<U>
 {
+  private static final NullSafeComparator<Integer> NullSafeEntityIdComparator = new ComparableNullSafeComparator<Integer>();
+
   public static <U extends ScreensaverUser> ScreensaverUserComparator<U> getInstance()
   {
     return new ScreensaverUserComparator<U>();
@@ -24,7 +27,10 @@ public class ScreensaverUserComparator<U extends ScreensaverUser> extends NullSa
   {
     int result = u1.getFullNameLastFirst().compareTo(u2.getFullNameLastFirst());
     if (result == 0) {
-      return u1.getEntityId().compareTo(u2.getEntityId());
+      if (u1.getEntityId() == null && u2.getEntityId() == null && u1 != u2) {
+        throw new IllegalStateException("cannot determine ordering of ScreensaverUsers that are missing entity IDs");
+      }
+      result = NullSafeEntityIdComparator.compare(u1.getEntityId(), u2.getEntityId());
     }
     return result;
   }

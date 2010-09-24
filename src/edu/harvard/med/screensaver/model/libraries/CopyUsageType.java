@@ -23,8 +23,9 @@ public enum CopyUsageType implements VocabularyTerm
 
   // the vocabulary
   
-  FOR_LIBRARY_SCREENING("For Library Screening"),
-  FOR_CHERRY_PICK_SCREENING("For Cherry Pick Screening"),
+  MASTER_STOCK_PLATES("Master Stock Plates"),
+  LIBRARY_SCREENING_PLATES("Library Screening Plates"),
+  CHERRY_PICK_STOCK_PLATES("Cherry Pick Stock Plates")
   ;
 
  

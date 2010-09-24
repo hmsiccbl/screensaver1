@@ -11,11 +11,14 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.sql.SQLException;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.joda.time.LocalDate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.UnexpectedRollbackException;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
@@ -35,7 +38,6 @@ import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -44,10 +46,13 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeCorrectionActivity;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
+import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 
 
 /**
@@ -62,6 +67,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
   private static final Logger log = Logger.getLogger(LibrariesDAOTest.class);
 
   protected LibrariesDAO librariesDao;
+  protected LibraryCreator libraryCreator;
   
   public void testFindReagent()
   {
@@ -96,22 +102,22 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
-        Copy copyC = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-        copyC.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyC.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
-        Copy copyD = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        copyD.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyD.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
-        Copy copyE = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "E");
-        copyE.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyE.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
-        Copy copyF = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "F");
-        copyF.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyF.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(100)); // should be ignored
-        Copy copyG = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "G"); // retired copies should be ignored
-        copyG.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10)).setDateRetired(new LocalDate());
-        Copy copyA = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A"); // library screening copies should be ignored
-        copyA.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
+        Copy copyC = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
+        copyC.findPlate(1).withWellVolume(new Volume(10));
+        copyC.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
+        Copy copyD = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "D");
+        copyD.findPlate(1).withWellVolume(new Volume(10));
+        copyD.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
+        Copy copyE = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "E");
+        copyE.findPlate(1).withWellVolume(new Volume(10));
+        copyE.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
+        Copy copyF = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "F");
+        copyF.findPlate(1).withWellVolume(new Volume(10));
+        copyF.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
+        Copy copyG = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "G"); // retired copies should be ignored
+        copyG.findPlate(1).withWellVolume(new Volume(10)).setDateRetired(new LocalDate());
+        Copy copyA = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A"); // library screening copies should be ignored
+        copyA.findPlate(1).withWellVolume(new Volume(10));
 
         genericEntityDao.saveOrUpdateEntity(library);
 
@@ -140,11 +146,11 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
       }
     });
 
-    Copy copyC = genericEntityDao.findEntityById(Copy.class, "library:C");
-    Copy copyD = genericEntityDao.findEntityById(Copy.class, "library:D");
-    Copy copyE = genericEntityDao.findEntityById(Copy.class, "library:E");
-    Copy copyF = genericEntityDao.findEntityById(Copy.class, "library:F");
-    Copy copyG = genericEntityDao.findEntityById(Copy.class, "library:G");
+    Copy copyC = genericEntityDao.findEntityByProperty(Copy.class, "name", "C");
+    Copy copyD = genericEntityDao.findEntityByProperty(Copy.class, "name", "D");
+    Copy copyE = genericEntityDao.findEntityByProperty(Copy.class, "name", "E");
+    Copy copyF = genericEntityDao.findEntityByProperty(Copy.class, "name", "F");
+    Copy copyG = genericEntityDao.findEntityByProperty(Copy.class, "name", "G");
     Well wellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");
     Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
     Well wellC03 = genericEntityDao.findEntityById(Well.class, "00001:C03");
@@ -332,12 +338,12 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     Library library = dataFactory.newInstance(Library.class);
     library.setStartPlate(100);
     library.setEndPlate(102);
-    final Copy copyC = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "C");
-    final Copy copyD = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "D");
-    copyC.createPlate(100, "", PlateType.ABGENE, new Volume(0));
-    copyC.createPlate(101, "", PlateType.ABGENE, new Volume(0));
-    copyD.createPlate(100, "", PlateType.ABGENE, new Volume(0));
-    copyD.createPlate(102, "", PlateType.ABGENE, new Volume(0));
+    final Copy copyC = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "C");
+    final Copy copyD = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "D");
+    copyC.findPlate(100).withWellVolume(new Volume(0));
+    copyC.findPlate(101).withWellVolume(new Volume(0));
+    copyD.findPlate(100).withWellVolume(new Volume(0));
+    copyD.findPlate(102).withWellVolume(new Volume(0));
     genericEntityDao.saveOrUpdateEntity(library);
 
     genericEntityDao.doInTransaction(new DAOTransaction() {
@@ -352,7 +358,7 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
         assertEquals(102, plate.getPlateNumber());
         assertEquals("D", plate.getCopy().getName());
         
-        assertNull(librariesDao.findPlate(101, copyD.getName()));
+        assertNull(librariesDao.findPlate(103, copyD.getName()));
       }
     });
   }
@@ -382,5 +388,126 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     assertEquals(Sets.newHashSet(ScreenType.RNAI),
                  librariesDao.findScreenTypesForReagents(Sets.newHashSet(rnaiReagentId.getVendorIdentifier())));
 
+  }
+
+  public void testLibraryCopyDeleteIsScreened()
+  {
+    // this test should show that if plate has an associated AssayPlate, then the copy delete will fail when 
+    // it cascades to the plate delete;
+    // also, this will verify that the same delete will fail if there is a LabCherryPick associated
+    // with the copy via the AssayPlate.
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        Library library1 = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 2);
+        Library library2 = MakeDummyEntities.makeDummyLibrary(2, ScreenType.SMALL_MOLECULE, 2);
+        Copy lib1Copy = library1.createCopy((AdministratorUser) library1.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
+        Copy lib2Copy = library2.createCopy((AdministratorUser) library2.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "B");
+        Plate plate1000 = lib1Copy.findPlate(1000).withWellVolume(new Volume(0));
+        Plate plate1001 = lib1Copy.findPlate(1001).withWellVolume(new Volume(0));
+        genericEntityDao.saveOrUpdateEntity(library1);
+        genericEntityDao.saveOrUpdateEntity(library2);
+        genericEntityDao.flush();
+        
+        Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
+        AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        ScreeningRoomUser user = new ScreeningRoomUser("Screener", "User");
+        LibraryScreening libraryScreening = screen.createLibraryScreening(admin, user, new LocalDate());
+        genericEntityDao.saveOrUpdateEntity(screen);
+        
+        libraryScreening.setNumberOfReplicates(1);
+        libraryScreening.addAssayPlatesScreened(plate1000);
+        libraryScreening.addAssayPlatesScreened(plate1001);
+        libraryScreening.update();
+      }
+    });
+
+    Copy copy1A = genericEntityDao.findEntityByProperty(Copy.class, "name", "A");
+    assertNotNull(copy1A);
+    Copy copy2A = genericEntityDao.findEntityByProperty(Copy.class, "name", "B");
+    assertNotNull(copy2A);
+
+    boolean fail = false;
+    try {
+      genericEntityDao.deleteEntity(copy1A);
+    }
+    catch (DataIntegrityViolationException e) {
+      fail = true;
+      SQLException se = getRootException(e);
+      if (se != null) {
+        log.error("SQL Exception: ", se);
+      }
+      else {
+        log.error("e: ", e);
+      }
+    }
+    assertTrue("Copy delete should fail due to associated LibraryScreening", fail);
+
+    // include a regular delete, to verify
+    genericEntityDao.deleteEntity(copy2A);
+  }
+
+  public void testLibraryCopyDeleteHasWVA()
+  {
+    // TODO: for [#2527] delete Copy command:
+    // The Copy viewer should allow the copy to be deleted, iff the copy has not been
+    // used (screened, cherry picked, or has well volume adjustments).  Deletion
+    // should cascade to all of its constituent Plates.
+    schemaUtil.truncateTablesOrCreateSchema();
+
+    // 1. create some WVA's
+    genericEntityDao.doInTransaction(new DAOTransaction()
+    {
+      public void runTransaction()
+      {
+        TestDataFactory dataFactory = new TestDataFactory();
+        Library library = dataFactory.newInstance(Library.class);
+        Copy copy1 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
+        Well well = dataFactory.newInstance(Well.class);
+        Volume volume = dataFactory.getTestValueForType(Volume.class);
+        WellVolumeCorrectionActivity wellVolumeCorrectionActivity = dataFactory.newInstance(WellVolumeCorrectionActivity.class);
+        WellVolumeAdjustment wellVolumeAdjustment = wellVolumeCorrectionActivity.createWellVolumeAdjustment(copy1, well, volume);
+        new EntityNetworkPersister(genericEntityDao, wellVolumeAdjustment).persistEntityNetwork();
+
+        Copy copy2 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "B");
+        genericEntityDao.persistEntity(copy2);
+      }
+    });
+    
+    Copy copy1A = genericEntityDao.findEntityByProperty(Copy.class, "name", "A");
+    assertNotNull(copy1A);
+    Copy copy2A = genericEntityDao.findEntityByProperty(Copy.class, "name", "B");
+    assertNotNull(copy2A);
+
+    boolean fail = false;
+    try {
+      genericEntityDao.deleteEntity(copy1A);
+    }
+    catch (DataIntegrityViolationException e) {
+      fail = true;
+      SQLException se = getRootException(e);
+      if (se != null) {
+        log.error("SQL Exception: ", se);
+      }
+      else {
+        log.error("e: ", e);
+      }
+    }
+    assertTrue("Copy delete should fail due to Well Volume Adjustments", fail);
+
+    // include a regular delete, to verify
+    genericEntityDao.deleteEntity(copy2A);
+  }
+
+  private SQLException getRootException(DataIntegrityViolationException e)
+  {
+    if (e.getCause() instanceof ConstraintViolationException) {
+      SQLException se = ((ConstraintViolationException) e.getCause()).getSQLException();
+      while (se.getNextException() != null)
+        se = se.getNextException();
+      return se;
+    }
+    return null;
   }
 }

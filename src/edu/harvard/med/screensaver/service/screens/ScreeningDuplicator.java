@@ -64,7 +64,7 @@ public class ScreeningDuplicator
   @Transactional
   public LibraryScreening addLibraryScreening(Screen screen, AdministratorUser recordedBy)
   {
-    screen = _dao.reloadEntity(screen);
+    screen = _dao.reloadEntity(screen, false, Screen.leadScreener.getPath());
     SortedSet<LibraryScreening> activities = screen.getLabActivitiesOfType(LibraryScreening.class);
     Screening lastScreening = null;
     if (!activities.isEmpty()) {
@@ -83,10 +83,10 @@ public class ScreeningDuplicator
                                                     AdministratorUser recordedBy,
                                                     CherryPickRequest cpr)
   {
-    screen = _dao.reloadEntity(screen);
-    cpr = _dao.reloadEntity(cpr);
     recordedBy = _dao.reloadEntity(recordedBy);
     performedBy = _dao.reloadEntity(performedBy);
+    screen = _dao.reloadEntity(screen);
+    cpr = _dao.reloadEntity(cpr);
     SortedSet<CherryPickScreening> activities = screen.getLabActivitiesOfType(CherryPickScreening.class);
     CherryPickScreening lastScreening = null;
     if (!activities.isEmpty()) {
@@ -109,9 +109,9 @@ public class ScreeningDuplicator
                                                               AdministratorUser recordedBy, 
                                                               CherryPickLiquidTransferStatus status)
   {
-    screen = _dao.reloadEntity(screen);
     recordedBy = _dao.reloadEntity(recordedBy);
     performedBy = _dao.reloadEntity(performedBy);
+    screen = _dao.reloadEntity(screen);
     CherryPickLiquidTransfer newCplt = screen.createCherryPickLiquidTransfer(recordedBy,
                                                                              performedBy,
                                                                              new LocalDate(),

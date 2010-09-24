@@ -18,6 +18,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
+import org.joda.time.DateTime;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -30,11 +34,6 @@ import edu.harvard.med.screensaver.model.entitytesters.ModelIntrospectionUtil;
 import edu.harvard.med.screensaver.model.entitytesters.VersionAccessorsTester;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-
-import org.apache.log4j.Logger;
-import org.hibernate.SessionFactory;
-import org.joda.time.DateTime;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 
 public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> extends AbstractSpringTest
 {
@@ -202,19 +201,6 @@ public abstract class AbstractEntityInstanceTest<E extends AbstractEntity> exten
     assertEquals("update activity admin", dataEntryUpdateAdmin.getEntityId(), actualUpdateActivity.getPerformedBy().getEntityId());
     assertEquals("update activity date", updateActivity.getDateOfActivity(), actualUpdateActivity.getDateOfActivity());
     assertEquals("update activity comment", "updated!", actualUpdateActivity.getComments());
-  }
-
-  /**
-   * @motivation lazy init database and test entity, to save time by not
-   *             invoking unless test is actually going to do something with the
-   *             database (many tests are skipped for various reasons)
-   */
-  protected E initTestEntity()
-  {
-    schemaUtil.truncateTablesOrCreateSchema();
-    E entity = dataFactory.newInstance(_entityClass);
-    persistEntityNetwork(entity);
-    return entity;
   }
 
   protected void persistEntityNetwork(final AbstractEntity root)

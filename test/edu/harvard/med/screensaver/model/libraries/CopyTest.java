@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.libraries;
 
 import java.beans.IntrospectionException;
 
+import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -34,15 +35,13 @@ public class CopyTest extends AbstractEntityInstanceTest<Copy>
     schemaUtil.truncateTablesOrCreateSchema();
     
     Copy copy = dataFactory.newInstance(Copy.class);
-    copy.getLibrary().setStartPlate(1);
-    copy.getLibrary().setStartPlate(1);
-    copy.createPlate(1, "fridge1", PlateType.EPPENDORF, new Volume(30));
+    int plateNumber = copy.getLibrary().getStartPlate();
+    copy.findPlate(plateNumber).withWellVolume(new Volume(30));
     persistEntityNetwork(copy);
-    //genericEntityDao.persistEntity(copy.getLibrary());
     
     Copy copy2 = genericEntityDao.findAllEntitiesOfType(Copy.class, true, Copy.plates.getPath()).get(0);
-    Plate plate2 = genericEntityDao.findAllEntitiesOfType(Plate.class, true, Plate.copy.getPath()).get(0);
-    assertEquals(copy2.getPlates().get(1), plate2);
+    Plate plate2 = Sets.newTreeSet(genericEntityDao.findAllEntitiesOfType(Plate.class, true, Plate.copy.getPath())).first();
+    assertEquals(copy2.findPlate(plateNumber), plate2);
     assertEquals(plate2.getCopy(), copy2);
   }
 }

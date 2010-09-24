@@ -15,17 +15,37 @@
 			<ui:include src="/libraries/libraryDetailViewerBody.xhtml" />
 		</t:panelGroup>
 	</h:form>
+ 
+ 
+  <t:panelGrid id="propertiesPanel" columns="2"
+   columnClasses="propertyLabelColumn,column"
+   styleClass="layoutPanel">
+ 
+    <ss:property id="libraryCopiesTable" label="Copy Information"
+      description="The copies for this library"
+      rendered="#{libraryDetailViewer.readAdmin}"
+      editable="false">
+      <ui:define name="data">
+        <ss:searchResult searchResults="#{libraryViewer.copiesBrowser}" />
+      </ui:define>
+    </ss:property>
+  </t:panelGrid>
 
 	<t:panelGroup>
 		<h:form id="libraryCommandsForm">
 			<h:commandButton value="View Library Contents"
 				action="#{libraryViewer.viewLibraryContents}" styleClass="command"
 				title="View a list of all the wells in the library" />
-	
-			<h:commandButton value="View Well Volumes"
-				action="#{libraryViewer.viewLibraryWellCopyVolumes}"
-				rendered="#{libraryViewer.readAdmin}" styleClass="command"
-				title="View volume information for all the wells in the library" />
+  
+      <h:commandButton value="View Well Volumes"
+        action="#{libraryViewer.viewLibraryWellCopyVolumes}"
+        rendered="#{libraryViewer.readAdmin}" styleClass="command"
+        title="View volume information for all the wells in the library" />
+         
+      <h:commandButton value="Add Copy..."
+        action="#{libraryViewer.addLibraryCopy}"
+        rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['libraryCopiesAdmin']}" styleClass="command"
+        title="Add a copy to the Library" />
 		</h:form>
 	</t:panelGroup>
 

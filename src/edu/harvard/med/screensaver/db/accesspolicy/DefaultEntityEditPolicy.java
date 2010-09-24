@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -288,6 +289,12 @@ public class DefaultEntityEditPolicy implements EntityEditPolicy
   }
 
   public boolean visit(FundingSupport fundingSupport)
+  {
+    return true;
+  }
+
+  @Override
+  public boolean visit(CopyScreeningStatus entity)
   {
     return true;
   }

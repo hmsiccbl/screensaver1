@@ -36,10 +36,11 @@ import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceTest
 {
@@ -468,9 +469,9 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
    */
   private void makeLibraryCopy(Library library, String copyName, int volume)
   {
-    Copy copy = library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, copyName);
-    for (int plateNumber = library.getStartPlate(); plateNumber <= library.getEndPlate(); plateNumber++) {
-      copy.createPlate(plateNumber, "<loc>", PlateType.EPPENDORF, new Volume(volume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+    Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, copyName);
+    for (Plate plate : copy.getPlates().values()) {
+      plate.withWellVolume(new Volume(volume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
     }
   }
 

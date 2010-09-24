@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,12 +19,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
@@ -32,13 +37,14 @@ import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 
 /**
- * A plate for a particular {@link Library} {@link Copy}.
- *
+ * A plate for a particular {@link Library} {@link Copy}. If the Plate has been
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -60,13 +66,16 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
   private Copy _copy;
   private Integer _plateNumber;
   private String _location;
+  private String _barcode;
   private PlateType _plateType;
   /** The default initial volume for a well on this copy plate. */
   private Volume _wellVolume;
   private String _comments;
   private LocalDate _datePlated;
   private LocalDate _dateRetired;
+  private Set<AssayPlate> _assayPlates = ImmutableSet.of();
 
+  private ScreeningStatistics _screeningStatistics;
 
   /**
    * Construct an initialized <code>Plate</code>. Intended only for use by {@link Copy}.
@@ -77,18 +86,11 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
    * @param volume the volume
    * @motivation intended only for use by {@link Copy}
    */
-  Plate(
-    Copy copy,
-    Integer plateNumber,
-    String location,
-    PlateType plateType,
-    Volume volume)
+  Plate(Copy copy,
+        Integer plateNumber)
   {
     _copy = copy;
     _plateNumber = plateNumber;
-    _location = location;
-    _plateType = plateType;
-    setWellVolume(volume);
   }
 
   /**
@@ -137,6 +139,19 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
     _copy = copy;
   }
 
+  @OneToMany(mappedBy = "plateScreened", cascade = {})
+  @MapKey(name = "plateNumber")
+  @ToMany(hasNonconventionalMutation = true /* we don't update this relationship in memory */)
+  public Set<AssayPlate> getAssayPlates()
+  {
+    return _assayPlates;
+  }
+
+  private void setAssayPlates(Set<AssayPlate> assayPlates)
+  {
+    _assayPlates = assayPlates;
+  }
+
   /**
    * Get the plate number.
    * @return the plate number
@@ -157,7 +172,6 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
    * Get the location.
    * @return the location
    */
-  @Column(nullable=false)
   @org.hibernate.annotations.Type(type="text")
   public String getLocation()
   {
@@ -173,11 +187,20 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
     _location = location;
   }
 
+  public String getBarcode()
+  {
+    return _barcode;
+  }
+
+  public void setBarcode(String barCode)
+  {
+    _barcode = barCode;
+  }
+
   /**
    * Get the plate type.
    * @return the plate type
    */
-  @Column(nullable=false)
   @org.hibernate.annotations.Type(
     type="edu.harvard.med.screensaver.model.libraries.PlateType$UserType"
   )
@@ -199,18 +222,24 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
    * Get the default volume for wells on this copy plate.
    * @return the volume
    */
-  @Column(nullable=false, precision=ScreensaverConstants.VOLUME_PRECISION, scale=ScreensaverConstants.VOLUME_SCALE)
-  @org.hibernate.annotations.Immutable
+  @Column(precision = ScreensaverConstants.VOLUME_PRECISION, scale = ScreensaverConstants.VOLUME_SCALE)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.usertypes.VolumeType") 
   public Volume getWellVolume()
   {
     return _wellVolume;
   }
 
-  private void setWellVolume(Volume volume)
+  public void setWellVolume(Volume volume)
   {
     _wellVolume = volume;
   }
+
+  public Plate withWellVolume(Volume volume)
+  {
+    setWellVolume(volume);
+    return this;
+  }
+
   /**
    * Get the comments.
    * @return the comments
@@ -228,6 +257,16 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
   public void setComments(String comments)
   {
     _comments = comments;
+  }
+
+  /**
+   * @return true if the plate has been physically created and exists at the screening facility. If true, the Plate will
+   *         have a {@link #getDatePlated() plated date}.
+   */
+  @Transient
+  public boolean isCreated()
+  {
+    return _datePlated != null;
   }
 
   /**
@@ -315,5 +354,31 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
       result = this.getCopy().compareTo(other.getCopy());
     }
     return result;
+  }
+
+  public Plate withLocation(String location)
+  {
+    setLocation(location);
+    return this;
+  }
+
+  public Plate withPlateType(PlateType plateType)
+  {
+    setPlateType(plateType);
+    return this;
+  }
+
+  @Transient
+  public ScreeningStatistics getScreeningStatistics()
+  {
+    if (_screeningStatistics == null) {
+      _screeningStatistics = new ScreeningStatistics();
+    }
+    return _screeningStatistics;
+  }
+
+  public void setScreeningStatistics(ScreeningStatistics screeningStatistics)
+  {
+    _screeningStatistics = screeningStatistics;
   }
 }

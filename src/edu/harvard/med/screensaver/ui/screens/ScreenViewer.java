@@ -15,9 +15,9 @@ import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AttachedFile;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
+import edu.harvard.med.screensaver.model.libraries.LibraryPlate;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.PlateScreeningStatus;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -31,7 +31,7 @@ import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.PlateScreeningStatusSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.LibraryPlateSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
@@ -55,7 +55,7 @@ public class ScreenViewer extends StudyViewer<Screen>
   private LabActivitySearchResults _labActivitySearchResults;
   private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
   private LibrarySearchResults _librarySearchResults;
-  private PlateScreeningStatusSearchResults _plateScreeningStatusSearchResults;
+  private LibraryPlateSearchResults _libraryPlateSearchResults;
 
   
   // constructors
@@ -78,7 +78,7 @@ public class ScreenViewer extends StudyViewer<Screen>
                       LabActivitySearchResults labActivitiesBrowser,
                       CherryPickRequestSearchResults cprsBrowser,
                       LibrarySearchResults librarySearchResults,
-                      PlateScreeningStatusSearchResults plateScreeningStatusSearchResults)
+                      LibraryPlateSearchResults libraryPlateSearchResults)
   {
     super(Screen.class,
           thisProxy,
@@ -95,7 +95,7 @@ public class ScreenViewer extends StudyViewer<Screen>
     _labActivitySearchResults = labActivitiesBrowser;
     _cherryPickRequestSearchResults = cprsBrowser;
     _librarySearchResults = librarySearchResults;
-    _plateScreeningStatusSearchResults = plateScreeningStatusSearchResults;
+    _libraryPlateSearchResults = libraryPlateSearchResults;
   }
 
   public void initializeViewer(Screen screen)
@@ -182,9 +182,9 @@ public class ScreenViewer extends StudyViewer<Screen>
     return BROWSE_CHERRY_PICK_REQUESTS;
   }
 
-  public PlateScreeningStatusSearchResults getPlateSearchResults()
+  public LibraryPlateSearchResults getPlateSearchResults()
   {
-    return _plateScreeningStatusSearchResults;
+    return _libraryPlateSearchResults;
   }
 
   @UICommand 
@@ -195,20 +195,20 @@ public class ScreenViewer extends StudyViewer<Screen>
   }
     
   @UICommand
-  public String browsePlatesScreened()
+  public String browseLibraryPlatesScreened()
   {
-    _plateScreeningStatusSearchResults.searchPlatesScreenedByScreen(getEntity());
-    return BROWSE_PLATES_SCREENED;
+    _libraryPlateSearchResults.searchLibraryPlatesScreenedByScreen(getEntity());
+    return BROWSE_LIBRARY_PLATES_SCREENED;
   }
     
   @UICommand
-  public String browsePlatesDataLoaded()
+  public String browseLibraryPlatesDataLoaded()
   {
-    _plateScreeningStatusSearchResults.searchPlatesScreenedByScreen(getEntity());
-    TableColumn<PlateScreeningStatus,Boolean> isDataLoadedCcolumn = 
-      (TableColumn<PlateScreeningStatus,Boolean>) _plateScreeningStatusSearchResults.getColumnManager().getColumn("Data Loaded");
+    _libraryPlateSearchResults.searchLibraryPlatesScreenedByScreen(getEntity());
+    TableColumn<LibraryPlate,Boolean> isDataLoadedCcolumn = 
+      (TableColumn<LibraryPlate,Boolean>) _libraryPlateSearchResults.getColumnManager().getColumn("Data Loaded");
     isDataLoadedCcolumn.getCriterion().setOperatorAndValue(Operator.EQUAL, Boolean.TRUE);
-    return BROWSE_PLATES_SCREENED;
+    return BROWSE_LIBRARY_PLATES_SCREENED;
   }
     
 }

@@ -19,6 +19,11 @@ import java.util.TreeSet;
 
 import javax.faces.model.DataModel;
 
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -30,22 +35,16 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 import edu.harvard.med.screensaver.ui.libraries.WellCopy;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.libraries.WellVolume;
 import edu.harvard.med.screensaver.ui.libraries.WellVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 {
@@ -217,12 +216,12 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         _library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
-        Copy copyC = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "C");
-        Copy copyD = _library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "D");
-        copyC.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyC.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(10));
-        copyD.createPlate(1, "loc1", PlateType.EPPENDORF, new Volume(20));
-        copyD.createPlate(2, "loc1", PlateType.EPPENDORF, new Volume(20));
+        Copy copyC = _library.createCopy((AdministratorUser) _library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
+        Copy copyD = _library.createCopy((AdministratorUser) _library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "D");
+        copyC.findPlate(1).setWellVolume(new Volume(10));
+        copyC.findPlate(2).setWellVolume(new Volume(10));
+        copyD.findPlate(1).setWellVolume(new Volume(20));
+        copyD.findPlate(2).setWellVolume(new Volume(20));
         genericEntityDao.saveOrUpdateEntity(_library);
 
         Well plate1WellA01 = genericEntityDao.findEntityById(Well.class, "00001:A01");

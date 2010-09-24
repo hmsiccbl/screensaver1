@@ -52,10 +52,10 @@
 								<t:outputText value="#{column.name}" styleClass="label" />
 							</t:column>
 							<t:column id="fieldOperatorColumn">
-								<ss:operator column="#{column}"/>
+								<ss:operator column="#{column}" editable="true"/>
 							</t:column>
 							<t:column id="fieldInputColumn">
-								<ss:criterion column="#{column}" />
+								<ss:criterion column="#{column}"  editable="true"/>
 							</t:column>
 							<t:column>
 								<t:commandButton value="Reset" immediate="true"
@@ -188,7 +188,7 @@
 
 				<t:panelGroup id="commandPanel">
 					<t:panelGroup id="editCommandsPanel"
-						rendered="#{searchResults.hasEditableColumns}">
+						rendered="#{searchResults.editable}">
 						<t:commandButton id="editCommand" value="Edit"
 							action="#{searchResults.edit}"
 							rendered="#{!searchResults.editMode}" />
@@ -214,11 +214,11 @@
 				<ui:define name="custom4">
           <t:panelGrid id="exportCommand" columns="2">
             <t:commandButton id="exportSearchResultsCommandButton"
-              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 0}"
+              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.dataExporterSelector.size > 0}"
               value="Export"
               action="#{searchResults.downloadSearchResults}" />
             <t:selectOneMenu id="downloadFormat"
-              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.capabilities['exportData'] &amp;&amp; searchResults.dataExporterSelector.size > 1}"
+              rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.dataExporterSelector.size > 1}"
               value="#{searchResults.dataExporterSelector.value}">
               <f:selectItems
                 value="#{searchResults.dataExporterSelector.selectItems}" />

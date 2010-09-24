@@ -9,7 +9,9 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -30,6 +32,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -51,6 +55,7 @@ import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -320,13 +325,18 @@ public class Library extends AuditedAbstractEntity<Integer>
    * @param usageType the copy usage type
    * @param name the copy name
    */
-  public Copy createCopy(CopyUsageType usageType, String name)
+  public Copy createCopy(AdministratorUser createdBy, CopyUsageType usageType, String name)
   {
-    Copy copy = new Copy(this, usageType, name);
+    Copy copy = new Copy(createdBy, this, usageType, name);
+    addCopy(copy);
+    return copy;
+  }
+
+  public void addCopy(Copy copy)
+  {
     if (!_copies.add(copy)) {
       throw new DuplicateEntityException(this, copy);
     }
-    return copy;
   }
 
   /**
@@ -812,4 +822,30 @@ public class Library extends AuditedAbstractEntity<Integer>
   {
     _owner = owner;
   }
+
+  @Transient
+  public SortedSet<LibraryPlate> getLibraryPlates()
+  {
+    SetMultimap<Integer,AssayPlate> index = HashMultimap.create();
+    for (Copy copy : getCopies()) {
+      for (Map.Entry<Integer,Plate> entry : copy.getPlates().entrySet()) {
+        index.putAll(entry.getKey(), entry.getValue().getAssayPlates());
+      }
+    }
+    SortedSet<LibraryPlate> libraryPlates = Sets.newTreeSet();
+    Set<AssayPlate> assayPlates;
+    for (int p = getStartPlate(); p <= getEndPlate(); ++p) {
+      if (index.containsKey(p)) {
+        assayPlates = index.get(p);
+      }
+      else {
+        assayPlates = Collections.emptySet();
+      }
+      libraryPlates.add(new LibraryPlate(p,
+                                         this,
+                                         assayPlates));
+    }
+    return libraryPlates;
+  }
+
 }

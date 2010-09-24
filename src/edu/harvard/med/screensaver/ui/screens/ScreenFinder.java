@@ -9,12 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
-
-import org.apache.log4j.Logger;
 
 /**
  *
@@ -82,24 +82,6 @@ public class ScreenFinder extends AbstractBackingBean
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
-  public String addLibraryScreening()
-  {
-    String result = findScreen();
-    if (result.equals(BROWSE_SCREENS)) {
-      return _screenDetailViewer.addLibraryScreening();
-    }
-    return result;
-  }
-
-  public String addCherryPickRequest()
-  {
-    String result = findScreen();
-    if (result.equals(BROWSE_SCREENS)) {
-      return _screenDetailViewer.addCherryPickRequest();
-    }
-    return result;
-  }
-  
   private void resetSearchFields()
   {
     _screenNumber = null;

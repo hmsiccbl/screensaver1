@@ -67,7 +67,7 @@ public abstract class ViewPolicyAwareResultValueColumn<R,T extends Object> exten
     return _baseColumn.getCellValue(row);
   }
 
-  public void setCellValue(R row, Object value)
+  public void setCellValue(R row, T value)
   {
     _baseColumn.setCellValue(row, value);
   }

@@ -24,18 +24,15 @@ import org.joda.time.LocalDate;
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
-import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.TestDataFactory;
-import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -45,7 +42,6 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.service.libraries.LibraryCopyGenerator;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
@@ -58,7 +54,6 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
   protected ScreenResultLoader screenResultLoader;
   protected ScreenResultDeleter screenResultDeleter;
   protected LibraryCreator libraryCreator;
-  protected LibraryCopyGenerator libraryCopyGenerator;
 
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
@@ -106,17 +101,9 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
         }
         libraryCreator.createLibrary(library);
         
-        try {
-          libraryCopyGenerator.createPlateCopies(Lists.newArrayList(1, 2, 3),
-                                                 Lists.newArrayList("C"),
-                                                 new Volume(0),
-                                                 PlateType.ABGENE,
-                                                 CopyUsageType.FOR_CHERRY_PICK_SCREENING,
-                                                 new LocalDate());
-        }
-        catch (ExtantLibraryException e) {
-          throw new DAOTransactionRollbackException(e);
-        }
+        library.createCopy((AdministratorUser) library.getCreatedBy(),
+                           CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
+        genericEntityDao.persistEntity(library);
       }
     });
   }

@@ -10,8 +10,8 @@
 
 <ui:composition template="/main/template.xhtml">
 
-	<ui:param name="pageTitle" value="Studies Browser" />
-    <ui:param name="pageHelpURL" value="screens/studiesBrowserHelp.jsf" />
+  <ui:param name="pageTitle" value="#{studiesBrowser.title}" />
+  <ui:param name="pageHelpURL" value="screens/studiesBrowserHelp.jsf" />
 
 	<ui:define name="body">
 		<ss:searchResult searchResults="#{studiesBrowser}">

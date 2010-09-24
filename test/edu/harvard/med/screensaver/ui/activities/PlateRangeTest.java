@@ -21,10 +21,10 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 public class PlateRangeTest extends TestCase
 {
@@ -34,12 +34,12 @@ public class PlateRangeTest extends TestCase
     Library library = dataFactory.newInstance(Library.class);
     library.setStartPlate(100);
     library.setEndPlate(103);
-    Copy copyA = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A");
-    Copy copyB = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "B");
-    Plate plate100 = copyA.createPlate(100, "", PlateType.ABGENE, new Volume(0)); 
-    Plate plate101 = copyA.createPlate(101, "", PlateType.ABGENE, new Volume(0)); 
-    Plate plate102 = copyB.createPlate(102, "", PlateType.ABGENE, new Volume(0)); 
-    Plate plate103 = copyA.createPlate(103, "", PlateType.ABGENE, new Volume(0));
+    Copy copyA = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
+    Copy copyB = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "B");
+    Plate plate100 = copyA.findPlate(100).withWellVolume(new Volume(0));
+    Plate plate101 = copyA.findPlate(101).withWellVolume(new Volume(0));
+    Plate plate102 = copyB.findPlate(102).withWellVolume(new Volume(0));
+    Plate plate103 = copyA.findPlate(103).withWellVolume(new Volume(0));
     Screen screen = dataFactory.newInstance(Screen.class);
     LibraryScreening libraryScreening = dataFactory.newInstance(LibraryScreening.class, screen);
     libraryScreening.setNumberOfReplicates(2);

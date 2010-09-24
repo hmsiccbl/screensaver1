@@ -88,10 +88,13 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
     _wellVolumeSearchResults = wellVolumeSearchResults;
     _libraryViewer = libraryViewer;
     _wellViewer = wellViewer;
+    setEditingRole(ScreensaverUserRole.LIBRARIES_ADMIN);
   }
 
   public void searchWells(final Set<WellKey> wellKeys)
   {
+    setTitle("Well Copy Volumes Search Result");
+    _wellVolumeSearchResults.setTitle("Well Volumes Search Result");
     EntityDataFetcher<WellVolumeAdjustment,Integer> wvaFetcher =
       new EntityDataFetcher<WellVolumeAdjustment,Integer>(WellVolumeAdjustment.class, _dao) {
       @Override
@@ -124,6 +127,7 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
 
   public void searchWellsForLibrary(final Library library)
   {
+    setTitle("Well Copy Volumes for library " + library.getLibraryName());
     EntityDataFetcher<WellVolumeAdjustment,Integer> wvaFetcher =
       new EntityDataFetcher<WellVolumeAdjustment,Integer>(WellVolumeAdjustment.class, _dao) {
       @Override
@@ -184,6 +188,9 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
       }
     }
     searchWells(wellKeys);
+    setTitle("Well Copy Volumes for cherry pick request " + cherryPickRequest.getCherryPickRequestNumber() + " lab cherry picks");
+    _wellVolumeSearchResults.setTitle("Well Volumes for cherry pick request " + cherryPickRequest.getCherryPickRequestNumber() +
+      " lab cherry picks");
   }
 
   @SuppressWarnings("unchecked")
@@ -287,10 +294,10 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
       public Volume getCellValue(WellCopy wellCopy) { return _newRemainingVolumes.get(wellCopy); }
 
       @Override
-      public void setCellValue(WellCopy wellCopy, Object value)
+      public void setCellValue(WellCopy wellCopy, Volume volume)
       {
-        if (value != null) {
-          _newRemainingVolumes.put(wellCopy, (Volume) value);
+        if (volume != null) {
+          _newRemainingVolumes.put(wellCopy, volume);
         }
         else {
           _newRemainingVolumes.remove(wellCopy);

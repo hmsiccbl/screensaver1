@@ -66,6 +66,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
 
   private GenericEntityDAO _dao;
 
+  private LibraryViewer _libraryViewer;
   
   /**
    * @motivation for CGLIB2
@@ -79,17 +80,19 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   {
     super(libraryViewer);
     _dao = dao;
+    _libraryViewer = libraryViewer;
   }
 
   @Override
   public void searchAll()
   {
     searchLibraryScreenType(null);
+    setTitle("Libraries");
   }
 
-  @SuppressWarnings("unchecked")
   public void searchLibraryScreenType(ScreenType screenType)
   {
+    setTitle(screenType + " Libraries");
     initialize(new InMemoryEntityDataModel<Library,Integer>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
@@ -209,6 +212,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
 
   public void searchLibrariesScreened(final Screen screen)
   {
+    setTitle("Libraries Screened by screen " + screen.getScreenNumber());
     EntityDataFetcher<Library,Integer> dataFetcher = new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
@@ -229,6 +233,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
 
   public void searchLibrariesScreened(final LibraryScreening libraryScreening)
   {
+    setTitle("Libraries Screened by library screening " + libraryScreening.getActivityId());
     EntityDataFetcher<Library,Integer> dataFetcher = new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
@@ -245,5 +250,10 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
     };
     initialize(new InMemoryEntityDataModel<Library,Integer>(dataFetcher));
     getColumnManager().getColumn("Copies").setVisible(false);
+  }
+
+  public LibraryCopySearchResults getCopiesBrowser()
+  {
+    return _libraryViewer.getCopiesBrowser();
   }
 }

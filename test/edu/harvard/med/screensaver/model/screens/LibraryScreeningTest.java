@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.model.screens;
 import java.beans.IntrospectionException;
 
 import junit.framework.TestSuite;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
@@ -21,11 +22,8 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.joda.time.LocalDate;
 
 public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScreening>
 {
@@ -49,10 +47,10 @@ public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScre
       {
         Library library1 = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 2);
         Library library2 = MakeDummyEntities.makeDummyLibrary(2, ScreenType.SMALL_MOLECULE, 2);
-        Copy lib1Copy = library1.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A");
-        Copy lib2Copy = library2.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A");
-        Plate plate1000 = lib1Copy.createPlate(1000, "", PlateType.ABGENE, new Volume(0));
-        Plate plate1001 = lib1Copy.createPlate(1001, "", PlateType.ABGENE, new Volume(0));
+        Copy lib1Copy = library1.createCopy((AdministratorUser) library1.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
+        Copy lib2Copy = library2.createCopy((AdministratorUser) library2.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
+        Plate plate1000 = lib1Copy.findPlate(1000).withWellVolume(new Volume(0));
+        Plate plate1001 = lib1Copy.findPlate(1001).withWellVolume(new Volume(0));
         genericEntityDao.saveOrUpdateEntity(library1);
         genericEntityDao.saveOrUpdateEntity(library2);
         genericEntityDao.flush();
@@ -74,8 +72,8 @@ public class LibraryScreeningTest extends AbstractEntityInstanceTest<LibraryScre
         assertEquals(2, libraryScreening.getLibraryPlatesScreenedCount());
         assertEquals(1, libraryScreening.getLibrariesScreenedCount());
 
-        Plate plate2000 = lib2Copy.createPlate(2000, "", PlateType.ABGENE, new Volume(0));
-        Plate plate2001 = lib2Copy.createPlate(2001, "", PlateType.ABGENE, new Volume(0));
+        Plate plate2000 = lib2Copy.findPlate(2000).withWellVolume(new Volume(0));
+        Plate plate2001 = lib2Copy.findPlate(2001).withWellVolume(new Volume(0));
         libraryScreening.addAssayPlatesScreened(plate2000);
         libraryScreening.addAssayPlatesScreened(plate2001);
         libraryScreening.update();

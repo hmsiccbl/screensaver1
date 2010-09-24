@@ -10,11 +10,9 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.io.Serializable;
-import java.util.List;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
-import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.ui.EntityViewer;
 
@@ -31,10 +29,9 @@ public abstract class TupleBasedEntitySearchResults<E extends Entity<K>,K extend
 
   public TupleBasedEntitySearchResults(Class<E> rootEntityClass,
                                        GenericEntityDAO dao,
-                                       List<DataExporter<Tuple<K>>> dataExporters,
                                        EntityViewer<E> wellViewer)
   {
-    super(dataExporters, wellViewer);
+    super(wellViewer);
     _dao = dao;
     _rootEntityClass = rootEntityClass;
   }

@@ -7,59 +7,50 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.model.screens;
+package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
-
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.NonPersistentEntity;
-import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
-
-import org.joda.time.LocalDate;
 
 import com.google.common.base.Functions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.NonPersistentEntity;
+import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
+import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 
-public class PlateScreeningStatus extends NonPersistentEntity<Integer> implements Comparable<PlateScreeningStatus>
+public class LibraryPlate extends NonPersistentEntity<Integer> implements Comparable<LibraryPlate>
 {
   private Library _library;
-  // note: we use a List instead of a Set, because legacy LibraryScreenings can
-  // contain the same plate number multiple times, and we want to count that
-  // multiply when counting screenings
-  private List<LibraryScreening> _libraryScreenings;
+  private SortedSet<LibraryScreening> _libraryScreenings;
   private int _assayPlateCount;
   private LocalDate _firstDateScreened;
   private LocalDate _lastDateScreened;
   private int _dataLoadingCount;
   private LocalDate _firstDateDataLoaded;
   private LocalDate _lastDateDataLoaded;
-  private SortedSet<String> _copyNames;
+  private SortedSet<Copy> _copiesScreened;
 
-  public PlateScreeningStatus(Integer plateNumber,
-                              Library library,
-                              Set<AssayPlate> assayPlates)
+  public LibraryPlate(Integer plateNumber,
+                      Library library,
+                      Set<AssayPlate> assayPlates)
   {
     super(plateNumber);
     
     _library = library; 
     _assayPlateCount = assayPlates.size();
     Iterable<AssayPlate> assayPlatesUniqueAttempts = Iterables.filter(assayPlates, AssayPlate.IsFirstReplicate);
-    _copyNames = Sets.newTreeSet(Iterables.transform(Iterables.filter(assayPlates, AssayPlate.HasLibraryScreening), 
-                                                     Functions.compose(Copy.ToName, Functions.compose(Plate.ToCopy, AssayPlate.ToPlate))));
-    _libraryScreenings = Lists.newArrayList(Iterables.filter(Iterables.transform(assayPlatesUniqueAttempts, AssayPlate.ToLibraryScreening), Predicates.notNull()));
+    _copiesScreened = Sets.newTreeSet(Iterables.transform(Iterables.filter(assayPlates, AssayPlate.HasLibraryScreening),
+                                                          Functions.compose(Plate.ToCopy, AssayPlate.ToPlate)));
+    _libraryScreenings = Sets.newTreeSet(Iterables.filter(Iterables.transform(assayPlatesUniqueAttempts, AssayPlate.ToLibraryScreening), Predicates.notNull()));
     if (!_libraryScreenings.isEmpty()) {
-      _firstDateScreened = _libraryScreenings.get(0).getDateOfActivity();
-      _lastDateScreened = Iterables.getLast(_libraryScreenings).getDateOfActivity();
+      _firstDateScreened = _libraryScreenings.first().getDateOfActivity();
+      _lastDateScreened = _libraryScreenings.last().getDateOfActivity();
     }
     SortedSet<AdministrativeActivity> dataLoadings =
       Sets.newTreeSet(Iterables.filter(Iterables.transform(assayPlatesUniqueAttempts, AssayPlate.ToScreenResultDataLoading), Predicates.notNull()));
@@ -80,6 +71,11 @@ public class PlateScreeningStatus extends NonPersistentEntity<Integer> implement
     return _library;
   }
   
+  public void setLibrary(Library library)
+  {
+    _library = library;
+  }
+
   public int getAssayPlateCount()
   {
     return _assayPlateCount;
@@ -125,9 +121,9 @@ public class PlateScreeningStatus extends NonPersistentEntity<Integer> implement
     return _lastDateDataLoaded;
   }
   
-  public Set<String> getCopiesScreened()
+  public Set<Copy> getCopiesScreened()
   {
-    return _copyNames;
+    return _copiesScreened;
   }
 
   @Override
@@ -137,7 +133,7 @@ public class PlateScreeningStatus extends NonPersistentEntity<Integer> implement
   }
 
   @Override
-  public int compareTo(PlateScreeningStatus other)
+  public int compareTo(LibraryPlate other)
   {
     return getEntityId().compareTo(other.getEntityId());
   }

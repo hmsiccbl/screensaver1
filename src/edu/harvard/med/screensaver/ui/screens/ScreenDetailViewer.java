@@ -64,7 +64,7 @@ import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
 import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestDetailViewer;
 import edu.harvard.med.screensaver.ui.util.AttachedFiles;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
@@ -84,7 +84,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private ScreenDAO _screenDao;
   private EntityViewPolicy _entityViewPolicy;
   private ScreenViewer _screenViewer;
-  private ActivityViewer _activityViewer;
+  private LabActivityViewer _labActivityViewer;
   private CherryPickRequestDetailViewer _cherryPickRequestDetailViewer;
   private PublicationInfoProvider _publicationInfoProvider;
   private ScreeningDuplicator _screeningDuplicator;
@@ -127,7 +127,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                             ScreenDAO screenDao,
                             UsersDAO usersDao,
                             EntityViewPolicy entityViewPolicy,
-                            ActivityViewer activityViewer,
+                            LabActivityViewer labActivityViewer,
                             CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                             PublicationInfoProvider publicationInfoProvider,
                             ScreeningDuplicator screeningDuplicator,
@@ -140,7 +140,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _screenDao = screenDao;
     _entityViewPolicy = entityViewPolicy;
     _screenViewer = screenViewer;
-    _activityViewer = activityViewer;
+    _labActivityViewer = labActivityViewer;
     _cherryPickRequestDetailViewer = cherryPickRequestDetailViewer;
     _publicationInfoProvider = publicationInfoProvider;
     _screeningDuplicator = screeningDuplicator;
@@ -669,7 +669,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     }
     Screening screening = _screeningDuplicator.addLibraryScreening(getEntity(),
                                                                    (AdministratorUser) getScreensaverUser());
-    return _activityViewer.editNewEntity(screening);
+    return _labActivityViewer.editNewEntity(screening);
   }
 
   @UICommand
@@ -736,11 +736,11 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   public String delete()
   {
     if (getEntity().isDataLoaded()) {
-      showMessage("screens.screenDeletionFailed.containsData", getEntity().getScreenNumber());
+      showMessage("cannotDeleteEntityInUse", "Screen " + getEntity().getScreenNumber());
     }
     else {
       _screenDao.deleteStudy(getEntity());
-      showMessage("screens.deletedScreen", "screenDetailViewer");
+      showMessage("deletedEntity", "Screen " + getEntity().getScreenNumber());
     }
     return VIEW_MAIN;
   }

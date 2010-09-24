@@ -54,11 +54,13 @@ public class EntityUpdateSearchResults<AE extends AuditedAbstractEntity<K>, K ex
   @Override
   public void searchAll()
   {
+    setTitle("");
     throw new UnsupportedOperationException("should only be used to find update activities for a single entity");
   }
 
   public void searchForParentEntity(AE auditedEntity)
   {
+    setTitle("Update History for " + auditedEntity); // TODO: need user-friendly toString(), see [#2560]
     _auditedEntity = _dao.reloadEntity(auditedEntity, true, AuditedAbstractEntity.updateActivities.getPath());
 
     EntityDataFetcher<AdministrativeActivity,Integer> dataFetcher =

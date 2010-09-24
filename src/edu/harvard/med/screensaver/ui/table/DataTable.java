@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.table;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
@@ -19,14 +21,20 @@ import javax.faces.component.UIInput;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.io.DataExporter;
+import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.searchresults.CsvDataExporter;
+import edu.harvard.med.screensaver.ui.searchresults.ExcelWorkbookDataExporter;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 /**
@@ -39,6 +47,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
  * <li>handles "goto row" command (via JSF listener method)</li>
  * <li>reports whether the "current" column is numeric {@link #isNumericColumn()}</li>
  * <li>Management of "filter mode"</li>
+ * <li>Provides the ability to export the search results via one or more {@link DataExporter}s.</li>
  * </ul>
  * 
  * @param R the type of the data object associated with each row
@@ -61,13 +70,12 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
   private UIInput _rowsPerPageUIComponent;
   private UISelectOneBean<Integer> _rowsPerPageSelector = new UISelectOneBean<Integer>(Collections.<Integer>emptyList());
   private boolean _isTableFilterMode;
+  private List<DataExporter<R>> _dataExporters;
+  private UISelectOneBean<DataExporter<R>> _dataExporterSelector;
   /**
    * @motivation for unit tests
    */
   private DataTableModel<R> _baseDataTableModel;
-
-
-
 
 
   // public constructors and methods
@@ -98,6 +106,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     _baseDataTableModel = dataTableModel;
     _dataTableModel = new DataTableModelLazyUpdateDecorator<R>(_baseDataTableModel);
     _pendingFirstRow = null;
+
     refetch();
     refilter();
     resort();
@@ -286,6 +295,56 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
 
   public void dataScrollerListener(ActionEvent event)
   {
+  }
+
+  public List<DataExporter<R>> getDataExporters()
+  {
+    if (_dataExporters == null) {
+      _dataExporters = Lists.newArrayList();
+      _dataExporters.add(new CsvDataExporter<R>("searchResult"));
+      _dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult"));
+    }
+    return _dataExporters;
+  }
+
+  public UISelectOneBean<DataExporter<R>> getDataExporterSelector()
+  {
+    if (_dataExporterSelector == null) {
+      _dataExporterSelector = new UISelectOneBean<DataExporter<R>>(getDataExporters()) {
+        @Override
+        protected String makeLabel(DataExporter<R> dataExporter)
+        {
+          return dataExporter.getFormatName();
+        }
+      };
+    }
+    return _dataExporterSelector;
+  }
+
+  @SuppressWarnings("unchecked")
+  @UICommand
+  /* final (CGLIB2 restriction) */
+  public String downloadSearchResults()
+  {
+    try {
+      DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
+      InputStream inputStream;
+      log.debug("starting exporting data for download");
+      // TODO: TableDataExporter should be injected with the associated data table so they can retrieve the columns on demand
+      if (dataExporter instanceof TableDataExporter) {
+        ((TableDataExporter<R>) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
+      }
+      inputStream = ((DataExporter<R>) dataExporter).export(getDataTableModel().iterator());
+      log.debug("finished exporting data for download");
+      JSFUtils.handleUserDownloadRequest(getFacesContext(),
+                                         inputStream,
+                                         dataExporter.getFileName(),
+                                         dataExporter.getMimeType());
+    }
+    catch (IOException e) {
+      reportApplicationError(e.toString());
+    }
+    return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   /**

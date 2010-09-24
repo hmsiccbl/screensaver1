@@ -108,8 +108,8 @@ a:hover {
 
 hr {
   height: 1px;
-  border-style: dotted;
-  border-color: #000000;
+  border-style: solid;
+  border-color: gray;
   border-width: 0px 0px 1px 0px;
 }
 
@@ -182,8 +182,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   vertical-align: bottom;
 }
 
-.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader
-  {
+.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader {
   font-size: small;
 }
 
@@ -388,6 +387,12 @@ a.heatMapValue:link,a.heatMapValue:visited {
 
 .contentColumn {
   width: 100%;
+}
+
+.menuSectionHeader {
+   color: white;
+   font-weight: bold;
+   font-size: large;
 }
 
 .menuItem,.menuItemActive,.submenuItem {

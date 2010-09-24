@@ -10,6 +10,8 @@
 package edu.harvard.med.screensaver.ui;
 
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -25,15 +27,17 @@ import edu.harvard.med.screensaver.ui.libraries.LibraryDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
 import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.LibraryCopySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
-
-import org.apache.log4j.Logger;
 
 
 public class Menu extends AbstractBackingBean
@@ -51,6 +55,7 @@ public class Menu extends AbstractBackingBean
   private StudySearchResults _studiesBrowser;
   private CherryPickRequestSearchResults _cherryPickRequestsBrowser;
   private LibrarySearchResults _librariesBrowser;
+  private LibraryCopySearchResults _copiesBrowser;
   private StaffSearchResults _staffBrowser;
   private ScreenerSearchResults _screenersBrowser;
   private ActivitySearchResults _activitiesBrowser;
@@ -58,6 +63,7 @@ public class Menu extends AbstractBackingBean
   private UserViewer _userViewer;
   private WellSearchResults _wellsBrowser;
   private LibraryDetailViewer _libraryDetailViewer;
+
 
   // public methods
 
@@ -74,6 +80,7 @@ public class Menu extends AbstractBackingBean
               StudySearchResults studiesBrowser,
               CherryPickRequestSearchResults cherryPickRequestsBrowser,
               LibrarySearchResults librariesBrowser,
+              LibraryCopySearchResults copiesBrowser,
               ScreenerSearchResults screenersBrowser,
               StaffSearchResults staffBrowser,
               ActivitySearchResults activitiesBrowser,
@@ -88,6 +95,7 @@ public class Menu extends AbstractBackingBean
     _studiesBrowser = studiesBrowser;
     _cherryPickRequestsBrowser = cherryPickRequestsBrowser;
     _librariesBrowser = librariesBrowser;
+    _copiesBrowser = copiesBrowser;
     _staffBrowser = staffBrowser;
     _screenersBrowser = screenersBrowser;
     _activitiesBrowser = activitiesBrowser;
@@ -173,12 +181,19 @@ public class Menu extends AbstractBackingBean
   }
 
   @UICommand
-  public String browseUsers()
+  public String browseLibraryCopies()
+  {
+    _copiesBrowser.searchAll();
+    return BROWSE_LIBRARY_COPIES;
+  }
+
+  @UICommand
+  public String browseScreeners()
   {
     if (!(getScreensaverUser() instanceof AdministratorUser)) {
-      throw new OperationRestrictedException("only administrators can browse users");
+      throw new OperationRestrictedException("only administrators can browse screeners");
     }
-    _screenersBrowser.searchAll();
+    _screenersBrowser.searchAll("Screeners");
     return BROWSE_SCREENERS;
   }
 
@@ -189,15 +204,13 @@ public class Menu extends AbstractBackingBean
       throw new OperationRestrictedException("only screening room users can browser associates");
     }
     _screenersBrowser.searchAssociatedUsers((ScreeningRoomUser) getScreensaverUser());
-    _screenersBrowser.setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchScreenAssociates"));
     return BROWSE_SCREENERS;
   }
 
   @UICommand
   public String browseStaff()
   {
-    _staffBrowser.searchAll();
-    _staffBrowser.setTitle(getMessage("screensaver.ui.users.UsersBrowser.title.searchStaff"));
+    _staffBrowser.searchAll("Staff");
     return BROWSE_STAFF;
   }
 
@@ -212,6 +225,30 @@ public class Menu extends AbstractBackingBean
   public String browseScreens()
   {
     _screensBrowser.searchAll();
+    // default to descending sort order on screen number
+    _screensBrowser.getColumnManager().setSortAscending(false);
+    return BROWSE_SCREENS;
+  }
+
+  @UICommand
+  public String browseRnaiScreens()
+  {
+    return browseScreensOfScreenType(ScreenType.RNAI);
+  }
+
+  @UICommand
+  public String browseSmallMoleculeScreens()
+  {
+    return browseScreensOfScreenType(ScreenType.SMALL_MOLECULE);
+  }
+
+  private String browseScreensOfScreenType(ScreenType screenType)
+  {
+    _screensBrowser.searchAll();
+    TableColumn<Screen,ScreenType> column = (TableColumn<Screen,ScreenType>) _screensBrowser.getColumnManager().getColumn("Screen Type");
+    column.clearCriteria();
+    column.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, screenType));
+
     // default to descending sort order on screen number
     _screensBrowser.getColumnManager().setSortAscending(false);
     return BROWSE_SCREENS;

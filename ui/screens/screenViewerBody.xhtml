@@ -106,9 +106,9 @@
                 label="Library Plates Screened"
                 description="The number of library plates that have been screened">
                 <ui:define name="data">
-                  <t:commandLink id="browsePlatesScreened"
+                  <t:commandLink id="browseLibraryPlatesScreened"
                     value="#{screenViewer.entity.libraryPlatesScreenedCount}"
-                    action="#{screenViewer.browsePlatesScreened}" />
+                    action="#{screenViewer.browseLibraryPlatesScreened}" />
                   <t:outputText
                     value="  (#{screenViewer.entity.assayPlatesScreenedCount} assay plates)"
                     styleClass="data" />
@@ -119,9 +119,9 @@
                 label="Library Plates Data Loaded"
                 description="The number of library plates that have raw data loaded into the system">
                 <ui:define name="data">
-                  <t:commandLink id="browsePlatesDataLoaded"
+                  <t:commandLink id="browseLibraryPlatesDataLoaded"
                     value="#{screenViewer.entity.libraryPlatesDataLoadedCount}"
-                    action="#{screenViewer.browsePlatesDataLoaded}" />
+                    action="#{screenViewer.browseLibraryPlatesDataLoaded}" />
                 </ui:define>
               </ss:property>
 

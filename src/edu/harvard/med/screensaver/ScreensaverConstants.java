@@ -72,9 +72,12 @@ public interface ScreensaverConstants
   public static final String VIEW_USER = "viewUser";
   public static final String UPDATE_USER_AGREEMENT = "updateUserAgreement";
   public static final String RUN_CELLHTS2 = "runCellHTS2";
-  public static final String BROWSE_PLATES_SCREENED = "browsePlatesScreened";
+  public static final String BROWSE_LIBRARY_PLATES_SCREENED = "browseLibraryPlatesScreened";
   public static final String BROWSE_ENTITY_UPDATE_HISTORY = "browseEntityUpdateHistory";
-
+  public static final String BROWSE_LIBRARY_COPIES = "browseLibraryCopies";
+  public static final String EDIT_LIBRARY_COPY = "editLibraryCopy";
+  public static final String VIEW_LIBRARY_COPY = "viewLibraryCopy";
+  public static final String BROWSE_LIBRARY_COPY_PLATES = "browseLibraryCopyPlates";
 
   public static final String WEBAPP_ROOT = System.getProperty("webapp.root");
 

@@ -46,7 +46,6 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -286,11 +285,13 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     assertEquals("comments", screen.getPinTransferApprovalActivity().getComments());
   }
 
-
   public void testBillingItems() 
   {
+    schemaUtil.truncateTablesOrCreateSchema();
+    Screen screen = dataFactory.newInstance(Screen.class);
+    persistEntityNetwork(screen);
+
     LocalDate date = new LocalDate(2000, 1, 1);
-    Screen screen = initTestEntity();
     screen.createBillingItem("item1", new BigDecimal("1.11"), date);
     screen.createBillingItem("item2", new BigDecimal("2.22"), date);
     screen.addCopyOfBillingItem(new BillingItem("item3", new BigDecimal("3.33"), date));
@@ -336,11 +337,11 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
         ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 4);
         
-        Copy copy = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A");
-        Plate plate1000 = copy.createPlate(1000, "", PlateType.ABGENE, new Volume(0));
-        Plate plate1001 = copy.createPlate(1001, "", PlateType.ABGENE, new Volume(0));
-        Plate plate1002 = copy.createPlate(1002, "", PlateType.ABGENE, new Volume(0));
-        Plate plate1003 = copy.createPlate(1003, "", PlateType.ABGENE, new Volume(0));
+        Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
+        Plate plate1000 = copy.findPlate(1000).withWellVolume(new Volume(0));
+        Plate plate1001 = copy.findPlate(1001).withWellVolume(new Volume(0));
+        Plate plate1002 = copy.findPlate(1002).withWellVolume(new Volume(0));
+        Plate plate1003 = copy.findPlate(1003).withWellVolume(new Volume(0));
 
         LibraryScreening libraryScreening;
         libraryScreening = screen1.createLibraryScreening(admin, screener, new LocalDate());
@@ -414,11 +415,11 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
         ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
 
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 4);
-        Copy copy = library.createCopy(CopyUsageType.FOR_LIBRARY_SCREENING, "A");
-        Plate plate1000 = copy.createPlate(1000, "", PlateType.ABGENE, new Volume(0));
-        Plate plate1001 = copy.createPlate(1001, "", PlateType.ABGENE, new Volume(0));
-        Plate plate1002 = copy.createPlate(1002, "", PlateType.ABGENE, new Volume(0));
-        Plate plate1003 = copy.createPlate(1003, "", PlateType.ABGENE, new Volume(0));
+        Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A");
+        Plate plate1000 = copy.findPlate(1000).withWellVolume(new Volume(0));
+        Plate plate1001 = copy.findPlate(1001).withWellVolume(new Volume(0));
+        Plate plate1002 = copy.findPlate(1002).withWellVolume(new Volume(0));
+        Plate plate1003 = copy.findPlate(1003).withWellVolume(new Volume(0));
         genericEntityDao.persistEntity(library);
 
         LibraryScreening libraryScreening;
@@ -472,7 +473,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       {
         Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.SMALL_MOLECULE);
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 1);
-        library.createCopy(CopyUsageType.FOR_CHERRY_PICK_SCREENING, "A").createPlate(1000, "", PlateType.ABGENE, new Volume(1000));
+        library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "A").findPlate(1000).setWellVolume(new Volume(1000));
         AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
         ScreeningRoomUser screener = new LabHead(admin);
         

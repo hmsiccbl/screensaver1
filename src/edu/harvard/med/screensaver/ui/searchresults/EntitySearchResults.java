@@ -9,11 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
@@ -23,14 +20,11 @@ import javax.faces.component.UIData;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModelListener;
 
-import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.datascroller.HtmlDataScroller;
 import org.apache.myfaces.custom.datascroller.ScrollerActionEvent;
 
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.io.TableDataExporter;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.ui.EntityViewer;
@@ -38,13 +32,12 @@ import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.table.DataTableModelType;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 
 /**
  * SearchResults where each row represents an {@link Entity}. Provides "Summary" and "Entity" viewing modes, where
  * Summary mode is the normal table-based view of entities, and Entity mode show a detailed, full-page view of a
- * single-entity. Provides the ability to download the search results via one or more {@link DataExporter}s.
+ * single-entity.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -52,13 +45,11 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serializable> extends SearchResults<R,K,PropertyPath<E>>
 {
   private static Logger log = Logger.getLogger(EntitySearchResults.class);
-  private static final String[] CAPABILITIES = { "viewEntity", "exportData", "filter" };
-
-  private List<DataExporter<R>> _dataExporters = Lists.newArrayList();
-  private UISelectOneBean<DataExporter<R>> _dataExporterSelector;
+  private static final String[] CAPABILITIES = { "viewEntity", "filter" };
 
   protected Observer _rowsPerPageSelectorObserver;
   private EntityViewer<E> _entityViewer;
+  private boolean _isNested;
 
   public void initialize(DataTableModel<R> dataTableModel)
   {
@@ -86,9 +77,25 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
   }
 
   /**
+   * Returns true if this search result is nested within another viewer, which causes all the special behavior of this
+   * class to be disabled
+   * 
+   * @motivation Java does not support mix-ins, so need a way to mix-out the behavior of this superclass
+   */
+  public boolean isNested()
+  {
+    return _isNested;
+  }
+
+  public void setNested(boolean isNested)
+  {
+    _isNested = isNested;
+  }
+
+  /**
    * View the entity currently selected in the DataTableModel in entity view
    * mode.
-   *
+   * 
    * @motivation To be called by a TableColumn.cellAction() method to view the
    *             current row's entity in the "entity view" mode, or by any other
    *             code that wants to switch to entity view mode.
@@ -108,6 +115,9 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
 
   protected UISelectOneBean<Integer> buildRowsPerPageSelector()
   {
+    if (isNested()) {
+      return super.buildRowsPerPageSelector();
+    }
     // note: we need a special "single" (1) selection item, for viewing the
     // entity in its full viewer page
     UISelectOneBean<Integer> rowsPerPageSelector = new UISelectOneBean<Integer>(Arrays.asList(1,
@@ -157,29 +167,13 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
     this(null);
   }
 
-  /**
-   * 
-   *
-   */
   public EntitySearchResults(EntityViewer<E> entityViewer)
-  {
-    this(Collections.<DataExporter<R>>emptyList(), entityViewer);
-  }
-
-  /**
-   * @param dataExporters a List of DataExporters that must be one of the reified
-   *          types DataExporter<DataTableModel<E>> or DataExporter<E>
-   */
-  public EntitySearchResults(List<DataExporter<R>> dataExporters, EntityViewer<E> entityViewer)
   {
     super(CAPABILITIES);
     _entityViewer = entityViewer;
     if (_entityViewer == null) {
       getCapabilities().remove("viewEntity");
     }
-    _dataExporters.add(new CsvDataExporter<R>("searchResult"));
-    _dataExporters.add(new ExcelWorkbookDataExporter<R>("searchResult"));
-    _dataExporters.addAll(dataExporters);
   }
 
   public boolean isRowRestricted()
@@ -194,6 +188,9 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
 
   public boolean isEntityView()
   {
+    if (isNested()) {
+      return false;
+    }
     return getRowsPerPage() == 1 && getRowCount() > 0;
   }
 
@@ -296,50 +293,6 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
     }
   }
 
-  public List<DataExporter<R>> getDataExporters()
-  {
-    return _dataExporters;
-  }
-
-  public UISelectOneBean<DataExporter<R>> getDataExporterSelector()
-  {
-    if (_dataExporterSelector == null) {
-      _dataExporterSelector = new UISelectOneBean<DataExporter<R>>(getDataExporters()) {
-        @Override
-        protected String makeLabel(DataExporter<R> dataExporter)
-        {
-          return dataExporter.getFormatName();
-        }
-      };
-    }
-    return _dataExporterSelector;
-  }
-
-  @SuppressWarnings("unchecked")
-  @UICommand
-  /* final (CGLIB2 restriction) */
-  public String downloadSearchResults()
-  {
-    try {
-      DataExporter<?> dataExporter = getDataExporterSelector().getSelection();
-      InputStream inputStream;
-      log.debug("starting exporting data for download");
-      // TODO: TableDataExporter should be injected with the associated data table so they can retrieve the columns on demand
-      if (dataExporter instanceof TableDataExporter) {
-        ((TableDataExporter<R>) dataExporter).setTableColumns(getColumnManager().getVisibleColumns());
-      }
-      inputStream = ((DataExporter<R>) dataExporter).export(getDataTableModel().iterator());
-      log.debug("finished exporting data for download");
-      JSFUtils.handleUserDownloadRequest(getFacesContext(),
-                                         inputStream,
-                                         dataExporter.getFileName(),
-                                         dataExporter.getMimeType());
-    }
-    catch (IOException e) {
-      reportApplicationError(e.toString());
-    }
-    return REDISPLAY_PAGE_ACTION_RESULT;
-  }
 
   // private methods
 

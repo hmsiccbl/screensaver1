@@ -65,8 +65,8 @@ import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanTupleColumn;
@@ -168,7 +168,8 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                            LibraryContentsVersionReference libraryContentsVersionRef,
                            List<DataExporter<Tuple<String>>> dataExporters)
   {
-    super(Well.class, dao, dataExporters, wellViewer);
+    super(Well.class, dao, wellViewer);
+    getDataExporters().addAll(dataExporters);
     _dao = dao;
     _librariesDao = librariesDao;
     _entityViewPolicy = entityViewPolicy;
@@ -187,6 +188,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   @Override
   public void searchAll()
   {
+    setTitle("Wells Search Result");
     setMode(WellSearchResultMode.ALL_WELLS);
     // initially, show an empty search result, but with all columns available
     initialize(buildColumns());
@@ -197,6 +199,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
   public void searchWellsForLibrary(final Library library)
   {
+    setTitle("Wells for library " + library.getLibraryName());
     setMode(WellSearchResultMode.LIBRARY_WELLS);
     _screenTypes = ImmutableSet.of(library.getScreenType());
     TupleDataFetcher<Well,String> dataFetcher = new TupleDataFetcher<Well,String>(Well.class, _dao) {
@@ -214,6 +217,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
   public void searchWellsForLibraryContentsVersion(final LibraryContentsVersion lcv)
   {
+    setTitle("Wells for library " + lcv.getLibrary().getLibraryName() + ", contents version " + lcv.getVersionNumber());
     setMode(WellSearchResultMode.LIBRARY_WELLS);
     _screenTypes = ImmutableSet.of(lcv.getLibrary().getScreenType());
     _libraryContentsVersionRef.setValue(lcv);

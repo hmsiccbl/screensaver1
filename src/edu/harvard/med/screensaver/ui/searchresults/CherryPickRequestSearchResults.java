@@ -75,6 +75,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
 
   public void searchAll()
   {
+    setTitle("Cherry Pick Requests");
     EntityDataFetcher<CherryPickRequest,Integer> dataFetcher =
       (EntityDataFetcher<CherryPickRequest,Integer>) new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao);
     initialize(new InMemoryEntityDataModel<CherryPickRequest,Integer>(dataFetcher));
@@ -86,6 +87,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
   @SuppressWarnings("unchecked")
   public void searchScreenType(ScreenType screenType)
   {
+    setTitle(screenType + " Cherry Pick Requests");
     searchAll();
     TableColumn<CherryPickRequest,ScreenType> column = (TableColumn<CherryPickRequest,ScreenType>) getColumnManager().getColumn("Screen Type");
     column.clearCriteria();
@@ -94,6 +96,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
 
   public void searchForScreen(final Screen screen)
   {
+    setTitle("Cherry Pick Requests for screen " + screen.getScreenNumber());
     initialize(new InMemoryEntityDataModel<CherryPickRequest,Integer>(new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)

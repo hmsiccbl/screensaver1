@@ -62,7 +62,7 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMap
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
 import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
@@ -103,7 +103,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   private CherryPickRequestDetailViewer _cherryPickRequestDetailViewer;
   private LibrariesDAO _librariesDao;
   private WellCopyVolumeSearchResults _wellCopyVolumesBrowser;
-  private ActivityViewer _activityViewer;
+  private LabActivityViewer _labActivityViewer;
   private PlateWellListParser _plateWellListParser;
   private CherryPickRequestCherryPicksAdder _cherryPickRequestCherryPicksAdder;
   private CherryPickRequestAllocator _cherryPickRequestAllocator;
@@ -130,7 +130,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
   public CherryPickRequestViewer(CherryPickRequestViewer thisProxy,
                                  CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                                  EntitySearchResults<CherryPickRequest,CherryPickRequest,?> cherryPickRequestsBrowser,
-                                 ActivityViewer activityViewer,
+                                 LabActivityViewer labActivityViewer,
                                  GenericEntityDAO dao,
                                  LibrariesDAO librariesDao,
                                  WellCopyVolumeSearchResults wellCopyVolumesBrowser,
@@ -147,7 +147,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
           dao,
           cherryPickRequestsBrowser);
     _cherryPickRequestDetailViewer = cherryPickRequestDetailViewer;
-    _activityViewer = activityViewer;
+    _labActivityViewer = labActivityViewer;
     _librariesDao = librariesDao;
     _wellCopyVolumesBrowser = wellCopyVolumesBrowser;
     _cherryPickRequestCherryPicksAdder = cherryPickRequestCherryPicksAdder;
@@ -829,7 +829,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     }
     _cherryPickRequestAllocator.deallocateAssayPlates(cplt.getCherryPickAssayPlates());
     
-    return _activityViewer.editNewEntity(cplt);
+    return _labActivityViewer.editNewEntity(cplt);
   }
 
   @UICommand
@@ -895,7 +895,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       cplt.addCherryPickAssayPlate(plate);
     }
     
-    return _activityViewer.editNewEntity(cplt);
+    return _labActivityViewer.editNewEntity(cplt);
   }
 
   @UICommand
@@ -913,7 +913,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
       screening.addCherryPickAssayPlateScreened(getDao().reloadEntity(plate));
     }
     
-    return _activityViewer.editNewEntity(screening);
+    return _labActivityViewer.editNewEntity(screening);
   }
 
   @UICommand
@@ -930,7 +930,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     for (CherryPickAssayPlate plate : getSelectedAssayPlates()) {
       cplt.addCherryPickAssayPlate(plate);
     }
-    return _activityViewer.editNewEntity(cplt);
+    return _labActivityViewer.editNewEntity(cplt);
   }
 
   @UICommand
@@ -944,7 +944,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
     if (!unfulfillable.isEmpty()) {
       showMessage("cherryPicks.someCherryPicksUnfulfillable");
     }
-    getDao().flush(); // HACK: only necessary because we're called from ActivityViewer.postEditAction(), which is already in a txn 
+    getDao().flush(); // HACK: only necessary because we're called from LabActivityViewer.postEditAction(), which is already in a txn 
     return reload();
   }
 

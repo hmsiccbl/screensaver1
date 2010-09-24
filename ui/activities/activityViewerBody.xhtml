@@ -33,7 +33,7 @@
 
     <ss:propertyGroup label="Screen">
       <ss:screenSummaryProperties
-        screen="#{activityViewer.entity.screen}" />
+        screen="#{activityViewer.screen}" />
     </ss:propertyGroup>
 
     <ss:property id="performedBy" label="Performed By"
@@ -69,10 +69,10 @@
       description="The number of library plates that have been screened during this activity"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' &amp;&amp; !activityViewer.editMode}">
       <ui:define name="data">
-        <t:commandLink id="browsePlatesScreened"
+        <t:commandLink id="browseLibraryPlatesScreened"
           disabled="#{activityViewer.editMode}"
           value="#{activityViewer.entity.libraryPlatesScreenedCount}"
-          action="#{activityViewer.browsePlatesScreened}" />
+          action="#{activityViewer.browseLibraryPlatesScreened}" />
         <t:outputText
           value="  (#{activityViewer.entity.assayPlatesScreenedCount} assay plates)"
           styleClass="data" />

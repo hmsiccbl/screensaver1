@@ -26,5 +26,13 @@ public class AssayWellTest extends AbstractEntityInstanceTest<AssayWell>
   {
     super(AssayWell.class);
   }
+
+  /**
+   * @motivation need custom test due to constraints
+   */
+  public void testAssayWellControlType()
+  {
+    // TODO
+  }
 }
 

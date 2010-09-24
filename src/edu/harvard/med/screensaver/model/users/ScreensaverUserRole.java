@@ -47,6 +47,7 @@ public enum ScreensaverUserRole implements VocabularyTerm, Principal
   READ_EVERYTHING_ADMIN("readEverythingAdmin", "Read Everything Administrator", "Administrators that can view and search over data of all categories, except screen billing information."),
   
   LIBRARIES_ADMIN("librariesAdmin", "Libraries Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify libraries."),
+  LIBRARY_COPIES_ADMIN("libraryCopiesAdmin", "Library Copy Administrator", READ_EVERYTHING_ADMIN, "Administrators that can create and modify library copies."),
   USER_CHECKLIST_ITEMS_ADMIN("userChecklistItemsAdmin", "User Checklist Items Administrator", READ_EVERYTHING_ADMIN, "Administrators that can edit the checklist items for a user, even if they are not a Users Adminstrator."),
   USERS_ADMIN("usersAdmin", "Users Administrator", USER_CHECKLIST_ITEMS_ADMIN, "Administrators that can create and modify user accounts that are not lab heads."),
   LAB_HEADS_ADMIN("labHeadsAdmin", "Lab Heads Administrator", USERS_ADMIN, "Administrators that can create and modify user accounts that are lab heads."),

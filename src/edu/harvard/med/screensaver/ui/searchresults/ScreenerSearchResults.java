@@ -46,19 +46,7 @@ public class ScreenerSearchResults extends UserSearchResults<ScreeningRoomUser>
   public void searchAssociatedUsers(ScreeningRoomUser screener)
   {
     screener = _dao.reloadEntity(screener, true, "labHead", "labMembers");
-    _dao.need(screener, 
-              "screensLed.collaborators", 
-              "screensLed.labHead", 
-              "screensLed.leadScreener");
-    _dao.need(screener, 
-              "screensHeaded.collaborators", 
-              "screensHeaded.labHead", 
-              "screensHeaded.leadScreener");
-    _dao.need(screener, 
-              "screensCollaborated.collaborators", 
-              "screensCollaborated.labHead", 
-              "screensCollaborated.leadScreener");
-    searchUsers(screener.getAssociatedUsers());
+    searchUsers(screener.getAssociatedUsers(), "Associates of screener " + screener.getFullNameFirstLast());
   }
 
   @Override

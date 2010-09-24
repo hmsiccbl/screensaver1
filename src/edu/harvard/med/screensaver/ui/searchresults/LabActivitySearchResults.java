@@ -32,7 +32,7 @@ import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.activities.ActivityViewer;
+import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
@@ -65,20 +65,21 @@ public class LabActivitySearchResults extends ActivitySearchResults<LabActivity>
   {
   }
 
-  public LabActivitySearchResults(ActivityViewer activityViewer,
+  public LabActivitySearchResults(LabActivityViewer labActivityViewer,
                                   ScreenViewer screenViewer,
                                   CherryPickRequestViewer cprViewer,
                                   UserViewer userViewer,
                                   ScreenSearchResults screenSearchResults,
                                   GenericEntityDAO dao)
   {
-    super(activityViewer, LabActivity.class, dao, userViewer);
+    super(labActivityViewer, LabActivity.class, dao, userViewer);
     _cprViewer = cprViewer;
     _screenSearchResults = screenSearchResults;
   }
 
   public void searchLabActivitiesForScreen(final Screen screen)
   {
+    setTitle("Lab Activities for screen " + screen.getScreenNumber());
     initialize(new InMemoryEntityDataModel<LabActivity,Integer>(new EntityDataFetcher<LabActivity,Integer>(LabActivity.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)

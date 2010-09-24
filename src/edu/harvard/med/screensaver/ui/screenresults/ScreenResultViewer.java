@@ -195,7 +195,7 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
       // Delete directory and all files under it
       DeleteDir.deleteDirectory(new File(_cellHTS2ReportFilePath));
       
-      showMessage("screens.screenResultDeleted");
+      showMessage("deletedEntity", "screen result");
       
       return _screenViewer.reload();
     }

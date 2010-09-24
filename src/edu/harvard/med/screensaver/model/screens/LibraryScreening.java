@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.SortedSet;
 
 import javax.persistence.Column;
@@ -19,7 +20,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Sort;
@@ -30,6 +34,7 @@ import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.annotations.Derived;
+import edu.harvard.med.screensaver.model.libraries.LibraryPlate;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
@@ -243,5 +248,24 @@ public class LibraryScreening extends Screening
       }
     }
     return changed;
+  }
+
+  @Transient
+  public SortedSet<LibraryPlate> getLibraryPlatesScreened()
+  {
+    Multimap<Integer,AssayPlate> index = Multimaps.index(getAssayPlatesScreened(),
+                                                         new Function<AssayPlate,Integer>() {
+                                                           @Override
+                                                           public Integer apply(AssayPlate p)
+                                                           {
+                                                             return p.getPlateNumber();
+                                                           }
+                                                         });
+    SortedSet<LibraryPlate> libraryPlates = Sets.newTreeSet();
+    for (Integer plateNumber : index.keySet()) {
+      Set<AssayPlate> assayPlates = Sets.newHashSet(index.get(plateNumber));
+      libraryPlates.add(new LibraryPlate(plateNumber, assayPlates.iterator().next().getPlateScreened().getCopy().getLibrary(), assayPlates));
+    }
+    return libraryPlates;
   }
 }

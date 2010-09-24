@@ -78,11 +78,6 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>viewDownloads</from-outcome>
-      <to-view-id>/main/downloadsViewer.jsf</to-view-id>
-      <redirect/>
-    </navigation-case>
-    <navigation-case>
       <from-outcome>viewHelp</from-outcome>
       <to-view-id>/help/helpViewer.jsf</to-view-id>
       <redirect/>
@@ -133,12 +128,12 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
     </navigation-case>
     <navigation-case>
       <from-outcome>browseWellVolumes</from-outcome>
-      <to-view-id>/libraries/admin/wellVolumeSearchResults</to-view-id>
+      <to-view-id>/libraries/wellVolumeSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
       <from-outcome>browseWellCopyVolumes</from-outcome>
-      <to-view-id>/libraries/admin/wellCopyVolumeSearchResults</to-view-id>
+      <to-view-id>/libraries/wellCopyVolumeSearchResults</to-view-id>
       <redirect/>
     </navigation-case>
     <navigation-case>
@@ -181,8 +176,8 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
     <navigation-case>
-      <from-outcome>browsePlatesScreened</from-outcome>
-      <to-view-id>/screens/platesScreenedBrowser</to-view-id>
+      <from-outcome>browseLibraryPlatesScreened</from-outcome>
+      <to-view-id>/screens/libraryPlatesBrowser</to-view-id>
       <redirect/>
     </navigation-case>
 
@@ -269,6 +264,29 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
       <redirect/>
     </navigation-case>
 
+    <navigation-case>
+      <from-outcome>browseLibraryCopies</from-outcome>
+      <to-view-id>/libraries/libraryCopiesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>editLibraryCopy</from-outcome>
+      <to-view-id>/libraries/libraryCopyEditor</to-view-id>
+      <redirect/>
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>viewLibraryCopy</from-outcome>
+      <to-view-id>/libraries/libraryCopyViewer</to-view-id>
+      <redirect/>
+    </navigation-case>
+    
+    <navigation-case>
+      <from-outcome>browseLibraryCopyPlates</from-outcome>
+      <to-view-id>/libraries/libraryCopyPlatesBrowser</to-view-id>
+      <redirect/>
+    </navigation-case>
+    
+    
   </navigation-rule>
 
 

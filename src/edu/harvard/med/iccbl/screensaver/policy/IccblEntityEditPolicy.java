@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
@@ -191,6 +192,13 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   @Override
   public boolean visit(Copy entity)
   {
+    return getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARY_COPIES_ADMIN);
+  }
+
+  @Override
+  public boolean visit(CopyScreeningStatus entity)
+  {
+    //TODO: as per [#1288] new Library Copy Viewer page - create a new library copy creation role - sde
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN);
   }
 
@@ -349,4 +357,5 @@ public class IccblEntityEditPolicy implements EntityEditPolicy
   {
     return getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN);
   }
+
 }
