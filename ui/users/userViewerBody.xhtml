@@ -111,35 +111,63 @@
 			value="#{userViewer.entity.email}" editable="#{userViewer.editMode}"
 			editWidth="60" />
 
-    <ss:property id="ecommonsId" label="eCommons ID"
-      description="The user's eCommons ID "
-      value="#{userViewer.entity.ECommonsId}"
+    <ss:property id="loginId" label="#{userViewer.applicationProperties['screensaver.ui.application_name']} Login ID"
+      description="The user's login ID"
+      value="#{userViewer.entity.loginId}"
       rendered="#{userViewer.readAdmin || userViewer.me}"
+      editable="#{userViewer.editMode}" />
+
+    <!-- Warning: passwords will be sent in plain text unless HTTPS is used -->
+    <ss:propertyGroup id="newPassword" label="Update password (leave empty to keep existing password)" description="(Re)set the user's password"
+        rendered="#{userViewer.editMode}" editable="#{userViewer.editMode}" adminOnly="true" >
+      <ss:property id="newPassword1" label="New password"
+        description="Enter the new password">
+        <ui:define name="editableData">
+          <t:inputSecret value="#{userViewer.newPassword1}" 
+            styleClass="inputText" />
+        </ui:define>
+      </ss:property>
+      <ss:property id="newPassword2" label="Confirm password"
+        description="Enter the new password again">
+        <ui:define name="editableData">
+          <t:inputSecret value="#{userViewer.newPassword2}" 
+            styleClass="inputText" />
+        </ui:define>
+      </ss:property>
+    </ss:propertyGroup>
+
+    <ss:property id="ecommonsId" label="eCommons ID"
+      description="The user's eCommons ID"
+      value="#{userViewer.entity.ECommonsId}"
+      rendered="#{userViewer.applicationProperties['screensaver.ui.facility_name'] == 'ICCB-Longwood/NSRB' &amp;&amp; (userViewer.readAdmin || userViewer.me)}"
       editable="#{userViewer.editMode}"
       converter="#{toLowerCaseConverter}" />
 
-    <ss:property id="harvardId" label="Harvard ID" description="The user "
-			value="#{userViewer.entity.harvardId}"
-			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}" />
+    <ss:property id="harvardId" label="Harvard ID"
+      description="The user's Harvard ID " value="#{userViewer.entity.harvardId}"
+      rendered="#{userViewer.applicationProperties['screensaver.ui.facility_name'] == 'ICCB-Longwood/NSRB' &amp;&amp; (userViewer.readAdmin || userViewer.me)}"
+      editable="#{userViewer.editMode}" />
 
-		<ss:property id="harvardIdExpiration" type="Date"
-			label="Harvard ID Actual Expiration Date"
-			description="The date when the user's Harvard ID will expire"
-			value="#{userViewer.entity.harvardIdExpirationDate}"
-			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}">
-			<!-- TODO: ui:define name="valueFooter">
+    <ss:property id="harvardIdExpiration" type="Date"
+      label="Harvard ID Actual Expiration Date"
+      description="The date when the user's Harvard ID will expire"
+      value="#{userViewer.entity.harvardIdExpirationDate}"
+      rendered="#{userViewer.applicationProperties['screensaver.ui.facility_name'] == 'ICCB-Longwood/NSRB' &amp;&amp; (userViewer.readAdmin || userViewer.me)}"
+      editable="#{userViewer.editMode}">
+      <!-- TODO: ui:define name="valueFooter">
 					  <t:outputText id="harvardIdExpirationWarning" value="#{userViewer.harvardIdExpired ? 'Expired!' : userViewer.harvardIdDaysUntilExpiration}"/>
 					</ui:define -->
-		</ss:property>
+    </ss:property>
 
-		<ss:property id="harvardIdRequestedExpiration" type="Date"
-			label="Harvard ID Requested Expiration Date"
-			description="The requested date when the user's Harvard ID will expire"
-			value="#{userViewer.entity.harvardIdRequestedExpirationDate}"
-			rendered="#{userViewer.readAdmin || userViewer.me}" editable="#{userViewer.editMode}">
-		</ss:property>
+    <ss:property id="harvardIdRequestedExpiration" type="Date"
+      label="Harvard ID Requested Expiration Date"
+      description="The requested date when the user's Harvard ID will expire"
+      value="#{userViewer.entity.harvardIdRequestedExpirationDate}"
+      rendered="#{userViewer.applicationProperties['screensaver.ui.facility_name'] == 'ICCB-Longwood/NSRB' &amp;&amp; (userViewer.readAdmin || userViewer.me)}"
+      editable="#{userViewer.editMode}">
+    </ss:property>
 
-		<ss:property id="phone" label="Phone"
+    <ss:property id="phone" label="Phone"
 			description="The user's phone number"
 			value="#{userViewer.entity.phone}" editable="#{userViewer.editMode}" />
 

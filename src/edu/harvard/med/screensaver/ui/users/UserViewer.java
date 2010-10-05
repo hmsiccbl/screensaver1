@@ -72,6 +72,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
@@ -115,6 +116,8 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   private Set<ScreensaverUserRole> _lastPrimaryRoles;
   private DataModel _facilityUsageRolesDataModel;
   private UISelectOneBean<FacilityUsageRole> _newFacilityUsageRole;
+  private String _newPassword1;
+  private String _newPassword2;
 
 
   // constructors
@@ -253,8 +256,29 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     _checklistItems.setEntity(user);
     _checklistItems.setChecklistItemGroups(CHECKLIST_ITEM_GROUPS);
     _lastPrimaryRoles = user.getPrimaryScreensaverUserRoles();
+    _newPassword1 = null;
+    _newPassword2 = null;
   }
-  
+
+  @Override
+  protected boolean validateEntity(ScreeningRoomUser entity)
+  {
+    boolean isNewPasswordDefined = !NullSafeUtils.toString(_newPassword1, "").isEmpty() ||
+      !NullSafeUtils.toString(_newPassword2, "").isEmpty();
+    if (isNewPasswordDefined && !NullSafeUtils.nullSafeEquals(_newPassword1, _newPassword2)) {
+      showMessage("users.passwordsDoNotMatch");
+      return false;
+    }
+    boolean isLoginIdDefined = !StringUtils.isEmpty(entity.getLoginId());
+    boolean isExistingPasswordDefined = !NullSafeUtils.toString(entity.getDigestedPassword(), "").isEmpty();
+    if (isNewPasswordDefined && !isLoginIdDefined ||
+      isLoginIdDefined && !isExistingPasswordDefined && !isNewPasswordDefined) {
+      showMessage("users.loginIdAndPasswordRequired");
+      return false;
+    }
+    return true;
+  }
+
   @Override
   public void updateEntityProperties(ScreeningRoomUser user)
   {
@@ -264,6 +288,12 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     else {
       Lab lab = getLabName().getSelection() == null ? null : getLabName().getSelection().getLab();
       user.setLab(lab);
+    }
+    if (StringUtils.isEmpty(user.getLoginId())) {
+      user.setDigestedPassword(null);
+    }
+    else if (!NullSafeUtils.toString(_newPassword1, "").isEmpty()) {
+      user.updateScreensaverPassword(_newPassword1);
     }
   }
 
@@ -277,9 +307,12 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     if (!!!rolesRemoved.isEmpty()) {
       recordUpdateActivity("primary roles removed: " + Joiner.on(", ").join(Iterables.transform(rolesRemoved, ScreensaverUserRole.ToDisplayableRoleName)));
     }
+    if (!StringUtils.isEmpty(_newPassword1)) {
+      recordUpdateActivity("password updated");
+    }
     super.recordUpdateActivity();
   }
-
+  
   public List<SelectItem> getUserClassificationSelections()
   {
     List<ScreeningRoomUserClassification> userClassifications;
@@ -487,6 +520,26 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
   public ChecklistItems getChecklistItems()
   {
     return _checklistItems;
+  }
+
+  public String getNewPassword1()
+  {
+    return _newPassword1;
+  }
+
+  public void setNewPassword1(String newPassword1)
+  {
+    _newPassword1 = newPassword1;
+  }
+
+  public String getNewPassword2()
+  {
+    return _newPassword2;
+  }
+
+  public void setNewPassword2(String newPassword2)
+  {
+    _newPassword2 = newPassword2;
   }
 
   @Override
