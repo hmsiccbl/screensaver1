@@ -101,6 +101,21 @@ public class StringUtils
     return s;
   }
   
+
+  //  /**
+  //   * @return true if s is zero-length or null
+  //   * @see #isBlank
+  //   */
+  //  public static boolean isEmpty(String s)
+  //  {
+  //    return s == null || s.length() == 0;
+  //  }
+
+  /**
+   * @return true if s contains only whitespace, is zero-length, or null
+   * @see #isBlank
+   */
+  // TODO: rename to isBlank and add a proper isEmpty method, above
   public static boolean isEmpty(String s)
   {
     return s == null || s.trim().length() == 0;
