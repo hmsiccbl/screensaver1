@@ -60,12 +60,10 @@ screensaver.service.smtpemailservice.host=
 screensaver.service.smtpemailservice.username=
 
 ### cellHTS2 properties
-# The cellHTS2 report directory
-# is <appserver.dir>/webapps/screensaver/<cellHTS2report.filepath.prefix><screen result Id>
 cellHTS2report.filepath.base=cellHTS2/output/
 cellHTS2report.filepath.prefix=cellHts2_output_screenResultId_
-#parameter setting cellHTS2 function writeReport for showing progress window. 
-cellHTS2report.writeReport.progressReport=FALSE
+cellHTS2report.saveRObjects=FALSE
+cellHTS2report.saveRObjects.path=
 
 ### database connection
 SCREENSAVER_PGSQL_SERVER=localhost

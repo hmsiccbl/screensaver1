@@ -12,7 +12,11 @@ readPlateListCommon <- function(xraw,name,dimPlate,pd,status,intensityFiles) {
 	## arrange the assayData slot:
 	
 	adata <- assayDataNew(storage.mode="environment")
-	chNames <- paste("ch", 1:nrChannel, sep="")
+	
+	#Storing in cellHTS2 object in environment variable, will put data for example ch10 in front of ch2
+	#To prevent this, use leading 0.
+	format <- paste("%0",nchar(as.character(nrChannel)),"d",sep="")
+	chNames <- paste("ch", sprintf(format,1:nrChannel), sep="")
 	
 	for(ch in 1:nrChannel) 
 		assign(chNames[ch], matrix(xraw[,,,ch, drop=TRUE], ncol=nrRep, nrow=nrWell*nrPlate), env=adata)

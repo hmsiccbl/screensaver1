@@ -1,4 +1,5 @@
-testReadPlateListUsingCommon1 <- function(debug=FALSE) {
+##disabled as readPlateListUsingCommon is not exported
+xtestReadPlateListUsingCommon1 <- function(debug=FALSE) {
 
 	library(cellHTS2);
 	

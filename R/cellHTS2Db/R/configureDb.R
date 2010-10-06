@@ -28,8 +28,8 @@ setMethod("configureDb", signature("cellHTS"),
 			nrWpP   = prod(pdimResult)
 			nrPlate = max(plate(object))
 			nrSample <- ncol(object)
-#			chNames <- channelNames(object)
-#			nrChannel <- length(chNames)
+			chNames <- channelNames(object)
+			nrChannel <- length(chNames)
 #			
 			xraw <- Data(object)
 #			

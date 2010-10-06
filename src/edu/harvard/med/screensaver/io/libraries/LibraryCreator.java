@@ -87,7 +87,7 @@ public class LibraryCreator
           OptionBuilder.hasArg()
           .withArgName("plate size")
           .withDescription(StringUtils.makeListString(Arrays.asList(PlateSize.values()), ", "))
-          .withLongOpt("plate-size").create("p"));
+            .withLongOpt("plate-size").create("ps"));
 
       if (!app.processOptions(true, true)) {
         System.exit(1);
@@ -112,7 +112,7 @@ public class LibraryCreator
             app.getCommandLineOptionValue("ds", dateFormat).toLocalDate() : null;
       PlateSize plateSize =  
         app.isCommandLineFlagSet("ps") ? 
-            app.getCommandLineOptionValue("ps", PlateSize.class) : ScreensaverConstants.DEFAULT_PLATE_SIZE;
+            app.getCommandLineOptionEnumValue("ps", PlateSize.class) : ScreensaverConstants.DEFAULT_PLATE_SIZE;
 
       Library library = 
         new Library(libraryName, shortName, screenType, libraryType, startPlate, endPlate, plateSize);

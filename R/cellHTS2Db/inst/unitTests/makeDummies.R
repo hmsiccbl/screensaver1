@@ -313,6 +313,213 @@ makeTestSet3 <- function() {
 	
 }
 
+# Testset for multiple channels
+makeTestSet4 <- function(withSlog=FALSE) {
+	## plate	cell	r1c1	r1c2	r2c1	r2c2
+	## 1	A01	1	4	9	6
+	## 1	A02	2	6	10	8
+	## 1	B01	3	5	11	7
+	## 1	B02	4	6	14	8
+	## 1	C01	2	8	6	10
+	## 1	C02		7		9
+	## 2	A01	5	14	13	16
+	## 2	A02	6	16	14	18
+	## 2	B01	7	15	15	17
+	## 2	B02	9	16	19	18
+	## 2	C01	4	18	8	20
+	## 2	C02		17		19
+	
+	#1. PARAMETERS FOR THE READPLATELIST
+	## A. GENERAL
+	nrWells = 6
+	nrPlates = 2
+	nrReps = 2
+	nrChannels = 2
+	
+	xraw <- array(as.numeric(NA), dim=c(nrWells,nrPlates,nrReps,nrChannels))
+	#p1r1c1
+	xraw[,1,1,1] <- c(1,2,3,4,2,NA)
+	
+	#p1r1c2
+	xraw[,1,1,2] <-  c(4,6,5,6,8,7)
+	
+	#p1r2c1
+	xraw[,1,2,1] <- c(9,10,11,14,6,NA)
+	
+	#p1r2c2
+	xraw[,1,2,2] <- c(6,8,7,8,10,9)
+
+	xraw[,2,1,1] <- c(5,6,7,9,4,NA)
+	
+	#p2r1c2
+	xraw[,2,1,2] <-  c(14,16,15,16,18,17)
+	
+	#p2r2c1
+	xraw[,2,2,1] <- c(13,14,15,19,8,NA)
+	
+	#p2r2c2
+	xraw[,2,2,2] <- c(16,18,17,18,20,19)
+	
+	## 1.1 READPLATELISTCOMMON
+	## dimPlate
+	dimPlate <-  c(nrow=as.integer(3), ncol=as.integer(2))
+	
+	## pd
+	vFileNames <- c("P1R1C1.txt","P1R1C2.txt","P1R2C1.txt","P1R2C2.txt","P2R1C1.txt","P2R1C2.txt","P2R2C1.txt","P2R2C2.txt")
+	vPlates <- c(1,1,1,1,2,2,2,2)
+	vRep <- rep(c(1,1,2,2),2)
+	vChannel <- rep(c(1,2,1,2),2)
+	
+	pd <- data.frame(Filename=vFileNames, Plate=as.integer(vPlates) , Replicate=as.integer(vRep) ,Channel=as.integer(vChannel),stringsAsFactors=FALSE)
+	
+	## status		
+	status =  rep("OK",nrow(pd))
+	
+	## intensityFile
+	intensityFiles <- makeIntensityFiles4()
+		
+	#2. CONF PARAMETER FOR THE CONFIGURATION
+	#building conf object
+	##  confFile : Same content als de config file (without the first two lines), f.e.
+	#	Plate	Well	Content
+	#	1	A01	pos
+	#	1	A02	sample	
+	#	1	BO1 N	
+	#	1	B02	sample
+	#	1	C01	NS
+	#	1	C02	sample
+	#
+	#	but now in a 'data.frame', f.e.   
+	conf <- data.frame(Plate=c("*"), Well=c("A01","A02","B01","B02","C01","C02"), 
+				Content=c("pos","sample","N","sample","NS","sample"),stringsAsFactors=FALSE)
+	
+	
+	plate <- c(rep(1,6),rep(2,6)); 
+	well <- rep(c("A01","A02","B01","B02","C01","C02"),2)
+	hfaid <- c(NA,"NM_000001",NA,"NM_000002",NA,"NM_000003",NA,"NM_000004",NA,"NM_000005",NA,"NM_000006")
+	geneid <- c("","AAP1","","AAP2","","AAP3","","AAP4","","AAP5","","AAP6")
+	
+	geneIDs <- data.frame(Plate=plate, Well=well, HFAID=hfaid, GeneID=geneid,stringsAsFactors=FALSE)
+	
+	testSet <- list(xraw=xraw, dimPlate=dimPlate, pd=pd, status=status, intensityFiles=intensityFiles,
+			name="Dummy_experiment", conf=conf, geneIDs=geneIDs)
+	
+	if (withSlog) { #for both channels A02 are flagged
+		#slog <- data.frame(Plate=c(1,1),Well=c("A02","A02"),Sample=c(1,1),Flag=c("NA","NA"),Channel=c(1,2), stringsAsFactors=FALSE)
+	slog <- data.frame(Plate=c(1),Well=c("A02"),Sample=c(1),Flag=c("NA"),Channel=c(2), stringsAsFactors=FALSE)
+		listSlog <- list(slog=slog)
+		testSet <- c(testSet, listSlog)
+	}
+
+}	
+
+makeIntensityFiles4 <- function() {
+	nrPlates = 2
+	nrReps=2
+	nrChannels = 2
+	intensityFilesTarget = vector(mode="list", length=nrPlates * nrReps * nrChannels)
+	
+	names(intensityFilesTarget) <- c("P1R1C1.txt","P1R1C2.txt","P1R2C1.txt","P1R2C2.txt","P2R1C1.txt","P2R1C2.txt","P2R2C1.txt","P2R2C2.txt")
+	intensityFilesTarget[[1]] <- I(c("P1R1C1.txt\tA01\t1","P1R1C1.txt\tA02\t2","P1R1C1.txt\tB01\t3","P1R1C1.txt\tB02\t4","P1R1C1.txt\tC01\t2","P1R1C1.txt\tC02\tNA"))
+	intensityFilesTarget[[2]] <- I(c("P1R1C2.txt\tA01\t4","P1R1C2.txt\tA02\t6","P1R1C2.txt\tB01\t5","P1R1C2.txt\tB02\t6","P1R1C2.txt\tC01\t8","P1R1C2.txt\tC02\t7"))
+	intensityFilesTarget[[3]] <- I(c("P1R2C1.txt\tA01\t9","P1R2C1.txt\tA02\t10","P1R2C1.txt\tB01\t11","P1R2C1.txt\tB02\t14","P1R2C1.txt\tC01\t6","P1R2C1.txt\tC02\tNA"))
+	intensityFilesTarget[[4]] <- I(c("P1R2C2.txt\tA01\t6","P1R2C2.txt\tA02\t8","P1R2C2.txt\tB01\t7","P1R2C2.txt\tB02\t8","P1R2C2.txt\tC01\t10","P1R2C2.txt\tC02\t9"))
+	intensityFilesTarget[[5]] <- I(c("P2R1C1.txt\tA01\t5","P2R1C1.txt\tA02\t6","P2R1C1.txt\tB01\t7","P2R1C1.txt\tB02\t9","P2R1C1.txt\tC01\t4","P2R1C1.txt\tC02\tNA"))
+	intensityFilesTarget[[6]] <- I(c("P2R1C2.txt\tA01\t14","P2R1C2.txt\tA02\t16","P2R1C2.txt\tB01\t15","P2R1C2.txt\tB02\t16","P2R1C2.txt\tC01\t18","P2R1C2.txt\tC02\t17"))
+	intensityFilesTarget[[7]] <- I(c("P2R2C1.txt\tA01\t13","P2R2C1.txt\tA02\t14","P2R2C1.txt\tB01\t15","P2R2C1.txt\tB02\t19","P2R2C1.txt\tC01\t8","P2R2C1.txt\tC02\tNA"))
+	intensityFilesTarget[[8]] <- I(c("P2R2C2.txt\tA01\t16","P2R2C2.txt\tA02\t18","P2R2C2.txt\tB01\t17","P2R2C2.txt\tB02\t18","P2R2C2.txt\tC01\t20","P2R2C2.txt\tC02\t19"))
+	
+	return(intensityFilesTarget)
+	
+}
+
+# Testset for 10 channels as this had a bug
+makeTestSet5 <- function() {
+	
+	## plate cell	c1	c2	c3	c4	c5	c6	c7	c8	c9	c10
+	## 1	A01	1	3	9	6	5	7	9	11	13	15
+	## 1	A02	2	6	10	8	3	5	7	9	11	13
+	
+	#1. PARAMETERS FOR THE READPLATELIST
+	## A. GENERAL
+	nrWells = 2
+	nrPlates = 1
+	nrReps = 1
+	nrChannels = 10
+	
+	xraw <- array(as.numeric(NA), dim=c(nrWells,nrPlates,nrReps,nrChannels))
+	#p1 A01
+	xraw[1,1,1,] <- c(1,3,9,6,5,7,9,11,13,15)
+	
+	#p1 A02
+	xraw[2,1,1,] <-  c(2,6,10,8,3,5,7,9,11,13)
+	
+	
+	## 1.1 READPLATELISTCOMMON
+	## dimPlate
+	dimPlate <-  c(nrow=as.integer(1), ncol=as.integer(2))
+	
+	## pd
+	vFileNames <- c("P1R1C1.txt","P1R1C2.txt","P1R1C3.txt","P1R1C4.txt","P1R1C5.txt","P1R1C6.txt","P1R1C7.txt","P1R1C8.txt","P1R1C9.txt","P1R1C10.txt")
+	vPlates <- rep(1,10)
+	vRep <- rep(1,10)
+	vChannel <- c(1:10)
+	
+	pd <- data.frame(Filename=vFileNames, Plate=as.integer(vPlates) , Replicate=as.integer(vRep) ,Channel=as.integer(vChannel),stringsAsFactors=FALSE)
+	
+	## status		
+	status =  rep("OK",nrow(pd))
+	
+	## intensityFile
+	intensityFiles <- makeIntensityFiles5()
+	
+	#2. CONF PARAMETER FOR THE CONFIGURATION
+	#building conf object
+	##  confFile : Same content als de config file (without the first two lines), f.e.
+	#	Plate	Well	Content
+	#	1	A01	N
+	#	1	A02	sample	
+	#
+	#	but now in a 'data.frame', f.e.   
+	conf <- data.frame(Plate=c("*"), Well=c("A01","A02"), 
+			Content=c("N","sample"),stringsAsFactors=FALSE)
+	
+	plate <- rep(1,2); 
+	well <- c("A01","A02")
+	hfaid <- c(NA,"NM_000001")
+	geneid <- c("","AAP1")
+	
+	geneIDs <- data.frame(Plate=plate, Well=well, HFAID=hfaid, GeneID=geneid,stringsAsFactors=FALSE)
+	
+	testSet <- list(xraw=xraw, dimPlate=dimPlate, pd=pd, status=status, intensityFiles=intensityFiles,
+			name="Dummy_experiment", conf=conf, geneIDs=geneIDs)
+
+}	
+
+makeIntensityFiles5 <- function() {
+	nrPlates = 1
+	nrReps=1
+	nrChannels = 10
+	intensityFilesTarget = vector(mode="list", length=nrPlates * nrReps * nrChannels)
+	
+	names(intensityFilesTarget) <- c("P1R1C1.txt","P1R1C2.txt","P1R1C3.txt","P1R1C4.txt","P1R1C5.txt","P1R1C6.txt","P1R1C7.txt","P1R1C8.txt","P1R1C9.txt","P1R1C10.txt")
+	## plate cell	c1	c2	c3	c4	c5	c6	c7	c8	c9	c10
+	## 1	A01	1	3	9	6	5	7	9	11	13	15
+	## 1	A02	2	6	10	8	3	5	7	9	11	13
+	intensityFilesTarget[[1]] <- I(c("P1R1C1.txt\tA01\t1","P1R1C1.txt\tA02\t2"))
+	intensityFilesTarget[[2]] <- I(c("P1R1C2.txt\tA01\t3","P1R1C2.txt\tA02\t6"))
+	intensityFilesTarget[[3]] <- I(c("P1R1C3.txt\tA01\t9","P1R1C3.txt\tA02\t10"))
+	intensityFilesTarget[[4]] <- I(c("P1R1C4.txt\tA01\t6","P1R1C4.txt\tA02\t8"))
+	intensityFilesTarget[[5]] <- I(c("P1R1C5.txt\tA01\t5","P1R1C5.txt\tA02\t3"))
+	intensityFilesTarget[[6]] <- I(c("P1R1C6.txt\tA01\t7","P1R1C6.txt\tA02\t5"))
+	intensityFilesTarget[[7]] <- I(c("P1R1C7.txt\tA01\t9","P1R1C7.txt\tA02\t7"))
+	intensityFilesTarget[[8]] <- I(c("P1R1C8.txt\tA01\t11","P1R1C8.txt\tA02\t9"))
+	intensityFilesTarget[[9]] <- I(c("P1R1C9.txt\tA01\t13","P1R1C9.txt\tA02\t11"))
+	intensityFilesTarget[[10]] <- I(c("P1R1C10.txt\tA01\t15","P1R1C10.txt\tA02\t13"))
+	
+	return(intensityFilesTarget)
+	
+}
 
 makeReadPlateListTarget <- function() {
 	
@@ -480,6 +687,58 @@ makeNormNegativesTarget <- function () {
 	
 }
 
+makeNormNegativesMultipleChannelsTarget <- function () {
+	
+	nrWells = 6
+	nrPlates = 2
+	nrReps = 2
+	nrChannels = 2
+	
+	dimNames <- list(Features=c(1:(nrWells * nrPlates)),Sample=c(1,2),Channels=c("ch1","ch2"))
+	dataNormTarget <- array(as.numeric(NA), dim=c(nrWells * nrPlates,nrReps,nrChannels), dimnames=dimNames)
+	
+	#r1_c1 
+	dataNormTarget[,1,1] <- c(0.5,1,1.5,2,1,NA,1.25,1.5,1.75,2.25,1,NA)
+	
+	#r2_c1 
+	dataNormTarget[,2,1] <-  c(1.5,1.67,1.83,2.33,1,NA,1.63,1.75,1.88,2.38,1,NA)
+	
+	#r1_c2 
+	dataNormTarget[,1,2] <- c(0.5,0.75,0.63,0.75,1,0.88,0.78,0.89,0.83,0.89,1,0.94)
+
+	#r2_c2 
+	dataNormTarget[,2,2] <- c(0.6,0.8,0.7,0.8,1,0.9,0.8,0.9,0.85,0.9,1,0.95)
+	
+	return(dataNormTarget)
+	
+}
+
+makeNormNegMultiCh10Target <- function () {
+	
+	nrWells = 2
+	nrPlates = 1
+	nrReps = 1
+	nrChannels = 10
+	
+	dimNames <- list(Features=c(1:(nrWells * nrPlates)),Sample="1",Channels=c("ch01","ch02","ch03","ch04","ch05","ch06","ch07","ch08","ch09","ch10"))
+	dataNormTarget <- array(as.numeric(NA), dim=c(nrWells * nrPlates,nrReps,nrChannels), dimnames=dimNames)
+	
+	## Original values
+	## plate cell	c1	c2	c3	c4	c5	c6	c7	c8	c9	c10
+	## 1	A01	1	3	9	6	5	7	9	11	13	15
+	## 1	A02	2	6	10	8	3	5	7	9	11	13
+	## Result values (value second row, divided by value first raw (the N well)
+	
+	
+	#A01. Divided by itself always 1
+	dataNormTarget[1,1,] <- rep(1,10)
+	
+	#A02 . 
+	dataNormTarget[2,1,] <-  c(2,2,1.11,1.33,0.6, 0.71,0.78,0.82, 0.85, 0.87)
+	
+	return(dataNormTarget)
+	
+}
 
 makeNormNpiTarget <- function () {
 	
@@ -525,5 +784,24 @@ makeNormNpiTarget <- function () {
 	#values replicate 2 (plate 1 + 2) 	
 	dataNormTarget[,2,1] <- c(0.0, 0.5, 1, 2.5, 0.0, 0.5, 1.0, 3.0)
 	return(dataNormTarget)
+	
+}
+
+
+makeScoresReplicatesultipleChannelsTarget <- function (){
+	nrWells = 6
+	nrPlates = 2
+	nrReps = 2
+	nrChannels = 2
+	
+	dimNames <- list(Features=c(1:12),Sample=c(1:2),Channels=c("ch1","ch2"))
+	dataScoresTarget <- array(as.numeric(NA), dim=c(nrWells * nrPlates,nrReps,nrChannels), dimnames=dimNames)
+	
+	dataScoresTarget[,1,1] <- c(-2.2483025,-1.3489815,-0.4496605,0.4496605,-1.3489815,NA,-0.8993210,-0.4496605,0.0000000,0.8993210,-1.3489815,NA)
+	dataScoresTarget[,1,2] <- c(-7.4193984,-2.5630649,-4.9912316,-2.5630649,2.2932686,-0.1348982,-2.0234723,0.1348982,-0.9442871,0.1348982,2.2932686,1.2140834)
+	dataScoresTarget[,2,1] <- c(-1.1691173,-0.8093889,-0.4496605,0.6295247,-2.2483025,NA,-0.8993210,-0.6295247,-0.3597284,0.7194568,-2.2483025,NA)
+	dataScoresTarget[,2,2] <- c(-8.0938891,-2.6979630,-5.3959261,-2.6979630,2.6979630,0.0000000,-2.6979630,0.0000000,-1.3489815,0.0000000,2.6979630,1.3489815)
+		
+	return(dataScoresTarget)
 	
 }

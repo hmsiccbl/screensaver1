@@ -185,7 +185,7 @@ public class CommandLineApplication
         return (T) cstr.newInstance(value);
       }
       catch (Exception e) {
-        throw new ParseException("could not parse option " + optionName + " with arg " + value + " as type " + ofType.getSimpleName());
+        throw new ParseException("could not parse option " + optionName + " with arg " + value + " as type " + ofType.getSimpleName() + e);
       }
     }
     return null;

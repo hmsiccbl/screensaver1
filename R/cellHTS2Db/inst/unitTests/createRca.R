@@ -8,10 +8,13 @@ createRca <- function(testSet=1,withSlog =FALSE) {
 		testSet <- makeTestSet2()
 	}else if (testSet==3) {
 		testSet <- makeTestSet3()		
-	}
-		
+	}else if (testSet==4) {
+		testSet <- makeTestSet4(withSlog)		
+	}else if (testSet==5) {
+		testSet <- makeTestSet5()		
+	}		
 	xrawd <- dim(testSet$xraw)
-	r <- readPlateListDb(testSet$xraw, testSet$name, testSet$nrRowsPlate, testSet$nrColsPlate)
+	r <- readPlateListDb(testSet$xraw, testSet$name, testSet$dimPlate[1], testSet$dimPlate[2])
 	
 	if (withSlog) {
 		rc <- configureDb(r,testSet$conf,testSet$slog)

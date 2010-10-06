@@ -31,3 +31,6 @@ testSummarizeReplicates1 <- function(debug=FALSE) {
 	checkEquals(dataSummarizedTarget,round(dataSummarized,7))
 	
 }
+
+## SummarizeReplicates not implemented in cellHTS2 for multichannel!!
+## testSummarizeReplicatesMultiChannel <- function(debug=FALSE)

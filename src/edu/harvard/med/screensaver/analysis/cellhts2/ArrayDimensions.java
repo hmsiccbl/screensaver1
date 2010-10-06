@@ -76,6 +76,11 @@ public class ArrayDimensions {
 	
 	public int hashCode() 
 	{
-	  throw new UnsupportedOperationException("hashCode not implemented");
+    return 17 * nrRowsPlate +
+      19 * nrColsPlate +
+      23 * nrWells +
+      29 * nrPlates +
+      31 * nrReps +
+      37 * nrChannels;
 	}
 }

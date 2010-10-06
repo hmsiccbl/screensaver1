@@ -49,6 +49,53 @@ testConfigureDb1 <- function(debug=FALSE) {
 	
 	#6 experimentData: an object of class 'MIAME' containing descriptions of the experiment, constructed from the screen description file.
 	
+}
+
+
+testConfigureDbMultichannelSlog <- function(debug=FALSE) {
+	## 1. PREPARE INPUT
+	source("../inst/unitTests/makeDummies.R")
+	testSet <- makeTestSet4(TRUE)
+	
+	r <- readPlateListDb(testSet$xraw, testSet$name, testSet$dimPlate[1], testSet$dimPlate[2])
+	
+	if (debug) 
+		trace("configureDb", browser, exit=browser, signature = c("cellHTS"))
+
+	## 2. RUN CONFIGUREDB
+	rc <- configureDb(r,testSet$conf,testSet$slog)
+	
+	## 3. CHECK EQUALS
+	#CHECK UPDATES OF SLOTS
+	
+	#3.1	plateConf: a 'data.frame' containing what was read from input file'confFile' (except the first two header rows).
+	plateConf <- rc@plateConf
+	plateConfTarget <- testSet$conf
+	# For the * a space has been placed
+	plateConfTarget[plateConfTarget=="*"] <- " *" 
+	checkEquals(plateConfTarget,plateConf)
+	
+	#3.2 screenLog: a data.frame containing what was read from input file 'logFile'.
+	# Channel is added in the configureDb
+	targetSlog <- data.frame(Plate=c(1,1),Well=c("A02","A02"),Sample=c(1,1),Flag=c("NA","NA"),Channel=c(1,2), stringsAsFactors=FALSE)
+	
+	#Check slot screenLog
+	checkEquals(targetSlog,rc@screenLog)
+	
+	#Check data adjusted, based on screenlog
+	#TODO
+
+	#3.3  screenDesc: object of class 'character' containing what was read from input file 'descripFile'.
+	#TODO
+	
+	#3.4 state: the processing status of the 'cellHTS' object is updated in to 'state["configured"]=TRUE'.
+	checkEquals(rc@state[["configured"]],TRUE)
+	
+	#5 featureData: the column 'controlStatus' is updated having into account the well annotation given by the plate configuration file.
+	#TODO
+	
+	#6 experimentData: an object of class 'MIAME' containing descriptions of the experiment, constructed from the screen description file.
+	#TODO	
 	
 	
 }

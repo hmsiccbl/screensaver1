@@ -10,7 +10,7 @@
 ## loess
 
 
-testNormalizeMean <- function(debug=FALSE,withSlog=FALSE) {
+testNormMean <- function(debug=FALSE,withSlog=FALSE) {
 	source("../inst/unitTests/createRca.R")
 	rca <- createRca(testSet=1,withSlog=withSlog)
 	
@@ -27,7 +27,7 @@ testNormalizeMean <- function(debug=FALSE,withSlog=FALSE) {
 	
 }
 
-testNormalizeMedian <- function(debug=FALSE,withSlog=FALSE) {
+testNormMedian <- function(debug=FALSE,withSlog=FALSE) {
 	source("../inst/unitTests/createRca.R")
 	rca <- createRca(testSet=1,withSlog=withSlog)
 	
@@ -45,11 +45,11 @@ testNormalizeMedian <- function(debug=FALSE,withSlog=FALSE) {
 	
 }
 
-testNormalizeMedianWithSlog <- function(debug=FALSE) {
-	testNormalizeMedian(debug,TRUE)
+testNormMedianWithSlog <- function(debug=FALSE) {
+	testNormMedian(debug,TRUE)
 }
 
- testNormalizeShorth <- function(debug=FALSE,withSlog=FALSE) {
+ testNormShorth <- function(debug=FALSE,withSlog=FALSE) {
      source("../inst/unitTests/createRca.R")
 #	 shorth calculates descriptive statistics based on the shortest half of the distribution of each variable or group specified: 
 #			 the shorth, the mean of values in that shortest half; 
@@ -72,7 +72,7 @@ testNormalizeMedianWithSlog <- function(debug=FALSE) {
  
  }
  
- testNormalizeNegatives <- function(debug=FALSE,withSlog=FALSE) {
+ testNormNegatives <- function(debug=FALSE,withSlog=FALSE) {
 	 source("../inst/unitTests/createRca.R")
 	 
 	 rca <- createRca(testSet=2,withSlog)
@@ -92,41 +92,55 @@ testNormalizeMedianWithSlog <- function(debug=FALSE) {
 	 
  }
  
- testNormalizeLoess <- function(debug=FALSE,withSlog=FALSE) {
-	source("../inst/unitTests/createRca.R")
+ #Function round in R rounds towards downwards, so 0.625 becomes 0.62
+ roundup <- function(x) {
+	 (trunc((x + 0.005) * 100))/100
+ }
 	 
-	## *  'method="loess"' (loess regression): for each plate and
-	## replicate, spatial effects are removed by fitting a loess
-	## curve (see 'spatial normalization function').
-	## help(spatialNormalization) 
-	Examples:
-			
-	data(KcViabSmall)
-	x <- KcViabSmall
-	xs <- spatialNormalization(x, model="loess", save.model = TRUE)
-	## Calling spatialNormalization function from "normalizePlates":
-	xopt <- normalizePlates(x, method="loess", varianceAdjust="none", save.model = TRUE)
-	all(xs@rowcol.effects == xopt@rowcol.effects, na.rm=TRUE)
-	
-		rca <- createRca(testSet=2,withSlog)
+ 
+ testNormNegMultiChannels <- function(debug=FALSE,withSlog=FALSE) {
+	 source("../inst/unitTests/createRca.R")
+	 
+	 rca <- createRca(testSet=4,withSlog)
 	 
 	 if (debug) 
 		 debug(normalizePlates)
 	 
-	 #see if annotation is required for normalizePlates
-	 rcan <- normalizePlates(rca,method="negatives");
+	 #In case of multiple channels, you have to provide a value for the negControls
+	 #scale multiplicative
+	 rcan <- normalizePlates(rca,method="negatives",scale="multiplicative", negControls=c("NS","NS"));
 	 
 	 dataNorm <- Data(rcan)
 	 
-	 dataNormTarget <- makeNormNegativesTarget()	
+	 dataNormTarget <- makeNormNegativesMultipleChannelsTarget()	
 	 #browser()
-	 checkEquals(dataNormTarget,dataNorm)
+
+	 checkEquals(dataNormTarget,roundup(dataNorm))
 	 
  }
  
+ testNormNegMultiChannels10 <- function(debug=FALSE,withSlog=FALSE) {
+	 source("../inst/unitTests/createRca.R")
+	 
+	 rca <- createRca(testSet=5,withSlog)
+	 
+	 if (debug) 
+		 debug(normalizePlates)
+	 
+	 #In case of multiple channels, you have to provide a value for the negControls
+	 #scale multiplicative
+	 rcan <- normalizePlates(rca,method="negatives",scale="multiplicative", negControls=rep("N",10));
+	 
+	 dataNorm <- Data(rcan)
+	 
+	 dataNormTarget <- makeNormNegMultiCh10Target()	
+	 #browser()
+	 
+	 checkEquals(dataNormTarget,roundup(dataNorm))
+	 
+ }
  
- 
- testNormalizeNpi <- function(debug=FALSE,withSlog=FALSE) {
+ testNormNpi <- function(debug=FALSE,withSlog=FALSE) {
 	 source("../inst/unitTests/createRca.R")
 	 
 	 rca <- createRca(testSet=1,withSlog)
@@ -143,5 +157,16 @@ testNormalizeMedianWithSlog <- function(debug=FALSE) {
 	 #browser()
 	 checkEquals(dataNormTarget,dataNorm)
 	 
+ }
+ 
+ testNormLoess <- function (debug=FALSE) {
+	 
+	 load("../data/jUnitLoess/rca.Rda")
+	 
+	 rcanActual <- normalizePlates(rca,scale="additive",method="loess",negControls=rep("N",1));
+
+	 load("../data/jUnitLoess/rcan.Rda")
+	 
+	 checkEquals(Data(rcanActual),Data(rcan))
  }
  

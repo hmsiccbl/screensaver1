@@ -24,6 +24,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.google.common.base.Function;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
@@ -54,6 +55,13 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   
   public static final RelationshipPath<AssayWell> screenResult = RelationshipPath.from(AssayWell.class).to("screenResult", Cardinality.TO_ONE);
   public static final RelationshipPath<AssayWell> libraryWell = RelationshipPath.from(AssayWell.class).to("libraryWell", Cardinality.TO_ONE);
+
+  public static final Function<AssayWell,Integer> ToPlateNumber = new Function<AssayWell,Integer>() {
+    public Integer apply(AssayWell aw)
+    {
+      return aw.getLibraryWell().getPlateNumber();
+    }
+  };
 
   private Integer _version;
   private ScreenResult _screenResult;

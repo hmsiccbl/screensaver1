@@ -97,6 +97,7 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   private Screen _screen;
   private SortedSet<AssayWell> _assayWells = Sets.newTreeSet(); 
   private Integer _replicateCount;
+  private Integer _channelCount;
   private SortedSet<DataColumn> _dataColumns = Sets.newTreeSet();
 
   private Integer _experimentalWellCount = 0; // can't be null
@@ -379,6 +380,61 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
     _replicateCount = replicateCount;
   }
 
+  /**
+   * Get the number of channels (assay plates) associated with this screen result. If the
+   * channel count was not explicitly specified at instantiation time, calculate the channel
+   * count by finding the maximum channel ordinal value from the screen result's
+   * DataColumns; if none of the DataColumns have their channel
+   * ordinal values defined, channel count is 1.
+   * 
+   * @return the number of channels (assay plates) associated with this <code>ScreenResult</code>
+   */
+  @Column(nullable=false)
+  public Integer getChannelCount()
+  {
+    if (_channelCount == null) {
+      if (getDataColumns().size() == 0) {
+        _channelCount = 0;
+      }
+      else {
+        DataColumn maxOrdinalRvt =
+          Collections.max(getDataColumns(),
+                          new Comparator<DataColumn>()
+            {
+              public int compare(DataColumn rvt1, DataColumn rvt2)
+              {
+                if (rvt1.getChannel() == null && rvt2.getChannel() == null) {
+                  return 0;
+                }
+                if (rvt1.getChannel() == null && rvt2.getChannel() != null) {
+                  return -1;
+                }
+                if (rvt1.getChannel() != null && rvt2.getChannel() == null) {
+                  return 1;
+                }
+                return rvt1.getChannel().compareTo(rvt2.getChannel());
+              }
+            } );
+        _channelCount = maxOrdinalRvt.getChannel();
+        if (_channelCount == null) {
+          // every DataColumn had null Channel value
+          _channelCount = 1;
+        }
+      }
+    }
+    return _channelCount;
+  }
+
+  /**
+   * Set the number of channels (assay plates) associated with this screen result.
+   * @param channelCount the new number of channels (assay plates) associated with this
+   * screen result
+   */
+  public void setChannelCount(Integer channelCount)
+  {
+    _channelCount = channelCount;
+  }
+
   @OneToMany(mappedBy="screenResult",
              fetch=FetchType.LAZY)
   @org.hibernate.annotations.LazyCollection(value=org.hibernate.annotations.LazyCollectionOption.TRUE)
@@ -422,6 +478,12 @@ public class ScreenResult extends AuditedAbstractEntity<Integer>
   private void setExperimentalWellCount(Integer experimentalWellCount)
   {
     _experimentalWellCount = experimentalWellCount;
+  }
+
+  @Transient
+  public Set<Integer> getPlateNumbers()
+  {
+    return Sets.newHashSet(Iterables.transform(getAssayWells(), AssayWell.ToPlateNumber));
   }
 
   /**

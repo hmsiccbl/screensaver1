@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.analysis.cellhts2;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +28,6 @@ import org.rosuda.REngine.Rserve.RserveException;
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -72,6 +72,8 @@ public class CellHTS2 {
   private SummarizeReplicatesMethod summarizeReplicatesMethod;
   private String reportOutputPath;
   private String writeReportIndexUrl;
+  private boolean saveRObjects = false;
+  private String saveRObjectsPath;
 
 
   public CellHTS2(ScreenResult screenResult, String title) throws RserveException, REngineException,
@@ -80,6 +82,24 @@ public class CellHTS2 {
     this.rConnection = new RConnection();
     this.arrayDimensions = calculateArrayDimensions(screenResult);
     this.title = title;
+    if (ScreensaverProperties.getProperty("cellHTS2report.saveRObjects").equals("T")){
+      this.saveRObjects=true;
+      this.saveRObjectsPath=ScreensaverProperties.getProperty("cellHTS2report.saveRObjects.path");
+      if (this.saveRObjectsPath ==null) {
+        log.error("cellHTS2report.saveRObjects.path saveRObjectsPath does not exist in screensaver.properties");
+      }else {
+        File file = null;
+        String dirName = this.saveRObjectsPath;
+        if (dirName == null || dirName.length() == 0) {
+           log.error("Property cellHTS2report.saveRObjects.path is missing or empty in the screensaver properties file");
+        }else 
+          file = new File(dirName);
+          if (!file.exists()) {
+            log.error(dirName + "does not exist. It is set as value for cellHTS2report.saveRObjects.path in screensaver.properties. saveRObjects set to false");
+            this.saveRObjects=false;
+          }
+      }
+    }
   }
 
   /**
@@ -210,9 +230,9 @@ public class CellHTS2 {
     result.setNrColsPlate(nrColsPlate);
 
     result.setNrWells(nrRowsPlate * nrColsPlate);
-    result.setNrPlates(screenResult.getScreen().getLibraryPlatesDataLoadedCount());
+    result.setNrPlates(screenResult.getPlateNumbers().size());
     result.setNrReps(screenResult.getReplicateCount());
-    result.setNrChannels(1);
+    result.setNrChannels(screenResult.getChannelCount());
 
     return (result);
   }
@@ -242,14 +262,11 @@ public class CellHTS2 {
     String strInitXraw = "xraw = array(as.numeric(NA), dim=c(" + nrWells + ","
         + nrPlates + "," + nrReps + "," + nrChannels + "))";
     RserveExtensions rserveExtensions = new RserveExtensions();
+    log.debug("strInitXraw = " + strInitXraw);
     rserveExtensions.tryEval(rConnection, strInitXraw);
 
     // Assign values to xraw in R.
     String strAssignVar;
-
-    // For now it is assumed that there are no different channels. Channel index
-    // therefore will always be 1.
-    int c = 0;
 
     this.plateNumberToSequenceNumberMap = createPlateNumberSequenceMapping(this.screenResult);
 
@@ -259,6 +276,11 @@ public class CellHTS2 {
       if (r == null) {
         r = 1;
       }
+      
+      Integer c = col.getChannel();
+      if (c == null) {
+        c = 1;
+      }
       resultValues = col.getResultValues();
 
       // For transfer the values for all the wells of a replicate to R at once,
@@ -267,7 +289,7 @@ public class CellHTS2 {
       double[][] values = new double[nrPlates][nrWells];
       
      /* ScreenResult is allowed to have wells in the upper-left part of a plate that do
-      not have ResultValues. */
+      not have ResultValues. Initize all values with CellHTS2.NA*/
       for (int p = 0; p < nrPlates; p++) {
         for (int w = 0; w < nrWells; w++) {
             values[p][w] = CellHTS2.NA;
@@ -302,13 +324,24 @@ public class CellHTS2 {
         rConnection.assign("plateValues", values[p]);
 
         // assign the the variable plateValues to the xraw
-        strAssignVar = "xraw[," + (p + 1) + "," + r + "," + (c + 1)
+        strAssignVar = "xraw[," + (p + 1) + "," + r + "," + c
             + "] <- plateValues";
+        log.debug("strAssignVar = " + strAssignVar);
         rserveExtensions.tryEval(rConnection, strAssignVar);
+        if (this.saveRObjects) {
+          //TODO change path to the one set in the properties file
+          rConnection.voidEval("save(xraw,file=\"" + saveRObjectsPath + "/xraw.Rda\")");
+        }
+        
       }
     }
 
     // 2. RUN METHOD IN R
+    //escape ", otherwise R parse error.
+    // to escape one backslach,  you need 4 
+    title=title.replaceAll("\"","\\\\\"" );
+
+    
     String runReadPlateListDb = "r <- readPlateListDb(xraw," + "\"" + title
         + "\"" + "," + arrayDimensions.getNrRowsPlate() + ","
         + arrayDimensions.getNrColsPlate() + ")";
@@ -320,10 +353,17 @@ public class CellHTS2 {
     // count 16 and names count 31
     // .. based on the name it will retrieve an element and then
     // arrayIndexOutOfBoundError
+    log.debug("rExpr = " + rExpr);
+    
     rserveExtensions.tryEval(rConnection, rExpr);
+
+    if (this.saveRObjects) {
+      //TODO change path to the one set in the properties file
+      rConnection.voidEval("save(r,file=\"" + saveRObjectsPath + "/r.Rda\")");
+  }
   }
   
-  public double[][] getReadPlateListDbResult() throws RserveException,
+  public REXP getReadPlateListDbResult() throws RserveException,
     REngineException, REXPMismatchException {
   // Retrieve data is only relevant for running tests on partial results of
   // the cellHTS2 run, ic. de readPlateListDb.
@@ -337,23 +377,18 @@ public class CellHTS2 {
   int nrPlates = arrayDimensions.getNrPlates();
   int nrReps = arrayDimensions.getNrReps();
   int nrChannels = arrayDimensions.getNrChannels();
-  double[][] result = new double[nrReps][nrWells * nrPlates];
+  //double[][][] result = new double[nrWells * nrPlates][nrReps][nrChannels];
   RserveExtensions rserveExtensions = new RserveExtensions();
   
   // put data in R from dataframe into multidimensional array
-  String strEval = "rData <- array(Data(r),c(" + (nrWells * nrPlates) + ","
-      + nrReps + "))";
+  String strEval = "rData <- array(Data(r),c(" + (nrWells * nrPlates) + "," + nrReps + "," + nrChannels + "))";
+  log.debug("strEval = " + strEval);
   rserveExtensions.tryEval(rConnection, strEval);
   
   // num [1:8, 1:2, 1] 1 3 4 5 ..
+  log.debug("strEval = " + strEval);
   
-  // retrieve dataobject at once in stead of per replicate
-  
-  // retrieve data per replicate over all plates
-  for (int r = 0; r < nrReps; r++) {
-    strEval = "rData[," + (r + 1) + "]"; // indexes in R start with 1
-    result[r] = rserveExtensions.tryEval(rConnection, strEval).asDoubles();
-  }
+  REXP result = rserveExtensions.tryEval(rConnection, strEval);
   
   return (result);
 
@@ -416,6 +451,12 @@ public class CellHTS2 {
     rConnection.assign("plate", plates);
     rConnection.assign("well", wells);
     rConnection.assign("content", contents);
+    if (this.saveRObjects) {
+      //TODO change path to the one set in the properties file
+      rConnection.voidEval("save(plate,file=\"" + saveRObjectsPath + "/plate.Rda\")");
+      rConnection.voidEval("save(well,file=\"" + saveRObjectsPath + "/well.Rda\")");      
+      rConnection.voidEval("save(content,file=\"" + saveRObjectsPath + "/content.Rda\")");
+    }
 
     // 2. RUN R-METHOD CONFIGURE IN R
     RserveExtensions rserveExtensions = new RserveExtensions();
@@ -428,6 +469,7 @@ public class CellHTS2 {
     ArrayList<Integer> slogP = new ArrayList<Integer>();
     ArrayList<String> slogW = new ArrayList<String>();
     ArrayList<Integer> slogS = new ArrayList<Integer>();
+    ArrayList<Integer> slogC = new ArrayList<Integer>();
     for (DataColumn col2 : screenResult.getRawNumericDataColumns()) {
       for (ResultValue rv : col2.getResultValues()) {
         if (rv.isExclude()) {
@@ -435,6 +477,11 @@ public class CellHTS2 {
               rv.getWell().getPlateNumber()));
           slogW.add(rv.getWell().getWellName());
           slogS.add(col2.getReplicateOrdinal());
+          if (col2.getChannel() == null) {
+            slogC.add(1);
+          }else {
+            slogC.add(col2.getChannel());
+          }
         }
       }
     }
@@ -446,36 +493,47 @@ public class CellHTS2 {
       double [] slogPd  = new double [slogP.size()];
       String [] slogWd  = new String [slogW.size()];
       double [] slogSd  = new double [slogS.size()];
+      double [] slogCd  = new double [slogC.size()];
       
       for (int j=0; j < slogP.size(); j++) {
     	  slogPd[j]=slogP.get(j);
     	  slogWd[j]=slogW.get(j);
     	  slogSd[j]=slogS.get(j);
+    	  slogCd[j]=slogC.get(j);
       }
 
       rConnection.assign("slogP",slogPd );
       rConnection.assign("slogW",slogWd );
       rConnection.assign("slogS",slogSd );
+      rConnection.assign("slogC",slogCd );
+      if (this.saveRObjects) {
+        rConnection.voidEval("save(slogP,file=\"" + saveRObjectsPath + "/slogP.Rda\")");
+        rConnection.voidEval("save(slogW,file=\"" + saveRObjectsPath + "/slogW.Rda\")");
+        rConnection.voidEval("save(slogS,file=\"" + saveRObjectsPath + "/slogS.Rda\")");        
+        rConnection.voidEval("save(slogC,file=\"" + saveRObjectsPath + "/slogC.Rda\")");        
+      }
       
-      double[] slogC = new double[slogP.size()] ;
       String [] slogF = new String [slogP.size()] ;
       for (i=0 ; i < slogP.size(); i++) {
-          slogC[i]=1;
           slogF[i]="NA";
       }
       // rConnection.assign("slogC" ,slogC);
       rConnection.assign("slogF" ,slogF);
       
       // Add slog statement to R expression
-      rExpr.append("slog <- data.frame(Plate=slogP,Well=slogW,Sample=slogS, Flag=slogF,stringsAsFactors=FALSE);");
+      rExpr.append("slog <- data.frame(Plate=slogP,Well=slogW,Sample=slogS, Flag=slogF, Channel=slogC,stringsAsFactors=FALSE);");
       rExpr.append("rc <- configureDb(r,conf,slog);");
     } else {
       rExpr.append("rc <- configureDb(r,conf);");
     }
     
     rExpr.append("\"OK\""); // OK, otherwise rc is retrieved in Rserve client
+    
+    log.debug("rExpr = " + rExpr);
     rserveExtensions.tryEval(rConnection, rExpr.toString());
-
+    if (this.saveRObjects) {
+      rConnection.voidEval("save(rc,file=\"" + saveRObjectsPath + "/rc.Rda\")");
+    }
     return (contents);
   }
   // 3. RETRIEVE DATA FROM R (ONLY RELEVANT FOR RUNIT TEST)
@@ -486,7 +544,6 @@ public class CellHTS2 {
     RserveExtensions rserveExtensions = new RserveExtensions();
     resultPlates = rserveExtensions.tryEval(rConnection, rExpr2).asStrings();
 
-    // TODO also return plate and well
     // # 'data.frame', f.e. 3 obs. of 3 variables:
     // # $ Plate : chr "1" "1" "1"
     // # $ Well : chr "A01" "A02" "B01"
@@ -494,18 +551,30 @@ public class CellHTS2 {
     return (resultPlates);
   }
 
-  public String[] getConfigureDbResultSlog() throws RserveException, REngineException, REXPMismatchException {
-    String rExpr2 = "screenLog <- rc@screenLog;"
-        + "resultContent <- screenLog$Plate";
+  public String[][] getConfigureDbResultSlog() throws RserveException, REngineException, REXPMismatchException {
+    
+    // Example screenlog: data.frame(Plate=c(1),Well=c("A02"),Sample=c(1),Flag=c("NA"),Channel=c(1),stringsAsFactors=FALSE)
+    
     RserveExtensions rserveExtensions = new RserveExtensions();
-    REXP result = rserveExtensions.tryEval(rConnection, rExpr2);
+    REXP rexpPlate = rserveExtensions.tryEval(rConnection, "screenLog <- rc@screenLog; resultContent <- screenLog$Plate");
+    REXP rexpWell = rserveExtensions.tryEval(rConnection, "resultContent <- screenLog$Well");
+    REXP rexpSample = rserveExtensions.tryEval(rConnection, "resultContent <- screenLog$Sample");    //Sample = Replicate
+    REXP rexpFlag = rserveExtensions.tryEval(rConnection, "resultContent <- screenLog$Flag");
+    REXP rexpChannel = rserveExtensions.tryEval(rConnection,"resultContent <- screenLog$Channel");
+    
+    String [][] result =null;
+    if (!rexpPlate.isNull()) {
+      // all have the same length
+      result = new String[5][rexpPlate.asStrings().length];
+      result[0] = rexpPlate.asStrings();
+      result[1] = rexpWell.asStrings();
+      result[2] = rexpSample.asStrings();
+      result[3] = rexpFlag.asStrings();
+      result[4] = rexpChannel.asStrings();
    
-    if ( result.isNull()) {
-       return null;
-    }else {
-      return result.asStrings();
     }
 
+    return result;
   }
 
   
@@ -558,6 +627,13 @@ public class CellHTS2 {
     rConnection.assign("hfaid", hfaIds);
     rConnection.assign("geneid", geneIds);
 
+    if (this.saveRObjects) {
+      rConnection.voidEval("save(plate,file=\"" + saveRObjectsPath + "/annotate_plate.Rda\")");
+      rConnection.voidEval("save(well,file=\"" + saveRObjectsPath + "/annotate_well.Rda\")");
+      rConnection.voidEval("save(hfaid,file=\"" + saveRObjectsPath + "/annotate_hfaid.Rda\")");
+      rConnection.voidEval("save(geneid,file=\"" + saveRObjectsPath + "/annotate_geneid.Rda\")");
+    }
+
     // 2. RUN ANNOTATEDB
     String rExpr = "library(cellHTS2);"
         + "library(cellHTS2Db);"
@@ -567,7 +643,10 @@ public class CellHTS2 {
     RserveExtensions rserveExtensions = new RserveExtensions();
     rserveExtensions.tryEval(rConnection, rExpr);
 
-    // rConnection.voidEval("save(rca,file=\"/tmp/rca.Rda\")");
+    if (this.saveRObjects) {
+      rConnection.voidEval("save(rca,file=\"" + saveRObjectsPath + "/rca.Rda\")");
+    }
+   
 
 
 
@@ -597,11 +676,16 @@ public class CellHTS2 {
     String cellHtsObjectName = null;
     if (rMethod.equals(RMethod.NORMALIZE_PLATES)) {
       cellHtsObjectName = "rcan";
+      String negControls ="";
+      //in case of multiple channels, the 
+     
+      
       runMethod = cellHtsObjectName +
       // [atolopko, 2008-03-12] this commented out line includes the version I used to produce matching analysis results for the example data supplied by Boutros cellHTS2 tutorial
       //" <- normalizePlates(rca,scale=\"multiplicative\", log=FALSE, varianceAdjust=\"none\", method=\""
 	     " <- normalizePlates(rca," +"scale=\"" + this.normalizePlatesScale.getValue() + "\"," +
-      		"method=\""+ this.normalizePlatesMethod.getValue() + "\"," + "negControls=\"" + this.normalizePlatesNegControls.getValue()  + "\");";
+      		"method=\""+ this.normalizePlatesMethod.getValue() + "\"," + "negControls=rep(\"" + this.normalizePlatesNegControls.getValue()  + "\"," 
+      		+  String.valueOf(this.arrayDimensions.getNrChannels()) + "));";
     } else if (rMethod.equals(RMethod.SCORE_REPLICATES)) {
       cellHtsObjectName = "rcans";
       // [atolopko, 2008-03-12] this commented out line includes the version I used to produce matching analysis results for the example data supplied by Boutros cellHTS2 tutorial
@@ -611,11 +695,20 @@ public class CellHTS2 {
       " <- scoreReplicates(rcan, method=\""
           + this.scoreReplicatesMethod.getValue() + "\");";
     } else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
+      //TODO RealiZe multichannel support for summarization. cellHTS2 2.8.0 does not support summarization for multi channel (=color). 
       cellHtsObjectName = "rcanss";
+      if (this.arrayDimensions.getNrChannels() == 1) {
       runMethod = cellHtsObjectName
           + " <- summarizeReplicates(rcans,summary=\"" + this.summarizeReplicatesMethod.getValue() + "\");";
+      }else {
+        runMethod = cellHtsObjectName + "<- NULL;";
+    }
     }
 
+    String createReturnObject= null;
+    if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES) && this.arrayDimensions.getNrChannels() > 1) {
+      createReturnObject = cellHtsObjectName + "Data <-NULL;";
+    }else {
     int nrWells = arrayDimensions.getNrWells();
     int nrPlates = arrayDimensions.getNrPlates();
     int nrReps;
@@ -625,17 +718,48 @@ public class CellHTS2 {
       nrReps = arrayDimensions.getNrReps();
     }
 
-    // int nrChannels = arrayDimensions.getNrChannels();
+      int nrChannels = arrayDimensions.getNrChannels();
     // str(rcanData): num [1:8, 1:2, 1] 1 3 4 5 .. , with dimension 1:
     // plate-well combination, dim. 2: replicate, dim 3: channel
-    String createReturnObject = cellHtsObjectName + "Data <- array(Data("
-        + cellHtsObjectName + "),c(" + (nrWells * nrPlates) + "," + nrReps
+      createReturnObject = cellHtsObjectName + "Data <- array(Data("
+          + cellHtsObjectName + "),c(" + (nrWells * nrPlates) + "," + nrReps + "," + nrChannels
         + "));";
+    }
 
     String rExpr = runMethod + createReturnObject + "\"OK\"";
     RserveExtensions rserveExtensions = new RserveExtensions();
+    log.debug("rExpr = " + rExpr);
     rserveExtensions.tryEval(rConnection, rExpr);
+    
+    if (this.saveRObjects) {
+      if (rMethod.equals(RMethod.NORMALIZE_PLATES)) {
+        rConnection.voidEval("save(rcan,file=\"" + saveRObjectsPath + "/rcan.Rda\")");
+      }else if (rMethod.equals(RMethod.SCORE_REPLICATES)) {
+          rConnection.voidEval("save(rcans,file=\"" + saveRObjectsPath + "/rcans.Rda\")");        
+      }else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
+        rConnection.voidEval("save(rcanss,file=\"" + saveRObjectsPath + "/rcanss.Rda\")");        
 }
+    }
+}
+  
+  //Output of Rserve is in our case always in threedimensional data object
+  public double[][][] convertOutputRserve (REXP output)  throws REXPMismatchException{
+    int[] dim = output.dim();
+  
+    double[][][] result = new double[dim[0]][dim[1]][dim[2]];
+    
+    int h = -1;
+
+    for (int k = 0; k < dim[2]; k++) {
+      for (int j = 0; j < dim[1]; j++) {
+          for (int i = 0; i < dim[0]; i++) {
+            h++;
+            result[i][j][k] = output.asDoubles()[h];
+        }          
+      }        
+    }
+    return result;
+  }
   
   private void addRMethodResult(RMethod rMethod) throws RserveException, REXPMismatchException {    
 	  
@@ -667,37 +791,65 @@ public class CellHTS2 {
     RserveExtensions rserveExtensions = new RserveExtensions();
     if (rMethod.equals(RMethod.NORMALIZE_PLATES)
         || rMethod.equals(RMethod.SCORE_REPLICATES)) {
-      double[][] result = new double[arrayDimensions.getNrWells() * arrayDimensions.getNrPlates()][arrayDimensions.getNrReps()];
-      result = rserveExtensions.tryEval(rConnection, rExpr2).asDoubleMatrix();
+      log.debug("rExpr2 = " + rExpr2);
+      REXP output = rserveExtensions.tryEval(rConnection, rExpr2);
+    
+      double [][][] result = convertOutputRserve (output);
 
       // looping through just to get the replicate name
       for (DataColumn col : screenResult.getRawNumericDataColumns()) {
 
         // the position in the result matrix is based on the replicateOrdinal
-        // value of the col: see readPlateListDb
-        int r = col.getReplicateOrdinal();
-        // col.getName();
+        // value of the rvt: see readPlateListDb
+        int r;
+        if (col.getReplicateOrdinal() != null) {
+          r = col.getReplicateOrdinal().intValue();
+        }
+        else {
+          r = 1;
+        }
+
+        int c;
+        if (col.getChannel() != null) {
+          c = col.getChannel().intValue();
+        }
+        else {
+          c = 1;
+        }
 
         DataColumn colNew = screenResult.createDataColumn(colPrefix + col.getName());
         colNew.forReplicate(r).forChannel(col.getChannel()).makeDerived("cellHTS2", ImmutableSet.of(col)).makeNumeric(3).forPhenotype("phenotype");
 
         for (int i = 0; i < assayWells.size(); ++i) {
           AssayWell assayWell = assayWells.get(i);
-          colNew.createResultValue(assayWell, result[i][r - 1]);
+          colNew.createResultValue(assayWell, result[i][r - 1][c-1]);
         }
       }
     } else if (rMethod.equals(RMethod.SUMMARIZE_REPLICATES)) {
-      double[] result = new double[arrayDimensions.getNrWells() *  arrayDimensions.getNrPlates()];
-      result = rserveExtensions.tryEval(rConnection, rExpr2).asDoubles();
 
-      DataColumn colSumm = 
-        screenResult.createDataColumn("cellhts2_summarized").
-        makeNumeric(3).
-        forPhenotype("phenotype").
-        makeDerived("cellHTS2", Collections.<DataColumn>emptySet());
-      for (int i = 0; i < assayWells.size(); ++i) {
-        AssayWell assayWell = assayWells.get(i);
-        colSumm.createResultValue(assayWell, result[i]);
+      //TODO Add multichannel support. CellHTS2 2.8.0 does not provide it.
+      if (this.arrayDimensions.getNrChannels() == 1) {
+        log.debug("rExpr2 = " + rExpr2);
+        REXP output = rserveExtensions.tryEval(rConnection, rExpr2);
+        //return two matrix
+        int[] dim = output.dim();
+        
+        double [][][] result = convertOutputRserve (output);
+        // create summarized per channel 
+        
+        // looping through just to get the name, see different summarization per 
+        // 
+        for (int c=0; c < dim[2]; c++) { //number of channel
+          DataColumn colSumm = 
+            screenResult.createDataColumn("cellhts2_summarized").
+            makeNumeric(3).
+            forPhenotype("phenotype").
+            makeDerived("cellHTS2", Collections.<DataColumn>emptySet());
+          for (int i = 0; i < assayWells.size(); ++i) {
+            AssayWell assayWell = assayWells.get(i);
+            colSumm.createResultValue(assayWell, result[i][0][c]);
+          }
+        }
       }
     }
   }
@@ -779,27 +931,23 @@ public class CellHTS2 {
     // not necessary
 
     // 2. RUN R METHOD WRITEREPORT AND RETRIEVE
-    // TODO ADD "scored"=rcanss
-    String progressReport = ScreensaverProperties.getProperty("cellHTS2report.writeReport.progressReport");
-    if (progressReport == null) {
-      progressReport = "TRUE";
-    }else {
-       if (progressReport.equals("FALSE") || progressReport.equals("TRUE") ) {
-         ;
-       }else {
-         log.warn("In screensaver.properties the value for cellHTS2report.writeReport.progressReport is not valid. Only FALSE or TRUE are valid. " +
-            "Given value is: " + progressReport + ". Value set to TRUE in this run.");
-         progressReport = "TRUE";
-       }
-    }
    
     // In R 2.7.0 png needs cairo >= 1.2, in order to support lower versions like 1.0.2 
     // use value cairo1 for type
     String rCairo = "temp <- png; png <- function(...) { temp (type=\"cairo1\", ...) };";
     
-    String rExpr = rCairo + "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan,\"scored\"=rcanss), plotPlateArgs = TRUE,"
-        + "imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = \""
-        + this.reportOutputPath + "\")";
+    String rExpr = rCairo + "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan";
+    
+    //In case of multichannel, no rcanss object. Summarizing ScoredReplicates in case of multichannel data not support by cellHTS2
+    if (this.getArrayDimensions().getNrChannels() == 1) {
+      rExpr = rExpr + ",\"scored\"=rcanss";
+    }
+    rExpr = rExpr + "), plotPlateArgs = TRUE,"
+        + "imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = \"" + this.reportOutputPath +  "\"," 
+        + "negControls=rep(\"" + this.normalizePlatesNegControls.getValue()  + "\"," 
+        +  String.valueOf(this.arrayDimensions.getNrChannels()) + "));"; 
+    
+    log.debug("rExpr = " + rExpr);
 
     RserveExtensions rserveExtensions = new RserveExtensions();
     String indexUrl = rserveExtensions.tryEval(rConnection, rExpr).asString();
@@ -819,8 +967,8 @@ public class CellHTS2 {
       ScreenResult screenResult) {
     BiMap<Integer, Integer> plateNumber2SequenceNumber = HashBiMap.create();
     int nextSequenceNumber = 1;
-    for (AssayPlate assayPlate : screenResult.getScreen().getAssayPlatesDataLoaded()) {
-      plateNumber2SequenceNumber.put(assayPlate.getPlateNumber(), nextSequenceNumber++);
+    for (Integer plateNumber : screenResult.getPlateNumbers()) {
+      plateNumber2SequenceNumber.put(plateNumber, nextSequenceNumber++);
     }
     return plateNumber2SequenceNumber;
   }

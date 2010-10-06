@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
@@ -47,6 +48,10 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 public class MakeDummyEntitiesCellHTS2
 {
+  private static final ImmutableMap<String,AssayWellControlType> ASSAY_CONTROL_WELLS = ImmutableMap.of("A01", AssayWellControlType.ASSAY_POSITIVE_CONTROL,
+                                                                                                       "B01", AssayWellControlType.ASSAY_CONTROL,
+                                                                                                       "C01", AssayWellControlType.ASSAY_CONTROL_SHARED);
+
   // static members
   private static TestDataFactory dataFactory = new TestDataFactory();
 
@@ -102,7 +107,9 @@ public class MakeDummyEntitiesCellHTS2
       int row = (i % (nrPlateColumns * nrPlateRows)) / nrPlateColumns;
       int col = (i % (nrPlateColumns * nrPlateRows)) % nrPlateColumns;
       WellKey wellKey = new WellKey(plate, row, col);
-      Well well = library.createWell(wellKey, LibraryWellType.EXPERIMENTAL);
+      Well well = library.createWell(wellKey,
+                                     ASSAY_CONTROL_WELLS.containsKey(wellKey.getWellName()) ? LibraryWellType.EMPTY
+                                       : LibraryWellType.EXPERIMENTAL);
       ReagentVendorIdentifier rvi = new ReagentVendorIdentifier("Vendor" + id, "" + i);
       SilencingReagent reagent = well.createSilencingReagent(rvi, SilencingReagentType.SIRNA, "ACTG");
       reagent.getVendorGene().withEntrezgeneSymbol("geneEntrezSym" + wellKey)
@@ -127,12 +134,16 @@ public class MakeDummyEntitiesCellHTS2
     return (makeSimpleDummyScreenResult( withExcl,  withNull, nrPlateColumns,withoutA01ResultValue,false));
   }    
   
+  public static ScreenResult makeSimpleDummyScreenResult(boolean withExcl, boolean withNull, int nrPlateColumns,boolean withoutA01ResultValue, boolean inclNS){
+    return (makeSimpleDummyScreenResult( withExcl,  withNull, nrPlateColumns,withoutA01ResultValue,inclNS,false));
+  }
 
   public static ScreenResult makeSimpleDummyScreenResult(boolean withExcl,
                                                          boolean withNull,
                                                          int nrPlateColumns,
                                                          boolean withoutA01ResultValue,
-                                                         boolean inclNS)
+                                                         boolean inclNS,
+                                                         boolean multiChannel)
   {
 
     Screen screen = MakeDummyEntities.makeDummyScreen(1, ScreenType.RNAI); 
@@ -151,6 +162,14 @@ public class MakeDummyEntitiesCellHTS2
     // Define two replicates
     DataColumn normRep1 = screenResult.createDataColumn("rep1").forReplicate(1).forPhenotype("phenotype").makeNumeric(3);
     DataColumn normRep2 = screenResult.createDataColumn("rep2").forReplicate(2).forPhenotype("phenotype").makeNumeric(3);
+    
+    DataColumn rep1C2 = null;
+    DataColumn rep2C2 = null;
+    if (multiChannel) {
+      rep1C2 = screenResult.createDataColumn("c2_rep1").forReplicate(1).forChannel(2).forPhenotype("phenotype").makeNumeric(3);
+      rep2C2 = screenResult.createDataColumn("c2_rep2").forReplicate(2).forChannel(2).forPhenotype("phenotype").makeNumeric(3);
+    }
+
 
     // create ResultValues
     // [Well(00001:A01), Well(00001:A02), Well(00001:B01), Well(00001:B02),
@@ -213,31 +232,50 @@ public class MakeDummyEntitiesCellHTS2
       rep2Values.add(new Double(26));
       rep2Values.add(new Double(29));
     }
+    
+    ArrayList<Double> rep1C2Values = new ArrayList<Double>();
+    ArrayList<Double> rep2C2Values = new ArrayList<Double>();
+    if (multiChannel) {
+        
+      rep1C2Values.add(new Double(4));
+      rep1C2Values.add(new Double(6));
+      rep1C2Values.add(new Double(5));
+      rep1C2Values.add(new Double(6));
+      rep1C2Values.add(new Double(8));
+      rep1C2Values.add(new Double(7));
+
+      rep1C2Values.add(new Double(14));
+      rep1C2Values.add(new Double(16));
+      rep1C2Values.add(new Double(15));
+      rep1C2Values.add(new Double(16));
+      rep1C2Values.add(new Double(18));
+      rep1C2Values.add(new Double(17));
+ 
+      rep2C2Values.add(new Double(6));
+      rep2C2Values.add(new Double(8));
+      rep2C2Values.add(new Double(7));
+      rep2C2Values.add(new Double(8));
+      rep2C2Values.add(new Double(10));
+      rep2C2Values.add(new Double(9));
+
+      rep2C2Values.add(new Double(16));
+      rep2C2Values.add(new Double(18));
+      rep2C2Values.add(new Double(17));
+      rep2C2Values.add(new Double(18));
+      rep2C2Values.add(new Double(20));
+      rep2C2Values.add(new Double(19));
+      
+    }
 
 
     AssayWellControlType assayWellControlType = null;
     for (int i = 0; i < wells.size(); ++i) {
       Well well = wells.get(i);
-      String wellName = well.getWellKey()
-                            .getWellName();
-      if (wellName.equals("A01")) {
-        assayWellControlType = AssayWellControlType.ASSAY_POSITIVE_CONTROL;
-      }
-      else if (wellName.equals("B01")) {
-        assayWellControlType = AssayWellControlType.ASSAY_CONTROL;
-      }
-      else if (wellName.equals("C01")) {
-        assayWellControlType = AssayWellControlType.ASSAY_CONTROL_SHARED;
-      }
-      else {
-        assayWellControlType = null;
-      }
-
+      String wellName = well.getWellKey().getWellName();
       boolean exclude = false;
-      if (withExcl && i == 2) { // set exclude for plate 1 well B01
+      if (withExcl && i == 2) { // set exclude for plate 1 well B01. In case of multiple channels, all channels.
         exclude = true;
       }
-
 
       // also test for null value
       if (withNull) {
@@ -245,14 +283,22 @@ public class MakeDummyEntitiesCellHTS2
         rep2Values.set(2, null);
       }
       
+      AssayWell assayWell = screenResult.createAssayWell(well);
+      if (ASSAY_CONTROL_WELLS.containsKey(assayWell.getLibraryWell().getWellName())) {
+        assayWell.setAssayWellControlType(ASSAY_CONTROL_WELLS.get(assayWell.getLibraryWell().getWellName()));
+      }
+
       if (withoutA01ResultValue && wellName.equals("A01")) { } 
       else {
-        AssayWell assayWell = screenResult.createAssayWell(well);
         normRep1.createResultValue(assayWell, rep1Values.get(i), exclude);
         normRep2.createResultValue(assayWell, rep2Values.get(i), exclude);
+        if (multiChannel) {
+          rep1C2.createResultValue(assayWell, rep1C2Values.get(i), exclude);
+          rep2C2.createResultValue(assayWell, rep2C2Values.get(i), exclude);
+        }
       }
     }
-
+    screen.setLibraryPlatesDataLoadedCount(2);
     return screenResult;
   }
 

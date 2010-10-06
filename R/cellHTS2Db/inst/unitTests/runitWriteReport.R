@@ -18,7 +18,7 @@ testWriteReport1 <- function(debug=FALSE) {
 	## .. 
 
 	out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan,"scored"=rcanss), plotPlateArgs = TRUE, 
-			 imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/",progressReport=FALSE)
+			 imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/")
 	
 	## 3. CHECK
 	## TODO check for all the expected files, starting with index.html 
@@ -52,10 +52,60 @@ testWriteReportInclScored <- function(debug=FALSE) {
    ## debug(imageScreen)
    ##,
    out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan,"scored"=rcanss ), plotPlateArgs = FALSE, imageScreenArgs = list(ar=1), map=TRUE,
-		   force = TRUE, outdir = "/tmp/screensaver/output2/",progressReport=FALSE)
+		   force = TRUE, outdir = "/tmp/screensaver/output2/",negControls="N")
 
    ## 3. CHECK
    ## TODO check for all the expected files, starting with index.html 
    
 }
-
+testWriteReportMultiChannel <- function(debug=FALSE) {
+#   
+	## The workdirectory is set by the Makefile to tests/ because there is doRUnit.R
+	## Paths are therefore relative to that directory
+	
+	##1. PREPARE INPUT
+	source("../inst/unitTests/createRca.R")
+	rca <- createRca(4)
+	rcan <- normalizePlates(rca,method="median");
+	rcans <- scoreReplicates(rcan, method="zscore")
+	
+	if (debug) 
+		debug(writeReport)
+	
+	##2. RUN METHOD WRITEREPORT #, TODO Add "scored"=rcanss. Currently not possible. The location for some text is
+	## calculated and failed in case to few samples.
+	## .. 
+	
+	out <- writeReport(raw=rca,normalized=rcan, plotPlateArgs = TRUE, 
+			imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/")
+	
+	## 3. CHECK
+	## TODO check for all the expected files, starting with index.html 
+	
+}	
+	
+testWriteReportMultiChannelSlog <- function(debug=FALSE) {
+#   
+	## The workdirectory is set by the Makefile to tests/ because there is doRUnit.R
+	## Paths are therefore relative to that directory
+	
+	##1. PREPARE INPUT
+	source("../inst/unitTests/createRca.R")
+	rca <- createRca(4,TRUE) #with Slog
+	rcan <- normalizePlates(rca,method="median");
+	rcans <- scoreReplicates(rcan, method="zscore")
+	
+	if (debug) 
+		debug(writeReport)
+	
+	##2. RUN METHOD WRITEREPORT #, TODO Add "scored"=rcanss. Currently not possible. The location for some text is
+	## calculated and failed in case to few samples.
+	## .. 
+	
+	out <- writeReport(raw=rca,normalized=rcan, plotPlateArgs = TRUE, 
+			imageScreenArgs = list(zrange=c( -4, 8), ar=1), map=TRUE,force = TRUE, outdir = "/tmp/screensaver/output/")
+	
+	## 3. CHECK
+	## TODO check for all the expected files, starting with index.html 
+	
+}	

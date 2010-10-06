@@ -59,3 +59,38 @@ testScoreReplicates1 <- function(debug=FALSE) {
 	checkEquals(dataScoresTarget,round(dataScores,7))
 
 }
+
+roundup3 <- function(x) {
+	(trunc((x + 0.0005) * 1000))/1000
+}
+
+testScoresReplicatesMultiChannels <- function(debug=FALSE) {
+	source("../inst/unitTests/createRca.R")
+	source("../inst/unitTests/makeDummies.R")	
+	rca <- createRca(testSet=4)
+	
+	if (debug) 
+		debug(normalizePlates)
+	
+	#In case of multiple channels, you have to provide a value for the negControls
+	#scale multiplicative
+	rcan <- normalizePlates(rca,method="negatives",scale="multiplicative", negControls=c("NS","NS"));
+	
+	if (debug)
+		debug(scoreReplicates) 
+	
+	# 2. RUN METHOD
+	#	ScoreReplicates		
+	rcans <- scoreReplicates(rcan, method="zscore")
+	
+	dataScores <- Data(rcans)
+	
+	dataScoresTarget <- makeScoresReplicatesultipleChannelsTarget()	
+	
+	browser()
+	checkEquals(dataScoresTarget,round(dataScores,7)) #R rounds downwards	
+
+	
+	
+	
+}
