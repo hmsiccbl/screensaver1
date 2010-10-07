@@ -106,6 +106,9 @@ From within an R session this information is retrieved via help(cellHTS2Db).
 Running R-based Unit Tests
 --------------------------
 
+The R-based unit tests are used to verify that the R code provided with 
+Screensaver is functioning properly.
+
 Install RUnit, if necessary:
 
   $ R
@@ -118,7 +121,6 @@ Run tests in R:
   > setwd("$SCREENSAVER/R/cellHTS2Db/tests")
   > testResult <- runTestFile("doRUnit.R")
   > printTextProtocol(testResult)
-
 
 
 Installing and Building cellHTS2Db R package
@@ -143,3 +145,16 @@ and build dates in $SCREENSAVER/R/cellHTS2Db/DESCRIPTION, then run:
   
 For general information about creating an R package see 
 http://cran.r-project.org/doc/manuals/R-exts.pdf
+
+
+
+Running Java-based Unit Tests
+-----------------------------
+
+The Java-based unit tests are used to verify that Screensaver application is 
+functioning properly and can communicate with the R/cellHTS2 installation and 
+a running Rserve daemon.  To run the tests:
+
+  1. Follow the installation and Rserve start-up instructions, above.
+  2. From within Eclipse, run the JUnit tests found in the test class
+     edu.harvard.med.screensaver.analysis.cellhts2.CellHTS2Test
