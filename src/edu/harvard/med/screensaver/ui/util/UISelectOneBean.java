@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import javax.faces.model.SelectItem;
 
+import com.google.common.collect.Iterables;
 import org.apache.log4j.Logger;
 
 public class UISelectOneBean<T> extends UISelectBean<T>
@@ -69,7 +70,14 @@ public class UISelectOneBean<T> extends UISelectBean<T>
   }
   
   @Override
-  public void setDomain(Collection<T> objects)
+  final public void setDomain(Collection<T> objects)
+  {
+    setDomain(objects,
+              objects.size() > 0 ? Iterables.get(objects, 0) : null);
+  }
+
+  public void setDomain(Collection<T> objects,
+                        T defaultSelection)
   {
     super.setDomain(objects);
     
@@ -84,15 +92,15 @@ public class UISelectOneBean<T> extends UISelectBean<T>
       _selection = null;
       _selectionKey = EMPTY_KEY;
       _selectionIndex = 0;
+      _defaultSelection = null;
     }
     else {
-      _defaultSelection = objects.iterator().next();
+      _defaultSelection = defaultSelection;
       if (!_key2Obj.containsKey(_selectionKey)) {
         setSelection(_defaultSelection);
       }
     }
   }
-
   
 
   /**

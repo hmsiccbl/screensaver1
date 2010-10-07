@@ -373,7 +373,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   {
     UISelectOneBean<Integer> rowsPerPageSelector = super.buildRowsPerPageSelector();
     rowsPerPageSelector.deleteObserver(_rowsPerPageSelectorObserver);
-    rowsPerPageSelector.setDomain(Lists.newArrayList(1, 12, 24, 48, 96, 384));
+    rowsPerPageSelector.setDomain(Lists.newArrayList(1, 12, 24, 48, 96, 384), 24);
     rowsPerPageSelector.setSelectionIndex(1);
     rowsPerPageSelector.addObserver(_rowsPerPageSelectorObserver);
     return rowsPerPageSelector;

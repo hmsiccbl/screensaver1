@@ -353,7 +353,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   public boolean isUnrestrictedReagent()
   {
     Well well = getEntity();
-    return well.getLatestReleasedReagent() != null
+    return well != null && well.getLatestReleasedReagent() != null
       && !well.getLatestReleasedReagent().isRestricted();
   }
 

@@ -76,7 +76,7 @@ public class WellFinder extends AbstractBackingBean
       showMessage("libraries.plateWellListParseError", error.getSecond());
     }
     _wellsBrowser.searchWells(parseResult.getParsedWellKeys());
-    if (parseResult.getParsedWellKeys().size() == 1) {
+    if (_wellsBrowser.getRowCount() == 1) {
       _wellsBrowser.getRowsPerPageSelector().setSelection(1);
     }
     resetSearchFields();
