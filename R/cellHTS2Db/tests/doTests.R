@@ -1,4 +1,4 @@
-setwd("~/ws_scr_nki_trunk/screensaver/R/cellHTS2Db/tests")
+setwd("~/ws_scr_trunk/screensaver/R/cellHTS2Db/tests")
 
 #source("doRUnit.R")
 #debug <- TRUE

@@ -404,13 +404,13 @@ makeTestSet4 <- function(withSlog=FALSE) {
 	testSet <- list(xraw=xraw, dimPlate=dimPlate, pd=pd, status=status, intensityFiles=intensityFiles,
 			name="Dummy_experiment", conf=conf, geneIDs=geneIDs)
 	
-	if (withSlog) { #for both channels A02 are flagged
-		#slog <- data.frame(Plate=c(1,1),Well=c("A02","A02"),Sample=c(1,1),Flag=c("NA","NA"),Channel=c(1,2), stringsAsFactors=FALSE)
+	if (withSlog) { 
 	slog <- data.frame(Plate=c(1),Well=c("A02"),Sample=c(1),Flag=c("NA"),Channel=c(2), stringsAsFactors=FALSE)
 		listSlog <- list(slog=slog)
 		testSet <- c(testSet, listSlog)
 	}
-
+	
+	return(testSet)
 }	
 
 makeIntensityFiles4 <- function() {

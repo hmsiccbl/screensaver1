@@ -87,7 +87,6 @@ testScoresReplicatesMultiChannels <- function(debug=FALSE) {
 	
 	dataScoresTarget <- makeScoresReplicatesultipleChannelsTarget()	
 	
-	browser()
 	checkEquals(dataScoresTarget,round(dataScores,7)) #R rounds downwards	
 
 	

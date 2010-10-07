@@ -77,7 +77,7 @@ testConfigureDbMultichannelSlog <- function(debug=FALSE) {
 	
 	#3.2 screenLog: a data.frame containing what was read from input file 'logFile'.
 	# Channel is added in the configureDb
-	targetSlog <- data.frame(Plate=c(1,1),Well=c("A02","A02"),Sample=c(1,1),Flag=c("NA","NA"),Channel=c(1,2), stringsAsFactors=FALSE)
+	targetSlog <- data.frame(Plate=c(1),Well=c("A02"),Sample=c(1),Flag=c("NA"),Channel=c(2), stringsAsFactors=FALSE)
 	
 	#Check slot screenLog
 	checkEquals(targetSlog,rc@screenLog)
