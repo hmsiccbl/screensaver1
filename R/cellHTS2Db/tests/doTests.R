@@ -7,7 +7,7 @@ library(cellHTS2Db)
  library(RUnit)
 
 ###
-## ## #######	I RUNNING THE TESTSUITE
+## ## #######	I RUNNING THE TESTSqUITE
 testSuite <- defineTestSuite(name="CellHTS2 integration",dirs="../inst/unitTests/", testFileRegexp="^runit.+[rR]$",
           testFuncRegexp="^test.+")
 isValidTestSuite(testSuite)
@@ -68,7 +68,7 @@ source("../inst/unitTests/runitNormalizePlates.R")
 ## #debug(testNormalizeNegativesMultiChannels)
 ## testNormalizeNegMultiChannels()
 ##testNormNegMultiChannels10()
-testNormLoess(debug)
+testNormLoess()
 
 
 ## debug(testNormalizeMeanWithSlog)
@@ -85,19 +85,19 @@ testNormLoess(debug)
 #debug(summarizeReplicates)
 #testSummarizeReplicates1(debug)
 
-## source("../inst/unitTests/runitWriteReport.R")
-## testWriteReportInclScored()
+source("../inst/unitTests/runitWriteReport.R")
+testWriteReportInclScored()
 
-## source("../inst/unitTests/runitWriteReport.R")
-## testWriteReport1()
+#source("../inst/unitTests/runitWriteReport.R")
+#testWriteReport1()
 
 ## 
 ## source("../inst/unitTests/runitWriteReport.R")
 ## testWriteReportMultiChannel()
 
-source("../inst/unitTests/runitWriteReport.R")
+#source("../inst/unitTests/runitWriteReport.R")
 #debug(testWriteReportMultiChannelSlog)
-testWriteReportMultiChannelSlog()
+#testWriteReportMultiChannelSlog()
 
 
 #source("../inst/unitTests/runitIntegrationTest.R")

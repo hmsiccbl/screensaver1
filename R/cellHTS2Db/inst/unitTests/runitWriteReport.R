@@ -41,7 +41,7 @@ testWriteReportInclScored <- function(debug=FALSE) {
    ##1. PREPARE INPUT
    source("../inst/unitTests/createRca.R")
    rca <- createRca(testSet=2)
-   rcan <- normalizePlates(rca,method="median");
+   rcan <- normalizePlates(rca,method="negatives",negControls="N");
    rcans <- scoreReplicates(rcan, method="zscore")
    rcanss <- summarizeReplicates(rcans,summary="mean");
    
@@ -52,7 +52,7 @@ testWriteReportInclScored <- function(debug=FALSE) {
    ## debug(imageScreen)
    ##,
    out <- writeReport(cellHTSlist=list("raw"=rca,"normalized"=rcan,"scored"=rcanss ), plotPlateArgs = FALSE, imageScreenArgs = list(ar=1), map=TRUE,
-		   force = TRUE, outdir = "/tmp/screensaver/output2/",negControls="N")
+		   force = TRUE, outdir = "/tmp/screensaver/output/",negControls="N")
 
    ## 3. CHECK
    ## TODO check for all the expected files, starting with index.html 

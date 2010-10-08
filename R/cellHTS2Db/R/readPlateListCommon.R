@@ -53,7 +53,7 @@ readPlateListCommon <- function(xraw,name,dimPlate,pd,status,intensityFiles) {
 			assayData=adata,
 			phenoData=pdata,
 			featureData=fdata,
-			plateList=cbind(pd[,1,drop=FALSE], status=I(status), pd[,-1,drop=FALSE]),
+			plateList=cbind(pd[,1,drop=FALSE], Status=I(status), pd[,-1,drop=FALSE]),
 			intensityFiles=intensityFiles
 			#state=c("configured"=FALSE, "normalized"=FALSE, "scored"=FALSE, "annotated" = FALSE)
 			)

@@ -15,15 +15,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableSet;
 import org.apache.log4j.Logger;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableSet;
 
 import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
@@ -932,11 +933,7 @@ public class CellHTS2 {
 
     // 2. RUN R METHOD WRITEREPORT AND RETRIEVE
    
-    // In R 2.7.0 png needs cairo >= 1.2, in order to support lower versions like 1.0.2 
-    // use value cairo1 for type
-    String rCairo = "temp <- png; png <- function(...) { temp (type=\"cairo1\", ...) };";
-    
-    String rExpr = rCairo + "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan";
+    String rExpr = "writeReport(cellHTSlist=list(\"raw\"=rca,\"normalized\"=rcan";
     
     //In case of multichannel, no rcanss object. Summarizing ScoredReplicates in case of multichannel data not support by cellHTS2
     if (this.getArrayDimensions().getNrChannels() == 1) {

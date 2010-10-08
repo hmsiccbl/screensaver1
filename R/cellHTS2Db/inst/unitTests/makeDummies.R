@@ -531,7 +531,7 @@ makeReadPlateListTarget <- function() {
 	vPlates <- c(1,1,2,2)
 	vRep <- c(1,2,1,2)
 	vChannel <- c(1,1,1,1)
-	plateListTarget <- data.frame(Filename=vFileNames, status=I(vStatus), Plate=as.integer(vPlates) , Replicate=as.integer(vRep) ,Channel=as.integer(vChannel),stringsAsFactors=FALSE)
+	plateListTarget <- data.frame(Filename=vFileNames, Status=I(vStatus), Plate=as.integer(vPlates) , Replicate=as.integer(vRep) ,Channel=as.integer(vChannel),stringsAsFactors=FALSE)
 
 	## CREATE DATA TARGET
 	## In the assaydata slot, the data is now three in stead of 4 dimensional as the plates are now below each other
