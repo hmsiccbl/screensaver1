@@ -22,7 +22,7 @@ As of 2010-10-06, the following versions appear to be compatible:
    * Bioconductor 2.5
    * Biobase 2.6.1
    * cellHTS2 2.10.5
-   * cellHTS2Db 0.42
+   * cellHTS2Db 0.99
   
 We recommend running the cellHTS2Db tests to verify your own environment; 
 see testing instructions below.   

@@ -12,7 +12,9 @@ createRca <- function(testSet=1,withSlog =FALSE) {
 		testSet <- makeTestSet4(withSlog)		
 	}else if (testSet==5) {
 		testSet <- makeTestSet5()		
-	}		
+	}else if (testSet==6) {
+			testSet <- makeTestSet6()		
+		}	
 	xrawd <- dim(testSet$xraw)
 	r <- readPlateListDb(testSet$xraw, testSet$name, testSet$dimPlate[1], testSet$dimPlate[2])
 	

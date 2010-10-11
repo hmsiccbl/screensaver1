@@ -160,13 +160,23 @@ testNormMedianWithSlog <- function(debug=FALSE) {
  }
  
  testNormLoess <- function (debug=FALSE) {
+	 #load("../data/jUnitLoess/rca.Rda")
 	 
-	 load("../data/jUnitLoess/rca.Rda")
+	 source("../inst/unitTests/createRca.R")
+	 rca <- createRca(testSet=6,F) 
+	 
+	 #TODO find out: when replacing load rca.Rda to createRca(testSet=6) , 
+	## Error in checkEquals(rca, rca2) : in which rca results from rca.Rda and rca2 from createRca
+	##         Attributes: < Component 6: Attributes: < Component 3: Component 4: Modes: character, logical > >
+	##         Attributes: < Component 6: Attributes: < Component 3: Component 4: target is character, current is logical > >
+	##         Attributes: < Component 9: Attributes: < Component 3: Component 2: 2 string mismatches > >
+	## This has however no effect on the checkEquals with the load rcan.Rda.
 	 
 	 rcanActual <- normalizePlates(rca,scale="additive",method="loess",negControls=rep("N",1));
 
-	 load("../data/jUnitLoess/rcan.Rda")
-	 
-	 checkEquals(Data(rcanActual),Data(rcan))
+	 #load("../data/jUnitLoess/rcan.Rda")
+	 rcanTarget <- makeNormLoessTarget()
+	
+	 checkEquals(round(Data(rcanActual),6),rcanTarget)
  }
  

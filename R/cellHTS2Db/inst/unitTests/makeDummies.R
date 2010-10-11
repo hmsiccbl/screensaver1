@@ -112,6 +112,21 @@ makeIntensityFiles <- function() {
 	
 }
 
+makePd2 <- function() {
+	
+	## pd
+	vFileNames <- c("P1R1C1.txt","P1R2C1.txt","P2R1C1.txt","P2R2C1.txt")
+	vPlates <- c(1,1,2,2)
+	vRep <- c(1,2,1,2)
+	vChannel <- c(1,1,1,1)
+	
+	pd <- data.frame(Filename=vFileNames, Plate=as.integer(vPlates) , Replicate=as.integer(vRep) ,Channel=as.integer(vChannel),stringsAsFactors=FALSE)
+	
+	return(pd)
+}
+
+
+
 makeTestSet2 <- function() {
 	
 	#1. PARAMETERS FOR THE READPLATELIST
@@ -143,12 +158,7 @@ makeTestSet2 <- function() {
 	dimPlate <-  c(nrow=as.integer(2), ncol=as.integer(3))
 	
 	## pd
-	vFileNames <- c("P1R1C1.txt","P1R2C1.txt","P2R1C1.txt","P2R2C1.txt")
-	vPlates <- c(1,1,2,2)
-	vRep <- c(1,2,1,2)
-	vChannel <- c(1,1,1,1)
-	
-	pd <- data.frame(Filename=vFileNames, Plate=as.integer(vPlates) , Replicate=as.integer(vRep) ,Channel=as.integer(vChannel),stringsAsFactors=FALSE)
+	pd <- makePd2();
 	
 	## status		
 	status =  rep("OK",nrow(pd))
@@ -174,7 +184,6 @@ makeTestSet2 <- function() {
 	#		$ Content: chr  "sample" "pos" "neg"	
 	negAnno <- "N"
 	conf <- data.frame(Plate=c("*","*","*"), Well=c("*","A01","B01"), Content=c("sample","pos",negAnno),stringsAsFactors=FALSE)
-	
 	
 	#3. ANNOTATION
 	##  geneIDs : Same content als de geneID file  f.e.
@@ -803,5 +812,95 @@ makeScoresReplicatesultipleChannelsTarget <- function (){
 	dataScoresTarget[,2,2] <- c(-8.0938891,-2.6979630,-5.3959261,-2.6979630,2.6979630,0.0000000,-2.6979630,0.0000000,-1.3489815,0.0000000,2.6979630,1.3489815)
 		
 	return(dataScoresTarget)
+	
+}
+
+makeIntensityFiles6 <- function() {
+	nrPlates = 2
+	nrReps=2
+	nrChannels = 1
+	intensityFilesTarget = vector(mode="list", length=nrPlates * nrReps * nrChannels)
+	
+	names(intensityFilesTarget) <- c("P1R1C1.txt","P1R2C1.txt","P2R1C1.txt","P2R2C1.txt")
+	intensityFilesTarget[[1]] <- I(c("P1R1C1.txt\tA01\t1","P1R1C1.txt\tA02\t2","P1R1C1.txt\tA03\t3","P1R1C1.txt\tB01\t4","P1R1C1.txt\tB02\t5","P1R1C1.txt\tB03\t6"))
+	intensityFilesTarget[[2]] <- I(c("P1R2C1.txt\tA01\t9","P1R2C1.txt\tA02\t10","P1R2C1.txt\tA03\t11","P1R2C1.txt\tB01\t14","P1R2C1.txt\tB02\t13","P1R2C1.txt\tB03\t14"))
+	intensityFilesTarget[[3]] <- I(c("P2R1C1.txt\tA01\t7","P2R1C1.txt\tA02\t9","P2R1C1.txt\tA03\t10","P2R1C1.txt\tB01\t11","P2R1C1.txt\tB02\t15","P2R1C1.txt\tB03\t13"))
+	intensityFilesTarget[[4]] <- I(c("P2R2C1.txt\tA01\t15","P2R2C1.txt\tA02\t19","P2R2C1.txt\tA03\t21","P2R2C1.txt\tB01\t23","P2R2C1.txt\tB02\t26","P2R2C1.txt\tB03\t29"))
+	
+	return(intensityFilesTarget)
+	
+}
+
+makeTestSet6 <- function() {
+	
+	#1. PARAMETERS FOR THE READPLATELIST
+	## A. GENERAL
+	nrWells = 6
+	nrPlates = 2
+	nrReps = 2
+	nrChannels = 1
+	
+	xraw <- array(as.numeric(NA), dim=c(nrWells,nrPlates,nrReps,nrChannels))
+	#plate 1, replicate 1
+	p1r1 <- c(1,2,3,4,5,6)
+	xraw[,1,1,] <- p1r1
+	
+	#plate 2, replicate 1
+	p2r1 <- c(7,9,10,11,15,13)
+	xraw[,2,1,] <- p2r1
+	
+	#plate 1, replicate 2
+	p1r2 <- c(9,10,11,14,13,14)
+	xraw[,1,2,] <- p1r2
+	
+	#plate 2, replicate 2
+	p2r2 <- c(15,19,21,23,26,29)
+	xraw[,2,2,] <- p2r2
+	
+	## dimPlate
+	dimPlate <-  c(nrow=as.integer(2), ncol=as.integer(3))
+	
+	## 1.1 READPLATELISTCOMMON
+	pd <- makePd2();
+	
+	## status		
+	status =  rep("OK",nrow(pd))
+	
+	## intensityFile
+	intensityFiles <- makeIntensityFiles6()
+	
+	#2. CONF PARAMETER FOR THE CONFIGURATION
+	plate <- c(rep("1",6),rep("2",6)) 
+	well <- rep(c("A01","A02","A03","B01","B02","B03"),2)
+
+	content <- c("pos","sample","sample","N","sample","sample","pos","sample","sample","N","sample","sample")
+	conf <- data.frame(Plate=plate, Well=well, Content=content,stringsAsFactors=FALSE)
+	
+	#3. ANNOTATION
+
+	hfaid <- rep(NA,2)
+	geneid <- c("GENE0","GENE1","GENE2","GENE3","GENE4","GENE5","GENE6","GENE7","GENE8","GENE9","GENE10","GENE11")
+	
+	geneIDs <- data.frame(Plate=plate, Well=well, HFAID=hfaid, GeneID=geneid,stringsAsFactors=FALSE)
+	
+	testSet <- list(xraw=xraw, dimPlate=dimPlate, pd=pd, status=status, intensityFiles=intensityFiles,
+			nrRowsPlate=2, nrColsPlate=3, name="Dummy_experiment", conf=conf, geneIDs=geneIDs)
+	
+}
+
+makeNormLoessTarget <- function () {
+	
+	nrWells = 6
+	nrPlates = 2
+	nrReps = 2
+	nrChannels = 1
+	
+	dimNames <- list(Features=c(1:12),Sample=c(1:2),Channels="ch1")
+	dataNormTarget <- array(as.numeric(NA), dim=c(nrWells * nrPlates,nrReps,nrChannels), dimnames=dimNames)
+	
+	dataNormTarget[,1,1] <- c(1.000000,0.672963,1.009555,4.000000,0.000000,0.000000,7.000000,3.028888,3.365703,11.000000,0.000000,0.000000)	
+	dataNormTarget[,2,1] <- c(9.000000,3.365703,3.702295,14.000000,0.000000,0.000000,15.000000,6.394739,7.067850,23.000000,0.000000,0.000000)
+	
+	return(dataNormTarget)
 	
 }

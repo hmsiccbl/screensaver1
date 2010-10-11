@@ -65,10 +65,12 @@ testResult <- runTestSuite(testSuite, useOwnErrorHandler=TRUE)
 #testNormalizeNegatives(T)
 
 source("../inst/unitTests/runitNormalizePlates.R")
+testNormLoess()
+
 ## #debug(testNormalizeNegativesMultiChannels)
 ## testNormalizeNegMultiChannels()
 ##testNormNegMultiChannels10()
-testNormLoess()
+
 
 
 ## debug(testNormalizeMeanWithSlog)
