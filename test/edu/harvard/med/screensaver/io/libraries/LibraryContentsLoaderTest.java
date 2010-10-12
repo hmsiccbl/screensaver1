@@ -17,6 +17,10 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -32,6 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -45,11 +50,6 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreatorTest;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 /**
  * Check the test {@link LibraryCreatorTest} as there is overlap between these tests.
@@ -87,18 +87,26 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
    */
   public void testCleanDataRNAi() throws IOException
   {
-    Library library = new Library("Human1",
+    Library library = new Library(_admin,
+                                  "Human1",
                                   "Human1",
                                   ScreenType.RNAI,
                                   LibraryType.SIRNA,
                                   50001,
-                                  50001);
+                                  50001,
+                                  PlateSize.WELLS_384);
     libraryCreator.createLibrary(library);
 
 
     // make sure that there is at least one other library in the system 
-    Library otherLibrary = new Library("Human2","Human2",ScreenType.RNAI,LibraryType.SIRNA,
-                                       50002,50002);
+    Library otherLibrary = new Library(_admin,
+                                       "Human2",
+                                       "Human2",
+                                       ScreenType.RNAI,
+                                       LibraryType.SIRNA,
+                                       50002,
+                                       50002,
+                                       PlateSize.WELLS_384);
     librariesDao.loadOrCreateWellsForLibrary(otherLibrary);
     otherLibrary.createContentsVersion(new AdministrativeActivity(_admin, new LocalDate(),
                                                                   AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
@@ -204,12 +212,14 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
 
   public void testDirtyDataRNAi() throws FileNotFoundException, IOException
   {
-    Library library = new Library("Human1",
+    Library library = new Library(_admin,
+                                  "Human1",
                                   "Human1",
                                   ScreenType.RNAI,
                                   LibraryType.SIRNA,
                                   50001,
-                                  50003);
+                                  50003,
+                                  PlateSize.WELLS_384);
     libraryCreator.createLibrary(library);
 
     String filename = "dirty_data_rnai.xls";
@@ -245,13 +255,14 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
   public void testCleanDataRNAi_withDuplex() throws IOException
   {
     // Load all of the duplex libraries needed for the pool library
-    Library library = new Library(
-      "Human1_duplex",
-      "Human1_duplex",
-      ScreenType.RNAI,
-      LibraryType.SIRNA,
-      50440,
-      50443);
+    Library library = new Library(_admin,
+                                  "Human1_duplex",
+                                  "Human1_duplex",
+                                  ScreenType.RNAI,
+                                  LibraryType.SIRNA,
+                                  50440,
+                                  50443,
+                                  PlateSize.WELLS_384);
     libraryCreator.createLibrary(library);
 
     String filename = "clean_rnai_duplex_50440_50443.xls";
@@ -274,13 +285,14 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
     
     // now load the pool library that references the duplex library
     
-    library = new Library(
-      "Human1_pool",
-      "Human1_pool",
-      ScreenType.RNAI,
-      LibraryType.SIRNA,
-      50439,
-      50439);
+    library = new Library(_admin,
+                          "Human1_pool",
+                          "Human1_pool",
+                          ScreenType.RNAI,
+                          LibraryType.SIRNA,
+                          50439,
+                          50439,
+                          PlateSize.WELLS_384);
     library.setPool(true);
     libraryCreator.createLibrary(library);
 
@@ -363,12 +375,14 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
   public void testCleanDataNaturalProduct() throws IOException
   {
     int TEST_PLATE = 2037;
-    Library library = new Library(
-        "NaturalProdTest",
-        "Natprod", 
-        ScreenType.SMALL_MOLECULE,
-        LibraryType.NATURAL_PRODUCTS,
-        TEST_PLATE, TEST_PLATE);
+    Library library = new Library(_admin,
+                                  "NaturalProdTest",
+                                  "Natprod",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.NATURAL_PRODUCTS,
+                                  TEST_PLATE,
+                                  TEST_PLATE,
+                                  PlateSize.WELLS_384);
     library.setProvider("test vendor");
     libraryCreator.createLibrary(library);
 
@@ -407,7 +421,14 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
 
   public void testCleanDataSmallMolecule() throws IOException
   {
-    Library library = new Library("COMP", "COMP", ScreenType.SMALL_MOLECULE, LibraryType.OTHER, 1534, 1534);
+    Library library = new Library(_admin,
+                                  "COMP",
+                                  "COMP",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.OTHER,
+                                  1534,
+                                  1534,
+                                  PlateSize.WELLS_384);
     String filename = "clean_data_small_molecule.sdf";
     File file = new File(TEST_INPUT_FILE_DIR, filename);
     InputStream stream = null;

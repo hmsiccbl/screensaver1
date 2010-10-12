@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -75,12 +76,14 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public MockDaoForScreenResultImporter()
   {
     _library =
-      new Library(NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
+      new Library(null,
+                  NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
                   NAME_OF_PSEUDO_LIBRARY_FOR_IMPORT,
                   ScreenType.SMALL_MOLECULE,
                   LibraryType.OTHER,
                   1,
-                  Integer.MAX_VALUE);
+                  Integer.MAX_VALUE,
+                  PlateSize.WELLS_384);
   }
 
   public Well findWell(WellKey wellKey)
@@ -180,7 +183,8 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   {
     if (entityClass.equals(Screen.class) && propertyName.equals("screenNumber")) {
       LabHead user = new LabHead("First", "Last", null);
-      Screen screen = new Screen(user,
+      Screen screen = new Screen(null,
+                                 user,
                                  user,
                                  (Integer) propertyValue,
                                  ScreenType.SMALL_MOLECULE,

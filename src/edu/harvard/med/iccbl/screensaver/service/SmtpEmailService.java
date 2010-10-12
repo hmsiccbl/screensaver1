@@ -252,7 +252,8 @@ public class SmtpEmailService implements EmailService
 
     try {
       if (!app.processOptions(/* acceptDatabaseOptions= */true,
-      /* showHelpOnError= */true)) {
+                              /* acceptAdminOptions = */true,
+                              /* showHelpOnError= */true)) {
         return;
       }
 

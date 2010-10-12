@@ -24,12 +24,11 @@ import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
-
-import com.google.common.collect.Lists;
 
 import edu.harvard.med.iccbl.screensaver.io.AdminEmailApplication;
 import edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater;
@@ -136,7 +135,9 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
                          .create(TEST_ONLY[SHORT_OPTION_INDEX]));
     
     try {
-      if (!app.processOptions(/* acceptDatabaseOptions= */true, /* showHelpOnError= */true)) 
+      if (!app.processOptions(/* acceptDatabaseOptions= */true,
+                              /* acceptAdminOptions= */true,
+                              /* showHelpOnError= */true))
       {
         return;
       }
@@ -148,7 +149,7 @@ public class SmallMoleculeUserExpirationUpdater extends AdminEmailApplication
         {
           try 
           {
-            AdministratorUser admin = app.getAdminUser(dao);
+            AdministratorUser admin = app.findAdministratorUser();
             EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
 
             int timeToExpireDays = DEFAULT_EXPIRATION_TIME_DAYS;

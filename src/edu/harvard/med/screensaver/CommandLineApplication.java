@@ -30,6 +30,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+
 /**
  * Convenience class for instantiating a Screensaver-based command-line
  * application. The main purpose of this class is to house the Spring framework
@@ -249,19 +252,23 @@ public class CommandLineApplication
 
   /**
    * @param acceptDatabaseOptions
+   * @param acceptAdminUserOptions
    * @param showHelpOnError if true and method returns false, calling code
-   *          should not call {@link #getCommandLineOptionValue} or
-   *          {@link #isCommandLineFlagSet(String)}.
-   * @return true if options were successfully processed, false if options were not successfully processed and showHelpOnError is true
+   *          should not call {@link #getCommandLineOptionValue} or {@link #isCommandLineFlagSet(String)}.
+   * @return true if options were successfully processed, false if options were not successfully processed and
+   *         showHelpOnError is true
    * @throws ParseException if options were not successfully processed and showHelpOnError is false
    */
   @SuppressWarnings("unchecked")
-  public boolean processOptions(
-    boolean acceptDatabaseOptions,
-    boolean showHelpOnError) throws ParseException
+  public boolean processOptions(boolean acceptDatabaseOptions,
+                                boolean acceptAdminUserOptions,
+                                boolean showHelpOnError) throws ParseException
   {
     if (acceptDatabaseOptions) {
       addDatabaseOptions();
+    }
+    if (acceptAdminUserOptions) {
+      addAdministratorUserOptions();
     }
 
     try {
@@ -367,6 +374,54 @@ public class CommandLineApplication
                          create("D"));
   }
 
+  @SuppressWarnings("static-access")
+  private void addAdministratorUserOptions()
+  {
+    addCommandLineOption(OptionBuilder
+                         .hasArg()
+                         .withArgName("user ID #")
+                         .withDescription("the User ID of the administrative user performing the load")
+                         .withLongOpt("admin-id")
+                         .create("A"));
+
+    addCommandLineOption(OptionBuilder
+                         .hasArg()
+                         .withArgName("login ID")
+                         .withDescription("the Login ID of the administrative user performing the load")
+                         .withLongOpt("admin-login-id")
+                         .create("AL"));
+
+    addCommandLineOption(OptionBuilder
+                         .hasArg()
+                         .withArgName("eCommons ID")
+                         .withDescription("the eCommons ID of the administrative user performing the load")
+                         .withLongOpt("user-ecommons-id")
+                         .create("AE"));
+  }
+
+  public AdministratorUser findAdministratorUser() throws ParseException
+  {
+    AdministratorUser admin;
+    String criterionMessage;
+    GenericEntityDAO dao = (GenericEntityDAO) getSpringBean("genericEntityDao");
+    if (isCommandLineFlagSet("-A")) {
+      Integer userId = getCommandLineOptionValue("-A", Integer.class);
+      admin = dao.findEntityById(AdministratorUser.class, userId);
+      criterionMessage = "User ID=" + userId;
+    }
+    else if (isCommandLineFlagSet("-AL")) {
+      String loginId = getCommandLineOptionValue("-AL");
+      admin = dao.findEntityByProperty(AdministratorUser.class, "loginId", loginId);
+      criterionMessage = "Login ID=" + loginId;
+    }
+    else {
+      throw new IllegalArgumentException("option --admin-id or --admin-login-id must be speciifed");
+    }
+    if (admin == null) {
+      throw new IllegalArgumentException("no administrator user found with " + criterionMessage);
+    }
+    return admin;
+  }
 
   public void setSpringConfigurationResource(String springConfigurationResource)
   {
@@ -375,7 +430,6 @@ public class CommandLineApplication
     }
     _springConfigurationResource = springConfigurationResource;
   }
-
 
   public Option getLastAccessOption()
   {

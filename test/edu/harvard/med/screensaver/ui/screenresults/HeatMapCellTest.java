@@ -12,12 +12,15 @@ package edu.harvard.med.screensaver.ui.screenresults;
 import java.awt.Color;
 import java.text.NumberFormat;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
@@ -25,9 +28,8 @@ import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapCell;
-
-import org.apache.log4j.Logger;
 
 public class HeatMapCellTest extends AbstractSpringTest
 {
@@ -40,7 +42,14 @@ public class HeatMapCellTest extends AbstractSpringTest
     Screen screen = MakeDummyEntities.makeDummyScreen(115);
     ScreenResult screenResult = screen.createScreenResult();
     DataColumn col = screenResult.createDataColumn("col1");
-    Library library = new Library("library 1", "lib1", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 1);
+    Library library = new Library((AdministratorUser) screen.getCreatedBy(),
+                                  "library 1",
+                                  "lib1",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  1,
+                                  PlateSize.WELLS_384);
     Well well = library.createWell(new WellKey(1, "A01"), LibraryWellType.EXPERIMENTAL);
     AssayWell assayWell = screenResult.createAssayWell(well);
     col.createResultValue(assayWell, 1.0);

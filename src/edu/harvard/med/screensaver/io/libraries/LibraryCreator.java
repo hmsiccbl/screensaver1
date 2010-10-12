@@ -89,7 +89,7 @@ public class LibraryCreator
           .withDescription(StringUtils.makeListString(Arrays.asList(PlateSize.values()), ", "))
             .withLongOpt("plate-size").create("ps"));
 
-      if (!app.processOptions(true, true)) {
+      if (!app.processOptions(true, true, true)) {
         System.exit(1);
       }
 
@@ -115,7 +115,14 @@ public class LibraryCreator
             app.getCommandLineOptionEnumValue("ps", PlateSize.class) : ScreensaverConstants.DEFAULT_PLATE_SIZE;
 
       Library library = 
-        new Library(libraryName, shortName, screenType, libraryType, startPlate, endPlate, plateSize);
+        new Library(app.findAdministratorUser(),
+                    libraryName,
+                    shortName,
+                    screenType,
+                    libraryType,
+                    startPlate,
+                    endPlate,
+                    plateSize);
       library.setPool(isPool);
       library.setDescription(description);
       library.setProvider(vendor);

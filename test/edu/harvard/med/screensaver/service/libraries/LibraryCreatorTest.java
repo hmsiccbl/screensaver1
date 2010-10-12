@@ -11,17 +11,19 @@ package edu.harvard.med.screensaver.service.libraries;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-
-import org.apache.log4j.Logger;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 /**
  * @author serickson
@@ -36,13 +38,15 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
   
   public void testCreateLibrary() throws ParseErrorsException, IOException
   {
-    final Library library = new Library(
-      "Human1",
-      "Human1",
-      ScreenType.RNAI,
-      LibraryType.SIRNA,
-      50439,
-      50439);
+    AdministratorUser adminUser = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    final Library library = new Library(adminUser,
+                                        "Human1",
+                                        "Human1",
+                                        ScreenType.RNAI,
+                                        LibraryType.SIRNA,
+                                        50439,
+                                        50439,
+                                        PlateSize.WELLS_384);
     library.setProvider("Dharmacon");
     library.setDescription("test library");
 
@@ -75,7 +79,7 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
     //  at edu.harvard.med.screensaver.db.GenericEntityDAOImpl$$EnhancerByCGLIB$$d60f3cb6.doInTransaction(<generated>)
     //  at edu.harvard.med.screensaver.service.libraries.LibraryCreatorTest.testCreateLibrary(LibraryCreatorTest.java:118)
  
-    Library library4 = new Library("library", "lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 50439, 50439);
+    Library library4 = new Library(adminUser, "library", "lib", ScreenType.RNAI, LibraryType.COMMERCIAL, 50439, 50439, PlateSize.WELLS_384);
     try {
       libraryCreator.createLibrary(library4);
       fail("expected failure on redundant library create");
@@ -90,7 +94,7 @@ public class LibraryCreatorTest extends AbstractSpringPersistenceTest
       fail(e.getMessage());
     }
     
-    Library library5 = new Library("library5", "lib5", ScreenType.RNAI, LibraryType.COMMERCIAL, 50438, 50441);
+    Library library5 = new Library(adminUser, "library5", "lib5", ScreenType.RNAI, LibraryType.COMMERCIAL, 50438, 50441, PlateSize.WELLS_384);
     try {
       libraryCreator.createLibrary(library5);
       fail("expected failure on conflicting plate range");

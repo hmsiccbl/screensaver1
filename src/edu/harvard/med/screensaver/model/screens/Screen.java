@@ -220,14 +220,15 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * @param studyType the study type
    * @param title the title
    */
-  public Screen(ScreeningRoomUser leadScreener,
+  public Screen(AdministratorUser createdBy,
+                ScreeningRoomUser leadScreener,
                 LabHead labHead,
                 Integer screenNumber,
                 ScreenType screenType,
                 StudyType studyType,
                 String title)
   {
-    super(null);
+    super(createdBy);
     _screenNumber = screenNumber;
     _screenType = screenType; // note: must be set before updateFacilityUsageRoleForAssociatedScreens() is called
     setLeadScreener(leadScreener);

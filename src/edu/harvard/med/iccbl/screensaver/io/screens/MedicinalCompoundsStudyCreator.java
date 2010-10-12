@@ -98,7 +98,7 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
     final MedicinalCompoundsStudyCreator app = new MedicinalCompoundsStudyCreator(args);
     app.addCommandLineOption(OptionBuilder.isRequired().hasArg().withArgName("workbook file").withLongOpt("input-file").create("f"));
     try {
-      if (!app.processOptions(true, true)) {
+      if (!app.processOptions(true, true, true)) {
         return;
       }
     }
@@ -127,7 +127,12 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
           LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(_dao, "Gregory", "Cuny", "gcuny@rics.bwh.harvard.edu", true, labAffiliation);
           ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(_dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu", false, null);
 
-          study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO, TITLE);
+          study = new Screen(findAdministratorUser(),
+                             leadScreener,
+                             labHead,
+                             STUDY_NUMBER,
+                             ScreenType.SMALL_MOLECULE,
+                             StudyType.IN_SILICO, TITLE);
           study.setSummary(SUMMARY);
 
           AnnotationType annotType = study.createAnnotationType("Notes on Suitability",

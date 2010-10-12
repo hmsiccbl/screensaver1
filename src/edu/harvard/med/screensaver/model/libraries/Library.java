@@ -44,7 +44,6 @@ import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
-import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -169,7 +168,8 @@ public class Library extends AuditedAbstractEntity<Integer>
    * @param startPlate the start plate
    * @param endPlate the end plate
    */
-  public Library(String libraryName,
+  public Library(AdministratorUser createdBy,
+                 String libraryName,
                  String shortName,
                  ScreenType screenType,
                  LibraryType libraryType,
@@ -177,7 +177,7 @@ public class Library extends AuditedAbstractEntity<Integer>
                  Integer endPlate,
                  PlateSize plateSize)
   {
-    super(null); /* TODO */
+    super(createdBy);
     _libraryName = libraryName;
     _shortName = shortName;
     _screenType = screenType;
@@ -186,16 +186,6 @@ public class Library extends AuditedAbstractEntity<Integer>
     _endPlate = endPlate;
     _plateSize = plateSize;
     setScreeningStatus(LibraryScreeningStatus.ALLOWED);
-  }
-
-  public Library(String libraryName,
-                 String shortName,
-                 ScreenType screenType,
-                 LibraryType libraryType,
-                 Integer startPlate,
-                 Integer endPlate)
-  {
-    this(libraryName, shortName, screenType, libraryType, startPlate, endPlate, ScreensaverConstants.DEFAULT_PLATE_SIZE);
   }
 
   @Override

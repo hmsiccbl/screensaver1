@@ -16,7 +16,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
+import org.apache.commons.io.IOUtils;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -33,11 +36,6 @@ import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.util.CryptoUtils;
-
-import org.apache.commons.io.IOUtils;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningRoomUser>
 {
@@ -277,12 +275,12 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     ScreeningRoomUser labMember2 = new ScreeningRoomUser("Lab", "Member2");
     labMember1.setLab(labHead.getLab());
     
-    Screen screen1 = new Screen(labMember1, labHead, 1, ScreenType.RNAI, StudyType.IN_VITRO, "1");
-    Screen screen2 = new Screen(labHead, labHead, 1, ScreenType.RNAI, StudyType.IN_VITRO, "2");
-    Screen screen3 = new Screen(labMember1, null, 1, ScreenType.RNAI, StudyType.IN_VITRO, "3");
-    Screen screen4 = new Screen(labMember1, null, 1, ScreenType.RNAI, StudyType.IN_VITRO, "4");
+    Screen screen1 = new Screen(null, labMember1, labHead, 1, ScreenType.RNAI, StudyType.IN_VITRO, "1");
+    Screen screen2 = new Screen(null, labHead, labHead, 1, ScreenType.RNAI, StudyType.IN_VITRO, "2");
+    Screen screen3 = new Screen(null, labMember1, null, 1, ScreenType.RNAI, StudyType.IN_VITRO, "3");
+    Screen screen4 = new Screen(null, labMember1, null, 1, ScreenType.RNAI, StudyType.IN_VITRO, "4");
     screen4.addCollaborator(labMember2);
-    Screen screen5 = new Screen(labMember2, labHead, 1, ScreenType.RNAI, StudyType.IN_VITRO, "5");
+    Screen screen5 = new Screen(null, labMember2, labHead, 1, ScreenType.RNAI, StudyType.IN_VITRO, "5");
     screen5.addCollaborator(labMember1);
     
     assertEquals(new HashSet<Screen>(Arrays.asList(screen1, screen2, screen5)), labHead.getAllAssociatedScreens());
@@ -407,7 +405,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     ScreeningRoomUser screener1 = new ScreeningRoomUser("Lab", "Screener1");
     ScreeningRoomUser screener2 = new ScreeningRoomUser("Lab", "Screener2");
 
-    Screen smScreen = new Screen(screener1, labHead1, 1, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, "sm");
+    Screen smScreen = new Screen(null, screener1, labHead1, 1, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, "sm");
     doTestUpdateFacilityUsagesRolesForAssociatedScreenss(labHead1,
                                                          labHead2,
                                                          screener1,
@@ -415,7 +413,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                                          smScreen,
                                                          FacilityUsageRole.SMALL_MOLECULE_SCREENER);
     
-    Screen rnaiScreen = new Screen(screener1, labHead1, 1, ScreenType.RNAI, StudyType.IN_VITRO, "rnai");
+    Screen rnaiScreen = new Screen(null, screener1, labHead1, 1, ScreenType.RNAI, StudyType.IN_VITRO, "rnai");
     doTestUpdateFacilityUsagesRolesForAssociatedScreenss(labHead1,
                                                          labHead2,
                                                          screener1,

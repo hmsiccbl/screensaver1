@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -70,12 +71,14 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
       public void runTransaction()
       {
         genericEntityDao.persistEntity(screen);
-        Library library = new Library("library for screen 115 test",
+        Library library = new Library((AdministratorUser) screen.getCreatedBy(),
+                                      "library for screen 115 test",
                                       "lwr",
                                       ScreenType.SMALL_MOLECULE,
                                       LibraryType.COMMERCIAL,
                                       1,
-                                      3);
+                                      3,
+                                      PlateSize.WELLS_384);
         for (int iPlate = 1; iPlate <= 3; ++iPlate) {
           int plateNumber = iPlate;
           for (int col = 'A'; col < 'Q'; col++) {

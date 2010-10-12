@@ -15,12 +15,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
-import edu.harvard.med.screensaver.util.StringUtils;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+
+import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * A command-line application for issuing HQL queries to a Screensaver database.
@@ -43,7 +43,7 @@ public class HibernateConsole
     BufferedReader br = null;
     try {
       CommandLineApplication app = new CommandLineApplication(args);
-      if (!app.processOptions(true, true)) {
+      if (!app.processOptions(true, false, true)) {
         System.exit(1);
       }
       br = new BufferedReader(new InputStreamReader(System.in));

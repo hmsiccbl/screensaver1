@@ -13,17 +13,14 @@ import java.beans.IntrospectionException;
 import java.math.BigDecimal;
 
 import junit.framework.TestSuite;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.model.AbstractEntityInstanceTest;
-import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-
-import org.joda.time.LocalDate;
 
 public class LibraryTest extends AbstractEntityInstanceTest<Library>
 {
@@ -44,8 +41,8 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Library library = new Library("Small Molecule Library", "smLib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 2, PlateSize.WELLS_384);
         AdministratorUser adminUser = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        Library library = new Library(adminUser, "Small Molecule Library", "smLib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 2, PlateSize.WELLS_384);
         library.createContentsVersion(new AdministrativeActivity(adminUser, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
         PlateSize plateSize = library.getPlateSize();
         for (int plate = library.getStartPlate(); plate <= library.getEndPlate(); ++plate) {

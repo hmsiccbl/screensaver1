@@ -17,8 +17,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
-
+import com.google.common.base.Joiner;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
@@ -30,7 +29,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
-import com.google.common.base.Joiner;
+import edu.harvard.med.screensaver.CommandLineApplication;
 
 /**
  * Utility for manipulating schemas, via Spring+Hibernate.
@@ -69,7 +68,7 @@ public class SchemaUtil extends AbstractDAO implements ApplicationContextAware
                              withDescription("drop and create the database schema").
                              create('r'));
     try {
-      if (!app.processOptions(/*acceptDatabaseOptions=*/true, /*showHelpOnError=*/true)) {
+      if (!app.processOptions(/* acceptDatabaseOptions= */true, false, /* showHelpOnError= */true)) {
         return;
       }
 

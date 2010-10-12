@@ -475,8 +475,9 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
 
   public static Library makeRNAiDuplexLibrary(String name, int startPlate, int endPlate, PlateSize plateSize)
   {
-    Library library = new Library(name, name, ScreenType.RNAI, LibraryType.COMMERCIAL, startPlate, endPlate);
-    LibraryContentsVersion contentsVersion = library.createContentsVersion(new AdministrativeActivity(new AdministratorUser(name, "Admin", "", "", "", "", name, ""), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+    AdministratorUser adminUser = new AdministratorUser(name, "Admin", "", "", "", "", name, "");
+    Library library = new Library(adminUser, name, name, ScreenType.RNAI, LibraryType.COMMERCIAL, startPlate, endPlate, PlateSize.WELLS_384);
+    LibraryContentsVersion contentsVersion = library.createContentsVersion(new AdministrativeActivity(adminUser, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
     NEXT_PLATE:
     for (int plateNumber = startPlate; plateNumber <= endPlate; plateNumber++) {
       int wellsToCreateOnPlate = plateSize.getWellCount();

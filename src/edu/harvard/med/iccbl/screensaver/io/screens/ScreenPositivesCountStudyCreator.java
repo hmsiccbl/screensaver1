@@ -154,7 +154,8 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                                           .create(TEST_ONLY[SHORT_OPTION_INDEX]));
     try {
       if (!app.processOptions(/* acceptDatabaseOptions= */true,
-      /* showHelpOnError= */true)) {
+                              /* acceptAdminUserOptions= */true,
+                              /* showHelpOnError= */true)) {
         return;
       }
 
@@ -166,7 +167,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
         public void runTransaction()
         {
           try {
-            AdministratorUser admin = app.getAdminUser(dao);
+            AdministratorUser admin = app.findAdministratorUser();
 
             boolean replaceStudyIfExists = app.isCommandLineFlagSet(OPTION_REPLACE[SHORT_OPTION_INDEX]);
             String title = null;
@@ -316,7 +317,8 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                                                                            true,
                                                                            null);
 
-    study = new Screen(labHead,
+    study = new Screen(admin,
+                       labHead,
                        labHead,
                        studyNumber,
                        screenType,

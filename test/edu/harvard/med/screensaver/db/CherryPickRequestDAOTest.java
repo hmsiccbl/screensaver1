@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -227,35 +228,41 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   
   private CherryPickRequest makeCherryPickRequest(final int screenNumber)
   {
-    Library duplexLibrary = new Library("Duplexes library 1",
+    AdministratorUser adminUser1 = new AdministratorUser("Admin" + screenNumber, "User1", "", "", "", "", "admin1" + screenNumber, "");
+    Library duplexLibrary = new Library(adminUser1,
+                                        "Duplexes library 1",
                                         "duplib1",
                                         ScreenType.RNAI,
                                         LibraryType.COMMERCIAL,
                                         3,
-                                        4);
-    duplexLibrary.createContentsVersion(new AdministrativeActivity(new AdministratorUser("Admin" + screenNumber, "User1", "", "", "", "", "admin1" + screenNumber, ""), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+                                        4,
+                                        PlateSize.WELLS_384);
+    duplexLibrary.createContentsVersion(new AdministrativeActivity(adminUser1, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
     for (int i = 0; i < 2; ++i ) {
       Well well = duplexLibrary.createWell(new WellKey(duplexLibrary.getStartPlate(), 0, i), LibraryWellType.EXPERIMENTAL);
       well.createSilencingReagent(new ReagentVendorIdentifier("vendor", "d" + i), 
                                   SilencingReagentType.SIRNA, "ATCG");
     }
-    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) duplexLibrary.getLatestContentsVersion().getLoadingActivity().getCreatedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    duplexLibrary.getLatestContentsVersion().release(new AdministrativeActivity(adminUser1, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.saveOrUpdateEntity(duplexLibrary);
     duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, Library.wells.to(Well.reagents).getPath(), Library.wells.to(Well.latestReleasedReagent).getPath());
 
-    Library poolLibrary = new Library("Pools library 1",
+    AdministratorUser adminUser2 = new AdministratorUser("Admin" + screenNumber, "User2", "", "", "", "", "admin2" + screenNumber, "");
+    Library poolLibrary = new Library(adminUser2,
+                                      "Pools library 1",
                                       "poollib1",
                                       ScreenType.RNAI,
                                       LibraryType.COMMERCIAL,
                                       1,
-                                      2);
-    poolLibrary.createContentsVersion(new AdministrativeActivity(new AdministratorUser("Admin" + screenNumber, "User2", "", "", "", "", "admin2" + screenNumber, ""), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
+                                      2,
+                                      PlateSize.WELLS_384);
+    poolLibrary.createContentsVersion(new AdministrativeActivity(adminUser2, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
     Well poolWell1 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 1, new WellName("A01"));
     Iterator<Well> duplexWellsIter = duplexLibrary.getWells().iterator();
     poolWell1.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
     Well poolWell2 = CherryPickRequestAllocatorTest.makeRNAiWell(poolLibrary, 2, new WellName("P24"));
     poolWell2.<SilencingReagent>getPendingReagent().withDuplexWell(duplexWellsIter.next());
-    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) poolLibrary.getLatestContentsVersion().getLoadingActivity().getCreatedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
+    poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity(adminUser2, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.saveOrUpdateEntity(poolLibrary);
 
     Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);

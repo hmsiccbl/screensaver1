@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -83,7 +84,9 @@ public class MakeDummyEntities
   {
     LabHead labHead = makeDummyLabHead(screenNumber, "Lab", "Head");
     ScreeningRoomUser leadScreener = makeDummyUser(screenNumber, "Lead", "Screener");
-    Screen screen = new Screen(leadScreener,
+    AdministratorUser admin = new AdministratorUser("Admin", "Screen", "", "", "", "", "", "");
+    Screen screen = new Screen(admin,
+                               leadScreener,
                                labHead,
                                screenNumber,
                                screenType,
@@ -201,12 +204,16 @@ public class MakeDummyEntities
     if (nPlates > 1000) {
       throw new IllegalArgumentException("too many plates requested");
     }
-    Library library = new Library("library " + id,
+
+    AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    Library library = new Library(admin,
+                                  "library " + id,
                                   "l" + id,
                                   screenType,
                                   LibraryType.COMMERCIAL,
                                   startPlate,
-                                  endPlate);
+                                  endPlate,
+                                  PlateSize.WELLS_384);
     dataFactory.newInstance(LibraryContentsVersion.class, library);
     int nWells = nPlates * library.getPlateSize().getWellCount();
     List<Well> wells = new ArrayList<Well>(nWells);

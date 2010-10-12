@@ -15,6 +15,7 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
@@ -30,7 +31,24 @@ public class AbstractDAOTest extends AbstractSpringPersistenceTest
 {
 
   private static final Logger log = Logger.getLogger(AbstractDAOTest.class);
+  private Library _library;
 
+  @Override
+  protected void onSetUp() throws Exception
+  {
+    super.onSetUp();
+    _library = new Library(null,
+                           "library Q",
+                           "Q",
+                           ScreenType.SMALL_MOLECULE,
+                           LibraryType.KNOWN_BIOACTIVES,
+                           1,
+                           2,
+                           PlateSize.WELLS_96);
+    _library.createWell(new WellKey(27, "A01"), LibraryWellType.EXPERIMENTAL);
+    _library.createWell(new WellKey(27, "A02"), LibraryWellType.EXPERIMENTAL);
+    _library.createWell(new WellKey(27, "A03"), LibraryWellType.EXPERIMENTAL);
+  }
 
   // protected instance fields
 
@@ -41,19 +59,10 @@ public class AbstractDAOTest extends AbstractSpringPersistenceTest
         {
           public void runTransaction()
           {
-            Library library = new Library(
-              "library Q",
-              "Q",
-              ScreenType.SMALL_MOLECULE,
-              LibraryType.KNOWN_BIOACTIVES,
-              1,
-              2);
-            library.createWell(new WellKey(27, "A01"), LibraryWellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A02"), LibraryWellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A03"), LibraryWellType.EXPERIMENTAL);
-            genericEntityDao.saveOrUpdateEntity(library);
+            genericEntityDao.saveOrUpdateEntity(_library);
             throw new RuntimeException("fooled ya!");
           }
+
         });
       fail("exception thrown from transaction didnt come thru");
     }
@@ -69,17 +78,7 @@ public class AbstractDAOTest extends AbstractSpringPersistenceTest
         {
           public void runTransaction()
           {
-            Library library = new Library(
-              "library Q",
-              "Q",
-              ScreenType.SMALL_MOLECULE,
-              LibraryType.KNOWN_BIOACTIVES,
-              1,
-              2);
-            library.createWell(new WellKey(27, "A01"), LibraryWellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A02"), LibraryWellType.EXPERIMENTAL);
-            library.createWell(new WellKey(27, "A03"), LibraryWellType.EXPERIMENTAL);
-            genericEntityDao.saveOrUpdateEntity(library);
+            genericEntityDao.saveOrUpdateEntity(_library);
           }
         });
     }

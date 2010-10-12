@@ -31,7 +31,6 @@ import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.TestDataFactory;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
-import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -52,13 +51,10 @@ public class WellsSdfDataExporterTest extends AbstractSpringPersistenceTest
     public void runTransaction()
     {
       TestDataFactory dataFactory = new TestDataFactory();
-      Library library = new Library(
-        "dummy",
-        "shortDummy",
-        ScreenType.SMALL_MOLECULE,
-        LibraryType.COMMERCIAL,
-        1,
-        1);
+      Library library = dataFactory.newInstance(Library.class);
+      library.setScreenType(ScreenType.SMALL_MOLECULE);
+      library.setStartPlate(1);
+      library.setEndPlate(1);
       librariesDao.loadOrCreateWellsForLibrary(library);
       LibraryContentsVersion lcv1 = dataFactory.newInstance(LibraryContentsVersion.class, library);
       Set<Well> wellSet = library.getWells();

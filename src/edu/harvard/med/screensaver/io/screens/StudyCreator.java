@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -65,6 +66,7 @@ public class StudyCreator
   protected ScreenType screenType;
   protected StudyType studyType;
   protected String summary;
+  protected AdministratorUser createdBy;
   protected DateTime dateCreated;
   protected File screenResultFile;
 
@@ -84,7 +86,7 @@ public class StudyCreator
     app = new CommandLineApplication(args);
     configureCommandLineArguments(app);
 
-    if (!app.processOptions(true, true)) {
+    if (!app.processOptions(true, false, true)) {
       throw new IllegalArgumentException("invalid usage");
     }
 
@@ -95,6 +97,7 @@ public class StudyCreator
     screenType = app.getCommandLineOptionEnumValue("y", ScreenType.class);
     studyType = app.getCommandLineOptionEnumValue("yy", StudyType.class);
     summary = app.isCommandLineFlagSet("s") ? app.getCommandLineOptionValue("s") : null;
+    createdBy = app.findAdministratorUser();
 
     labHeadFirstName = app.getCommandLineOptionValue("hf");
     labHeadLastName = app.getCommandLineOptionValue("hl");
@@ -214,7 +217,7 @@ public class StudyCreator
       log.info("set lab head for lead screener");
     }
 
-    Screen study = new Screen(leadScreener, labHead, studyNumber, screenType, studyType, title);
+    Screen study = new Screen(createdBy, leadScreener, labHead, studyNumber, screenType, studyType, title);
     study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);
     return study;

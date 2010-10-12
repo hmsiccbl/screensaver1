@@ -13,11 +13,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
-
-import com.google.common.collect.Sets;
 
 import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPrivacyExpirationUpdater;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -94,7 +93,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
   private Screen createScreen(String title, ScreenType type)
   {
     log.info("leads" + leadScreener);
-    Screen screen = new Screen(leadScreener, labHead, screen_number_counter++, type, StudyType.IN_VITRO, title);
+    Screen screen = new Screen(null, leadScreener, labHead, screen_number_counter++, type, StudyType.IN_VITRO, title);
     screen.addCollaborator(collaborator);
     screen.createStatusItem(new LocalDate(), StatusValue.ACCEPTED);
     genericEntityDao.persistEntity(screen);

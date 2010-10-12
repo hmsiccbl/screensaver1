@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -26,6 +28,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.MolecularFormula;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
@@ -34,9 +37,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<SmallMoleculeCherryPickRequest>
 {
@@ -63,8 +63,8 @@ public class SmallMoleculeCherryPickRequestTest extends CherryPickRequestTest<Sm
     {
       public void runTransaction()
       {
-        Library library = new Library("Small Molecule Library", "smlib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 10);
         AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+        Library library = new Library(admin, "Small Molecule Library", "smlib", ScreenType.SMALL_MOLECULE, LibraryType.COMMERCIAL, 1, 10, PlateSize.WELLS_384);
         /*LibraryContentsVersion libraryContentsVersion =*/ 
         library.createContentsVersion(new AdministrativeActivity(admin, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_LOADING));
         librariesDao.loadOrCreateWellsForLibrary(library);

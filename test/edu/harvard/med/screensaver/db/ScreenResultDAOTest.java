@@ -12,10 +12,10 @@ package edu.harvard.med.screensaver.db;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -664,12 +665,14 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     col1.makePartitionPositiveIndicator();
     DataColumn col2 = screenResult.createDataColumn("DataColumn2");
     col2.makeBooleanPositiveIndicator();
-    Library library = new Library("library 1",
+    Library library = new Library((AdministratorUser) screen.getCreatedBy(),
+                                  "library 1",
                                   "lib1",
                                   ScreenType.SMALL_MOLECULE,
                                   LibraryType.COMMERCIAL,
                                   1,
-                                  1);
+                                  1,
+                                  PlateSize.WELLS_384);
     for (int i = 1; i <= 10; ++i) {
       int plateNumber = i;
       Well well = library.createWell(new WellKey(plateNumber, "A01"), LibraryWellType.EXPERIMENTAL);
@@ -710,13 +713,14 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     ScreenResult screenResult = screen.createScreenResult();
     DataColumn col1 = screenResult.createDataColumn("Raw Value").makeNumeric(3);
     DataColumn col2 = screenResult.createDataColumn("Derived Value").makeNumeric(3);
-    Library library = new Library(
-      "library 1",
-      "lib1",
-      ScreenType.SMALL_MOLECULE,
-      LibraryType.COMMERCIAL,
-      1,
-      1);
+    Library library = new Library((AdministratorUser) screen.getCreatedBy(),
+                                  "library 1",
+                                  "lib1",
+                                  ScreenType.SMALL_MOLECULE,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  1,
+                                  PlateSize.WELLS_384);
     for (int iPlate = 1; iPlate <= 3; ++iPlate) {
       int plateNumber = iPlate;
       for (int iWell = 0; iWell < 10; ++iWell) {

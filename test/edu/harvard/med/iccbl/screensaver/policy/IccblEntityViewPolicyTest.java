@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -430,14 +431,19 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
   
   public void testSilencingReagentSequenceRestriction()
   {
-    Library library = new Library("rnai library", "rnai lib",
-                                  ScreenType.RNAI, LibraryType.COMMERCIAL,
-                                  1, 1);
+    AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
+    Library library = new Library(admin,
+                                  "rnai library",
+                                  "rnai lib",
+                                  ScreenType.RNAI,
+                                  LibraryType.COMMERCIAL,
+                                  1,
+                                  1,
+                                  PlateSize.WELLS_384);
     new TestDataFactory().newInstance(LibraryContentsVersion.class, library);
     SilencingReagent reagent = 
       library.createWell(new WellKey(1, 0, 0), LibraryWellType.EXPERIMENTAL).createSilencingReagent(new ReagentVendorIdentifier("vendor", "sirnai1"), SilencingReagentType.SIRNA, "ACTG");
 
-    AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
     admin.addScreensaverUserRole(ScreensaverUserRole.SCREENSAVER_USER);
     admin.addScreensaverUserRole(ScreensaverUserRole.READ_EVERYTHING_ADMIN);
 
@@ -825,12 +831,14 @@ public class IccblEntityViewPolicyTest extends AbstractTransactionalSpringContex
     genericEntityDao.saveOrUpdateEntity(admUsers[0]);
     admUsers[0].addScreensaverUserRole(ScreensaverUserRole.LIBRARIES_ADMIN);
 
-    Library library = new Library("library 1",
+    Library library = new Library(admUsers[0],
+                                  "library 1",
                                   "lib1",
                                   ScreenType.RNAI,
                                   LibraryType.COMMERCIAL,
                                   100001,
-                                  100002);
+                                  100002,
+                                  PlateSize.WELLS_384);
     library.setOwner(users[0]);
     librariesDao.loadOrCreateWellsForLibrary(library);
     genericEntityDao.saveOrUpdateEntity(library);

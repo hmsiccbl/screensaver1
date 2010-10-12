@@ -14,6 +14,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
@@ -25,14 +33,6 @@ import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
 
 /**
  * Command-line application that deprecates a set of wells
@@ -50,24 +50,22 @@ public class WellDeprecator
   {
     final CommandLineApplication app = new CommandLineApplication(args);
     try {
-      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("eCommons ID").withLongOpt("user-performed-by").withDescription("eCommons ID of administrator performing this well deprecation activity").create("p"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("eCommons ID").withLongOpt("user-approved-by").withDescription("eCommons ID of administrator that approved this well deprecation activity").create("a"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("yyyy-mm-dd").withLongOpt("approval-date").withDescription("date this well deprecation activity was approved").create("d"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("text").withLongOpt("comments").create("c"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("file").withLongOpt("input-file").withDescription("workbook file containing list of wells to be deprecated").create("f"));
-      if (!app.processOptions(true, true)) {
+      if (!app.processOptions(true, true, true)) {
         System.exit(1);
       }
 
       String comments = app.getCommandLineOptionValue("c");
       String approvedByEcommonsId = app.getCommandLineOptionValue("a");
-      String performedByEcommonsId = app.getCommandLineOptionValue("p");
       LocalDate dateApproved = app.getCommandLineOptionValue("d", DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN)).toLocalDate();
 
       GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
       final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
-      AdministratorUser performedBy = findAdminUser(performedByEcommonsId, dao);
-      AdministratorUser approvedBy = findAdminUser(approvedByEcommonsId, dao);
+      AdministratorUser performedBy = app.findAdministratorUser();
+      AdministratorUser approvedBy = findPerformedByAdminUser(approvedByEcommonsId, dao);
 
       final AdministrativeActivity activity =
         new AdministrativeActivity(performedBy,
@@ -103,8 +101,8 @@ public class WellDeprecator
     }
   }
 
-  private static AdministratorUser findAdminUser(String performedByEcommonsId,
-                                                 GenericEntityDAO dao)
+  private static AdministratorUser findPerformedByAdminUser(String performedByEcommonsId,
+                                                            GenericEntityDAO dao)
     throws Exception
   {
     AdministratorUser performedBy =

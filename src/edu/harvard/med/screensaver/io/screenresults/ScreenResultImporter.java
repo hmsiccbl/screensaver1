@@ -13,9 +13,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Iterator;
 
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.math.IntRange;
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;
@@ -24,11 +28,6 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.EntityNotFoundException;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
-
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.math.IntRange;
-import org.apache.log4j.Logger;
 
 public class ScreenResultImporter extends CommandLineApplication
 {
@@ -50,7 +49,6 @@ public class ScreenResultImporter extends CommandLineApplication
   static final String[] PLATE_NUMBER_END_OPTION = { "ep", "end-plate" };
   static final String[] IGNORE_DUPLICATE_ERRORS_OPTION = { "ignoreDuplicates", "ignore-duplicate-well-errors" };
   static final String[] INCREMENTAL_FLUSH_OPTION = { "incrementalFlush", "incremental-flush" };
-  static final String[] ADMIN_USER_ECOMMONS_ID_OPTION = { "u", "ecommons-id", "the eCommons ID of the administrative user performing the load" };
   static final String[] COMMENTS = { "c", "comments", "Comments to be recorded for this screen result data loading activity" };
   static final String[] DELETE_EXISTING = { "d", "delete", "Delete existing screen result, if it exists" };
 
@@ -75,12 +73,6 @@ public class ScreenResultImporter extends CommandLineApplication
                                           .withDescription("the file location of the Excel workbook file holding the Screen Result metadata")
                                           .withLongOpt(INPUT_FILE_OPTION[LONG_OPTION])
                                           .create(INPUT_FILE_OPTION[SHORT_OPTION]));
-    app.addCommandLineOption(OptionBuilder.hasArg()
-                             .withArgName("ecommonsId")
-                             .isRequired()
-                             .withDescription("the eCommons ID of the administrator performing the data loading")
-                             .withLongOpt(ADMIN_USER_ECOMMONS_ID_OPTION[LONG_OPTION])
-                             .create(ADMIN_USER_ECOMMONS_ID_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.hasArg()
                              .withArgName("comments")
                              .isRequired(false)
@@ -119,6 +111,7 @@ public class ScreenResultImporter extends CommandLineApplication
     File inputFile = null;
     try {
       if (!app.processOptions(/* acceptDatabaseOptions= */true,
+                              /* acceptAdminUserOptions= */true,
                               /* showHelpOnError= */true)) {
         return;
 
@@ -164,9 +157,7 @@ public class ScreenResultImporter extends CommandLineApplication
         
         log.info("incrementalFlush: " + incrementalFlush);
 
-        String ecommonsId = 
-          app.getCommandLineOptionValue(ADMIN_USER_ECOMMONS_ID_OPTION[SHORT_OPTION]);
-        AdministratorUser admin = findAdministratorUser(ecommonsId, dao);
+        AdministratorUser admin = app.findAdministratorUser();
         deleteIfNecessary(app, screen, admin);
         String comments = 
           app.getCommandLineOptionValue(COMMENTS[SHORT_OPTION]);
@@ -213,15 +204,6 @@ public class ScreenResultImporter extends CommandLineApplication
       ScreenResultDeleter screenResultDeleter = (ScreenResultDeleter) app.getSpringBean("screenResultDeleter");
       screenResultDeleter.deleteScreenResult(screen.getScreenResult(), admin);
     }
-  }
-
-  private static AdministratorUser findAdministratorUser(String ecommonsId, GenericEntityDAO dao)
-  {
-    AdministratorUser admin = dao.findEntityByProperty(AdministratorUser.class, "ECommonsId", ecommonsId);
-    if (admin == null) {
-      throw new IllegalArgumentException("no administrator user with eCommons ID: " + ecommonsId);
-    }
-    return admin;
   }
 
   @SuppressWarnings("unchecked")

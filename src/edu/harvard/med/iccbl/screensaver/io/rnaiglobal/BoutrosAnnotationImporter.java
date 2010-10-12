@@ -16,7 +16,6 @@ import java.util.List;
 
 import jxl.Cell;
 import jxl.Sheet;
-
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
@@ -59,11 +58,11 @@ public class BoutrosAnnotationImporter
   @SuppressWarnings("static-access")
   public static void main(String[] args) throws ParseException
   {
-    CommandLineApplication app = new CommandLineApplication(args);
+    final CommandLineApplication app = new CommandLineApplication(args);
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("data file to import").withArgName("Excel workbook file").create("f"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for RNAi Global user").withArgName("password").create("rp"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withDescription("password for user accounts associated with study").withArgName("password").create("up"));
-    if (!app.processOptions(true, true)) {
+    if (!app.processOptions(true, true, true)) {
       System.exit(1);
     }
 
@@ -117,7 +116,8 @@ public class BoutrosAnnotationImporter
                                                             null,
                                                             dao);
           leadScreener.setLab(labHead.getLab());
-          Screen screen = new Screen(leadScreener,
+          Screen screen = new Screen(app.findAdministratorUser(),
+                                     leadScreener,
                                      labHead,
                                      STUDY_NUMBER,
                                      ScreenType.RNAI,

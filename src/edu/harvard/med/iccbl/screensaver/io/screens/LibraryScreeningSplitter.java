@@ -45,12 +45,11 @@ public class LibraryScreeningSplitter
   private static final String MIGRATION_COMMENT_TEMPLATE = "This library screening was created automatically during data migration.  It was created to accommodate library plates that were screened multiple times within the original library screening (#).";
   private static Logger log = Logger.getLogger(LibraryScreeningSplitter.class);
 
-  @SuppressWarnings("static-access")
   public static void main(String[] args) throws ParseException
   {
     final CommandLineApplication app = new CommandLineApplication(args);
 
-    if (!app.processOptions(true, true)) {
+    if (!app.processOptions(true, false, true)) {
       System.exit(1);
     }
 

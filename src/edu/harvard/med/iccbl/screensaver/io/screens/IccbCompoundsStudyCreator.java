@@ -47,9 +47,9 @@ public class IccbCompoundsStudyCreator
 
   public static void main(String[] args)
   {
-    CommandLineApplication app = new CommandLineApplication(args);
+    final CommandLineApplication app = new CommandLineApplication(args);
     try {
-      app.processOptions(true, true);
+      app.processOptions(true, true, true);
     }
     catch (ParseException e1) {
       System.exit(1);
@@ -72,7 +72,12 @@ public class IccbCompoundsStudyCreator
           LabHead labHead = (LabHead) ScreenCreator.findOrCreateScreeningRoomUser(dao, "Caroline", "Shamu", "caroline_shamu@hms.harvard.edu", true, labAffiliation);
           ScreeningRoomUser leadScreener = labHead;
 
-          study = new Screen(leadScreener, labHead, STUDY_NUMBER, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, TITLE);
+          study = new Screen(app.findAdministratorUser(),
+                             leadScreener,
+                             labHead,
+                             STUDY_NUMBER,
+                             ScreenType.SMALL_MOLECULE,
+                             StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);
 
           AnnotationType unsuitableAnnotType = study.createAnnotationType("Unsuitable", "Flag indicating whether compound is unsuitable for screening.", false);

@@ -33,6 +33,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
+import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
@@ -90,12 +91,14 @@ public class MakeDummyEntitiesCellHTS2
     
     
     int nWells = nPlates * nrPlateColumns * nrPlateRows;
-    Library library = new Library("library " + id,
+    Library library = new Library(null,
+                                  "library " + id,
                                   "l" + id,
                                   screenType,
                                   LibraryType.COMMERCIAL,
                                   startPlate,
-                                  endPlate);
+                                  endPlate,
+                                  PlateSize.WELLS_384);
 
     dataFactory.newInstance(LibraryContentsVersion.class, library);
     library.getLatestContentsVersion().release(new AdministrativeActivity((AdministratorUser) library.getLatestContentsVersion().getLoadingActivity().getPerformedBy(), new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
