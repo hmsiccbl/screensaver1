@@ -83,11 +83,12 @@
       label="Add computed cellHTS data to screen result"
       description="Add the normalized, scored, and summarized data that cellHTS2 computes as new data columns to the screen result"
       value="#{cellHTS2Runner.addNewCellHtsDataColumns}" editable="true"
+      rendered="#{screenResultViewer.editable}"
       type="Boolean" />
   </t:panelGrid>
 
   <t:panelGroup id="commandPanel">
-    <h:commandButton value="Create Report"
+    <h:commandButton value="Run Report"
       action="#{cellHTS2Runner.runCellHTS2}" styleClass="command"
       title="After filling in the form, click this button to run cellHTS2" />
   </t:panelGroup>

@@ -56,7 +56,8 @@ public class CellHTS2Runner extends AbstractBackingBean
   {
     _screenResult = screenResult;
     if (screenResult != null) {
-      _reportFilePath = new File(ScreensaverProperties.getProperty("cellHTS2.report.directory"),
+      _reportFilePath = new File(ScreensaverProperties.getProperty("cellHTS2.report.directory") +
+                                 getScreensaverUser().getEntityId() + "/",
                                  screenResult.getScreenResultId().toString());
       _reportUrl = ScreensaverConstants.CELLHTS2_REPORTS_BASE_URL + _screenResult.getScreenResultId() + "/index.html";
     }
@@ -64,6 +65,7 @@ public class CellHTS2Runner extends AbstractBackingBean
       _reportFilePath = null;
       _reportUrl = null;
     }
+    _addNewCellHtsDataColumns = false; // always reset, for safety of data
   }
 
   public ScreenResult getScreenResult()

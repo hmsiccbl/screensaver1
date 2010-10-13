@@ -54,7 +54,7 @@ public class CellHts2Annotator
 
   @Transactional
   public synchronized void runCellhts2( RMethod untilInclRmethod,
-                      					ScreenResult screenResult,
+                                        ScreenResult screenResult,
                                         String analysisName,
                                         NormalizePlatesMethod normalizationMethod,
                                         NormalizePlatesNegControls normalizePlatesNegControls, 
@@ -66,22 +66,21 @@ public class CellHts2Annotator
   throws CellHts2AnnotatorException
   {
     _dao.reattachEntity(screenResult);
-    deleteCellHtsDataColumns(screenResult);
     try {
       try {
         _cellHts = new CellHTS2(screenResult,analysisName);
-        
-    if (untilInclRmethod.getIndex() >= RMethod.READ_PLATELIST
-        .getIndex()) {
-      _cellHts.readPlateListDbInit();
-    }
-    if (untilInclRmethod.getIndex() >= RMethod.CONFIGURE.getIndex()) {
-      _cellHts.configureDbInit();
-    }
-    if (untilInclRmethod.getIndex() >= RMethod.ANNOTATE.getIndex()) {
-      _cellHts.annotateDbInit();
-    }
-        
+
+        if (untilInclRmethod.getIndex() >= RMethod.READ_PLATELIST
+          .getIndex()) {
+          _cellHts.readPlateListDbInit();
+        }
+        if (untilInclRmethod.getIndex() >= RMethod.CONFIGURE.getIndex()) {
+          _cellHts.configureDbInit();
+        }
+        if (untilInclRmethod.getIndex() >= RMethod.ANNOTATE.getIndex()) {
+          _cellHts.annotateDbInit();
+        }
+
         //Initiate the parameters for all the methods to be run
         if (untilInclRmethod.getIndex() >= RMethod.NORMALIZE_PLATES.getIndex()){ 
           _cellHts.normalizePlatesInit(normalizationMethod,normalizationScale,normalizePlatesNegControls);
@@ -94,19 +93,20 @@ public class CellHts2Annotator
         }
         if (untilInclRmethod.getIndex() >= RMethod.WRITE_REPORT.getIndex()){ 
           File dir = new File(reportOutputPath);
-		  if (dir.exists()) {
-		    DeleteDir.deleteDirectory(dir);
-		  }
+          if (dir.exists()) {
+            DeleteDir.deleteDirectory(dir);
+          }
           if (!dir.mkdirs()) {
             throw new IOException("could not create cellHTS2 report output directory path " + dir);
           }
           _cellHts.writeReportInit(reportOutputPath);
         }
-        
+
         _cellHts.run();
-        
+
         //Add result of the methods which have run
         if (addNewCellHtsDataColumns) {
+          deleteCellHtsDataColumns(screenResult);
           if (untilInclRmethod.getIndex() >= RMethod.NORMALIZE_PLATES.getIndex()){ 
             _cellHts.normalizePlatesAddResult();
           }
@@ -132,7 +132,7 @@ public class CellHts2Annotator
       _cellHts.closeConnection();
     }
   }
- 
+
 
   private void deleteCellHtsDataColumns(ScreenResult screenResult)
   {

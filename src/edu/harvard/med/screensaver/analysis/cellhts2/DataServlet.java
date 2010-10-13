@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverProperties;
+import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 
 public class DataServlet extends HttpServlet {
 
@@ -51,7 +52,8 @@ public class DataServlet extends HttpServlet {
     byte[] result = null;
     String outputRoot = ScreensaverProperties.getProperty("cellHTS2.report.directory");
     String relativePath = pathInfo.substring(pathInfo.indexOf("/") + 1);
-    String fileLocation = outputRoot + relativePath;
+    Integer userId = ((CurrentScreensaverUser) request.getSession().getAttribute("scopedTarget.currentScreensaverUser")).getScreensaverUser().getEntityId();
+    String fileLocation = outputRoot + "/" + userId + "/" + relativePath;
     File f = new File(fileLocation);
     log.debug("serving file " + fileLocation);
 
