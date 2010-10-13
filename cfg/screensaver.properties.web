@@ -60,8 +60,10 @@ screensaver.service.smtpemailservice.host=
 screensaver.service.smtpemailservice.username=
 
 ### cellHTS2 properties
-cellHTS2report.filepath.base=cellHTS2/output/
-cellHTS2report.filepath.prefix=cellHts2_output_screenResultId_
+# the base directory containing the generated cellHTS2 reports for all screen results
+cellHTS2report.filepath.base=cellHTS2-reports/
+# the prefix of the directory name containing the report for a screen result (will be appended with screen result ID)
+cellHTS2report.filepath.prefix=screen_result_
 cellHTS2report.saveRObjects=FALSE
 cellHTS2report.saveRObjects.path=
 
