@@ -96,6 +96,28 @@
     </ss:collapsiblePanel>
   </h:form>
 
+  <h:form id="cellHTS2PanelForm">
+    <ss:collapsiblePanel id="cellHTS2Panel"
+      isCollapsed="#{screenResultViewer.isPanelCollapsedMap['cellHTS2']}"
+      label="CellHTS2"
+      rendered="#{appInfo.featuresEnabled['cellHTS2'] &amp;&amp; !empty cellHTS2Runner.screenResult &amp;&amp; !cellHTS2Runner.screenResult.restricted}">
+      <ui:define name="content">
+        <t:panelGroup id="screenResultReportLink"
+          rendered="#{cellHTS2Runner.cellHTS2ReportFileExists}">
+          <h:outputLink value="#{cellHTS2Runner.reportURL}"
+            target="_blank"
+            title="Click here to view the CellHTS2 report">
+            <h:outputText value="View CellHTS2 Report"
+              styleClass="dataText" />
+          </h:outputLink>
+        </t:panelGroup>
+        <t:panelGroup styleClass="commandPanel">
+          <ui:include src="cellHTS2Runner.xhtml"/>
+        </t:panelGroup>
+      </ui:define>
+    </ss:collapsiblePanel>
+  </h:form>
+
 </ui:composition>
 
 </html>

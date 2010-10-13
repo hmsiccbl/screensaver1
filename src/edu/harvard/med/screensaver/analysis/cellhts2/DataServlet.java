@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import edu.harvard.med.screensaver.ScreensaverProperties;
-
 import org.apache.log4j.Logger;
+
+import edu.harvard.med.screensaver.ScreensaverProperties;
 
 public class DataServlet extends HttpServlet {
 
@@ -49,10 +49,11 @@ public class DataServlet extends HttpServlet {
 		response.setContentType(mimeType);
 	
     byte[] result = null;
-    String outputRoot = ScreensaverProperties.getProperty("cellHTS2report.filepath.base");
-    String fileLocation = outputRoot + request.getServletPath() + pathInfo;
+    String outputRoot = ScreensaverProperties.getProperty("cellHTS2.report.directory");
+    String relativePath = pathInfo.substring(pathInfo.indexOf("/") + 1);
+    String fileLocation = outputRoot + relativePath;
     File f = new File(fileLocation);
-    log.debug("Trying to read from: " + fileLocation);
+    log.debug("serving file " + fileLocation);
 
     //System.out.println;
     result = new byte[(int) f.length()];
@@ -63,8 +64,6 @@ public class DataServlet extends HttpServlet {
     
     byte[] file = result;
 
-    log.debug("Returning File");
-    
 		out.write(file);
   }
 

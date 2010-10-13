@@ -494,6 +494,7 @@
     <constructor-arg ref="wellsBrowser" />
     <constructor-arg ref="screenResultViewer" />
     <constructor-arg ref="heatMapViewer" />
+    <constructor-arg ref="cellHTS2Runner" />
     <constructor-arg ref="screenResultImporter" />
     <constructor-arg ref="labActivitiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
@@ -552,8 +553,6 @@
         parent="uiBean" />
     </constructor-arg>
     <constructor-arg ref="wellsBrowser" />
-    <constructor-arg ref="cellHts2Annotator" />
-    <constructor-arg ref="cellHTS2Runner" />
     <property
       name="entityEditPolicy"
       ref="entityEditPolicy" />
@@ -691,7 +690,6 @@
     <aop:scoped-proxy/>
   </bean>
   
-  <!-- BII -->
   <bean
   	id="cellHTS2Runner"
    	parent="uiBean"
@@ -699,6 +697,12 @@
     class="edu.harvard.med.screensaver.ui.screenresults.cellhts2.CellHTS2Runner">
     <constructor-arg ref="cellHts2Annotator" />
     <aop:scoped-proxy/>
+  </bean>
+  
+  <bean 
+    id="cellHTS2ReportAuthorizationFilter" 
+    class="edu.harvard.med.screensaver.ui.util.CellHTS2ReportAuthorizationFilter">
+    <constructor-arg ref="genericEntityDao" />
   </bean>
 
   <!-- === users backing beans === -->

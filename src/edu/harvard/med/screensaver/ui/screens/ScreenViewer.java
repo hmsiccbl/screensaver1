@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Activity;
@@ -27,17 +29,16 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
+import edu.harvard.med.screensaver.ui.screenresults.cellhts2.CellHTS2Runner;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibraryPlateSearchResults;
+import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-
-import org.apache.log4j.Logger;
 
 public class ScreenViewer extends StudyViewer<Screen>
 {
@@ -50,12 +51,14 @@ public class ScreenViewer extends StudyViewer<Screen>
 
   private ScreenResultViewer _screenResultViewer;
   private HeatMapViewer _heatMapViewer;
+  private CellHTS2Runner _cellHTS2Runner;
   private ScreenResultImporter _screenResultImporter;
   private ScreenDetailViewer _screenDetailViewer;
   private LabActivitySearchResults _labActivitySearchResults;
   private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
   private LibrarySearchResults _librarySearchResults;
   private LibraryPlateSearchResults _libraryPlateSearchResults;
+
 
   
   // constructors
@@ -74,6 +77,7 @@ public class ScreenViewer extends StudyViewer<Screen>
                       WellSearchResults wellsBrowser,
                       ScreenResultViewer screenResultViewer,
                       HeatMapViewer heatMapViewer,
+                      CellHTS2Runner cellHTS2Runner,
                       ScreenResultImporter screenResultImporter,
                       LabActivitySearchResults labActivitiesBrowser,
                       CherryPickRequestSearchResults cprsBrowser,
@@ -91,6 +95,7 @@ public class ScreenViewer extends StudyViewer<Screen>
     _screenDetailViewer = screenDetailViewer;
     _screenResultViewer = screenResultViewer;
     _heatMapViewer = heatMapViewer;
+    _cellHTS2Runner = cellHTS2Runner;
     _screenResultImporter = screenResultImporter;
     _labActivitySearchResults = labActivitiesBrowser;
     _cherryPickRequestSearchResults = cprsBrowser;
@@ -109,6 +114,7 @@ public class ScreenViewer extends StudyViewer<Screen>
     }
     _screenResultViewer.setEntity(screenResult);
     _heatMapViewer.setScreenResult(screenResult);
+    _cellHTS2Runner.setScreenResult(screenResult);
 
     warnAdminOnMismatchedDataSharingLevel(screen);
   }

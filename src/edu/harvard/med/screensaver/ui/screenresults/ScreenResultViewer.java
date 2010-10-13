@@ -9,7 +9,6 @@
 
 package edu.harvard.med.screensaver.ui.screenresults;
 
-import java.io.File;
 import java.util.Set;
 
 import javax.faces.event.ValueChangeEvent;
@@ -22,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator;
-import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -30,16 +28,13 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
 import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.screenresults.cellhts2.CellHTS2Runner;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.util.DeleteDir;
 
 
 /**
@@ -60,12 +55,8 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
   private ScreenViewer _screenViewer;
   private ScreenResultDataColumnsTables _screenResultDataColumnsTables;
   private WellSearchResults _wellSearchResults;
-  private CellHts2Annotator _cellHts2Annotator;
 
   private boolean _isWellSearchResultsInitialized;
-
-  private String _cellHTS2ReportFilePath;
-  private CellHTS2Runner _cellHTS2Runner;
 
   private boolean _isFilterPositives = false;
   private boolean _isShowMutualColumns = false;
@@ -84,9 +75,7 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
                             ScreenResultDeleter screenResultDeleter,
                             ScreenViewer screenViewer,
                             ScreenResultDataColumnsTables screenResultDataColumnsTables,
-                            WellSearchResults wellSearchResults,
-                            CellHts2Annotator cellHts2Annotator,
-                            CellHTS2Runner cellHTS2Runner)
+                            WellSearchResults wellSearchResults)
 
   {
     super(thisProxy,
@@ -98,13 +87,12 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
     _screenViewer = screenViewer;
     _screenResultDataColumnsTables = screenResultDataColumnsTables;
     _wellSearchResults = wellSearchResults;
-    _cellHts2Annotator = cellHts2Annotator;
-    _cellHTS2Runner = cellHTS2Runner;
 
     getIsPanelCollapsedMap().put("screeningSummary", false);
     getIsPanelCollapsedMap().put("dataColumnsTable", true);
     getIsPanelCollapsedMap().put("dataTable", true);
     getIsPanelCollapsedMap().put("heatMaps", true);
+    getIsPanelCollapsedMap().put("cellHTS2", true);
   }
   
   public String postEditAction(ScreenResult entity)
@@ -133,9 +121,6 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
     getIsPanelCollapsedMap().put("heatMaps", true);
 
     _screenResultDataColumnsTables.initialize(screenResult.getDataColumnsList());
-    _cellHTS2ReportFilePath = ScreensaverProperties.getProperty("cellHTS2report.filepath.base") + 
-    ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + 
-    screenResult.getScreenResultId();
   }
 
   /**
@@ -192,35 +177,13 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
       _screenResultDeleter.deleteScreenResult(getEntity(), 
                                               (AdministratorUser) getScreensaverUser());
      
-      // Delete directory and all files under it
-      DeleteDir.deleteDirectory(new File(_cellHTS2ReportFilePath));
-      
       showMessage("deletedEntity", "screen result");
       
       return _screenViewer.reload();
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
-
-  public boolean isCellHTS2ReportFileExists() 
-  {
-	  File file = new File(_cellHTS2ReportFilePath);
-	  return file.exists();
-  }
   
-  public String getReportURL()
-  {
-	  String contextRoot = WEBAPP_ROOT.substring(WEBAPP_ROOT.lastIndexOf("/", WEBAPP_ROOT.length()-2), WEBAPP_ROOT.length());
-    return contextRoot + ScreensaverProperties.getProperty("cellHTS2report.filepath.prefix") + getEntity().getScreenResultId() +
-        "/index.html";
-  }
-  
-  @UICommand
-  public String viewCellHTS2Runner()
-  {
-	  return _cellHTS2Runner.viewCellHTS2Runner(getEntity());
-  }
-
   public boolean isFilterPositives()
   {
     return _isFilterPositives;

@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:t="http://myfaces.apache.org/tomahawk"
+  xmlns:s="http://myfaces.apache.org/sandbox"
+  xmlns:ss="http://screensaver.med.harvard.edu/ui">
+
+<ui:composition>
+
+  <t:panelGrid columns="2" styleClass="layoutPanel"
+    columnClasses="propertyLabelColumn,column">
+
+    <ss:property id="normalizePlatesMethod"
+      label="Normalize Plates Method"
+      description="The method used for normalizing plates"
+      value="#{cellHTS2Runner}">
+      <ui:define name="data">
+        <t:selectOneMenu value="#{value.normalizePlatesMethod}"
+          converter="#{normalizePlatesMethodConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{value.normalizePlatesMethodSelections}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="normalizePlatesScale"
+      label="Normalize Plates Scale"
+      description="The scale used for normalizing plates"
+      value="#{cellHTS2Runner}">
+      <ui:define name="data">
+        <t:selectOneMenu value="#{value.normalizePlatesScale}"
+          converter="#{normalizePlatesScaleConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems value="#{value.normalizePlatesScaleSelections}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+    <ss:property id="normalizePlatesNegControls"
+      label="Normalize Plates NegControls"
+      description="Type of neg control used when using 'negatives' as method for normalization. "
+      value="#{cellHTS2Runner}">
+      <ui:define name="data">
+        <t:selectOneMenu value="#{value.normalizePlatesNegControls}"
+          converter="#{normalizePlatesNegControlsConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{value.normalizePlatesNegControlsSelections}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <ss:property id="scoreReplicatesMethod"
+      label="Score Replicates Method"
+      description="The method used for scoring replicates"
+      value="#{cellHTS2Runner}">
+      <ui:define name="data">
+        <t:selectOneMenu value="#{value.scoreReplicatesMethod}"
+          converter="#{scoreReplicatesMethodConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{value.scoreReplicatesMethodSelections}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+    <ss:property id="summarizeReplicatesMethod"
+      label="Summarize Replicates Method"
+      description="The method used for summarizing replicates"
+      value="#{cellHTS2Runner}">
+      <ui:define name="data">
+        <t:selectOneMenu value="#{value.summarizeReplicatesMethod}"
+          converter="#{summarizeReplicatesMethodConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{value.summarizeReplicatesMethodSelections}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+    <ss:property id="addNewCellHtsDataColumns"
+      label="Add computed cellHTS data to screen result"
+      description="Add the normalized, scored, and summarized data that cellHTS2 computes as new data columns to the screen result"
+      value="#{cellHTS2Runner.addNewCellHtsDataColumns}" editable="true"
+      type="Boolean" />
+  </t:panelGrid>
+
+  <t:panelGroup id="commandPanel">
+    <h:commandButton value="Create Report"
+      action="#{cellHTS2Runner.runCellHTS2}" styleClass="command"
+      title="After filling in the form, click this button to run cellHTS2" />
+  </t:panelGroup>
+
+
+</ui:composition>
+
+</html>

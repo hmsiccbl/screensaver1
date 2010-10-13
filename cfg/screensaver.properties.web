@@ -60,10 +60,10 @@ screensaver.service.smtpemailservice.host=
 screensaver.service.smtpemailservice.username=
 
 ### cellHTS2 properties
-# the base directory containing the generated cellHTS2 reports for all screen results
-cellHTS2report.filepath.base=cellHTS2-reports/
-# the prefix of the directory name containing the report for a screen result (will be appended with screen result ID)
-cellHTS2report.filepath.prefix=screen_result_
+# the base directory containing the generated cellHTS2 reports; this must be a directory external 
+# to the Tomcat web application deployment directory; make sure the Tomcat "user" has sufficient file 
+# systems to create and write to this directory 
+cellHTS2.report.directory=/tmp/cellHTS2_reports/
 cellHTS2report.saveRObjects=FALSE
 cellHTS2report.saveRObjects.path=
 

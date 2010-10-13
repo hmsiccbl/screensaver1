@@ -1,74 +1,72 @@
 package edu.harvard.med.screensaver.ui.util;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
 
 /**
-* Servlet filter for cellHTS2 report authorization
-* @author siew cheng (BII). Thanks to Andrew for the code to retrieve bean from session.
-* 
-*/
+ * Servlet filter for cellHTS2 report authorization
+ * @author siew cheng (BII). Thanks to Andrew for the code to retrieve bean from session.
+ * 
+ */
 
-public class CellHTS2ReportAuthorizationFilter extends OncePerRequestFilter {
-
-  //static data members
-
+public class CellHTS2ReportAuthorizationFilter extends OncePerRequestFilter
+{
   private static Logger log = Logger.getLogger(CellHTS2ReportAuthorizationFilter.class);
 
-  private static final String CELLHTS2_REPORT_ACCESS_DENIED_URL = "/screensaver/main/cellHTS2ReportAccessDenied.jsf";
+  private static final Pattern ScreenResultIdPattern =
+    Pattern.compile("^" + ScreensaverConstants.CELLHTS2_REPORTS_BASE_URL + "([0-9]+)/.*$");
 
-  //instance data members
+  private GenericEntityDAO _dao;
 
-  //methods
+  public CellHTS2ReportAuthorizationFilter(GenericEntityDAO dao)
+  {
+    _dao = dao;
+  }
 
-  protected void doFilterInternal(final HttpServletRequest request, 
-                                  final HttpServletResponse response, 
-                                  final FilterChain filterChain)
+  protected void doFilterInternal(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  FilterChain filterChain)
   throws ServletException, IOException 
   {
-
-    final HttpSession httpSession = request.getSession();
-
-    ScreenViewer bean = ((ScreenViewer) httpSession.getAttribute("scopedTarget.screenViewer"));
     try {
-      if (bean != null) {
-        Screen screen = bean.getEntity();
-        if (screen != null) {
-          ScreenResult screenResult = screen.getScreenResult();
-          if (screenResult != null && !screenResult.isRestricted()) {
-            log.info("user authorized to view screen result for screen " + screen.getScreenNumber());
-          }
-          else {
-            log.info("user not authorized to view screen result for screen " + screen.getScreenNumber());
-            response.sendRedirect(CELLHTS2_REPORT_ACCESS_DENIED_URL);
-          }
-        }
-        else {
-          log.info("can't get screen from screenViewer in http session");
-          response.sendRedirect(CELLHTS2_REPORT_ACCESS_DENIED_URL);
-        }
+      Integer screenResultId = getScreenResultId(request);
+      if (isReportRestricted(screenResultId)) {
+        log.error("unauthorized access of cellHTS2 report for screen result " + screenResultId + " by " + request.getRemoteUser());
+        response.sendError(401);
       }
-      else {
-        log.info("screenViewer not in http session");
-        response.sendRedirect(CELLHTS2_REPORT_ACCESS_DENIED_URL);
-      }
-
       filterChain.doFilter(request, response);
     }
     catch (Exception e) {
-      e.printStackTrace();
+      log.error(e.toString());
+      throw new ServletException(e);
     }
+  }
+
+  public boolean isReportRestricted(Integer screenResultId)
+  {
+    ScreenResult screenResult = _dao.findEntityById(ScreenResult.class, screenResultId);
+    return screenResult == null || screenResult.isRestricted();
+  }
+
+  public static Integer getScreenResultId(HttpServletRequest request)
+  {
+    Matcher matcher = ScreenResultIdPattern.matcher(request.getRequestURI());
+    if (matcher.matches()) {
+      return Integer.valueOf(matcher.group(1));
+    }
+    throw new IllegalArgumentException("cannot parse screen result ID from URL " + request.getRequestURI());
   }
 }

@@ -58,29 +58,6 @@
                 styleClass="command"
                 rendered="#{screenResultViewer.editable}"
                 title="Delete the screen result data for this screen" />
-              <t:panelGroup
-                rendered="#{appInfo.featuresEnabled['cellHTS2']}">
-                <t:commandButton
-                  action="#{screenResultViewer.viewCellHTS2Runner}"
-                  value="Click here to enter CellHTS2 parameters"
-                  styleClass="command"
-                  rendered="#{screenResultViewer.editable &amp;&amp; !screenResultViewer.cellHTS2ReportFileExists}"
-                  title="Run CellHTS2 on the screen result for this screen" />
-                <t:panelGroup id="screenResultReportLink"
-                  rendered="#{screenResultViewer.cellHTS2ReportFileExists}">
-                  <t:commandButton
-                    action="#{screenResultViewer.viewCellHTS2Runner}"
-                    value="Click here to reenter CellHTS2 parameters"
-                    styleClass="command"
-                    rendered="#{screenResultViewer.editable}"
-                    title="Rerun CellHTS2 analysis on the screen result for this screen" />
-                  <h:outputLink value="#{screenResultViewer.reportURL}"
-                    title="Click here for CellHTS2 report">
-                    <h:outputText value="CellHTS2 Report"
-                      styleClass="dataText" />
-                  </h:outputLink>
-                </t:panelGroup>
-              </t:panelGroup>
             </t:panelGroup>
 
             <t:panelGrid id="screeningSummaryPropertiesPanel"
