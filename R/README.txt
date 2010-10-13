@@ -58,7 +58,7 @@ Installation Instructions for R, Rserve, cellHTS2, and cellHTS2Db
 
 3. Install Screensaver's cellHTS2Db2 R package:
 
-  $ R CMD INSTALL $SCREENSAVER/R/cellHTS2Db_0.42.tar.gz
+  $ R CMD INSTALL $SCREENSAVER/R/cellHTS2Db_0.99.tar.gz
 
   (To build and install the cellHTS2Db package from the latest Screensaver 
   source code, see notes below)
