@@ -10,8 +10,12 @@
 package edu.harvard.med.screensaver.service.cellhts2;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.analysis.cellhts2.CellHTS2;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
@@ -24,9 +28,6 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.util.DeleteDir;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
 public class CellHts2Annotator
 {
@@ -96,7 +97,9 @@ public class CellHts2Annotator
 		  if (dir.exists()) {
 		    DeleteDir.deleteDirectory(dir);
 		  }
-          dir.mkdir();
+          if (!dir.mkdirs()) {
+            throw new IOException("could not create cellHTS2 report output directory path " + dir);
+          }
           _cellHts.writeReportInit(reportOutputPath);
         }
         
