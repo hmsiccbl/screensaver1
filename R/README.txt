@@ -22,7 +22,7 @@ As of 2010-10-06, the following versions appear to be compatible:
    * Bioconductor 2.5
    * Biobase 2.6.1
    * cellHTS2 2.10.5
-   * cellHTS2Db 0.99
+   * cellHTS2Db 1.0
   
 We recommend running the cellHTS2Db tests to verify your own environment; 
 see testing instructions below.   
@@ -58,7 +58,7 @@ Installation Instructions for R, Rserve, cellHTS2, and cellHTS2Db
 
 3. Install Screensaver's cellHTS2Db2 R package:
 
-  $ R CMD INSTALL $SCREENSAVER/R/cellHTS2Db_0.99.tar.gz
+  $ R CMD INSTALL $SCREENSAVER/R/cellHTS2Db_1.0.tar.gz
 
   (To build and install the cellHTS2Db package from the latest Screensaver 
   source code, see notes below)
