@@ -23,9 +23,9 @@
         <t:panelGrid style="padding-top: 20px">
           <!-- for ICCB-L/NSRB -->
           <h:outputLink
-            value="#{appInfo.applicationProperties['screensaver.ui.download_sd_files_url']}"
+            value="#{appInfo.applicationProperties.map['screensaver.ui.download_sd_files_url']}"
             target="_blank" title="Download SD Files for small molecule libraries"
-            rendered="#{!empty appInfo.applicationProperties['screensaver.ui.download_sd_files_url']}">
+            rendered="#{!empty appInfo.applicationProperties.map['screensaver.ui.download_sd_files_url']}">
             <h:outputText value="Download SD files" />
           </h:outputLink>
         </t:panelGrid>

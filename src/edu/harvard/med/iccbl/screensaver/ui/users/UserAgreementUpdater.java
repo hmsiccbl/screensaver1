@@ -12,6 +12,9 @@ package edu.harvard.med.iccbl.screensaver.ui.users;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -21,9 +24,6 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 
 public class UserAgreementUpdater extends AbstractBackingBean
@@ -37,6 +37,11 @@ public class UserAgreementUpdater extends AbstractBackingBean
   private edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater _userAgreementUpdater;
 
   protected UserAgreementUpdater() {}
+
+  public boolean isEnabled()
+  {
+    return getApplicationProperties().isFeatureEnabled("user_agreement_updater");
+  }
 
   public UserAgreementUpdater(UserViewer userViewer,
                               edu.harvard.med.iccbl.screensaver.service.users.UserAgreementUpdater userAgreementUpdater)

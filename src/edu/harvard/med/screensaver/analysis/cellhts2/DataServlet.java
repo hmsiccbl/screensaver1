@@ -50,7 +50,7 @@ public class DataServlet extends HttpServlet {
 		response.setContentType(mimeType);
 	
     byte[] result = null;
-    String outputRoot = ScreensaverProperties.getProperty("cellHTS2.report.directory");
+    String outputRoot = ((ScreensaverProperties) request.getSession().getAttribute("screensaverProperties")).getProperty("cellHTS2.report.directory");
     String relativePath = pathInfo.substring(pathInfo.indexOf("/") + 1);
     Integer userId = ((CurrentScreensaverUser) request.getSession().getAttribute("scopedTarget.currentScreensaverUser")).getScreensaverUser().getEntityId();
     String fileLocation = outputRoot + "/" + userId + "/" + relativePath;

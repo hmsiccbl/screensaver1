@@ -34,7 +34,7 @@
 						style="font-size: large; font-weight: bold" />
 				</h:panelGroup>
         <br/>
-        <h:outputLink value="#{appInfo.applicationProperties['screensaver.ui.feedback_url']}" target="_blank" styleClass="label">
+        <h:outputLink value="#{appInfo.applicationProperties.map['screensaver.ui.feedback_url']}" target="_blank" styleClass="label">
           <h:outputText value="Report this problem to the authorities" />
         </h:outputLink>
 			</t:panelGrid>

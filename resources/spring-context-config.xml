@@ -38,5 +38,9 @@
       value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
   </bean>
 
+  <bean
+    id="screensaverProperties"
+    class="edu.harvard.med.screensaver.ScreensaverProperties"
+    scope="singleton" />
 
 </beans>

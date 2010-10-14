@@ -13,7 +13,6 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
@@ -32,6 +31,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -61,17 +61,11 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
 {
   private static Logger log = Logger.getLogger(AbstractBackingBean.class);
 
-  private Properties _applicationProperties = new Properties();
+  private ScreensaverProperties _applicationProperties;
   private Messages _messages;
   private CurrentScreensaverUser _currentScreensaverUser;
 
   private Map<String,Boolean> _isPanelCollapsedMap = Maps.newHashMap();
-
-  /*
-   * TODO: it's wasteful to compute and store the enabled features in every
-   * backing bean, since this is global to the application
-   */
-  private Map<String,Boolean> _featuresEnabled;
 
   /**
    * Get the application name (without version number).
@@ -109,12 +103,12 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
     //return _applicationProperties.getProperty(HEADER_COLOR_PROPERTY); 
   } 
   
-  public Properties getApplicationProperties()
+  public ScreensaverProperties getApplicationProperties()
   {
     return _applicationProperties;
   }
 
-  public void setApplicationProperties(Properties applicationProperties)
+  public void setApplicationProperties(ScreensaverProperties applicationProperties)
   {
     _applicationProperties = applicationProperties;
   }
@@ -431,44 +425,5 @@ public abstract class AbstractBackingBean implements ScreensaverConstants
   public Map<String,Boolean> getIsPanelCollapsedMap()
   {
     return _isPanelCollapsedMap;
-  }
-
-  /**
-   * It is preferable to use {@link #isFeatureEnabled(String)}, as this handles
-   * undefined feature keys. You should only need to call this method from JSF
-   * EL expressions.
-   * 
-   * @return a Map of the UI features in Screensaver that can be enabled or
-   *         disable. Map key is the feature name, as determined by the property
-   *         name without the
-   *         {@link ScreensaverConstants#SCREENSAVER_UI_FEATURE_PREFIX} prefix
-   *         (e.g., the property key "screensaver.ui.feature.someFeature" would
-   *         be identified by the key "someFeature" in the returned map). Map
-   *         value is a Boolean, where <code>true</code> indicates the feature
-   *         is enabled, otherwise it is disabled.
-   */
-  public Map<String,Boolean> getFeaturesEnabled()
-  {
-    if (_featuresEnabled == null) {
-      _featuresEnabled = Maps.newHashMap();
-      for (Map.Entry<Object,Object> featureEntry : getApplicationProperties().entrySet()) {
-        if (featureEntry.getKey().toString().startsWith(SCREENSAVER_UI_FEATURE_PREFIX)) {
-          String featureKey = featureEntry.getKey().toString().substring(SCREENSAVER_UI_FEATURE_PREFIX.length());
-          Boolean featureEnabled = Boolean.valueOf(featureEntry.getValue().toString());
-          _featuresEnabled.put(featureKey, featureEnabled);
-          log.info("screensaver feature " + featureKey + " is " + (featureEnabled ? "enabled" : "disabled"));
-        }
-      }
-    }
-    return _featuresEnabled;
-  }
-  
-  public boolean isFeatureEnabled(String featureKey)
-  {
-    if (getFeaturesEnabled().containsKey(featureKey)) {
-      return getFeaturesEnabled().get(featureKey);
-    }
-    log.warn("unknown feature " + featureKey);
-    return false;
   }
 }

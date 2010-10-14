@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableSet;
 import org.apache.log4j.Logger;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
@@ -22,11 +25,6 @@ import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableSet;
-
-import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
@@ -73,32 +71,34 @@ public class CellHTS2 {
   private SummarizeReplicatesMethod summarizeReplicatesMethod;
   private String reportOutputPath;
   private String writeReportIndexUrl;
-  private boolean saveRObjects = false;
+  private String reportsPath;
+  private boolean saveRObjects;
   private String saveRObjectsPath;
 
-
-  public CellHTS2(ScreenResult screenResult, String title) throws RserveException, REngineException,
+  public CellHTS2(ScreenResult screenResult, 
+                  String title,
+                  String reportsPath,
+                  String saveRObjectsPath) throws RserveException, REngineException,
   REXPMismatchException {
     this.screenResult = screenResult;
     this.rConnection = new RConnection();
     this.arrayDimensions = calculateArrayDimensions(screenResult);
     this.title = title;
-    if (ScreensaverProperties.getProperty("cellHTS2report.saveRObjects").equals("T")){
-      this.saveRObjects=true;
-      this.saveRObjectsPath=ScreensaverProperties.getProperty("cellHTS2report.saveRObjects.path");
-      if (this.saveRObjectsPath ==null) {
-        log.error("cellHTS2report.saveRObjects.path saveRObjectsPath does not exist in screensaver.properties");
-      }else {
-        File file = null;
-        String dirName = this.saveRObjectsPath;
-        if (dirName == null || dirName.length() == 0) {
-           log.error("Property cellHTS2report.saveRObjects.path is missing or empty in the screensaver properties file");
-        }else 
-          file = new File(dirName);
-          if (!file.exists()) {
-            log.error(dirName + "does not exist. It is set as value for cellHTS2report.saveRObjects.path in screensaver.properties. saveRObjects set to false");
-            this.saveRObjects=false;
-          }
+    this.reportsPath = reportsPath;
+    if (saveRObjectsPath != null) {
+      this.saveRObjects = true;
+      this.saveRObjectsPath = saveRObjectsPath;
+      File file = null;
+      String dirName = this.saveRObjectsPath;
+      if (dirName == null || dirName.length() == 0) {
+        log.error("Property cellHTS2report.saveRObjects.path is missing or empty in the screensaver properties file");
+      }
+      else
+        file = new File(dirName);
+      if (!file.exists()) {
+        log.error(dirName +
+          "does not exist. It is set as value for cellHTS2report.saveRObjects.path in screensaver.properties. saveRObjects set to false");
+        this.saveRObjects = false;
       }
     }
   }
@@ -973,5 +973,4 @@ public class CellHTS2 {
   public String getWriteReportIndexUrl() {
 	 return writeReportIndexUrl;
   }
-
 }

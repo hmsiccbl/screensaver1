@@ -728,7 +728,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   @Override
   public boolean isDeleteSupported()
   {
-    return isFeatureEnabled("delete_screen");
+    return getApplicationProperties().isFeatureEnabled("delete_screen");
   }
   
   @UICommand

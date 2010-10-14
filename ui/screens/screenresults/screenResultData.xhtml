@@ -101,7 +101,7 @@
     <ss:collapsiblePanel id="cellHTS2Panel"
       isCollapsed="#{screenResultViewer.isPanelCollapsedMap['cellHTS2']}"
       label="CellHTS2"
-      rendered="#{appInfo.featuresEnabled['cellHTS2'] &amp;&amp; !empty cellHTS2Runner.screenResult &amp;&amp; !cellHTS2Runner.screenResult.restricted}">
+      rendered="#{cellHTS2Runner.enabled &amp;&amp; !empty cellHTS2Runner.screenResult &amp;&amp; !cellHTS2Runner.screenResult.restricted}">
       <ui:define name="content">
         <t:panelGrid columns="1">
           <t:panelGroup id="screenResultReportLink"

@@ -68,8 +68,9 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
        null,
        null,
        true,
-       "");
-
+       ".",
+       null);
+    
     // load again, to ensure we're testing the persisted version of the data
     screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,

@@ -62,13 +62,14 @@ public class CellHts2Annotator
                                         ScoreReplicatesMethod scoreReplicatesMethod,
                                         SummarizeReplicatesMethod summarizeReplicatesMethod,
                                         boolean addNewCellHtsDataColumns,
-                                        String reportOutputPath)
+                                        String reportOutputPath,
+                                        String saveRObjectsPath)
   throws CellHts2AnnotatorException
   {
     _dao.reattachEntity(screenResult);
     try {
       try {
-        _cellHts = new CellHTS2(screenResult,analysisName);
+        _cellHts = new CellHTS2(screenResult, analysisName, reportOutputPath, saveRObjectsPath);
 
         if (untilInclRmethod.getIndex() >= RMethod.READ_PLATELIST
           .getIndex()) {

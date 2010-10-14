@@ -79,7 +79,7 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     initialize(dataTableModel,
                columns,
                buildRowsPerPageSelector(),
-               !isFeatureEnabled("data_table_tree_column_selector"));               
+               !getApplicationProperties().isFeatureEnabled("data_table_tree_column_selector"));
   }
   
   /** 

@@ -9,7 +9,6 @@ import javax.faces.model.SelectItem;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.ScreensaverProperties;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesNegControls;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesScale;
@@ -52,13 +51,17 @@ public class CellHTS2Runner extends AbstractBackingBean
     _cellHts2Annotator = cellHts2Annotator;
   }
 
+  public boolean isEnabled()
+  {
+    return getApplicationProperties().isFeatureEnabled("cellHTS2");
+  }
+
   public void setScreenResult(ScreenResult screenResult)
   {
     _screenResult = screenResult;
     if (screenResult != null) {
-      _reportFilePath = new File(ScreensaverProperties.getProperty("cellHTS2.report.directory") +
-                                 getScreensaverUser().getEntityId() + "/",
-                                 screenResult.getScreenResultId().toString());
+      _reportFilePath = new File(new File(getApplicationProperties().getProperty("cellHTS2.reports.directory"), getScreensaverUser().getEntityId().toString()),
+                                 screenResult.getEntityId().toString());
       _reportUrl = ScreensaverConstants.CELLHTS2_REPORTS_BASE_URL + _screenResult.getScreenResultId() + "/index.html";
     }
     else {
@@ -154,7 +157,9 @@ public class CellHTS2Runner extends AbstractBackingBean
                                    _scoreReplicatesMethod,
                                    _summarizeReplicatesMethod,
                                    _addNewCellHtsDataColumns,
-                                   _reportFilePath.getPath());
+                                   _reportFilePath.getPath(),
+                                   getApplicationProperties().isPropertySet("cellHTS2report.saveRObjects") ?
+                                     getApplicationProperties().getProperty("cellHTS2report.saveRObjects.path") : null);
     return VIEW_SCREEN;
   }
 

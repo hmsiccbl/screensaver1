@@ -101,7 +101,7 @@
     </description>
     <property
       name="applicationProperties"
-      ref="applicationProperties" />
+      ref="screensaverProperties" />
     <property
       name="messages"
       ref="messages" />

@@ -35,7 +35,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
     ScreenResult screenResult = MakeDummyEntitiesCellHTS2.makeSimpleDummyScreenResult();
     String title = "Dummy_Experiment";
-    CellHTS2 cellHts2 = new CellHTS2(screenResult, title);
+    CellHTS2 cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
     ArrayDimensions expected = new ArrayDimensions();
 
@@ -110,7 +110,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
     CellHTS2 cellHts2 = null;
     try {
-      cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
       // 2. RUN METHOD
       cellHts2.readPlateListDbInit();
@@ -266,7 +266,7 @@ public class CellHTS2Test extends AbstractSpringTest
     String title = "Dummy_Experiment";
     CellHTS2 cellHts2 = null;
     try {
-      cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
       // 2. RUN METHOD CONFIGUREDBS
       cellHts2.configureDbInit();
@@ -352,7 +352,7 @@ public class CellHTS2Test extends AbstractSpringTest
   String title = "Dummy_Experiment";
   CellHTS2 cellHts2 = null;
   try {
-    cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
     // 2. RUN METHOD CONFIGUREDBS
     cellHts2.configureDbInit();
@@ -423,7 +423,7 @@ public class CellHTS2Test extends AbstractSpringTest
     String title = "Dummy_Experiment";
     CellHTS2 cellHts2 = null;
     try {
-      cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
       // 2. RUN UNTIL AND INCLUSIVE METHOD ANNOTATEDB
       cellHts2.annotateDbInit();
@@ -678,7 +678,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
     CellHTS2 cellHts2 = null;
     try {
-      cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
       cellHts2.normalizePlatesInit(normalizePlatesMethod,
                                    normalizePlatesScale,
                                    normalizePlatesNegControls);
@@ -1082,7 +1082,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
     CellHTS2 cellHts2 = null;
     try {
-      cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
       // 2. RUN METHOD
       cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN,
@@ -1176,7 +1176,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
   CellHTS2 cellHts2 = null;
   try {
-    cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
     // 2. RUN METHOD
     cellHts2.normalizePlatesInit(NormalizePlatesMethod.NEGATIVES,
@@ -1279,7 +1279,7 @@ public class CellHTS2Test extends AbstractSpringTest
 
     CellHTS2 cellHts2 = null;
     try {
-      cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
       // 2. RUN
       cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN,
@@ -1339,7 +1339,7 @@ public class CellHTS2Test extends AbstractSpringTest
     String indexUrl = null;
     CellHTS2 cellHts2 = null;
     try {
-      cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
       cellHts2.normalizePlatesInit(NormalizePlatesMethod.MEAN,
                                    NormalizePlatesScale.ADDITIVE,
                                    NormalizePlatesNegControls.NEG);
@@ -1379,7 +1379,7 @@ public class CellHTS2Test extends AbstractSpringTest
   String indexUrl = null;
   CellHTS2 cellHts2 = null;
   try {
-    cellHts2 = new CellHTS2(screenResult, title);
+      cellHts2 = new CellHTS2(screenResult, title, ".", null);
 
     
     cellHts2.normalizePlatesInit(NormalizePlatesMethod.NEGATIVES,
