@@ -35,6 +35,7 @@ public class ScreensaverProperties
     try {
       initializeProperties(screensaverPropertiesInputStream);
       initializeFeaturesEnabled(_properties); // initialize
+      validateProperties(_properties);
     }
     catch (IOException e) {
       throw new ScreensaverConfigurationException("error loading screensaver.properties resource", e);
@@ -45,16 +46,15 @@ public class ScreensaverProperties
   {
     _properties.load(screensaverPropertiesInputStream);
     logProperties(_properties);
-    validateProperties(_properties);
   }
 
-  private static void validateProperties(Properties screensaverProperties)
+  private void validateProperties(Properties screensaverProperties)
   {
-    //    if (creensaverProperties.getBooleanProperty("screensaver.ui.feature.cellHTS2")) {
-    //      if (!ScreensaverProperties.isPropertySet("cellHTS2.report.directory")) {
-    //        throw new ScreensaverConfigurationException("undefined system property 'cellHTS2.report.directory'");
-    //      }
-    //    }
+    if (isFeatureEnabled("cellHTS2")) {
+      if (!isPropertySet("cellHTS2.report.directory")) {
+        throw new ScreensaverConfigurationException("undefined system property 'cellHTS2.report.directory'");
+      }
+    }
   }
 
   /**

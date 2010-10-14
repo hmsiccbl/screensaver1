@@ -60,7 +60,7 @@ public class CellHTS2Runner extends AbstractBackingBean
   {
     _screenResult = screenResult;
     if (screenResult != null) {
-      _reportFilePath = new File(new File(getApplicationProperties().getProperty("cellHTS2.reports.directory"), getScreensaverUser().getEntityId().toString()),
+      _reportFilePath = new File(new File(getApplicationProperties().getProperty("cellHTS2.report.directory"), getScreensaverUser().getEntityId().toString()),
                                  screenResult.getEntityId().toString());
       _reportUrl = ScreensaverConstants.CELLHTS2_REPORTS_BASE_URL + _screenResult.getScreenResultId() + "/index.html";
     }

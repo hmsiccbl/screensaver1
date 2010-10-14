@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * This package contains an API for calls to a number of methods of CellHTS2
@@ -85,20 +86,15 @@ public class CellHTS2 {
     this.arrayDimensions = calculateArrayDimensions(screenResult);
     this.title = title;
     this.reportsPath = reportsPath;
-    if (saveRObjectsPath != null) {
-      this.saveRObjects = true;
+    if (StringUtils.isEmpty(saveRObjectsPath)) {
       this.saveRObjectsPath = saveRObjectsPath;
-      File file = null;
-      String dirName = this.saveRObjectsPath;
-      if (dirName == null || dirName.length() == 0) {
-        log.error("Property cellHTS2report.saveRObjects.path is missing or empty in the screensaver properties file");
+      File file = new File(saveRObjectsPath);
+      if (file.exists()) {
+        this.saveRObjects = true;
       }
-      else
-        file = new File(dirName);
-      if (!file.exists()) {
-        log.error(dirName +
-          "does not exist. It is set as value for cellHTS2report.saveRObjects.path in screensaver.properties. saveRObjects set to false");
-        this.saveRObjects = false;
+      else {
+        log.error(saveRObjectsPath +
+          "does not exist (cellHTS2report.saveRObjects.path system property); R objects will not be saved");
       }
     }
   }
