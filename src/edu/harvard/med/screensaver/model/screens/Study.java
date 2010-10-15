@@ -55,6 +55,8 @@ public abstract class Study extends AuditedAbstractEntity<Integer>
 
   abstract public ScreenType getScreenType();
 
+  abstract public ProjectPhase getProjectPhase();
+
   @Transient
   public boolean isStudyOnly()
   {

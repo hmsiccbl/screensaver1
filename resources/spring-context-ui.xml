@@ -822,6 +822,8 @@
 
   <bean id="operatorConverter" class="edu.harvard.med.screensaver.ui.table.column.OperatorConverter" />
 
+  <bean id="projectPhaseConverter" class="edu.harvard.med.screensaver.ui.util.ProjectPhaseConverter" />
+
   <bean id="screenTypeConverter" class="edu.harvard.med.screensaver.ui.util.ScreenTypeConverter" />
 
   <bean id="copyUsageTypeConverter" class="edu.harvard.med.screensaver.ui.util.CopyUsageTypeConverter" />

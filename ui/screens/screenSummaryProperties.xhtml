@@ -34,16 +34,27 @@
     </ui:define>
 	</ss:property>
 
-	<ss:property id="screenType" label="Screen Type"
-		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
-		editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
-		converter="#{screenTypeConverter}">
-		<ui:define name="editableData">
-			<ui:insert name="editableScreenType">
+  <ss:property id="screenType" label="Screen Type"
+    description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
+    editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
+    converter="#{screenTypeConverter}">
+    <ui:define name="editableData">
+      <ui:insert name="editableScreenType">
       No editableScreenType definition!
       </ui:insert>
-		</ui:define>
-	</ss:property>
+    </ui:define>
+  </ss:property>
+  
+  <ss:property id="projectPhase" label="Project Phase"
+    description="'Primary','Counter', or 'Follow-Up'" value="#{screen.projectPhase}"
+    editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
+    converter="#{projectPhaseConverter}">
+    <ui:define name="editableData">
+      <ui:insert name="editableProjectPhase">
+      No editable Project Phase definition!
+      </ui:insert>
+    </ui:define>
+  </ss:property>
 
 	<!-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design -->
 	<ss:property id="labName" label="Lab Name" primary="true" 

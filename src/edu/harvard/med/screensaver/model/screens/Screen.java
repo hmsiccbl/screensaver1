@@ -40,6 +40,12 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
@@ -47,11 +53,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -153,6 +154,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   private String _publishableProtocol;
   private ScreenResult _screenResult;
   private SortedSet<AssayPlate> _assayPlates = Sets.newTreeSet();
+  private ProjectPhase _projectPhase;
 
   // iccb screen
 
@@ -1184,6 +1186,18 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
     _screenType = screenType;
   }
 
+  public void setProjectPhase(ProjectPhase projectPhase)
+  {
+    _projectPhase = projectPhase;
+  }
+
+  @Column(nullable = false)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.screens.ProjectPhase$UserType")
+  public ProjectPhase getProjectPhase()
+  {
+    return _projectPhase;
+  }
+
   @Transient
   public boolean isDataLoaded()
   {
@@ -1986,4 +2000,5 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   {
     return _dataPrivacyExpirationNotifiedDate;
   }
+
 }

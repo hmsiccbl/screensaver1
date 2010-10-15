@@ -40,6 +40,15 @@ TODO:
             value="#{screenDetailViewer.screenTypeSelectItems}" />
         </t:selectOneMenu>
       </ui:define>
+      <ui:define name="editableProjectPhase">
+        <t:selectOneMenu id="projectPhaseMenu"
+          value="#{screenDetailViewer.entity.projectPhase}"
+          required="true" converter="#{projectPhaseConverter}"
+          styleClass="inputText selectMenu">
+          <f:selectItems
+            value="#{screenDetailViewer.projectPhaseSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
       <ui:define name="editableLabHead">
         <t:commandButton id="submitLabHead" immediate="true"
           styleClass="hiddenCommand" />

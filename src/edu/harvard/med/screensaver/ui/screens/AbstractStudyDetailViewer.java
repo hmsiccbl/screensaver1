@@ -20,24 +20,24 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
+import org.apache.log4j.Logger;
+
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
-
-import org.apache.log4j.Logger;
-
-import com.google.common.collect.Sets;
 
 public abstract class AbstractStudyDetailViewer<E extends Study> extends EditableEntityViewerBackingBean<E>
 {
@@ -77,6 +77,17 @@ public abstract class AbstractStudyDetailViewer<E extends Study> extends Editabl
   {
     List<ScreenType> items = Arrays.asList(ScreenType.values());
     if (getEntity().getScreenType() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(items, "<select>");
+    }
+    else {
+      return JSFUtils.createUISelectItems(items);
+    }
+  }
+
+  public List<SelectItem> getProjectPhaseSelectItems()
+  {
+    List<ProjectPhase> items = Arrays.asList(ProjectPhase.values());
+    if (getEntity().getProjectPhase() == null) {
       return JSFUtils.createUISelectItemsWithEmptySelection(items, "<select>");
     }
     else {
