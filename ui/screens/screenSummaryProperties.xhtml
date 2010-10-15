@@ -47,7 +47,7 @@
   
   <ss:property id="projectPhase" label="Project Phase"
     description="'Primary','Counter', or 'Follow-Up'" value="#{screen.projectPhase}"
-    editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
+    editable="#{editable}"
     converter="#{projectPhaseConverter}">
     <ui:define name="editableData">
       <ui:insert name="editableProjectPhase">
