@@ -195,44 +195,75 @@
   <h:form id="panelsForm">
     <ss:collapsiblePanel id="duplexWellsPanel"
       isCollapsed="#{wellViewer.isPanelCollapsedMap['duplexWells']}"
-      rendered="#{wellViewer.duplexWellsDataModel.rowCount > 0}"
+      rendered="#{wellViewer.confirmationReport.columnDataModel.rowCount > 0}"
       label="Duplex Wells">
       <ui:define name="content">
-        <t:dataTable id="duplexWellsTable" var="well"
-          value="#{wellViewer.duplexWellsDataModel}"
-          styleClass="standardTable" columnClasses="column"
-          rowClasses="row1,row2" headerClass="tableHeader">
-          <t:column>
-            <f:facet name="header">
-              <t:outputText value="Well" />
-            </f:facet>
-            <ss:entityLink id="wellEntity" entity="#{well}"
-              viewer="#{wellViewer}" />
-          </t:column>
-          <t:column>
-            <f:facet name="header">
-              <t:outputText value="Library Name" />
-            </f:facet>
-            <ss:entityLink id="libraryEntity" entity="#{well.library}"
-              viewer="#{libraryViewer}" property="libraryName" />
-          </t:column>
-          <t:column>
-            <f:facet name="header">
-              <t:outputText value="Vendor Reagent Identifier" />
-            </f:facet>
-            <t:outputText value="#{well.latestReleasedReagent.vendorId}" />
-          </t:column>
-          <t:column rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}">
-            <f:facet name="header">
-              <t:outputText value="Sequence" />
-            </f:facet>
-            <t:outputText value="#{well.latestReleasedReagent.sequence}" />
-          </t:column>
-        </t:dataTable>
-        <!-- h:commandButton value="Browse..."
-          action="#{wellViewer.browseDuplexWells}" styleClass="command"
-          rendered="#{wellViewer.duplexWellsDataModel.rowCount > 0}"
-          title="Browse the duplex wells to which this pool well deconvolutes" /-->
+        <t:panelGrid columns="1">
+          <t:dataTable id="duplexWellReport" var="row"
+             styleClass="confirmationTable" columnClasses="column"
+             headerClass="confirmationTableHeader" value="#{wellViewer.confirmationReport.dataModel}"
+             rendered="#{wellViewer.confirmationReport.columnDataModel.rowCount > 0}">
+            <t:column>
+              <f:facet name="header">
+                <t:panelGrid columnClasses="propertyLabelColumn" styleClass="layoutPanel" columns="1">
+                  <t:outputText styleClass="label" value="Well" />
+                  <t:outputText value="Vendor Id" />
+                  <t:outputText rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}" value="Sequence" />
+                </t:panelGrid>
+              </f:facet>
+              <t:outputText value="&nbsp;" />
+            </t:column>
+            <t:columns
+              value="#{wellViewer.confirmationReport.columnDataModel}"
+              var="column" styleClass="confirmationTableCell #{wellViewer.confirmationReport.cell.styleClass}"
+              >
+              <f:facet name="header">
+                <t:panelGrid columns="1" columnClasses="confirmationTableColumn"   >
+                  <t:commandLink id="confirmationReportWellLink" action="#{wellViewer.viewEntity}"
+                    styleClass="entityLink tableHeader">
+                    <f:param name="entityId" value="#{column.well.entityId}" />
+                    <t:outputText value="#{column.well.wellKey}" styleClass="" />
+                  </t:commandLink>
+                  <t:outputText value="#{column.vendorId}" />
+                  <t:outputText value="#{column.sequence}" style="font-size: xx-small;" rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}"  />
+                </t:panelGrid>
+              </f:facet>
+              <t:outputText value="&nbsp;" />
+            </t:columns>
+            <t:column rendered="#{wellViewer.confirmationReport.dataModel.rowCount > 0}" styleClass="confirmationTableCell" >
+              <f:facet name="header">
+                <t:div style="min-height: #{wellViewer.allowedAccessToSilencingReagentSequence ? '5':'3'}em;" styleClass="propertyLabelColumn" >
+                  <t:outputText value="Screen # " />
+                </t:div>
+              </f:facet>
+              <t:commandLink id="confirmationReportScreenLink" action="#{screenViewer.viewEntity}"
+                 styleClass="entityLink tableHeader"
+                 rendered="#{! wellViewer.confirmationReport.screen.restricted}"
+                >
+                 <f:param name="entityId" value="#{wellViewer.confirmationReport.screen.entityId}" />
+                 <t:outputText value="#{wellViewer.confirmationReport.screen.screenNumber}" />
+              </t:commandLink>
+              <t:outputText rendered="#{wellViewer.confirmationReport.screen.restricted}" value="&nbsp;" />
+            </t:column>
+          </t:dataTable>
+          <t:panelGrid rendered="#{wellViewer.confirmationReport.dataModel.rowCount > 0}" columns="2">
+            <t:div  styleClass="propertyLabel propertyLabelColumn" >
+              <t:outputText value="Legend&nbsp;&nbsp;"/>
+            </t:div>
+            <table class="standardTable confirmationTableLegend">
+              <tbody >
+                <tr>
+                  <td class="confirmationTableCell confirmationReportFalsePositive">&nbsp;</td>
+                  <td class="propertyValue confirmationTableLegendCellLabel">did NOT re-confirm</td>
+                  <td class="confirmationTableCell confirmationReportConfirmedPositive">&nbsp;</td>
+                  <td class="propertyValue confirmationTableLegendCellLabel">DID re-confirm</td>
+                  <td class="confirmationTableCell confirmationReportNoData">&nbsp;</td>
+                  <td class="propertyValue confirmationTableLegendCellLabel">Inconclusive or No Data</td>
+                </tr>
+              </tbody>
+            </table>   
+          </t:panelGrid>       
+        </t:panelGrid>
       </ui:define>
     </ss:collapsiblePanel>
 

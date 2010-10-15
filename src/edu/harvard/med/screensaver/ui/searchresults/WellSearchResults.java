@@ -14,13 +14,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -52,6 +53,7 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
+import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
@@ -65,8 +67,8 @@ import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.DataTable;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanTupleColumn;
@@ -673,6 +675,13 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
                                                      makeColumnDescription(dataColumn, screenNumber, screenTitle, dataColumn.getDataType()),
                                                      makeScreenColumnGroup(screenNumber, screenTitle));
       }
+      else if (dataColumn.isConfirmedPositiveIndicator()) {
+        column = new EnumTupleColumn<Well,String,ConfirmedPositiveValue>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("confirmedPositiveValue"),
+                                                     makeColumnName(dataColumn, screenNumber),
+                                                     makeColumnDescription(dataColumn, screenNumber, screenTitle, dataColumn.getDataType()),
+                                                                         makeScreenColumnGroup(screenNumber, screenTitle),
+                                                                         ConfirmedPositiveValue.values());
+      }
       else if (dataColumn.isNumeric()) {
         column = new RealTupleColumn<Well,String>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("numericValue"),
                                                   makeColumnName(dataColumn, screenNumber),
@@ -948,6 +957,9 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         break;
       case POSITIVE_INDICATOR_BOOLEAN:
         columnDescription.append("<div class=\"positivesDataColumnLegend\">Legend:<br/>true=Positive<br/>false=Not a positive<br/>blank=No data</div>");
+        break;
+      case CONFIRMED_POSITIVE_INDICATOR:
+        columnDescription.append("<div class=\"positivesDataColumnLegend\">Legend:<br/>true=Confirmed positive<br/>false=Not a confirmed positive<br/>blank=No data</div>");
         break;
     }
     return columnDescription.toString();

@@ -64,6 +64,7 @@ public class ResultValue extends AbstractEntity<Integer>
   private static final Logger log = Logger.getLogger(ResultValue.class);
 
   public static final RelationshipPath<ResultValue> DataColumn = RelationshipPath.from(ResultValue.class).to("dataColumn", Cardinality.TO_ONE);
+  public static final RelationshipPath<ResultValue> Well = RelationshipPath.from(ResultValue.class).to("well", Cardinality.TO_ONE);
 
   private Well _well;
   private DataColumn _dataColumn;
@@ -82,6 +83,7 @@ public class ResultValue extends AbstractEntity<Integer>
 
   private PartitionedValue _partitionedPositiveValue;
   private Boolean _booleanPositiveValue;
+  private ConfirmedPositiveValue _confirmedPositiveValue;
 
   /**
    * Constructs a <code>ResultValue</code>.
@@ -103,6 +105,7 @@ public class ResultValue extends AbstractEntity<Integer>
               Double numericValue,
               PartitionedValue partitionPositiveIndicatorValue,
               Boolean booleanPositiveIndicatorValue,
+              ConfirmedPositiveValue confirmedPositiveIndicatorValue,
               boolean exclude)
   {
     if (dataColumn == null) {
@@ -135,6 +138,9 @@ public class ResultValue extends AbstractEntity<Integer>
       case POSITIVE_INDICATOR_PARTITION:
         setPartitionedPositiveValue(partitionPositiveIndicatorValue);
         break;
+      case CONFIRMED_POSITIVE_INDICATOR:
+        setConfirmedPositiveValue(confirmedPositiveIndicatorValue);
+        break;
       case TEXT:
         setValue(value);
         break;
@@ -144,6 +150,19 @@ public class ResultValue extends AbstractEntity<Integer>
 
   }
 
+  private void setConfirmedPositiveValue(ConfirmedPositiveValue value)
+  {
+    if (!isHibernateCaller()) {
+      if (value == null) {
+        value = ConfirmedPositiveValue.NOT_TESTED;
+      }
+      if (value == ConfirmedPositiveValue.CONFIRMED_POSITIVE && isPositiveCandidate()) {
+        setPositive(true);
+      }
+      setValue(value.toStorageValue());
+    }
+    _confirmedPositiveValue = value;
+  }
   /**
    * Constructs a numeric ResultValue object
    * Returns the value of this <code>ResultValue</code> as an appropriately
@@ -174,9 +193,18 @@ public class ResultValue extends AbstractEntity<Integer>
         return getBooleanPositiveValue();
       case POSITIVE_INDICATOR_PARTITION:
         return getPartitionedPositiveValue();
+      case CONFIRMED_POSITIVE_INDICATOR:
+        return getConfirmedPositiveValue();
       default:
         return getValue();
     }
+  }
+
+  @Column(name = "value", updatable = false, insertable = false)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValueUserType")
+  public ConfirmedPositiveValue getConfirmedPositiveValue()
+  {
+    return _confirmedPositiveValue;
   }
 
   @Column(name = "value", updatable = false, insertable = false)

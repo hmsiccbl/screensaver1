@@ -169,6 +169,11 @@
     <constructor-arg value="${screensaver.service.smtpemailservice.username}" />
   </bean>
 
+  <bean id="duplexConfirmationReport"
+        class="edu.harvard.med.screensaver.service.libraries.rnai.DuplexConfirmationReport"
+        scope="singleton"  >
+    <constructor-arg ref="genericEntityDao"/>
+  </bean>
   
   <bean
     id="serviceMessages"

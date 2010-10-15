@@ -23,15 +23,16 @@ import java.util.TreeSet;
 import javax.faces.component.UIData;
 import javax.faces.model.DataModel;
 
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.joda.time.LocalDate;
+import org.springframework.util.comparator.NullSafeComparator;
+
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.joda.time.LocalDate;
-import org.springframework.util.comparator.NullSafeComparator;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -147,7 +148,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       });
     }
 
-    _wellViewer = new WellViewer(null, null, genericEntityDao, librariesDao, new DefaultEntityViewPolicy(), null, null, null, null, null);
+    _wellViewer = new WellViewer(null, null, genericEntityDao, librariesDao, new DefaultEntityViewPolicy(), null, null, null, null, null, null);
     _wellSearchResults = new WellSearchResults(genericEntityDao,
                                                librariesDao,
                                                new DefaultEntityViewPolicy(),

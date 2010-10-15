@@ -31,11 +31,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Maps;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.OptimisticLock;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -204,7 +205,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     if (getDataType() != DataType.TEXT) {
       throw new DataModelViolationException("not a text data column");
     }
-    return createResultValue(assayWell, value, null, null, null, exclude);
+    return createResultValue(assayWell, value, null, null, null, null, exclude);
   }
 
   /**
@@ -228,7 +229,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     if (getDataType() != DataType.NUMERIC) {
       throw new DataModelViolationException("not a numeric data column");
     }
-    return createResultValue(assayWell, null, numericValue, null, null, exclude);
+    return createResultValue(assayWell, null, numericValue, null, null, null, exclude);
   }
   
   public ResultValue createPartitionedPositiveResultValue(AssayWell assayWell,
@@ -238,9 +239,17 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     if (getDataType() != DataType.POSITIVE_INDICATOR_PARTITION) {
       throw new DataModelViolationException("not a partition positive indicator data column");
     }
-    return createResultValue(assayWell, null, null, value, null, exclude);
+    return createResultValue(assayWell, null, null, value, null, null, exclude);
   }
-  
+
+  public ResultValue createConfirmedPositiveResultValue(AssayWell assayWell, ConfirmedPositiveValue value, boolean exclude)
+  {
+    if (getDataType() != DataType.CONFIRMED_POSITIVE_INDICATOR) {
+      throw new DataModelViolationException("not a confirmed positive indicator data column");
+    }
+    return createResultValue(assayWell, null, null, null, null, value, exclude);
+  }
+
   public ResultValue createBooleanPositiveResultValue(AssayWell assayWell,
                                                       Boolean value,
                                                       boolean exclude)
@@ -248,7 +257,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     if (getDataType() != DataType.POSITIVE_INDICATOR_BOOLEAN) {
       throw new DataModelViolationException("not a boolean positive indicator data column");
     }
-    return createResultValue(assayWell, null, null, null, value, exclude);
+    return createResultValue(assayWell, null, null, null, value, null, exclude);
   }
 
   @Column(nullable=false, updatable=false)
@@ -321,6 +330,12 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     return this;
   }
   
+  public DataColumn makeConfirmedPositiveIndicator()
+  {
+    setDataType(DataType.CONFIRMED_POSITIVE_INDICATOR);
+    return this;
+  }
+
   public DataColumn makeDerived(String howDerived, Set<DataColumn> derivedFrom)
   {
     setDerived(true);
@@ -709,6 +724,12 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
     return getDataType() == DataType.POSITIVE_INDICATOR_BOOLEAN;
   }
 
+  @Transient
+  public boolean isConfirmedPositiveIndicator()
+  {
+    return getDataType() == DataType.CONFIRMED_POSITIVE_INDICATOR;
+  }
+
   /**
    * Get whether this data column contains follow up data.
    * <p>
@@ -1011,6 +1032,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                         Double numericValue,
                                         PartitionedValue partitionPositiveIndicatorValue,
                                         Boolean booleanPositiveIndicatorValue,
+                                        ConfirmedPositiveValue confirmedPositiveIndicatorValue,
                                         boolean exclude)
   {
     ResultValue resultValue = new ResultValue(this,
@@ -1019,6 +1041,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
                                               numericValue,
                                               partitionPositiveIndicatorValue,
                                               booleanPositiveIndicatorValue,
+                                              confirmedPositiveIndicatorValue,
                                               exclude);
 
     if (getOrdinal() == 0) { // yuck! due to denormalization... // TODO: should move to AssayWell constructor
@@ -1031,7 +1054,6 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
       incrementPositivesCount(resultValue);
       assayWell.setPositive(true);
     }
-
     _resultValues.add(resultValue);
     
     return resultValue;
@@ -1136,4 +1158,5 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
   {
     this.zdepthOrdinal = zdepthOrdinal;
   }
+
 }

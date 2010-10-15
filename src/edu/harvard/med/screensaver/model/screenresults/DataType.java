@@ -28,7 +28,8 @@ public enum DataType implements VocabularyTerm
   NUMERIC("Numeric", false),
   TEXT("Text", false),
   POSITIVE_INDICATOR_BOOLEAN("Boolean Positive Indicator", true),
-  POSITIVE_INDICATOR_PARTITION("Partition Positive Indicator", true)
+  POSITIVE_INDICATOR_PARTITION("Partition Positive Indicator", true),
+  CONFIRMED_POSITIVE_INDICATOR("Confirmed Positive Indicator", true)
   ;
 
  

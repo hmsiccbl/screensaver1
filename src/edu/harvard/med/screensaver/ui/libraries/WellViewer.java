@@ -23,9 +23,10 @@ import java.util.Set;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import org.apache.log4j.Logger;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -43,8 +44,12 @@ import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
+import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
+import edu.harvard.med.screensaver.service.libraries.rnai.DuplexConfirmationReport;
+import edu.harvard.med.screensaver.service.libraries.rnai.DuplexConfirmationReport.ConfirmationReport;
 import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
@@ -82,6 +87,8 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   private DataModel _duplexWellsDataModel;
   private Reagent _versionedReagent;
 
+  private ConfirmationReportTableModel _confirmationReportTableModel;
+  private DuplexConfirmationReport _duplexConfirmationReport;
   
   /**
    * @motivation for CGLIB2
@@ -97,7 +104,8 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
                     StructureImageProvider structureImageProvider,
                     StudyViewer studyViewer,
                     WellsSdfDataExporter wellsSdfDataExporter,
-                    LibraryContentsVersionReference libraryContentsVersionRef)
+                    LibraryContentsVersionReference libraryContentsVersionRef,
+                    DuplexConfirmationReport duplexConfirmationReport)
   {
     super(thisProxy,
           Well.class,
@@ -113,6 +121,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     _wellsSdfDataExporter = wellsSdfDataExporter;
     _libraryContentsVersionRef = libraryContentsVersionRef == null ? new LibraryContentsVersionReference()
       : libraryContentsVersionRef;
+    _duplexConfirmationReport = duplexConfirmationReport;
     getIsPanelCollapsedMap().put("otherWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("duplexWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("annotations", Boolean.TRUE);
@@ -190,6 +199,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
 //    return BROWSE_WELLS;
 //  }
 
+  //TODO: Remove this, as [#1476] replaces it (confirmation table)
   public DataModel getDuplexWellsDataModel()
   {
     if (_duplexWellsDataModel == null) {
@@ -204,6 +214,85 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     return _duplexWellsDataModel;
   }
   
+  public static class ConfirmationReportTableModel
+  {
+    public DataModel _columnDataModel = new ListDataModel(); //List<SilencingReagent>
+    public DataModel _dataModel = new ListDataModel(); // List<Map<SilencingReagent,SimpleCell>>
+    private ConfirmationReport _report;
+
+    public ConfirmationReportTableModel()
+    {};
+
+    public ConfirmationReportTableModel(ConfirmationReport report)
+    {
+      _report = report;
+      _dataModel = new ListDataModel(_report.screens);
+      _columnDataModel = new ListDataModel(_report.reagents);
+    }
+    
+    public DataModel getDataModel()
+    {
+      return _dataModel;
+    }
+
+    public DataModel getColumnDataModel()
+    {
+      return _columnDataModel;
+    }
+
+    public SimpleCell getCell()
+    {
+      Screen s = getScreen();
+      SilencingReagent r = _report.reagents.get(_columnDataModel.getRowIndex());
+      ConfirmedPositiveValue value = _report.results.get(s).get(r);
+      String style = getStyleClass(value);
+      
+      return new SimpleCell(r.getSequence(), value, "Value for " + r.getSequence())
+        .withStyleClass(style)
+        .withLinkValue(r.getWell());
+    }
+
+    private String getStyleClass(ConfirmedPositiveValue value)
+    {
+      String style = "";
+      if (value != null) {
+        switch (value) {
+          case CONFIRMED_POSITIVE:
+            style = "confirmationReportConfirmedPositive";
+            break;
+          case FALSE_POSITIVE:
+            style = "confirmationReportFalsePositive";
+            break;
+          case INCONCLUSIVE:
+            style = "confirmationReportInconclusive";
+            break;
+          default:
+            style = "confirmationReportNoData";
+            break;
+        }
+      }
+      return style;
+    }
+
+    public Screen getScreen()
+    {
+      return _report.screens.get(_dataModel.getRowIndex());
+    }
+  } 
+  
+  public ConfirmationReportTableModel getConfirmationReport()
+  {
+    if (_versionedReagent == null || !(_versionedReagent instanceof SilencingReagent)
+      || !_versionedReagent.getWell().getLibrary().isPool()) {
+      return new ConfirmationReportTableModel();
+    }
+    if (_confirmationReportTableModel == null) { //TODO: will this report become too stale if a user session lasts too long?
+      ConfirmationReport report = _duplexConfirmationReport.getDuplexReconfirmationReport((SilencingReagent) _versionedReagent);
+      _confirmationReportTableModel = new ConfirmationReportTableModel(report);
+    }
+    return _confirmationReportTableModel;
+  }
+
 //  @UICommand
 //  public String browseDuplexWells()
 //  {
@@ -321,6 +410,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     initializeAnnotationValuesTable(well);
     _otherWellsDataModel = null;
     _duplexWellsDataModel = null;
+    _confirmationReportTableModel = null;
   }
 
   public boolean isAllowedAccessToSilencingReagentSequence() 

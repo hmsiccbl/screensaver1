@@ -9,13 +9,13 @@
 
 package edu.harvard.med.screensaver.service.libraries;
 
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service that creates a new library and its wells and imports its well
@@ -78,4 +78,5 @@ public class LibraryCreator
           + newLibrary.getStartPlate() + "," + newLibrary.getEndPlate() + "] is not available");
     }
   }
+
 }

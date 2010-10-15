@@ -25,12 +25,13 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.math.IntRange;
+import org.apache.log4j.Logger;
+
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.math.IntRange;
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -51,6 +52,7 @@ import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
+import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
@@ -108,6 +110,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private static SortedMap<String,Boolean> primaryOrFollowUpMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,Boolean> booleanMap = new TreeMap<String,Boolean>();
   private static SortedMap<String,PartitionedValue> partitionedValueMap = new TreeMap<String,PartitionedValue>();
+  private static SortedMap<String,ConfirmedPositiveValue> confirmedPositiveValueMap = new TreeMap<String,ConfirmedPositiveValue>();
   private static SortedMap<String,AssayWellControlType> assayWellControlTypeMap = new TreeMap<String,AssayWellControlType>();
   static {
     for (AssayReadoutType assayReadoutType : AssayReadoutType.values()) {
@@ -138,6 +141,11 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       partitionedValueMap.put(pv.getValue().toUpperCase(), pv);
     }
 
+    for (ConfirmedPositiveValue pv : ConfirmedPositiveValue.values()) {
+      confirmedPositiveValueMap.put(pv.getValue().toLowerCase(), pv);
+      confirmedPositiveValueMap.put(pv.getValue().toUpperCase(), pv);
+    }
+
     for (AssayWellControlType awct : AssayWellControlType.values()) {
       assayWellControlTypeMap.put(awct.getAbbreviation(), awct);
     }
@@ -161,6 +169,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
   private CellVocabularyParser<Boolean> _primaryOrFollowUpParser;
   private CellVocabularyParser<Boolean> _booleanParser;
   private CellVocabularyParser<PartitionedValue> _partitionedValueParser;
+  private CellVocabularyParser<ConfirmedPositiveValue> _confirmedPositiveValueParser;
   private CellVocabularyParser<AssayWellControlType> _assayWellControlTypeParser;
   private WellNameParser _wellNameParser;
   
@@ -261,6 +270,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
     _primaryOrFollowUpParser = new CellVocabularyParser<Boolean>(primaryOrFollowUpMap, Boolean.FALSE);
     _booleanParser = new CellVocabularyParser<Boolean>(booleanMap, Boolean.FALSE);
     _partitionedValueParser = new CellVocabularyParser<PartitionedValue>(partitionedValueMap, PartitionedValue.NOT_POSITIVE);
+    _confirmedPositiveValueParser = new CellVocabularyParser<ConfirmedPositiveValue>(confirmedPositiveValueMap, ConfirmedPositiveValue.INCONCLUSIVE);
     _assayWellControlTypeParser = new CellVocabularyParser<AssayWellControlType>(assayWellControlTypeMap);
     _wellNameParser = new WellNameParser();
 
@@ -398,6 +408,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           case TEXT: dataColumn.makeTextual(); break;
           case POSITIVE_INDICATOR_BOOLEAN: dataColumn.makeBooleanPositiveIndicator(); break;
           case POSITIVE_INDICATOR_PARTITION: dataColumn.makePartitionPositiveIndicator(); break;
+          case CONFIRMED_POSITIVE_INDICATOR: dataColumn.makeConfirmedPositiveIndicator(); break; 
           default: throw new DevelopmentException("unhandled data type " + dataType);
           }
         }
@@ -421,9 +432,9 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       if (!!!(StringUtils.isEmpty(howDerived) && columnsDerivedFrom.isEmpty())) { 
         dataColumn.makeDerived(howDerived, columnsDerivedFrom);
       }
-      if (!!!dataColumn.isDerived()) {
+      if (!!!dataColumn.isDerived() && !!!dataColumn.isPositiveIndicator()) {
         if (dataColumnPropertyRows.containsKey(DataColumnProperty.ASSAY_READOUT_TYPE)) {
-          dataColumn.setAssayReadoutType(_assayReadoutTypeParser.parse(dataColumnPropertyRows.get(DataColumnProperty.ASSAY_READOUT_TYPE).getCell(iDataColumn, true)));
+          dataColumn.setAssayReadoutType(_assayReadoutTypeParser.parse(dataColumnPropertyRows.get(DataColumnProperty.ASSAY_READOUT_TYPE).getCell(iDataColumn, false)));
         }
       }
       if (dataColumnPropertyRows.containsKey(DataColumnProperty.PRIMARY_OR_FOLLOWUP)) {
@@ -673,6 +684,12 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
           newResultValue =
             dataColumn.createPartitionedPositiveResultValue(assayWell,
                                                             _partitionedValueParser.parse(cell),
+                                                            isExclude);
+        }
+        else if (dataColumn.isConfirmedPositiveIndicator()) {
+          newResultValue =
+            dataColumn.createConfirmedPositiveResultValue(assayWell,
+                                                            _confirmedPositiveValueParser.parse(cell),
                                                             isExclude);
         }
         else if (dataColumn.isNumeric()) {

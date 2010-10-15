@@ -25,15 +25,17 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.google.common.collect.Sets;
 import jxl.BooleanFormulaCell;
 import jxl.CellType;
 import jxl.NumberFormulaCell;
 import jxl.Sheet;
 import jxl.read.biff.BiffException;
 import jxl.write.WriteException;
+
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.AbstractSpringTest;
 import edu.harvard.med.screensaver.io.ParseError;
@@ -44,6 +46,7 @@ import edu.harvard.med.screensaver.io.workbook2.Worksheet;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
+import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -115,7 +118,8 @@ public class ScreenResultParserTest extends AbstractSpringTest
       "FI_B",
       "Average",
       "PositiveIndicator2",
-      "PositiveIndicator3" };
+      "PositiveIndicator3",
+      "PositiveIndicator4" };
 
     InputStream xlsInStream = ScreenResultParserTest.class.getResourceAsStream(SCREEN_RESULT_115_TEST_WORKBOOK_FILE);
     jxl.Workbook wb = jxl.Workbook.getWorkbook(xlsInStream);
@@ -271,7 +275,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
     List<WorkbookParseError> errors = mockScreenResultParser.getErrors();
     assertTrue(errors.contains(new ParseError("value required", "Data Columns:(B,3)")));
     assertTrue(errors.contains(new ParseError("illegal value", "Data Columns:(E,4)")));
-    assertTrue(errors.contains(new ParseError("unparseable value \"paradiso positive indicator\" (expected one of [Boolean Positive Indicator, Numeric, Partition Positive Indicator, Text])", "Data Columns:(G,3)")));
+    assertTrue(errors.contains(new ParseError("unparseable value \"paradiso positive indicator\" (expected one of [Boolean Positive Indicator, Confirmed Positive Indicator, Numeric, Partition Positive Indicator, Text])", "Data Columns:(G,3)")));
     assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'B' (expected one of [E, F])", "Data Columns:(D,10)")));
     assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'H' (expected one of [E, F, G])", "Data Columns:(E,10)")));
     assertTrue(errors.contains(new ParseError("invalid Data Column worksheet column label 'D' (expected one of [E, F, G, H])", "Data Columns:(F,10)")));
@@ -482,6 +486,11 @@ public class ScreenResultParserTest extends AbstractSpringTest
     dataColumn.makeBooleanPositiveIndicator();
     expectedDataColumns.put(6, dataColumn);
 
+    dataColumn = expectedScreenResult.createDataColumn("PositiveIndicator4");
+    dataColumn.setDescription("Desc8");
+    dataColumn.makeDerived("PositiveIndicator2 is M or S", Sets.newHashSet(expectedDataColumns.get(5)));
+    dataColumn.makeConfirmedPositiveIndicator();
+    expectedDataColumns.put(7, dataColumn);
 
     Integer[] expectedPlateNumbers = {1, 1, 1, 1, 1, 1, 1, 1};
 
@@ -499,24 +508,26 @@ public class ScreenResultParserTest extends AbstractSpringTest
       };
 
     boolean[][] expectedExcludeValues = {
-      {false, false, false, false, false, false, false},
-      {false, false, false, false, false, false, false},
-      {false, true,  false, true,  false, false, false},
-      {false, false, false, false, false, false, false},
-      {false, false, false, false, false, false, false},
-      {false, false, false, false, false, false, false},
-      {true,  true,  true,  true,  true,  true,  true},
-      {false, false, false, false, false, false, false}};
+      { false, false, false, false, false, false, false, false },
+      { false, false, false, false, false, false, false, false },
+      { false, true, false, true, false, false, false, false },
+      { false, false, false, false, false, false, false, false },
+      { false, false, false, false, false, false, false, false },
+      { false, false, false, false, false, false, false, false },
+      { true, true, true, true, true, true, true, true },
+      { false, false, false, false, false, false, false, false } };
+
 
     Object[][] expectedValues = {
-          { 1071894., 1196906., 0.98, 1.11, 1.045, PartitionedValue.NOT_POSITIVE, Boolean.TRUE },
-          { 1174576., 1469296., null, 5.8, 5.80, PartitionedValue.STRONG, Boolean.TRUE },
-          { 1294182., 1280934., 1.18, 1.19, 1.185, PartitionedValue.NOT_POSITIVE, Boolean.FALSE },
-          { 1158888., 1458878., 1.06, 1.35, 1.205, PartitionedValue.WEAK, Boolean.FALSE },
-          { 1385142., 1383446., 1.26, 1.28, 1.270, PartitionedValue.WEAK, Boolean.FALSE },
-          { null, null, null, null, null, PartitionedValue.NOT_POSITIVE, Boolean.FALSE },
-          { 1666646., 1154436., 1.52, 1.07, 1.295, PartitionedValue.WEAK, Boolean.FALSE },
-          { null, null, null, null, null, PartitionedValue.NOT_POSITIVE, Boolean.FALSE } };
+          { 1071894., 1196906., 0.98, 1.11, 1.045, PartitionedValue.NOT_POSITIVE, Boolean.TRUE, ConfirmedPositiveValue.INCONCLUSIVE },
+          { 1174576., 1469296., null, 5.8, 5.80, PartitionedValue.STRONG, Boolean.TRUE, ConfirmedPositiveValue.CONFIRMED_POSITIVE },
+          { 1294182., 1280934., 1.18, 1.19, 1.185, PartitionedValue.NOT_POSITIVE, Boolean.FALSE,
+            ConfirmedPositiveValue.CONFIRMED_POSITIVE },
+          { 1158888., 1458878., 1.06, 1.35, 1.205, PartitionedValue.WEAK, Boolean.FALSE, ConfirmedPositiveValue.CONFIRMED_POSITIVE },
+          { 1385142., 1383446., 1.26, 1.28, 1.270, PartitionedValue.WEAK, Boolean.FALSE, ConfirmedPositiveValue.FALSE_POSITIVE },
+          { null, null, null, null, null, PartitionedValue.NOT_POSITIVE, Boolean.FALSE, ConfirmedPositiveValue.FALSE_POSITIVE },
+          { 1666646., 1154436., 1.52, 1.07, 1.295, PartitionedValue.WEAK, Boolean.FALSE, ConfirmedPositiveValue.INCONCLUSIVE },
+          { null, null, null, null, null, PartitionedValue.NOT_POSITIVE, Boolean.FALSE, ConfirmedPositiveValue.FALSE_POSITIVE } };
 
     SortedSet<DataColumn> dataColumns = screenResult.getDataColumns();
     int iCol = 0;
@@ -540,7 +551,7 @@ public class ScreenResultParserTest extends AbstractSpringTest
           assertEquals("col " + iCol + " well #" + iWell + " well type",
                        expectedAssayWellControlTypes[iWell],
                        rv.getAssayWellControlType());
-          assertEquals("col " + iCol + " well #" + iWell + " well type",
+          assertEquals("col " + iCol + " well #" + iWell + ", wellkey: " + wellKey + ", exclude",
                        expectedExcludeValues[iWell][iCol],
                        rv.isExclude());
           if (expectedValues[iWell][iCol] == null) {

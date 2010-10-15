@@ -219,7 +219,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   display: none;
 }
 
-.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.fixedColumn100,.fixedColumn200,.fixedColumn300,.greedyColumn,.collectionTableColumn
+.column,.keyColumn,.propertyLabelColumn,.numericColumn,.textColumn,.fixedColumn100,.fixedColumn200,.fixedColumn300,.greedyColumn,.collectionTableColumn,.confirmationTableColumn
   {
   vertical-align: top;
   border-style: none;
@@ -318,7 +318,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   text-decoration: line-through;
 }
 
-.tableHeader,.heatMapTableHeader {
+.tableHeader,.heatMapTableHeader,.confirmationTableHeader {
   font-size: small;
   font-weight: bold;
   color: black;
@@ -328,7 +328,7 @@ a.heatMapValue:link,a.heatMapValue:visited {
   vertical-align: top;
 }
 
-.tableHeader {
+.tableHeader,.confirmationTableHeader {
   text-align: left;
   /* this should match the padding-right used for the table columns (see above) */
   padding-right: 16px;
@@ -522,4 +522,60 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 .positivesDataColumnLegend {
   font-size: x-small;
   color: gray;
+}
+
+.confirmationTable {
+  border-width: 2px;
+  border-style: solid;
+  border-color: #dddddd;
+  /* controls space between cells */
+  border-spacing: 0px;
+  font-size: small;
+  text-align: center;
+}
+
+.confirmationTableColumn {
+  padding-bottom: 4px;
+  border-width: 2px;	
+  
+}
+
+.confirmationTableLegend {
+  border-spacing: 2px;
+  text-align: center;
+  font-size: xx-small;
+}
+
+.confirmationTableCell {
+  border-style: solid;
+  border-width: 2px 1px 1px 2px;
+  border-color: gray;
+  min-width: 50px; min-height:20px; max-height:20px;
+}
+
+.confirmationTableLegendCellLabel {
+	padding-right:50px;
+}
+
+.confirmationTableHeader {
+  font-weight: normal;
+  background-color: transparent;
+  padding-right: 1px;
+  border-right: 1px;
+}
+
+.confirmationReportConfirmedPositive {
+  background-color: blue;
+}
+
+.confirmationReportFalsePositive {
+  background-color: red;
+}
+
+.confirmationReportInconclusive {
+  background-color: white;
+}
+
+.confirmationReportNoData {
+  background-color: white;
 }
