@@ -441,9 +441,9 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
     sortedCherryPicks.addAll(cherryPickRequest.getLabCherryPicks());
     List<LabCherryPick> indexedCherryPicks = new ArrayList<LabCherryPick>(sortedCherryPicks);
     for (int index = firstIndex; index <= lastIndex; index++) {
-      String expectedAssayPlateName = String.format("Cherry Picker_%d (%d) CP%d  Plate %02d of %d",
-                                                    cherryPickRequest.getScreen().getScreenNumber(),
-                                                    cherryPickRequest.getScreen().getScreenNumber(),
+      String expectedAssayPlateName = String.format("Cherry Picker_%s (%s) CP%d  Plate %02d of %d",
+                                                    cherryPickRequest.getScreen().getFacilityId(),
+                                                    cherryPickRequest.getScreen().getFacilityId(),
                                                     cherryPickRequest.getEntityId(),
                                                     expectedAssayPlateNumber,
                                                     cherryPickRequest.getCherryPickAssayPlates().size());

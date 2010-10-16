@@ -26,7 +26,7 @@ public class AssayInfoProducer
   public AssayInfo getAssayInfoForScreen(Screen screen)
   {
     AssayInfo assayInfo = new AssayInfo();
-    assayInfo.setAssayName("ICCBL" + screen.getScreenNumber());
+    assayInfo.setAssayName("ICCBL" + screen.getFacilityId());
     assayInfo.setProtocolDescription(screen.getTitle());
     assayInfo.setPNote(screen.getSummary());
     assayInfo.setInvestigator(screen.getLabHead() == null ? "" : screen.getLabHead().getLastName().toUpperCase());

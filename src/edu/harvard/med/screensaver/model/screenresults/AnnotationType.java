@@ -120,12 +120,6 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
     return getOrdinal().compareTo(that.getOrdinal());
   }
 
-//  @Override
-//  public String toString()
-//  {
-//    return _study.getScreenNumber() + ":" + _name;
-//  }
-
   /**
    * Get the id for the annotation.
    * @return the id for the annotation type

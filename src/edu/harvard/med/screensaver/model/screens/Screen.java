@@ -108,6 +108,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   private static final long serialVersionUID = 0L;
 
   public static final RelationshipPath<Screen> thisEntity = RelationshipPath.from(Screen.class);
+  public static final PropertyPath<Screen> facilityId = thisEntity.toProperty("facilityId");
   public static final RelationshipPath<Screen> screenResult = thisEntity.to("screenResult", Cardinality.TO_ONE);
   public static final RelationshipPath<Screen> labHead = thisEntity.to("labHead", Cardinality.TO_ONE);
   public static final RelationshipPath<Screen> leadScreener = thisEntity.to("leadScreener", Cardinality.TO_ONE);
@@ -125,7 +126,12 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   public static final RelationshipPath<Screen> reagents = thisEntity.to("reagents");
   public static final RelationshipPath<Screen> assayPlates = thisEntity.to("assayPlates");
 
-  public static final Function<Screen,Integer> ToScreenNumberFunction = new Function<Screen,Integer>() { public Integer apply(Screen s) { return s.getScreenNumber(); } };
+  public static final Function<Screen,String> ToNameFunction = new Function<Screen,String>() {
+    public String apply(Screen s)
+    {
+      return s.getFacilityId();
+    }
+  };
 
   // private instance data
 
@@ -147,7 +153,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
 
   // generic screen
 
-  private Integer _screenNumber;
+  private String _facilityId;
   private ScreenType _screenType;
   private Set<AttachedFile> _attachedFiles = new HashSet<AttachedFile>();
   private SortedSet<String> _keywords = new TreeSet<String>();
@@ -215,23 +221,23 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
 
   /**
    * Construct an initialized <code>Screen</code>.
+   * @param facilityId the screen facility ID
    * @param leadScreener the lead screener
    * @param labHead the lab head
-   * @param screenNumber the screen number
    * @param screenType the screen type
    * @param studyType the study type
    * @param title the title
    */
   public Screen(AdministratorUser createdBy,
+                String facilityId,
                 ScreeningRoomUser leadScreener,
                 LabHead labHead,
-                Integer screenNumber,
                 ScreenType screenType,
                 StudyType studyType,
                 String title)
   {
     super(createdBy);
-    _screenNumber = screenNumber;
+    _facilityId = facilityId;
     _screenType = screenType; // note: must be set before updateFacilityUsageRoleForAssociatedScreens() is called
     setLeadScreener(leadScreener);
     setLabHead(labHead);
@@ -1110,37 +1116,23 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
                              dtoBillingItem.getDateSentForBilling());
   }
 
-  /**
-   * Get the screen number.
-   * @return the screen number
-   */
   @Column(unique=true, nullable=false)
-  public Integer getScreenNumber()
+  @org.hibernate.annotations.Type(type="text")
+  public String getFacilityId()
   {
-    return _screenNumber;
+    return _facilityId;
   }
 
-  /**
-   * Set the screen number.
-   * @param screenNumber the new screen number
-   */
-  public void setScreenNumber(Integer screenNumber)
+  public void setFacilityId(String name)
   {
-    _screenNumber = screenNumber;
-  }
-
-  @Transient
-  @Override
-  public Integer getStudyNumber()
-  {
-    return getScreenNumber();
+    _facilityId = name;
   }
 
   /**
    * Get the study type.
    * @return the study type
    */
-  @Column(nullable=false)
+  @Column(nullable = false)
   @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.model.screens.StudyType$UserType")
   public StudyType getStudyType()
   {

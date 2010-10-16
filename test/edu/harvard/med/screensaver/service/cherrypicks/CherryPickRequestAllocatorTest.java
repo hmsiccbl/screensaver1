@@ -494,12 +494,12 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     return library;
   }
 
-  public static RNAiCherryPickRequest createRNAiCherryPickRequest(int screenNumber, Volume volume)
+  public static RNAiCherryPickRequest createRNAiCherryPickRequest(int screenFacilityId, Volume volume)
   {
-    Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
+    Screen screen = MakeDummyEntities.makeDummyScreen(screenFacilityId, ScreenType.RNAI);
     // Note: if we use screen.getLeadScreener() as requestor, Hibernate complains!
     ScreeningRoomUser cherryPickRequestor =
-      MakeDummyEntities.makeDummyUser(screenNumber, "Cherry", "Picker");
+      MakeDummyEntities.makeDummyUser(screenFacilityId, "Cherry", "Picker");
     RNAiCherryPickRequest cherryPickRequest = (RNAiCherryPickRequest)
       screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy(), cherryPickRequestor, new LocalDate());
     cherryPickRequest.setTransferVolumePerWellApproved(volume);
@@ -520,7 +520,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     return well1;
   }
 
-  private RNAiCherryPickRequest doTestCherryPickRequestAllocation(final int screenNumber,
+  private RNAiCherryPickRequest doTestCherryPickRequestAllocation(final int screenFacilityId,
                                                                   final Volume requestVolume,
                                                                   final String[] cherryPickWellNames,
                                                                   final String[] expectedUnfillableCherryPickWellNames)
@@ -529,7 +529,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        RNAiCherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(screenNumber, requestVolume);
+        RNAiCherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(screenFacilityId, requestVolume);
         Set<LabCherryPick> expectedUnfulfillableCherryPicks = new HashSet<LabCherryPick>();
         Set<String> expectedUnfillableCherryPickWellNamesSet = new HashSet<String>(Arrays.asList(expectedUnfillableCherryPickWellNames));
         ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, new WellName(cherryPickWellNames[0]))));

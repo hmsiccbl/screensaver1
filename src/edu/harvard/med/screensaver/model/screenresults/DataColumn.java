@@ -145,7 +145,7 @@ public class DataColumn extends AbstractEntity<Integer> implements MetaDataType,
    */
   public int compareTo(DataColumn other)
   {
-    int result = getScreenResult().getScreen().getScreenNumber().compareTo(other.getScreenResult().getScreen().getScreenNumber());
+    int result = getScreenResult().getScreen().getFacilityId().compareTo(other.getScreenResult().getScreen().getFacilityId());
     if (result == 0) {
       result = getOrdinal().compareTo(other.getOrdinal());
     }

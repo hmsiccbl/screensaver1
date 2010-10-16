@@ -29,7 +29,7 @@ public class ScreenFinder extends AbstractBackingBean
   private ScreenViewer _screenViewer;
   private ScreenDetailViewer _screenDetailViewer;
 
-  private Integer _screenNumber;
+  private String _screenFacilityId;
 
 
   /**
@@ -51,40 +51,40 @@ public class ScreenFinder extends AbstractBackingBean
 
   // public instance methods
 
-  public Integer getScreenNumber()
+  public String getScreenFacilityId()
   {
-    return _screenNumber;
+    return _screenFacilityId;
   }
 
-  public void setScreenNumber(Integer screenNumber)
+  public void setScreenFacilityId(String screenFacilityId)
   {
-    _screenNumber = screenNumber;
+    _screenFacilityId = screenFacilityId;
   }
 
   @UICommand
   public String findScreen()
   {
-    if (_screenNumber != null) {
+    if (_screenFacilityId != null) {
       Screen screen = _dao.findEntityByProperty(Screen.class,
-                                                "screenNumber",
-                                                _screenNumber);
+                                                Screen.facilityId.getPropertyName(),
+                                                _screenFacilityId);
       if (screen != null) {
         resetSearchFields();
         return _screenViewer.viewEntity(screen);
       }
       else {
-        showMessage("noSuchEntity", "Screen " + _screenNumber);
+        showMessage("noSuchEntity", "Screen " + _screenFacilityId);
       }
     }
     else {
-      showMessage("screens.screenNumberRequired", _screenNumber);
+      showMessage("screens.screenFacilityIdRequired", _screenFacilityId);
     }
     return REDISPLAY_PAGE_ACTION_RESULT;
   }
 
   private void resetSearchFields()
   {
-    _screenNumber = null;
+    _screenFacilityId = null;
   }
 
 }

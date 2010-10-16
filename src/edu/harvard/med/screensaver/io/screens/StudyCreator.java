@@ -61,7 +61,7 @@ public class StudyCreator
 
   protected GenericEntityDAO dao;
 
-  protected int studyNumber;
+  protected String facilityId;
   protected String title;
   protected ScreenType screenType;
   protected StudyType studyType;
@@ -92,7 +92,7 @@ public class StudyCreator
 
     dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
 
-    studyNumber = app.getCommandLineOptionValue("n", Integer.class);
+    facilityId = app.getCommandLineOptionValue("i", String.class);
     title = app.getCommandLineOptionValue("t");
     screenType = app.getCommandLineOptionEnumValue("y", ScreenType.class);
     studyType = app.getCommandLineOptionEnumValue("yy", StudyType.class);
@@ -112,20 +112,20 @@ public class StudyCreator
     replace = app.isCommandLineFlagSet("r");
     
 
-    validateStudyNumber();
+    validateStudyFacilityId();
   }
 
-  protected void validateStudyNumber()
+  protected void validateStudyFacilityId()
   {
-    if (studyNumber < Study.MIN_STUDY_NUMBER) {
-      throw new IllegalArgumentException("study number must >= " + Study.MIN_STUDY_NUMBER);
+    if (facilityId.startsWith(Study.STUDY_FACILITY_ID_PREFIX)) {
+      throw new IllegalArgumentException("study identifier must start with " + Study.STUDY_FACILITY_ID_PREFIX);
     }
   }
 
   @SuppressWarnings("static-access")
   protected void configureCommandLineArguments(CommandLineApplication app)
   {
-    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("#").withLongOpt("number").create("n"));
+    app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("#").withLongOpt("study-id").create("i"));
     app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("title").withLongOpt("title").withDescription("the title of the screen").create("t"));
     List<String> desc = new ArrayList<String>();
     for(ScreenType t: EnumSet.allOf(ScreenType.class) ) desc.add(t.name());
@@ -178,14 +178,14 @@ public class StudyCreator
   {
     final GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
     
-    Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", studyNumber);
+    Screen study = dao.findEntityByProperty(Screen.class, "facilityId", facilityId);
     if (study != null) {
       if (!replace) {
-        log.error("study " + studyNumber + " already exists (use --replace flag to delete existing study first)"); 
+        log.error("study " + facilityId + " already exists (use --replace flag to delete existing study first)");
         return;
       }
       dao.deleteEntity(study);
-      log.error("deleted existing study " + studyNumber); 
+      log.error("deleted existing study " + facilityId);
     }
 
     dao.doInTransaction(new DAOTransaction() {
@@ -205,7 +205,7 @@ public class StudyCreator
       }
 
     });
-    log.info("study " + studyNumber + " succesfully added to database");
+    log.info("study " + facilityId + " succesfully added to database");
   }
 
   protected Study newStudy()
@@ -217,7 +217,7 @@ public class StudyCreator
       log.info("set lab head for lead screener");
     }
 
-    Screen study = new Screen(createdBy, leadScreener, labHead, studyNumber, screenType, studyType, title);
+    Screen study = new Screen(createdBy, facilityId, leadScreener, labHead, screenType, studyType, title);
     study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);
     return study;

@@ -23,27 +23,23 @@ import java.util.TreeSet;
 import javax.faces.component.UIData;
 import javax.faces.model.DataModel;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.joda.time.LocalDate;
-import org.springframework.util.comparator.NullSafeComparator;
-
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.joda.time.LocalDate;
+import org.springframework.util.comparator.NullSafeComparator;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.SortDirection;
-import edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityViewPolicy;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
-import edu.harvard.med.screensaver.io.DataExporter;
-import edu.harvard.med.screensaver.io.libraries.smallmolecule.LibraryContentsVersionReference;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
@@ -60,7 +56,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
@@ -81,9 +76,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   // instance data members
 
   protected LibrariesDAO librariesDao;
-
-  private WellSearchResults _wellSearchResults;
-  private WellViewer _wellViewer;
+  protected WellSearchResults wellsBrowser;
 
   private static boolean oneTimeDataSetup = false;
   private static Library _bigSmallMoleculeLibrary;
@@ -148,16 +141,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
       });
     }
 
-    _wellViewer = new WellViewer(null, null, genericEntityDao, librariesDao, new DefaultEntityViewPolicy(), null, null, null, null, null, null);
-    _wellSearchResults = new WellSearchResults(genericEntityDao,
-                                               librariesDao,
-                                               new DefaultEntityViewPolicy(),
-                                               null,
-                                               _wellViewer,
-                                               null,
-                                               new LibraryContentsVersionReference(),
-                                               Collections.<DataExporter<Tuple<String>>>emptyList());
-    _wellSearchResults.setDataTableUIComponent(new UIData());
+    wellsBrowser.setDataTableUIComponent(new UIData());
   }
 
   /** for testing that multiple contents versions are handled in a disjoint manner */
@@ -195,11 +179,11 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   
   public void testSearchAllWellsIsInitiallyEmpty()
   {
-    _wellSearchResults.searchAll();
-    assertEquals("search result is initially empty", 0, _wellSearchResults.getRowCount());
-    ((Criterion<String>) _wellSearchResults.getColumnManager().getColumn("Well").getCriterion()).setOperatorAndValue(Operator.TEXT_STARTS_WITH, "B");
-    _wellSearchResults.searchCommandListener(null);
-    assertTrue("search result is non-empty after explicit search command listener is invoked", 0 != _wellSearchResults.getRowCount());
+    wellsBrowser.searchAll();
+    assertEquals("search result is initially empty", 0, wellsBrowser.getRowCount());
+    ((Criterion<String>) wellsBrowser.getColumnManager().getColumn("Well").getCriterion()).setOperatorAndValue(Operator.TEXT_STARTS_WITH, "B");
+    wellsBrowser.searchCommandListener(null);
+    assertTrue("search result is non-empty after explicit search command listener is invoked", 0 != wellsBrowser.getRowCount());
   }
 
   /**
@@ -207,7 +191,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
    */
   public void testAllEntitiesOfType()
   {
-    WellSearchResults wsr = _wellSearchResults;
+    WellSearchResults wsr = wellsBrowser;
     wsr.searchAll();
     wsr.searchCommandListener(null); // invoke search now (necessary when using searchAll(), above)
     setOrderBy(wsr);
@@ -218,7 +202,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   public void testEntitySet()
   {
-    WellSearchResults wsr = _wellSearchResults;
+    WellSearchResults wsr = wellsBrowser;
     wsr.searchWells(_bigWellKeys);
     setOrderBy(wsr);
     DataTableModel model = wsr.getDataTableModel();
@@ -227,7 +211,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   public void testParentedEntity()
   {
-    WellSearchResults wsr = _wellSearchResults;
+    WellSearchResults wsr = wellsBrowser;
     // reload library to ensure LCV.equals() works in Well.getReagent() 
     Library library =
       genericEntityDao.reloadEntity(_bigSmallMoleculeLibrary, true, Library.wells.to(Well.latestReleasedReagent).getPath());
@@ -244,15 +228,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
    */
   public void testScreenResultDataColumnAndStudyAnnotationColumns()
   {
-    WellSearchResults wsr = _wellSearchResults;
+    WellSearchResults wsr = wellsBrowser;
 
     Set<TableColumn<?,?>> columns = Sets.newHashSet();
     wsr.searchAll(); // initialize columns
     for (DataColumn dataColumn : _screenResult.getDataColumns()) {
-      columns.add(_wellSearchResults.getColumnManager().getColumn(WellSearchResults.makeColumnName(dataColumn, dataColumn.getScreenResult().getScreen().getScreenNumber())));
+      columns.add(wellsBrowser.getColumnManager().getColumn(WellSearchResults.makeColumnName(dataColumn, dataColumn.getScreenResult().getScreen().getFacilityId())));
     }
     for (AnnotationType annotType : _study.getAnnotationTypes()) {
-      columns.add(_wellSearchResults.getColumnManager().getColumn(WellSearchResults.makeColumnName(annotType, annotType.getStudy().getScreenNumber())));
+      columns.add(wellsBrowser.getColumnManager().getColumn(WellSearchResults.makeColumnName(annotType, annotType.getStudy().getFacilityId())));
     }
     assertTrue("table columns exist for all screen result data columns and study annotation types", Iterables.all(columns, Predicates.notNull()));
     assertEquals("table columns exist for all screen result data columns and study annotation types", _screenResult.getDataColumns().size() +
@@ -310,7 +294,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   public void testFilterScreenResultResultValues()
   {
-    WellSearchResults wsr = _wellSearchResults;
+    WellSearchResults wsr = wellsBrowser;
     wsr.searchWellsForScreenResult(_screenResult);
     setOrderBy(wsr);
 
@@ -361,7 +345,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
   public void testFilterOnColumns()
   {
-    WellSearchResults wsr = _wellSearchResults;
+    WellSearchResults wsr = wellsBrowser;
     wsr.searchAll();
     wsr.searchCommandListener(null); // invoke search now (necessary when using searchAll(), above
 
@@ -391,15 +375,15 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
 
     // tests the well-to-reagent-to-annotationValue relationship
     columnNameToExpectedValue.clear();
-    columnNameToExpectedValue.put("text annot [100000]", "bbb");
-    wsr.getColumnManager().getColumn("text annot [100000]").setVisible(true);
+    columnNameToExpectedValue.put("text annot [S]", "bbb");
+    wsr.getColumnManager().getColumn("text annot [S]").setVisible(true);
     doTestFilterOnColumns(wsr, columnNameToExpectedValue, 1);
     
     // tests the well-to-reagent-to-annotationValue relationship, 
     // looking for an old reagent not mapped by the latest LCV 
     columnNameToExpectedValue.clear();
-    columnNameToExpectedValue.put("text annot [100000]", "bbb (non-released)");
-    wsr.getColumnManager().getColumn("text annot [100000]").setVisible(true);
+    columnNameToExpectedValue.put("text annot [S]", "bbb (non-released)");
+    wsr.getColumnManager().getColumn("text annot [S]").setVisible(true);
     doTestFilterOnColumns(wsr, columnNameToExpectedValue, 0);    
     // this is the value that would be expected if [#2251] data table filtering not restricting properly on study annotation columns
     // were not implemented
@@ -539,7 +523,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     return (ScreenResult)
     genericEntityDao.runQuery(new Query() {
       public List execute(Session session) {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true);
         genericEntityDao.needReadOnly(screen.getScreenResult(), "dataColumns.resultValues");
         return Arrays.asList(screen.getScreenResult());
       }
@@ -565,7 +549,7 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     return (Screen)
     genericEntityDao.runQuery(new Query() {
       public List execute(Session session) {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", Study.MIN_STUDY_NUMBER, true);
+        Screen screen = genericEntityDao.findAllEntitiesOfType(Screen.class).get(0);
         genericEntityDao.needReadOnly(screen, "reagents");
         genericEntityDao.needReadOnly(screen, "annotationTypes.annotationValues");
         return Arrays.asList(screen);

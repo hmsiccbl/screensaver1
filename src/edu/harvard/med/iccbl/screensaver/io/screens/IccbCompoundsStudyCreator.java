@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -40,7 +41,7 @@ public class IccbCompoundsStudyCreator
 
   private static Logger log = Logger.getLogger(IccbCompoundsStudyCreator.class);
 
-  private static final int STUDY_NUMBER = 100001;
+  private static final String STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "100001";
   private static final String TITLE = "Annotations on Suitability of Compounds: Miscellaneous Sources";
   private static final String SUMMARY = "Annotations for ICCB-L compounds, from sources other than Kyungae Lee and Greg Cuny";
   private static final String LAB_AFFILIATION_NAME = "Harvard Medical School, Institute of Chemistry and Cell Biology";
@@ -60,7 +61,7 @@ public class IccbCompoundsStudyCreator
     dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         try {
-          Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
+          Screen study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), STUDY_FACILITY_ID);
           if (study != null) {
             screenDao.deleteStudy(study);
           }
@@ -73,9 +74,9 @@ public class IccbCompoundsStudyCreator
           ScreeningRoomUser leadScreener = labHead;
 
           study = new Screen(app.findAdministratorUser(),
+                             STUDY_FACILITY_ID,
                              leadScreener,
                              labHead,
-                             STUDY_NUMBER,
                              ScreenType.SMALL_MOLECULE,
                              StudyType.IN_VITRO, TITLE);
           study.setSummary(SUMMARY);

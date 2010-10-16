@@ -23,14 +23,17 @@ public class HqlBuilderTest extends TestCase
   public void testBasicUsage()
   {
     HqlBuilder hb = new HqlBuilder();
-    hb.select("s", "screenNumber").
+    hb.select("s", Screen.facilityId.getPropertyName()).
     from(Screen.class, "s").
     from("s", "screenResult", "sr", JoinType.INNER).
     from("sr", "dataColumns", "col", JoinType.INNER).
     where("col", "numeric", Operator.EQUAL, true).
       where("col", "name", Operator.TEXT_LIKE, "Positive").
-    orderBy("s", "screenNumber");
-    assertEquals("hql text", "select s.screenNumber from Screen s join s.screenResult sr join sr.dataColumns col where col.numeric=:arg0 and lower(col.name) like lower(:arg1) order by s.screenNumber",
+    orderBy("s", Screen.facilityId.getPropertyName());
+    assertEquals("hql text", "select s." + Screen.facilityId.getPropertyName() +
+                 " from Screen s join s.screenResult sr join sr.dataColumns col" +
+                 " where col.numeric=:arg0 and lower(col.name) like lower(:arg1)" +
+                 " order by s." + Screen.facilityId.getPropertyName(),
                  hb.toHql());
     Map<String,Object> expectedArgs = new HashMap<String,Object>();
     expectedArgs.put("arg0", Boolean.TRUE);
@@ -73,7 +76,7 @@ public class HqlBuilderTest extends TestCase
   {
 
     try {
-      new HqlBuilder().select("t", "screenNumber").from(Screen.class, "s").toHql();
+      new HqlBuilder().select("t", Screen.facilityId.getPropertyName()).from(Screen.class, "s").toHql();
       fail("expected exception for undefined select alias");
     }
     catch (Exception e) {}

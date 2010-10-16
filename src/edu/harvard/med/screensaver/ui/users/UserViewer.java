@@ -582,7 +582,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
           if (screen.getScreenType() == ScreenType.SMALL_MOLECULE) {
             if ((labHead.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_SCREENS) > 0) ||
               (labHead.getScreensaverUserRoles().contains(ScreensaverUserRole.SM_DSL_LEVEL2_MUTUAL_POSITIVES) && screen.getDataSharingLevel().compareTo(ScreenDataSharingLevel.MUTUAL_POSITIVES) > 0)) {
-              showMessage("users.labHeadScreenTooRestrictive", screen.getScreenNumber(), screen.getDataSharingLevel());
+              showMessage("users.labHeadScreenTooRestrictive", screen.getFacilityId(), screen.getDataSharingLevel());
             }
           }
         }

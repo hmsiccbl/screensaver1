@@ -14,14 +14,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -59,6 +58,7 @@ import edu.harvard.med.screensaver.model.screenresults.DataType;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
@@ -67,8 +67,8 @@ import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanTupleColumn;
@@ -103,21 +103,21 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations (Other Studies)";
   private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations";
 
-  protected static final Function<DataColumn,Triple<DataColumn,Integer,String>> DataColumnToMetaDataColumn =
-    new Function<DataColumn,Triple<DataColumn,Integer,String>>() {
+  protected static final Function<DataColumn,Triple<DataColumn,String,String>> DataColumnToMetaDataColumn =
+    new Function<DataColumn,Triple<DataColumn,String,String>>() {
       @Override
-      public Triple<DataColumn,Integer,String> apply(DataColumn dataColumn)
+      public Triple<DataColumn,String,String> apply(DataColumn dataColumn)
       {
-        return new Triple<DataColumn,Integer,String>(dataColumn, dataColumn.getScreenResult().getScreen().getScreenNumber(), dataColumn.getScreenResult().getScreen().getTitle());
+        return new Triple<DataColumn,String,String>(dataColumn, dataColumn.getScreenResult().getScreen().getFacilityId(), dataColumn.getScreenResult().getScreen().getTitle());
       }
     };
 
-  protected static final Function<AnnotationType,Triple<AnnotationType,Integer,String>> AnnotationTypeToMetaAnnotationType =
-    new Function<AnnotationType,Triple<AnnotationType,Integer,String>>() {
+  protected static final Function<AnnotationType,Triple<AnnotationType,String,String>> AnnotationTypeToMetaAnnotationType =
+    new Function<AnnotationType,Triple<AnnotationType,String,String>>() {
       @Override
-        public Triple<AnnotationType,Integer,String> apply(AnnotationType annotType)
+      public Triple<AnnotationType,String,String> apply(AnnotationType annotType)
         {
-          return new Triple<AnnotationType,Integer,String>(annotType, annotType.getStudy().getScreenNumber(), annotType.getStudy().getTitle());
+          return new Triple<AnnotationType,String,String>(annotType, annotType.getStudy().getFacilityId(), annotType.getStudy().getTitle());
         }
     };
 
@@ -267,7 +267,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 
       // show columns for this screenResult's data columns
       for (DataColumn dataColumn : screenResult.getDataColumns()) {
-        TableColumn<Tuple<String>,?> column = getColumnManager().getColumn(makeColumnName(dataColumn, screenResult.getScreen().getScreenNumber()));
+        TableColumn<Tuple<String>,?> column = getColumnManager().getColumn(makeColumnName(dataColumn, screenResult.getScreen().getFacilityId()));
         if (column != null) {
           column.setVisible(true);
         }
@@ -323,7 +323,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     getColumnManager().getColumn("Reagent ID").setVisible(true);
     // show columns for this screenResult's data columns
     for (AnnotationType at : study.getAnnotationTypes()) {
-      getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getStudyNumber())).setVisible(true);
+      getColumnManager().getColumn(WellSearchResults.makeColumnName(at, _study.getFacilityId())).setVisible(true);
     }
   }
 
@@ -395,9 +395,9 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     // wherein the annotation goes before the other data columns) - sde4
     List<DataColumn> dataColumns = Lists.newLinkedList();
     List<DataColumn> otherDataColumns = Lists.newLinkedList();
-    Integer thisScreenNumber = _screenResult == null ? null : _screenResult.getScreen().getScreenNumber();
+    Screen thisScreen = _screenResult == null ? null : _screenResult.getScreen();
     for (DataColumn entry : findValidDataColumns()) {
-      if (entry.getScreenResult().getScreen().getScreenNumber().equals(thisScreenNumber)) {
+      if (entry.getScreenResult().getScreen().equals(thisScreen)) {
         dataColumns.add(entry);
       }
       else {
@@ -656,7 +656,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       if (dataColumn.isRestricted()) {
         continue;
       }
-      Integer screenNumber = dataColumn.getScreenResult().getScreen().getScreenNumber();
+      String screenFacilityId = dataColumn.getScreenResult().getScreen().getFacilityId();
       String screenTitle = dataColumn.getScreenResult().getScreen().getTitle();
 
       TableColumn<Tuple<String>,?> column;
@@ -664,36 +664,36 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       if (dataColumn.isPartitionPositiveIndicator()) {
         column =
           new EnumTupleColumn<Well,String,PartitionedValue>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("partitionedPositiveValue"),
-                                                            makeColumnName(dataColumn, screenNumber),
-                                                            makeColumnDescription(dataColumn, screenNumber, screenTitle, dataColumn.getDataType()),
-                                                            makeScreenColumnGroup(screenNumber, screenTitle),
+                                                            makeColumnName(dataColumn, screenFacilityId),
+                                                            makeColumnDescription(dataColumn, screenFacilityId, screenTitle, dataColumn.getDataType()),
+                                                            makeScreenColumnGroup(screenFacilityId, screenTitle),
                                                             PartitionedValue.values());
       }
       else if (dataColumn.isBooleanPositiveIndicator()) {
         column = new BooleanTupleColumn<Well,String>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("booleanPositiveValue"),
-                                                     makeColumnName(dataColumn, screenNumber),
-                                                     makeColumnDescription(dataColumn, screenNumber, screenTitle, dataColumn.getDataType()),
-                                                     makeScreenColumnGroup(screenNumber, screenTitle));
+                                                     makeColumnName(dataColumn, screenFacilityId),
+                                                     makeColumnDescription(dataColumn, screenFacilityId, screenTitle, dataColumn.getDataType()),
+                                                     makeScreenColumnGroup(screenFacilityId, screenTitle));
       }
       else if (dataColumn.isConfirmedPositiveIndicator()) {
         column = new EnumTupleColumn<Well,String,ConfirmedPositiveValue>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("confirmedPositiveValue"),
-                                                     makeColumnName(dataColumn, screenNumber),
-                                                     makeColumnDescription(dataColumn, screenNumber, screenTitle, dataColumn.getDataType()),
-                                                                         makeScreenColumnGroup(screenNumber, screenTitle),
+                                                                         makeColumnName(dataColumn, screenFacilityId),
+                                                                         makeColumnDescription(dataColumn, screenFacilityId, screenTitle, dataColumn.getDataType()),
+                                                                         makeScreenColumnGroup(screenFacilityId, screenTitle),
                                                                          ConfirmedPositiveValue.values());
       }
       else if (dataColumn.isNumeric()) {
         column = new RealTupleColumn<Well,String>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("numericValue"),
-                                                  makeColumnName(dataColumn, screenNumber),
-                                                  makeColumnDescription(dataColumn, screenNumber, screenTitle, dataColumn.getDataType()),
-                                                  makeScreenColumnGroup(screenNumber, screenTitle),
+                                                  makeColumnName(dataColumn, screenFacilityId),
+                                                  makeColumnDescription(dataColumn, screenFacilityId, screenTitle, dataColumn.getDataType()),
+                                                  makeScreenColumnGroup(screenFacilityId, screenTitle),
                                                   dataColumn.getDecimalPlaces());
       }
       else {
         column = new TextTupleColumn<Well,String>(Well.resultValues.restrict(ResultValue.DataColumn.getLeaf(), dataColumn).toProperty("value"),
-                                                  makeColumnName(dataColumn, screenNumber),
-                                                  makeColumnDescription(dataColumn, screenNumber, screenTitle, dataColumn.getDataType()),
-                                                  makeScreenColumnGroup(screenNumber, screenTitle));
+                                                  makeColumnName(dataColumn, screenFacilityId),
+                                                  makeColumnDescription(dataColumn, screenFacilityId, screenTitle, dataColumn.getDataType()),
+                                                  makeScreenColumnGroup(screenFacilityId, screenTitle));
       }
 
       column = new ViewPolicyAwareResultValueColumn<Tuple<String>,Object>((TableColumn<Tuple<String>,Object>) column, dataColumn) {
@@ -753,27 +753,27 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     columns.addAll(otherColumns);
   }
 
-  private String makeScreenColumnGroup(Integer screenNumber, String screenTitle)
+  private String makeScreenColumnGroup(String facilityId, String screenTitle)
   {
     String columnGroup;
-    if (_screenResult != null && _screenResult.getScreen().getScreenNumber().equals(screenNumber)) {
+    if (_screenResult != null && _screenResult.getScreen().getFacilityId().equals(facilityId)) {
       columnGroup = OUR_DATA_COLUMNS_GROUP;
     }
     else {
-      columnGroup = OTHER_DATA_COLUMNS_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + screenNumber + " (" + screenTitle +
+      columnGroup = OTHER_DATA_COLUMNS_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + facilityId + " (" + screenTitle +
         ")";
     }
     return columnGroup;
   }
 
-  private String makeStudyColumnGroup(Integer studyNumber, String studyTitle)
+  private String makeStudyColumnGroup(String facilityId, String studyTitle)
   {
     String columnGroup;
-    if (_study != null && studyNumber.equals(_study.getStudyNumber())) {
+    if (_study != null && facilityId.equals(_study.getFacilityId())) {
       columnGroup = OUR_ANNOTATION_TYPES_COLUMN_GROUP;
     }
     else {
-      columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + studyNumber + " (" +
+      columnGroup = OTHER_ANNOTATION_TYPES_COLUMN_GROUP + TableColumnManager.GROUP_NODE_DELIMITER + facilityId + " (" +
         studyTitle + ")";
     }
     return columnGroup;
@@ -791,7 +791,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         from("dc", "screenResult", "sr", JoinType.LEFT_FETCH).
         from("sr", "screen", "s", JoinType.LEFT_FETCH).
         whereIn("s", "screenType", _screenTypes).
-        orderBy("s", "screenNumber").orderBy("dc", "ordinal");
+        orderBy("s", Screen.facilityId.getPropertyName()).orderBy("dc", "ordinal");
         if (log.isDebugEnabled()) {
           log.debug("findValidDataColumns query: " + hql.toHql());
         }
@@ -810,7 +810,7 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
         hql.select("at").distinctProjectionValues().
         from(AnnotationType.class, "at").from("at", "study", "s", JoinType.LEFT_FETCH).
         whereIn("s", "screenType", _screenTypes).
-          orderBy("s", "screenNumber").orderBy("at", "ordinal");
+          orderBy("s", Screen.facilityId.getPropertyName()).orderBy("at", "ordinal");
         if (log.isDebugEnabled()) {
           log.debug("findValidAnnotationTypes query: " + hql.toHql());
         }
@@ -824,23 +824,23 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   {
     List<TableColumn<Tuple<String>,?>> otherColumns = Lists.newArrayList();
     for (final AnnotationType annotationType : findValidAnnotationTypes()) {
-      Integer studyNumber = annotationType.getStudy().getScreenNumber();
+      String studyId = annotationType.getStudy().getFacilityId();
       String studyTitle = annotationType.getStudy().getTitle();
       TableColumn<Tuple<String>,?> column;
 
-      String columnGroup = makeStudyColumnGroup(studyNumber, studyTitle);
+      String columnGroup = makeStudyColumnGroup(studyId, studyTitle);
       if (annotationType.isNumeric()) {
         // TODO: find appropriate version of reagent
         column = new RealTupleColumn<Well,String>(Well.latestReleasedReagent.to(Reagent.annotationValues).restrict(AnnotationValue.annotationType.getLeaf(), annotationType).toProperty("numericValue"),
-                                                  makeColumnName(annotationType, studyNumber),
-                                                  WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle, DataType.NUMERIC),
+                                                  makeColumnName(annotationType, studyId),
+                                                  WellSearchResults.makeColumnDescription(annotationType, studyId, studyTitle, DataType.NUMERIC),
                                                   columnGroup,
                                                   -1);
       }
       else {
         column = new TextTupleColumn<Well,String>(Well.latestReleasedReagent.to(Reagent.annotationValues).restrict(AnnotationValue.annotationType.getLeaf(), annotationType).toProperty("value"),
-                                                  makeColumnName(annotationType, studyNumber),
-                                                  WellSearchResults.makeColumnDescription(annotationType, studyNumber, studyTitle, DataType.TEXT),
+                                                  makeColumnName(annotationType, studyId),
+                                                  WellSearchResults.makeColumnDescription(annotationType, studyId, studyTitle, DataType.TEXT),
                                                   columnGroup);
       }
 
@@ -928,20 +928,20 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     return super.resetColumnFilter();
   }
 
-  public static String makeColumnName(MetaDataType mdt, Integer parentIdentifier)
+  public static String makeColumnName(MetaDataType mdt, String parentIdentifier)
   {
     // note: replacing "_" with white space allows column name labels to wrap, creating narrower columns
-    return String.format("%s [%d]", mdt.getName().replaceAll("_", " "), parentIdentifier);
+    return String.format("%s [%s]", mdt.getName().replaceAll("_", " "), parentIdentifier);
   }
 
-  static String makeColumnDescription(MetaDataType mdt, Integer parentIdentifier, String parentTitle, DataType dataType)
+  static String makeColumnDescription(MetaDataType mdt, String parentIdentifier, String parentTitle, DataType dataType)
   {
     return makeColumnDescription(mdt.getName(), mdt.getDescription(), parentIdentifier, parentTitle, dataType);
   }
 
   static String makeColumnDescription(String name,
                                       String description,
-                                      Integer parentIdentifier,
+                                      String parentIdentifier,
                                       String parentTitle,
                                       DataType dataType)
   {

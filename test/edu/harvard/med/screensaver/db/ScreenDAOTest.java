@@ -34,44 +34,13 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
   protected ScreenDAO screenDao;
 
 
-  public void testFindNextScreenNumber()
-  {
-    genericEntityDao.doInTransaction(new DAOTransaction() {
-      public void runTransaction() {
-        Integer nextScreenNumber = screenDao.findNextScreenNumber();
-        assertEquals(Integer.valueOf(1), nextScreenNumber);
-        Screen screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
-        genericEntityDao.persistEntity(screen.getLabHead());
-        genericEntityDao.persistEntity(screen.getLeadScreener());
-        genericEntityDao.persistEntity(screen);
-
-        nextScreenNumber = screenDao.findNextScreenNumber();
-        assertEquals(Integer.valueOf(2), nextScreenNumber);
-        screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
-        genericEntityDao.persistEntity(screen.getLabHead());
-        genericEntityDao.persistEntity(screen.getLeadScreener());
-        genericEntityDao.persistEntity(screen);
-      }
-    });
-    Integer nextScreenNumber = screenDao.findNextScreenNumber();
-    assertEquals(Integer.valueOf(3), nextScreenNumber);
-    nextScreenNumber = screenDao.findNextScreenNumber();
-    assertEquals(Integer.valueOf(3), nextScreenNumber);
-
-    screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 2));
-    nextScreenNumber = screenDao.findNextScreenNumber();
-    assertEquals(Integer.valueOf(2), nextScreenNumber);
-  }
-  
   public void testDelete()
   {
-    final Integer nextScreenNumber = screenDao.findNextScreenNumber();
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        assertEquals(Integer.valueOf(1), nextScreenNumber);
-        Screen screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
         genericEntityDao.persistEntity(screen);
       }
     });
@@ -80,11 +49,11 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber));
+        screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1"));
       }
     });
 
-    Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber);
+    Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertNull("screen not deleted", screen1);
   }
 
@@ -93,7 +62,6 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
    */
   public void testDeleteStudy()
   {
-    final Integer nextScreenNumber = screenDao.findNextScreenNumber();
     genericEntityDao.doInTransaction(new DAOTransaction()
       {
       public void runTransaction()
@@ -103,8 +71,7 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
         Well well1 = wellsIter.next();
         genericEntityDao.saveOrUpdateEntity(library);
 
-        assertEquals(Integer.valueOf(1), nextScreenNumber);
-        Screen screen = MakeDummyEntities.makeDummyScreen(nextScreenNumber);
+        Screen screen = MakeDummyEntities.makeDummyScreen(1);
         genericEntityDao.persistEntity(screen);
         // Create the dummy annotation
         AnnotationType aType = new AnnotationType((Screen) screen,
@@ -119,14 +86,14 @@ public class ScreenDAOTest extends AbstractSpringPersistenceTest
     });
 
     genericEntityDao.doInTransaction(new DAOTransaction()
-      {
+    {
       public void runTransaction()
-            {
-        screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber));
+      {
+        screenDao.deleteStudy(genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1"));
       }
     });
 
-    Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", nextScreenNumber);
+    Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertNull("screen not deleted", screen1);
   }
 }

@@ -55,8 +55,8 @@ public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
 
     ScreenResult screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
-                                            "screenNumber",
-                                            1,
+                                            Screen.facilityId.getPropertyName(),
+                                            "1",
                                             true,
                                             "screenResult.dataColumns.derivedTypes",
                                             "screenResult.dataColumns.typesDerivedFrom")
@@ -79,8 +79,8 @@ public class DataColumnTest extends AbstractEntityInstanceTest<DataColumn>
 
     screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
-                                            "screenNumber",
-                                            1,
+                                            Screen.facilityId.getPropertyName(),
+                                            "1",
                                             true,
                                             "screenResult.dataColumns.derivedTypes",
                                             "screenResult.dataColumns.typesDerivedFrom")

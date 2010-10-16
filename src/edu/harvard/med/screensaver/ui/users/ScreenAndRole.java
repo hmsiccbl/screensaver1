@@ -35,7 +35,7 @@ public class ScreenAndRole extends Pair<Screen,String> implements Comparable<Scr
 
   public int compareTo(ScreenAndRole other)
   {
-    return -1 * getScreen().getScreenNumber().compareTo(other.getScreen().getScreenNumber());
+    return -1 * getScreen().getFacilityId().compareTo(other.getScreen().getFacilityId());
   }
 
 }

@@ -85,7 +85,7 @@ public class LibraryPlateSearchResults extends EntityBasedEntitySearchResults<Li
   @Transactional
   public void searchLibraryPlatesScreenedByScreen(Screen screen)
   {
-    setTitle("Library Plates Screened by screen " + screen.getScreenNumber());
+    setTitle("Library Plates Screened by screen " + screen.getFacilityId());
     screen = _dao.reloadEntity(screen);
     SortedSet<LibraryPlate> libraryPlates = screen.getLibraryPlatesScreened();
 

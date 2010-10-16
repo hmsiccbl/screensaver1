@@ -52,7 +52,7 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
 
     ScreenResult screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
-                                            "screenNumber",
+                                            Screen.facilityId.getPropertyName(),
                                             1,
                                             true,
                                             "screenResult.dataColumns")
@@ -74,7 +74,7 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
     // load again, to ensure we're testing the persisted version of the data
     screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
-                                            "screenNumber",
+                                            Screen.facilityId.getPropertyName(),
                                             1,
                                             true,
                                             "screenResult.dataColumns")

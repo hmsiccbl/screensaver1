@@ -153,7 +153,7 @@ public class MakeDummyEntitiesCellHTS2
 
     
     
-    Library library = makeSimpleDummyLibrary(screen.getScreenNumber(),
+    Library library = makeSimpleDummyLibrary(1,
                                              screen.getScreenType(),
                                              2,
                                              nrPlateColumns,

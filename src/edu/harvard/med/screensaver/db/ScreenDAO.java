@@ -13,7 +13,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 
 public interface ScreenDAO
 {
-  Integer findNextScreenNumber();
   void deleteStudy(Screen study);
   int countScreenedExperimentalWells(Screen screen, boolean distinct);
   int countFulfilledLabCherryPicks(Screen screen);

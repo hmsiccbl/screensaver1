@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -31,8 +30,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
-
-import org.apache.log4j.Logger;
 
 public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryPickRequest>
 {
@@ -74,7 +71,7 @@ public class RNAiCherryPickRequestTest extends CherryPickRequestTest<RNAiCherryP
     {
       public void runTransaction()
       {
-        Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         assertTrue(screen2.getCherryPickRequests().iterator().next().getEmptyWellsOnAssayPlate().size() == 144 + (3 - 1 /* -1 to account for overlap w/edge wells */));
         assertTrue(screen2.getCherryPickRequests().iterator().next().getEmptyWellsOnAssayPlate().containsAll(requestedEmptyWells));
       }

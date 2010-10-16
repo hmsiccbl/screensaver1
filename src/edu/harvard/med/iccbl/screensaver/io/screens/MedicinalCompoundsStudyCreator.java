@@ -39,6 +39,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -51,7 +52,7 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
 
   private static Logger log = Logger.getLogger(MedicinalCompoundsStudyCreator.class);
 
-  private static final int STUDY_NUMBER = 100002;
+  private static final String STUDY_NAME = Study.STUDY_FACILITY_ID_PREFIX + "100002";
   private static final String TITLE = "Annotations on Suitability of Compounds: G. Cuny & K. Lee";
   private static final String SUMMARY =
     "Note for screeners regarding medchem annotation:\n" +
@@ -115,7 +116,7 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
     _dao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         try {
-          Screen study = _dao.findEntityByProperty(Screen.class, "screenNumber", STUDY_NUMBER);
+          Screen study = _dao.findEntityByProperty(Screen.class, Screen.facilityId.getPath(), STUDY_NAME);
           if (study != null) {
             _screenDao.deleteStudy(study);
           }
@@ -128,9 +129,9 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
           ScreeningRoomUser leadScreener = ScreenCreator.findOrCreateScreeningRoomUser(_dao, "Kyungae", "Lee", "kyungae_lee@hms.harvard.edu", false, null);
 
           study = new Screen(findAdministratorUser(),
+                             STUDY_NAME,
                              leadScreener,
                              labHead,
-                             STUDY_NUMBER,
                              ScreenType.SMALL_MOLECULE,
                              StudyType.IN_SILICO, TITLE);
           study.setSummary(SUMMARY);

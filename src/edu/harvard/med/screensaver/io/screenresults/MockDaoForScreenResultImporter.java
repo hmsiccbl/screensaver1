@@ -181,12 +181,12 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   @SuppressWarnings("unchecked")
   public <E extends Entity> E findEntityByProperty(Class<E> entityClass, String propertyName, Object propertyValue)
   {
-    if (entityClass.equals(Screen.class) && propertyName.equals("screenNumber")) {
+    if (entityClass.equals(Screen.class) && propertyName.equals(Screen.facilityId.getPropertyName())) {
       LabHead user = new LabHead("First", "Last", null);
       Screen screen = new Screen(null,
+                                 propertyValue.toString(),
                                  user,
                                  user,
-                                 (Integer) propertyValue,
                                  ScreenType.SMALL_MOLECULE,
                                  StudyType.IN_VITRO,
                                  "title");

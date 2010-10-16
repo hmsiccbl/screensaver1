@@ -51,8 +51,8 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
   private static Logger log = Logger.getLogger(WellVolumeSearchResultsTest.class);
 
   protected LibrariesDAO librariesDao;
-  private WellVolumeSearchResults _wellVolumeSearchResults;
-  private WellCopyVolumeSearchResults _wellCopyVolumeSearchResults;
+  protected WellCopyVolumeSearchResults wellCopyVolumesBrowser;
+  protected WellVolumeSearchResults wellVolumesBrowser;
   private Library _library;
   private CherryPickRequest _cherryPickRequest;
   private Map<WellCopy,Volume> _expectedRemainingWellCopyVolume = Maps.newHashMap();
@@ -65,29 +65,27 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
     super.onSetUp();
 
     initializeWellCopyVolumes();
-    _wellVolumeSearchResults = new WellVolumeSearchResults(genericEntityDao, null, null, null);
-    _wellCopyVolumeSearchResults = new WellCopyVolumeSearchResults(genericEntityDao, null, null, _wellVolumeSearchResults);
   }
 
   public void testWellVolumeSearchResults()
   {
-    _wellCopyVolumeSearchResults.searchWellsForLibrary(_library);
+    wellCopyVolumesBrowser.searchWellsForLibrary(_library);
     doTestWellCopyVolumeSearchResult(makeWellCopies(_library));
     doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopies(_library)));
 
     List<Well> wells = new ArrayList<Well>(_library.getWells()).subList(24, 96);
-    _wellCopyVolumeSearchResults.searchWells(makeWellKeys(wells));
+    wellCopyVolumesBrowser.searchWells(makeWellKeys(wells));
     doTestWellCopyVolumeSearchResult(makeWellCopies(wells));
     doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopies(wells)));
 
-    _wellCopyVolumeSearchResults.searchWellsForCherryPickRequest(_cherryPickRequest, false);
+    wellCopyVolumesBrowser.searchWellsForCherryPickRequest(_cherryPickRequest, false);
     doTestWellCopyVolumeSearchResult(makeWellCopies(_cherryPickRequest));
     doTestWellVolumeSearchResult(makeWellVolumeKeys(makeWellCopies(_cherryPickRequest)));
   }
 
   private void doTestWellCopyVolumeSearchResult(SortedSet<WellCopy> expectedWellCopies)
   {
-    DataModel model = _wellCopyVolumeSearchResults.getDataTableModel();
+    DataModel model = wellCopyVolumesBrowser.getDataTableModel();
     assertEquals("row count", expectedWellCopies.size(), model.getRowCount());
     int j = 0;
     for (WellCopy expectedWellCopy : expectedWellCopies) {
@@ -95,7 +93,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
       //assertEquals("row data " + j, expectedWellCopy, ((WellCopy) model.getRowData()));
       int columnsTested = 0;
       WellCopy rowData = (WellCopy) model.getRowData();
-      for (TableColumn<WellCopy,?> column : _wellCopyVolumeSearchResults.getColumnManager().getAllColumns()) {
+      for (TableColumn<WellCopy,?> column : wellCopyVolumesBrowser.getColumnManager().getAllColumns()) {
         if (column.isVisible()) {
           Object cellValue = column.getCellValue(rowData);
           if (column.getName().equals("Library")) {
@@ -138,7 +136,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
 
   private void doTestWellVolumeSearchResult(SortedSet<WellKey> expectedWellKeys)
   {
-    DataModel model = _wellVolumeSearchResults.getDataTableModel();
+    DataModel model = wellVolumesBrowser.getDataTableModel();
     assertEquals("row count", expectedWellKeys.size(), model.getRowCount());
     int j = 0;
     for (WellKey expectedKey : expectedWellKeys) {
@@ -148,7 +146,7 @@ public class WellVolumeSearchResultsTest extends AbstractSpringPersistenceTest
                    ((WellVolume) model.getRowData()).getWell().getWellKey());
       int columnsTested = 0;
       WellVolume rowData = (WellVolume) model.getRowData();
-      for (TableColumn<WellVolume,?> column : _wellVolumeSearchResults.getColumnManager().getAllColumns()) {
+      for (TableColumn<WellVolume,?> column : wellVolumesBrowser.getColumnManager().getAllColumns()) {
         if (column.isVisible()) {
           Object cellValue = column.getCellValue(rowData);
           if (column.getName().equals("Library")) {

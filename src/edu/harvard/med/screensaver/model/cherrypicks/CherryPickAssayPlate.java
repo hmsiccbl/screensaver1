@@ -246,7 +246,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
     if (_name == null || logicalAssayPlates != _logicalAssayPlateCount) {
       StringBuilder name = new StringBuilder();
       name.append(_cherryPickRequest.getRequestedBy().getFullNameFirstLast()).
-      append(" (").append(_cherryPickRequest.getScreen().getScreenNumber()).append(") ").
+      append(" (").append(_cherryPickRequest.getScreen().getFacilityId()).append(") ").
       append("CP").append(_cherryPickRequest.getEntityId()).
       append("  Plate ").append(String.format("%02d", (_plateOrdinal + 1))).append(" of ").
       append(logicalAssayPlates);

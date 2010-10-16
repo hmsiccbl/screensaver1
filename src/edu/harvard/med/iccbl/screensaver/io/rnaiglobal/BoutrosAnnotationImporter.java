@@ -46,7 +46,7 @@ public class BoutrosAnnotationImporter
   private static final String RNAIGLOBAL_LOGIN = "rnaiglobal";
   private static final String RNAI_GLOBAL_EMAIL = "info@rnaiglobal.org";
 
-  private static final int STUDY_NUMBER = 100000;
+  private static final String STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "100000";
   private static final String STUDY_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
   private static final String STUDY_SUMMARY = "In-silico analysis of SMARTPool siRNA gene targets, using RefSeq release 23";
   private static final String STUDY_URL = "http://www.dkfz.de/signaling2/siGENOME/";
@@ -80,8 +80,8 @@ public class BoutrosAnnotationImporter
       public void runTransaction()
       {
         Study study = dao.findEntityByProperty(Screen.class,
-                                               "screenNumber",
-                                               STUDY_NUMBER);
+                                               Screen.facilityId.getPropertyName(),
+                                               STUDY_FACILITY_ID);
         if (study != null) {
           log.info("deleting existing screen " + study);
           if (study.getLabHead() != null) {
@@ -117,9 +117,9 @@ public class BoutrosAnnotationImporter
                                                             dao);
           leadScreener.setLab(labHead.getLab());
           Screen screen = new Screen(app.findAdministratorUser(),
+                                     STUDY_FACILITY_ID,
                                      leadScreener,
                                      labHead,
-                                     STUDY_NUMBER,
                                      ScreenType.RNAI,
                                      StudyType.IN_SILICO,
                                      STUDY_TITLE);

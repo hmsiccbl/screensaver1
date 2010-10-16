@@ -22,7 +22,6 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.Study;
 
 public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
 {
@@ -44,26 +43,6 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     _dao = dao;
   }
   
-  public Integer findNextScreenNumber()
-  {
-    _dao.flush(); // allow us to create multiple screens within the same Hibernate session
-    class NextScreenNumberQuery implements edu.harvard.med.screensaver.db.Query 
-    {
-     public List execute(Session session)
-      {
-        Query hqlQuery = session.createQuery("select max(screenNumber) + 1 from Screen where screenNumber < " +
-          Study.MIN_STUDY_NUMBER);
-         return (List) hqlQuery.list();
-      } 
-    }
-    List<Integer> result = _dao.runQuery(new NextScreenNumberQuery());
-    Integer nextScreenNumber = result.get(0);
-    if (nextScreenNumber == null) {
-      nextScreenNumber = FIRST_SCREEN_NUMBER;
-    }
-    return  nextScreenNumber;
-  }
-    
   /**
    * Quickly delete the study by first removing all of the AnnotationTypes and AnnotationValues manually.
    * Uses HQL.
@@ -72,7 +51,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
   public void deleteStudy(Screen study)
     throws DataModelViolationException
   {
-    log.info("delete annotation values and and types for the study: " + study.getScreenNumber());
+    log.info("delete annotation values and and types for the study: " + study.getFacilityId());
     final Screen finalStudy = _dao.reloadEntity(study);
 
     // TODO: see if we can delete these using the entity delete
@@ -99,7 +78,7 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
     });
 
     // TODO: reimplement this in the proper (performant) HQL!
-    log.info("delete the study: " + finalStudy.getScreenNumber());
+    log.info("delete the study: " + finalStudy.getFacilityId());
     runQuery(new edu.harvard.med.screensaver.db.Query() {
       public List<?> execute(Session session)
       {

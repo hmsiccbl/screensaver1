@@ -97,8 +97,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
         }
       }));
 
-      // default to descending sort order on screen number
-      getColumnManager().setSortAscending(false);
+      sortByCreationDateDesc();
     }
   }
 
@@ -111,9 +110,18 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       public void addDomainRestrictions(HqlBuilder hql)
       {
         super.addDomainRestrictions(hql);
-        hql.where(getRootAlias(), "screenNumber", Operator.LESS_THAN, Study.MIN_STUDY_NUMBER);
+        hql.where(getRootAlias(), Screen.facilityId.getPropertyName(), Operator.TEXT_NOT_LIKE, Study.STUDY_FACILITY_ID_PREFIX + "%");
       }
     }));
+    sortByCreationDateDesc();
+  }
+
+  private void sortByCreationDateDesc()
+  {
+    if (getColumnManager().getColumn("Date Created") != null) {
+      getColumnManager().setSortColumnName("Date Created");
+      getColumnManager().setSortAscending(false);
+    }
   }
 
   // implementations of the SearchResults abstract methods
@@ -180,7 +188,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
               if (sr1.isRestricted() && !sr2.isRestricted()) {
                 return 1;
               }
-              return sr1.getScreen().getScreenNumber().compareTo(sr2.getScreen().getScreenNumber());
+              return sr1.getScreen().getFacilityId().compareTo(sr2.getScreen().getFacilityId());
             }
             };
 
@@ -212,15 +220,13 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
     
-    columns.add(new DateEntityColumn<Screen>(
-                                             RelationshipPath.from(Screen.class).toProperty("dateCreated"),
+    columns.add(new DateEntityColumn<Screen>(Screen.thisEntity.toProperty("dateCreated"),
       "Date Created", "The date the screen was added to the database",
       TableColumn.UNGROUPED) {
       @Override
       protected LocalDate getDate(Screen screen) { return screen.getDateCreated().toLocalDate(); }
     });
-    columns.get(columns.size() - 1).setAdministrative(true);
-    columns.get(columns.size() - 1).setVisible(false);
+    Iterables.getLast(columns).setAdministrative(true);
     
     columns.add(new EnumEntityColumn<Screen,ScreenDataSharingLevel>(
                                                                     RelationshipPath.from(Screen.class).toProperty("dataSharingLevel"),
@@ -339,10 +345,15 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
   List<TableColumn<Screen,?>> buildScreenSummaryColumns()
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
-    columns.add(new IntegerEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("screenNumber"),
-      "Screen Number", "The screen number", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<Screen>(Screen.facilityId,
+                                             "Screen ID",
+                                             "The facility-assigned screen identifier",
+                                             TableColumn.UNGROUPED) {
       @Override
-      public Integer getCellValue(Screen screen) { return screen.getScreenNumber(); }
+      public String getCellValue(Screen screen)
+      {
+        return screen.getFacilityId();
+      }
 
       @Override
       public Object cellAction(Screen screen) {
@@ -353,6 +364,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       @Override
       public boolean isCommandLink() { return true; }
     });
+
     columns.add(new EnumEntityColumn<Screen,ScreenType>(RelationshipPath.from(Screen.class).toProperty("screenType"),
       "Screen Type", "'RNAi' or 'Small Molecule'", TableColumn.UNGROUPED, ScreenType.values()) {
       @Override

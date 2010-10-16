@@ -225,8 +225,6 @@ public class Menu extends AbstractBackingBean
   public String browseScreens()
   {
     _screensBrowser.searchAll();
-    // default to descending sort order on screen number
-    _screensBrowser.getColumnManager().setSortAscending(false);
     return BROWSE_SCREENS;
   }
 
@@ -248,9 +246,6 @@ public class Menu extends AbstractBackingBean
     TableColumn<Screen,ScreenType> column = (TableColumn<Screen,ScreenType>) _screensBrowser.getColumnManager().getColumn("Screen Type");
     column.clearCriteria();
     column.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, screenType));
-
-    // default to descending sort order on screen number
-    _screensBrowser.getColumnManager().setSortAscending(false);
     return BROWSE_SCREENS;
   }
 

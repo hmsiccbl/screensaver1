@@ -43,6 +43,12 @@
     id="currentScreensaverUser"
     class="edu.harvard.med.screensaver.ui.CurrentScreensaverUser"
     scope="session">
+    <property name="screensaverUser">
+      <bean class="edu.harvard.med.screensaver.model.users.ScreeningRoomUser">
+        <constructor-arg index="0" value="First"/>
+        <constructor-arg index="1" value="Last"/>
+      </bean>
+    </property>
   </bean>
 
   <bean id="structureImageProvider"

@@ -228,17 +228,18 @@
         </h:form>
 
         <h:form id="screensForm">
-          <t:panelGrid columns="2"
+          <t:panelGrid columns="1"
             rendered="#{menu.screener || menu.readAdmin}">
-            <t:outputLabel id="screenNumberLabel" for="screenNumber"
-              value="Screen #" styleClass="menuItem" />
-            <t:outputText value="" />
-            <t:inputText id="screenNumber"
-              value="#{screenFinder.screenNumber}" size="5"
-              styleClass="inputText" />
-            <t:commandButton action="#{screenFinder.findScreen}"
-              id="findScreenCommand" value="Go"
-              image="/images/arrow-next.png" />
+            <t:outputLabel id="screenFacilityIdLabel" for="screenFacilityId"
+              value="Screen ID" styleClass="menuItem" />
+            <t:div>
+              <t:inputText id="screenFacilityId"
+                value="#{screenFinder.screenFacilityId}" size="5"
+                styleClass="inputText" />
+              <t:commandButton action="#{screenFinder.findScreen}"
+                id="findScreenCommand" value="Go"
+                image="/images/arrow-next.png" />
+            </t:div>
           </t:panelGrid>
         </h:form>
 

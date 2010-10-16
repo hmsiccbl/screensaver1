@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -59,8 +60,8 @@ import edu.harvard.med.screensaver.service.EmailService;
 // TODO: rename this class to be more specific to what we are doing with the cross-screen comparison
 public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
 {
-  public static int DEFAULT_SMALL_MOLECULE_SCREEN_NUMBER = 200001;
-  public static int DEFAULT_RNAI_SCREEN_NUMBER = 200002;
+  public static String DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "200001";
+  public static String DEFAULT_RNAI_STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "200002";
   
   public static final String DEFAULT_SM_STUDY_TITLE = "Reagent Counts for Small Molecule Screens";
   public static final String DEFAULT_SM_STUDY_SUMMARY =
@@ -175,13 +176,13 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
             String annotationDesc = null;
             String overallAnnotationDesc = null;
 
-            int studyNumber = -1;
+            String studyFacilityId = null;
             ScreenType screenType = null;
             if(app.isCommandLineFlagSet(OPTION_SCREEN_TYPE_SM[SHORT_OPTION_INDEX])) {
               screenType = ScreenType.SMALL_MOLECULE;
-              studyNumber = DEFAULT_SMALL_MOLECULE_SCREEN_NUMBER;
+              studyFacilityId = DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID;
               if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-                studyNumber = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], Integer.class);
+                studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
               }
               // todo: title = getMessages().getMessage("admin.studies.cross_screen_comparison_study.study_title");
               title = DEFAULT_SM_STUDY_TITLE;
@@ -197,9 +198,9 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                 System.exit(1);
               }
               screenType = ScreenType.RNAI;
-              studyNumber = DEFAULT_RNAI_SCREEN_NUMBER;
+              studyFacilityId = DEFAULT_RNAI_STUDY_FACILITY_ID;
               if (app.isCommandLineFlagSet(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX])) {
-                studyNumber = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], Integer.class);
+                studyFacilityId = app.getCommandLineOptionValue(OPTION_STUDY_NUMBER[SHORT_OPTION_INDEX], String.class);
               }
               title = DEFAULT_RNAi_STUDY_TITLE;
               summary = DEFAULT_RNAi_STUDY_SUMMARY;
@@ -223,7 +224,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
               summary = app.getCommandLineOptionValue(OPTION_STUDY_SUMMARY[SHORT_OPTION_INDEX]);
             }
 
-            Screen study = dao.findEntityByProperty(Screen.class, "screenNumber", studyNumber);
+            Screen study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
             if (study != null) {
               // first check if the study is out of date
               ScreenResult latestScreenResult = screenResultsDao.getLatestScreenResult();
@@ -238,7 +239,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
               else if (replaceStudyIfExists) {
                 screenDao.deleteStudy(study);
               }else {                
-                String msg = "study " + studyNumber +
+                String msg = "study " + studyFacilityId +
                   " already exists and is up-to-date (as determined by the date of the latest uploaded screen result).  " +
                   "Use the --" + OPTION_REPLACE[LONG_OPTION_INDEX] + " flag to delete the existing study first.";
                 log.info(msg);
@@ -247,7 +248,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
             }
 
             int count = app.createReagentCountStudy(admin,
-                                                studyNumber,
+                                                    studyFacilityId,
                                                 title,
                                                 summary,
                                                 DEFAULT_POSITIVES_ANNOTATION_NAME,
@@ -260,7 +261,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
             
             InternetAddress adminEmail = app.getEmail(admin);
             String subject = "Study created: " + study.getTitle(); //app.getMessages().getMessage("Study generated");
-            String msg = "Study: " + study.getScreenNumber() + ", " + study.getTitle() + ": " + study.getSummary()
+            String msg = "Study: " + study.getFacilityId() + ", " + study.getTitle() + ": " + study.getSummary()
               + "\nCross-screen Reagents found: " + count;
             log.info(msg);
             EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
@@ -290,22 +291,22 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
    * @return the count of reagents
    */
   public int createReagentCountStudy(AdministratorUser admin,
-                                        int studyNumber,
-                                        String title,
-                                        String summary,
-                                        String positiveCountAnnotationName,
-                                        String positiveCountAnnotationDescription,
-                                        String overallCountAnnotationName,
-                                        String overallCountAnnotationDesc,
-                                        ScreenType screenType,
-                                        GenericEntityDAO dao,
-                                        ScreenResultsDAO _screenResultsDao)
+                                     String studyName,
+                                     String title,
+                                     String summary,
+                                     String positiveCountAnnotationName,
+                                     String positiveCountAnnotationDescription,
+                                     String overallCountAnnotationName,
+                                     String overallCountAnnotationDesc,
+                                     ScreenType screenType,
+                                     GenericEntityDAO dao,
+                                     ScreenResultsDAO _screenResultsDao)
   {
     Screen study = dao.findEntityByProperty(Screen.class,
-                                            "screenNumber",
-                                            studyNumber);
+                                            Screen.facilityId.getPropertyName(),
+                                            studyName);
     if (study != null) {
-      String errMsg = "study " + studyNumber +
+      String errMsg = "study " + studyName +
         " already exists (use --replace flag to delete existing study first)";
       throw new IllegalArgumentException(errMsg);
     }
@@ -318,9 +319,9 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                                                                            null);
 
     study = new Screen(admin,
+                       studyName,
                        labHead,
                        labHead,
-                       studyNumber,
                        screenType,
                        StudyType.IN_SILICO,
                        title);

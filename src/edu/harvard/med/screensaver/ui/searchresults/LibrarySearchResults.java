@@ -212,7 +212,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
 
   public void searchLibrariesScreened(final Screen screen)
   {
-    setTitle("Libraries Screened by screen " + screen.getScreenNumber());
+    setTitle("Libraries Screened by screen " + screen.getFacilityId());
     EntityDataFetcher<Library,Integer> dataFetcher = new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)

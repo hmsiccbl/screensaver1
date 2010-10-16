@@ -23,11 +23,11 @@
         and was visibleOnUserRole="developer" - how to do this? and do we want this? sde4 -->
 
 
-	<ss:property id="screenNumber" label="Study Number"
-		description="The number used to uniquely identify the study"
-		value="#{study.screenNumber}" editable="false">
+	<ss:property id="studyFacilityId" label="Study Facility ID"
+		description="The unique identifier for the study"
+		value="#{study.facilityId}" editable="false">
 		<ui:define name="data">
-      <ss:entityLink entity="#{study}" property="screenNumber"
+      <ss:entityLink entity="#{study}" property="facilityId"
         viewer="#{studyViewer}" />
     </ui:define>
 	</ss:property>

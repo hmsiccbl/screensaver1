@@ -88,7 +88,7 @@ public class EntityDataFetcherTest extends AbstractSpringPersistenceTest
         public void runTransaction()
         {
           _rnaiScreen = MakeDummyEntities.makeDummyScreen(2, ScreenType.RNAI);
-          _rnaiLibrary = MakeDummyEntities.makeDummyLibrary(_rnaiScreen.getScreenNumber(),
+          _rnaiLibrary = MakeDummyEntities.makeDummyLibrary(2,
                                                             _rnaiScreen.getScreenType(),
                                                             _plates);
           genericEntityDao.saveOrUpdateEntity(_rnaiLibrary.getContentsVersions().first().getLoadingActivity().getCreatedBy());

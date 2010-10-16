@@ -135,7 +135,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       {
         Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
         assertEquals("session initially empty", 0, session.getStatistics().getEntityCount());
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 107);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "107");
         assertNotNull("screen in session", screen);
         for (Object key : session.getStatistics().getEntityKeys()) {
           EntityKey entityKey = (EntityKey) key;
@@ -156,14 +156,14 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     schemaUtil.truncateTablesOrCreateSchema();
     Screen screen1a = MakeDummyEntities.makeDummyScreen(1);
     genericEntityDao.persistEntity(screen1a);
-    Screen screen1b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", Integer.valueOf(1), true, "labHead", "leadScreener");
+    Screen screen1b = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true, "labHead", "leadScreener");
     assertEquals(screen1a.getLabHead().getEntityId(), screen1b.getLabHead().getEntityId());
     assertEquals(screen1a.getLeadScreener().getEntityId(), screen1b.getLeadScreener().getEntityId());
 
     Screen screen2a = MakeDummyEntities.makeDummyScreen(2);
     screen2a.setLeadScreener(screen2a.getLabHead());
     genericEntityDao.persistEntity(screen2a);
-    Screen screen2b = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", Integer.valueOf(2), true, "labHead", "leadScreener");
+    Screen screen2b = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "2", true, "labHead", "leadScreener");
     assertEquals(screen2a.getLabHead().getEntityId(), screen2b.getLabHead().getEntityId());
     assertEquals(screen2a.getLabHead().getEntityId(), screen2b.getLeadScreener().getEntityId());
   }
@@ -247,7 +247,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     genericEntityDao.persistEntity(screen);
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true, "attachedFiles");
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true, "attachedFiles");
         assertEquals("add attached file to transient screen", 1, screen.getAttachedFiles().size());
         try {
           assertEquals("attached file contents accessible",
@@ -264,7 +264,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     AttachedFile attachedFile = iter.next();
     screen.getAttachedFiles().remove(attachedFile);
     genericEntityDao.saveOrUpdateEntity(screen);
-    screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true, "attachedFiles");
+    screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true, "attachedFiles");
     assertEquals("delete attached file from detached screen", 0, screen.getAttachedFiles().size());
   }
   
@@ -331,8 +331,8 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     {
       public void runTransaction()
       {
-        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
-        Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 2);
+        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
+        Screen screen2 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "2");
         AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", ""); 
         ScreeningRoomUser screener = new ScreeningRoomUser("Screener", "User");
         Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.SMALL_MOLECULE, 4);
@@ -364,7 +364,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       }
     });
     
-    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertEquals(384 * 5, screen.getScreenedExperimentalWellCount());
     assertEquals(384 * 3, screen.getUniqueScreenedExperimentalWellCount());
     assertEquals(5, screen.getAssayPlatesScreenedCount());
@@ -382,7 +382,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         LibraryScreening libraryScreening = screen.getLabActivitiesOfType(LibraryScreening.class).first();
         assertTrue(libraryScreening.removeAssayPlatesScreened(libraryScreening.getAssayPlatesScreened().first().getPlateScreened()));
         screen.update();
@@ -443,7 +443,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
       }
     });
     
-    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true, Screen.assayPlates.getPath());
+    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true, Screen.assayPlates.getPath());
     assertEquals(8, screen.getAssayPlatesScreenedCount());
     assertEquals(11, screen.getAssayPlatesDataLoaded().size());
     assertEquals(3, screen.getLibraryPlatesScreenedCount());
@@ -497,7 +497,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         Library library = genericEntityDao.findEntityById(Library.class, ids[0]);
         CherryPickRequest cpr = genericEntityDao.findEntityById(CherryPickRequest.class, ids[1]);
 
@@ -528,7 +528,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         CherryPickRequest cpr = genericEntityDao.findEntityById(CherryPickRequest.class, ids[1]);
         AdministratorUser admin = genericEntityDao.findEntityById(AdministratorUser.class, ids[2]);
 
@@ -549,7 +549,7 @@ public class ScreenTest extends AbstractEntityInstanceTest<Screen>
         screen.update();
       }
     });
-    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertEquals(expectedFulfilledLabCherryPicksCount, screen.getFulfilledLabCherryPicksCount());
   }
   

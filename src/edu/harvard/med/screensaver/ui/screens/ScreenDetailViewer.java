@@ -53,6 +53,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
+import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -461,7 +462,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   @Override
   protected void initializeNewEntity(Screen screen)
   {
-    screen.setScreenNumber(_screenDao.findNextScreenNumber());
     screen.setStudyType(StudyType.IN_VITRO);
     if (screen.getLabHead() != null) {
       screen.setDataSharingLevel(DataSharingLevelMapper.getScreenDataSharingLevelForUser(screen.getScreenType(), screen.getLabHead()));
@@ -532,6 +532,11 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   @Override
   protected boolean validateEntity(Screen screen)
   {
+    if (screen.getFacilityId().startsWith(Study.STUDY_FACILITY_ID_PREFIX)) {
+      showMessage("screens.invalidScreenFacilityId", screen.getFacilityId());
+      return false;
+    }
+
     LocalDate max = screen.getMaxAllowedDataPrivacyExpirationDate();
     LocalDate min = screen.getMinAllowedDataPrivacyExpirationDate();
     
@@ -736,11 +741,11 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   public String delete()
   {
     if (getEntity().isDataLoaded()) {
-      showMessage("cannotDeleteEntityInUse", "Screen " + getEntity().getScreenNumber());
+      showMessage("cannotDeleteEntityInUse", "Screen " + getEntity().getFacilityId());
     }
     else {
       _screenDao.deleteStudy(getEntity());
-      showMessage("deletedEntity", "Screen " + getEntity().getScreenNumber());
+      showMessage("deletedEntity", "Screen " + getEntity().getFacilityId());
     }
     return VIEW_MAIN;
   }

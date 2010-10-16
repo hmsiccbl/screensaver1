@@ -61,9 +61,9 @@ public class CherryPickRequestFinder extends AbstractBackingBean
     return _cherryPickRequestNumber;
   }
 
-  public void setCherryPickRequestNumber(Integer screenNumber)
+  public void setCherryPickRequestNumber(Integer cherryPickRequestNumber)
   {
-    _cherryPickRequestNumber = screenNumber;
+    _cherryPickRequestNumber = cherryPickRequestNumber;
   }
 
   @UICommand

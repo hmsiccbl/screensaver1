@@ -13,9 +13,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.model.Entity;
-
 import org.springframework.transaction.annotation.Transactional;
+
+import edu.harvard.med.screensaver.model.Entity;
 
 public interface GenericEntityDAO
 {
@@ -371,8 +371,8 @@ public interface GenericEntityDAO
    *    than one entity with the specified value for the property
    */
   public <E extends Entity> E findEntityByProperty(Class<E> entityClass,
-                                                           String propertyName,
-                                                           Object propertyValue);
+                                                   String propertyName,
+                                                   Object propertyValue);
 
   /**
    * See @{@link #findEntityByProperty(Class, String, Object)}.

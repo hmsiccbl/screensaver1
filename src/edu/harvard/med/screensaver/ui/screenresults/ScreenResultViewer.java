@@ -234,14 +234,14 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
     ScreenResult screenResult = getEntity();
     String crossScreenCountColumnName = "";
     if (screenResult.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
-      crossScreenCountColumnName = "[" + ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_SCREEN_NUMBER + "]";
+      crossScreenCountColumnName = "[" + ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID + "]";
     }
     else {
-      crossScreenCountColumnName = "[" + ScreenPositivesCountStudyCreator.DEFAULT_RNAI_SCREEN_NUMBER + "]";
+      crossScreenCountColumnName = "[" + ScreenPositivesCountStudyCreator.DEFAULT_RNAI_STUDY_FACILITY_ID + "]";
     }
 
     for (DataColumn dataColumn : _screenResultsDao.findMutualPositiveColumns(screenResult)) {
-      String colName = WellSearchResults.makeColumnName(dataColumn, dataColumn.getScreenResult().getScreen().getScreenNumber());
+      String colName = WellSearchResults.makeColumnName(dataColumn, dataColumn.getScreenResult().getScreen().getFacilityId());
       boolean found = false;
       for (TableColumn tc : getWellSearchResults().getColumnManager().getAllColumns()) {
         if (tc.getName().equals(colName)) {

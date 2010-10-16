@@ -138,10 +138,10 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     Well wellRnai3 = wellsIter.next();
     // Create Screens
     // Create Small Molecule Screens
-    int screenNumber = 0;
+    int screenFacilityId = 0;
     
     // Screen1
-    Screen screen1 = MakeDummyEntities.makeDummyScreen(screenNumber++, ScreenType.SMALL_MOLECULE);
+    Screen screen1 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.SMALL_MOLECULE);
     screen1.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
     ScreenResult screenResult = screen1.createScreenResult();
     DataColumn col = screenResult.createDataColumn("col1").forReplicate(1);
@@ -163,7 +163,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     // Screen2 - smallMoleculeUser's screen (has to have at least one screen with results to see the study,
     // refer to edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy.userHasQualifiedDepositedSmallMoleculeData()
     
-    Screen screen2 = MakeDummyEntities.makeDummyScreen(screenNumber++, ScreenType.SMALL_MOLECULE);
+    Screen screen2 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.SMALL_MOLECULE);
     screen2.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
     screen2.setLeadScreener(smallMoleculeUser);
 
@@ -187,7 +187,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     
     // Screen3 - Private screen
 
-    Screen screen3 = MakeDummyEntities.makeDummyScreen(screenNumber++, ScreenType.SMALL_MOLECULE);
+    Screen screen3 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.SMALL_MOLECULE);
     screen3.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
     //screen3.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
     screen3.setLeadScreener(smallMoleculeUser);
@@ -212,7 +212,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     
     //RNAI screens - do the same 
     
-    Screen screenRnai1 = MakeDummyEntities.makeDummyScreen(screenNumber++, ScreenType.RNAI);
+    Screen screenRnai1 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.RNAI);
     screenResult = screenRnai1.createScreenResult();
     col = screenResult.createDataColumn("col1").forReplicate(1);
     col.makeBooleanPositiveIndicator();
@@ -230,7 +230,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     resultValue = col.createBooleanPositiveResultValue(assayWellRnai1a, false, false);
     assertTrue(!resultValue.isPositive());
 
-    Screen screenRnai2 = MakeDummyEntities.makeDummyScreen(screenNumber++, ScreenType.RNAI);
+    Screen screenRnai2 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.RNAI);
     screenResult = screenRnai2.createScreenResult();
     col = screenResult.createDataColumn("col1").forReplicate(1);
     col.makeBooleanPositiveIndicator();
@@ -275,7 +275,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     //    assertFalse("no SM positives found!", reagents.isEmpty());
     ScreenPositivesCountStudyCreator creator = new ScreenPositivesCountStudyCreator(null);
     int count = creator.createReagentCountStudy(admin,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_SCREEN_NUMBER,
+                                                     ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID,
                                                      ScreenPositivesCountStudyCreator.DEFAULT_SM_STUDY_TITLE,
                                                      ScreenPositivesCountStudyCreator.DEFAULT_SM_STUDY_SUMMARY,
                                                      ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME,
@@ -299,7 +299,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     //    reagents = screenResultsDao.findScreenPositiveReagentsNotDistinct(screenType);
     //    assertFalse("no RNAi positives found!", reagents.isEmpty());
     count = creator.createReagentCountStudy(admin,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_RNAI_SCREEN_NUMBER,
+                                                       ScreenPositivesCountStudyCreator.DEFAULT_RNAI_STUDY_FACILITY_ID,
                                                        ScreenPositivesCountStudyCreator.DEFAULT_RNAi_STUDY_TITLE,
                                                        ScreenPositivesCountStudyCreator.DEFAULT_RNAi_STUDY_SUMMARY,
                                                        ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME,
@@ -318,9 +318,9 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     setComplete();
     endTransaction();
     startNewTransaction();
-    Screen smStudy = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_SCREEN_NUMBER);
+    Screen smStudy = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID);
     assertNotNull(smStudy);
-    Screen rnaiStudy = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", ScreenPositivesCountStudyCreator.DEFAULT_RNAI_SCREEN_NUMBER);
+    Screen rnaiStudy = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), ScreenPositivesCountStudyCreator.DEFAULT_RNAI_STUDY_FACILITY_ID);
     assertNotNull(rnaiStudy);
     
     smStudy = genericEntityDao.reloadEntity(smStudy);
@@ -552,7 +552,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
       log.info("return dataColumn: " +
                WellSearchResults.makeColumnName(dc, dc.getScreenResult()
                                                       .getScreen()
-                                                      .getScreenNumber()));
+                                                      .getFacilityId()));
     }
     assertEquals("should only find one mutual column", 1, columns.size());
     assertTrue("should contain the mutual column: " + mutualColumn,
@@ -627,21 +627,21 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     endTransaction();
 
     startNewTransaction();
-    screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     screen1.invalidate();
     screen1.update();
     setComplete();
     endTransaction();
 
     startNewTransaction();
-    screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertNotNull(screen1.getScreenResult());
     endTransaction();
 
     screenResultsDao.deleteScreenResult(screen1.getScreenResult());
 
     startNewTransaction();
-    screen1 = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1, true);
+    screen1 = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1", true);
     assertNull(screen1.getScreenResult());
     assertEquals(0, screen1.getLibraryPlatesDataLoadedCount());
     assertNull(screen1.getMaxDataLoadedReplicateCount());
@@ -699,7 +699,7 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
     endTransaction();
     startNewTransaction();
 
-    screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+    screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
     assertEquals("wells", expectedAssayWells, screen.getScreenResult().getAssayWells());
     assertEquals("experimental well count", expectedExperimentalWellCount, screen.getScreenResult().getExperimentalWellCount().intValue());
     assertEquals("positives", expectedPositives, screen.getScreenResult().getDataColumnsList().get(0).getPositivesCount().intValue());

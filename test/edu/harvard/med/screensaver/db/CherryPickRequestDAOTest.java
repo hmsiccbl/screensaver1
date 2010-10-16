@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocatorTest;
 
@@ -87,7 +88,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
 
   public void testFindDuplicateCherryPicksForScreen()
   {
-    CherryPickRequest cherryPickRequest1 = makeCherryPickRequest(1);
+    CherryPickRequest cherryPickRequest1 = makeCherryPickRequest("1");
     Screen screen = cherryPickRequest1.getScreen();
 
     CherryPickRequest cherryPickRequest2 = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
@@ -117,13 +118,13 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
 
   public void testDeleteCherryPickRequest()
   {
-    final int screenNumber = 1;
-    final CherryPickRequest cherryPickRequest = makeCherryPickRequest(screenNumber);
+    final String screenFacilityId = "1";
+    final CherryPickRequest cherryPickRequest = makeCherryPickRequest(screenFacilityId);
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
         assertEquals("screen has 1 cherry pick request before deleting cherry pick request",
                      1,
                      screen.getCherryPickRequests().size());
@@ -142,7 +143,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
         assertEquals("screen has no cherry pick requests", 0, screen.getCherryPickRequests().size());
         assertNull("cherry pick request deleted",
                    genericEntityDao.findEntityById(CherryPickRequest.class, cherryPickRequest.getEntityId()));
@@ -153,13 +154,13 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   // TODO: test case where deletion not allowed
   public void testDeleteScreenerCherryPick()
   {
-    final int screenNumber = 1;
-    makeCherryPickRequest(screenNumber);
+    final String screenFacilityId = "1";
+    makeCherryPickRequest(screenFacilityId);
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("screener cherry picks exist before delete",
                      2,
@@ -177,7 +178,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("screener cherry picks deleted from cherry pick request", 0, cherryPickRequest.getScreenerCherryPicks().size());
         assertEquals("screener cherry picks deleted from well1", 0, cherryPickRequestDao.findScreenerCherryPicksForWell(librariesDao.findWell(new WellKey(1, "A01"))).size());
@@ -189,13 +190,13 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   // TODO: test case where deletion not allowed
   public void testDeleteLabCherryPick()
   {
-    final int screenNumber = 1;
-    makeCherryPickRequest(screenNumber);
+    final String screenFacilityId = "1";
+    makeCherryPickRequest(screenFacilityId);
     genericEntityDao.doInTransaction(new DAOTransaction()
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("lab cherry picks exist before delete",
                      2,
@@ -213,7 +214,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
         CherryPickRequest cherryPickRequest = screen.getCherryPickRequests().iterator().next();
         assertEquals("lab cherry picks deleted from cherry pick request", 0, cherryPickRequest.getLabCherryPicks().size());
         assertEquals("lab cherry picks deleted from well1", 0, cherryPickRequestDao.findLabCherryPicksForWell(librariesDao.findWell(new WellKey(3, "A01"))).size());
@@ -226,9 +227,9 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
   
   // private methods
   
-  private CherryPickRequest makeCherryPickRequest(final int screenNumber)
+  private CherryPickRequest makeCherryPickRequest(final String screenFacilityId)
   {
-    AdministratorUser adminUser1 = new AdministratorUser("Admin" + screenNumber, "User1", "", "", "", "", "admin1" + screenNumber, "");
+    AdministratorUser adminUser1 = new AdministratorUser("Admin" + screenFacilityId, "User1", "", "", "", "", "admin1" + screenFacilityId, "");
     Library duplexLibrary = new Library(adminUser1,
                                         "Duplexes library 1",
                                         "duplib1",
@@ -247,7 +248,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.saveOrUpdateEntity(duplexLibrary);
     duplexLibrary = genericEntityDao.reloadEntity(duplexLibrary, true, Library.wells.to(Well.reagents).getPath(), Library.wells.to(Well.latestReleasedReagent).getPath());
 
-    AdministratorUser adminUser2 = new AdministratorUser("Admin" + screenNumber, "User2", "", "", "", "", "admin2" + screenNumber, "");
+    AdministratorUser adminUser2 = new AdministratorUser("Admin" + screenFacilityId, "User2", "", "", "", "", "admin2" + screenFacilityId, "");
     Library poolLibrary = new Library(adminUser2,
                                       "Pools library 1",
                                       "poollib1",
@@ -265,7 +266,7 @@ public class CherryPickRequestDAOTest extends AbstractSpringPersistenceTest
     poolLibrary.getLatestContentsVersion().release(new AdministrativeActivity(adminUser2, new LocalDate(), AdministrativeActivityType.LIBRARY_CONTENTS_VERSION_RELEASE));
     genericEntityDao.saveOrUpdateEntity(poolLibrary);
 
-    Screen screen = MakeDummyEntities.makeDummyScreen(screenNumber, ScreenType.RNAI);
+    Screen screen = MakeDummyEntities.makeDummyScreen(screenFacilityId, ScreenType.RNAI, StudyType.IN_VITRO);
     CherryPickRequest cherryPickRequest = screen.createCherryPickRequest((AdministratorUser) screen.getCreatedBy());
     cherryPickRequest.createScreenerCherryPick(poolWell1).createLabCherryPick(poolWell1.<SilencingReagent>getLatestReleasedReagent().getDuplexWells().iterator().next());
     cherryPickRequest.createScreenerCherryPick(poolWell2).createLabCherryPick(poolWell2.<SilencingReagent>getLatestReleasedReagent().getDuplexWells().iterator().next());

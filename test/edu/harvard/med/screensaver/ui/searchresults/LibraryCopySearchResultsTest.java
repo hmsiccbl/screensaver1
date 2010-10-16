@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 public class LibraryCopySearchResultsTest extends AbstractSpringPersistenceTest
 {
   protected LibrariesDAO librariesDao;
+  protected LibraryCopySearchResults libraryCopiesBrowser;
   
   @Override
   protected void onSetUp() throws Exception
@@ -85,17 +86,16 @@ public class LibraryCopySearchResultsTest extends AbstractSpringPersistenceTest
 
   public void testSearchPlatesScreenedByLibrary()
   {
-    LibraryCopySearchResults searchResults = new LibraryCopySearchResults(genericEntityDao, null, null, null, null);
-    searchResults.searchCopiesByLibrary(genericEntityDao.findEntityByProperty(Library.class, "startPlate", 100));
-    searchResults.getColumnManager().setSortColumnName("Copy Name");
-    searchResults.getColumnManager().setSortAscending(true);
-    assertEquals(Lists.newArrayList(100, 100, 100), getColumnsValues(searchResults, "Start Plate"));
-    assertEquals(Lists.newArrayList("A", "B", "C"), getColumnsValues(searchResults, "Copy Name"));
-    assertEquals(Lists.newArrayList(1, 2, 0), getColumnsValues(searchResults, "Screening Count"));
-    assertEquals(Lists.newArrayList(2, 5, 0), getColumnsValues(searchResults, "Plate Screening Count"));
-    assertEquals(Lists.newArrayList(4, 4, 4), getColumnsValues(searchResults, "Copy Plate Count"));
+    libraryCopiesBrowser.searchCopiesByLibrary(genericEntityDao.findEntityByProperty(Library.class, "startPlate", 100));
+    libraryCopiesBrowser.getColumnManager().setSortColumnName("Copy Name");
+    libraryCopiesBrowser.getColumnManager().setSortAscending(true);
+    assertEquals(Lists.newArrayList(100, 100, 100), getColumnsValues(libraryCopiesBrowser, "Start Plate"));
+    assertEquals(Lists.newArrayList("A", "B", "C"), getColumnsValues(libraryCopiesBrowser, "Copy Name"));
+    assertEquals(Lists.newArrayList(1, 2, 0), getColumnsValues(libraryCopiesBrowser, "Screening Count"));
+    assertEquals(Lists.newArrayList(2, 5, 0), getColumnsValues(libraryCopiesBrowser, "Plate Screening Count"));
+    assertEquals(Lists.newArrayList(4, 4, 4), getColumnsValues(libraryCopiesBrowser, "Copy Plate Count"));
     assertEquals(Lists.newArrayList(new BigDecimal("0.5"), new BigDecimal("1.3"), BigDecimal.ZERO),
-                 getColumnsValues(searchResults, "Plate Screening Count Average"));
+                 getColumnsValues(libraryCopiesBrowser, "Plate Screening Count Average"));
   }
 
   private List<Object> getColumnsValues(SearchResults searchResults, String columnName)

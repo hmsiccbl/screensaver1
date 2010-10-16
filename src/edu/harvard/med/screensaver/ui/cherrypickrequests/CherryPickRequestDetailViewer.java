@@ -462,7 +462,7 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
     if (duplicateScreenerCherryPickWellKeysMap.size() > 0) {
       String duplicateWellsList = Joiner.on(", ").join(duplicateScreenerCherryPickWellKeys);
       showMessage("cherryPicks.duplicateCherryPicksInScreen",
-                  cherryPickRequest.getScreen().getScreenNumber(),
+                  cherryPickRequest.getScreen().getFacilityId(),
                   duplicateWellsList);
       return true;
     }

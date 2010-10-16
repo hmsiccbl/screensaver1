@@ -18,7 +18,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
@@ -135,7 +134,6 @@ public class LabHead extends ScreeningRoomUser
     mappedBy="labHead",
     fetch=FetchType.LAZY
   )
-  @OrderBy("screenNumber")
   @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="screenHeaded")
   public Set<Screen> getScreensHeaded()
   {

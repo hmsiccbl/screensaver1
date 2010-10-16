@@ -253,7 +253,7 @@ public class DataExportersTest extends AbstractSpringPersistenceTest
                                                             new DefaultEntityViewPolicy(),
                                                             null, null, null, null,
                                                             Lists.<DataExporter<Tuple<String>>>newArrayList(new ExcelWorkbookDataExporter<Tuple<String>>("wells")));
-    ScreenResult screenResult = dao.findEntityByProperty(Screen.class, "screenNumber", 974, true, Screen.screenResult.to(ScreenResult.dataColumns).getPath()).getScreenResult();
+    ScreenResult screenResult = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), 974, true, Screen.screenResult.to(ScreenResult.dataColumns).getPath()).getScreenResult();
     searchResults.searchWellsForScreenResult(screenResult);
     searchResults.getRowCount(); // force initial data fetch
 

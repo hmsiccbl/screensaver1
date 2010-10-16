@@ -321,7 +321,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         genericEntityDao.need(screen,
                               "keywords",
                               "labHead.labMembers");
@@ -333,7 +333,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     Screen screen = screenOut[0];
     try {
       assertEquals("keywords size", 2, screen.getKeywords().size());
-      assertEquals("labHead last name", "Head_1", screen.getLabHead().getLastName());
+      assertEquals("labHead last name", "Head_" + ("1".hashCode()), screen.getLabHead().getLastName());
       assertEquals("labHead.labMembers size", 1, screen.getLabHead().getLab().getLabMembers().size());
       assertEquals("labHead.labMembers[0].lastName", "Member", screen.getLabHead().getLab().getLabMembers().iterator().next().getLastName());
     }
@@ -393,7 +393,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
       LabActivity activity;
       public void runTransaction()
       {
-        //screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        //screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         //screen = genericEntityDao.reloadEntity(screen, true, "leadScreener");
         activity = genericEntityDao.findEntityByProperty(LabActivity.class, "dateOfActivity", new LocalDate());
         activity = genericEntityDao.reloadEntity(activity, true, "performedBy");
@@ -435,7 +435,7 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     {
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         assertEquals("publications size", 2, genericEntityDao.relationshipSize(screen.getPublications()));
         assertEquals("collaborators size", 2, genericEntityDao.relationshipSize(screen.getCollaborators()));
         // TODO: test that this relationshipSize() method is invocable outside of a Hibernate session

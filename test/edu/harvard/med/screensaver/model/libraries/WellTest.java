@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.model.libraries;
 import java.beans.IntrospectionException;
 
 import junit.framework.TestSuite;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -21,14 +22,12 @@ import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.EntityNetworkPersister;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
-import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
+import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
-import org.joda.time.LocalDate;
 
 public class WellTest extends AbstractEntityInstanceTest<Well>
 {
@@ -62,7 +61,7 @@ public class WellTest extends AbstractEntityInstanceTest<Well>
 
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", 1);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "1");
         ScreenResult screenResult = screen.getScreenResult();
         Well well = genericEntityDao.findEntityById(Well.class, screen.getScreenResult().getAssayWells().first().getLibraryWell().getWellId());
         assertEquals("well.resultValues size",

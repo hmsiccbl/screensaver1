@@ -187,7 +187,7 @@ public class ICBGReportGenerator
   
   private void parseScreenResult(ScreenResult screenResult)
   {
-    log.info("processing screen result for screen " + screenResult.getScreen().getScreenNumber());
+    log.info("processing screen result for screen " + screenResult.getScreen().getFacilityId());
     AssayInfo assayInfo = _assayInfoProducer.getAssayInfoForScreen(screenResult.getScreen());
 
     // TODO: printBioactivityRows should be called once for each assay phenotype

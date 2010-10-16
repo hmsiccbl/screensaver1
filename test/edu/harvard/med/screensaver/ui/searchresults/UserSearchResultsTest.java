@@ -26,33 +26,25 @@ import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 
 public class UserSearchResultsTest extends AbstractSpringPersistenceTest
 {
-  // static members
-
   private static Logger log = Logger.getLogger(UserSearchResultsTest.class);
-  private ScreenerSearchResults _screenerSearchResults;
+
+  protected ScreenerSearchResults screenersBrowser;
+
   private ScreeningRoomUser _admin1;
   private ScreeningRoomUser _admin2;
   private ScreeningRoomUser _admin3;
-
-  // instance data members
-
-
-
-  // public constructors and methods
 
   @Override
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
 
-    _screenerSearchResults = new ScreenerSearchResults(genericEntityDao, null);
-    _screenerSearchResults.setMessages(messages);
-    _screenerSearchResults.searchAll();
-    TableColumnManager<ScreeningRoomUser> columnManager = _screenerSearchResults.getColumnManager();
-    _screenerSearchResults.getColumnManager().addCompoundSortColumns(columnManager.getColumn("User"),
-                                                                     columnManager.getColumn("Date Created"));
-    _screenerSearchResults.getColumnManager().setSortColumnName("Name");
-    _screenerSearchResults.getColumnManager().setSortDirection(SortDirection.DESCENDING);
+    screenersBrowser.searchAll();
+    TableColumnManager<ScreeningRoomUser> columnManager = screenersBrowser.getColumnManager();
+    screenersBrowser.getColumnManager().addCompoundSortColumns(columnManager.getColumn("User"),
+                                                               columnManager.getColumn("Date Created"));
+    screenersBrowser.getColumnManager().setSortColumnName("Name");
+    screenersBrowser.getColumnManager().setSortDirection(SortDirection.DESCENDING);
 
     _admin1 = MakeDummyEntities.makeDummyUser(1, "Al", "Capone");
     _admin2 = MakeDummyEntities.makeDummyUser(1, "Bugsy", "Malone");
@@ -69,31 +61,31 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     _expectedUsers.add(_admin3);
     _expectedUsers.add(_admin1);
 
-    //_screenerSearchResults.searchUsers();
+    //screenersBrowser.searchUsers();
 
-    DataTableModel<ScreeningRoomUser> dataTableModel = _screenerSearchResults.getDataTableModel();
+    DataTableModel<ScreeningRoomUser> dataTableModel = screenersBrowser.getDataTableModel();
     for (int rowIndex = 0; rowIndex < _expectedUsers.size(); rowIndex++) {
       ScreeningRoomUser user = _expectedUsers.get(rowIndex);
       dataTableModel.setRowIndex(rowIndex);
-      _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(1);
-      assertEquals("row " + rowIndex + ", col 0", user.getFullNameLastFirst(), _screenerSearchResults.getCellValue());
+      screenersBrowser.getColumnManager().getVisibleColumnModel().setRowIndex(1);
+      assertEquals("row " + rowIndex + ", col 0", user.getFullNameLastFirst(), screenersBrowser.getCellValue());
     }
   }
 
   @SuppressWarnings("unchecked")
   public void testFilter()
   {
-    //_screenerSearchResults.searchUsers();
+    //screenersBrowser.searchUsers();
     Criterion<String> criterion = new Criterion<String>(Operator.TEXT_STARTS_WITH, "Mal");
-    ((UserNameColumn<ScreeningRoomUser,ScreeningRoomUser>) _screenerSearchResults.getColumnManager().getColumn("Name"))
+    ((UserNameColumn<ScreeningRoomUser,ScreeningRoomUser>) screenersBrowser.getColumnManager().getColumn("Name"))
     .clearCriteria().addCriterion(criterion);
-    DataTableModel<ScreeningRoomUser> dataTableModel = _screenerSearchResults.getDataTableModel();
+    DataTableModel<ScreeningRoomUser> dataTableModel = screenersBrowser.getDataTableModel();
 
     assertEquals("filtered result size", 1, dataTableModel.getRowCount());
-    _screenerSearchResults.getColumnManager().getVisibleColumnModel().setRowIndex(1);
-    assertEquals("filtered data", _admin2.getFullNameLastFirst(), _screenerSearchResults.getCellValue());
+    screenersBrowser.getColumnManager().getVisibleColumnModel().setRowIndex(1);
+    assertEquals("filtered data", _admin2.getFullNameLastFirst(), screenersBrowser.getCellValue());
 
-    _screenerSearchResults.resetFilter();
+    screenersBrowser.resetFilter();
     assertEquals("full result size, after filter reset", 3, dataTableModel.getRowCount());
   }
 }

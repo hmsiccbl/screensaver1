@@ -330,8 +330,8 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     Collections.sort(annotationValues, new Comparator<AnnotationValue>() {
       public int compare(AnnotationValue o1, AnnotationValue o2)
       {
-        return o1.getAnnotationType().getStudy().getStudyNumber()
-          .compareTo(o2.getAnnotationType().getStudy().getStudyNumber());
+        return o1.getAnnotationType().getStudy().getFacilityId()
+          .compareTo(o2.getAnnotationType().getStudy().getFacilityId());
       }
     });
 
@@ -376,7 +376,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
                        textValue,
                        value.getAnnotationType().getDescription(),
                        metaInformation)
-        .setGroupId("" + value.getAnnotationType().getStudy().getStudyNumber()));
+        .setGroupId("" + value.getAnnotationType().getStudy().getFacilityId()));
 
     }
   }

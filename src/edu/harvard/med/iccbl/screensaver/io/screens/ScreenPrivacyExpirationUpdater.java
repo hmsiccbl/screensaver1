@@ -491,7 +491,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
             }catch(MessagingException e) {
               String errMsg = "Warn: could not validate the email address for the dataSharingLevelAdmin role: " 
                 + printUserInformation(user);
-              emailService.send("Error sending expiration notification for screen: #" + screen.getScreenNumber(),
+              emailService.send("Error sending expiration notification for screen: #" + screen.getFacilityId(),
                                 errMsg,
                                 adminEmail,
                                 adminRecipients.toArray(new InternetAddress[] {}), null);
@@ -499,7 +499,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
           }
           try {
             notificationMessage = MessageFormat.format(subjectMessage.getSecond(),
-                                      screen.getScreenNumber(),
+                                      screen.getFacilityId(),
                                       getScreenTitle(screen), 
                                       EXPIRE_DATE_FORMATTER.print(screen.getDataPrivacyExpirationDate()) );
 
@@ -638,7 +638,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
   public static String printScreen(Screen screen)
   {
     Object[] values = {
-      "" + screen.getScreenNumber(),
+      "" + screen.getFacilityId(),
       "" + screen.getDataPrivacyExpirationDate(),
       "" + screen.getDataSharingLevel(),
       getScreenTitle(screen).trim()
@@ -722,7 +722,7 @@ public class ScreenPrivacyExpirationUpdater extends AdminEmailApplication
   //    }
   //    tempUserTable += "</table>";
   //    msg.append(printTableRow(new String[] {
-  //      "" + screen.getScreenNumber(),"" + screen.getDataPrivacyExpirationDate(), "" + screen.getDataSharingLevel(), screen.getTitle(), tempUserTable 
+  //      "" + screen.getName(),"" + screen.getDataPrivacyExpirationDate(), "" + screen.getDataSharingLevel(), screen.getTitle(), tempUserTable 
   //    }));
   //  }
 

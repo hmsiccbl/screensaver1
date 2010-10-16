@@ -36,6 +36,7 @@ import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.VolumeEntityColumn;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
@@ -96,7 +97,7 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
 
   public void searchForScreen(final Screen screen)
   {
-    setTitle("Cherry Pick Requests for screen " + screen.getScreenNumber());
+    setTitle("Cherry Pick Requests for screen " + screen.getFacilityId());
     initialize(new InMemoryEntityDataModel<CherryPickRequest,Integer>(new EntityDataFetcher<CherryPickRequest,Integer>(CherryPickRequest.class, _dao) {
       @Override
       public void addDomainRestrictions(HqlBuilder hql)
@@ -128,13 +129,15 @@ public class CherryPickRequestSearchResults extends EntityBasedEntitySearchResul
       public boolean isCommandLink() { return true; }
     });
     
-    columns.add(new IntegerEntityColumn<CherryPickRequest>(
-      CherryPickRequest.screen.toProperty("screenNumber"),
-      "Screen #", 
-      "The screen number of the cherry pick request's screen", 
-      TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<CherryPickRequest>(CherryPickRequest.screen.to(Screen.facilityId),
+                                                        "Screen ID",
+                                                        "The facility-assigned ID of the cherry pick request's screen",
+                                                        TableColumn.UNGROUPED) {
       @Override
-      public Integer getCellValue(CherryPickRequest cpr) { return cpr.getScreen().getScreenNumber(); }
+      public String getCellValue(CherryPickRequest cpr)
+      {
+        return cpr.getScreen().getFacilityId();
+      }
 
       @Override
       public Object cellAction(CherryPickRequest cpr) { 

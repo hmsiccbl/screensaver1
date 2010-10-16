@@ -55,40 +55,40 @@ public class MakeDummyEntities
   private static Logger log = Logger.getLogger(MakeDummyEntities.class);
   private static TestDataFactory dataFactory = new TestDataFactory();
 
-  public static ScreeningRoomUser makeDummyUser(int screenNumber, String first, String last)
+  public static ScreeningRoomUser makeDummyUser(int screenFacilityId, String first, String last)
   {
     return new ScreeningRoomUser(first,
-                                 last + "_" + screenNumber);
+                                 last + "_" + screenFacilityId);
   }
 
-  public static LabHead makeDummyLabHead(int screenNumber, String first, String last)
+  public static LabHead makeDummyLabHead(int screenFacilityId, String first, String last)
   {
     return new LabHead(first,
-                       last + "_" + screenNumber,
-                       new LabAffiliation("affiliation " + screenNumber, AffiliationCategory.HMS));
+                       last + "_" + screenFacilityId,
+                       new LabAffiliation("affiliation " + screenFacilityId, AffiliationCategory.HMS));
   }
 
-  public static Screen makeDummyScreen(int screenNumber, ScreenType screenType)
+  public static Screen makeDummyScreen(int screenFacilityId, ScreenType screenType)
   {
-    return makeDummyScreen(screenNumber, screenType, StudyType.IN_VITRO);
+    return makeDummyScreen(Integer.toString(screenFacilityId), screenType, StudyType.IN_VITRO);
   }
 
-  public static Screen makeDummyScreen(int screenNumber)
+  public static Screen makeDummyScreen(int screenFacilityId)
   {
-    return makeDummyScreen(screenNumber, ScreenType.SMALL_MOLECULE);
+    return makeDummyScreen(screenFacilityId, ScreenType.SMALL_MOLECULE);
   }
 
-  public static Screen makeDummyScreen(int screenNumber,
+  public static Screen makeDummyScreen(String screenFacilityId,
                                        ScreenType screenType,
                                        StudyType studyType)
   {
-    LabHead labHead = makeDummyLabHead(screenNumber, "Lab", "Head");
-    ScreeningRoomUser leadScreener = makeDummyUser(screenNumber, "Lead", "Screener");
+    LabHead labHead = makeDummyLabHead(screenFacilityId.hashCode(), "Lab", "Head");
+    ScreeningRoomUser leadScreener = makeDummyUser(screenFacilityId.hashCode(), "Lead", "Screener");
     AdministratorUser admin = new AdministratorUser("Admin", "Screen", "", "", "", "", "", "");
     Screen screen = new Screen(admin,
+                               screenFacilityId,
                                leadScreener,
                                labHead,
-                               screenNumber,
                                screenType,
                                studyType,
                                "Dummy screen");
@@ -166,7 +166,7 @@ public class MakeDummyEntities
     assert library.getLatestReleasedContentsVersion() != null;
 
     int annotationOrdinal = 0;
-    Screen study = MakeDummyEntities.makeDummyScreen(Study.MIN_STUDY_NUMBER, library.getScreenType());
+    Screen study = MakeDummyEntities.makeDummyScreen(Study.STUDY_FACILITY_ID_PREFIX, library.getScreenType(), StudyType.IN_SILICO);
     AnnotationType annotType1 = new AnnotationType(study, "numeric_annot", "numeric annotation", annotationOrdinal++, true);
     AnnotationType annotType2 = new AnnotationType(study, "text_annot", "text annotation", annotationOrdinal++, false);
     Iterator<Well> wellIter = new TreeSet<Well>(library.getWells()).iterator();

@@ -11,6 +11,9 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import java.beans.IntrospectionException;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import junit.framework.TestSuite;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
@@ -28,10 +31,6 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationType>
 {
@@ -62,7 +61,7 @@ public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationTyp
         Reagent reagent1 = well1.createSilencingReagent(new ReagentVendorIdentifier("vendor", "1"), SilencingReagentType.SIRNA, "ATCG");
         Reagent reagent2 = well2.createSilencingReagent(new ReagentVendorIdentifier("vendor", "2"), SilencingReagentType.SIRNA, "GCTA");
         Screen study = dataFactory.newInstance(Screen.class);
-        study.setScreenNumber(Study.MIN_STUDY_NUMBER);
+        study.setFacilityId(Study.STUDY_FACILITY_ID_PREFIX);
         AnnotationType at = study.createAnnotationType("annotation", "", false);
         assertNotNull(at.createAnnotationValue(reagent1, "a"));
         assertNotNull(at.createAnnotationValue(reagent2, "b"));
@@ -74,7 +73,7 @@ public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationTyp
       }
     });
 
-    Screen study = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", Study.MIN_STUDY_NUMBER, false, "annotationTypes.annotationValues.reagent");
+    Screen study = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), Study.STUDY_FACILITY_ID_PREFIX, false, "annotationTypes.annotationValues.reagent");
     AnnotationType at = study.getAnnotationTypes().last();
     assertEquals(at.getName(), "annotation");
     Reagent reagent1 = genericEntityDao.findEntityByProperty(Reagent.class, "vendorId.vendorIdentifier", "1");

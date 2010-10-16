@@ -26,7 +26,6 @@ import edu.harvard.med.screensaver.ui.screens.StudyViewer;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
@@ -78,7 +77,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
       public void addDomainRestrictions(HqlBuilder hql)
       {
         super.addDomainRestrictions(hql);
-        hql.where(getRootAlias(), "screenNumber", Operator.GREATER_THAN_EQUAL, Study.MIN_STUDY_NUMBER);
+        hql.where(getRootAlias(), Screen.facilityId.getPropertyName(), Operator.TEXT_STARTS_WITH, Study.STUDY_FACILITY_ID_PREFIX);
       }
     }));
   }
@@ -86,16 +85,17 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
 
   // implementations of the SearchResults abstract methods
 
-  @SuppressWarnings("unchecked")
   @Override
   protected List<? extends TableColumn<Screen,?>> buildColumns()
   {
     List<TableColumn<Screen,?>> columns = Lists.newArrayList();
-    columns.add(new IntegerEntityColumn<Screen>(
-                                                Screen.thisEntity.toProperty("screenNumber"),
-      "Study Number", "The study number", TableColumn.UNGROUPED) {
+    columns.add(new TextEntityColumn<Screen>(Screen.facilityId,
+                                             "Study Facility ID", "The facility-assigned study identifier", TableColumn.UNGROUPED) {
       @Override
-      public Integer getCellValue(Screen study) { return study.getStudyNumber(); }
+      public String getCellValue(Screen study)
+      {
+        return study.getFacilityId();
+      }
 
       @Override
       public Object cellAction(Screen study) { return viewSelectedEntity(); }

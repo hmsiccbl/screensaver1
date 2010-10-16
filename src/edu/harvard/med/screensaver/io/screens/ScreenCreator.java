@@ -11,17 +11,17 @@ package edu.harvard.med.screensaver.io.screens;
 
 import java.io.FileNotFoundException;
 
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.ParseException;
+import org.apache.log4j.Logger;
+import org.springframework.dao.DataIntegrityViolationException;
+
 import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParser;
 import edu.harvard.med.screensaver.io.workbook2.WorkbookParseError;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
-
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
-import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * Command-line application that creates a new screen in the database.
@@ -67,10 +67,10 @@ public class ScreenCreator extends StudyCreator
   }
 
   @Override
-  protected void validateStudyNumber()
+  protected void validateStudyFacilityId()
   {
-    if (studyNumber >= Study.MIN_STUDY_NUMBER) {
-      throw new IllegalArgumentException("screen number must < " + Study.MIN_STUDY_NUMBER);
+    if (facilityId.startsWith(Study.STUDY_FACILITY_ID_PREFIX)) {
+      throw new IllegalArgumentException("screen ID must not start with " + Study.STUDY_FACILITY_ID_PREFIX);
     }
   }
   

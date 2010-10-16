@@ -93,7 +93,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
   private Screen createScreen(String title, ScreenType type)
   {
     log.info("leads" + leadScreener);
-    Screen screen = new Screen(null, leadScreener, labHead, screen_number_counter++, type, StudyType.IN_VITRO, title);
+    Screen screen = new Screen(null, Integer.toString(screen_number_counter++), leadScreener, labHead, type, StudyType.IN_VITRO, title);
     screen.addCollaborator(collaborator);
     screen.createStatusItem(new LocalDate(), StatusValue.ACCEPTED);
     genericEntityDao.persistEntity(screen);

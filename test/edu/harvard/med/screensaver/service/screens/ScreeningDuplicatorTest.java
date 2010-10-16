@@ -93,6 +93,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         genericEntityDao.reattachEntity(_screen);
+        genericEntityDao.persistEntity(_screen.getCreatedBy());
         /*RNAiCherryPickRequest cpr = (RNAiCherryPickRequest)*/ _screen.createCherryPickRequest((AdministratorUser) _screen.getCreatedBy());
       }
     });

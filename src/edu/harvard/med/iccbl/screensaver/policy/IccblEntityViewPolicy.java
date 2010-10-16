@@ -359,23 +359,23 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
       return true;
     }
     if (findMyScreens().contains(screen)) {
-      log.debug("screen " + screen.getScreenNumber() + " is visible: \"my screen\"");
+      log.debug("screen " + screen.getFacilityId() + " is visible: \"my screen\"");
       return true;
     }
     if (findPublicScreens().contains(screen)) {
-      log.debug("screen " + screen.getScreenNumber() + " is visible: \"public\"");
+      log.debug("screen " + screen.getFacilityId() + " is visible: \"public\"");
       return true;
     }
     if (screen.getScreenType().equals(ScreenType.SMALL_MOLECULE)) {
       boolean isOthersVisibleScreen = findOthersVisibleSmallMoleculeScreens().contains(screen);
       if (isOthersVisibleScreen) {
-        log.debug("screen is " + screen.getScreenNumber() + " visible: \"small molecule screen shared by others\"");
+        log.debug("screen is " + screen.getFacilityId() + " visible: \"small molecule screen shared by others\"");
       }
       return isOthersVisibleScreen;
     }
     if (screen.getScreenType().equals(ScreenType.RNAI) &&
       user.getScreensaverUserRoles().contains(ScreensaverUserRole.RNAI_SCREENS)) {
-      log.debug("screen " + screen.getScreenNumber() + " is visible: \"rnai screen for rnai screener\"");
+      log.debug("screen " + screen.getFacilityId() + " is visible: \"rnai screen for rnai screener\"");
       return true;
     }
     return false;
@@ -459,7 +459,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
       }));
       if (log.isDebugEnabled()) {
         log.debug("others' level 1 and level 2 small molecule screens : " + 
-                  Joiner.on(", ").join(Iterables.transform(_smallMoleculeLevel1AndLevel2Screens, Screen.ToScreenNumberFunction)));
+                  Joiner.on(", ").join(Iterables.transform(_smallMoleculeLevel1AndLevel2Screens, Screen.ToNameFunction)));
       }
     }
     return _smallMoleculeLevel1AndLevel2Screens;
@@ -482,7 +482,7 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
       }
       if (log.isDebugEnabled()) {
         log.debug("other's mutually shared small molecule screens: " + 
-                  Joiner.on(", ").join(Iterables.transform(_mutualSmallMoleculeScreens, Screen.ToScreenNumberFunction)));
+                  Joiner.on(", ").join(Iterables.transform(_mutualSmallMoleculeScreens, Screen.ToNameFunction)));
       }
     }
     return _mutualSmallMoleculeScreens;

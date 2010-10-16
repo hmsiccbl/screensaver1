@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
 public class LibraryCopyPlateSearchResultsTest extends AbstractSpringPersistenceTest
 {
   protected LibrariesDAO librariesDao;
+  protected LibraryCopyPlateSearchResults libraryCopyPlatesBrowser;
   
   @Override
   protected void onSetUp() throws Exception
@@ -51,7 +52,7 @@ public class LibraryCopyPlateSearchResultsTest extends AbstractSpringPersistence
 
   public void testSearchPlatesForCopy()
   {
-    LibraryCopyPlateSearchResults searchResults = new LibraryCopyPlateSearchResults(genericEntityDao, librariesDao, null, null, null);
+    LibraryCopyPlateSearchResults searchResults = libraryCopyPlatesBrowser;
     searchResults.searchPlatesForCopy(genericEntityDao.findEntityByProperty(Copy.class, "name", "B", true, Copy.library.getPath()));
     assertEquals(Lists.newArrayList(100, 101, 102), getColumnsValues(searchResults, "Plate"));
     assertEquals(Lists.newArrayList("B", "B", "B"), getColumnsValues(searchResults, "Copy"));

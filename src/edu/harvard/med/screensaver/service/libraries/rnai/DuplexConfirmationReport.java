@@ -14,12 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hibernate.Session;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.hibernate.Session;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -105,13 +104,13 @@ public class DuplexConfirmationReport
       @Override
       public int doCompare(Screen o1, Screen o2)
       {
-        return new NullSafeComparator<Integer>() {
+        return new NullSafeComparator<String>() {
           @Override
-          protected int doCompare(Integer o1, Integer o2)
+          protected int doCompare(String o1, String o2)
           {
             return o1.compareTo(o2);
           }
-        }.compare(o1.getScreenNumber(), o2.getScreenNumber());
+        }.compare(o1.getFacilityId(), o2.getFacilityId());
       }
     });
 

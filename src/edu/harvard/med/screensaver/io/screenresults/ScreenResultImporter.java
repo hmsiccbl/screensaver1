@@ -62,9 +62,9 @@ public class ScreenResultImporter extends CommandLineApplication
   {
     ScreenResultImporter app = new ScreenResultImporter(args);
     app.addCommandLineOption(OptionBuilder.hasArg()
-                                          .withArgName("#")
+                                          .withArgName("screen facility ID")
                                           .isRequired()
-                                          .withDescription("the screen number of the screen for which the screen result is being parsed")
+                                          .withDescription("the facility-assigned ID of the screen for which the screen result is being parsed")
                                           .withLongOpt(SCREEN_OPTION[LONG_OPTION])
                                           .create(SCREEN_OPTION[SHORT_OPTION]));
     app.addCommandLineOption(OptionBuilder.hasArg()
@@ -136,10 +136,10 @@ public class ScreenResultImporter extends CommandLineApplication
       }
       final IntRange finalPlateNumberRange = plateNumberRange;
 
-      int screenNumber = Integer.parseInt(app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]));
-      Screen screen = dao.findEntityByProperty(Screen.class, "screenNumber", screenNumber);
+      String screenFacilityId = app.getCommandLineOptionValue(SCREEN_OPTION[SHORT_OPTION]);
+      Screen screen = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), screenFacilityId);
       if (screen == null) {
-        throw new EntityNotFoundException(Screen.class, screenNumber);
+        throw new EntityNotFoundException(Screen.class, screenFacilityId);
       }
       
       Workbook workbook = new Workbook(inputFile);

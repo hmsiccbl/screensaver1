@@ -23,7 +23,6 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 
 public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
 {
@@ -44,7 +43,7 @@ public class StudyAnnotationParserTest extends AbstractSpringPersistenceTest
     Library library = MakeDummyEntities.makeDummyLibrary(1, ScreenType.RNAI, 1);
     genericEntityDao.persistEntity(library);
     
-    Screen study = MakeDummyEntities.makeDummyScreen(Study.MIN_STUDY_NUMBER, library.getScreenType());
+    Screen study = MakeDummyEntities.makeDummyScreen(1, library.getScreenType());
     studyAnnotationParser.parse(study, getClass().getClassLoader().getResourceAsStream(WORKBOOK_FILE));
     assertEquals("annotation type count", expectedData.length, study.getAnnotationTypes().size());
     assertEquals("reagent count", rvIds.length, study.getReagents().size());

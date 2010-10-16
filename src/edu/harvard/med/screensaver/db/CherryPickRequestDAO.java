@@ -17,6 +17,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.springframework.orm.hibernate3.HibernateCallback;
+
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -25,12 +31,6 @@ import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.Screen;
-
-import org.apache.log4j.Logger;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.springframework.orm.hibernate3.HibernateCallback;
 
 public class CherryPickRequestDAO extends AbstractDAO
 {
@@ -164,11 +164,11 @@ public class CherryPickRequestDAO extends AbstractDAO
         Query query = session.createQuery(
           "select sw.wellId, count(*) " +
           "from Screen s left join s.cherryPickRequests cpr left join cpr.screenerCherryPicks scp join scp.screenedWell sw " +
-          "where s.screenNumber = :screenNumber " +
+            "where s." + Screen.facilityId.getPropertyName() + " = :screenId " +
           "group by sw.wellId " +
           "having count(*) > 1");
         query.setReadOnly(true);
-        query.setParameter("screenNumber", screen.getScreenNumber());
+        query.setParameter("screenId", screen.getFacilityId());
         Map<WellKey,Number> result = new HashMap<WellKey,Number>();
         for (Iterator iter = query.list().iterator(); iter.hasNext();) {
           Object[] row = (Object[]) iter.next();

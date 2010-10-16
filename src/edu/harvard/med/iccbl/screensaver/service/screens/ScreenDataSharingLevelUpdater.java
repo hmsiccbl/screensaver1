@@ -14,16 +14,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
-import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
@@ -99,14 +97,13 @@ public class ScreenDataSharingLevelUpdater
         " and s.screenType = ? " +
         " and s.dataPrivacyExpirationNotifiedDate is null" +
         " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " + 
-        " order by s.screenNumber";
+        " order by s.screenId";
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
-                                  expireDate, 
-                                  ScreenDataSharingLevel.MUTUAL_SCREENS, 
-                                  ScreenType.SMALL_MOLECULE ,
-                                  StatusValue.DROPPED_TECHNICAL, 
-                                  StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE
-                                  );
+                                               expireDate,
+                                               ScreenDataSharingLevel.MUTUAL_SCREENS,
+                                               ScreenType.SMALL_MOLECULE,
+                                               StatusValue.DROPPED_TECHNICAL,
+                                               StatusValue.TRANSFERRED_TO_BROAD_INSTITUTE);
     log.info("Hql: " + hql + ", " + list.size());
     return list;
   }
@@ -120,7 +117,7 @@ public class ScreenDataSharingLevelUpdater
         " and s.dataSharingLevel > ? " +
         " and s.screenType = ? " +
         " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " + 
-        " order by s.screenNumber";
+        " order by s.screenId";
     List<Screen> list = _dao.findEntitiesByHql(Screen.class, hql, 
                                   expireDate, 
                                   ScreenDataSharingLevel.MUTUAL_SCREENS, 
@@ -197,7 +194,7 @@ public class ScreenDataSharingLevelUpdater
     		" s.screenType = ? " +
     		" and s.dataSharingLevel > ? " +
         " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " +
-    		" order by s.screenNumber"  ;
+        " order by s.screenId";
 
     List<Screen> screens = _dao.findEntitiesByHql(Screen.class, hql, 
                                                   ScreenType.SMALL_MOLECULE, 
@@ -232,7 +229,7 @@ public class ScreenDataSharingLevelUpdater
         
         if( currentExpiration != null && currentExpiration.equals(requestedDate) )
         {
-          log.info("DataPrivacyExpirationDate is already set to the correct value for screen number: " + s.getScreenNumber());
+          log.info("DataPrivacyExpirationDate is already set to the correct value for screen number: " + s.getFacilityId());
         } else {
           s.setDataPrivacyExpirationDate(requestedDate);
           LocalDate setDate = s.getDataPrivacyExpirationDate();
@@ -304,7 +301,7 @@ public class ScreenDataSharingLevelUpdater
     		" where s.dataSharingLevel > ? " +
     		" and s.screenType = ? " +
         " and s.screenId not in (select s.screenId from Screen s join s.statusItems si where si.statusValue in ( ?, ? ) and si.screen = s ) " + 
-    		" order by s.screenNumber";
+        " order by s.screenId";
     return _dao.findEntitiesByHql(Screen.class, hql, 
                                   ScreenDataSharingLevel.SHARED, 
                                   ScreenType.SMALL_MOLECULE,

@@ -42,6 +42,7 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
@@ -58,14 +59,14 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
 
   public static final File TEST_INPUT_FILE_DIR = new File("test/edu/harvard/med/screensaver/io/screenresults");
   public static final String SCREEN_RESULT_115_TEST_WORKBOOK_FILE = "ScreenResultTest115.xls";
-  public static final int TEST_SCREEN_NUMBER = 115;
+  public static final String TEST_SCREEN_FACILITY_ID = "115";
   
   @Override
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
     
-    final Screen screen = MakeDummyEntities.makeDummyScreen(TEST_SCREEN_NUMBER);
+    final Screen screen = MakeDummyEntities.makeDummyScreen(TEST_SCREEN_FACILITY_ID, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO);
     genericEntityDao.doInTransaction(new DAOTransaction() {
 
       public void runTransaction()
@@ -129,7 +130,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
       final AdministratorUser admin = new AdministratorUser("Admin", "User", "", "", "", "", "", "");
       genericEntityDao.saveOrUpdateEntity(admin);
 
-      Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", TEST_SCREEN_NUMBER);
+      Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), TEST_SCREEN_FACILITY_ID);
       screenResultLoader.parseAndLoad(screen,
                                       new Workbook(workbookFile),
                                       admin,
@@ -155,7 +156,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
       @Override
       public void runTransaction()
       {
-        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, "screenNumber", TEST_SCREEN_NUMBER);
+        Screen screen = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), TEST_SCREEN_FACILITY_ID);
         LibraryScreening libraryScreening = screen.createLibraryScreening((AdministratorUser) screen.getCreatedBy(), screen.getLabHead(), new LocalDate());
         libraryScreening.setNumberOfReplicates(1);
         libraryScreening.addAssayPlatesScreened(genericEntityDao.findEntityByProperty(Plate.class, "plateNumber", 1));
@@ -305,7 +306,8 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
     {
       public List execute(Session s) {
         Screen screen = genericEntityDao.findEntityByProperty(Screen.class, 
-                                                              "screenNumber", 115, 
+                                                              Screen.facilityId.getPropertyName(),
+                                                              TEST_SCREEN_FACILITY_ID,
                                                               true, 
                                                               Screen.assayPlates.getPath());
         genericEntityDao.needReadOnly(screen, Screen.updateActivities.getPath());

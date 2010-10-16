@@ -18,33 +18,26 @@
 
 <ui:composition>
 
-	<!--
-	<ss:property id="screenId" label="Screen ID"
-		description="The database ID for the screen. This is an implementation-level detail displayed only for development purposes"
-		value="#{screen.screenId}"
-		rendered="#{appInfo.screensaverUser.isUserInRoleOfNameMap['developer']}" />
- -->
-
-	<ss:property id="screenNumber" label="Screen Number"
-		description="The number used to uniquely identify the screen"
-		value="#{screen.screenNumber}" editable="false">
-		<ui:define name="data">
-      <ss:entityLink entity="#{screen}" property="screenNumber"
+  <ss:property id="facilityId" label="Screen ID"
+    description="The facility-assigned unique identifier for the screen"
+    value="#{screen.facilityId}" editable="#{editable}" required="true">
+    <ui:define name="data">
+      <ss:entityLink entity="#{screen}" property="facilityId"
         viewer="#{screenViewer}" />
     </ui:define>
-	</ss:property>
+  </ss:property>
 
   <ss:property id="screenType" label="Screen Type"
-    description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
-    editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
-    converter="#{screenTypeConverter}">
-    <ui:define name="editableData">
-      <ui:insert name="editableScreenType">
+		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
+		editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
+		converter="#{screenTypeConverter}">
+		<ui:define name="editableData">
+			<ui:insert name="editableScreenType">
       No editableScreenType definition!
       </ui:insert>
-    </ui:define>
-  </ss:property>
-  
+		</ui:define>
+	</ss:property>
+
   <ss:property id="projectPhase" label="Project Phase"
     description="'Primary','Counter', or 'Follow-Up'" value="#{screen.projectPhase}"
     editable="#{editable}"

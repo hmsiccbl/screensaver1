@@ -27,7 +27,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
@@ -240,7 +239,6 @@ public class ScreeningRoomUser extends ScreensaverUser implements AttachedFilesE
     mappedBy="leadScreener",
     fetch=FetchType.LAZY
   )
-  @OrderBy("screenNumber")
   @edu.harvard.med.screensaver.model.annotations.ToMany(singularPropertyName="screenLed", inverseProperty="leadScreener")
   public Set<Screen> getScreensLed()
   {

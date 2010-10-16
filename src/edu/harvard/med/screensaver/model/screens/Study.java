@@ -26,7 +26,7 @@ public abstract class Study extends AuditedAbstractEntity<Integer>
 {
   private static final long serialVersionUID = 1L;
   
-  public static final Integer MIN_STUDY_NUMBER = 100000;
+  public static final String STUDY_FACILITY_ID_PREFIX = "S";
   
   protected Study() {}
   
@@ -41,7 +41,10 @@ public abstract class Study extends AuditedAbstractEntity<Integer>
 
   abstract public ScreeningRoomUser getLeadScreener();
 
-  abstract public Integer getStudyNumber();
+  /**
+   * Short name to uniquely identify a screen.
+   */
+  abstract public String getFacilityId();
 
   abstract public StudyType getStudyType();
 
@@ -61,7 +64,7 @@ public abstract class Study extends AuditedAbstractEntity<Integer>
   public boolean isStudyOnly()
   {
     // TODO: this is a total hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
-    return getStudyNumber() == null || getStudyNumber() >= MIN_STUDY_NUMBER;
+    return getFacilityId() == null || getFacilityId().startsWith(STUDY_FACILITY_ID_PREFIX);
   }
 
   @Override
