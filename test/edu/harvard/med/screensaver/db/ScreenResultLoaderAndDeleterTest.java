@@ -179,7 +179,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
                                                                                true,
                                                                                "resultValues");
     assertNotNull(loadedDataColumns);
-    assertEquals("DataColumns count", 7, loadedDataColumns.size());
+    assertEquals("DataColumns count", 8, loadedDataColumns.size());
     for (DataColumn actualCol : loadedDataColumns) {
       assertEquals(960, actualCol.getResultValues().size());
     }
