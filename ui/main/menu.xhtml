@@ -84,7 +84,8 @@
               rendered="#{menu.screener || menu.readAdmin}">
               <u>S</u>creens</t:commandLink>
               <t:panelGrid columns="2" id="screensSubmenu" forceId="true"
-                style="visibility:hidden; margin-right: 10px">
+                style="visibility:hidden; margin-right: 10px"
+                rendered="#{menu.screener || menu.readAdmin}">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeScreens}"
                   styleClass="submenuItem"
@@ -117,7 +118,8 @@
               <u>C</u>PRs</t:commandLink>
 
               <t:panelGrid columns="2" id="cprsSubmenu" forceId="true"
-                style="visibility:hidden; margin-right: 10px">
+                style="visibility:hidden; margin-right: 10px"
+                rendered="#{menu.screener || menu.readAdmin}">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeCherryPickRequests}"
                   styleClass="submenuItem"
