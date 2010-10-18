@@ -34,11 +34,13 @@ public class CellHTS2Runner extends AbstractBackingBean
   private NormalizePlatesNegControls _normalizePlatesNegControls = NormalizePlatesNegControls.NEG;
   private ScoreReplicatesMethod _scoreReplicatesMethod = ScoreReplicatesMethod.ZSCORE;
   private SummarizeReplicatesMethod _summarizeReplicatesMethod = SummarizeReplicatesMethod.MEAN;
+  private File _reportPath;
   private File _reportFilePath;
   private String _reportUrl;
 
   private boolean _addNewCellHtsDataColumns;
   private CellHts2Annotator _cellHts2Annotator;
+
 
   /**
    * @motivation for CGLIB2
@@ -60,12 +62,13 @@ public class CellHTS2Runner extends AbstractBackingBean
   {
     _screenResult = screenResult;
     if (screenResult != null) {
-      _reportFilePath = new File(new File(new File(getApplicationProperties().getProperty("cellHTS2.report.directory"), getScreensaverUser().getEntityId().toString()),
-                                          screenResult.getEntityId().toString()),
-                                 "index.html");
+      _reportPath = new File(new File(getApplicationProperties().getProperty("cellHTS2.report.directory"), getScreensaverUser().getEntityId().toString()),
+                             screenResult.getEntityId().toString());
+      _reportFilePath = new File(_reportPath, "index.html");
       _reportUrl = ScreensaverConstants.CELLHTS2_REPORTS_BASE_URL + _screenResult.getScreenResultId() + "/index.html";
     }
     else {
+      _reportPath = null;
       _reportFilePath = null;
       _reportUrl = null;
     }
@@ -158,7 +161,7 @@ public class CellHTS2Runner extends AbstractBackingBean
                                    _scoreReplicatesMethod,
                                    _summarizeReplicatesMethod,
                                    _addNewCellHtsDataColumns,
-                                   _reportFilePath.getPath(),
+                                   _reportPath.getPath(),
                                    getApplicationProperties().isPropertySet("cellHTS2report.saveRObjects") ?
                                      getApplicationProperties().getProperty("cellHTS2report.saveRObjects.path") : null);
     return VIEW_SCREEN;
