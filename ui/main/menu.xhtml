@@ -44,7 +44,7 @@
         <t:htmlTag value="hr" />
 
         <h:form id="navForm">
-          <t:panelGrid columns="1">
+          <t:panelGrid columns="1" styleClass="layoutPanel">
             <t:outputText styleClass="menuSectionHeader"
               value="Browse..." />
 
@@ -57,6 +57,7 @@
                 <u>L</u>ibraries</t:commandLink>
               <t:panelGrid columns="2" id="librariesSubmenu"
                 forceId="true"
+                styleClass="layoutPanel"
                 style="visibility:hidden; margin-right: 10px">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeLibraries}"
@@ -85,6 +86,7 @@
                 <u>S</u>creens</t:commandLink>
               <t:panelGrid columns="2" id="screensSubmenu"
                 forceId="true"
+                styleClass="layoutPanel"
                 style="visibility:hidden; margin-right: 10px">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeScreens}"
@@ -116,6 +118,7 @@
                 title="Browse the cherry pick requests currently available and accessible to you">
                 <u>C</u>PRs</t:commandLink>
               <t:panelGrid columns="2" id="cprsSubmenu" forceId="true"
+                styleClass="layoutPanel"
                 style="visibility:hidden; margin-right: 10px">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeCherryPickRequests}"
@@ -160,9 +163,9 @@
         <t:outputText styleClass="menuSectionHeader"
           value="Find Wells by..." />
         <h:form>
-          <t:panelGrid columns="1">
+          <t:panelGrid columns="1" styleClass="layoutPanel">
             Plate/Well ID
-            <t:panelGroup>
+            <t:panelGroup styleClass="layoutPanel">
               <t:inputTextarea id="plateWellListMenu"
                 value="#{wellFinder.plateWellList}"
                 styleClass="inputText"
@@ -185,18 +188,6 @@
               title="Look up one or more library wells matching criteria "
               rendered="#{menu.screener || menu.readAdmin}" />
           </t:panelGrid>
-        </h:form>
-
-
-        <h:form>
-
-          <t:panelGrid columns="1">
-            <t:commandLink action="goEnvironmentInfo"
-              styleClass="menuItem" value="Environment"
-              visibleOnUserRole="developer"
-              title="Access information about the environment that Screensaver is running in" />
-          </t:panelGrid>
-
         </h:form>
 
         <t:htmlTag value="hr" />
@@ -262,6 +253,16 @@
         </h:form>
 
         <t:htmlTag value="hr" />
+
+        <h:form>
+          <t:panelGrid columns="1" styleClass="layoutPanel">
+            <t:commandLink action="goEnvironmentInfo"
+              styleClass="menuItem" value="Environment"
+              visibleOnUserRole="developer"
+              title="Access information about the environment that Screensaver is running in" />
+          </t:panelGrid>
+          <t:htmlTag value="hr" visibleOnUserRole="developer"/>
+        </h:form>
 
         <h:form id="entityCreationForm" title="Entity creation commands">
           <t:outputText styleClass="menuSectionHeader"
