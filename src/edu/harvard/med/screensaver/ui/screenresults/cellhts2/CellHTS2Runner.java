@@ -168,8 +168,8 @@ public class CellHTS2Runner extends AbstractBackingBean
                                    _summarizeReplicatesMethod,
                                    _addNewCellHtsDataColumns,
                                    _reportPath.getPath(),
-                                   getApplicationProperties().isPropertySet("cellHTS2report.saveRObjects") ?
-                                     getApplicationProperties().getProperty("cellHTS2report.saveRObjects.path") : null);
+                                   getApplicationProperties().getBooleanProperty("cellHTS2.saveRObjects") ?
+                                     getApplicationProperties().getProperty("cellHTS2.saveRObjects.directory") : null);
     return VIEW_SCREEN;
   }
 

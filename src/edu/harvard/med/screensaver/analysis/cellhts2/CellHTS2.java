@@ -96,7 +96,7 @@ public class CellHTS2 {
       }
       else {
         log.error(saveRObjectsPath +
-          "does not exist (cellHTS2report.saveRObjects.path system property); R objects will not be saved");
+          "does not exist (cellHTS2.saveRObjects.directory system property); R objects will not be saved");
       }
     }
   }

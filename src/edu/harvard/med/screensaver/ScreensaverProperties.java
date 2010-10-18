@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -54,6 +55,16 @@ public class ScreensaverProperties
       if (!isPropertySet("cellHTS2.report.directory")) {
         throw new ScreensaverConfigurationException("undefined system property 'cellHTS2.report.directory'");
       }
+      File reportDir = new File(getProperty("cellHTS2.report.directory"));
+      if (!reportDir.exists()) {
+        throw new ScreensaverConfigurationException("'cellHTS2.report.directory' " + reportDir + " does not exist");
+      }
+      if (getBooleanProperty("cellHTS2.saveRObjects")) {
+        File rObjectsDir = new File(getProperty("cellHTS2.saveRObjects.directory"));
+        if (!rObjectsDir.exists()) {
+          throw new ScreensaverConfigurationException("'cellHTS2.saveRObjects' " + rObjectsDir + " does not exist");
+        }
+      }
     }
   }
 
@@ -92,9 +103,12 @@ public class ScreensaverProperties
    * @return true if the specified property has been defined, and has a non-null value
    * @see #isPropertyDefined(String)
    */
-  public boolean isPropertySet(String propKey)
+  public boolean isPropertySet(String name)
   {
-    return !StringUtils.isEmpty(_properties.getProperty(propKey));
+    if (!isPropertyDefined(name)) {
+      return false;
+    }
+    return !StringUtils.isEmpty(_properties.getProperty(name));
   }
   
   public String getProperty(String name)
