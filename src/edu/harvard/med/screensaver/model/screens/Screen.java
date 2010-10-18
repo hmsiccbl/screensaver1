@@ -161,6 +161,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   private ScreenResult _screenResult;
   private SortedSet<AssayPlate> _assayPlates = Sets.newTreeSet();
   private ProjectPhase _projectPhase;
+  private String _projectId;
 
   // iccb screen
 
@@ -1214,6 +1215,18 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   public void setTitle(String title)
   {
     _title = title;
+  }
+
+  public void setProjectId(String projectId)
+  {
+    _projectId = projectId;
+  }
+
+  @Column(nullable = true)
+  @org.hibernate.annotations.Type(type = "text")
+  public String getProjectId()
+  {
+    return _projectId;
   }
 
   /**
