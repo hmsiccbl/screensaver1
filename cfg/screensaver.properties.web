@@ -60,12 +60,17 @@ screensaver.service.smtpemailservice.host=
 screensaver.service.smtpemailservice.username=
 
 ### cellHTS2 properties
-# the base directory containing the generated cellHTS2 reports; this must be a directory external 
-# to the Tomcat web application deployment directory; make sure the Tomcat "user" has sufficient file 
-# systems to create and write to this directory 
-cellHTS2.report.directory=/tmp/cellHTS2_reports/
-cellHTS2report.saveRObjects=FALSE
-cellHTS2report.saveRObjects.path=
+# The base directory containing the generated cellHTS2 reports.
+# This should be a directory external to the Tomcat web application deployment directory and must already exist.
+# Make sure the Tomcat "user" has sufficient file system permissions to read from this directory 
+# and the Rserve "user" has sufficient file system permissions to write to this directory. 
+cellHTS2.report.directory=/tmp/cellHTS2-reports/
+# Option to have cellHTS2Db save intermediate and final result R data objects to the file system.
+cellHTS2.saveRObjects=FALSE
+# The directory where intermediate and final result R data objects are written.
+# This should be a directory external to the Tomcat web application deployment directory and must already exist.
+# Make sure the Rserve "user" has sufficient file system permissions to write to this directory. 
+cellHTS2.saveRObjects.directory=/tmp/cellHTS2-robjectsx/
 
 ### database connection
 SCREENSAVER_PGSQL_SERVER=localhost
