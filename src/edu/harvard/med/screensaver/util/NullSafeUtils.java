@@ -51,4 +51,12 @@ public class NullSafeUtils
     }
     return toStringFunction.apply(o);
   }
+  
+  public static <T> T value(T o, T defaultValue)
+  {
+    if (o == null) {
+      return defaultValue;
+    }
+    return o;
+  }
 }

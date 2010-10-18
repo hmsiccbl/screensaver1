@@ -18,6 +18,7 @@ import java.util.List;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
@@ -32,6 +33,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWellControlType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
@@ -86,7 +88,7 @@ public class CellHTS2 {
     this.arrayDimensions = calculateArrayDimensions(screenResult);
     this.title = title;
     this.reportsPath = reportsPath;
-    if (StringUtils.isEmpty(saveRObjectsPath)) {
+    if (!StringUtils.isEmpty(saveRObjectsPath)) {
       this.saveRObjectsPath = saveRObjectsPath;
       File file = new File(saveRObjectsPath);
       if (file.exists()) {
@@ -463,22 +465,17 @@ public class CellHTS2 {
     
     // CREATE SLOG
     // CellHTS2 requires the Plate, Sample, Channel as numeric fields
-    ArrayList<Integer> slogP = new ArrayList<Integer>();
-    ArrayList<String> slogW = new ArrayList<String>();
-    ArrayList<Integer> slogS = new ArrayList<Integer>();
-    ArrayList<Integer> slogC = new ArrayList<Integer>();
+    List<Integer> slogP = Lists.newArrayList();
+    List<String> slogW = Lists.newArrayList();
+    List<Integer> slogS = Lists.newArrayList();
+    List<Integer> slogC = Lists.newArrayList();
     for (DataColumn col2 : screenResult.getRawNumericDataColumns()) {
       for (ResultValue rv : col2.getResultValues()) {
         if (rv.isExclude()) {
-          slogP.add(this.plateNumberToSequenceNumberMap.get(
-              rv.getWell().getPlateNumber()));
+          slogP.add(plateNumberToSequenceNumberMap.get(rv.getWell().getPlateNumber()));
           slogW.add(rv.getWell().getWellName());
-          slogS.add(col2.getReplicateOrdinal());
-          if (col2.getChannel() == null) {
-            slogC.add(1);
-          }else {
-            slogC.add(col2.getChannel());
-          }
+          slogS.add(NullSafeUtils.value(col2.getReplicateOrdinal(), 1));
+          slogC.add(NullSafeUtils.value(col2.getChannel(), 1));
         }
       }
     }
@@ -491,12 +488,12 @@ public class CellHTS2 {
       String [] slogWd  = new String [slogW.size()];
       double [] slogSd  = new double [slogS.size()];
       double [] slogCd  = new double [slogC.size()];
-      
-      for (int j=0; j < slogP.size(); j++) {
-    	  slogPd[j]=slogP.get(j);
-    	  slogWd[j]=slogW.get(j);
-    	  slogSd[j]=slogS.get(j);
-    	  slogCd[j]=slogC.get(j);
+
+      for (int j = 0; j < slogP.size(); j++) {
+        slogPd[j] = slogP.get(j);
+        slogWd[j] = slogW.get(j);
+        slogSd[j] = slogS.get(j);
+        slogCd[j] = slogC.get(j);
       }
 
       rConnection.assign("slogP",slogPd );
@@ -533,6 +530,7 @@ public class CellHTS2 {
     }
     return (contents);
   }
+
   // 3. RETRIEVE DATA FROM R (ONLY RELEVANT FOR RUNIT TEST)
   public String[] getConfigureDbResultConf() throws RserveException, REngineException, REXPMismatchException {
     String[] resultPlates = null;
@@ -643,13 +641,11 @@ public class CellHTS2 {
     if (this.saveRObjects) {
       rConnection.voidEval("save(rca,file=\"" + saveRObjectsPath + "/rca.Rda\")");
     }
-   
-
-
-
   }
 
-  // 3. RETRIEVE RESULTDATA ONLY RELEVANT FOR JUNIT TEST
+  /**
+   * @motivation for unit testing
+   */
   public String[] getAnnotateDbResult() throws REngineException, RserveException, REXPMismatchException {
     RserveExtensions rserveExtensions = new RserveExtensions();
     String[] result = rserveExtensions.tryEval(rConnection, "fData(rca)$GeneID").asStrings();
@@ -665,7 +661,7 @@ public class CellHTS2 {
 
   private void runRMethod(RMethod rMethod) throws RserveException, REXPMismatchException {
 
-    // In the assaydata slot, the data is now three in stead of 4 dimensional as
+    // In the assaydata slot, the data is now 3 instead of 4 dimensional as
     // the plates are now below each other
     // De dimensions are now: "Features","Sample", "Channels" . Sample can also
     // be read as "Replicate". See fData below for the details
