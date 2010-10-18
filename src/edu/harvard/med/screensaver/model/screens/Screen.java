@@ -40,12 +40,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.apache.log4j.Logger;
-import org.hibernate.annotations.Sort;
-import org.hibernate.annotations.SortType;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
@@ -53,6 +47,11 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -227,6 +226,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
    * @param labHead the lab head
    * @param screenType the screen type
    * @param studyType the study type
+   * @param projectPhase TODO
    * @param title the title
    */
   public Screen(AdministratorUser createdBy,
@@ -235,15 +235,17 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
                 LabHead labHead,
                 ScreenType screenType,
                 StudyType studyType,
+                ProjectPhase projectPhase,
                 String title)
   {
     super(createdBy);
     _facilityId = facilityId;
     _screenType = screenType; // note: must be set before updateFacilityUsageRoleForAssociatedScreens() is called
+    _studyType = studyType;
+    _projectPhase = projectPhase;
     setLeadScreener(leadScreener);
     setLabHead(labHead);
     _title = title;
-    _studyType = studyType;
     _dataSharingLevel = ScreenDataSharingLevel.PRIVATE;
   }
 

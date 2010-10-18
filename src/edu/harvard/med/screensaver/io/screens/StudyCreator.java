@@ -32,6 +32,7 @@ import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -217,7 +218,7 @@ public class StudyCreator
       log.info("set lab head for lead screener");
     }
 
-    Screen study = new Screen(createdBy, facilityId, leadScreener, labHead, screenType, studyType, title);
+    Screen study = new Screen(createdBy, facilityId, leadScreener, labHead, screenType, studyType, ProjectPhase.PRIMARY_SCREEN, title);
     study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);
     return study;

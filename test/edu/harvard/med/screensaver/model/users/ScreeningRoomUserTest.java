@@ -31,6 +31,7 @@ import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DomainModelDefinitionException;
 import edu.harvard.med.screensaver.model.TestDataFactory;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -275,12 +276,12 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     ScreeningRoomUser labMember2 = new ScreeningRoomUser("Lab", "Member2");
     labMember1.setLab(labHead.getLab());
     
-    Screen screen1 = new Screen(null, "1", labMember1, labHead, ScreenType.RNAI, StudyType.IN_VITRO, "1");
-    Screen screen2 = new Screen(null, "1", labHead, labHead, ScreenType.RNAI, StudyType.IN_VITRO, "2");
-    Screen screen3 = new Screen(null, "1", labMember1, null, ScreenType.RNAI, StudyType.IN_VITRO, "3");
-    Screen screen4 = new Screen(null, "1", labMember1, null, ScreenType.RNAI, StudyType.IN_VITRO, "4");
+    Screen screen1 = new Screen(null, "1", labMember1, labHead, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "1");
+    Screen screen2 = new Screen(null, "1", labHead, labHead, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "2");
+    Screen screen3 = new Screen(null, "1", labMember1, null, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "3");
+    Screen screen4 = new Screen(null, "1", labMember1, null, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "4");
     screen4.addCollaborator(labMember2);
-    Screen screen5 = new Screen(null, "1", labMember2, labHead, ScreenType.RNAI, StudyType.IN_VITRO, "5");
+    Screen screen5 = new Screen(null, "1", labMember2, labHead, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "5");
     screen5.addCollaborator(labMember1);
     
     assertEquals(new HashSet<Screen>(Arrays.asList(screen1, screen2, screen5)), labHead.getAllAssociatedScreens());
@@ -405,7 +406,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
     ScreeningRoomUser screener1 = new ScreeningRoomUser("Lab", "Screener1");
     ScreeningRoomUser screener2 = new ScreeningRoomUser("Lab", "Screener2");
 
-    Screen smScreen = new Screen(null, "1", screener1, labHead1, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, "sm");
+    Screen smScreen = new Screen(null, "1", screener1, labHead1, ScreenType.SMALL_MOLECULE, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "sm");
     doTestUpdateFacilityUsagesRolesForAssociatedScreenss(labHead1,
                                                          labHead2,
                                                          screener1,
@@ -413,7 +414,7 @@ public class ScreeningRoomUserTest extends AbstractEntityInstanceTest<ScreeningR
                                                          smScreen,
                                                          FacilityUsageRole.SMALL_MOLECULE_SCREENER);
     
-    Screen rnaiScreen = new Screen(null, "1", screener1, labHead1, ScreenType.RNAI, StudyType.IN_VITRO, "rnai");
+    Screen rnaiScreen = new Screen(null, "1", screener1, labHead1, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "rnai");
     doTestUpdateFacilityUsagesRolesForAssociatedScreenss(labHead1,
                                                          labHead2,
                                                          screener1,

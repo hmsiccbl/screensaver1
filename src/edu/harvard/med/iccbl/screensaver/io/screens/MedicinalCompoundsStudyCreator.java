@@ -37,6 +37,7 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -133,7 +134,9 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
                              leadScreener,
                              labHead,
                              ScreenType.SMALL_MOLECULE,
-                             StudyType.IN_SILICO, TITLE);
+                             StudyType.IN_SILICO,
+                             ProjectPhase.PRIMARY_SCREEN,
+                             TITLE);
           study.setSummary(SUMMARY);
 
           AnnotationType annotType = study.createAnnotationType("Notes on Suitability",

@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -91,6 +92,7 @@ public class MakeDummyEntities
                                labHead,
                                screenType,
                                studyType,
+                               ProjectPhase.PRIMARY_SCREEN,
                                "Dummy screen");
     return screen;
   }

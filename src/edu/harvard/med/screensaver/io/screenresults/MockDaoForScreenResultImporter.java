@@ -47,6 +47,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
@@ -189,6 +190,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
                                  user,
                                  ScreenType.SMALL_MOLECULE,
                                  StudyType.IN_VITRO,
+                                 ProjectPhase.PRIMARY_SCREEN,
                                  "title");
       return (E) screen;
     }

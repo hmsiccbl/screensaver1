@@ -53,9 +53,9 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
     ScreenResult screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
                                             Screen.facilityId.getPropertyName(),
-                                            1,
+                                            "1",
                                             true,
-                                            "screenResult.dataColumns")
+                                            Screen.screenResult.to(ScreenResult.dataColumns).getPath())
                                             .getScreenResult();
 
     assertEquals("pre-cellHTS raw DataColumn count", 8, screenResult.getDataColumns().size());
@@ -75,9 +75,9 @@ public class CellHts2AnnotatorTest extends AbstractSpringPersistenceTest
     screenResult =
       genericEntityDao.findEntityByProperty(Screen.class,
                                             Screen.facilityId.getPropertyName(),
-                                            1,
+                                            "1",
                                             true,
-                                            "screenResult.dataColumns")
+                                            Screen.screenResult.to(ScreenResult.dataColumns).getPath())
                                             .getScreenResult();
     assertEquals("post-cellHTS raw DataColumn count", 10, screenResult.getDataColumns().size());
     for (int i = 8; i < 10; ++i ) {

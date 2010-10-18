@@ -27,6 +27,7 @@ import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.io.screens.StudyCreator;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
@@ -324,6 +325,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                        labHead,
                        screenType,
                        StudyType.IN_SILICO,
+                       ProjectPhase.PRIMARY_SCREEN,
                        title);
     study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);

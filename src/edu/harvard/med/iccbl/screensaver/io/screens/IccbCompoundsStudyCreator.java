@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.io.screens.ScreenCreator;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -78,7 +79,9 @@ public class IccbCompoundsStudyCreator
                              leadScreener,
                              labHead,
                              ScreenType.SMALL_MOLECULE,
-                             StudyType.IN_VITRO, TITLE);
+                             StudyType.IN_VITRO,
+                             ProjectPhase.PRIMARY_SCREEN,
+                             TITLE);
           study.setSummary(SUMMARY);
 
           AnnotationType unsuitableAnnotType = study.createAnnotationType("Unsuitable", "Flag indicating whether compound is unsuitable for screening.", false);

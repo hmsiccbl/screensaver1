@@ -23,6 +23,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
@@ -93,7 +94,7 @@ public class ScreenDataSharingLevelUpdaterTest extends AbstractTransactionalSpri
   private Screen createScreen(String title, ScreenType type)
   {
     log.info("leads" + leadScreener);
-    Screen screen = new Screen(null, Integer.toString(screen_number_counter++), leadScreener, labHead, type, StudyType.IN_VITRO, title);
+    Screen screen = new Screen(null, Integer.toString(screen_number_counter++), leadScreener, labHead, type, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, title);
     screen.addCollaborator(collaborator);
     screen.createStatusItem(new LocalDate(), StatusValue.ACCEPTED);
     genericEntityDao.persistEntity(screen);
