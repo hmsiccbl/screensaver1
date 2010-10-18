@@ -55,13 +55,13 @@
                 styleClass="menuItem" accesskey="L"
                 title="Browse all available libraries">
                 <u>L</u>ibraries</t:commandLink>
-              <t:panelGrid columns="2" id="librariesSubmenu" forceId="true"
+              <t:panelGrid columns="2" id="librariesSubmenu"
+                forceId="true"
                 style="visibility:hidden; margin-right: 10px">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeLibraries}"
                   styleClass="submenuItem"
-                  title="Browse Small Molecule libraries"
-                  value="SM" />
+                  title="Browse Small Molecule libraries" value="SM" />
                 <t:commandLink action="#{menu.browseRnaiLibraries}"
                   styleClass="submenuItem" title="Browse RNAi libraries"
                   value="RNAi" />
@@ -111,11 +111,11 @@
             <t:panelGrid columns="2" styleClass="layoutPanel"
               onmouseover="javascript:document.getElementById('cprsSubmenu').style.visibility='visible'"
               onmouseout="javascript:document.getElementById('cprsSubmenu').style.visibility='hidden'">
-            <t:commandLink action="#{menu.browseCherryPickRequests}"
-              styleClass="menuItem" accesskey="C"
-              title="Browse the cherry pick requests currently available and accessible to you"
-              rendered="#{menu.screener || menu.readAdmin}">
-              <u>C</u>PRs</t:commandLink>
+              <t:commandLink action="#{menu.browseCherryPickRequests}"
+                styleClass="menuItem" accesskey="C"
+                title="Browse the cherry pick requests currently available and accessible to you"
+                rendered="#{menu.screener || menu.readAdmin}">
+                <u>C</u>PRs</t:commandLink>
 
               <t:panelGrid columns="2" id="cprsSubmenu" forceId="true"
                 style="visibility:hidden; margin-right: 10px"
@@ -125,9 +125,10 @@
                   styleClass="submenuItem"
                   title="Browse Small Molecule cherry pick requests"
                   value="SM" />
-                <t:commandLink action="#{menu.browseRnaiCherryPickRequests}"
-                  styleClass="submenuItem" title="Browse RNAi cherry pick requests"
-                  value="RNAi" />
+                <t:commandLink
+                  action="#{menu.browseRnaiCherryPickRequests}"
+                  styleClass="submenuItem"
+                  title="Browse RNAi cherry pick requests" value="RNAi" />
               </t:panelGrid>
             </t:panelGrid>
 
