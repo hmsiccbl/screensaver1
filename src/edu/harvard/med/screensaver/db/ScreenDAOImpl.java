@@ -20,8 +20,11 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.orm.hibernate3.HibernateCallback;
 
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
+import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
 public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
 {
@@ -128,5 +131,25 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
       log.debug("hql: " + hql + ", screen: " + screen + ", returns: " + count);
     }
     return count.intValue();
+  }
+
+  @Override
+  public Screen findPrimaryScreen(final Screen screen)
+  {
+    List<Screen> result = _dao.runQuery(new edu.harvard.med.screensaver.db.Query<Screen>() {
+      @Override
+      public List<Screen> execute(Session session)
+      {
+        HqlBuilder hql = new HqlBuilder();
+        hql.from(Screen.class, "s").
+          where("s", "projectPhase", Operator.EQUAL, ProjectPhase.PRIMARY_SCREEN).
+          where("s", "projectId", Operator.EQUAL, screen.getProjectId());
+        return hql.toQuery(session, true).list();
+      }
+    });
+    if (result.size() == 0) {
+      return null;
+    }
+    return result.get(0);
   }
 }

@@ -21,11 +21,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import edu.harvard.med.screensaver.db.hqlbuilder.HqlUtils;
-import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.util.CollectionUtils;
-import edu.harvard.med.screensaver.util.StringUtils;
-
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -37,6 +32,11 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.type.CollectionType;
 import org.springframework.orm.hibernate3.HibernateCallback;
+
+import edu.harvard.med.screensaver.db.hqlbuilder.HqlUtils;
+import edu.harvard.med.screensaver.model.Entity;
+import edu.harvard.med.screensaver.util.CollectionUtils;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * GenericEntityDAO that provides basic data access methods that are applicable
@@ -345,9 +345,8 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
    */
   public int relationshipSize(final Entity entity, final String relationship)
   {
-    return (Integer)
-    runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List execute(Session session)
+    return (Integer) runQuery(new edu.harvard.med.screensaver.db.Query<Integer>() {
+      public List<Integer> execute(Session session)
       {
         Criteria criteria = session.createCriteria(entity.getEntityClass()).add(Restrictions.idEq(entity.getEntityId())).createCriteria(relationship);
         ScrollableResults scroll = criteria.scroll();

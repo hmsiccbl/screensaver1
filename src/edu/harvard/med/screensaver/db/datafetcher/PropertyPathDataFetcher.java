@@ -94,10 +94,10 @@ public abstract class PropertyPathDataFetcher<R,E extends Entity,K> implements D
     return _dao.runQuery(buildFetchKeysQuery());
   }
 
-  private Query<E> buildFetchKeysQuery()
+  private Query<K> buildFetchKeysQuery()
   {
-    return new Query<E>() {
-      public List<E> execute(Session session)
+    return new Query<K>() {
+      public List<K> execute(Session session)
       {
         HqlBuilder hql = new HqlBuilder();
         Map<RelationshipPath<E>,String> path2Alias = Maps.newHashMap();

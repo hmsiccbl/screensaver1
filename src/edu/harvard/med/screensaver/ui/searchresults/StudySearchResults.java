@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
@@ -77,7 +78,7 @@ public class StudySearchResults extends EntityBasedEntitySearchResults<Screen,In
       public void addDomainRestrictions(HqlBuilder hql)
       {
         super.addDomainRestrictions(hql);
-        hql.where(getRootAlias(), Screen.facilityId.getPropertyName(), Operator.TEXT_STARTS_WITH, Study.STUDY_FACILITY_ID_PREFIX);
+        hql.where(getRootAlias(), "projectPhase", Operator.EQUAL, ProjectPhase.ANNOTATION);
       }
     }));
   }

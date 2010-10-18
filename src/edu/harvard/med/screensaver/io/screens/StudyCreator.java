@@ -111,16 +111,6 @@ public class StudyCreator
     screenResultFile = app.isCommandLineFlagSet("f") ?  app.getCommandLineOptionValue("f", File.class) : null;
     
     replace = app.isCommandLineFlagSet("r");
-    
-
-    validateStudyFacilityId();
-  }
-
-  protected void validateStudyFacilityId()
-  {
-    if (facilityId.startsWith(Study.STUDY_FACILITY_ID_PREFIX)) {
-      throw new IllegalArgumentException("study identifier must start with " + Study.STUDY_FACILITY_ID_PREFIX);
-    }
   }
 
   @SuppressWarnings("static-access")
@@ -218,7 +208,7 @@ public class StudyCreator
       log.info("set lab head for lead screener");
     }
 
-    Screen study = new Screen(createdBy, facilityId, leadScreener, labHead, screenType, studyType, ProjectPhase.PRIMARY_SCREEN, title);
+    Screen study = new Screen(createdBy, facilityId, leadScreener, labHead, screenType, studyType, ProjectPhase.ANNOTATION, title);
     study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);
     return study;

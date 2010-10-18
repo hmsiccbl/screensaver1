@@ -28,9 +28,9 @@ import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 
 public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationType>
 {
@@ -61,7 +61,8 @@ public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationTyp
         Reagent reagent1 = well1.createSilencingReagent(new ReagentVendorIdentifier("vendor", "1"), SilencingReagentType.SIRNA, "ATCG");
         Reagent reagent2 = well2.createSilencingReagent(new ReagentVendorIdentifier("vendor", "2"), SilencingReagentType.SIRNA, "GCTA");
         Screen study = dataFactory.newInstance(Screen.class);
-        study.setFacilityId(Study.STUDY_FACILITY_ID_PREFIX);
+        study.setFacilityId("S");
+        study.setProjectPhase(ProjectPhase.ANNOTATION);
         AnnotationType at = study.createAnnotationType("annotation", "", false);
         assertNotNull(at.createAnnotationValue(reagent1, "a"));
         assertNotNull(at.createAnnotationValue(reagent2, "b"));
@@ -73,7 +74,7 @@ public class AnnotationTypeTest extends AbstractEntityInstanceTest<AnnotationTyp
       }
     });
 
-    Screen study = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), Study.STUDY_FACILITY_ID_PREFIX, false, "annotationTypes.annotationValues.reagent");
+    Screen study = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), "S", false, "annotationTypes.annotationValues.reagent");
     AnnotationType at = study.getAnnotationTypes().last();
     assertEquals(at.getName(), "annotation");
     Reagent reagent1 = genericEntityDao.findEntityByProperty(Reagent.class, "vendorId.vendorIdentifier", "1");

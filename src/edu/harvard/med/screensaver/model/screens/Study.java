@@ -26,8 +26,6 @@ public abstract class Study extends AuditedAbstractEntity<Integer>
 {
   private static final long serialVersionUID = 1L;
   
-  public static final String STUDY_FACILITY_ID_PREFIX = "S";
-  
   protected Study() {}
   
   public Study(AdministratorUser createdBy)
@@ -63,8 +61,8 @@ public abstract class Study extends AuditedAbstractEntity<Integer>
   @Transient
   public boolean isStudyOnly()
   {
-    // TODO: this is a total hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
-    return getFacilityId() == null || getFacilityId().startsWith(STUDY_FACILITY_ID_PREFIX);
+    // TODO: this is a hack; proper solution is waiting on having the Study->Screen->IccbScreen hierarchy in place
+    return getProjectPhase() == ProjectPhase.ANNOTATION;
   }
 
   @Override

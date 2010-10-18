@@ -50,9 +50,9 @@ public interface GenericEntityDAO
    *             {@link #saveOrUpdateEntity(Entity)} instead.
    */
   public <E extends Entity> E defineEntity(Class<E> entityClass,
-                                                   Object... constructorArguments);
+                                           Object... constructorArguments);
 
-  public <E> List<E> runQuery(edu.harvard.med.screensaver.db.Query query);
+  public <E> List<E> runQuery(edu.harvard.med.screensaver.db.Query<E> query);
 
   /**
    * Make the specified entity persistent. The entity's ID property will be set

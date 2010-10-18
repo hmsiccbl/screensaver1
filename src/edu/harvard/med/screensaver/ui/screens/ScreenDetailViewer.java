@@ -33,7 +33,6 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.NoSuchEntityException;
 import edu.harvard.med.screensaver.db.ScreenDAO;
@@ -53,8 +52,6 @@ import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
-import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
@@ -114,6 +111,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   private LocalDate _lastMaxAllowedDataPrivacyExpirationDate;
 
   private AttachedFileType _publicationAttachedFileType;
+
 
   /**
    * @motivation for CGLIB2
@@ -462,13 +460,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   @Override
   protected void initializeNewEntity(Screen screen)
   {
-    screen.setStudyType(StudyType.IN_VITRO);
-    if (screen.getLabHead() != null) {
-      screen.setDataSharingLevel(DataSharingLevelMapper.getScreenDataSharingLevelForUser(screen.getScreenType(), screen.getLabHead()));
-    }
-    else {
-      screen.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
-    }
   }
 
   @Override
@@ -532,11 +523,6 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   @Override
   protected boolean validateEntity(Screen screen)
   {
-    if (screen.getFacilityId().startsWith(Study.STUDY_FACILITY_ID_PREFIX)) {
-      showMessage("screens.invalidScreenFacilityId", screen.getFacilityId());
-      return false;
-    }
-
     LocalDate max = screen.getMaxAllowedDataPrivacyExpirationDate();
     LocalDate min = screen.getMinAllowedDataPrivacyExpirationDate();
     

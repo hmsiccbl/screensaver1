@@ -31,7 +31,6 @@ import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -61,8 +60,8 @@ import edu.harvard.med.screensaver.service.EmailService;
 // TODO: rename this class to be more specific to what we are doing with the cross-screen comparison
 public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
 {
-  public static String DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "200001";
-  public static String DEFAULT_RNAI_STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "200002";
+  public static String DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID = "200001";
+  public static String DEFAULT_RNAI_STUDY_FACILITY_ID = "200002";
   
   public static final String DEFAULT_SM_STUDY_TITLE = "Reagent Counts for Small Molecule Screens";
   public static final String DEFAULT_SM_STUDY_SUMMARY =
@@ -325,7 +324,7 @@ public class ScreenPositivesCountStudyCreator extends AdminEmailApplication
                        labHead,
                        screenType,
                        StudyType.IN_SILICO,
-                       ProjectPhase.PRIMARY_SCREEN,
+                       ProjectPhase.ANNOTATION,
                        title);
     study.setDataSharingLevel(ScreenDataSharingLevel.SHARED);
     study.setSummary(summary);

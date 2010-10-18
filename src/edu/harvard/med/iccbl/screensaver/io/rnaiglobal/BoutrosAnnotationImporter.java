@@ -47,7 +47,7 @@ public class BoutrosAnnotationImporter
   private static final String RNAIGLOBAL_LOGIN = "rnaiglobal";
   private static final String RNAI_GLOBAL_EMAIL = "info@rnaiglobal.org";
 
-  private static final String STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "100000";
+  private static final String STUDY_FACILITY_ID = "100000";
   private static final String STUDY_TITLE = "Sequence Annotation of the Dharmacon/Thermofisher siGENOME Whole Human Genome siRNA Library";
   private static final String STUDY_SUMMARY = "In-silico analysis of SMARTPool siRNA gene targets, using RefSeq release 23";
   private static final String STUDY_URL = "http://www.dkfz.de/signaling2/siGENOME/";
@@ -123,7 +123,7 @@ public class BoutrosAnnotationImporter
                                      labHead,
                                      ScreenType.RNAI,
                                      StudyType.IN_SILICO,
-                                     ProjectPhase.PRIMARY_SCREEN,
+                                     ProjectPhase.ANNOTATION,
                                      STUDY_TITLE);
           screen.setSummary(STUDY_SUMMARY);
           screen.setUrl(STUDY_URL);

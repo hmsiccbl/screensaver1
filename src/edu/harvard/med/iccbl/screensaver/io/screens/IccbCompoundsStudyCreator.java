@@ -28,7 +28,6 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -42,7 +41,7 @@ public class IccbCompoundsStudyCreator
 
   private static Logger log = Logger.getLogger(IccbCompoundsStudyCreator.class);
 
-  private static final String STUDY_FACILITY_ID = Study.STUDY_FACILITY_ID_PREFIX + "100001";
+  private static final String STUDY_FACILITY_ID = "100001";
   private static final String TITLE = "Annotations on Suitability of Compounds: Miscellaneous Sources";
   private static final String SUMMARY = "Annotations for ICCB-L compounds, from sources other than Kyungae Lee and Greg Cuny";
   private static final String LAB_AFFILIATION_NAME = "Harvard Medical School, Institute of Chemistry and Cell Biology";
@@ -80,7 +79,7 @@ public class IccbCompoundsStudyCreator
                              labHead,
                              ScreenType.SMALL_MOLECULE,
                              StudyType.IN_VITRO,
-                             ProjectPhase.PRIMARY_SCREEN,
+                             ProjectPhase.ANNOTATION,
                              TITLE);
           study.setSummary(SUMMARY);
 

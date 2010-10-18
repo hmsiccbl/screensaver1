@@ -346,7 +346,7 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
 
   public void clear() {}
 
-  public <E> List<E> runQuery(Query query)
+  public <E> List<E> runQuery(Query<E> query)
   {
     return null;
   }

@@ -147,6 +147,7 @@
     class="edu.harvard.med.screensaver.ui.Menu">
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="librariesDao" />
+    <constructor-arg ref="screenGenerator" />
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="studiesBrowser" />
     <constructor-arg ref="cherryPickRequestsBrowser" />
@@ -737,6 +738,7 @@
     <constructor-arg ref="screenDetailViewer" />
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="usersDao" />
+    <constructor-arg ref="screenGenerator" />
     <constructor-arg ref="screenersBrowser" />
     <constructor-arg ref="screensBrowser" />
     <constructor-arg ref="attachedFiles"/>

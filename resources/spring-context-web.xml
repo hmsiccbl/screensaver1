@@ -69,7 +69,20 @@
         class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
     <constructor-arg value="${screensaver.ui.structure_images_base_url}" />
   </bean>
-
+  
+  <bean
+    id="screenGenerator"
+    class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenGenerator">
+    <constructor-arg>
+      <bean
+        id="screenIdentifierGenerator"
+        class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenIdentifierGenerator">
+        <constructor-arg ref="genericEntityDao" />
+        <constructor-arg ref="screenDao" />
+      </bean>
+    </constructor-arg>
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
 
   <!--  Top-level web application construction -->
 

@@ -17,7 +17,8 @@ public enum ProjectPhase implements VocabularyTerm
   // the vocabulary
   PRIMARY_SCREEN("Primary Screen"),
   COUNTER_SCREEN("Counter Screen"),
-  FOLLOW_UP_SCREEN("Follow Up Screen")
+  FOLLOW_UP_SCREEN("Follow Up Screen"),
+  ANNOTATION("Annotation")
   ;
 
   /**

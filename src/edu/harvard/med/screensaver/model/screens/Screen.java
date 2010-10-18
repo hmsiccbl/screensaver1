@@ -217,6 +217,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   public Screen(AdministratorUser createdBy) 
   {
     super(createdBy);
+    _dataSharingLevel = ScreenDataSharingLevel.PRIVATE;
   }
 
   /**
@@ -238,7 +239,7 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
                 ProjectPhase projectPhase,
                 String title)
   {
-    super(createdBy);
+    this(createdBy);
     _facilityId = facilityId;
     _screenType = screenType; // note: must be set before updateFacilityUsageRoleForAssociatedScreens() is called
     _studyType = studyType;
@@ -246,7 +247,6 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
     setLeadScreener(leadScreener);
     setLabHead(labHead);
     _title = title;
-    _dataSharingLevel = ScreenDataSharingLevel.PRIVATE;
   }
 
 

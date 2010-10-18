@@ -60,6 +60,7 @@ import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.SearchResultContextEditableEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
+import edu.harvard.med.screensaver.ui.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
 import edu.harvard.med.screensaver.ui.table.Criterion;
@@ -101,6 +102,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
 
   private ScreenDetailViewer _screenDetailViewer;
   private UsersDAO _usersDao;
+  private ScreenGenerator _screenGenerator;
   private ScreenSearchResults _screensBrowser;
   private AttachedFiles _attachedFiles;
   private ChecklistItems _checklistItems;
@@ -133,6 +135,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
                     ScreenDetailViewer screenDetailViewer,
                     GenericEntityDAO dao,
                     UsersDAO usersDao,
+                    ScreenGenerator screenGenerator,
                     UserSearchResults userSearchResults,
                     ScreenSearchResults screensBrowser,
                     AttachedFiles attachedFiles,
@@ -146,6 +149,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
           userSearchResults);
     _screenDetailViewer = screenDetailViewer;
     _usersDao = usersDao;
+    _screenGenerator = screenGenerator;
     _screensBrowser = screensBrowser;
     _attachedFiles = attachedFiles;
     _checklistItems = checklistItems;
@@ -706,16 +710,9 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     if (isEditMode()) {
       throw new DevelopmentException("cannot create screen while editing user");
     }
-    Screen screen = new Screen((AdministratorUser) getScreensaverUser());
-    ScreeningRoomUser leadScreener = getDao().reloadEntity(getScreeningRoomUser());
-    screen.setLeadScreener(leadScreener);
-    screen.setLabHead(leadScreener.getLab().getLabHead());
-    // infer appropriate screen type from user roles
-    if (screenType == null) {
-      screenType = leadScreener.isRnaiUser() && !leadScreener.isSmallMoleculeUser() ? ScreenType.RNAI : !leadScreener.isRnaiUser() && leadScreener.isSmallMoleculeUser() ? ScreenType.SMALL_MOLECULE : null;
-    }
-    screen.setScreenType(screenType);
-    
+    Screen screen = _screenGenerator.create((AdministratorUser) getScreensaverUser(),
+                                            getEntity(),
+                                            screenType);
     return _screenDetailViewer.editNewEntity(screen);
   }
 

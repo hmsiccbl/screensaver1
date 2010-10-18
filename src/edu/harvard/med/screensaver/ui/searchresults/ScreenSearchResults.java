@@ -15,12 +15,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.joda.time.LocalDate;
-
 import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
@@ -35,7 +34,6 @@ import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StatusItem;
 import edu.harvard.med.screensaver.model.screens.StatusValue;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
@@ -112,7 +110,7 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       public void addDomainRestrictions(HqlBuilder hql)
       {
         super.addDomainRestrictions(hql);
-        hql.where(getRootAlias(), Screen.facilityId.getPropertyName(), Operator.TEXT_NOT_LIKE, Study.STUDY_FACILITY_ID_PREFIX + "%");
+        hql.where(getRootAlias(), "projectPhase", Operator.NOT_EQUAL, ProjectPhase.ANNOTATION);
       }
     }));
     sortByCreationDateDesc();

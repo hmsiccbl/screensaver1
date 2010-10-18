@@ -66,14 +66,6 @@ public class ScreenCreator extends StudyCreator
     protocol = app.isCommandLineFlagSet("p") ? app.getCommandLineOptionValue("p") : null;
   }
 
-  @Override
-  protected void validateStudyFacilityId()
-  {
-    if (facilityId.startsWith(Study.STUDY_FACILITY_ID_PREFIX)) {
-      throw new IllegalArgumentException("screen ID must not start with " + Study.STUDY_FACILITY_ID_PREFIX);
-    }
-  }
-  
   @SuppressWarnings("static-access")
   @Override
   protected void configureCommandLineArguments(CommandLineApplication app)

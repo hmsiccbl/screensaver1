@@ -75,7 +75,7 @@ public class AbstractDAO extends HibernateDaoSupport
 
 
   @SuppressWarnings("unchecked")
-  public <E> List<E> runQuery(final edu.harvard.med.screensaver.db.Query query)
+  public <E> List<E> runQuery(final edu.harvard.med.screensaver.db.Query<E> query)
   {
     return (List<E>)
     getHibernateTemplate().execute(new HibernateCallback()

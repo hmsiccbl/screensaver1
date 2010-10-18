@@ -25,6 +25,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.ui.libraries.LibraryDetailViewer;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
+import edu.harvard.med.screensaver.ui.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
 import edu.harvard.med.screensaver.ui.searchresults.LibraryCopySearchResults;
@@ -51,6 +52,7 @@ public class Menu extends AbstractBackingBean
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
+  private ScreenGenerator _screenGenerator;
   private ScreenSearchResults _screensBrowser;
   private StudySearchResults _studiesBrowser;
   private CherryPickRequestSearchResults _cherryPickRequestsBrowser;
@@ -76,6 +78,7 @@ public class Menu extends AbstractBackingBean
 
   public Menu(GenericEntityDAO dao,
               LibrariesDAO librariesDao,
+              ScreenGenerator screenGenerator,
               ScreenSearchResults screensBrowser,
               StudySearchResults studiesBrowser,
               CherryPickRequestSearchResults cherryPickRequestsBrowser,
@@ -91,6 +94,7 @@ public class Menu extends AbstractBackingBean
   {
     _dao = dao;
     _librariesDao = librariesDao;
+    _screenGenerator = screenGenerator;
     _screensBrowser = screensBrowser;
     _studiesBrowser = studiesBrowser;
     _cherryPickRequestsBrowser = cherryPickRequestsBrowser;
@@ -304,7 +308,8 @@ public class Menu extends AbstractBackingBean
   @UICommand
   public String addScreen()
   {
-    return _screenDetailViewer.editNewEntity(new Screen((AdministratorUser) getScreensaverUser()));
+    Screen screen = _screenGenerator.create((AdministratorUser) getScreensaverUser(), null, null);
+    return _screenDetailViewer.editNewEntity(screen);
   }
 
   @UICommand

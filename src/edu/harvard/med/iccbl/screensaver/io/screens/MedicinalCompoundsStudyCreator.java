@@ -40,7 +40,6 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
@@ -53,7 +52,7 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
 
   private static Logger log = Logger.getLogger(MedicinalCompoundsStudyCreator.class);
 
-  private static final String STUDY_NAME = Study.STUDY_FACILITY_ID_PREFIX + "100002";
+  private static final String STUDY_NAME = "100002";
   private static final String TITLE = "Annotations on Suitability of Compounds: G. Cuny & K. Lee";
   private static final String SUMMARY =
     "Note for screeners regarding medchem annotation:\n" +
@@ -135,7 +134,7 @@ public class MedicinalCompoundsStudyCreator extends CommandLineApplication
                              labHead,
                              ScreenType.SMALL_MOLECULE,
                              StudyType.IN_SILICO,
-                             ProjectPhase.PRIMARY_SCREEN,
+                             ProjectPhase.ANNOTATION,
                              TITLE);
           study.setSummary(SUMMARY);
 

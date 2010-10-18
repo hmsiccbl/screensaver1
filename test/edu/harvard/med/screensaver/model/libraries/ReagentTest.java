@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 
 public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
@@ -52,7 +51,7 @@ public class ReagentTest extends AbstractEntityInstanceTest<Reagent>
         Reagent reagent2 = well2.createSmallMoleculeReagent(new ReagentVendorIdentifier("Vendor", "2"), "molfile", "smiles", "inchi", new BigDecimal("2.000"), new BigDecimal("2.000"), new MolecularFormula("CCCCCC"));
         genericEntityDao.persistEntity(library);
 
-        Screen study = MakeDummyEntities.makeDummyScreen(Study.STUDY_FACILITY_ID_PREFIX, ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO);
+        Screen study = MakeDummyEntities.makeDummyScreen("S", ScreenType.SMALL_MOLECULE, StudyType.IN_SILICO);
         AnnotationType annotType1 = study.createAnnotationType("annotType1", "", false);
         AnnotationType annotType2 = study.createAnnotationType("annotType2", "", false);
         annotType1.createAnnotationValue(reagent1, "annotType1_annotValue1");

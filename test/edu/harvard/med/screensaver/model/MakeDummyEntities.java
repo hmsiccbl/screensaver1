@@ -41,7 +41,6 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.AffiliationCategory;
@@ -168,7 +167,8 @@ public class MakeDummyEntities
     assert library.getLatestReleasedContentsVersion() != null;
 
     int annotationOrdinal = 0;
-    Screen study = MakeDummyEntities.makeDummyScreen(Study.STUDY_FACILITY_ID_PREFIX, library.getScreenType(), StudyType.IN_SILICO);
+    Screen study = MakeDummyEntities.makeDummyScreen("S", library.getScreenType(), StudyType.IN_SILICO);
+    study.setProjectPhase(ProjectPhase.ANNOTATION);
     AnnotationType annotType1 = new AnnotationType(study, "numeric_annot", "numeric annotation", annotationOrdinal++, true);
     AnnotationType annotType2 = new AnnotationType(study, "text_annot", "text annotation", annotationOrdinal++, false);
     Iterator<Well> wellIter = new TreeSet<Well>(library.getWells()).iterator();

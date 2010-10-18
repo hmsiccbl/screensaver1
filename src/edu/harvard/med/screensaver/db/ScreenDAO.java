@@ -16,4 +16,5 @@ public interface ScreenDAO
   void deleteStudy(Screen study);
   int countScreenedExperimentalWells(Screen screen, boolean distinct);
   int countFulfilledLabCherryPicks(Screen screen);
+  Screen findPrimaryScreen(Screen screen);
 }
