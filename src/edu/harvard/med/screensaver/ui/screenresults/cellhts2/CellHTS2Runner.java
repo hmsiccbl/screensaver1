@@ -7,6 +7,7 @@ import java.util.List;
 import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.analysis.cellhts2.NormalizePlatesMethod;
@@ -80,9 +81,14 @@ public class CellHTS2Runner extends AbstractBackingBean
     return _screenResult;
   }
 
-  public boolean isCellHTS2ReportFileExists()
+  public boolean isReportExists()
   {
     return _reportFilePath.exists();
+  }
+
+  public DateTime getReportCreationDateTime()
+  {
+    return new DateTime(_reportFilePath.lastModified());
   }
 
   public String getReportURL()

@@ -105,13 +105,15 @@
       <ui:define name="content">
         <t:panelGrid columns="1">
           <t:panelGroup id="screenResultReportLink"
-            rendered="#{cellHTS2Runner.cellHTS2ReportFileExists}">
+            rendered="#{cellHTS2Runner.reportExists}">
             <h:outputLink value="#{cellHTS2Runner.reportURL}"
               target="_blank"
               title="Click here to view the CellHTS2 report">
-              <h:outputText value="View CellHTS2 Report..."
-                styleClass="dataText" />
+              <t:div style="text-decoration: underline">View CellHTS2 Report</t:div>
             </h:outputLink>
+            <h:outputText value="(created "/><h:outputText
+                value="#{cellHTS2Runner.reportCreationDateTime}"
+                converter="#{dateTimeConverter}" /><h:outputText value=")"/>
           </t:panelGroup>
           <t:panelGroup styleClass="commandPanel">
             <ui:include src="cellHTS2Runner.xhtml" />
