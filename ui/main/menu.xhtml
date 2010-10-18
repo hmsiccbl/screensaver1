@@ -76,21 +76,20 @@
 
             <t:panelGrid columns="2" styleClass="layoutPanel"
               onmouseover="javascript:document.getElementById('screensSubmenu').style.visibility='visible'"
-              onmouseout="javascript:document.getElementById('screensSubmenu').style.visibility='hidden'">
-            <t:commandLink id="browseScreensCommand"
-              action="#{menu.browseScreens}" styleClass="menuItem"
-              accesskey="S"
-              title="Browse the screens currently available and accessible to you"
+              onmouseout="javascript:document.getElementById('screensSubmenu').style.visibility='hidden'"
               rendered="#{menu.screener || menu.readAdmin}">
-              <u>S</u>creens</t:commandLink>
-              <t:panelGrid columns="2" id="screensSubmenu" forceId="true"
-                style="visibility:hidden; margin-right: 10px"
-                rendered="#{menu.screener || menu.readAdmin}">
+              <t:commandLink id="browseScreensCommand"
+                action="#{menu.browseScreens}" styleClass="menuItem"
+                accesskey="S"
+                title="Browse the screens currently available and accessible to you">
+                <u>S</u>creens</t:commandLink>
+              <t:panelGrid columns="2" id="screensSubmenu"
+                forceId="true"
+                style="visibility:hidden; margin-right: 10px">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeScreens}"
                   styleClass="submenuItem"
-                  title="Browse Small Molecule screens"
-                  value="SM" />
+                  title="Browse Small Molecule screens" value="SM" />
                 <t:commandLink action="#{menu.browseRnaiScreens}"
                   styleClass="submenuItem" title="Browse RNAi screens"
                   value="RNAi" />
@@ -110,16 +109,14 @@
 
             <t:panelGrid columns="2" styleClass="layoutPanel"
               onmouseover="javascript:document.getElementById('cprsSubmenu').style.visibility='visible'"
-              onmouseout="javascript:document.getElementById('cprsSubmenu').style.visibility='hidden'">
+              onmouseout="javascript:document.getElementById('cprsSubmenu').style.visibility='hidden'"
+              rendered="#{menu.screener || menu.readAdmin}">
               <t:commandLink action="#{menu.browseCherryPickRequests}"
                 styleClass="menuItem" accesskey="C"
-                title="Browse the cherry pick requests currently available and accessible to you"
-                rendered="#{menu.screener || menu.readAdmin}">
+                title="Browse the cherry pick requests currently available and accessible to you">
                 <u>C</u>PRs</t:commandLink>
-
               <t:panelGrid columns="2" id="cprsSubmenu" forceId="true"
-                style="visibility:hidden; margin-right: 10px"
-                rendered="#{menu.screener || menu.readAdmin}">
+                style="visibility:hidden; margin-right: 10px">
                 <t:commandLink
                   action="#{menu.browseSmallMoleculeCherryPickRequests}"
                   styleClass="submenuItem"
