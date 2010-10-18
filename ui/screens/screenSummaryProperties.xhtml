@@ -38,6 +38,11 @@
 		</ui:define>
 	</ss:property>
 
+  <ss:property id="projectId" label="Project ID" primary="true" 
+    description="The project ID shared by this screen" value="#{screen.projectId}"
+    editable="#{editable}" >
+  </ss:property>
+
   <ss:property id="projectPhase" label="Project Phase"
     description="'Primary','Counter', or 'Follow-Up'" value="#{screen.projectPhase}"
     editable="#{editable}"
@@ -47,11 +52,6 @@
       No editable Project Phase definition!
       </ui:insert>
     </ui:define>
-  </ss:property>
-
-  <ss:property id="projectId" label="Project ID" primary="true" 
-    description="The project ID shared by this screen" value="#{screen.projectId}"
-    editable="#{editable}" >
   </ss:property>
 
 	<!-- "lab name" == last name of "lab head", but former is required for UI, latter is for internal design -->
