@@ -302,20 +302,20 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       }
     });
 
-    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("barcode"),
-                                            "Barcode",
-                                            "The barcode used by the facility to uniquely identify the plate",
+    columns.add(new TextEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("facilityId"),
+                                            "Facility ID",
+                                            "The identifier used by the facility to uniquely identify the plate",
                                             TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Plate plate)
       {
-        return plate.getBarcode();
+        return plate.getFacilityId();
       }
 
       @Override
-      public void setCellValue(Plate plate, String barcode)
+      public void setCellValue(Plate plate, String facilityId)
       {
-        plate.setBarcode(barcode);
+        plate.setFacilityId(facilityId);
       }
 
       @Override

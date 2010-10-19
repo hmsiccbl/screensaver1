@@ -46,7 +46,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   private UISelectOneBean<CopyUsageType> _copyUsageType;
   private UISelectOneBean<PlateType> _plateType;
   private String _location;
-  private String _barcode;
+  private String facilityId;
   private UISelectOneBean<VolumeUnit> _volumeType;
   private String _volumeValue;
   private LocalDate _datePlated;
@@ -108,7 +108,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     _volumeValue = null;
     _volumeType = null;
     _location = null;
-    _barcode = null;
+    facilityId = null;
     _datePlated = null;
     _dateRetired = null;
     _startPlate = copy.getLibrary().getStartPlate();
@@ -202,8 +202,8 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
         if (!StringUtils.isEmpty(getLocation())) {
           plate.setLocation(getLocation());
         }
-        if (!StringUtils.isEmpty(getBarcode())) {
-          plate.setBarcode(getBarcode());
+        if (!StringUtils.isEmpty(getFacilityId())) {
+          plate.setFacilityId(getFacilityId());
         }
         if (!StringUtils.isEmpty(getComments())) {
           plate.setComments(getComments());
@@ -305,14 +305,14 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     _location = location;
   }
 
-  public String getBarcode()
+  public String getFacilityId()
   {
-    return _barcode;
+    return facilityId;
   }
 
-  public void setBarcode(String barcode)
+  public void setFacilityId(String facilityId)
   {
-    _barcode = barcode;
+    this.facilityId = facilityId;
   }
 
   public String getComments()

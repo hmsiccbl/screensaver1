@@ -66,7 +66,7 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
   private Copy _copy;
   private Integer _plateNumber;
   private String _location;
-  private String _barcode;
+  private String _facilityId;
   private PlateType _plateType;
   /** The default initial volume for a well on this copy plate. */
   private Volume _wellVolume;
@@ -187,14 +187,14 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
     _location = location;
   }
 
-  public String getBarcode()
+  public String getFacilityId()
   {
-    return _barcode;
+    return _facilityId;
   }
 
-  public void setBarcode(String barCode)
+  public void setFacilityId(String facilityId)
   {
-    _barcode = barCode;
+    _facilityId = facilityId;
   }
 
   /**
