@@ -56,6 +56,10 @@
     <constructor-arg value="http://localhost:8080/" />
   </bean>
 
+  <bean
+    id="screenGenerator"
+    class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator"/>
+
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-logging.xml"/>
