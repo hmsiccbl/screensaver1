@@ -97,6 +97,11 @@
     <constructor-arg ref="genericEntityDao" />
   </bean>
 
+  <bean
+    id="plateFacilityIdInitializer"
+    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
+  </bean>
+
   <!--  Top-level web application construction -->
 
   <import resource="spring-context-persistence.xml"/>

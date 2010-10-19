@@ -46,7 +46,6 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   private UISelectOneBean<CopyUsageType> _copyUsageType;
   private UISelectOneBean<PlateType> _plateType;
   private String _location;
-  private String facilityId;
   private UISelectOneBean<VolumeUnit> _volumeType;
   private String _volumeValue;
   private LocalDate _datePlated;
@@ -54,7 +53,6 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   private String _comments;
   private Integer _startPlate;
   private Integer _endPlate;
-
 
   /**
    * @motivation for CGLIB2
@@ -108,7 +106,6 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     _volumeValue = null;
     _volumeType = null;
     _location = null;
-    facilityId = null;
     _datePlated = null;
     _dateRetired = null;
     _startPlate = copy.getLibrary().getStartPlate();
@@ -202,12 +199,11 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
         if (!StringUtils.isEmpty(getLocation())) {
           plate.setLocation(getLocation());
         }
-        if (!StringUtils.isEmpty(getFacilityId())) {
-          plate.setFacilityId(getFacilityId());
-        }
         if (!StringUtils.isEmpty(getComments())) {
           plate.setComments(getComments());
         }
+        plate.invalidate();
+        plate.update();
       }
     }
   }
@@ -303,16 +299,6 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   public void setLocation(String location)
   {
     _location = location;
-  }
-
-  public String getFacilityId()
-  {
-    return facilityId;
-  }
-
-  public void setFacilityId(String facilityId)
-  {
-    this.facilityId = facilityId;
   }
 
   public String getComments()
