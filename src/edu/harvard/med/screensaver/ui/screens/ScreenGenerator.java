@@ -14,6 +14,14 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
+/**
+ * Service to create a new, non-persisted {@link Screen}, with properties initialized as appropriate for a particular
+ * facility.
+ * 
+ * @motivation allows screens created via the user interface to be initialized in a way that supports facility workflow
+ *             and policies.
+ * @author atolopko
+ */
 public interface ScreenGenerator
 {
   Screen create(AdministratorUser admin, ScreeningRoomUser leadScreener, ScreenType screenType);
