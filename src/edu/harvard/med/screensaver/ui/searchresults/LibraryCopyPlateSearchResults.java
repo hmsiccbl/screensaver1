@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.ui.searchresults;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -21,6 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.hibernate.Session;
 import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
@@ -470,6 +472,7 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
   }
 
   @Override
+  @Transactional
   public void doSave()
   {
     final ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
@@ -477,6 +480,9 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       !((AdministratorUser) screensaverUser).isUserInRole(ScreensaverUserRole.LIBRARY_COPIES_ADMIN)) {
       throw new BusinessRuleViolationException("only library copies administrators can edit library copy plates");
     }
-    _dao.saveOrUpdateEntity(_libraryCopyViewer.getEntity());
+    Iterator<Plate> rowIter = getDataTableModel().iterator();
+    while (rowIter.hasNext()) {
+      _dao.saveOrUpdateEntity(rowIter.next());
+    }
   }
 }
