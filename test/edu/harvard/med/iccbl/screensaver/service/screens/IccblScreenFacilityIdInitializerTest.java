@@ -17,16 +17,16 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 
-public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenceTest
+public class IccblScreenFacilityIdInitializerTest extends AbstractSpringPersistenceTest
 {
-  private IccblScreenIdentifierGenerator screenIdentifierGenerator;
+  private IccblScreenFacilityIdInitializer screenFacilityIdInitializer;
   protected ScreenDAO screenDao;
 
   @Override
   protected void onSetUp() throws Exception
   {
     super.onSetUp();
-    screenIdentifierGenerator = new IccblScreenIdentifierGenerator(genericEntityDao, screenDao);
+    screenFacilityIdInitializer = new IccblScreenFacilityIdInitializer(genericEntityDao, screenDao);
     LabHead user = new LabHead("Test", "User", null);
     Screen primaryScreen = new Screen(null, "1", user, user, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "test");
     primaryScreen.setProjectId("PID1");
@@ -37,7 +37,7 @@ public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenc
   {
     Screen primaryScreen = new Screen(null);
     primaryScreen.setProjectPhase(ProjectPhase.PRIMARY_SCREEN);
-    assertTrue(screenIdentifierGenerator.updateIdentifier(primaryScreen));
+    assertTrue(screenFacilityIdInitializer.initializeFacilityId(primaryScreen));
     assertEquals("2", primaryScreen.getFacilityId());
   }
 
@@ -46,7 +46,7 @@ public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenc
     Screen primaryScreen2 = new Screen(null);
     primaryScreen2.setProjectPhase(ProjectPhase.PRIMARY_SCREEN);
     primaryScreen2.setFacilityId("X");
-    assertFalse(screenIdentifierGenerator.updateIdentifier(primaryScreen2));
+    assertFalse(screenFacilityIdInitializer.initializeFacilityId(primaryScreen2));
     assertEquals("X", primaryScreen2.getFacilityId());
   }
 
@@ -55,8 +55,8 @@ public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenc
     Screen followUpScreen = new Screen(null);
     followUpScreen.setProjectId("PID1");
     followUpScreen.setProjectPhase(ProjectPhase.FOLLOW_UP_SCREEN);
-    assertTrue(screenIdentifierGenerator.updateIdentifier(followUpScreen));
-    assertEquals("1F", followUpScreen.getFacilityId());
+    assertTrue(screenFacilityIdInitializer.initializeFacilityId(followUpScreen));
+    assertEquals("1-F", followUpScreen.getFacilityId());
   }
 
   public void testCounterScreen()
@@ -64,8 +64,8 @@ public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenc
     Screen counterScreen = new Screen(null);
     counterScreen.setProjectId("PID1");
     counterScreen.setProjectPhase(ProjectPhase.COUNTER_SCREEN);
-    assertTrue(screenIdentifierGenerator.updateIdentifier(counterScreen));
-    assertEquals("1C", counterScreen.getFacilityId());
+    assertTrue(screenFacilityIdInitializer.initializeFacilityId(counterScreen));
+    assertEquals("1-C", counterScreen.getFacilityId());
   }
 
   public void testNonPrimaryScreenMissingPrimaryScreen()
@@ -73,7 +73,7 @@ public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenc
     Screen followUpScreen2 = new Screen(null);
     followUpScreen2.setProjectId("PID2");
     followUpScreen2.setProjectPhase(ProjectPhase.FOLLOW_UP_SCREEN);
-    assertFalse(screenIdentifierGenerator.updateIdentifier(followUpScreen2));
+    assertFalse(screenFacilityIdInitializer.initializeFacilityId(followUpScreen2));
     assertNull(followUpScreen2.getFacilityId());
   }
 
@@ -88,7 +88,7 @@ public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenc
 
     Screen nextPrimaryScreen = new Screen(null);
     nextPrimaryScreen.setProjectPhase(ProjectPhase.PRIMARY_SCREEN);
-    assertTrue(screenIdentifierGenerator.updateIdentifier(nextPrimaryScreen));
+    assertTrue(screenFacilityIdInitializer.initializeFacilityId(nextPrimaryScreen));
     assertEquals("3", nextPrimaryScreen.getFacilityId());
   }
 }

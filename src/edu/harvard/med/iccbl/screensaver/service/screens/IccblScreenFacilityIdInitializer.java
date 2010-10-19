@@ -26,11 +26,11 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.service.screens.ScreenIdentifierGenerator;
+import edu.harvard.med.screensaver.service.screens.ScreenFacilityIdInitializer;
 
-public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
+public class IccblScreenFacilityIdInitializer implements ScreenFacilityIdInitializer
 {
-  private static final Logger log = Logger.getLogger(IccblScreenIdentifierGenerator.class);
+  private static final Logger log = Logger.getLogger(IccblScreenFacilityIdInitializer.class);
   
   private static final Map<ProjectPhase,String> PROJECT_PHASE_FACILITY_ID_SUFFIX =
     ImmutableMap.of(ProjectPhase.FOLLOW_UP_SCREEN, "F",
@@ -57,7 +57,7 @@ public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
   private GenericEntityDAO _dao;
   private ScreenDAO _screenDao;
 
-  public IccblScreenIdentifierGenerator(GenericEntityDAO dao,
+  public IccblScreenFacilityIdInitializer(GenericEntityDAO dao,
                                         ScreenDAO screenDao)
   {
     _dao = dao;
@@ -65,7 +65,7 @@ public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
   }
 
   @Override
-  public boolean updateIdentifier(Screen screen)
+  public boolean initializeFacilityId(Screen screen)
   {
     if (screen.getFacilityId() != null) {
       return false;

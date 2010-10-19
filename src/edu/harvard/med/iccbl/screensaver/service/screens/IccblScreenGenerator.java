@@ -19,14 +19,14 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator;
-import edu.harvard.med.screensaver.service.screens.ScreenIdentifierGenerator;
+import edu.harvard.med.screensaver.service.screens.ScreenFacilityIdInitializer;
 
 public class IccblScreenGenerator extends DefaultScreenGenerator
 {
   protected IccblScreenGenerator()
   {}
 
-  public IccblScreenGenerator(ScreenIdentifierGenerator screenIdentiferGenerator,
+  public IccblScreenGenerator(ScreenFacilityIdInitializer screenIdentiferGenerator,
                               GenericEntityDAO dao)
   {
     super(screenIdentiferGenerator, dao);

@@ -22,13 +22,13 @@ import edu.harvard.med.screensaver.ui.screens.ScreenGenerator;
 
 public class DefaultScreenGenerator implements ScreenGenerator
 {
-  private ScreenIdentifierGenerator _screenIdentiferGenerator;
+  private ScreenFacilityIdInitializer _screenIdentiferGenerator;
   private GenericEntityDAO _dao;
 
   protected DefaultScreenGenerator()
   {}
 
-  public DefaultScreenGenerator(ScreenIdentifierGenerator screenIdentiferGenerator,
+  public DefaultScreenGenerator(ScreenFacilityIdInitializer screenIdentiferGenerator,
                                 GenericEntityDAO dao)
 
   {
@@ -49,7 +49,7 @@ public class DefaultScreenGenerator implements ScreenGenerator
       screen.setLeadScreener(leadScreener);
       screen.setLabHead(leadScreener.getLab().getLabHead());
     }
-    _screenIdentiferGenerator.updateIdentifier(screen);
+    _screenIdentiferGenerator.initializeFacilityId(screen);
     return screen;
   }
 
@@ -66,7 +66,7 @@ public class DefaultScreenGenerator implements ScreenGenerator
     screen.setStudyType(primaryScreen.getStudyType());
     screen.setLeadScreener(primaryScreen.getLeadScreener());
     screen.setLabHead(primaryScreen.getLabHead());
-    _screenIdentiferGenerator.updateIdentifier(screen);
+    _screenIdentiferGenerator.initializeFacilityId(screen);
     return screen;
   }
 }

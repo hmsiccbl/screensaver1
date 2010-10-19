@@ -11,10 +11,10 @@ package edu.harvard.med.screensaver.service.screens;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
 
-public class DefaultScreenIdentifierGenerator implements ScreenIdentifierGenerator
+public class DefaultScreenFacilityIdInitializer implements ScreenFacilityIdInitializer
 {
   @Override
-  public boolean updateIdentifier(Screen screen)
+  public boolean initializeFacilityId(Screen screen)
   {
     return false;
   }

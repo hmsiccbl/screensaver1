@@ -76,8 +76,8 @@
     class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator">
     <constructor-arg>
       <bean
-        id="screenIdentifierGenerator"
-        class="edu.harvard.med.iccbl.screensaver.service.screens.DefaultScreenIdentifierGenerator" />
+        id="screenFacilityIdInitializer"
+        class="edu.harvard.med.iccbl.screensaver.service.screens.DefaultScreenFacilityIdInitializer" />
     </constructor-arg>
     <constructor-arg ref="genericEntityDao" />
   </bean>
@@ -88,8 +88,8 @@
     class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenGenerator">
     <constructor-arg>
       <bean
-        id="screenIdentifierGenerator"
-        class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenIdentifierGenerator">
+        id="screenFacilityIdInitializer"
+        class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenFacilityIdInitializer">
         <constructor-arg ref="genericEntityDao" />
         <constructor-arg ref="screenDao" />
       </bean>
