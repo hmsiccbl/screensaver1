@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.SortedSet;
 
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
+import javax.faces.model.SelectItem;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
@@ -454,6 +456,14 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     return _dataSharingLevel;
   }
   
+  @Override
+  public List<SelectItem> getProjectPhaseSelectItems()
+  {
+    List<SelectItem> selectItems = super.getProjectPhaseSelectItems();
+    selectItems.remove(ProjectPhase.ANNOTATION.ordinal());
+    return selectItems;
+  }
+
   @UICommand
   public String toggleAdminViewMode()
   {
