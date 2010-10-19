@@ -76,4 +76,19 @@ public class IccblScreenIdentifierGeneratorTest extends AbstractSpringPersistenc
     assertFalse(screenIdentifierGenerator.updateIdentifier(followUpScreen2));
     assertNull(followUpScreen2.getFacilityId());
   }
+
+  public void testInadmissableAndSuspectPrimaryScreenFacilityIds()
+  {
+    LabHead user = new LabHead("Test", "User2", null);
+    Screen invalidIdPrimaryScreen = new Screen(null, "XX3", user, user, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "test2");
+    genericEntityDao.persistEntity(invalidIdPrimaryScreen);
+    user = new LabHead("Test", "User3", null);
+    Screen suspectIdPrimaryScreen = new Screen(null, "2X", user, user, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "test2");
+    genericEntityDao.persistEntity(suspectIdPrimaryScreen);
+
+    Screen nextPrimaryScreen = new Screen(null);
+    nextPrimaryScreen.setProjectPhase(ProjectPhase.PRIMARY_SCREEN);
+    assertTrue(screenIdentifierGenerator.updateIdentifier(nextPrimaryScreen));
+    assertEquals("3", nextPrimaryScreen.getFacilityId());
+  }
 }

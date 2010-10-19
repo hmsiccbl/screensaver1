@@ -19,6 +19,9 @@ public class DefaultScreenGenerator implements ScreenGenerator
 {
   private ScreenIdentifierGenerator _screenIdentiferGenerator;
 
+  protected DefaultScreenGenerator()
+  {}
+
   public DefaultScreenGenerator(ScreenIdentifierGenerator screenIdentiferGenerator)
   {
     _screenIdentiferGenerator = screenIdentiferGenerator;

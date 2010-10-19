@@ -11,19 +11,22 @@ package edu.harvard.med.iccbl.screensaver.service.screens;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Ordering;
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.ScreenDAO;
-import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.service.screens.ScreenIdentifierGenerator;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
 public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
 {
@@ -32,6 +35,24 @@ public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
   private static final Map<ProjectPhase,String> PROJECT_PHASE_FACILITY_ID_SUFFIX =
     ImmutableMap.of(ProjectPhase.FOLLOW_UP_SCREEN, "F",
                     ProjectPhase.COUNTER_SCREEN, "C");
+
+  private static Pattern numericPrefix = Pattern.compile("^([?0-9]+).*");
+  private static final Function<String,Integer> NonStrictStringToInteger =
+    new Function<String,Integer>() {
+      @Override
+      public Integer apply(String s)
+      {
+        try {
+          Matcher m = numericPrefix.matcher(s);
+          if (m.matches()) {
+            return Integer.valueOf(m.group(1));
+          }
+        }
+        catch (NumberFormatException e) {
+        }
+      return null;
+      }
+    };
 
   private GenericEntityDAO _dao;
   private ScreenDAO _screenDao;
@@ -71,18 +92,22 @@ public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
 
   public boolean updateIdentifierForPrimaryScreen(Screen screen)
   {
-    Integer lastPrimaryScreenFacilityId = _dao.runQuery(new Query<Integer>() {
-      @Override
-      public List<Integer> execute(Session session)
-      {
-        HqlBuilder hql = new HqlBuilder();
-        hql.selectExpression("max(cast(s.facilityId as integer))").from(Screen.class, "s").
-          where("s", "projectPhase", Operator.EQUAL, ProjectPhase.PRIMARY_SCREEN);
-        return hql.toQuery(session, true).list();
-      }
-    }).get(0);
+    List<Screen> primaryScreens = _dao.findEntitiesByProperty(Screen.class,
+                                                              "projectPhase",
+                                                              ProjectPhase.PRIMARY_SCREEN,
+                                                              true);
+    Iterable<Integer> primaryScreenNumericFacilityIds =
+      Iterables.filter(Iterables.transform(primaryScreens,
+                                           Functions.compose(NonStrictStringToInteger, Screen.ToFacilityId)),
+                       Predicates.notNull());
 
-    String nextPrimaryScreenFacilityIdentifier = Integer.valueOf(lastPrimaryScreenFacilityId + 1).toString();
+    
+    int nextId = 1;
+    if (primaryScreenNumericFacilityIds.iterator().hasNext()) {
+      Integer maxNumericFacilityId = Ordering.natural().max(primaryScreenNumericFacilityIds);
+      nextId += maxNumericFacilityId;
+    }
+    String nextPrimaryScreenFacilityIdentifier = Integer.toString(nextId);
     screen.setFacilityId(nextPrimaryScreenFacilityIdentifier);
     log.info("set new primary screen facility ID to " + nextPrimaryScreenFacilityIdentifier);
     return true;

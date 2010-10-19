@@ -125,6 +125,13 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   public static final RelationshipPath<Screen> reagents = thisEntity.to("reagents");
   public static final RelationshipPath<Screen> assayPlates = thisEntity.to("assayPlates");
 
+  public static final Function<Screen,String> ToFacilityId = new Function<Screen,String>() {
+    public String apply(Screen screen)
+    {
+      return screen.getFacilityId();
+    }
+  };
+
   public static final Function<Screen,String> ToNameFunction = new Function<Screen,String>() {
     public String apply(Screen s)
     {
