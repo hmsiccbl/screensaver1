@@ -86,7 +86,7 @@ public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
     if (!PROJECT_PHASE_FACILITY_ID_SUFFIX.containsKey(screen.getProjectPhase())) {
       return false;
     }
-    screen.setFacilityId(primaryScreen.getFacilityId() + PROJECT_PHASE_FACILITY_ID_SUFFIX.get(screen.getProjectPhase()));
+    screen.setFacilityId(primaryScreen.getFacilityId() + "-" + PROJECT_PHASE_FACILITY_ID_SUFFIX.get(screen.getProjectPhase()));
     return true;
   }
 

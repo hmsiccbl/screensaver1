@@ -710,7 +710,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     if (isEditMode()) {
       throw new DevelopmentException("cannot create screen while editing user");
     }
-    Screen screen = _screenGenerator.create((AdministratorUser) getScreensaverUser(),
+    Screen screen = _screenGenerator.createPrimaryScreen((AdministratorUser) getScreensaverUser(),
                                             getEntity(),
                                             screenType);
     return _screenDetailViewer.editNewEntity(screen);

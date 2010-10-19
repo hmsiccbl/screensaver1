@@ -16,51 +16,46 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.model.screens.StudyType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator;
 import edu.harvard.med.screensaver.service.screens.ScreenIdentifierGenerator;
-import edu.harvard.med.screensaver.ui.screens.ScreenGenerator;
 
-public class IccblScreenGenerator implements ScreenGenerator
+public class IccblScreenGenerator extends DefaultScreenGenerator
 {
-  private ScreenIdentifierGenerator _screenIdentiferGenerator;
-  private GenericEntityDAO _dao;
-
   protected IccblScreenGenerator()
   {}
 
   public IccblScreenGenerator(ScreenIdentifierGenerator screenIdentiferGenerator,
                               GenericEntityDAO dao)
   {
-    _screenIdentiferGenerator = screenIdentiferGenerator;
-    _dao = dao;
+    super(screenIdentiferGenerator, dao);
   }
 
   @Override
   @Transactional
-  public Screen create(AdministratorUser admin,
-                       ScreeningRoomUser leadScreener,
-                       ScreenType screenType)
+  public Screen createPrimaryScreen(AdministratorUser admin,
+                                    ScreeningRoomUser leadScreener,
+                                    ScreenType screenType)
   {
-    Screen screen = new Screen(admin);
-    screen.setProjectPhase(ProjectPhase.PRIMARY_SCREEN);
-    screen.setStudyType(StudyType.IN_VITRO);
-    leadScreener = _dao.reloadEntity(leadScreener);
-    if (leadScreener != null) {
-      screen.setLeadScreener(leadScreener);
-      screen.setLabHead(leadScreener.getLab().getLabHead());
-      if (screen.getLabHead() != null) {
-        screen.setDataSharingLevel(DataSharingLevelMapper.getScreenDataSharingLevelForUser(screen.getScreenType(), screen.getLabHead()));
-      }
+    Screen screen = super.createPrimaryScreen(admin, leadScreener, screenType);
+    if (screen.getLabHead() != null) {
+      screen.setDataSharingLevel(DataSharingLevelMapper.getScreenDataSharingLevelForUser(screen.getScreenType(), screen.getLabHead()));
     }
     // infer appropriate screen type from user's facility usage roles
     if (screenType == null && leadScreener != null) {
       screenType = leadScreener.isRnaiUser() && !leadScreener.isSmallMoleculeUser() ? ScreenType.RNAI
         : !leadScreener.isRnaiUser() && leadScreener.isSmallMoleculeUser() ? ScreenType.SMALL_MOLECULE : null;
     }
-    screen.setScreenType(screenType);
-    _screenIdentiferGenerator.updateIdentifier(screen);
+    return screen;
+  }
+
+  @Override
+  @Transactional
+  public Screen createRelatedScreen(AdministratorUser admin, Screen primaryScreen, ProjectPhase projectPhase)
+  {
+    Screen screen = super.createRelatedScreen(admin, primaryScreen, projectPhase);
+    screen.setDataSharingLevel(primaryScreen.getDataSharingLevel());
     return screen;
   }
 }

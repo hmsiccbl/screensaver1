@@ -308,7 +308,7 @@ public class Menu extends AbstractBackingBean
   @UICommand
   public String addScreen()
   {
-    Screen screen = _screenGenerator.create((AdministratorUser) getScreensaverUser(), null, null);
+    Screen screen = _screenGenerator.createPrimaryScreen((AdministratorUser) getScreensaverUser(), null, null);
     return _screenDetailViewer.editNewEntity(screen);
   }
 

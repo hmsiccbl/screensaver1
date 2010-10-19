@@ -530,6 +530,7 @@
     <constructor-arg ref="publicationInfoProvider" />
     <constructor-arg ref="screeningDuplicator" />
     <constructor-arg ref="attachedFiles" />
+    <constructor-arg ref="screenGenerator" />
     <property
       name="entityUpdateHistoryBrowser"
       ref="entityUpdateHistoryBrowser" />

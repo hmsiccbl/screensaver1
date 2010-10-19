@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.screens;
 
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -24,5 +25,7 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
  */
 public interface ScreenGenerator
 {
-  Screen create(AdministratorUser admin, ScreeningRoomUser leadScreener, ScreenType screenType);
+  Screen createPrimaryScreen(AdministratorUser admin, ScreeningRoomUser leadScreener, ScreenType screenType);
+
+  Screen createRelatedScreen(AdministratorUser admin, Screen primaryScreen, ProjectPhase projectPhase);
 }

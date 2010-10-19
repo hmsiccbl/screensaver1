@@ -20,6 +20,11 @@ TODO:
   <ui:param name="hideId" value="#{true}" />
 
   <ui:define name="entityCommands">
+    <h:commandButton id="addRelatedScreen"
+      value="Add Related Screen..."
+      rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) &amp;&amp; !screenDetailViewer.editMode}"
+      action="#{screenDetailViewer.addRelatedScreen}"
+      title="Add a related screen (e.g. a follow-up or counter screen)" />
     <h:commandButton id="viewAdminOnlyFieldsCommand"
       value="#{screenDetailViewer.adminViewMode ? 'Admin &lt;&lt;' : 'Admin &gt;&gt;'}"
       rendered="#{(screenDetailViewer.editable || screenDetailViewer.readAdmin) &amp;&amp; !screenDetailViewer.editMode}"

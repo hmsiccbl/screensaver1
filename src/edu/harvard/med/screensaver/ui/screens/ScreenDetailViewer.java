@@ -45,6 +45,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.screens.BillingItem;
 import edu.harvard.med.screensaver.model.screens.FundingSupport;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Publication;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenAttachedFileType;
@@ -112,6 +113,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
 
   private AttachedFileType _publicationAttachedFileType;
 
+  private ScreenGenerator _screenGenerator;
+
 
   /**
    * @motivation for CGLIB2
@@ -130,7 +133,8 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
                             CherryPickRequestDetailViewer cherryPickRequestDetailViewer,
                             PublicationInfoProvider publicationInfoProvider,
                             ScreeningDuplicator screeningDuplicator,
-                            AttachedFiles attachedFiles)
+                            AttachedFiles attachedFiles,
+                            ScreenGenerator screenGenerator)
   {
     super(thisProxy,
           dao,
@@ -144,6 +148,7 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
     _publicationInfoProvider = publicationInfoProvider;
     _screeningDuplicator = screeningDuplicator;
     _attachedFiles = attachedFiles;
+    _screenGenerator = screenGenerator;
     getIsPanelCollapsedMap().put("screenDetail", false);
   }
 
@@ -535,6 +540,15 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       }
     }
     return super.validateEntity(screen);
+  }
+
+  @UICommand
+  public String addRelatedScreen()
+  {
+    Screen relatedScreen = _screenGenerator.createRelatedScreen((AdministratorUser) getScreensaverUser(),
+                                                                getEntity(),
+                                                                ProjectPhase.COUNTER_SCREEN);
+    return getThisProxy().editNewEntity(relatedScreen);
   }
 
   @UICommand
