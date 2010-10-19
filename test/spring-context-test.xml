@@ -22,11 +22,11 @@
   <import resource="spring-context-config.xml"/>
 
   <bean id="entityViewPolicy"
-   class="edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityViewPolicy">
+   class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
   </bean>
 
   <bean id="entityEditPolicy"
-   class="edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityEditPolicy">
+   class="edu.harvard.med.screensaver.policy.DefaultEntityEditPolicy">
   </bean>
 
   <bean id="smallMoleculeCherryPickRequestAllowancePolicy"
@@ -60,19 +60,24 @@
     id="screenGenerator"
     class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator"/>
 
+  <bean
+    id="plateFacilityIdInitializer"
+    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
+  </bean>
+
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>
   <import resource="spring-context-logging.xml"/>
   <import resource="spring-context-ui.xml"/>
   
-      <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
-        <property name="scopes">
-            <map>
-                <entry key="session">
-                    <bean class="edu.harvard.med.screensaver.ui.MockSessionScope"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
+  <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+    <property name="scopes">
+        <map>
+            <entry key="session">
+                <bean class="edu.harvard.med.screensaver.ui.MockSessionScope"/>
+            </entry>
+        </map>
+    </property>
+  </bean>
 
 </beans>

@@ -39,19 +39,16 @@
   <import resource="spring-context-config.xml"/>
 
   <bean
-  id="entityViewPolicy"
-  class="edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy"
-  scope="session">
-    <constructor-arg ref="currentScreensaverUser" />
-    <constructor-arg ref="genericEntityDao" />
+    id="entityViewPolicy"
+    class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy"
+    scope="session">
     <aop:scoped-proxy />
   </bean>
   
   <bean
-  id="entityEditPolicy"
-  class="edu.harvard.med.iccbl.screensaver.policy.IccblEntityEditPolicy"
-  scope="session">
-    <constructor-arg ref="currentScreensaverUser" />
+    id="entityEditPolicy"
+    class="edu.harvard.med.screensaver.policy.DefaultEntityEditPolicy"
+    scope="session">
     <aop:scoped-proxy />
   </bean>
   
@@ -70,29 +67,13 @@
     <constructor-arg value="${screensaver.ui.structure_images_base_url}" />
   </bean>
   
-<!-- 
   <bean
     id="screenGenerator"
     class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator">
     <constructor-arg>
       <bean
         id="screenFacilityIdInitializer"
-        class="edu.harvard.med.iccbl.screensaver.service.screens.DefaultScreenFacilityIdInitializer" />
-    </constructor-arg>
-    <constructor-arg ref="genericEntityDao" />
-  </bean>
--->
-
-  <bean
-    id="screenGenerator"
-    class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenGenerator">
-    <constructor-arg>
-      <bean
-        id="screenFacilityIdInitializer"
-        class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenFacilityIdInitializer">
-        <constructor-arg ref="genericEntityDao" />
-        <constructor-arg ref="screenDao" />
-      </bean>
+        class="edu.harvard.med.screensaver.service.screens.DefaultScreenFacilityIdInitializer" />
     </constructor-arg>
     <constructor-arg ref="genericEntityDao" />
   </bean>

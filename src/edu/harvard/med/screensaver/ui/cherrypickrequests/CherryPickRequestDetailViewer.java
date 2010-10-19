@@ -27,8 +27,6 @@ import com.google.common.collect.TreeMultimap;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.RNAiCherryPickRequestAllowancePolicy;
-import edu.harvard.med.iccbl.screensaver.policy.cherrypicks.SmallMoleculeCherryPickRequestAllowancePolicy;
 import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -73,8 +71,8 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
   private CherryPickRequestDAO _cherryPickRequestDao;
   private CherryPickRequestViewer _cherryPickRequestViewer;
   private ScreenViewer _screenViewer;
-  private SmallMoleculeCherryPickRequestAllowancePolicy _smallMoleculeCherryPickRequestAllowancePolicy;
-  private RNAiCherryPickRequestAllowancePolicy _rnaiCherryPickRequestAllowancePolicy;
+  private CherryPickRequestAllowancePolicy<SmallMoleculeCherryPickRequest> _smallMoleculeCherryPickRequestAllowancePolicy;
+  private CherryPickRequestAllowancePolicy<RNAiCherryPickRequest> _rnaiCherryPickRequestAllowancePolicy;
 
   private UISelectOneBean<PlateType> _assayPlateType;
   private UISelectOneEntityBean<ScreeningRoomUser> _requestedBy;
@@ -98,8 +96,8 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
                                        GenericEntityDAO dao,
                                        CherryPickRequestDAO cherryPickRequestDao,
                                        ScreenViewer screenViewer,
-                                       SmallMoleculeCherryPickRequestAllowancePolicy smallMoleculeCherryPickRequestAllowancePolicy,
-                                       RNAiCherryPickRequestAllowancePolicy rnaiCherryPickRequestAllowancePolicy)
+                                       CherryPickRequestAllowancePolicy<SmallMoleculeCherryPickRequest> smallMoleculeCherryPickRequestAllowancePolicy,
+                                       CherryPickRequestAllowancePolicy<RNAiCherryPickRequest> rnaiCherryPickRequestAllowancePolicy)
   {
     super(thisProxy,
           CherryPickRequest.class,

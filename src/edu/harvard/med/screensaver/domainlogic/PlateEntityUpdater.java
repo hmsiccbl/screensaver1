@@ -11,23 +11,19 @@ package edu.harvard.med.screensaver.domainlogic;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.service.libraries.PlateFacilityIdInitializer;
 
 public class PlateEntityUpdater implements EntityUpdater<Plate>
 {
-  private GenericEntityDAO _dao;
   private PlateFacilityIdInitializer _plateFacilityIdInitializer;
 
   /** for CGLIB2 */
   protected PlateEntityUpdater()
   {}
 
-  public PlateEntityUpdater(GenericEntityDAO dao,
-                            PlateFacilityIdInitializer plateFacilityIdInitializer)
+  public PlateEntityUpdater(PlateFacilityIdInitializer plateFacilityIdInitializer)
   {
-    _dao = dao;
     _plateFacilityIdInitializer = plateFacilityIdInitializer;
   }
 
@@ -41,7 +37,6 @@ public class PlateEntityUpdater implements EntityUpdater<Plate>
   @Transactional
   public void apply(Plate plate)
   {
-    //    plate = _dao.reloadEntity(plate);
     _plateFacilityIdInitializer.initializeFacilityId(plate);
   }
 }

@@ -58,7 +58,6 @@
           <constructor-arg ref="librariesDao"/>
         </bean>
         <bean class="edu.harvard.med.screensaver.domainlogic.PlateEntityUpdater">
-          <constructor-arg ref="genericEntityDao"/>
           <constructor-arg ref="plateFacilityIdInitializer"/>
         </bean>
       </list>

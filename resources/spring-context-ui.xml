@@ -640,8 +640,8 @@
     <constructor-arg ref="genericEntityDao" />
     <constructor-arg ref="cherryPickRequestDao" />
     <constructor-arg ref="screenViewer" />
-    <constructor-arg ref="smallMoleculeCherryPickRequestAllowancePolicy" />
-    <constructor-arg ref="rnaiCherryPickRequestAllowancePolicy" />
+    <constructor-arg ref="smallMoleculeCherryPickRequestAllowancePolicy" index="5"/>
+    <constructor-arg ref="rnaiCherryPickRequestAllowancePolicy" index="6"/>
     <property
       name="entityUpdateHistoryBrowser"
       ref="entityUpdateHistoryBrowser" />

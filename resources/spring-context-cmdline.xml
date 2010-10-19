@@ -22,7 +22,7 @@
   <import resource="spring-context-config.xml"/>
 
   <bean id="entityViewPolicy"
-   class="edu.harvard.med.screensaver.db.accesspolicy.DefaultEntityViewPolicy">
+   class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
   </bean>
 
   <import resource="spring-context-persistence.xml"/>

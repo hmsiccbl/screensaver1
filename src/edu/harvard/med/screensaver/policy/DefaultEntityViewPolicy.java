@@ -7,7 +7,7 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
-package edu.harvard.med.screensaver.db.accesspolicy;
+package edu.harvard.med.screensaver.policy;
 
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -56,12 +56,11 @@ import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.policy.EntityEditPolicy;
 
 /**
- * A {@link EntityEditPolicy} that allows any user to edit any entity in the system.
+ * A {@link EntityViewPolicy} that allows any user to view any entity in the system.
  */
-public class DefaultEntityEditPolicy implements EntityEditPolicy
+public class DefaultEntityViewPolicy implements EntityViewPolicy
 {
   public boolean visit(AbaseTestset entity)
   {
@@ -139,6 +138,12 @@ public class DefaultEntityEditPolicy implements EntityEditPolicy
   }
 
   public boolean visit(Copy entity)
+  {
+    return true;
+  }
+
+  @Override
+  public boolean visit(CopyScreeningStatus entity)
   {
     return true;
   }
@@ -293,10 +298,30 @@ public class DefaultEntityEditPolicy implements EntityEditPolicy
     return true;
   }
 
-  @Override
-  public boolean visit(CopyScreeningStatus entity)
+  public boolean isAllowedAccessToScreenDetails(Screen screen)
   {
     return true;
   }
+
+  public boolean isAllowedAccessToScreenActivity(Screen screen)
+  {
+    return true;
+  }
+
+  public boolean isAllowedAccessToSilencingReagentSequence(SilencingReagent reagent)
+  {
+    return true;
+  }
+
+  public boolean isAllowedAccessToDataColumnDueToMutualPositives(DataColumn dataColumn)
+  {
+    return true;
+  }
+
+  public boolean isAllowedAccessToResultValueDueToMutualPositive(boolean isPositive, Screen screen, String wellId)
+  {
+    return true;
+  }
+
 }
 

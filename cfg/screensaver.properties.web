@@ -25,7 +25,7 @@ debug=false
 ### run-time properties
 
 screensaver.ui.application_name=Screensaver
-screensaver.ui.version=2.1.0
+screensaver.ui.version=2010.10.29 (beta)
 # build number placeholder value, below, will be replaced by Ant "build" target at build/deploy time, using the build.number property
 screensaver.ui.build_number=BUILD_NUMBER
 
@@ -70,7 +70,7 @@ cellHTS2.saveRObjects=FALSE
 # The directory where intermediate and final result R data objects are written.
 # This should be a directory external to the Tomcat web application deployment directory and must already exist.
 # Make sure the Rserve "user" has sufficient file system permissions to write to this directory. 
-cellHTS2.saveRObjects.directory=/tmp/cellHTS2-robjectsx/
+cellHTS2.saveRObjects.directory=/tmp/cellHTS2-robjects/
 
 ### database connection
 SCREENSAVER_PGSQL_SERVER=localhost
