@@ -70,6 +70,19 @@
     <constructor-arg value="${screensaver.ui.structure_images_base_url}" />
   </bean>
   
+<!-- 
+  <bean
+    id="screenGenerator"
+    class="edu.harvard.med.screensaver.service.screens.DefaultScreenGenerator">
+    <constructor-arg>
+      <bean
+        id="screenIdentifierGenerator"
+        class="edu.harvard.med.iccbl.screensaver.service.screens.DefaultScreenIdentifierGenerator" />
+    </constructor-arg>
+    <constructor-arg ref="genericEntityDao" />
+  </bean>
+-->
+
   <bean
     id="screenGenerator"
     class="edu.harvard.med.iccbl.screensaver.service.screens.IccblScreenGenerator">

@@ -11,17 +11,11 @@ package edu.harvard.med.screensaver.service.screens;
 
 import edu.harvard.med.screensaver.model.screens.Screen;
 
-/**
- * Service that update a {@link Screen}'s {@link Screen#facilityId facility identifier} using a facility-specific
- * convention for generating these identifiers.
- * 
- * @author atolopko
- */
-public interface ScreenIdentifierGenerator
+public class DefaultScreenIdentifierGenerator implements ScreenIdentifierGenerator
 {
-  /**
-   * @param screen
-   * @return true if the Screen's facility identifier was updated
-   */
-  public boolean updateIdentifier(Screen screen);
+  @Override
+  public boolean updateIdentifier(Screen screen)
+  {
+    return false;
+  }
 }

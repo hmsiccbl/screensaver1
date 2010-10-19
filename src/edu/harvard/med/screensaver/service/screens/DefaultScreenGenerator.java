@@ -17,6 +17,13 @@ import edu.harvard.med.screensaver.ui.screens.ScreenGenerator;
 
 public class DefaultScreenGenerator implements ScreenGenerator
 {
+  private ScreenIdentifierGenerator _screenIdentiferGenerator;
+
+  public DefaultScreenGenerator(ScreenIdentifierGenerator screenIdentiferGenerator)
+  {
+    _screenIdentiferGenerator = screenIdentiferGenerator;
+  }
+
   @Override
   public Screen create(AdministratorUser admin, ScreeningRoomUser leadScreener, ScreenType screenType)
   {
@@ -26,6 +33,7 @@ public class DefaultScreenGenerator implements ScreenGenerator
       screen.setLabHead(leadScreener.getLab().getLabHead());
     }
     screen.setScreenType(screenType);
+    _screenIdentiferGenerator.updateIdentifier(screen);
     return screen;
   }
 }

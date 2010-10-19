@@ -24,7 +24,6 @@ import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.service.screens.ScreenIdentifierGenerator;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.util.DevelopmentException;
 
 public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
 {
@@ -32,8 +31,7 @@ public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
   
   private static final Map<ProjectPhase,String> PROJECT_PHASE_FACILITY_ID_SUFFIX =
     ImmutableMap.of(ProjectPhase.FOLLOW_UP_SCREEN, "F",
-                    ProjectPhase.COUNTER_SCREEN, "C",
-                    ProjectPhase.ANNOTATION, "A");
+                    ProjectPhase.COUNTER_SCREEN, "C");
 
   private GenericEntityDAO _dao;
   private ScreenDAO _screenDao;
@@ -65,7 +63,7 @@ public class IccblScreenIdentifierGenerator implements ScreenIdentifierGenerator
       return false;
     }
     if (!PROJECT_PHASE_FACILITY_ID_SUFFIX.containsKey(screen.getProjectPhase())) {
-      throw new DevelopmentException("unhandled project phase " + screen.getProjectPhase());
+      return false;
     }
     screen.setFacilityId(primaryScreen.getFacilityId() + PROJECT_PHASE_FACILITY_ID_SUFFIX.get(screen.getProjectPhase()));
     return true;
