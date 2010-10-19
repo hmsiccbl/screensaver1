@@ -20,7 +20,7 @@
 
   <ss:property id="facilityId" label="Screen ID"
     description="The facility-assigned unique identifier for the screen"
-    value="#{screen.facilityId}" editable="#{editable}" required="true">
+    value="#{screen.facilityId}" editable="#{editable}" required="true" primary="true">
     <ui:define name="data">
       <ss:entityLink entity="#{screen}" property="facilityId"
         viewer="#{screenViewer}" />
@@ -38,7 +38,7 @@
 		</ui:define>
 	</ss:property>
 
-  <ss:property id="projectId" label="Project ID" primary="true" 
+  <ss:property id="projectId" label="Project ID" 
     description="The project ID shared by this screen" value="#{screen.projectId}"
     editable="#{editable}" >
   </ss:property>
