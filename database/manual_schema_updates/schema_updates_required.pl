@@ -45,7 +45,7 @@ for $line (@output) {
   $required_scripts{$1} = 1 if $1;
 }
 
-print STDERR "schema migrations required (>= rev $from_revision):\n";
+print STDERR "schema migrations required (" . join(", ", @revisions) . (@revisions ? "; " : "") . ">= rev $from_revision):\n";
 for $rev (sort keys %required_scripts) {
   print "$rev\n"  unless $required_scripts{$rev};
 }
