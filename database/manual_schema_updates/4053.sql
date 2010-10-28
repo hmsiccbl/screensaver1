@@ -14,7 +14,7 @@ select screen_result_id, nextval('activity_id_seq') from screen_result;
 
 /* TODO: must update administrator user IDs */
 insert into activity (activity_id, date_created, date_of_activity, performed_by_id, created_by_id, comments, version)
-select srdl.screen_result_data_loading_id, sr.date_last_imported, sr.date_last_imported, 761, 755, 'added automatically for data migration', 0
+select srdl.screen_result_data_loading_id, sr.date_last_imported, sr.date_last_imported, -1, -1, 'added automatically for data migration', 0
 from screen_result_data_loading srdl join screen_result sr using(screen_result_id);
 
 insert into administrative_activity (activity_id, administrative_activity_type)
