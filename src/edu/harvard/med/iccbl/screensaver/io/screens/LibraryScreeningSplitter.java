@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/screening-status/src/edu/harvard/med/iccbl/screensaver/io/libraries/LibraryScreeningSplitter.java $
-// $Id: LibraryScreeningSplitter.java 4054 2010-04-27 01:09:11Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2010 by the President and Fellows of Harvard College.
 // 

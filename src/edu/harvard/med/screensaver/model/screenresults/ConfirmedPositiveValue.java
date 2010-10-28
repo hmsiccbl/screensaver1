@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.0.0-dev/src/edu/harvard/med/screensaver/model/screenresults/PartitionedValue.java $
-// $Id: PartitionedValue.java 4278 2010-06-17 19:36:08Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 // 

@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/library-copy-mgmt/test/edu/harvard/med/screensaver/ui/searchresults/LibraryPlateSearchResultsTest.java $
-// $Id: LibraryPlateSearchResultsTest.java 4625 2010-09-17 19:29:34Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2010 by the President and Fellows of Harvard College.
 // 

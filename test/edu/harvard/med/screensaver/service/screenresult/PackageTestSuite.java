@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.2.0-dev/test/edu/harvard/med/screensaver/service/libraries/PackageTestSuite.java $
-// $Id: PackageTestSuite.java 4852 2010-10-25 16:12:50Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 //

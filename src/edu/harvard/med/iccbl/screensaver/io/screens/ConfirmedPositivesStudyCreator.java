@@ -1,7 +1,7 @@
 // $HeadURL:
 // http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/data-sharing-levels/src/edu/harvard/med/screensaver/io/screenresults/ScreenResultImporter.java
 // $
-// $Id: ScreenPositivesCountStudyCreator.java 4797 2010-10-18 20:48:51Z atolopko $
+// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 //

@@ -1,7 +1,7 @@
 // $HeadURL:
 // http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/2.0.0-dev/src/edu/harvard/med/screensaver/model/screenresults/ConfirmedPositiveValueUserType.java
 // $
-// $Id: ConfirmedPositiveValueUserType.java 4278 2010-06-17 19:36:08Z atolopko $
+// $Id$
 //
 // Copyright © 2010 by the President and Fellows of Harvard College.
 // 

@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/screening-status/src/edu/harvard/med/screensaver/service/screenresult/ScreenResultLoader.java $
-// $Id: ScreenResultLoader.java 4098 2010-05-06 13:09:14Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 // 

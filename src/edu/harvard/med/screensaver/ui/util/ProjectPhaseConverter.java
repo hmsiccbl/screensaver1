@@ -1,5 +1,5 @@
-// $HeadURL: http://seanderickson1@forge.abcd.harvard.edu/svn/screensaver/trunk/src/edu/harvard/med/screensaver/ui/util/ScreenTypeConverter.java $
-// $Id: ScreenTypeConverter.java 3968 2010-04-08 17:04:35Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 //

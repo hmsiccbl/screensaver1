@@ -1,5 +1,5 @@
-// $HeadURL: http://forge.abcd.harvard.edu/svn/screensaver/branches/iccbl/library-copy-mgmt/src/edu/harvard/med/screensaver/db/datafetcher/AggregateDataFetcher.java $
-// $Id: AggregateDataFetcher.java 4450 2010-07-28 17:12:57Z atolopko $
+// $HeadURL$
+// $Id$
 //
 // Copyright © 2006, 2010 by the President and Fellows of Harvard College.
 // 
