@@ -60,6 +60,8 @@ public class DefaultScreenGenerator implements ScreenGenerator
     primaryScreen = _dao.reloadEntity(primaryScreen);
 
     Screen screen = new Screen(admin);
+    screen.setTitle(primaryScreen.getTitle());
+    screen.setSummary(primaryScreen.getSummary());
     screen.setProjectId(primaryScreen.getProjectId());
     screen.setProjectPhase(projectPhase);
     screen.setScreenType(primaryScreen.getScreenType());

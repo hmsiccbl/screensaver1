@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.db;
 
+import java.util.List;
+
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 public interface ScreenDAO
@@ -16,5 +18,8 @@ public interface ScreenDAO
   void deleteStudy(Screen study);
   int countScreenedExperimentalWells(Screen screen, boolean distinct);
   int countFulfilledLabCherryPicks(Screen screen);
-  Screen findPrimaryScreen(Screen screen);
+
+  List<Screen> findRelatedScreens(Screen screen);
+
+  boolean isScreenFacilityIdUnique(Screen screen);
 }

@@ -17,9 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.hibernate.ScrollableResults;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -42,7 +44,6 @@ import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
@@ -351,6 +352,11 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }
 
+  public ScrollableResults runScrollQuery(final edu.harvard.med.screensaver.db.ScrollQuery query)
+  {
+    return null;
+  }
+
   public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey)
   {
     return null;
@@ -380,15 +386,6 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
     return null;
   }   
   
-  @Override
-  public int createScreenedReagentCounts(ScreenType screenType,
-                                         Screen study,
-                                         AnnotationType positiveAnnotationType,
-                                         AnnotationType overallAnnotationType)
-  {
-    return 0;
-  }
-
   @Override
   public ScreenResult getLatestScreenResult()
   {

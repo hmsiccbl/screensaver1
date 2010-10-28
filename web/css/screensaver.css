@@ -4,7 +4,7 @@
 /* Copyright © 2006, 2010 by the President and Fellows of Harvard College.                       */
 /*                                                                                       */
 /* Screensaver is an open-source project developed by the ICCB-L and NSRB labs           */
-/* at Harvard Medical School. This software is distributed under the terms of            */      
+/* at Harvard Medical School. This software is distributed under the terms of            */
 /* the GNU General Public License.                                                       */
 body {
   font-family: sans-serif;
@@ -122,8 +122,7 @@ hr {
   color: #000000;
   border-style: none;
   /* note: IE doesn't support border-spacing, seems to default to 1 */
-  border-spacing: 0px 1px
-  /*width: 100%;*/
+  border-spacing: 0px 1px /*width: 100%;*/
 }
 
 /* for panelGroup containing horizontal sequence of command buttons (and possibly input controls) */
@@ -182,7 +181,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
   vertical-align: bottom;
 }
 
-.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader {
+.dataText,.inputText,.label,.inverseLabel,.propertyValue,.propertyLabel,.dataHeader
+  {
   font-size: small;
 }
 
@@ -230,7 +230,8 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 /* we want table columns to preserve some internal, right-hand space for readability */
-.column,.keyColumn,.numericColumn,.textColumn,.fixedColumn100,.fixedColumn200,.fixedColumn300,.greedyColumn {
+.column,.keyColumn,.numericColumn,.textColumn,.fixedColumn100,.fixedColumn200,.fixedColumn300,.greedyColumn
+  {
   padding-right: 16px;
 }
 
@@ -390,9 +391,9 @@ a.heatMapValue:link,a.heatMapValue:visited {
 }
 
 .menuSectionHeader {
-   color: white;
-   font-weight: bold;
-   font-size: large;
+  color: white;
+  font-weight: bold;
+  font-size: large;
 }
 
 .menuItem,.menuItemActive,.submenuItem {
@@ -513,6 +514,11 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
   vertical-align: bottom;
 }
 
+.searchPanelColumn {
+  vertical-align: top;
+  /*width: 50%*/
+}
+
 .new {
   color: fuchsia;
   font-style: italic;
@@ -536,8 +542,8 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
 
 .confirmationTableColumn {
   padding-bottom: 4px;
-  border-width: 2px;	
-  
+  border-width: 2px;
+  min-height: 1em;
 }
 
 .confirmationTableLegend {
@@ -550,11 +556,13 @@ a.menuItem:hover,a.menuItemActive:hover,a.submenuItem:hover,a.submenuItemActive:
   border-style: solid;
   border-width: 2px 1px 1px 2px;
   border-color: gray;
-  min-width: 50px; min-height:20px; max-height:20px;
+  min-width: 50px;
+  min-height: 20px;
+  max-height: 20px;
 }
 
 .confirmationTableLegendCellLabel {
-	padding-right:50px;
+  padding-right: 50px;
 }
 
 .confirmationTableHeader {

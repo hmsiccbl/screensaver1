@@ -12,6 +12,7 @@
 package edu.harvard.med.screensaver.db;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -22,7 +23,6 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
 
@@ -134,22 +134,48 @@ public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
   }
 
   @Override
-  public Screen findPrimaryScreen(final Screen screen)
+  public List<Screen> findRelatedScreens(final Screen screen)
   {
+    if (screen.getProjectId() == null) {
+      return Collections.emptyList();
+    }
     List<Screen> result = _dao.runQuery(new edu.harvard.med.screensaver.db.Query<Screen>() {
       @Override
       public List<Screen> execute(Session session)
       {
         HqlBuilder hql = new HqlBuilder();
         hql.from(Screen.class, "s").
-          where("s", "projectPhase", Operator.EQUAL, ProjectPhase.PRIMARY_SCREEN).
-          where("s", "projectId", Operator.EQUAL, screen.getProjectId());
+          where("s", "projectId", Operator.EQUAL, screen.getProjectId()).
+          orderBy("s", "dateCreated");
         return hql.toQuery(session, true).list();
       }
     });
-    if (result.size() == 0) {
-      return null;
+    return result;
+  }
+
+  @Override
+  public boolean isScreenFacilityIdUnique(final Screen screen)
+  {
+    List<Integer> screenIds = _dao.runQuery(new edu.harvard.med.screensaver.db.Query<Integer>() {
+      @Override
+      public List<Integer> execute(Session session)
+      {
+        HqlBuilder hql = new HqlBuilder().
+          select("s", "id").
+          from(Screen.class, "s").
+          where("s", Screen.facilityId.getPropertyName(), Operator.EQUAL, screen.getFacilityId());
+        if (!screen.isTransient()) {
+          hql.where("s", "id", Operator.NOT_EQUAL, screen.getScreenId());
+        }
+        return hql.toQuery(session, true).list();
+      }
+    });
+
+    if (screenIds.size() > 0) {
+      if (!screenIds.get(0).equals(screen.getScreenId())) {
+        return false;
+      }
     }
-    return result.get(0);
+    return true;
   }
 }

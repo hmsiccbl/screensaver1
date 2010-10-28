@@ -97,4 +97,9 @@ public interface ScreensaverConstants
   public static final int MOLECULAR_WEIGHT_PRECISION = 15;
   public static final int MOLECULAR_WEIGHT_SCALE = 9;
   
+  // Keep track of the study facility ID's being used for the batch process studies
+  public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM = "200001";
+  public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI = "200002";
+  public static final String DEFAULT_BATCH_STUDY_ID_CONFIRMATION_SUMMARY = "200003";
+
 }

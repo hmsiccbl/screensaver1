@@ -12,28 +12,23 @@ package edu.harvard.med.screensaver.db;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.springframework.test.AbstractTransactionalSpringContextTests;
 
-import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator;
-import edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy;
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.io.screenresults.ScreenResultParserTest;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationValue;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.PartitionedValue;
@@ -43,10 +38,6 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenDataSharingLevel;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.model.users.LabHead;
-import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 /**
@@ -61,39 +52,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
   protected ScreenResultsDAO screenResultsDao;
   protected LibrariesDAO librariesDao;
   protected SchemaUtil schemaUtil;
-  private IccblEntityViewPolicy entityViewPolicy;
-
-  
-  AssayWell assayWell1 = null;
-  AssayWell assayWell1a = null;
-  AssayWell assayWell2 = null;
-  AssayWell assayWell2a = null;
-  
-  Reagent reagent1 = null;
-  Reagent reagent1a = null;
-  Reagent reagent2 = null;
-  Reagent reagent2a = null;
-
-  AssayWell assayWellRnai1 = null;
-  AssayWell assayWellRnai1a = null;
-  AssayWell assayWellRnai2 = null;
-  AssayWell assayWellRnai2a = null;
-
-  Reagent reagentRnai1 = null;
-  Reagent reagentRnai1a = null;
-  Reagent reagentRnai2 = null;
-  Reagent reagentRnai2a = null;
-
-  AdministratorUser admin = null;
-  ScreeningRoomUser rnaiUser = null;
-  ScreeningRoomUser smallMoleculeUser = null;
-  ScreeningRoomUser smallMoleculeLevel3User = null;
-  ScreeningRoomUser smallMoleculeRnaiUser = null;
-  
-  int crossScreenPositiveCountWell1 = 0;
-  int crossScreenCountWell1 = 0;
-  int crossScreenPositiveCountWell1Rnai = 0;
-  int crossScreenCountWell1Rnai = 0;
 
   @Override
   protected String[] getConfigLocations()
@@ -111,314 +69,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
   {
     schemaUtil.truncateTablesOrCreateSchema();
   }
-  
-  protected void onSetUpInTransaction_ScreenResults()
-  {
-    String server = "ss.harvard.com"; // note mailinator reduced size of supported addresses
-    admin = new AdministratorUser("dev", "testaccount", "admin@" + server, "", "", "", "dev", "");
-
-    rnaiUser = makeUserWithRoles(false, ScreensaverUserRole.RNAI_SCREENS);
-    smallMoleculeUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS);
-    smallMoleculeRnaiUser = makeUserWithRoles(false, ScreensaverUserRole.SM_DSL_LEVEL1_MUTUAL_SCREENS,
-                                              ScreensaverUserRole.RNAI_SCREENS);
-
-    // Create a library  - SM
-    int libraryId = 1;
-    Library library = MakeDummyEntities.makeDummyLibrary(libraryId++, ScreenType.SMALL_MOLECULE, 1);
-    Iterator<Well> wellsIter = library.getWells().iterator();
-    Well well1 = wellsIter.next();
-    Well well2 = wellsIter.next();
-    Well well3 = wellsIter.next();
-
-    // Create a library  - RNAi
-    Library libraryRnai = MakeDummyEntities.makeDummyLibrary(libraryId++, ScreenType.RNAI, 1);
-    wellsIter = libraryRnai.getWells().iterator();
-    Well wellRnai1 = wellsIter.next();
-    Well wellRnai2 = wellsIter.next();
-    Well wellRnai3 = wellsIter.next();
-    // Create Screens
-    // Create Small Molecule Screens
-    int screenFacilityId = 0;
-    
-    // Screen1
-    Screen screen1 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.SMALL_MOLECULE);
-    screen1.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
-    ScreenResult screenResult = screen1.createScreenResult();
-    DataColumn col = screenResult.createDataColumn("col1").forReplicate(1);
-    col.makeBooleanPositiveIndicator();
-    // create a positive: positive count: 1
-    assayWell1 = screenResult.createAssayWell(well1);
-    reagent1 = assayWell1.getLibraryWell().getLatestReleasedReagent();
-    ResultValue resultValue = col.createBooleanPositiveResultValue(assayWell1, true, false);
-    assertTrue(resultValue.isPositive());
-    crossScreenPositiveCountWell1++;
-    crossScreenCountWell1++;
-
-    // create a "negative"
-    assayWell1a = screenResult.createAssayWell(well3);
-    reagent1a = assayWell1a.getLibraryWell().getLatestReleasedReagent();
-    resultValue = col.createBooleanPositiveResultValue(assayWell1a, false, false);
-    assertTrue(!resultValue.isPositive());
-
-    // Screen2 - smallMoleculeUser's screen (has to have at least one screen with results to see the study,
-    // refer to edu.harvard.med.iccbl.screensaver.policy.IccblEntityViewPolicy.userHasQualifiedDepositedSmallMoleculeData()
-    
-    Screen screen2 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.SMALL_MOLECULE);
-    screen2.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
-    screen2.setLeadScreener(smallMoleculeUser);
-
-    screenResult = screen2.createScreenResult();
-    col = screenResult.createDataColumn("col1").forReplicate(1);
-    col.makeBooleanPositiveIndicator();
-
-    // create a cross-screen negative: (positive count still 2)
-    assayWell2a = screenResult.createAssayWell(well1);
-    reagent2a = assayWell2a.getLibraryWell().getLatestReleasedReagent();
-    assertEquals("Reagent2a should be the same as Reagent1",reagent1,reagent2a);
-    resultValue = col.createBooleanPositiveResultValue(assayWell2a, false, false);
-    assertTrue(!resultValue.isPositive());
-    crossScreenCountWell1++;
-
-    // create a positive
-    assayWell2 = screenResult.createAssayWell(well2);
-    reagent2 = assayWell1.getLibraryWell().getLatestReleasedReagent();
-    resultValue = col.createBooleanPositiveResultValue(assayWell2, true, false);
-    assertTrue(resultValue.isPositive());
-    
-    // Screen3 - Private screen
-
-    Screen screen3 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.SMALL_MOLECULE);
-    screen3.setDataSharingLevel(ScreenDataSharingLevel.MUTUAL_SCREENS);
-    //screen3.setDataSharingLevel(ScreenDataSharingLevel.PRIVATE);
-    screen3.setLeadScreener(smallMoleculeUser);
-
-    screenResult = screen3.createScreenResult();
-    col = screenResult.createDataColumn("col1").forReplicate(1);
-    col.makeBooleanPositiveIndicator();
-    // create a cross-screen positive: positive count: 2; note that private screens are included
-    assayWell2a = screenResult.createAssayWell(well1);
-    reagent2a = assayWell2a.getLibraryWell().getLatestReleasedReagent();
-    assertEquals("Reagent2a should be the same as Reagent1", reagent1, reagent2a);
-    resultValue = col.createBooleanPositiveResultValue(assayWell2a, true, false);
-    assertTrue(resultValue.isPositive());
-    crossScreenPositiveCountWell1++;
-    crossScreenCountWell1++;
-
-    // create a positive
-    assayWell2 = screenResult.createAssayWell(well2);
-    reagent2 = assayWell1.getLibraryWell().getLatestReleasedReagent();
-    resultValue = col.createBooleanPositiveResultValue(assayWell2, true, false);
-    assertTrue(resultValue.isPositive());
-    
-    //RNAI screens - do the same 
-    
-    Screen screenRnai1 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.RNAI);
-    screenResult = screenRnai1.createScreenResult();
-    col = screenResult.createDataColumn("col1").forReplicate(1);
-    col.makeBooleanPositiveIndicator();
-    // create a positive
-    assayWellRnai1 = screenResult.createAssayWell(wellRnai1);
-    reagentRnai1 = assayWellRnai1.getLibraryWell().getLatestReleasedReagent();
-    resultValue = col.createBooleanPositiveResultValue(assayWellRnai1, true, false);
-    assertTrue(resultValue.isPositive());
-    crossScreenPositiveCountWell1Rnai++;
-    crossScreenCountWell1Rnai++;
-    
-    // create a "negative"
-    assayWellRnai1a = screenResult.createAssayWell(wellRnai3);
-    reagentRnai1a = assayWellRnai1a.getLibraryWell().getLatestReleasedReagent();
-    resultValue = col.createBooleanPositiveResultValue(assayWellRnai1a, false, false);
-    assertTrue(!resultValue.isPositive());
-
-    Screen screenRnai2 = MakeDummyEntities.makeDummyScreen(screenFacilityId++, ScreenType.RNAI);
-    screenResult = screenRnai2.createScreenResult();
-    col = screenResult.createDataColumn("col1").forReplicate(1);
-    col.makeBooleanPositiveIndicator();
-    // create a cross-screen positive
-    assayWellRnai2a = screenResult.createAssayWell(wellRnai1);
-    reagentRnai2a = assayWellRnai1.getLibraryWell().getLatestReleasedReagent();
-    assertEquals("Reagent2a should be the same as Reagent1", reagentRnai1, reagentRnai2a);
-    resultValue = col.createBooleanPositiveResultValue(assayWellRnai2a, true, false);
-    assertTrue(resultValue.isPositive());
-    crossScreenPositiveCountWell1Rnai++;
-    crossScreenCountWell1Rnai++;
-    log.info("sm reagent: " + reagent1 + ", studies: " + reagent1.getStudies());
-    log.info("rnai reagent: " + reagentRnai1 + ", studies: " + reagentRnai1.getStudies());
-
-    // create a positive
-    assayWellRnai2 = screenResult.createAssayWell(wellRnai2);
-    reagentRnai2 = assayWellRnai1.getLibraryWell().getLatestReleasedReagent();
-    resultValue = col.createBooleanPositiveResultValue(assayWellRnai2, true, false);
-    assertTrue(resultValue.isPositive());
-
-    genericEntityDao.persistEntity(library);
-    genericEntityDao.persistEntity(libraryRnai);
-    genericEntityDao.persistEntity(screen1);
-    genericEntityDao.persistEntity(screen2);
-    genericEntityDao.persistEntity(screen3);
-    genericEntityDao.persistEntity(screenRnai1);
-    genericEntityDao.persistEntity(screenRnai2);
-    genericEntityDao.flush();
-  }
-
-  public void testCrossScreenPositivesStudyCreator()
-  {
-    onSetUpInTransaction_ScreenResults();
-    setComplete();
-    endTransaction();
-    startNewTransaction();
-
-    // Create a SM Study
-    
-    ScreenType screenType = ScreenType.SMALL_MOLECULE;
-    //    Multiset<Reagent> reagents = screenResultsDao.findScreenPositiveReagentsNotDistinct(screenType);
-    //    assertFalse("no SM positives found!", reagents.isEmpty());
-    ScreenPositivesCountStudyCreator creator = new ScreenPositivesCountStudyCreator(null);
-    int count = creator.createReagentCountStudy(admin,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_STUDY_TITLE,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_STUDY_SUMMARY,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_POSITIVES_ANNOTATION_DESC,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_OVERALL_ANNOTATION_NAME,
-                                                     ScreenPositivesCountStudyCreator.DEFAULT_SM_OVERALL_ANNOTATION_DESC,
-                                                     screenType,
-                                                     genericEntityDao,
-                                                     screenResultsDao);
-    assertTrue(count > 0);
-
-    //    setComplete();
-    //    endTransaction();
-    //    startNewTransaction();
-    //    genericEntityDao.flush();
-    //    genericEntityDao.clear();
-    
-    // Create a RNAi Study
-    
-    screenType = ScreenType.RNAI;
-    //    reagents = screenResultsDao.findScreenPositiveReagentsNotDistinct(screenType);
-    //    assertFalse("no RNAi positives found!", reagents.isEmpty());
-    count = creator.createReagentCountStudy(admin,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_RNAI_STUDY_FACILITY_ID,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_RNAi_STUDY_TITLE,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_RNAi_STUDY_SUMMARY,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_SM_POSITIVES_ANNOTATION_DESC,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_OVERALL_ANNOTATION_NAME,
-                                                       ScreenPositivesCountStudyCreator.DEFAULT_SM_OVERALL_ANNOTATION_DESC,
-                                                       screenType,
-                                                       genericEntityDao,
-                                                       screenResultsDao);
-    assertTrue(count > 0);
-
-    //    setComplete();
-    //    endTransaction();
-    //    startNewTransaction();
-
-    setComplete();
-    endTransaction();
-    startNewTransaction();
-    Screen smStudy = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID);
-    assertNotNull(smStudy);
-    Screen rnaiStudy = genericEntityDao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), ScreenPositivesCountStudyCreator.DEFAULT_RNAI_STUDY_FACILITY_ID);
-    assertNotNull(rnaiStudy);
-    
-    smStudy = genericEntityDao.reloadEntity(smStudy);
-    Set<Reagent> studyReagents = smStudy.getReagents();
-    assertNotNull(studyReagents);
-    assertTrue("no reagents in the study:", !studyReagents.isEmpty());
-    assertEquals("should be: 1 each for Wells 1,2,3", 3, studyReagents.size());
-
-    log.info("SM Study - display the annotation values");
-    for(Reagent reagent:studyReagents)
-    {
-      log.info("reagent: " + reagent.getVendorId());
-      for (Map.Entry<AnnotationType,AnnotationValue> entry : reagent.getAnnotationValues().entrySet()) {
-        log.info("" + entry.getKey() + ", " + entry.getKey().getName() + ", Study: " +
-          ((Screen) entry.getKey().getStudy()).getTitle() + ", " +
-          entry.getValue().getNumericValue());
-      }
-    }
-    
-    Reagent studyReagent = assayWell1.getLibraryWell().getReagents().entrySet().iterator().next().getValue();
-    log.info("reagent to test: " + studyReagent.getVendorId());
-    assertTrue(studyReagents.contains(studyReagent));
-    
-    studyReagent = genericEntityDao.reloadEntity(studyReagent, true, Reagent.annotationValues.getPath());
-    
-    // verify #annotation values: this will be 2 - positives count and overall count
-    assertEquals("reagent.getAnnotationValues().size()", 2, studyReagent.getAnnotationValues().size());
-
-    AnnotationValue avPositiveCount = null;
-    for (Entry<AnnotationType,AnnotationValue> entry : studyReagent.getAnnotationValues().entrySet()) {
-      if (entry.getKey().getName().equals(ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME)) {
-        avPositiveCount = entry.getValue();
-        break;
-      }
-    }
-    assertNotNull(avPositiveCount);
-    assertEquals("avPositiveCount is: " + avPositiveCount.getNumericValue(), new Double(crossScreenPositiveCountWell1), avPositiveCount.getNumericValue());
-
-    AnnotationValue avOverallCount = null;
-    for (Entry<AnnotationType,AnnotationValue> entry : studyReagent.getAnnotationValues().entrySet()) {
-      if (entry.getKey().getName().equals(ScreenPositivesCountStudyCreator.DEFAULT_OVERALL_ANNOTATION_NAME)) {
-        avOverallCount = entry.getValue();
-        break;
-      }
-    }
-    assertNotNull(avOverallCount);
-    assertEquals("avOverallCount is: " + avOverallCount.getNumericValue(), new Double(crossScreenCountWell1), avOverallCount.getNumericValue());
-
-    //verify that the SM user can see it
-    setCurrentUser(smallMoleculeUser);
-    assertTrue("SM user should not be restricted from SM Study", entityViewPolicy.visit(smStudy));
-    
-    setCurrentUser(rnaiUser);
-    assertFalse("rnai user should be restricted from SM Study", entityViewPolicy.visit(smStudy));
-        
-    //setCurrentUser(smallMoleculeRnaiUser);
-    //assertTrue("smallMoleculeRnaiUser user should not be restricted from SM Study", entityViewPolicy.visit(study));
-    
-    ////////////
-    //RNAi Study
-    ////////////
-    
-    rnaiStudy = genericEntityDao.reloadEntity(rnaiStudy);
-    studyReagents = rnaiStudy.getReagents();
-    assertNotNull(studyReagents);
-    assertTrue("no reagents in the RNAi study:", !studyReagents.isEmpty());
-    assertEquals("RNAi Study: should be: 1 reagent for each 3 wells", 3, studyReagents.size());
-
-    log.info("RNAi Study");
-    for(Reagent reagent:studyReagents)
-    {
-      log.info("reagent: " + reagent.getVendorId());
-      for (Map.Entry<AnnotationType,AnnotationValue> entry : reagent.getAnnotationValues().entrySet()) {
-        log.info("Annotation: " + entry.getKey() + ", " + entry.getKey().getName() + ", Study: " +
-          ((Screen) entry.getKey().getStudy()).getTitle() + ", " +
-          entry.getValue().getNumericValue());
-      }
-    }
-    
-    studyReagent = assayWellRnai1.getLibraryWell().getReagents().entrySet().iterator().next().getValue();
-    assertTrue(studyReagents.contains(studyReagent));
-    
-    studyReagent = genericEntityDao.reloadEntity(studyReagent, true, Reagent.annotationValues.getPath());
-    
-    assertEquals("reagent.getAnnotationValues().size()", 2, studyReagent.getAnnotationValues().size());
-
-    AnnotationValue avPositiveCountRnai = null;
-    for (Entry<AnnotationType,AnnotationValue> entry : studyReagent.getAnnotationValues().entrySet()) {
-      if (entry.getKey().getName().equals(ScreenPositivesCountStudyCreator.DEFAULT_POSITIVES_ANNOTATION_NAME)) {
-        avPositiveCountRnai = entry.getValue();
-        break;
-      }
-    }
-    //avPositiveCount = studyReagent.getAnnotationValues().entrySet().iterator().next().getValue();
-    assertEquals("av.getNumericValue() is: " + avPositiveCountRnai.getNumericValue(), avPositiveCountRnai.getNumericValue(), new Double(crossScreenPositiveCountWell1Rnai));
-  
-  }
-  
   
   
   public void testFindMutualPositiveColumns()
@@ -746,29 +396,6 @@ public class ScreenResultDAOTest extends AbstractTransactionalSpringContextTests
       assertEquals("rv.value", new Double(iWell), rv.getNumericValue());
     }
   }
-  
-  private ScreeningRoomUser makeUserWithRoles(boolean isLabHead, ScreensaverUserRole... roles)
-  {
-    
-    ScreeningRoomUser user;
-    if (isLabHead) {
-      user = new LabHead("first", 
-                         "last" + new Object().hashCode(),
-                         null);
-    }
-    else {
-      user = new ScreeningRoomUser("first",
-                                   "last" + new Object().hashCode());
-    }
-    for (ScreensaverUserRole role : roles) {
-      user.addScreensaverUserRole(role);
-    }
-    genericEntityDao.saveOrUpdateEntity(user);
-    return user;
-  }
-  
-  private void setCurrentUser(ScreensaverUser user)
-  {
-    entityViewPolicy = new IccblEntityViewPolicy(user, genericEntityDao);
-  }
+
+
 }

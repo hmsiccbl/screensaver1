@@ -13,13 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 import edu.harvard.med.screensaver.model.libraries.WellKey;
-import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.AssayWell;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
-import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.model.screens.ScreenType;
 
 public interface ScreenResultsDAO
 {
@@ -30,11 +27,6 @@ public interface ScreenResultsDAO
   public AssayWell findAssayWell(ScreenResult screenResult, WellKey wellKey);
 
   public List<DataColumn> findMutualPositiveColumns(ScreenResult sr);
-
-  public int createScreenedReagentCounts(final ScreenType screenType,
-                                          Screen study,
-                                          AnnotationType positiveAnnotationType,
-                                          AnnotationType overallAnnotationType);
 
   public ScreenResult getLatestScreenResult();
 }

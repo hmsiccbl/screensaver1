@@ -31,6 +31,10 @@ public class IccblScreenFacilityIdInitializerTest extends AbstractSpringPersiste
     Screen primaryScreen = new Screen(null, "1", user, user, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "test");
     primaryScreen.setProjectId("PID1");
     genericEntityDao.persistEntity(primaryScreen);
+
+    Screen study = new Screen(null, "100000", user, user, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "test");
+    study.setProjectPhase(ProjectPhase.ANNOTATION);
+    genericEntityDao.saveOrUpdateEntity(study);
   }
 
   public void testPrimaryScreen()
@@ -50,31 +54,22 @@ public class IccblScreenFacilityIdInitializerTest extends AbstractSpringPersiste
     assertEquals("X", primaryScreen2.getFacilityId());
   }
 
-  public void testFollowUpScreen()
+  public void testRelatedScreen()
   {
-    Screen followUpScreen = new Screen(null);
+    LabHead user = new LabHead("Test", "User", null);
+    Screen followUpScreen = new Screen(null, null, user, user, ScreenType.RNAI, StudyType.IN_VITRO, ProjectPhase.PRIMARY_SCREEN, "test");
     followUpScreen.setProjectId("PID1");
     followUpScreen.setProjectPhase(ProjectPhase.FOLLOW_UP_SCREEN);
     assertTrue(screenFacilityIdInitializer.initializeFacilityId(followUpScreen));
-    assertEquals("1-F", followUpScreen.getFacilityId());
-  }
+    assertEquals("1-1", followUpScreen.getFacilityId());
 
-  public void testCounterScreen()
-  {
-    Screen counterScreen = new Screen(null);
-    counterScreen.setProjectId("PID1");
-    counterScreen.setProjectPhase(ProjectPhase.COUNTER_SCREEN);
-    assertTrue(screenFacilityIdInitializer.initializeFacilityId(counterScreen));
-    assertEquals("1-C", counterScreen.getFacilityId());
-  }
+    genericEntityDao.persistEntity(followUpScreen);
 
-  public void testNonPrimaryScreenMissingPrimaryScreen()
-  {
-    Screen followUpScreen2 = new Screen(null);
-    followUpScreen2.setProjectId("PID2");
-    followUpScreen2.setProjectPhase(ProjectPhase.FOLLOW_UP_SCREEN);
-    assertFalse(screenFacilityIdInitializer.initializeFacilityId(followUpScreen2));
-    assertNull(followUpScreen2.getFacilityId());
+    followUpScreen = new Screen(null);
+    followUpScreen.setProjectId("PID1");
+    followUpScreen.setProjectPhase(ProjectPhase.FOLLOW_UP_SCREEN);
+    assertTrue(screenFacilityIdInitializer.initializeFacilityId(followUpScreen));
+    assertEquals("1-2", followUpScreen.getFacilityId());
   }
 
   public void testInadmissableAndSuspectPrimaryScreenFacilityIds()

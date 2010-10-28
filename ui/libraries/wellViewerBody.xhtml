@@ -51,7 +51,7 @@
          value="#{wellViewer.entity.libraryWellType}">
        </ss:property>
 
-       <ss:property id="facilityId" label="Facility Identifier" 
+       <ss:property id="Id" label="Facility Identifier" 
          type="Text" 
          description="An alternate identifier assigned by the facility to identify this well" 
          value="#{wellViewer.entity.facilityId}">
@@ -206,34 +206,43 @@
             <t:column>
               <f:facet name="header">
                 <t:panelGrid columnClasses="propertyLabelColumn" styleClass="layoutPanel" columns="1">
-                  <t:outputText styleClass="label" value="Well" />
                   <t:outputText value="Vendor Id" />
                   <t:outputText rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}" value="Sequence" />
+                  <t:outputText styleClass="label" value="Well" />
                 </t:panelGrid>
               </f:facet>
-              <t:outputText value="&nbsp;" />
+              <ui:remove><!--  NOTE: nesting an absolutely positioned div inside a relatively positioned div so that the inner element is removed from the flow (will not resize the row) --> </ui:remove>
+              <t:div style="position:relative;">
+                <t:div style="position:absolute;" rendered="#{wellViewer.confirmationReport.dataModel.rowIndex == 0}">
+                  <t:outputText value="Duplex Activity Confirmation Data" styleClass="label" />
+                </t:div>
+              </t:div>
             </t:column>
             <t:columns
               value="#{wellViewer.confirmationReport.columnDataModel}"
               var="column" styleClass="confirmationTableCell #{wellViewer.confirmationReport.cell.styleClass}"
-              >
+              ><ui:remove><!--  NOTE: the style is being applied at the t:columns level, this appears to be a jsf bug, it should be applied down below at the outputtext --> </ui:remove>
               <f:facet name="header">
                 <t:panelGrid columns="1" columnClasses="confirmationTableColumn"   >
-                  <t:commandLink id="confirmationReportWellLink" action="#{wellViewer.viewEntity}"
-                    styleClass="entityLink tableHeader">
+                  <t:outputText value="#{column.vendorId}" styleClass="label"/>
+                  <t:outputText value="#{column.sequence}" style="font-size: small;" rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}"  />
+                  <t:commandLink id="confirmationReportWellLink" action="#{wellViewer.viewEntity}" styleClass="entityLink">
                     <f:param name="entityId" value="#{column.well.entityId}" />
                     <t:outputText value="#{column.well.wellKey}" styleClass="" />
                   </t:commandLink>
-                  <t:outputText value="#{column.vendorId}" />
-                  <t:outputText value="#{column.sequence}" style="font-size: xx-small;" rendered="#{wellViewer.allowedAccessToSilencingReagentSequence}"  />
                 </t:panelGrid>
               </f:facet>
-              <t:outputText value="&nbsp;" />
+              <t:outputText value="&nbsp;" /> <ui:remove><!-- NOTE: the style is *not* being applied here, rather, it is above, at the t:columns level  --> </ui:remove>
             </t:columns>
             <t:column rendered="#{wellViewer.confirmationReport.dataModel.rowCount > 0}" styleClass="confirmationTableCell" >
               <f:facet name="header">
                 <t:div style="min-height: #{wellViewer.allowedAccessToSilencingReagentSequence ? '5':'3'}em;" styleClass="propertyLabelColumn" >
-                  <t:outputText value="Screen # " />
+                  <t:popup>
+                    <f:facet name="popup">
+                      <t:div styleClass="popupHelp popupText">Confirming Screen ID, **hidden if a screen's information is restricted by privacy policy</t:div>
+                    </f:facet>
+                    <t:outputText value="Screen ID" />
+                  </t:popup>
                 </t:div>
               </f:facet>
               <t:commandLink id="confirmationReportScreenLink" action="#{screenViewer.viewEntity}"
@@ -241,9 +250,9 @@
                  rendered="#{! wellViewer.confirmationReport.screen.restricted}"
                 >
                  <f:param name="entityId" value="#{wellViewer.confirmationReport.screen.entityId}" />
-                 <t:outputText value="#{wellViewer.confirmationReport.screen.screenNumber}" />
+                 <t:outputText value="#{wellViewer.confirmationReport.screen.facilityId}" />
               </t:commandLink>
-              <t:outputText rendered="#{wellViewer.confirmationReport.screen.restricted}" value="&nbsp;" />
+              <t:outputText rendered="#{wellViewer.confirmationReport.screen.restricted}" value="**" />
             </t:column>
           </t:dataTable>
           <t:panelGrid rendered="#{wellViewer.confirmationReport.dataModel.rowCount > 0}" columns="2">
@@ -254,11 +263,11 @@
               <tbody >
                 <tr>
                   <td class="confirmationTableCell confirmationReportFalsePositive">&nbsp;</td>
-                  <td class="propertyValue confirmationTableLegendCellLabel">did NOT re-confirm</td>
+                  <td class="propertyValue confirmationTableLegendCellLabel">pool result not confirmed</td>
                   <td class="confirmationTableCell confirmationReportConfirmedPositive">&nbsp;</td>
-                  <td class="propertyValue confirmationTableLegendCellLabel">DID re-confirm</td>
+                  <td class="propertyValue confirmationTableLegendCellLabel">pool result confirmed</td>
                   <td class="confirmationTableCell confirmationReportNoData">&nbsp;</td>
-                  <td class="propertyValue confirmationTableLegendCellLabel">Inconclusive or No Data</td>
+                  <td class="propertyValue confirmationTableLegendCellLabel">inconclusive or no data</td>
                 </tr>
               </tbody>
             </table>   

@@ -9,9 +9,6 @@
 
 	<!--
 	facelets params:
-	  - custom0: UI fragment
-    - custom1: UI fragment
-    - custom2: UI fragment
     - custom3: UI fragment
     - custom4: UI fragment
 	-->
@@ -23,11 +20,7 @@
 	<!--t:saveState value="#{dataTable.dataTableModel.rowIndex}"/-->
 
   <ss:roundedDiv style="height: 100%">
-    <t:panelGrid id="dataTableNavPanel" columns="9" width="100%">
-
-      <ui:insert name="custom0">
-        <t:div/>
-      </ui:insert>
+    <t:panelGrid id="dataTableNavPanel" columns="6" width="100%">
 
       <!-- note: immediate="false" is necessary to support user-edited field values between page scrolls; e.g. see [#1361] -->
       <t:dataScroller id="dataTableScroller"
@@ -62,10 +55,6 @@
         </f:facet>
       </t:dataScroller>
       
-      <ui:insert name="m1">
-        <t:div/>
-      </ui:insert>
-
       <t:dataScroller id="dataTableScroller2"
         for=":#{dataTable.clientId}" pageCountVar="pages"
         pageIndexVar="page" firstRowIndexVar="fromRow"
@@ -77,10 +66,6 @@
           Page&#160;#{page}&#160;of&#160;#{rowCount == 0 ? 0 : pages} (#{rowCount}&#160;#{rowCount == 1 ? &quot;row&quot; : &quot;rows&quot;})
         </t:div>
       </t:dataScroller>
-
-      <ui:insert name="custom2">
-        <t:div/>
-      </ui:insert>
 
       <t:panelGroup id="rowsPerPagePanel" styleClass="commandPanel">
         <t:div styleClass="inverseLabel">

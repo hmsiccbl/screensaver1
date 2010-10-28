@@ -42,12 +42,7 @@ import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 public class ScreenViewer extends StudyViewer<Screen>
 {
-  // static members
-
   private static Logger log = Logger.getLogger(ScreenViewer.class);
-
-
-  // instance data members
 
   private ScreenResultViewer _screenResultViewer;
   private HeatMapViewer _heatMapViewer;
@@ -58,10 +53,6 @@ public class ScreenViewer extends StudyViewer<Screen>
   private CherryPickRequestSearchResults _cherryPickRequestSearchResults;
   private LibrarySearchResults _librarySearchResults;
   private LibraryPlateSearchResults _libraryPlateSearchResults;
-
-
-  
-  // constructors
 
   /**
    * @motivation for CGLIB2
@@ -186,6 +177,14 @@ public class ScreenViewer extends StudyViewer<Screen>
   {
     _cherryPickRequestSearchResults.searchForScreen(getEntity());
     return BROWSE_CHERRY_PICK_REQUESTS;
+  }
+
+  @UICommand
+  public String browseProjectScreens()
+  {
+    String projectId = getRequestParameter("projectId").toString();
+    ((ScreenSearchResults) getContextualSearchResults()).searchScreensForProject(projectId);
+    return BROWSE_SCREENS;
   }
 
   public LibraryPlateSearchResults getPlateSearchResults()

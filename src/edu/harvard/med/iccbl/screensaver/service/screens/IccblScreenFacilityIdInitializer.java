@@ -10,21 +10,19 @@
 package edu.harvard.med.iccbl.screensaver.service.screens;
 
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
-import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.service.screens.ScreenFacilityIdInitializer;
 
@@ -32,10 +30,6 @@ public class IccblScreenFacilityIdInitializer implements ScreenFacilityIdInitial
 {
   private static final Logger log = Logger.getLogger(IccblScreenFacilityIdInitializer.class);
   
-  private static final Map<ProjectPhase,String> PROJECT_PHASE_FACILITY_ID_SUFFIX =
-    ImmutableMap.of(ProjectPhase.FOLLOW_UP_SCREEN, "F",
-                    ProjectPhase.COUNTER_SCREEN, "C");
-
   private static Pattern numericPrefix = Pattern.compile("^([?0-9]+).*");
   private static final Function<String,Integer> NonStrictStringToInteger =
     new Function<String,Integer>() {
@@ -54,11 +48,19 @@ public class IccblScreenFacilityIdInitializer implements ScreenFacilityIdInitial
       }
     };
 
+  private static final Predicate<Screen> ScreenWithFacilityId = new Predicate<Screen>() {
+    @Override
+    public boolean apply(Screen screen)
+    {
+      return !screen.isStudyOnly();
+    }
+  };
+
   private GenericEntityDAO _dao;
   private ScreenDAO _screenDao;
 
   public IccblScreenFacilityIdInitializer(GenericEntityDAO dao,
-                                        ScreenDAO screenDao)
+                                          ScreenDAO screenDao)
   {
     _dao = dao;
     _screenDao = screenDao;
@@ -70,38 +72,36 @@ public class IccblScreenFacilityIdInitializer implements ScreenFacilityIdInitial
     if (screen.getFacilityId() != null) {
       return false;
     }
-    if (screen.getProjectPhase() == ProjectPhase.PRIMARY_SCREEN) {
-      return updateIdentifierForPrimaryScreen(screen);
+
+    if (updateIdentifierForRelatedScreen(screen)) {
+      return true;
     }
-    return updateIdentifierForNonPrimaryScreen(screen);
+    return updateIdentifierForPrimaryScreen(screen);
   }
 
-  private boolean updateIdentifierForNonPrimaryScreen(Screen screen)
+  private boolean updateIdentifierForRelatedScreen(Screen screen)
   {
-    Screen primaryScreen = _screenDao.findPrimaryScreen(screen);
-    if (primaryScreen == null) {
-      log.warn("cannot generate facility ID for screen " + screen + ": no primary screen");
+    if (screen.getProjectId() == null) {
       return false;
     }
-    if (!PROJECT_PHASE_FACILITY_ID_SUFFIX.containsKey(screen.getProjectPhase())) {
-      return false;
+    List<Screen> relatedScreens = _screenDao.findRelatedScreens(screen);
+    List<Screen> projectScreens = _dao.findEntitiesByProperty(Screen.class, "projectId", screen.getProjectId(), true);
+    projectScreens.remove(screen);
+    if (projectScreens.size() > 0) {
+      screen.setFacilityId(NonStrictStringToInteger.apply(relatedScreens.get(0).getFacilityId()) + "-" + projectScreens.size());
+      return true;
     }
-    screen.setFacilityId(primaryScreen.getFacilityId() + "-" + PROJECT_PHASE_FACILITY_ID_SUFFIX.get(screen.getProjectPhase()));
-    return true;
+    return false;
   }
 
   public boolean updateIdentifierForPrimaryScreen(Screen screen)
   {
-    List<Screen> primaryScreens = _dao.findEntitiesByProperty(Screen.class,
-                                                              "projectPhase",
-                                                              ProjectPhase.PRIMARY_SCREEN,
-                                                              true);
+    List<Screen> screens = _dao.findAllEntitiesOfType(Screen.class, true);
     Iterable<Integer> primaryScreenNumericFacilityIds =
-      Iterables.filter(Iterables.transform(primaryScreens,
+      Iterables.filter(Iterables.transform(Iterables.filter(screens, ScreenWithFacilityId),
                                            Functions.compose(NonStrictStringToInteger, Screen.ToFacilityId)),
-                       Predicates.notNull());
+                                           Predicates.notNull());
 
-    
     int nextId = 1;
     if (primaryScreenNumericFacilityIds.iterator().hasNext()) {
       Integer maxNumericFacilityId = Ordering.natural().max(primaryScreenNumericFacilityIds);

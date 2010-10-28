@@ -178,11 +178,6 @@ public class TableColumnManager<R> extends Observable implements Observer
     return _columnsSelectionTree;
   }
 
-  public boolean isColumnsTreeOpen()
-  {
-    return getColumnsTreeModel().getTreeState().isNodeExpanded("0");
-  }
-
   public int getSortColumnIndex()
   {
     return getSortColumnSelector().getSelectionIndex();
@@ -396,8 +391,6 @@ public class TableColumnManager<R> extends Observable implements Observer
   @UICommand
   public String updateColumnSelections()
   {
-    getColumnsTreeModel().getTreeState().collapsePath(new String[] { "0" });
-    
     if(isUseReorderListWidget())
     {
       // For ReorderListWidget: To arrange the columns according to the order specified by user

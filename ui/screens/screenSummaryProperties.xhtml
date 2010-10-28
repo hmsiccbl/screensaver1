@@ -41,6 +41,14 @@
   <ss:property id="projectId" label="Project ID" 
     description="The project ID shared by this screen" value="#{screen.projectId}"
     editable="#{editable}" >
+    <ui:define name="data">
+      <t:commandLink id="projectIdLink"
+        action="#{screenViewer.browseProjectScreens}" styleClass="entityLink">
+        <f:param name="projectId" value="#{screenDetailViewer.entity.projectId}" />
+        <t:outputText id="projectIdLinkValue"
+          value="#{screenDetailViewer.entity.projectId}" />
+      </t:commandLink>
+    </ui:define>
   </ss:property>
 
   <ss:property id="projectPhase" label="Project Phase"

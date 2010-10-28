@@ -10,8 +10,10 @@
 package edu.harvard.med.screensaver.ui.searchresults;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Function;
@@ -27,7 +29,6 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
-import edu.harvard.med.screensaver.db.datafetcher.NoOpDataFetcher;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
@@ -62,13 +63,11 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
-import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.LibraryViewer;
 import edu.harvard.med.screensaver.ui.libraries.WellViewer;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 import edu.harvard.med.screensaver.ui.table.Criterion;
 import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.table.DataTable;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.column.entity.BooleanTupleColumn;
@@ -95,13 +94,13 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
 {
   private static final Logger log = Logger.getLogger(WellSearchResults.class);
 
-  private static final String WELL_COLUMNS_GROUP = TableColumn.UNGROUPED;
-  private static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent";
-  private static final String COMPOUND_COLUMNS_GROUP = "Compound";
-  private static final String OUR_DATA_COLUMNS_GROUP = "Data Columns";
-  private static final String OTHER_DATA_COLUMNS_GROUP = "Data Columns (Other Screen Results)";
-  private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations (Other Studies)";
-  private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Annotations";
+  private static final String WELL_COLUMNS_GROUP = "Well Columns";
+  private static final String SILENCING_REAGENT_COLUMNS_GROUP = "Silencing Reagent Columns";
+  private static final String COMPOUND_COLUMNS_GROUP = "Compound Reagent Columns";
+  private static final String OUR_DATA_COLUMNS_GROUP = "Screen Result Data Columns";
+  private static final String OTHER_DATA_COLUMNS_GROUP = "Screen Result Data Columns (Other Screen Results)";
+  private static final String OTHER_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations (Other Studies)";
+  private static final String OUR_ANNOTATION_TYPES_COLUMN_GROUP = "Study Annotations";
 
   protected static final Function<DataColumn,Triple<DataColumn,String,String>> DataColumnToMetaDataColumn =
     new Function<DataColumn,Triple<DataColumn,String,String>>() {
@@ -193,7 +192,37 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     setTitle("Wells Search Result");
     setMode(WellSearchResultMode.ALL_WELLS);
     // initially, show an empty search result, but with all columns available
-    initialize(buildColumns());
+    TupleDataFetcher<Well,String> dataFetcher = new TupleDataFetcher<Well,String>(Well.class, _dao)
+    {
+      @Override
+      public List<String> findAllKeys()
+      {
+        if (!hasCriteriaDefined(getCriteria())) {
+          return Collections.emptyList();
+        }
+        return super.findAllKeys();
+      }
+
+      private boolean hasCriteriaDefined(Map<PropertyPath<Well>,List<? extends Criterion<?>>> criteria)
+      {
+        for (List<? extends Criterion> propCriteria : criteria.values()) {
+          for (Criterion criterion : propCriteria) {
+            if (!criterion.isUndefined()) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        hql.from(getRootAlias(), "library", "l");
+        hql.whereIn("l", "libraryType", LibrarySearchResults.LIBRARY_TYPES_TO_DISPLAY);
+      }
+    };
+    initialize(dataFetcher);
 
     // start with search panel open
     setTableFilterMode(true);
@@ -360,14 +389,6 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     DataTableModel<Tuple<String>> dataModel =
       new VirtualPagingEntityDataModel<String,Well,Tuple<String>>(dataFetcher, new RowsToFetchReference());
     initialize(dataModel);
-  }
-
-  private void initialize(DataFetcher<Tuple<String>,String,PropertyPath<Well>> dataFetcher,
-                          List<? extends TableColumn<Tuple<String>,?>> columns)
-  {
-    DataTableModel<Tuple<String>> dataModel =
-      new VirtualPagingEntityDataModel<String,Well,Tuple<String>>(dataFetcher, new RowsToFetchReference());
-    initialize(dataModel, columns);
   }
 
   @Override
@@ -637,13 +658,13 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     columns.add(new BooleanTupleColumn<Well,String>(RelationshipPath.from(Well.class).toProperty("deprecated"),
                                                     "Deprecated",
                                                     "Whether the well has been deprecated",
-                                                    TableColumn.UNGROUPED));
+                                                    WELL_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
 
     columns.add(new TextTupleColumn<Well,String>(Well.deprecationActivity.toProperty("comments"),
                                                  "Deprecation Reason",
                                                  "Why the well has been deprecated",
-                                                 TableColumn.UNGROUPED));
+                                                 WELL_COLUMNS_GROUP));
     columns.get(columns.size() - 1).setVisible(false);
   }
 
@@ -854,78 +875,6 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
       }
     }
     columns.addAll(otherColumns);
-  }
-
-  /**
-   * Effects the replacement of the NoOpDataFetcher (set as the default search for
-   * users entering the page) so that the current search will return results.
-   * 
-   * @motivation to be tied to the actionListener for search field buttons.
-   *             Sequence of a user search is:
-   *             <ol>
-   *             <li>User enters search patterns and submits (by pressing enter or the search button).</li>
-   *             <li>The Criteria field notifies the {@link Criterion} of the value change. This triggers the chain of
-   *             events that causes the table to refresh. If the table has been initialized with a NoOpDataFetcher (the
-   *             default), then no data is retrieved.</li>
-   *             <li>This action listener is invoked; it will call <code>initialize</code> on the parent
-   *             {@link DataTable} class:</li>
-   *             <li>replaces the {@link NoOpDataFetcher} with a valid {@link DataFetcher},</li>
-   *             <li>uses the {@link TableColumn}s from the users search set with the proper {@link Criterion},</li>
-   *             <li>triggers execution of the search.</li>
-   *             </ol>
-   * @see WellSearchResults#searchAll
-   */
-  public void searchCommandListener(javax.faces.event.ActionEvent e)
-  {
-    // By looking at this flag, we can tell if the search is being done in some context or not.
-    if (_mode == WellSearchResultMode.ALL_WELLS) {
-      TupleDataFetcher<Well,String> dataFetcher =
-        new TupleDataFetcher<Well,String>(Well.class, _dao) {
-        @Override
-        public void addDomainRestrictions(HqlBuilder hql)
-        {
-          hql.from(getRootAlias(), "library", "l");
-          hql.whereIn("l", "libraryType", LibrarySearchResults.LIBRARY_TYPES_TO_DISPLAY);
-        }
-        };
-      initialize(dataFetcher, getColumnManager().getAllColumns());
-    }
-  }
-
-  /**
-   * Override resetFilter() in order to handle the "reset all" command in
-   * "all wells" mode by resetting to an empty search result.
-   */
-  @UICommand
-  public String resetFilter()
-  {
-    if (_mode == WellSearchResultMode.ALL_WELLS) {
-      log.info("reverting to empty search result");
-      initialize();
-    }
-    return super.resetFilter();
-  }
-
-  @Override
-  public String resetColumnFilter()
-  {
-    if (_mode == WellSearchResultMode.ALL_WELLS) {
-      // if no other columns have criteria defined, reset to empty search result
-      TableColumn<Tuple<String>,?> resetColumn = (TableColumn<Tuple<String>,?>) getRequestMap().get("column");
-      boolean willHaveEmptyCriteria = true;
-      for (TableColumn<Tuple<String>,?> column : getColumnManager().getAllColumns()) {
-        if (!column.getCriterion().isUndefined() && column != resetColumn) {
-          willHaveEmptyCriteria = false;
-          break;
-        }
-      }
-      if (willHaveEmptyCriteria) {
-        // reset to an empty search result
-        log.info("all columns have empty criteria; reverting to empty search result");
-        initialize();
-      }
-    }
-    return super.resetColumnFilter();
   }
 
   public static String makeColumnName(MetaDataType mdt, String parentIdentifier)

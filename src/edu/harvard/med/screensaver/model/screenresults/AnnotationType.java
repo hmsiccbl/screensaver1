@@ -31,6 +31,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.OptimisticLock;
 
+import com.google.common.base.Function;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -61,7 +63,12 @@ public class AnnotationType extends AbstractEntity<Integer> implements MetaDataT
   public static final RelationshipPath<AnnotationType> study = RelationshipPath.from(AnnotationType.class).to("study", Cardinality.TO_ONE);
   public static final RelationshipPath<AnnotationType> annotationValues = RelationshipPath.from(AnnotationType.class).to("annotationValues");
 
-
+  public static final Function<AnnotationType,String> ToName = new Function<AnnotationType,String>() {
+    public String apply(AnnotationType entity)
+    {
+      return entity.getName();
+    }
+  };
   // private instance data
 
   private Integer _version;

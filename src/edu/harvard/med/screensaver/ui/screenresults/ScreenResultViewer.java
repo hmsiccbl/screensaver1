@@ -20,7 +20,7 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.harvard.med.iccbl.screensaver.io.screens.ScreenPositivesCountStudyCreator;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
@@ -234,10 +234,10 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
     ScreenResult screenResult = getEntity();
     String crossScreenCountColumnName = "";
     if (screenResult.getScreen().getScreenType() == ScreenType.SMALL_MOLECULE) {
-      crossScreenCountColumnName = "[" + ScreenPositivesCountStudyCreator.DEFAULT_SMALL_MOLECULE_STUDY_FACILITY_ID + "]";
+      crossScreenCountColumnName = "[" + ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM + "]";
     }
     else {
-      crossScreenCountColumnName = "[" + ScreenPositivesCountStudyCreator.DEFAULT_RNAI_STUDY_FACILITY_ID + "]";
+      crossScreenCountColumnName = "[" + ScreensaverConstants.DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI + "]";
     }
 
     for (DataColumn dataColumn : _screenResultsDao.findMutualPositiveColumns(screenResult)) {

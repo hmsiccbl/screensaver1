@@ -12,8 +12,6 @@ package edu.harvard.med.screensaver.db;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.hibernate.CacheMode;
@@ -21,6 +19,9 @@ import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
@@ -166,7 +167,8 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
       }
     });
   }
-  
+
+  //TODO: move to report class
   public int createScreenedReagentCounts(final ScreenType screenType,
                                           Screen study,
                                           AnnotationType positiveAnnotationType,
@@ -300,6 +302,12 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     return (AssayWell) result.get(0); 
   }      
 
+  /**
+   * Use SQL to populate the Study-to-Reagent link table: <br>
+   * Reagents could be added to the study in java-hibernate, however, this
+   * poses memory performance issues.
+   */
+  //TODO: move this to the report class
   private int populateStudyReagentLinkTable(final int screenId)
   {
     final int[] result = new int[1];
@@ -334,32 +342,33 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     return result[0];
   }
 
-  public void populateScreenResultWellLinkTable(final int screenResultId)
-    throws DataModelViolationException
-  {
-    runQuery(new edu.harvard.med.screensaver.db.Query() {
-      public List<?> execute(Session session)
-      {
-        String sql = "insert into screen_result_well_link (screen_result_id, well_id) "
-          + "select :screenResultId  as screen_result_id,"
-          + "well_id from (select distinct(well_id) from result_value "
-          + "join data_column using(data_column_id) "
-          + "where screen_result_id = :screenResultId and well_id is not null) as well_id";
-
-        log.debug("sql: " + sql);
-
-        Query query = session.createSQLQuery(sql);
-        query.setParameter("screenResultId", screenResultId);
-        int rows = query.executeUpdate();
-        if (rows == 0) {
-          throw new DataModelViolationException("No rows were updated: " +
-            query.getQueryString());
-    }
-        log.info("screen_result_well_link updated: " + rows);
-        return null;
-      }
-    });
-  }
+  //
+  //  public void populateScreenResultWellLinkTable(final int screenResultId)
+  //    throws DataModelViolationException
+  //  {
+  //    runQuery(new edu.harvard.med.screensaver.db.Query() {
+  //      public List<?> execute(Session session)
+  //      {
+  //        String sql = "insert into screen_result_well_link (screen_result_id, well_id) "
+  //          + "select :screenResultId  as screen_result_id,"
+  //          + "well_id from (select distinct(well_id) from result_value "
+  //          + "join data_column using(data_column_id) "
+  //          + "where screen_result_id = :screenResultId and well_id is not null) as well_id";
+  //
+  //        log.debug("sql: " + sql);
+  //
+  //        Query query = session.createSQLQuery(sql);
+  //        query.setParameter("screenResultId", screenResultId);
+  //        int rows = query.executeUpdate();
+  //        if (rows == 0) {
+  //          throw new DataModelViolationException("No rows were updated: " +
+  //            query.getQueryString());
+  //    }
+  //        log.info("screen_result_well_link updated: " + rows);
+  //        return null;
+  //      }
+  //    });
+  //  }
 
   public ScreenResult getLatestScreenResult()
   {
@@ -376,4 +385,6 @@ public class ScreenResultsDAOImpl extends AbstractDAO implements ScreenResultsDA
     if (results == null || results.isEmpty()) return null;
     return results.get(0);
   }
+
+
 }

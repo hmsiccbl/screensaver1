@@ -10,6 +10,9 @@
 package edu.harvard.med.screensaver.service.libraries;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import edu.harvard.med.screensaver.model.libraries.Plate;
 
@@ -20,7 +23,8 @@ public class DefaultPlateFacilityIdInitializer implements PlateFacilityIdInitial
   @Override
   public boolean initializeFacilityId(Plate plate)
   {
-    plate.setFacilityId(JOINER.join(plate.getPlateNumber(), plate.getCopy().getName(), plate.getLocation()));
+    Iterable<Object> facilityIdParts = Iterables.filter(Lists.<Object>newArrayList(plate.getPlateNumber(), plate.getCopy().getName(), plate.getLocation()), Predicates.notNull());
+    plate.setFacilityId(JOINER.join(facilityIdParts));
     return true;
   }
 }

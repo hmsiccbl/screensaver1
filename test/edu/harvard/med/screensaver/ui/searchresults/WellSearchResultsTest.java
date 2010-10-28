@@ -182,7 +182,6 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
     wellsBrowser.searchAll();
     assertEquals("search result is initially empty", 0, wellsBrowser.getRowCount());
     ((Criterion<String>) wellsBrowser.getColumnManager().getColumn("Well").getCriterion()).setOperatorAndValue(Operator.TEXT_STARTS_WITH, "B");
-    wellsBrowser.searchCommandListener(null);
     assertTrue("search result is non-empty after explicit search command listener is invoked", 0 != wellsBrowser.getRowCount());
   }
 
@@ -193,9 +192,8 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   {
     WellSearchResults wsr = wellsBrowser;
     wsr.searchAll();
-    wsr.searchCommandListener(null); // invoke search now (necessary when using searchAll(), above)
+    ((Criterion<Integer>) wsr.getColumnManager().getColumn("Plate").getCriterion()).setOperatorAndValue(Operator.GREATER_THAN_EQUAL, Integer.valueOf(0));
     setOrderBy(wsr);
-    wsr.clearFilter();
     DataTableModel model = wsr.getDataTableModel();
     verifySearchResult(wsr, model, _allWellKeys);
   }
@@ -347,7 +345,6 @@ public class WellSearchResultsTest extends AbstractSpringPersistenceTest
   {
     WellSearchResults wsr = wellsBrowser;
     wsr.searchAll();
-    wsr.searchCommandListener(null); // invoke search now (necessary when using searchAll(), above
 
     Map<String,Object> columnNameToExpectedValue = new HashMap<String,Object>();
     

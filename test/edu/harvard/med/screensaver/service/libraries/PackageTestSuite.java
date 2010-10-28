@@ -28,5 +28,6 @@ public class PackageTestSuite extends TestSuite
   {
     addTestSuite(edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManagerTest.class);
     addTestSuite(edu.harvard.med.screensaver.service.libraries.LibraryCreatorTest.class);
+    addTestSuite(edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializerTest.class);
   }
 }

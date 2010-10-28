@@ -12,24 +12,10 @@
 
 	<f:subview>
 
-		<t:panelGrid id="searchAndColumnsPanel" columns="1" width="100%">
-			<h:form>
-				<t:collapsiblePanel id="columnsSelectionPanel" var="isCollapsed"
-					rendered="#{!searchResults.capabilities['viewEntity'] || searchResults.summaryView}">
-					<f:facet name="header">
-						<t:headerLink immediate="true">
-							<t:outputText
-								value="Columns #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
-								escape="true" styleClass="label" />
-						</t:headerLink>
-					</f:facet>
-					<ss:columnSelectorTree rendered="#{searchResults.columnManager.useTreeWidget}"/>
-					<ss:columnSelectorReorderList rendered="#{searchResults.columnManager.useReorderListWidget}"/>
-				</t:collapsiblePanel>
-			</h:form>
+		<t:panelGrid id="searchAndColumnsPanel" columns="1" columnClasses="searchPanelColumn,searchPanelColumn">
 
 			<h:form id="searchForm">
-				<t:collapsiblePanel var="isCollapsed">
+				<t:collapsiblePanel value="#{searchResults.isPanelCollapsedMap['search']}"  var="isCollapsed">
 					<f:facet name="header">
 						<t:headerLink immediate="true">
 							<t:outputText
@@ -40,7 +26,7 @@
 
 					<!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
 					<t:commandButton id="defaultSearchButton" forceId="true"
-						styleClass="hiddenCommand"  actionListener="#{searchResults.searchCommandListener}"/>
+						styleClass="hiddenCommand"/>
 
 					<t:panelGrid styleClass="groupingPanel" style="margin-top: 2px">
 						<t:dataTable id="queryTable" var="column"
@@ -65,8 +51,8 @@
 						<t:panelGroup id="searchCommandPanel">
 							<!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
 							<t:commandButton id="searchButton" value="Search"
-								styleClass="command" actionListener="#{searchResults.searchCommandListener}"/>
-							<t:commandButton value="Reset All" immediate="true"
+								styleClass="command"/>
+							<t:commandButton value="Clear All" immediate="true"
 								action="#{searchResults.resetFilter}" styleClass="command" />
 							<t:selectBooleanCheckbox id="showFiltersInTableOption"
 								value="#{searchResults.tableFilterMode}"
@@ -77,6 +63,28 @@
 					</t:panelGrid>
 				</t:collapsiblePanel>
 			</h:form>
+
+      <h:form>
+        <t:collapsiblePanel id="columnsSelectionPanel"
+          value="#{searchResults.isPanelCollapsedMap['columns']}"
+          var="isCollapsed"
+          rendered="#{!searchResults.capabilities['viewEntity'] || searchResults.summaryView}">
+          <f:facet name="header">
+            <t:headerLink immediate="true">
+              <t:outputText
+                value="Columns (add/remove) #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
+                escape="true" styleClass="label" />
+            </t:headerLink>
+          </f:facet>
+          <t:panelGrid styleClass="groupingPanel"
+            style="margin-top: 2px">
+            <ss:columnSelectorTree
+              rendered="#{searchResults.columnManager.useTreeWidget}" />
+            <ss:columnSelectorReorderList
+              rendered="#{searchResults.columnManager.useReorderListWidget}" />
+          </t:panelGrid>
+        </t:collapsiblePanel>
+      </h:form>
 		</t:panelGrid>
 
 		<h:form>
@@ -131,8 +139,8 @@
 									<t:panelGrid columns="2">
 										<t:commandButton id="search" forceId="true" value="Search"
 											styleClass="command"
-											rendered="#{searchResults.tableFilterMode}"  actionListener="#{searchResults.searchCommandListener}"/>
-                    <t:commandButton value="Reset" immediate="true"
+											rendered="#{searchResults.tableFilterMode}"/>
+                    <t:commandButton value="Clear" immediate="true"
                       action="#{searchResults.resetColumnFilter}"
                       styleClass="command"
                       rendered="#{searchResults.tableFilterMode}" />
@@ -212,7 +220,7 @@
 				</ui:define>
 
 				<ui:define name="custom4">
-          <t:panelGrid id="exportCommand" columns="2">
+          <t:panelGrid id="exportCommand" columns="2" styleClass="layout">
             <t:commandButton id="exportSearchResultsCommandButton"
               rendered="#{(!searchResults.capabilities['entityView'] || searchResults.summaryView) &amp;&amp; searchResults.dataExporterSelector.size > 0}"
               value="Export"

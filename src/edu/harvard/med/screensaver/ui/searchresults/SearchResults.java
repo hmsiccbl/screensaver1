@@ -60,6 +60,8 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
         _capabilities.put(capability, true);
       }
     }
+    getIsPanelCollapsedMap().put("columns", true);
+    getIsPanelCollapsedMap().put("search", true);
     initialize();
   }
 
@@ -87,20 +89,13 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
    */
   public void initialize()
   {
-    initialize(new ArrayList<TableColumn<R,?>>());
-  }
-
-  /** 
-   * Initialize with empty search result, but with columns 
-   */
-  public void initialize(List<? extends TableColumn<R,?>> columns)
-  {
     initialize(new InMemoryDataModel<R>(new NoOpDataFetcher<R,K,P>()),
-               columns,
+               new ArrayList<TableColumn<R,?>>(),
                new UISelectOneBean<Integer>(Arrays.asList(0)),
                false);  
   }
-  
+
+
   // abstract methods
 
   abstract protected List<? extends TableColumn<R,?>> buildColumns();
@@ -148,8 +143,4 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
     return new UISelectOneBean<Integer>(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
                                         DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1));
   }
-
-
-  // private instance methods
-
 }

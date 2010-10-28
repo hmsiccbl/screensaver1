@@ -414,8 +414,13 @@ public class CommandLineApplication
       admin = dao.findEntityByProperty(AdministratorUser.class, "loginId", loginId);
       criterionMessage = "Login ID=" + loginId;
     }
+    else if (isCommandLineFlagSet("-AE")) {
+      String ecommonsId = getCommandLineOptionValue("-AE");
+      admin = dao.findEntityByProperty(AdministratorUser.class, "ECommonsId", ecommonsId);
+      criterionMessage = "eCommons ID=" + ecommonsId;
+    }
     else {
-      throw new IllegalArgumentException("option --admin-id or --admin-login-id must be speciifed");
+      throw new IllegalArgumentException("option --admin-id, --admin-login-id, or --user-ecommons-id (admin) must be speciifed");
     }
     if (admin == null) {
       throw new IllegalArgumentException("no administrator user found with " + criterionMessage);

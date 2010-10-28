@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.ScrollableResults;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.screensaver.model.Entity;
@@ -53,6 +54,8 @@ public interface GenericEntityDAO
                                            Object... constructorArguments);
 
   public <E> List<E> runQuery(edu.harvard.med.screensaver.db.Query<E> query);
+
+  public ScrollableResults runScrollQuery(final edu.harvard.med.screensaver.db.ScrollQuery query);
 
   /**
    * Make the specified entity persistent. The entity's ID property will be set

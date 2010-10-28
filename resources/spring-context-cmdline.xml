@@ -25,6 +25,11 @@
    class="edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy">
   </bean>
 
+  <bean
+    id="plateFacilityIdInitializer"
+    class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
+  </bean>
+
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-config.xml"/>
   <import resource="spring-context-services.xml"/>

@@ -101,6 +101,23 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
     }
   }
 
+  public void searchScreensForProject(final String projectId)
+  {
+    setTitle("Screens for project " + projectId);
+    initialize(new InMemoryEntityDataModel<Screen,Integer>(new EntityDataFetcher<Screen,Integer>(Screen.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        hql.where(getRootAlias(), "projectId", Operator.EQUAL, projectId);
+      }
+    }));
+
+    if (getColumnManager().getColumn("Project Phase") != null) {
+      getColumnManager().setSortColumnName("Project Phase");
+      getColumnManager().setSortAscending(true);
+    }
+  }
+
   @Override
   public void searchAll()
   {
@@ -379,6 +396,19 @@ public class ScreenSearchResults extends EntityBasedEntitySearchResults<Screen,I
       "Project ID", "The project ID of the screen", TableColumn.UNGROUPED) {
       @Override
       public String getCellValue(Screen screen) { return screen.getProjectId(); }
+
+      @Override
+      public boolean isCommandLink()
+      {
+        return true;
+      }
+
+      @Override
+      public Object cellAction(Screen screen)
+      {
+        searchScreensForProject(screen.getProjectId());
+        return BROWSE_SCREENS;
+      }
     });
     columns.add(new TextEntityColumn<Screen>(RelationshipPath.from(Screen.class).toProperty("title"),
       "Title", "The title of the screen", TableColumn.UNGROUPED) {

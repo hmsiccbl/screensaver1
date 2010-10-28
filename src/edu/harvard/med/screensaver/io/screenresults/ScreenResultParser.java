@@ -25,13 +25,12 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.math.IntRange;
-import org.apache.log4j.Logger;
-
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang.math.IntRange;
+import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -580,10 +579,10 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
               boolean duplicate = !parsedWellKeys.add(wellKey.getKey());
               if (duplicate) {
                 if (!_ignoreDuplicateErrors) {
-                  wellNameCell.addError("already parsed this well");
+                  wellNameCell.addError("duplicate well: " + wellKey);
                 }
                 else {
-                  log.debug("Already parsed: " + wellKey + ", duplicate found at: " + wellNameCell );
+                  log.debug("duplicate well: " + wellKey + ", duplicate found at: " + wellNameCell);
                 }
               } 
               else {
@@ -668,7 +667,7 @@ public class ScreenResultParser implements ScreenResultWorkbookSpecification
       AssayWell assayWell = createAssayWell(well, assayWellControlType);
       List<DataColumn> wellExcludes = _excludeParser.parseList(row.getCell(WellInfoColumn.EXCLUDE.ordinal()));
       int iDataColumn = 0;
-      int maxReplicateOrdinal = 0;
+      int maxReplicateOrdinal = 1;
       for (DataColumn dataColumn : screenResult.getDataColumns()) {
         Cell cell = row.getCell(getDataColumn(iDataColumn));
         boolean isExclude = (wellExcludes != null && wellExcludes.contains(dataColumn));

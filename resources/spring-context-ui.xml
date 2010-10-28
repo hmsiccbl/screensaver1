@@ -354,7 +354,7 @@
     <constructor-arg ref="studyViewer" />
     <constructor-arg ref="wellsSdfDataExporterForUi" />
     <constructor-arg ref="libraryContentsVersionRef" />
-    <constructor-arg ref="duplexConfirmationReport" />
+    <constructor-arg ref="screenResultReporter" />
     <aop:scoped-proxy/>
   </bean>
 

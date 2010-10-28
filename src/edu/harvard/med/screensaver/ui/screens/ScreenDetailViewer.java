@@ -536,15 +536,18 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   }
   
   @Override
-  protected boolean validateEntity(Screen screen)
+  protected boolean validateEntity(final Screen screen)
   {
+    if (!_screenDao.isScreenFacilityIdUnique(screen)) {
+      showMessage("duplicateEntity", "Screen ID");
+      return false;
+    }
+
     LocalDate max = screen.getMaxAllowedDataPrivacyExpirationDate();
     LocalDate min = screen.getMinAllowedDataPrivacyExpirationDate();
-    
     //TODO: consider using a Comparator Utility class! - sde4
-    if(max != null && min != null)
-    {
-      if(max.compareTo(min) < 0) {
+    if (max != null && min != null) {
+      if (max.compareTo(min) < 0) {
         showMessage("screens.dataPrivacyExpirationDateOrderError", min, max);
         return false;
       }
@@ -555,9 +558,14 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   @UICommand
   public String addRelatedScreen()
   {
+    if (getEntity().getProjectId() == null) {
+      showMessage("screens.projectIdRequiredForRelatedScreens");
+      return REDISPLAY_PAGE_ACTION_RESULT;
+    }
     Screen relatedScreen = _screenGenerator.createRelatedScreen((AdministratorUser) getScreensaverUser(),
                                                                 getEntity(),
-                                                                ProjectPhase.COUNTER_SCREEN);
+                                                                null);
+
     return getThisProxy().editNewEntity(relatedScreen);
   }
 

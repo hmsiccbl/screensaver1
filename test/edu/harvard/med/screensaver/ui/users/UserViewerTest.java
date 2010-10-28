@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
 import edu.harvard.med.screensaver.ui.util.Messages;
+import edu.harvard.med.screensaver.util.CryptoUtils;
 
 public class UserViewerTest extends AbstractTransactionalSpringContextTests
 {
@@ -143,5 +144,54 @@ public class UserViewerTest extends AbstractTransactionalSpringContextTests
     assertEquals(today, group2.get(1).getValue().getDatePerformed());
     assertEquals("Admin User", group2.get(1).getValue().getCreatedBy().getFullNameFirstLast());
     assertTrue(group2.get(1).getValue().isExpiration());
+  }
+
+  public void testUpdateLoginIdAndPassword()
+  {
+    ScreeningRoomUser user = new ScreeningRoomUser("Test", "User");
+    genericEntityDao.persistEntity(user);
+    setComplete();
+    endTransaction();
+
+    user = genericEntityDao.reloadEntity(user);
+    userViewer.setEntity(user);
+    userViewer.getEntity().setLoginId("loginId");
+    userViewer.save();
+    user = genericEntityDao.reloadEntity(user);
+    assertNull("new login ID cannot be set without password", user.getLoginId());
+    assertNull("new login ID cannot be set without password", user.getDigestedPassword());
+
+    userViewer.setEntity(user);
+    userViewer.getEntity().setLoginId("loginId");
+    userViewer.setNewPassword1("xyz");
+    userViewer.setNewPassword2("xy");
+    userViewer.save();
+    user = genericEntityDao.reloadEntity(user);
+    assertNull("passwords must match", user.getLoginId());
+    assertNull("passwords must match", user.getDigestedPassword());
+
+    userViewer.setEntity(user);
+    userViewer.setNewPassword1("xyz");
+    userViewer.setNewPassword2("xyz");
+    userViewer.save();
+    user = genericEntityDao.reloadEntity(user);
+    assertNull("passwords cannot be entered w/o login ID", user.getLoginId());
+    assertNull("passwords cannot be entered w/o login ID", user.getDigestedPassword());
+
+    userViewer.setEntity(user);
+    userViewer.getEntity().setLoginId("loginId");
+    userViewer.setNewPassword1("xyz");
+    userViewer.setNewPassword2("xyz");
+    userViewer.save();
+    user = genericEntityDao.reloadEntity(user);
+    assertEquals("loginId", user.getLoginId());
+    assertEquals(CryptoUtils.digest("xyz"), user.getDigestedPassword());
+
+    userViewer.setEntity(user);
+    userViewer.getEntity().setLoginId(null);
+    userViewer.save();
+    user = genericEntityDao.reloadEntity(user);
+    assertNull("loginId", user.getLoginId());
+    assertNull("clearing login ID also clears password", user.getDigestedPassword());
   }
 }

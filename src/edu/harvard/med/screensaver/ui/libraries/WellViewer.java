@@ -48,8 +48,8 @@ import edu.harvard.med.screensaver.model.screenresults.ConfirmedPositiveValue;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
-import edu.harvard.med.screensaver.service.libraries.rnai.DuplexConfirmationReport;
-import edu.harvard.med.screensaver.service.libraries.rnai.DuplexConfirmationReport.ConfirmationReport;
+import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter;
+import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter.ConfirmationReport;
 import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
@@ -88,7 +88,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
   private Reagent _versionedReagent;
 
   private ConfirmationReportTableModel _confirmationReportTableModel;
-  private DuplexConfirmationReport _duplexConfirmationReport;
+  private ScreenResultReporter _screenResultReporter;
   
   /**
    * @motivation for CGLIB2
@@ -105,7 +105,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
                     StudyViewer studyViewer,
                     WellsSdfDataExporter wellsSdfDataExporter,
                     LibraryContentsVersionReference libraryContentsVersionRef,
-                    DuplexConfirmationReport duplexConfirmationReport)
+                    ScreenResultReporter screenResultReporter)
   {
     super(thisProxy,
           Well.class,
@@ -121,7 +121,7 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     _wellsSdfDataExporter = wellsSdfDataExporter;
     _libraryContentsVersionRef = libraryContentsVersionRef == null ? new LibraryContentsVersionReference()
       : libraryContentsVersionRef;
-    _duplexConfirmationReport = duplexConfirmationReport;
+    _screenResultReporter = screenResultReporter;
     getIsPanelCollapsedMap().put("otherWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("duplexWells", Boolean.TRUE);
     getIsPanelCollapsedMap().put("annotations", Boolean.TRUE);
@@ -188,121 +188,6 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     }
     return _otherWellsDataModel;
   }
-  
-//  @UICommand
-//  public String browseOtherWells()
-//  {
-//    Iterable<ReagentVendorIdentifier> rvis = 
-//      Iterables.transform((List<Reagent>) getOtherWellsDataModel().getWrappedData(),
-//                          new Function<Reagent,ReagentVendorIdentifier>() { public ReagentVendorIdentifier apply(Reagent r) { return r.getVendorId(); } });
-//    _wellSearchResults.searchReagents(Sets.newHashSet(rvis));
-//    return BROWSE_WELLS;
-//  }
-
-  //TODO: Remove this, as [#1476] replaces it (confirmation table)
-  public DataModel getDuplexWellsDataModel()
-  {
-    if (_duplexWellsDataModel == null) {
-      if (_versionedReagent != null && _versionedReagent instanceof SilencingReagent) {
-        Set<Well> well = ((SilencingReagent) _versionedReagent).getDuplexWells();
-        _duplexWellsDataModel = new ListDataModel(Lists.newArrayList(well));
-      }
-      else {
-        _duplexWellsDataModel = new ListDataModel(Lists.newArrayList());
-      }
-    }
-    return _duplexWellsDataModel;
-  }
-  
-  public static class ConfirmationReportTableModel
-  {
-    public DataModel _columnDataModel = new ListDataModel(); //List<SilencingReagent>
-    public DataModel _dataModel = new ListDataModel(); // List<Map<SilencingReagent,SimpleCell>>
-    private ConfirmationReport _report;
-
-    public ConfirmationReportTableModel()
-    {};
-
-    public ConfirmationReportTableModel(ConfirmationReport report)
-    {
-      _report = report;
-      _dataModel = new ListDataModel(_report.screens);
-      _columnDataModel = new ListDataModel(_report.reagents);
-    }
-    
-    public DataModel getDataModel()
-    {
-      return _dataModel;
-    }
-
-    public DataModel getColumnDataModel()
-    {
-      return _columnDataModel;
-    }
-
-    public SimpleCell getCell()
-    {
-      Screen s = getScreen();
-      SilencingReagent r = _report.reagents.get(_columnDataModel.getRowIndex());
-      ConfirmedPositiveValue value = _report.results.get(s).get(r);
-      String style = getStyleClass(value);
-      
-      return new SimpleCell(r.getSequence(), value, "Value for " + r.getSequence())
-        .withStyleClass(style)
-        .withLinkValue(r.getWell());
-    }
-
-    private String getStyleClass(ConfirmedPositiveValue value)
-    {
-      String style = "";
-      if (value != null) {
-        switch (value) {
-          case CONFIRMED_POSITIVE:
-            style = "confirmationReportConfirmedPositive";
-            break;
-          case FALSE_POSITIVE:
-            style = "confirmationReportFalsePositive";
-            break;
-          case INCONCLUSIVE:
-            style = "confirmationReportInconclusive";
-            break;
-          default:
-            style = "confirmationReportNoData";
-            break;
-        }
-      }
-      return style;
-    }
-
-    public Screen getScreen()
-    {
-      return _report.screens.get(_dataModel.getRowIndex());
-    }
-  } 
-  
-  public ConfirmationReportTableModel getConfirmationReport()
-  {
-    if (_versionedReagent == null || !(_versionedReagent instanceof SilencingReagent)
-      || !_versionedReagent.getWell().getLibrary().isPool()) {
-      return new ConfirmationReportTableModel();
-    }
-    if (_confirmationReportTableModel == null) { //TODO: will this report become too stale if a user session lasts too long?
-      ConfirmationReport report = _duplexConfirmationReport.getDuplexReconfirmationReport((SilencingReagent) _versionedReagent);
-      _confirmationReportTableModel = new ConfirmationReportTableModel(report);
-    }
-    return _confirmationReportTableModel;
-  }
-
-//  @UICommand
-//  public String browseDuplexWells()
-//  {
-//    Iterable<WellKey> wellKeys =
-//      Iterables.transform((List<Well>) getDuplexWellsDataModel().getWrappedData(),
-//                          new Function<Well,WellKey>() { public WellKey apply(Well w) { return w.getWellKey(); } });
-//    _wellSearchResults.searchWells(Sets.newHashSet(wellKeys));
-//    return BROWSE_WELLS;
-//  }
-
 
   public DataModel getAnnotationNameValueTable()
   {
@@ -487,4 +372,96 @@ public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,
     return ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula() == null ?
       "" : ((SmallMoleculeReagent) getVersionedReagent()).getMolecularFormula().toHtml();
   }
+
+  //// confirmation report table model
+  public class ConfirmationReportTableModel
+  {
+    public DataModel _columnDataModel = new ListDataModel(); //List<SilencingReagent>
+    public DataModel _dataModel = new ListDataModel(); // List<Map<SilencingReagent,SimpleCell>>
+    private ConfirmationReport _report;
+
+    public ConfirmationReportTableModel()
+    {};
+
+    public ConfirmationReportTableModel(ConfirmationReport report)
+    {
+      _report = report;
+      _dataModel = new ListDataModel(_report.getScreens());
+
+      List<SilencingReagent> duplexReagents = Lists.newArrayList();
+      for (SilencingReagent dr : _report.getDuplexReagents()) {
+        duplexReagents.add(getDao().reloadEntity(dr, true, SilencingReagent.well.getPath()));
+      }
+      _columnDataModel = new ListDataModel(duplexReagents);
+    }
+
+    public DataModel getDataModel()
+    {
+      return _dataModel;
+    }
+
+    public DataModel getColumnDataModel()
+    {
+      return _columnDataModel;
+    }
+
+    public SimpleCell getCell()
+    {
+      Screen s = getScreen();
+      SilencingReagent r = _report.getDuplexReagents().get(_columnDataModel.getRowIndex());
+      ConfirmedPositiveValue value = _report.getResults().get(s).get(r);
+      String style = getStyleClass(value);
+
+      return new SimpleCell(r.getSequence(), value, "Value for " + r.getSequence())
+        .withStyleClass(style)
+        .withLinkValue(r.getWell());
+    }
+
+    private String getStyleClass(ConfirmedPositiveValue value)
+    {
+      String style = "";
+      if (value != null) {
+        switch (value) {
+          case CONFIRMED_POSITIVE:
+            style = "confirmationReportConfirmedPositive";
+            break;
+          case FALSE_POSITIVE:
+            style = "confirmationReportFalsePositive";
+            break;
+          case INCONCLUSIVE:
+            style = "confirmationReportInconclusive";
+            break;
+          default:
+            style = "confirmationReportNoData";
+            break;
+        }
+      }
+      return style;
+    }
+
+    public Screen getScreen()
+    {
+      return _report.getScreens().get(_dataModel.getRowIndex());
+    }
+  }
+
+  public ConfirmationReportTableModel getConfirmationReport()
+  {
+    if (_versionedReagent == null || !(_versionedReagent instanceof SilencingReagent)
+      || !_versionedReagent.getWell().getLibrary().isPool()) {
+      return new ConfirmationReportTableModel();
+    }
+    if (_confirmationReportTableModel == null) { //TODO: will this report become too stale if a user session lasts too long?
+      ConfirmationReport report = _screenResultReporter.getDuplexReconfirmationReport((SilencingReagent) _versionedReagent);
+      if (report.getDuplexReagents().isEmpty()) { // this will occur if there are no confirmation results.  the UI should still show the duplex wells
+        report.setDuplexReagents(((SilencingReagent) _versionedReagent).getDuplexSilencingReagents());
+      }
+
+      _confirmationReportTableModel = new ConfirmationReportTableModel(report);
+    }
+    return _confirmationReportTableModel;
+  }
+
+
+
 }

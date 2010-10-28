@@ -30,7 +30,6 @@ import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.searchresults.CsvDataExporter;
 import edu.harvard.med.screensaver.ui.searchresults.ExcelWorkbookDataExporter;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
 import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
@@ -455,12 +454,6 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
                              getColumnManager().getSortDirection());
     setRowIndex(0);
   }
-
-  /**
-   * This is a design hook that can be used by sub classes to implement Screensaver search workflow.
-   * @see WellSearchResults#searchCommandListener(ActionEvent)
-   */
-  public void searchCommandListener(javax.faces.event.ActionEvent e) {}
 
   // private methods
 
