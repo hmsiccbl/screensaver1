@@ -1,17 +1,18 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 
-# adds the 'HeadURL' and 'Id' svn keywords to the svn properties of
-# the specified files, iff HeadURL is not already an svn:keywords
-# property
+# adds the specified svn keywords to the 'svn:keywords' subversion property of
+# the specified file, iff the keyword is not already an svn:keywords property
 
-my $keywords="'HeadURL Id'";
-
-my $file = $ARGV[0];
+my $file = shift;
+my @keywords = @ARGV;
 my $svn_props=`svn pg svn:keywords $file`;
-my $has_svn_keywords=($svn_props =~ /HeadURL/);
-unless ($has_svn_keywords) {
-    system("svn propset svn:keywords $keywords $file ");
-    print "added svn:keywords $keywords to $file\n";
+my $needs_update;
+for $keyword (@keywords) {
+  $needs_update = 1 unless ($svn_props =~ /$keyword/);
+}
+if ($needs_update) {
+  system("svn propset svn:keywords '" . join(' ', @keywords) . "' $file ");
+  print "added svn:keywords @keywords to $file\n";
 }
 
 
