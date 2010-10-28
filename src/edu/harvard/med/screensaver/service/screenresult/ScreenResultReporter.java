@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.CacheMode;
 import org.hibernate.Query;
@@ -24,11 +28,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.AbstractDAO;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -105,10 +104,6 @@ public class ScreenResultReporter
    * and report on whether the results score a {@link DataType#CONFIRMED_POSITIVE_INDICATOR}<br>
    * <br>
    * re: [#1476] RNAi duplex validation report<br>
-   * <br>
-   * 
-   * @param poolReagent
-   * @return
    */
   public ConfirmationReport getDuplexReconfirmationReport(final SilencingReagent poolReagent)
   {
@@ -511,7 +506,6 @@ public class ScreenResultReporter
      * WeightedAverage = sum(D[i]*i)/sum(D[i])
      * 
      * @param binArray - for each bin: index=itemValue, bin[index]=itemWeight
-     * @return
      */
     public static float getWeightedAverage(int[] binArray, int decimalPlaces)
     {

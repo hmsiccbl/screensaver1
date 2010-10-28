@@ -40,18 +40,16 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
  * this (and don't have to cut and paste code between various main() methods).
  * Also provides help with:
  * <ul>
- * <li>command-line argument parsing (including special-case handling of
- * database connection options)
+ * <li>command-line argument parsing (including special-case handling of database connection options)
  * <li>obtaining Spring-managed beans.
- * <ul>.
+ * <ul>
+ * .
  * <p>
- * Normally, a screensaver distribution will use the database connection
- * settings specified in "classpath:screensaver.properties". However, if
- * {@link #processOptions(boolean, boolean)} is called with
- * acceptDatabaseOptions=true, the command line options 'dbhost', 'dbport',
- * 'dbname', 'dbuser', and 'dbpassword' will be used to configure the database
- * connection settings.
- *
+ * Normally, a screensaver distribution will use the database connection settings specified in
+ * "classpath:screensaver.properties". However, if {@link #processOptions(boolean, boolean, boolean)} is called with
+ * acceptDatabaseOptions=true, the command line options 'dbhost', 'dbport', 'dbname', 'dbuser', and 'dbpassword' will be
+ * used to configure the database connection settings.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

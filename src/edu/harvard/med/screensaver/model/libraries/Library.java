@@ -398,8 +398,6 @@ public class Library extends AuditedAbstractEntity<Integer>
    * Get the provider of the library. The provider may be a commercial vendor, an academic lab, etc. Note that a library
    * may be comprised of reagents from multiple {@link Reagent#getVendorId() vendors}, and these vendor(s) are not
    * necessarily the same as the library's provider.
-   * 
-   * @return
    */
   @org.hibernate.annotations.Type(type = "text")
   public String getProvider()

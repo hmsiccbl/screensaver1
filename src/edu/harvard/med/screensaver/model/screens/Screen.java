@@ -53,6 +53,7 @@ import org.hibernate.annotations.SortType;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
@@ -85,7 +86,6 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.service.screenresult.ScreenResultLoader;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 
 
@@ -694,9 +694,8 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   }
 
   /**
-   * Clear the screen result (in memory only). Use
-   * {@link ScreenResultLoader#deleteScreenResult(ScreenResult)} to delete from
-   * persistent storage.
+   * Clear the screen result (in memory only). Use {@link ScreenResultsDAO#deleteScreenResult(ScreenResult)} to delete
+   * from persistent storage.
    */
   public void clearScreenResult()
   {

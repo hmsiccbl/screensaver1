@@ -68,8 +68,6 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
   /**
    * Initializes the SearchResults for a new data set. Columns are (re)built,
    * existing data is cleared and (re)fetched via the specified DataFetcher.
-   * 
-   * @param dataFetcher
    */
   public void initialize(DataTableModel<R> dataTableModel)
   {

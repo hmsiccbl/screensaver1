@@ -79,11 +79,6 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
 
   /**
    * Construct an initialized <code>Plate</code>. Intended only for use by {@link Copy}.
-   * @param copy the copy
-   * @param plateNumber the plate number
-   * @param location the location
-   * @param plateType the plate type
-   * @param volume the volume
    * @motivation intended only for use by {@link Copy}
    */
   Plate(Copy copy,

@@ -182,9 +182,8 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
   /**
    * Called from the top level menu page.
    * 
-   * @motivation Initializes the DataTable with a NoOpDataFetcher; causing the bean
-   *             to return an empty search result on the first viewing.
-   * @see WellSearchResults#searchCommandListener(javax.faces.event.ActionEvent)
+   * @motivation Initializes the DataTable with a specialized DataFetcher; causing the bean
+   *             to return an empty search result where there all search criteria are undefined
    */
   @Override
   public void searchAll()

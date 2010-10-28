@@ -12,15 +12,14 @@ package edu.harvard.med.screensaver.service.libraries;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 
 /**
- * Service that initializes a {@link Plate}'s {@link Plate#facilityId facility identifier} using a facility-specific
- * convention for generating these identifiers.
+ * Service that initializes a {@link Plate}'s {@link Plate#getFacilityId() facility identifier} using a
+ * facility-specific convention for generating these identifiers.
  * 
  * @author atolopko
  */
 public interface PlateFacilityIdInitializer
 {
   /**
-   * @param Plate
    * @return true if the Plate's facility identifier was updated
    */
   public boolean initializeFacilityId(Plate plate);

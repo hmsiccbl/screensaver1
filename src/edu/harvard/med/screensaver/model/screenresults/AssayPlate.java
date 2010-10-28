@@ -48,7 +48,7 @@ import edu.harvard.med.screensaver.model.screens.Screen;
  * in its wells by combining the {@link Reagent}s with the biological targets (e.g., cells). If screening multiple
  * replicates, one assay plate will exist for each replicate and will have an assigned {@link #getReplicateOrdinal()
  * replicate ordinal}. If an assay plate screening fails, it may be necessary to create new assay plates to re-screen
- * the library {@link plate}, but these repeated assay plates must belong to new {@link LibraryScreening}. It is valid
+ * the library {@link Plate}, but these repeated assay plates must belong to new {@link LibraryScreening}. It is valid
  * for an AssayPlate to have a missing {@link #getLibraryScreening() library screening}, while having a
  * {@link #getScreenResultDataLoading() data loading activity}. It is not valid for an AssayPlate to exist without
  * having an association to one of these activities.
@@ -93,7 +93,7 @@ public class AssayPlate extends AbstractEntity<Integer> implements Comparable<As
   /** @motivation for hibernate */
   protected AssayPlate() {}
 
-  /** should only be called by {@link Screen#createAssayPlate(Plate, int)} */
+  /* should only be called by Screen.createAssayPlate */
   public AssayPlate(Screen screen, Plate plateScreened, int replicateOrdinal)
   {
     this(screen, plateScreened.getPlateNumber(), replicateOrdinal);

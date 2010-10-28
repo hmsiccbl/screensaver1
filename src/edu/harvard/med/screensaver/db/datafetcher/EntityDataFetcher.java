@@ -27,12 +27,10 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 /**
- * DataFetcher that fetches entities or entity networks from persistent storage.
- * As entities have relationships, and thus form entity networks, this
- * DataFetcher allows the network "structure" to be specified via
- * {@link #setRelationshipsToFetch}. Subclasses can also enforce
- * additional, implicit filtering constraints on the data set to be fetched via
- * {@link #addDomainRestrictions(HqlBuilder)}.
+ * DataFetcher that fetches entities or entity networks from persistent storage. As entities have relationships, and
+ * thus form entity networks, this DataFetcher allows the network "structure" to be specified via
+ * {@link #setPropertiesToFetch}. Subclasses can also enforce additional, implicit filtering constraints on the data set
+ * to be fetched via {@link #addDomainRestrictions(HqlBuilder)}.
  */
 public class EntityDataFetcher<E extends Entity,K> extends PropertyPathDataFetcher<E,E,K>
 {

@@ -113,7 +113,6 @@ public class StringUtils
 
   /**
    * @return true if s contains only whitespace, is zero-length, or null
-   * @see #isBlank
    */
   // TODO: rename to isBlank and add a proper isEmpty method, above
   public static boolean isEmpty(String s)
