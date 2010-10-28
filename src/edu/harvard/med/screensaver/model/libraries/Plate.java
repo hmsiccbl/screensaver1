@@ -43,7 +43,7 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 
 /**
- * A plate for a particular {@link Library} {@link Copy}. If the Plate has been
+ * A plate for a particular {@link Library} {@link Copy}.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
