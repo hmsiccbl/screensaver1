@@ -28,6 +28,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -35,15 +37,7 @@ import edu.harvard.med.screensaver.model.AttachedFileType;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-import org.apache.log4j.Logger;
 
-
-/**
- * A Hibernate entity bean representing a publication.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- */
 @Entity
 @org.hibernate.annotations.Proxy
 @edu.harvard.med.screensaver.model.annotations.ContainedEntity(containingEntityClass=Screen.class)

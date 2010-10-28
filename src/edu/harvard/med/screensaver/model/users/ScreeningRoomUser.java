@@ -51,10 +51,10 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
 
-
 /**
- * A Hibernate entity bean representing a screening room user.
- *
+ * A person that is using the screening facility to conduct one or more {@link Screen}s.
+ * 
+ * @see AdministratorUser
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

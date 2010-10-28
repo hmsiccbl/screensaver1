@@ -59,19 +59,10 @@ import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
-
 /**
- * A Hibernate entity bean representing a Screensaver user. A Screensaver user
+ * A person that is a user of the screening facility and/or Screensaver itself. A Screensaver user
  * may be an {@link AdministratorUser} and/or a {@link ScreeningRoomUser}.
- * Also acts as JAAS {@link java.security.Principal}.
- * <p>
- * This parent "user" class supports multiple forms of login IDs. The
- * <code>loginID</code> property is a Screensaver-managed login ID, whereas
- * the <code>eCommonsID</code> and <code>harvardID</code> properties are
- * managed at higher organizational levels, and the passwords for these latter
- * login IDs are <i>not</i> stored by Screensaver (authentication via these
- * IDs will require use of a network authentication service).
- *
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
@@ -523,8 +514,7 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
   }
 
   /**
-   * Get the eCommons ID.
-   * @return the eCommons ID
+   * Harvard-specific user identifier for authentication purposes.
    */
   // TODO: make this unique when duplicates are taken care of in the database
   //@Column(unique=true)
@@ -534,10 +524,6 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
     return _eCommonsId;
   }
 
-  /**
-   * Set the eCommons ID.
-   * @param eCommonsId the new eCommons ID
-   */
   public void setECommonsId(String eCommonsId)
   {
     if (eCommonsId != null && !eCommonsId.toLowerCase().equals(eCommonsId)) {
@@ -547,7 +533,8 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
   }
 
   /**
-   * Get the harvard id.
+   * Harvard-specific user identifier.
+   * 
    * @return the harvard id
    */
   @org.hibernate.annotations.Type(type="text")
@@ -556,10 +543,6 @@ abstract public class ScreensaverUser extends AuditedAbstractEntity<Integer> imp
     return _harvardId;
   }
 
-  /**
-   * Set the harvard id.
-   * @param harvardId the new harvard id
-   */
   public void setHarvardId(String harvardId)
   {
     _harvardId = harvardId;

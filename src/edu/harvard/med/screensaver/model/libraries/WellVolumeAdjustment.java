@@ -38,16 +38,15 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 
 /**
- * A Hibernate entity bean representing a well volume adjustment. A well volume
- * adjustment normally occurs when the lab removes liquid from a library copy
+ * A well volume adjustment normally occurs when the lab removes liquid from a library copy
  * plate in order to produce assay plates; see {@link LabCherryPick}. Rarely, a
  * well volume adjustment occurs to reconcile any differences detected between
  * the physical volume of a library copy well and the volume reported by the
  * Screensaver database; see {@link WellVolumeCorrectionActivity}.
  * <p>
- * {@link #getLabCherryPick()} returns non-null iff {@link
- * #getWellVolumeCorrectionActivity()} returns null, and vice-versa.
- *
+ * {@link #getLabCherryPick()} returns non-null iff {@link #getWellVolumeCorrectionActivity()} returns null, and
+ * vice-versa.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

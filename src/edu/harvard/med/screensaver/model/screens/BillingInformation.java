@@ -10,19 +10,15 @@
 package edu.harvard.med.screensaver.model.screens;
 
 import java.math.BigDecimal;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 
-/**
- * A Hibernate entity bean representing a billing information.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- */
 @Embeddable
 public class BillingInformation
 {

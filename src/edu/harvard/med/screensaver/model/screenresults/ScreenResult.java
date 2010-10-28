@@ -50,6 +50,7 @@ import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
+import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.AssayReadoutType;
@@ -60,18 +61,19 @@ import edu.harvard.med.screensaver.ui.activities.PlateRange;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
- * A <code>ScreenResult</code> represents the data produced by machine-reading
- * each of the assay plates associated with a
- * {@link edu.harvard.med.screensaver.model.screens.Screen}. Each stock plate of
- * the library being screened will be replicated across one or more assay plates
- * ("replicates"). Each replicate assay plate can have one or more readouts
+ * Maintains the raw data (from screening instrument output) and the screener-curated results that are produced from
+ * performing a {@link Screen}. An important curated
+ * result of the screen is the set of "screening positive" reagents that have been identified as having the desired
+ * biological activity in the screening assay.
+ * If a screen is performed in replicate (i.e., multiple, redundant assay plates are created for each library
+ * {@link Plate} being screened), then each replicate produces at least one data column of data.
+ * Note that each replicate assay plate may have one or more readouts
  * performed on it, possibly over time intervals and/or with different assay
- * readout technologies. Every distinct readout type is identified by a
- * {@link DataColumn}. A <code>ScreenResult</code> becomes the parent of
- * {@link ResultValue}s. For visualization purposes, one can imagine a
- * <code>ScreenResult</code> as representing a spreadsheet, where the column
- * headings are represented by {@link DataColumn}s and the rows are identified
- * by {@link AssayWell}s, and each cell contains a {@link ResultValue}.
+ * readout technologies. Every distinct raw data readout is tracked via a {@link DataColumn}. For example, if 2
+ * replicates are used, with 3 time intervals, and 2 readout types, then the screen result will have 2*3*2=12 data
+ * columns <br>
+ * A <code>ScreenResult</code> becomes the parent of a table of {@link ResultValue}s, with {@link DataColumn}s defining
+ * the horizontal axis of the table and {@link AssayWell}s defining the vertical axis of the table.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>

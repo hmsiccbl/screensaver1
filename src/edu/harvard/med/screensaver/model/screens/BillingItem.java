@@ -19,12 +19,6 @@ import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
 
-/**
- * A Hibernate entity bean representing a billing item.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- */
 @Embeddable
 public class BillingItem
 {

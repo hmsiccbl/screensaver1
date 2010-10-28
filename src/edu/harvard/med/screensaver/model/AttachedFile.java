@@ -44,10 +44,8 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 
-
 /**
- * A Hibernate entity bean representing an attached file, which can be
- * associated with either a {@link Screen} or {@link ScreeningRoomUser}.
+ * A file (document or data file) that can be associated with either a {@link Screen} or {@link ScreeningRoomUser}.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>

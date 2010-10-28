@@ -10,24 +10,16 @@
 package edu.harvard.med.screensaver.model.users;
 
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 
-import org.apache.log4j.Logger;
-
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.AdministrativeActivity;
-
 
 /**
- * A Hibernate entity bean representing an Administrator user.
- *
+ * A person, usually a staff member of the screening facility, that can add and modify data in Screensaver, and has full
+ * data viewing privileges.
+ * 
+ * @see ScreeningRoomUser
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

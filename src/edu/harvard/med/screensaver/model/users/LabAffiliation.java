@@ -17,16 +17,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Version;
 
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 /**
- * A Hibernate entity bean representing a lab affiliation.
- *
+ * The parent organization of a {@link Lab}
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */

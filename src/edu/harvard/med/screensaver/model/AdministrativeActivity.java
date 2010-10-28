@@ -14,18 +14,15 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import edu.harvard.med.screensaver.model.users.AdministratorUser;
-
 import org.hibernate.annotations.Immutable;
 import org.joda.time.LocalDate;
+
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 /**
  * Represents an activity involving administrative decisions or changes to data.
  * Provides auditing capabilities to data modifications by tracking the
- * administrator who performed the activity. Note that in some cases, such as
- * activities that represent decisions, approvals, etc., the Administrator who
- * recorded the activity in Screensaver may be different than the Administrator
- * that actually "performed" the activity.
+ * administrator who performed the activity.
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>

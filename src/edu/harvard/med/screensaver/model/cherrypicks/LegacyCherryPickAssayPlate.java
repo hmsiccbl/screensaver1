@@ -17,12 +17,6 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 
-/**
- * A Hibernate entity bean representing a legacy cherry pick assay plate.
- *
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- */
 @Entity
 @DiscriminatorValue("LegacyCherryPickAssayPlate")
 @org.hibernate.annotations.Proxy

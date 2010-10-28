@@ -20,25 +20,18 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
-
-import edu.harvard.med.screensaver.model.AbstractEntity;
-import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.screensaver.model.AbstractEntity;
+import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 
-/**
- * A Hibernate entity bean representing a status item.
- *
- * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
- * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
- */
+
 @Entity
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={
   "screenId",

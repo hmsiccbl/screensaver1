@@ -47,10 +47,9 @@ import edu.harvard.med.screensaver.model.screenresults.DataColumn;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 
-
 /**
- * A Hibernate entity bean representing a well.
- *
+ * Describes the location and contents of a well in a {@link Library} {@link Plate}.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */

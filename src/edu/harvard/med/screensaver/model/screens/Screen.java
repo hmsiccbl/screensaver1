@@ -88,11 +88,11 @@ import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 
-
-
 /**
- * A Hibernate entity bean representing a screen.
- *
+ * A screen tracks the progress of performing a screening assay, including a description of its biological significance,
+ * its experimental protocol, and additional data to support the administrative needs of the facility. After screening
+ * data is generated, a screen will contain a {@link ScreenResult}.
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */

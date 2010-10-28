@@ -33,8 +33,8 @@ import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
- * A Hibernate entity bean representing a lab head.
- *
+ * The head honcho of a {@link Lab}.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity

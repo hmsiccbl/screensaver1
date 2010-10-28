@@ -12,18 +12,17 @@ package edu.harvard.med.screensaver.model.users;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
-import com.google.common.collect.Sets;
-
 /**
- * Abstraction of a Lab. At the physical schema layer, a lab is represented by a
- * LabHead. However, at the logical entity model layer, it is conceptually
- * clearer to model a Lab as its own class. This allows the lab head and its lab
+ * A research lab, that has a {@link LabHead lab head} and {@link Lab#getLabMembers() lab members}. <br>
+ * Note that a Lab is not directly represented in the physical database schema. Rather, a lab is persisted as a
+ * LabHead. At the domain model level, it is conceptually
+ * clearer to model a Lab as its own class, as this allows the lab head and its lab
  * members to all share and reference the same Lab object. In particular, this
  * allows the lab head to be determined for either a lab member or a lab head in
- * the same way:
- * <code>labMember.getLab().getLabHead() == labHead.getLab().getLabHead()</code>
+ * the same way: <code>labMember.getLab().getLabHead() == labHead.getLab().getLabHead()</code>
  * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
