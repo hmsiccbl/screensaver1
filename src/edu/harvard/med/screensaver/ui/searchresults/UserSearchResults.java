@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.joda.time.LocalDate;
 
+import edu.harvard.med.iccbl.screensaver.IccblScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.datafetcher.DataFetcherUtil;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
@@ -153,39 +154,57 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
       public String getCellValue(ScreensaverUser user) { return user.getMailingAddress(); }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
-    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("ECommonsId"),
-                                        "eCommons ID",
-                                        "The eCommons ID of the user",
-                                        TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(ScreensaverUser user) { return user.getECommonsId(); }
-    });
-    columns.get(columns.size() - 1).setAdministrative(true);
+
     columns.add(new TextEntityColumn<E>(pathRoot.toProperty("loginId"),
                                         "Login ID",
                                         "The login ID of the user",
                                         TableColumn.UNGROUPED) {
       @Override
-      public String getCellValue(ScreensaverUser user) { return user.getLoginId(); }
+      public String getCellValue(ScreensaverUser user)
+      {
+        return user.getLoginId();
+      }
     });
     columns.get(columns.size() - 1).setAdministrative(true);
     columns.get(columns.size() - 1).setVisible(false);
-    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("harvardId"),
-                                        "Harvard ID",
-                                        "The Harvard ID of the user",
-                                        TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(ScreensaverUser user) { return user.getHarvardId(); }
-    });
-    columns.get(columns.size() - 1).setAdministrative(true);
-    columns.add(new DateEntityColumn<E>(pathRoot.toProperty("harvardIdExpirationDate"),
-                                        "Harvard ID Initial Expiration Date",
-                                        "The date this user's Harvard ID is initially set to expire",
-                                        TableColumn.UNGROUPED) {
-      protected LocalDate getDate(E user) { return user.getHarvardIdExpirationDate(); }
-    });
-    columns.get(columns.size() - 1).setAdministrative(true);
-    columns.get(columns.size() - 1).setVisible(false);
+
+    if (getApplicationProperties().getProperty(FACILITY_NAME).equals(IccblScreensaverConstants.ICCBL_LONGWOOD_NSRB_FACILITY_NAME)) {
+      columns.add(new TextEntityColumn<E>(pathRoot.toProperty("ECommonsId"),
+                                          "eCommons ID",
+                                          "The eCommons ID of the user",
+                                          TableColumn.UNGROUPED) {
+        @Override
+        public String getCellValue(ScreensaverUser user)
+        {
+          return user.getECommonsId();
+        }
+      });
+      columns.get(columns.size() - 1).setAdministrative(true);
+
+      columns.add(new TextEntityColumn<E>(pathRoot.toProperty("harvardId"),
+                                          "Harvard ID",
+                                          "The Harvard ID of the user",
+                                          TableColumn.UNGROUPED) {
+        @Override
+        public String getCellValue(ScreensaverUser user)
+        {
+          return user.getHarvardId();
+        }
+      });
+      columns.get(columns.size() - 1).setAdministrative(true);
+
+      columns.add(new DateEntityColumn<E>(pathRoot.toProperty("harvardIdExpirationDate"),
+                                          "Harvard ID Initial Expiration Date",
+                                          "The date this user's Harvard ID is initially set to expire",
+                                          TableColumn.UNGROUPED) {
+        protected LocalDate getDate(E user)
+        {
+          return user.getHarvardIdExpirationDate();
+        }
+      });
+      columns.get(columns.size() - 1).setAdministrative(true);
+      columns.get(columns.size() - 1).setVisible(false);
+    }
 
     columns.add(new TextSetEntityColumn<E>(pathRoot.to(ScreeningRoomUser.facilityUsageRoles), // convert to a path with same root type as all other column paths 
                                            "Facility Usage Roles",
