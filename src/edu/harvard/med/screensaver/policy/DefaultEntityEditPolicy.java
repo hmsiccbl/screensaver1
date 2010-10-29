@@ -26,7 +26,6 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -55,238 +54,271 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.LabAffiliation;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 
 /**
  * A {@link EntityEditPolicy} that allows any user to edit any entity in the system.
  */
 public class DefaultEntityEditPolicy implements EntityEditPolicy
 {
+  @Override
   public boolean visit(AbaseTestset entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AdministrativeActivity administrativeActivity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AnnotationType annotation)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AnnotationValue annotationValue)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AssayPlate assayPlate)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AssayWell assayWell)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AttachedFile entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AttachedFileType entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(BillingInformation entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(BillingItem entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(ChecklistItemEvent entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(ChecklistItem entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(LabCherryPick entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(ScreenerCherryPick entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(SmallMoleculeReagent entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(Copy entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(Plate entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(EquipmentUsed entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(Gene entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(LabAffiliation entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(Library entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(LibraryContentsVersion libraryContentsVersion)
   {
-    return false;
+    return true;
   }
 
+  @Override
   public boolean visit(Publication entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(ResultValue entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(DataColumn entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(RNAiKnockdownConfirmation entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(Screen screen)
   {
     return true;
   }
 
+  @Override
   public boolean visit(ScreenResult screenResult)
   {
     return true;
   }
 
-  public boolean visit(ScreensaverUser screensaverUser)
-  {
-    return true;
-  }
-
+  @Override
   public boolean visit(SilencingReagent entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(StatusItem entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(Well entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(CherryPickAssayPlate entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(CherryPickLiquidTransfer entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(SmallMoleculeCherryPickRequest entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(LibraryScreening entity)
   {
     return true;
   }
 
-  public boolean visit(Reagent reagent)
-  {
-    return true;
-  }
-
+  @Override
   public boolean visit(RNAiCherryPickRequest entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(CherryPickScreening entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(AdministratorUser administratorUser)
   {
     return true;
   }
 
+  @Override
   public boolean visit(ScreeningRoomUser screeningRoomUser)
   {
     return true;
   }
 
+  @Override
   public boolean visit(WellVolumeCorrectionActivity entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(Study study)
   {
     return true;
   }
 
+  @Override
   public boolean visit(LabHead labHead)
   {
-    return false;
+    return true;
   }
 
+  @Override
   public boolean visit(NaturalProductReagent entity)
   {
     return true;
   }
 
+  @Override
   public boolean visit(FundingSupport fundingSupport)
   {
     return true;
