@@ -68,30 +68,28 @@ import edu.harvard.med.screensaver.util.DevelopmentException;
  * targeted, cellular function, chemical similarity, or any combination thereof.
  * Reagents may belong to multiple libraries.
  * <ul>
- * <li>Screensaver supports libraries for either RNAi and Small Molecule
- * screens. RNAi library wells contain silencing reagents and small
- * molecule library wells contain compounds.</li>
- * <li>Only 384 well plate configurations are currently supported.</li>
- * <li>A library must be defined for a set of plates that have a sequential
- * plate numbers.</li>
+ * <li>Screensaver supports libraries for either RNAi and Small Molecule screens. RNAi library wells contain silencing
+ * reagents and small molecule library wells contain compounds.</li>
+ * <li>96-, 384-, and 1536-well {@link PlateSize plate sizes} are currently supported.</li>
+ * <li>A library must be defined for a set of plates that have a sequential plate numbers.</li>
  * </ul>
  * <p>
- * Screensaver allows a Library to be defined independently of its wells and its
- * well reagents. In other words, the data model permits any of the following
- * states for a library:
+ * A Library in Screensaver is the <i>definition</i> of a library, and does not imply that the library plates are
+ * physically present at the screening facility. The instances of a library being maintained at the screening facility
+ * are tracked by library {@link Copy copies}.
+ * <p>
+ * The domain model allows for a Library to be defined independently of its {@link Well wells} and its well
+ * {@link Reagent reagents}. In other words, the domain model permits any of the following states for a Library:
  * <ul>
- * <li>Library is defined with related Wells and Well reagents. This is the
- * usual state of a library in Screensaver.
- * <li>Library is defined with related Wells, but without Well reagents. This
- * allows for a library's contents to be unloaded and reloaded without deleting
- * the Library definition itself, which is useful if updated/corrected well
- * contents data becomes available.
- * <li>Library is defined, but without related Wells, and thus without Well
- * reagents. This state is supported for legacy reasons only, but one must be
- * aware that a given member Well may not be defined. See
- * {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}.
+ * <li>Library is defined with related Wells and Reagents. This is the normal state of a Library in Screensaver.
+ * <li>Library is defined with related Wells, but without Reagents ("library contents"). This allows for a library's
+ * contents to be unloaded and reloaded without deleting the Library definition itself, which is useful if
+ * updated/corrected well contents data becomes available.
+ * <li>Library is defined, but without related Wells, and thus without Reagents. It is recommended that Library's
+ * {@link Well wells} always be created at the same time a Library is created, even if the Wells are initially all
+ * {@link LibraryWellType#EMPTY empty}. See {@link LibrariesDAO#loadOrCreateWellsForLibrary(Library)}.
  * </ul>
- *
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
