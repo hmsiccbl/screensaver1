@@ -1,20 +1,25 @@
 # screensaver.properties.web
 
 
-### build-time properties
+### Build-time properties
+# Used by Ant targets that build and deploy Screensaver.
+# Changes to build-time properties require re-deploying the application to Tomcat (e.g., via 'ant restart')
 
-# authentication can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog).  
+# Authentication can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog).  
 # BASIC mode is useful during development, to avoid repeating the login step between Tomcat restarts.
 servlet.authentication.method=FORM
+
+# The application name in Tomcat (affects the base URL of the web application)  
 app.name=screensaver
 
 # TODO: set your Tomcat installation directory here.  
 appserver.dir=/usr/local/tomcat
 
 
-# specify the log4j properties file that will be used to control the logging output
-# hint: during development, you can specify cfg/log4j.properties.debug, allowing you to maintain debug-related 
-# logging options separately from your production/deployment log output settings
+# Specify the Log4j properties file that will be used to control the logging output
+# You may also want to edit the =log4j.properties.web= file itself to meet your logging output needs.
+# Hint: during development, you can specify cfg/log4j.properties.debug, allowing you to maintain 
+# debug-related logging options separately from your production/deployment log output settings.
 log4j.properties.file=cfg/log4j.properties.web
 
 # controls whether deployment is debug-enabled, which includes having debug-information 
@@ -22,11 +27,18 @@ log4j.properties.file=cfg/log4j.properties.web
 debug=false
 
 
-### run-time properties
+### Run-time properties (web application configuration)
+# Changes to run-time properties require restarting Tomcat or restarting the web application 
+# within Tomcat (re-deployment is not reqiured)
 
+# The name of the web application, as displayed i the web user interface
 screensaver.ui.application_name=Screensaver
+
+# The version number of Screensaver
 screensaver.ui.version=2010.10.29
-# build number placeholder value, below, will be replaced by Ant "build" target at build/deploy time, using the build.number property
+
+# if value is "BUILD_NUMBER", then the actual value can be set when running the Ant "build" target at 
+# build/deploy time, using the 'build.number' property
 screensaver.ui.build_number=BUILD_NUMBER
 
 # TODO: set the name of your screening facility here
@@ -47,19 +59,29 @@ screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/
 # Note that this is a general URL that can be external to the Screensaver web application URL.
 screensaver.ui.release_notes_url=/screensaver/main/changelog.html
 
-# Screensaver features that can be enabled or disabled
+## Screensaver features that can be enabled or disabled
+
+# whether to allow administrators to delete screens from web application user interface
 screensaver.ui.feature.delete_screen=true
+
+# whether to allow administrators to invoke a special wizard for updating user agreements
+# (intended for use by ICCB-Longwood/NSRB) 
 screensaver.ui.feature.user_agreement_updater=false
+
+# whether to enable the cellHTS2 analysis feature (see R/README.txt for additional required configuration)
 screensaver.ui.feature.cellHTS2=false
-# if false, use a list-based column selector, allowing for user-specified column ordering 
+
+# The user interface for data table column selections; if false, a list-based column selector is shown, 
+# allowing for user-specified column ordering; if true, a tree-based column selector is shown 
 screensaver.ui.feature.data_table_tree_column_selector=true
 
 # Email server settings used by edu.harvard.med.iccbl.screensaver.service.SmtpEmailService
-# TODO: configure email server settings if your deployment uses the SmtpEmailService
+# Not currently used by the web application, but property names are required here
 screensaver.service.smtpemailservice.host=
 screensaver.service.smtpemailservice.username=
 
-### cellHTS2 properties
+## cellHTS2 properties
+
 # The base directory containing the generated cellHTS2 reports.
 # This should be a directory external to the Tomcat web application deployment directory and must already exist.
 # Make sure the Tomcat "user" has sufficient file system permissions to read from this directory 
@@ -72,7 +94,15 @@ cellHTS2.saveRObjects=FALSE
 # Make sure the Rserve "user" has sufficient file system permissions to write to this directory. 
 cellHTS2.saveRObjects.directory=/tmp/cellHTS2-robjects/
 
-### database connection
+## Database connection settings
+
+# TODO: set the below variables to specify the connection settings for your PostgreSQL Screensaver database.
+# Alternately, you can specify these four database connection settings as environment variables, which will override 
+# the settings found below.  If using a password with your database user accounts (and you should!), we recommend 
+# making use of PostreSQL's .pgpass file mechanism [http://www.postgresql.org/docs/8.1/static/libpq-pgpass.html], which 
+# allows you to securely specify passwords.  To do so, comment out the =SCREENSAVER_PGSQL_PASSWORD= line below (prepend 
+# with a =#= symbol). Screensaver will then read the password from the =.pgpass= file of the UNIX user under which 
+# Tomcat is being run.
 SCREENSAVER_PGSQL_SERVER=localhost
 SCREENSAVER_PGSQL_DB=screensaver
 SCREENSAVER_PGSQL_USER=screensaver
