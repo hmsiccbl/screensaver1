@@ -15,6 +15,10 @@ import java.util.List;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
+import com.google.common.collect.Lists;
+import org.apache.log4j.Logger;
+import org.apache.myfaces.custom.fileupload.UploadedFile;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
@@ -24,14 +28,9 @@ import edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
 
-import org.apache.log4j.Logger;
-import org.apache.myfaces.custom.fileupload.UploadedFile;
-
-import com.google.common.collect.Lists;
-
 /**
- * The JSF backing bean for the compoundLibraryContentsImporter subview.
- *
+ * JSF backing bean for the Library Contents Importer page.
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
