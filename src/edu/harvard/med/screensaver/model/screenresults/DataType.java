@@ -11,11 +11,13 @@ package edu.harvard.med.screensaver.model.screenresults;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
+import edu.harvard.med.screensaver.model.libraries.Reagent;
+import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.ProjectPhase;
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
- * Vocabulary used to specify how the determination of "positives" is being
- * recorded by a {@link DataColumn}, when
- * {@link DataColumn#isPositiveIndicator()} is <code>true</code>.
+ * Vocabulary of {@link DataColumn} data types.
  * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
@@ -25,10 +27,27 @@ public enum DataType implements VocabularyTerm
 
   // the vocabulary
   
+  /** {@link DataColumn} contains numeric data. */
   NUMERIC("Numeric", false),
+  /** {@link DataColumn} contains textual data. */
   TEXT("Text", false),
+  /**
+   * {@link DataColumn} contains positive determinations data as true/false values, indicating whether a tested
+   * {@link Well} {@link Reagent} has
+   * been identified as having the desired biological activity in the screening assay.
+   */
   POSITIVE_INDICATOR_BOOLEAN("Boolean Positive Indicator", true),
+  /**
+   * {@link DataColumn} contains positive determinations data as {@link PartitionedValue} values ("strong", "medium",
+   * "weak", or "not positive"), indicating indicating whether a tested {@link Well} {@link Reagent} has
+   * been identified as having the desired biological activity in the screening assay, and if so, with what strength.
+   */
   POSITIVE_INDICATOR_PARTITION("Partition Positive Indicator", true),
+  /**
+   * {@link DataColumn} contains confirmed positive determinations data, indicating whether a
+   * {@link ProjectPhase#FOLLOW_UP_SCREEN follow-up} screen has confirmed (reproduced) the original positive
+   * determination of a related, {@link ProjectPhase#PRIMARY_SCREEN primary} {@link Screen}
+   */
   CONFIRMED_POSITIVE_INDICATOR("Confirmed Positive Indicator", true)
   ;
 

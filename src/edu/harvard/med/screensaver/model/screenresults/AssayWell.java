@@ -36,15 +36,15 @@ import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-
+import edu.harvard.med.screensaver.model.screens.Screen;
 
 /**
- * AssayWell maintains information common to each ResultValue of a given library Well.
- *
+ * Groups {@link ResultValue} data generated for a library {@link Well} by a {@link Screen}.
+ * An <code>AssayWell</code> can be thought of as a "row" of a {@link ScreenResult}.
+ * 
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */
 @Entity
-@org.hibernate.annotations.Entity
 @org.hibernate.annotations.Proxy
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "screenResultId", "well_id" }) })
 @ContainedEntity(containingEntityClass=ScreenResult.class)                                 
@@ -172,8 +172,9 @@ public class AssayWell extends AbstractEntity<Integer> implements Comparable<Ass
   }
 
   /**
-   * Get whether this assay well contains at least one {@link ResultValue} that
-   * is a {@link ResultValue#isPositive() positive}.
+   * Get whether the screen has determined that the reagent in the tested well is a positive result.
+   * 
+   * @return true if at least one the assay well's {@link ResultValue}s is a {@link ResultValue#isPositive() positive}.
    */
   @Column(nullable=false, name="isPositive")
   @org.hibernate.annotations.Index(name="assay_well_well_positives_only_index")

@@ -61,17 +61,23 @@ import edu.harvard.med.screensaver.ui.activities.PlateRange;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
- * Maintains the raw data (from screening instrument output) and the screener-curated results that are produced from
- * performing a {@link Screen}. An important curated
+ * Maintains the raw data (from screening instrument output) and the screener-provided, curated results that are
+ * produced from performing a {@link Screen}. An important curated
  * result of the screen is the set of "screening positive" reagents that have been identified as having the desired
  * biological activity in the screening assay.
  * If a screen is performed in replicate (i.e., multiple, redundant assay plates are created for each library
  * {@link Plate} being screened), then each replicate produces at least one data column of data.
- * Note that each replicate assay plate may have one or more readouts
+ * Each replicate assay plate may have one or more readouts
  * performed on it, possibly over time intervals and/or with different assay
- * readout technologies. Every distinct raw data readout is tracked via a {@link DataColumn}. For example, if 2
- * replicates are used, with 3 time intervals, and 2 readout types, then the screen result will have 2*3*2=12 data
- * columns <br>
+ * readout technologies. Every distinct raw data readout is a {@link ResultValue} that is stored in a {@link DataColumn}
+ * .
+ * For example, if 2 replicates are used, with 3 time intervals, and 2 readout types, then the screen result will have
+ * 2*3*2=12 data columns.
+ * <p/>
+ * In addition to the {@link DataColumn}s containing the raw data, a <code>ScreenResult</code> may also contain
+ * additional, screener-provided "derived" {@link DataColumn}s for storing calculated values for normalized, scored, and
+ * "positive" indicator data. Textual data columns may also be added for storing screener-provided comments.
+ * <p/>
  * A <code>ScreenResult</code> becomes the parent of a table of {@link ResultValue}s, with {@link DataColumn}s defining
  * the horizontal axis of the table and {@link AssayWell}s defining the vertical axis of the table.
  * 

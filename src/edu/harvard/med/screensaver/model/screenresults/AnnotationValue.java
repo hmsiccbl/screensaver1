@@ -95,8 +95,9 @@ public class AnnotationValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Get the reagent the well is in.
-   * @return the reagent the well is in.
+   * Get the reagent being annotated.
+   * 
+   * @return the annotated reagent
    */
   @ManyToOne(fetch=FetchType.LAZY)
   @JoinColumn(name="reagentId", nullable=false)
@@ -109,8 +110,9 @@ public class AnnotationValue extends AbstractEntity<Integer>
   }
 
   /**
-   * Get the value.
-   * @return the value
+   * Get the annotation value.
+   * 
+   * @return the annotation value
    */
   @Column(updatable=false)
   @org.hibernate.annotations.Type(type="text")
