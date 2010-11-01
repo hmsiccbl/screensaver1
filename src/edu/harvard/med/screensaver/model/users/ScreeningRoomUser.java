@@ -49,7 +49,6 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
 
 /**
  * A person that is using the screening facility to conduct one or more {@link Screen}s.

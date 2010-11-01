@@ -24,11 +24,11 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ChecklistItem;
 import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
+import edu.harvard.med.screensaver.model.users.ChecklistItemsEntity;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.users.ChecklistItemsEntity;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 import org.apache.log4j.Logger;
