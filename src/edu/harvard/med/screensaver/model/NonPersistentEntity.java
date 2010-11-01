@@ -11,8 +11,6 @@ package edu.harvard.med.screensaver.model;
 
 import java.io.Serializable;
 
-import edu.harvard.med.screensaver.model.libraries.WellCopy;
-
 /**
  * Entity that is a first-class member of the domain model, but is not
  * explicitly represented in the database, usually because it is more efficient
@@ -67,7 +65,13 @@ public abstract class NonPersistentEntity<K extends Serializable> implements Ent
   @Override
   public boolean equals(Object obj)
   {
-    return this == obj|| (obj != null && obj instanceof WellCopy && this.getEntityId().equals(((WellCopy) obj).getEntityId()));
+    if (this == obj) {
+      return true;
+    }
+    if (obj instanceof NonPersistentEntity) {
+      return (((NonPersistentEntity) obj).hashCode() == hashCode());
+    }
+    return false;
   }
   
   @Override
