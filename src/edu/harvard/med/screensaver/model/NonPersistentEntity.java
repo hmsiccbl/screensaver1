@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver.model;
 
 import java.io.Serializable;
 
-import edu.harvard.med.screensaver.ui.libraries.WellCopy;
+import edu.harvard.med.screensaver.model.libraries.WellCopy;
 
 /**
  * Entity that is a first-class member of the domain model, but is not

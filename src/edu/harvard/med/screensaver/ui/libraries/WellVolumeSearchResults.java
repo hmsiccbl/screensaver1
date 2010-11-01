@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.libraries.WellVolume;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.table.column.ColumnType;
