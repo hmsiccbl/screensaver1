@@ -50,7 +50,7 @@ public class WellDeprecator
   {
     final CommandLineApplication app = new CommandLineApplication(args);
     try {
-      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("eCommons ID").withLongOpt("user-approved-by").withDescription("eCommons ID of administrator that approved this well deprecation activity").create("a"));
+      app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("admin user ID").withLongOpt("admin-approved-by").withDescription("user ID of administrator that approved this well deprecation activity").create("aa"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("yyyy-mm-dd").withLongOpt("approval-date").withDescription("date this well deprecation activity was approved").create("d"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("text").withLongOpt("comments").create("c"));
       app.addCommandLineOption(OptionBuilder.hasArg().isRequired().withArgName("file").withLongOpt("input-file").withDescription("workbook file containing list of wells to be deprecated").create("f"));
@@ -59,13 +59,16 @@ public class WellDeprecator
       }
 
       String comments = app.getCommandLineOptionValue("c");
-      String approvedByEcommonsId = app.getCommandLineOptionValue("a");
+      String approvedByAdminId = app.getCommandLineOptionValue("aab");
       LocalDate dateApproved = app.getCommandLineOptionValue("d", DateTimeFormat.forPattern(CommandLineApplication.DEFAULT_DATE_PATTERN)).toLocalDate();
 
       GenericEntityDAO dao = (GenericEntityDAO) app.getSpringBean("genericEntityDao");
       final LibrariesDAO librariesDao = (LibrariesDAO) app.getSpringBean("librariesDao");
       AdministratorUser performedBy = app.findAdministratorUser();
-      AdministratorUser approvedBy = findPerformedByAdminUser(approvedByEcommonsId, dao);
+      AdministratorUser approvedBy = dao.findEntityById(AdministratorUser.class, approvedByAdminId);
+      if (approvedBy == null) {
+        throw new IllegalArgumentException("no administrator user found with User ID=" + approvedByAdminId);
+      }
 
       final AdministrativeActivity activity =
         new AdministrativeActivity(performedBy,
