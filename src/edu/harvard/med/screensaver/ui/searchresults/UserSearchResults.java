@@ -155,18 +155,20 @@ public class UserSearchResults<E extends ScreensaverUser> extends EntityBasedEnt
     });
     columns.get(columns.size() - 1).setAdministrative(true);
 
-    columns.add(new TextEntityColumn<E>(pathRoot.toProperty("loginId"),
-                                        "Login ID",
-                                        "The login ID of the user",
-                                        TableColumn.UNGROUPED) {
-      @Override
-      public String getCellValue(ScreensaverUser user)
-      {
-        return user.getLoginId();
-      }
-    });
-    columns.get(columns.size() - 1).setAdministrative(true);
-    columns.get(columns.size() - 1).setVisible(false);
+    if (getApplicationProperties().isFeatureEnabled("manage_authentication_credentials")) {
+      columns.add(new TextEntityColumn<E>(pathRoot.toProperty("loginId"),
+                                          "Login ID",
+                                          "The login ID of the user",
+                                          TableColumn.UNGROUPED) {
+        @Override
+        public String getCellValue(ScreensaverUser user)
+        {
+          return user.getLoginId();
+        }
+      });
+      columns.get(columns.size() - 1).setAdministrative(true);
+      columns.get(columns.size() - 1).setVisible(false);
+    }
 
     if (getApplicationProperties().getProperty(FACILITY_NAME).equals(IccblScreensaverConstants.ICCBL_LONGWOOD_NSRB_FACILITY_NAME)) {
       columns.add(new TextEntityColumn<E>(pathRoot.toProperty("ECommonsId"),

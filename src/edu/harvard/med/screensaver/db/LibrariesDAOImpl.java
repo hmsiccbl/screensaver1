@@ -269,13 +269,14 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
   }
 
+  @Override
   @SuppressWarnings("unchecked")
-  public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well)
+  public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well, CopyUsageType copyUsageType)
   {
-    String hql = "select c, ci.wellVolume, " +
+    String hql = "select c, p.wellVolume, " +
     		"(select sum(wva.volume) from WellVolumeAdjustment wva where wva.copy = c and wva.well.id=?) " +
-    		"from Plate ci join ci.copy c " +
-        "where ci.plateNumber=? and ci.dateRetired is null and c.usageType = ?";
+        "from Plate p join p.copy c " +
+        "where p.plateNumber=? and p.dateRetired is null and c.usageType = ?";
     
     
     List<Object[]> copyVolumes = 

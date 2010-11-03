@@ -791,7 +791,6 @@
     <constructor-arg ref="labActivitiesBrowser" />
     <constructor-arg ref="screenViewer" />
     <constructor-arg ref="cherryPickRequestViewer" />
-    <constructor-arg ref="cherryPickRequestAllocator" />
     <constructor-arg ref="librariesBrowser" />
     <property
       name="entityUpdateHistoryBrowser"

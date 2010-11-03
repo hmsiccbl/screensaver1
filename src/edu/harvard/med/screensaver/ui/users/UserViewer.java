@@ -160,6 +160,11 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
     getIsPanelCollapsedMap().put("screens", false);
   }
 
+  public boolean isManageAuthenticationCredentialsFeatureEnabled()
+  {
+    return getApplicationProperties().isFeatureEnabled("manage_authentication_credentials");
+  }
+
   /**
    * @return true if the logged in user is the same as the user being shown by the user viewer
    *

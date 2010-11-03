@@ -19,12 +19,14 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
+import edu.harvard.med.screensaver.db.CherryPickRequestDAO;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransfer;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickLiquidTransferStatus;
@@ -52,15 +54,18 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.policy.CherryPickPlateSourceWellMinimumVolumePolicy;
 
 public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTest
 {
   private static Logger log = Logger.getLogger(CherryPickRequestAllocatorTest.class);
 
-
   protected LibrariesDAO librariesDao;
+  protected CherryPickRequestDAO cherryPickRequestDao;
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
   protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
+
+  private Volume _minimumSourceWellVolume = new Volume(5, VolumeUnit.MICROLITERS);
 
 
   /**
@@ -80,30 +85,30 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "D");
-        copy1.getPlates().get(1).withWellVolume(new Volume(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy1.getPlates().get(2).withWellVolume(new Volume(11).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy1.getPlates().get(3).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy1.getPlates().get(4).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy1.getPlates().get(5).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy1.getPlates().get(6).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy1.getPlates().get(1).withWellVolume(new Volume(12).add(_minimumSourceWellVolume));
+        copy1.getPlates().get(2).withWellVolume(new Volume(11).add(_minimumSourceWellVolume));
+        copy1.getPlates().get(3).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
+        copy1.getPlates().get(4).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
+        copy1.getPlates().get(5).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
+        copy1.getPlates().get(6).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
 
         Copy copy2 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "E");
-        copy2.getPlates().get(1).withWellVolume(new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy2.getPlates().get(2).withWellVolume(new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy2.getPlates().get(3).withWellVolume(new Volume(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy2.getPlates().get(4).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy2.getPlates().get(5).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy2.getPlates().get(1).withWellVolume(new Volume(22).add(_minimumSourceWellVolume));
+        copy2.getPlates().get(2).withWellVolume(new Volume(22).add(_minimumSourceWellVolume));
+        copy2.getPlates().get(3).withWellVolume(new Volume(12).add(_minimumSourceWellVolume));
+        copy2.getPlates().get(4).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
+        copy2.getPlates().get(5).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
         Plate retiredPlate =
-          copy2.getPlates().get(6).withWellVolume(new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+          copy2.getPlates().get(6).withWellVolume(new Volume(22).add(_minimumSourceWellVolume));
         retiredPlate.setDateRetired(new LocalDate());
 
         Copy copy3 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "F");
-        copy3.getPlates().get(1).withWellVolume(new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy3.getPlates().get(2).withWellVolume(new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy3.getPlates().get(3).withWellVolume(new Volume(22).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy3.getPlates().get(4).withWellVolume(new Volume(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy3.getPlates().get(5).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
-        copy3.getPlates().get(6).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy3.getPlates().get(1).withWellVolume(new Volume(22).add(_minimumSourceWellVolume));
+        copy3.getPlates().get(2).withWellVolume(new Volume(22).add(_minimumSourceWellVolume));
+        copy3.getPlates().get(3).withWellVolume(new Volume(22).add(_minimumSourceWellVolume));
+        copy3.getPlates().get(4).withWellVolume(new Volume(12).add(_minimumSourceWellVolume));
+        copy3.getPlates().get(5).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
+        copy3.getPlates().get(6).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
       }
     });
 
@@ -141,6 +146,80 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
   }
 
   /**
+   * Test a single allocation request, focusing on testing the basic volume
+   * comparison logic, using 3 virgin copies, and a minimum source well volume. Does not test the
+   * "minimum copy count" logic, as only one cherry pick is created per plate.
+   */
+  public void testCherryPickRequestAllocatorWithNegativeMinimumVolume()
+  {
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        Library library = makeRNAiDuplexLibrary("library1", 1, 2, PlateSize.WELLS_96);
+        Copy copy1 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C1");
+        copy1.getPlates().get(1).withWellVolume(new Volume(1, VolumeUnit.MICROLITERS).add(_minimumSourceWellVolume));
+        Copy copy2 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C2");
+        copy2.getPlates().get(1).withWellVolume(new Volume(3, VolumeUnit.MICROLITERS).add(_minimumSourceWellVolume));
+        genericEntityDao.saveOrUpdateEntity(library);
+      }
+    });
+    
+    final CherryPickRequestAllocator allocator = new CherryPickRequestAllocator(genericEntityDao,
+                                                                                librariesDao,
+                                                                                cherryPickRequestDao,
+                                                                                new CherryPickPlateSourceWellMinimumVolumePolicy() {
+
+                                                                            @Override
+                                                                            public Volume getMinimumVolumeAllowed(Well well)
+                                                                            {
+                                                                              return new Volume(-1, VolumeUnit.MICROLITERS);
+                                                                            }
+                                                                          });
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        CherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(1, new Volume(2, VolumeUnit.MICROLITERS));
+        ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
+        LabCherryPick lcp = dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+        Set<LabCherryPick> unfulfillableCherryPicks = allocator.allocate(cherryPickRequest);
+        assertTrue(unfulfillableCherryPicks.isEmpty());
+        assertEquals("sufficient volume in copy 1", "C1", lcp.getSourceCopy().getName());
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        CherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(2, new Volume(2, VolumeUnit.MICROLITERS));
+        ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
+        LabCherryPick lcp = dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+        Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
+        assertTrue(unfulfillableCherryPicks.isEmpty());
+        assertEquals("sufficient volume in copy 2", "C2", lcp.getSourceCopy().getName());
+      }
+    });
+
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      public void runTransaction()
+      {
+        CherryPickRequest cherryPickRequest = createRNAiCherryPickRequest(3, new Volume(2, VolumeUnit.MICROLITERS));
+        ScreenerCherryPick dummyScreenerCherryPick = cherryPickRequest.createScreenerCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
+        LabCherryPick lcp = dummyScreenerCherryPick.createLabCherryPick(librariesDao.findWell(new WellKey(1, "A01")));
+        genericEntityDao.saveOrUpdateEntity(cherryPickRequest.getScreen());
+        genericEntityDao.flush();
+        Set<LabCherryPick> unfulfillableCherryPicks = cherryPickRequestAllocator.allocate(cherryPickRequest);
+        assertEquals(Sets.newHashSet(lcp), unfulfillableCherryPicks);
+      }
+    });
+
+  }
+
+  /**
    * Test multiple, sequential allocation requests, testing whether allocations
    * for each request are being recorded and considered in subsequent allocation
    * requests (volumes are cumulatively reduced).
@@ -153,9 +232,9 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
-        copy1.getPlates().get(1).withWellVolume(new Volume(10).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy1.getPlates().get(1).withWellVolume(new Volume(10).add(_minimumSourceWellVolume));
         Copy copy2 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "D");
-        copy2.getPlates().get(1).withWellVolume(new Volume(12).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy2.getPlates().get(1).withWellVolume(new Volume(12).add(_minimumSourceWellVolume));
       }
     });
 
@@ -214,9 +293,9 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       public void runTransaction() {
         Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         Copy copy1 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
-        copy1.getPlates().get(1).withWellVolume(requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy1.getPlates().get(1).withWellVolume(requestVolume.add(_minimumSourceWellVolume));
         Copy copy2 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "D");
-        copy2.getPlates().get(1).withWellVolume(requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy2.getPlates().get(1).withWellVolume(requestVolume.add(_minimumSourceWellVolume));
         genericEntityDao.saveOrUpdateEntity(library);
 
         WellVolumeCorrectionActivity wellVolumeCorrectionActivity =
@@ -264,11 +343,11 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
         genericEntityDao.saveOrUpdateEntity(library);
 
         Copy copy1 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
-        copy1.getPlates().get(1).withWellVolume(new Volume(6).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy1.getPlates().get(1).withWellVolume(new Volume(6).add(_minimumSourceWellVolume));
         Copy copy2 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "D");
-        copy2.getPlates().get(1).withWellVolume(new Volume(6).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy2.getPlates().get(1).withWellVolume(new Volume(6).add(_minimumSourceWellVolume));
         Copy copy3 = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "E");
-        copy3.getPlates().get(1).withWellVolume(new Volume(6).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy3.getPlates().get(1).withWellVolume(new Volume(6).add(_minimumSourceWellVolume));
       }
     });
 
@@ -358,7 +437,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       public void runTransaction() {
         Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
-        copy.getPlates().get(1).withWellVolume(requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy.getPlates().get(1).withWellVolume(requestVolume.add(_minimumSourceWellVolume));
         genericEntityDao.saveOrUpdateEntity(library);
       }
     });
@@ -410,7 +489,7 @@ public class CherryPickRequestAllocatorTest extends AbstractSpringPersistenceTes
       public void runTransaction() {
         Library library = makeRNAiDuplexLibrary("library", 1, 1, PlateSize.WELLS_384);
         Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
-        copy.getPlates().get(1).withWellVolume(requestVolume.add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+        copy.getPlates().get(1).withWellVolume(requestVolume.add(_minimumSourceWellVolume));
         genericEntityDao.saveOrUpdateEntity(library);
       }
     });

@@ -15,10 +15,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
@@ -44,7 +44,9 @@ import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.policy.CherryPickPlateSourceWellMinimumVolumePolicy;
 import edu.harvard.med.screensaver.util.PowerSet;
 
 /**
@@ -55,22 +57,12 @@ import edu.harvard.med.screensaver.util.PowerSet;
  */
 public class CherryPickRequestAllocator
 {
-  /**
-   * The amount of microliter volume in a source copy well at which the well
-   * should be considered depleted. By setting this to a positive value, we
-   * account for real-world inaccuracies that might otherwise cause a source
-   * well to be overdrawn. (A theoretically better approach might be to base the
-   * inaccuracy on the number of times the well was drawn from, but the above
-   * strategy is considered sufficient by the lab).
-   */
-  public static final Volume MINIMUM_SOURCE_WELL_VOLUME = new Volume(5);
-
   private static Logger log = Logger.getLogger(CherryPickRequestAllocator.class);
 
   private GenericEntityDAO _dao;
   private LibrariesDAO _librariesDao;
   private CherryPickRequestDAO _cherryPickRequestDao;
-
+  private CherryPickPlateSourceWellMinimumVolumePolicy _cherryPickPlateSourceWellMinimumVolumePolicy;
 
   /**
    * @motivation for CGLIB2
@@ -81,11 +73,13 @@ public class CherryPickRequestAllocator
 
   public CherryPickRequestAllocator(GenericEntityDAO dao,
                                     LibrariesDAO librariesDao,
-                                    CherryPickRequestDAO cherryPickRequestDao)
+                                    CherryPickRequestDAO cherryPickRequestDao,
+                                    CherryPickPlateSourceWellMinimumVolumePolicy cherryPickPlateSourceWellMinimumVolumePolicy)
   {
     _dao = dao;
     _librariesDao = librariesDao;
     _cherryPickRequestDao = cherryPickRequestDao;
+    _cherryPickPlateSourceWellMinimumVolumePolicy = cherryPickPlateSourceWellMinimumVolumePolicy;
   }
 
   /**
@@ -124,9 +118,10 @@ public class CherryPickRequestAllocator
       final ImmutableMap<Well,LabCherryPick> well2lcp =
         Maps.uniqueIndex(labCherryPicks,
                          new Function<LabCherryPick, Well>() { public Well apply(LabCherryPick lcp) { return lcp.getSourceWell(); } });
+      CherryPickRequest cherryPickRequest = labCherryPicks.iterator().next().getCherryPickRequest();
       Map<Well,Set<Copy>> copyCandidatesForWells =
         findCopyCandidatesForWells(well2lcp.keySet(),
-                                   labCherryPicks.iterator().next().getCherryPickRequest().getTransferVolumePerWellApproved());
+                                   cherryPickRequest.getTransferVolumePerWellApproved());
       // remove unfulfillable wells now, as they would force the minimum copy set to always be empty
       Set<Well> unfulfillableWells = removeUnfulfillableWells(copyCandidatesForWells);
       assert Sets.intersection(unfulfillableWells, copyCandidatesForWells.keySet()).isEmpty();
@@ -225,13 +220,15 @@ public class CherryPickRequestAllocator
       log.debug("need " + volumeNeeded + " for " + well);
     }
     SortedSet<Copy> result = new TreeSet<Copy>();
-    Map<Copy,Volume> wellCopiesVolumeRemaining = _librariesDao.findRemainingVolumesInWellCopies(well);
+    Map<Copy,Volume> wellCopiesVolumeRemaining = _librariesDao.findRemainingVolumesInWellCopies(well, CopyUsageType.CHERRY_PICK_STOCK_PLATES);
+    Volume minimumSourceWellVolume = _cherryPickPlateSourceWellMinimumVolumePolicy.getMinimumVolumeAllowed(well);
+
     for (Copy copy : wellCopiesVolumeRemaining.keySet()) {
       Volume wellCopyVolumeRemaining = wellCopiesVolumeRemaining.get(copy);
       if (log.isDebugEnabled()) {
         log.debug("remaining volume in " + well + " " + copy + ": " + wellCopyVolumeRemaining);
       }
-      if (wellCopyVolumeRemaining.subtract(volumeNeeded).compareTo(MINIMUM_SOURCE_WELL_VOLUME) >= 0) {
+      if (wellCopyVolumeRemaining.subtract(volumeNeeded).compareTo(minimumSourceWellVolume) >= 0) {
         result.add(copy);
       }
     }
@@ -363,5 +360,4 @@ public class CherryPickRequestAllocator
     }
     return unfullfilable;
   }
-
 }

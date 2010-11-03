@@ -39,6 +39,10 @@
     class="edu.harvard.med.screensaver.service.libraries.DefaultPlateFacilityIdInitializer">
   </bean>
 
+  <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
+  </bean>
+ 
   <import resource="spring-context-authentication.xml"/>
   <import resource="spring-context-persistence.xml"/>
   <import resource="spring-context-services.xml"/>

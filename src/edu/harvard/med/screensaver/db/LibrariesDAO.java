@@ -15,6 +15,7 @@ import java.util.Set;
 
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.Plate;
@@ -68,7 +69,7 @@ public interface LibrariesDAO
 
   public void loadOrCreateWellsForLibrary(Library library);
 
-  public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well);
+  public Map<Copy,Volume> findRemainingVolumesInWellCopies(Well well, CopyUsageType copyUsageType);
 
   public Collection<String> findAllVendorNames();
 

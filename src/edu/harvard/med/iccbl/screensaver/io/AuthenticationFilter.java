@@ -1,7 +1,6 @@
 package edu.harvard.med.iccbl.screensaver.io;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,59 +102,53 @@ public class AuthenticationFilter implements Filter
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
     throws IOException, ServletException
   {
-    if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse))
-    {
+    if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
       throw new ServletException("SecurityFilter only accepts HTTP requests");
     }
-    if (request instanceof HttpServletRequest) 
-    {
-      HttpServletRequest req = (HttpServletRequest)request;
-      HttpServletResponse res = (HttpServletResponse)response;
-      
-      Principal principal = req.getUserPrincipal();
-      if (principal==null) 
-      {
-        // need to get authenticated first
-        chain.doFilter(request,response);
-      } else {
-        String pathInfo = req.getServletPath();
-        if (pathInfo != null)
-        {
-          Matcher match = _preRegex.matcher(pathInfo);
-          if (match.matches())
-          {
-            String subdir = match.group(1);
-            
-            for (Pattern p: _regexs)
-            {
-              if (p.matcher(subdir).matches())
-              {
-                boolean roleFound = false;
-                for (String role:_roles)
-                {
-                  if (req.isUserInRole(role))
-                  {
+    if (request instanceof HttpServletRequest) {
+      HttpServletRequest req = (HttpServletRequest) request;
+      HttpServletResponse res = (HttpServletResponse) response;
+
+      String pathInfo = req.getServletPath();
+      if (pathInfo != null) {
+        Matcher match = _preRegex.matcher(pathInfo);
+        if (match.matches()) {
+          String subdir = match.group(1);
+
+          for (Pattern p : _regexs) {
+            if (p.matcher(subdir).matches()) {
+              boolean roleFound = false;
+              if (req.getUserPrincipal() != null) {
+                for (String role : _roles) {
+                  if (req.isUserInRole(role)) {
                     roleFound = true;
+                    break;
                   }
                 }
-                if(!roleFound)
-                {
-                  log.info("access for the user \"" + principal.getName() + "\" to: " + pathInfo
-                           + ", subdir: " + subdir 
+              }
+              if (!roleFound) {
+                if (req.getUserPrincipal() != null) {
+                  log.info("access for the user \"" + req.getUserPrincipal().getName() + "\" to: " + pathInfo
+                           + ", subdir: " + subdir
                            + " has been denied!");
-                  res.sendError(javax.servlet.http.HttpServletResponse.SC_FORBIDDEN);
-                  return;
                 }
-              }// match subdir
-            }
-          }// match preRegex
-        }
-        // post login action
-        chain.doFilter(request, response);
+                else {
+                  log.info("access for unauthenticated user at: " + req.getRemoteAddr() + " to: " + pathInfo + ", subdir: " +
+                    subdir + " has been denied!");
+                }
+                res.sendError(javax.servlet.http.HttpServletResponse.SC_FORBIDDEN);
+                return;
+              }
+            }// match subdir
+          }
+        }// match preRegex
       }
-    } else {
+      // post login action
+      chain.doFilter(request, response);
+    }
+    else {
       // only allow http servlet requests
-      throw new ServletException("Invalid request type (must be http servlet request): " 
+      throw new ServletException("Invalid request type (must be http servlet request): "
           + request.getClass().getName());
     }
   }

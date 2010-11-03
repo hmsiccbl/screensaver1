@@ -108,6 +108,7 @@
     <constructor-arg ref="genericEntityDao"/>
     <constructor-arg ref="librariesDao"/>
     <constructor-arg ref="cherryPickRequestDao"/>
+    <constructor-arg ref="cherryPickPlateSourceWellMinimumVolumePolicy"/>
   </bean>
 
   <bean

@@ -61,6 +61,10 @@ screensaver.ui.release_notes_url=/screensaver/main/changelog.html
 
 ## Screensaver features that can be enabled or disabled
 
+# whether Screensaver will expose the user "Login ID" and "Password" fields in the user interface,
+# allowing administrators to view and edit authentication credentials for screener user accounts
+screensaver.ui.feature.manage_authentication_credentials=true
+
 # whether to allow administrators to delete screens from web application user interface
 screensaver.ui.feature.delete_screen=true
 

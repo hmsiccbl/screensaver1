@@ -20,6 +20,8 @@ import edu.harvard.med.screensaver.util.StringUtils;
 public class Volume extends Quantity<Volume,VolumeUnit>
 {
   
+  /** @deprecated use a constructor that takes an explicit VolumeUnit argument, for safety */
+  @Deprecated
   public Volume(Integer value)
   {
     super(value, VolumeUnit.MICROLITERS);
@@ -30,6 +32,8 @@ public class Volume extends Quantity<Volume,VolumeUnit>
     super(value.toString(), units);
   }
 
+  /** @deprecated use a constructor that takes an explicit VolumeUnit argument, for safety */
+  @Deprecated
   public Volume(Long value)
   {
     this(value, VolumeUnit.MICROLITERS);

@@ -48,7 +48,6 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestAllocator;
 import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.EditResult;
 import edu.harvard.med.screensaver.ui.SearchResultContextEditableEntityViewerBackingBean;
@@ -68,7 +67,6 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private LibrariesDAO _librariesDao;
   private ScreenViewer _screenViewer;
   private CherryPickRequestViewer _cherryPickRequestViewer;
-  private CherryPickRequestAllocator _cherryPickRequestAllocator;
   private LibrarySearchResults _librarySearchResults;
   private DataModel _platesScreenedDataModel;
 
@@ -100,19 +98,17 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   }
 
   public LabActivityViewer(LabActivityViewer thisProxy,
-                        GenericEntityDAO dao,
-                        LibrariesDAO librariesDao,
-                        ActivitySearchResults activitiesBrowser,
-                        ScreenViewer screenViewer,
-                        CherryPickRequestViewer cherryPickRequestViewer,
-                        CherryPickRequestAllocator cherryPickRequestAllocator,
-                        LibrarySearchResults librarySearchResults)
+                           GenericEntityDAO dao,
+                           LibrariesDAO librariesDao,
+                           ActivitySearchResults activitiesBrowser,
+                           ScreenViewer screenViewer,
+                           CherryPickRequestViewer cherryPickRequestViewer,
+                           LibrarySearchResults librarySearchResults)
   {
     super(thisProxy, LabActivity.class, BROWSE_ACTIVITIES, VIEW_ACTIVITY, dao, activitiesBrowser);
     _screenViewer = screenViewer;
     _cherryPickRequestViewer = cherryPickRequestViewer;
     _librariesDao = librariesDao;
-    _cherryPickRequestAllocator = cherryPickRequestAllocator;
     _librarySearchResults = librarySearchResults;
   }
 

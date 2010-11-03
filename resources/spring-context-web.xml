@@ -62,6 +62,10 @@
     <constructor-arg ref="genericEntityDao"/>
   </bean>
  
+  <bean id="cherryPickPlateSourceWellMinimumVolumePolicy"
+   class="edu.harvard.med.iccbl.screensaver.policy.cherrypicks.IccblCherryPickPlateSourceWellMinimumVolumePolicy">
+  </bean>
+ 
   <bean id="structureImageProvider"
         class="edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider">
     <constructor-arg value="${screensaver.ui.structure_images_base_url}" />

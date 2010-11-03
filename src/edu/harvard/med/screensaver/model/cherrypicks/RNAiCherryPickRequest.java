@@ -13,15 +13,14 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import org.joda.time.LocalDate;
+
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-
-import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 
 /**
  * A hibernate entity representing an RNAi cherry pick request.
@@ -36,12 +35,19 @@ import org.joda.time.LocalDate;
 public class RNAiCherryPickRequest extends CherryPickRequest
 {
   private static final long serialVersionUID = 1L;
-  private static Logger log = Logger.getLogger(RNAiCherryPickRequest.class);
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
-  public static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
+  private static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
   private static final Volume DEFAULT_TRANSFER_VOLUME = null;
   
-  
+
+  /**
+   * Construct an uninitialized <code>RNAiCherryPickRequest</code>.
+   * 
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected RNAiCherryPickRequest()
+  {}
+
   /**
    * Construct an initialized <code>RNAiCherryPickRequest</code>.
    * 
@@ -74,11 +80,4 @@ public class RNAiCherryPickRequest extends CherryPickRequest
   {
     return DEFAULT_TRANSFER_VOLUME;
   }
-
-  /**
-   * Construct an uninitialized <code>RNAiCherryPickRequest</code>.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected RNAiCherryPickRequest() {}
 }
-

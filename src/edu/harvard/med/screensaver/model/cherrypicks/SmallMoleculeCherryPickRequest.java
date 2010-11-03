@@ -13,7 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
-import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
@@ -39,6 +38,14 @@ public class SmallMoleculeCherryPickRequest extends CherryPickRequest
   private static final long serialVersionUID = 1L;
   private static final PlateType SMALL_MOLECULE_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.ABGENE;
   private static final Volume DEFAULT_TRANSFER_VOLUME = new Volume("1.20", VolumeUnit.MICROLITERS);
+
+  /**
+   * Construct an uninitialized <code>SmallMoleculeCherryPickRequest</code>.
+   * 
+   * @motivation for hibernate and proxy/concrete subclass constructors
+   */
+  protected SmallMoleculeCherryPickRequest()
+  {}
 
   /**
    * Construct an initialized <code>SmallMoleculeCherryPickRequest</code>.
@@ -73,11 +80,5 @@ public class SmallMoleculeCherryPickRequest extends CherryPickRequest
   {
     return DEFAULT_TRANSFER_VOLUME;
   }
-
-  /**
-   * Construct an uninitialized <code>SmallMoleculeCherryPickRequest</code>.
-   * @motivation for hibernate and proxy/concrete subclass constructors
-   */
-  protected SmallMoleculeCherryPickRequest() {}
 }
 

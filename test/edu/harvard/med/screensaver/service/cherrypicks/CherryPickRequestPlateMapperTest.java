@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
 import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
@@ -55,6 +56,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
   protected CherryPickRequestPlateMapper cherryPickRequestPlateMapper;
   protected CherryPickRequestAllocator cherryPickRequestAllocator;
 
+  private Volume _minimumSourceWellVolume = new Volume(5, VolumeUnit.MICROLITERS);
 
   // public constructors and methods
 
@@ -462,7 +464,6 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
   }
 
   /**
-   * Note: adds CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME to volume!
    * @param library
    * @param copyName
    * @param volume
@@ -471,7 +472,7 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
   {
     Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, copyName);
     for (Plate plate : copy.getPlates().values()) {
-      plate.withWellVolume(new Volume(volume).add(CherryPickRequestAllocator.MINIMUM_SOURCE_WELL_VOLUME));
+      plate.withWellVolume(new Volume(volume).add(_minimumSourceWellVolume));
     }
   }
 
