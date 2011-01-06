@@ -21,9 +21,9 @@ create temp table plated_plate_activity (activity_id int, plate_id int, date_pla
 
 insert into plated_plate_activity select nextval('activity_id_seq'), plate_id, p.date_plated from plate p where date_plated is not null;
 
-/* TODO: update performed_by_id and created_by_id to an existing administrator_user */
+/* TODO: update performed_by_id and created_by_id (currently set to -1, below) to an existing administrator_user */
 insert into activity (activity_id, version, date_created, comments, date_of_activity, performed_by_id, created_by_id)
-select ppa.activity_id, 0, now(), '''Plate Status Update'' activity created by database migration for plate''s ''Available'' status (the status has not been changed).', ppa.date_plated, 755, 755 
+select ppa.activity_id, 0, now(), '''Plate Status Update'' activity created by database migration for plate''s ''Available'' status (the status has not been changed).', ppa.date_plated, -1, -1
 from plated_plate_activity ppa;
 
 insert into administrative_activity (activity_id, administrative_activity_type) 

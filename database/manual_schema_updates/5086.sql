@@ -6,6 +6,8 @@ SELECT
 current_timestamp,
 'add plate size to eppendorf plate type, correct bad "ABGene" plate_type values';
 
+/* note: incorrect "ABGene" plate_type values were introduced by bug in 4026.sql; the 'G' should have been lowercase */
+
 update plate set plate_type = 'ABgene 384 CB PP' where plate_type in ('ABgene', 'ABGene');
 update plate set plate_type = 'Costar 96 RB PS' where plate_type = 'Costar';
 update plate set plate_type = 'Eppendorf 384 CB PP' where plate_type = 'Eppendorf';
