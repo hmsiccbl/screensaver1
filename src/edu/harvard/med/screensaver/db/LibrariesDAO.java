@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
@@ -80,4 +81,6 @@ public interface LibrariesDAO
   public Set<ScreenType> findScreenTypesForReagents(Set<String> reagentIds);
 
   public Plate findPlate(int plateNumber, String copyName);
+
+  public Set<Integer> queryForPlateIds(LibraryCopyPlateListParserResult parserResult);
 }

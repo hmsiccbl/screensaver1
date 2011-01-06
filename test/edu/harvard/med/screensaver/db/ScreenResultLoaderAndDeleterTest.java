@@ -93,7 +93,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
                 else if (row == 5)
                   libraryWellType = LibraryWellType.LIBRARY_CONTROL;
                 else if (row == 6)
-                  libraryWellType = LibraryWellType.BUFFER;
+                  libraryWellType = LibraryWellType.RNAI_BUFFER;
                 else if (row == 7)
                   libraryWellType = LibraryWellType.EMPTY;
                 else if (row == 8)
@@ -106,7 +106,7 @@ public class ScreenResultLoaderAndDeleterTest extends AbstractSpringPersistenceT
         libraryCreator.createLibrary(library);
         
         library.createCopy((AdministratorUser) library.getCreatedBy(),
-                           CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
+                           CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "C");
         genericEntityDao.persistEntity(library);
       }
     });

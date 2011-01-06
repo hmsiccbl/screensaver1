@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Activity;
@@ -48,17 +49,16 @@ import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Screening;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.EditResult;
-import edu.harvard.med.screensaver.ui.SearchResultContextEditableEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.EditResult;
+import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.SelectableRow;
+import edu.harvard.med.screensaver.ui.libraries.LibrarySearchResults;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
-import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 
 public class LabActivityViewer extends SearchResultContextEditableEntityViewerBackingBean<LabActivity,LabActivity>
 {
@@ -436,7 +436,11 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
       _copies = getAllCopies();
       SortedSet<String> copyNames = Sets.newTreeSet(Iterables.transform(_copies, Copy.ToName)); 
       _newPlateRangeScreenedCopy = new UISelectOneBean<String>(copyNames, null, true) {
-        @Override protected String getEmptyLabel() { return "<select>"; }
+        @Override
+        protected String getEmptyLabel()
+        {
+          return ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT;
+        }
       };
     }
     return _newPlateRangeScreenedCopy;
@@ -546,10 +550,12 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
         return REDISPLAY_PAGE_ACTION_RESULT;
       }
       if (getNewPlateRangeScreenedStartPlate() != null &&
-        getNewPlateRangeScreenedEndPlate() != null &&
         getNewPlateRangeScreenedCopy() != null) {
         Set<Plate> newPlates = Sets.newHashSet();
         Library library = null;
+        if (getNewPlateRangeScreenedEndPlate() == null) {
+          setNewPlateRangeScreenedEndPlate(getNewPlateRangeScreenedStartPlate());
+        }
         for (int plateNumber = getNewPlateRangeScreenedStartPlate(); plateNumber <= getNewPlateRangeScreenedEndPlate(); ++plateNumber) {
           final Plate plate = _librariesDao.findPlate(plateNumber, getNewPlateRangeScreenedCopy().getSelection());
           if (plate == null) {

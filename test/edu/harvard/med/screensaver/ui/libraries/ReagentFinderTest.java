@@ -22,7 +22,6 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
 
 public class ReagentFinderTest extends AbstractSpringPersistenceTest
 {

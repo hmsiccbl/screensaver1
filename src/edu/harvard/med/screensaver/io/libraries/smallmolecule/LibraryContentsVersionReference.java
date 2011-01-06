@@ -10,7 +10,7 @@
 package edu.harvard.med.screensaver.io.libraries.smallmolecule;
 
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
-import edu.harvard.med.screensaver.ui.util.ValueReference;
+import edu.harvard.med.screensaver.ui.arch.util.ValueReference;
 
 public class LibraryContentsVersionReference implements ValueReference<LibraryContentsVersion>
 {

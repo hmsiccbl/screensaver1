@@ -204,7 +204,7 @@ public class LibraryContentsLoaderTest extends AbstractSpringPersistenceTest
         assertEquals(SilencingReagentType.ESIRNA, ((SilencingReagent)a15.getLatestReleasedReagent()).getSilencingReagentType());
         assertEquals(SilencingReagentType.SIRNA, ((SilencingReagent)a07.getLatestReleasedReagent()).getSilencingReagentType());
         assertEquals(LibraryWellType.EMPTY, a09.getLibraryWellType());
-        assertEquals(LibraryWellType.BUFFER, a11.getLibraryWellType());
+        assertEquals(LibraryWellType.RNAI_BUFFER, a11.getLibraryWellType());
         assertEquals(LibraryWellType.LIBRARY_CONTROL, a20.getLibraryWellType());
       }
     });

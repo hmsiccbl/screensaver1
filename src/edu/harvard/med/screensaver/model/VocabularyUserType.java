@@ -7,6 +7,8 @@
 // at Harvard Medical School. This software is distributed under the terms of
 // the GNU General Public License.
 
+// TODO: this is not a model class, but rather a persistence-related class, as it is only concerned with how to convert
+// model types into values that can be persisted; it should be moved to e.h.m.s.db.usertypes
 package edu.harvard.med.screensaver.model;
 
 import java.io.Serializable;

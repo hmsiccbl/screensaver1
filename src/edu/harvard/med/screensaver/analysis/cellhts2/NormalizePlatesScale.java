@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.analysis.cellhts2;
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
+// TODO: no need to implement VocabularyTerm, as this is not a persisted type
 public enum NormalizePlatesScale implements VocabularyTerm
 {
   ADDITIVE("additive"),

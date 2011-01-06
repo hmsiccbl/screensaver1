@@ -10,59 +10,66 @@
 
 <ui:component>
 
-	<f:subview>
+	<f:subview rendered="#{empty rendered ? true : rendered}">
 
-		<t:panelGrid id="searchAndColumnsPanel" columns="1" columnClasses="searchPanelColumn,searchPanelColumn">
+    <t:panelGrid id="searchAndColumnsPanel" columns="1"
+      columnClasses="searchPanelColumn,searchPanelColumn">
 
-			<h:form id="searchForm">
-				<t:collapsiblePanel value="#{searchResults.isPanelCollapsedMap['search']}"  var="isCollapsed">
-					<f:facet name="header">
-						<t:headerLink immediate="true">
-							<t:outputText
-								value="Search #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
-								escape="true" styleClass="label" />
-						</t:headerLink>
-					</f:facet>
+      <h:form id="searchForm">
+        <t:collapsiblePanel
+          value="#{searchResults.isPanelCollapsedMap['search']}"
+          var="isCollapsed">
+          <f:facet name="header">
+            <t:headerLink immediate="true">
+              <t:outputText
+                value="Search #{isCollapsed ? '&gt;&gt;' : '&lt;&lt;'}"
+                escape="true" styleClass="label" />
+            </t:headerLink>
+          </f:facet>
 
-					<!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
-					<t:commandButton id="defaultSearchButton" forceId="true"
-						styleClass="hiddenCommand"/>
+          <!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
+          <t:commandButton id="defaultSearchButton" forceId="true"
+            styleClass="hiddenCommand" />
 
-					<t:panelGrid styleClass="groupingPanel" style="margin-top: 2px">
-						<t:dataTable id="queryTable" var="column"
-							styleClass="standardTable"
-							value="#{searchResults.columnManager.sortableSearchableColumns}"
-							rendered="#{!searchResults.tableFilterMode}">
-							<t:column id="columnName" styleClass="keyColumn"
-								style="width: 33%">
-								<t:outputText value="#{column.name}" styleClass="label" />
-							</t:column>
-							<t:column id="fieldOperatorColumn">
-								<ss:operator column="#{column}" editable="true"/>
-							</t:column>
-							<t:column id="fieldInputColumn">
-								<ss:criterion column="#{column}"  editable="true"/>
-							</t:column>
-							<t:column>
-								<t:commandButton value="Clear" immediate="true"
-									action="#{searchResults.resetColumnFilter}" styleClass="command" />
-							</t:column>
-						</t:dataTable>
-						<t:panelGroup id="searchCommandPanel">
-							<!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
-							<t:commandButton id="searchButton" value="Search"
-								styleClass="command"/>
-							<t:commandButton value="Clear All" immediate="true"
-								action="#{searchResults.resetFilter}" styleClass="command" />
-							<t:selectBooleanCheckbox id="showFiltersInTableOption"
-								value="#{searchResults.tableFilterMode}"
-								onchange="javascript:submit()" />
-							<t:outputLabel for="showFiltersInTableOption"
-								value="Show search fields above table columns" styleClass="label" />
-						</t:panelGroup>
-					</t:panelGrid>
-				</t:collapsiblePanel>
-			</h:form>
+          <t:panelGrid styleClass="groupingPanel"
+            style="margin-top: 2px">
+            <t:dataTable id="queryTable" var="column"
+              styleClass="standardTable"
+              value="#{searchResults.columnManager.sortableSearchableColumns}"
+              rendered="#{!searchResults.tableFilterMode}">
+              <t:column id="columnName" styleClass="keyColumn"
+                style="width: 33%">
+                <t:outputText value="#{column.name}" styleClass="label" />
+              </t:column>
+              <t:column id="fieldOperatorColumn">
+                <ss:operator column="#{column}" editable="true" />
+              </t:column>
+              <t:column id="fieldInputColumn">
+                <ss:criterion column="#{column}" editable="true" />
+              </t:column>
+              <t:column>
+                <t:commandButton value="Clear" immediate="true"
+                  action="#{searchResults.resetColumnFilter}"
+                  styleClass="command" />
+              </t:column>
+            </t:dataTable>
+            <t:panelGroup id="searchCommandPanel">
+              <!-- Note: this button is the default form-submit button, invoked when user presses enter in an input text field -->
+              <t:commandButton id="searchButton" value="Search"
+                styleClass="command" />
+              <t:commandButton value="Clear All" immediate="true"
+                action="#{searchResults.resetFilter}"
+                styleClass="command" />
+              <t:selectBooleanCheckbox id="showFiltersInTableOption"
+                value="#{searchResults.tableFilterMode}"
+                onchange="javascript:submit()" />
+              <t:outputLabel for="showFiltersInTableOption"
+                value="Show search fields above table columns"
+                styleClass="label" />
+            </t:panelGroup>
+          </t:panelGrid>
+        </t:collapsiblePanel>
+      </h:form>
 
       <h:form>
         <t:collapsiblePanel id="columnsSelectionPanel"
@@ -85,9 +92,9 @@
           </t:panelGrid>
         </t:collapsiblePanel>
       </h:form>
-		</t:panelGrid>
+    </t:panelGrid>
 
-		<h:form>
+    <h:form>
 			<t:buffer into="#{dataTableBuffer}">
 				<t:dataTable id="searchResultsTable"
 					binding="#{searchResults.dataTableUIComponent}"

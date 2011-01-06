@@ -42,10 +42,9 @@
           value="#{entity.entityId}" adminOnly="true"
           rendered="#{!hideId}" />
 
-        <ss:property id="dateCreated" label="Created"
+        <ss:property id="dateRecorded" label="Recorded"
           description="The date the entity was originally recorded in Screensaver"
-          value="#{entity.dateCreated}" type="Date" adminOnly="true"
-          rendered="#{! empty entity.dateCreated}" /><!--TODO: remove this check - sde4 -->
+          value="#{entity.dateCreated}" type="Date" adminOnly="true" />
         <ui:insert name="propertiesContent" />
       </t:panelGrid>
 

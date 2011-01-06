@@ -56,12 +56,14 @@ import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
-import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 /**
  * High-level test covering DataTable, TableColumnManager, SearchResults, and

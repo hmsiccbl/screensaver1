@@ -16,25 +16,9 @@
     </t:panelGroup>
   </h:form>
 
-  <t:panelGrid id="propertiesPanel" columns="2"
-   rendered="#{!libraryCopyViewer.entity.transient}"
-   columnClasses="propertyLabelColumn,column"
-   styleClass="layoutPanel">
-     <ss:property id="libraryCopyPlatesTable" label="Plates Information"
-      description="The plates for this library copy"
-      editable="false">
-      <ui:define name="data">
-        <ss:searchResult searchResults="#{libraryCopyViewer.libraryCopyPlateSearchResults}" >
-          <ui:define name="searchResultFooter">
-            <t:commandButton id="editMultiplePlates" value="Batch Edit"
-              action="#{libraryCopyDetail.edit}"
-              title="Update a range of plates as a batch"
-              rendered="#{!searchResults.editMode &amp;&amp; !libraryCopyDetail.editMode &amp;&amp; libraryCopyDetail.editable}" />
-          </ui:define>
-        </ss:searchResult>
-      </ui:define>
-    </ss:property>
-  </t:panelGrid>
+  <ui:include src="platesBrowserWithComments.xhtml">
+    <ui:param name="viewer" value="#{libraryCopyViewer}" />
+  </ui:include>
 
 </ui:composition>
 

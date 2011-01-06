@@ -15,7 +15,7 @@ import java.text.NumberFormat;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
-import edu.harvard.med.screensaver.ui.util.HtmlUtils;
+import edu.harvard.med.screensaver.ui.arch.util.HtmlUtils;
 
 import org.apache.log4j.Logger;
 

@@ -25,7 +25,7 @@ import org.hibernate.transform.DistinctRootEntityResultTransformer;
 
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.Entity;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class HqlBuilder

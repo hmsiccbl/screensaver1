@@ -21,6 +21,8 @@ import javax.servlet.http.Cookie;
 
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 import org.springframework.dao.ConcurrencyFailureException;
 

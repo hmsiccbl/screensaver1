@@ -17,8 +17,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;

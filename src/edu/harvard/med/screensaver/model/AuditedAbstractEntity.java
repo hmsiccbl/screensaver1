@@ -10,6 +10,7 @@
 package edu.harvard.med.screensaver.model;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.SortedSet;
 
 import javax.persistence.Column;
@@ -19,6 +20,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
@@ -116,6 +118,41 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
     return _updateActivities;
   }
   
+  @Transient
+  public SortedSet<AdministrativeActivity> getUpdateActivitiesOfType(AdministrativeActivityType activityType)
+  {
+    return Sets.newTreeSet(Sets.filter(_updateActivities,
+                                       AdministrativeActivity.IsOfType(activityType)));
+  }
+
+  /**
+   * @param activityType
+   * @return the most recently performed {@link AdministrativeActivity} of the specified type; if no activity of the
+   *         specified type exists, returns a {@link AdministrativeActivity} with all properties set to
+   *         </code>null</code>
+   */
+  @Transient
+  public AdministrativeActivity getLastUpdateActivityOfType(AdministrativeActivityType activityType)
+  {
+    SortedSet<AdministrativeActivity> activities = getUpdateActivitiesOfType(activityType);
+    return activities.isEmpty() ? AdministrativeActivity.Null : activities.last();
+  }
+  
+  private static Ordering<Activity> ActivityRecordedOrdering = Ordering.from(new Comparator<Activity>() {
+    @Override
+    public int compare(Activity a1, Activity a2)
+    {
+      return a1.getDateCreated().compareTo(a2.getDateCreated());
+    }
+  });
+
+  @Transient
+  public AdministrativeActivity getLastRecordedUpdateActivityOfType(AdministrativeActivityType activityType)
+  {
+    SortedSet<AdministrativeActivity> activities = getUpdateActivitiesOfType(activityType);
+    return activities.isEmpty() ? AdministrativeActivity.Null : ActivityRecordedOrdering.max(activities);
+  }
+
   private void setUpdateActivities(SortedSet<AdministrativeActivity> updateActivities)
   {
     _updateActivities = updateActivities;

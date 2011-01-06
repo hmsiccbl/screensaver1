@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 
 public class NoOpDataFetcher<R,K,P> implements DataFetcher<R,K,P>
 {

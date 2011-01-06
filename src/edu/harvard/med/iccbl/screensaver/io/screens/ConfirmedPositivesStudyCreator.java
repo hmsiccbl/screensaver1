@@ -197,9 +197,9 @@ public class ConfirmedPositivesStudyCreator extends AdminEmailApplication
             study = dao.findEntityByProperty(Screen.class, Screen.facilityId.getPropertyName(), studyFacilityId);
             
             InternetAddress adminEmail = app.getEmail(admin);
-            String subject = "Study created: " + study.getTitle(); //app.getMessages().getMessage("Study generated");
-            String msg = "Study: " + study.getFacilityId() + ", " + study.getTitle() + "; " + study.getSummary()
-              + "\ntotal count of Confirmed Positives considered in the study: " + count;
+            String subject = "Study created: \"" + study.getTitle() + "\""; //app.getMessages().getMessage("Study generated");
+            String msg = "Study: " + study.getFacilityId() + "\n\"" + study.getTitle() + "\"\n" + study.getSummary()
+              + "\n\nTotal count of Confirmed Positives considered in the study: " + count;
             log.info(msg);
             EmailService emailService = app.getEmailServiceBasedOnCommandLineOption(admin);
             emailService.send(subject,

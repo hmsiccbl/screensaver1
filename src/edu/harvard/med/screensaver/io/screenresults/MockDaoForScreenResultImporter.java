@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.ScrollableResults;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
@@ -28,6 +28,7 @@ import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.db.ScreenResultsDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
+import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.Volume;
@@ -402,5 +403,16 @@ public class MockDaoForScreenResultImporter implements GenericEntityDAO, ScreenR
   public Set<ScreenType> findScreenTypesForWells(Set<WellKey> wellKeys)
   {
     return null;
+  }
+
+  @Override
+  public <E extends Entity,T> Set<T> findDistinctPropertyValues(Class<E> entityClass, String propertyName)
+  {
+    return Sets.newHashSet();
+  }
+  
+  public Set<Integer> queryForPlateIds(LibraryCopyPlateListParserResult parserResult)
+  {
+    return Sets.newHashSet();
   }
 }

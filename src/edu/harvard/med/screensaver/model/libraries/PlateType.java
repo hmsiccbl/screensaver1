@@ -20,9 +20,7 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  */
 public enum PlateType implements VocabularyTerm
 {
-
-  // the vocabulary
-  
+  // TODO: consider enums for the below secondary attributes
   // Legend:
   //
   //  RB - Round Bottom
@@ -41,17 +39,14 @@ public enum PlateType implements VocabularyTerm
    */
   ABGENE("ABgene", PlateSize.WELLS_384, "CB", "PP"), 
   COSTAR("Costar", PlateSize.WELLS_96, "RB", "PS"),
-  EPPENDORF("Eppendorf", PlateSize.WELLS_384, "CB", "PP"),
+  EPPENDORF_384("Eppendorf", PlateSize.WELLS_384, "CB", "PP"),
+  EPPENDORF_96("Eppendorf", PlateSize.WELLS_96, "CB", "PP"),
   GENETIX("Genetix", PlateSize.WELLS_384, "CB", "PP"),
   MARSH("Marsh", PlateSize.WELLS_384, "VB", "PP"),
   NUNC("Nunc", PlateSize.WELLS_96, "VB", "PS"),
   ;
   
-  // TODO: consider enums for auxiliary attributes
-
  
-  // static inner class
-
   /**
    * A Hibernate <code>UserType</code> to map the {@link PlateType} vocabulary.
    */
@@ -63,28 +58,32 @@ public enum PlateType implements VocabularyTerm
     }
   }
 
-
-  // private instance field and constructor
-
   private String _value;
+  private String _brand;
   private PlateSize _plateSize;
   private String _wellBottomShape;
   private String _material;
 
   /**
    * Constructs a <code>PlateType</code> vocabulary term.
-   * @param value The value of the term.
+   * 
+   * @param brand The value of the term.
    */
-  private PlateType(String value, PlateSize plateSize, String wellBottomShape, String material)
+  private PlateType(String brand, PlateSize plateSize, String wellBottomShape, String material)
   {
-    _value = value;
+    _brand = brand;
     _plateSize = plateSize;
     _wellBottomShape = wellBottomShape;
     _material = material;
+    _value = new StringBuilder().append(_brand)
+      .append(' ')
+      .append(getPlateSize().getWellCount())
+      .append(' ')
+      .append(_wellBottomShape)
+      .append(' ')
+      .append(_material)
+      .toString();
   }
-
-
-  // public instance methods
 
   /**
    * Get the value of the vocabulary term.
@@ -93,6 +92,11 @@ public enum PlateType implements VocabularyTerm
   public String getValue()
   {
     return _value;
+  }
+
+  public String getBrand()
+  {
+    return _brand;
   }
 
   public String getMaterial()
@@ -110,27 +114,9 @@ public enum PlateType implements VocabularyTerm
     return _wellBottomShape;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString()
   {
     return getValue();
-  }
-
-  // Note: we cannot return this in toString(), as it prevents String->Enum reverse lookup
-  public String getFullName()
-  {
-    return new StringBuilder().append(_value)
-    .append(' ')
-    .append(getPlateSize().getWellCount())
-    .append(' ')
-    .append(_wellBottomShape)
-    .append(' ')
-    .append(_material)
-    .toString();
   }
 }

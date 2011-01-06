@@ -5,6 +5,10 @@
 # Used by Ant targets that build and deploy Screensaver.
 # Changes to build-time properties require re-deploying the application to Tomcat (e.g., via 'ant restart')
 
+# The top-level Spring application context file to be used to configure and instantiate the web application.
+# This file configures the various policy implementations that are used by the web application.
+web.application.context.file=spring-context-web-default.xml
+
 # Authentication can be 'FORM' (Screensaver login web page) or 'BASIC' (browser dialog).  
 # BASIC mode is useful during development, to avoid repeating the login step between Tomcat restarts.
 servlet.authentication.method=FORM
@@ -29,7 +33,7 @@ debug=false
 
 ### Run-time properties (web application configuration)
 # Changes to run-time properties require restarting Tomcat or restarting the web application 
-# within Tomcat (re-deployment is not reqiured)
+# within Tomcat (re-deployment is not required)
 
 # The name of the web application, as displayed i the web user interface
 screensaver.ui.application_name=Screensaver
@@ -54,6 +58,12 @@ screensaver.ui.feedback_url=mailto:screensaver-feedback@localhost
 # See edu.harvard.med.iccbl.screensaver.io.libraries.smallmolecule.PlateWellFileNameStructureImageProvider.  
 # If you have configured Screensaver to use a different StructureImageProvider (in spring-context-web.xml), you can ignore this setting.
 screensaver.ui.structure_images_base_url=http://localhost:8080/screensaver/
+# ImageProviderServlet: provide a file system path for the ImageProviderServlet to prepend to the path of intercepted http image requests.  
+# See edu.harvard.med.screensaver.ui.arch.util.servlet.ImageProviderServlet.
+# The ImageProviderServlet will intercept requests as defined in web.xml (the default <url-pattern>/imageprovider/*</url-pattern> is specified).
+# Additionally, with the standard screensaver setup; make sure that the url-pattern is allowed in the <security-constraint> section!
+# This should be an absolute file path; however, if the path is relative, it will be interpreted as relative to the web application root directory.
+screensaver.ui.imageproviderservlet.filesystempath=images
 
 # The location of the change log file that will made available to web application users.  
 # Note that this is a general URL that can be external to the Screensaver web application URL.

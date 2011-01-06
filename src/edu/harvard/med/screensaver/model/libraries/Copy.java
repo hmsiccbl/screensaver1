@@ -35,6 +35,8 @@ import com.google.common.collect.Maps;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Sort;
 import org.hibernate.annotations.SortType;
+import org.hibernate.annotations.Type;
+import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
@@ -42,6 +44,7 @@ import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
+import edu.harvard.med.screensaver.model.annotations.Derived;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -81,6 +84,7 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   private String _name;
   private CopyUsageType _usageType;
   private String _comments;
+  private LocalDate _datePlated;
   private Map<Integer,Plate> _plates = Maps.newHashMap();
   private ScreeningStatistics _screeningStatistics;
 
@@ -297,5 +301,18 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   public SortedSet<AdministrativeActivity> getUpdateActivities()
   {
     return _updateActivities;
+  }
+
+  @Column
+  @Type(type = "edu.harvard.med.screensaver.db.usertypes.LocalDateType")
+  @Derived
+  public LocalDate getDatePlated()
+  {
+    return _datePlated;
+  }
+
+  public void setDatePlated(LocalDate datePlated)
+  {
+    _datePlated = datePlated;
   }
 }

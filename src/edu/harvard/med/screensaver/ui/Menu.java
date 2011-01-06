@@ -24,20 +24,23 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
+import edu.harvard.med.screensaver.ui.activities.ActivitySearchResults;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.LibraryCopyPlateSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.LibraryCopySearchResults;
 import edu.harvard.med.screensaver.ui.libraries.LibraryDetailViewer;
+import edu.harvard.med.screensaver.ui.libraries.LibrarySearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
-import edu.harvard.med.screensaver.ui.searchresults.ActivitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LibraryCopySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenerSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.StaffSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
+import edu.harvard.med.screensaver.ui.screens.ScreenSearchResults;
+import edu.harvard.med.screensaver.ui.screens.StudySearchResults;
+import edu.harvard.med.screensaver.ui.users.ScreenerSearchResults;
+import edu.harvard.med.screensaver.ui.users.StaffSearchResults;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 
@@ -58,6 +61,7 @@ public class Menu extends AbstractBackingBean
   private CherryPickRequestSearchResults _cherryPickRequestsBrowser;
   private LibrarySearchResults _librariesBrowser;
   private LibraryCopySearchResults _copiesBrowser;
+  private LibraryCopyPlateSearchResults _libraryCopyPlatesBrowser;
   private StaffSearchResults _staffBrowser;
   private ScreenerSearchResults _screenersBrowser;
   private ActivitySearchResults _activitiesBrowser;
@@ -65,6 +69,7 @@ public class Menu extends AbstractBackingBean
   private UserViewer _userViewer;
   private WellSearchResults _wellsBrowser;
   private LibraryDetailViewer _libraryDetailViewer;
+
 
 
   // public methods
@@ -84,6 +89,7 @@ public class Menu extends AbstractBackingBean
               CherryPickRequestSearchResults cherryPickRequestsBrowser,
               LibrarySearchResults librariesBrowser,
               LibraryCopySearchResults copiesBrowser,
+              LibraryCopyPlateSearchResults libraryCopyPlatesBrowser,
               ScreenerSearchResults screenersBrowser,
               StaffSearchResults staffBrowser,
               ActivitySearchResults activitiesBrowser,
@@ -100,6 +106,7 @@ public class Menu extends AbstractBackingBean
     _cherryPickRequestsBrowser = cherryPickRequestsBrowser;
     _librariesBrowser = librariesBrowser;
     _copiesBrowser = copiesBrowser;
+    _libraryCopyPlatesBrowser = libraryCopyPlatesBrowser;
     _staffBrowser = staffBrowser;
     _screenersBrowser = screenersBrowser;
     _activitiesBrowser = activitiesBrowser;
@@ -189,6 +196,13 @@ public class Menu extends AbstractBackingBean
   {
     _copiesBrowser.searchAll();
     return BROWSE_LIBRARY_COPIES;
+  }
+
+  @UICommand
+  public String browseLibraryCopyPlates()
+  {
+    _libraryCopyPlatesBrowser.searchAll();
+    return BROWSE_LIBRARY_COPY_PLATES;
   }
 
   @UICommand

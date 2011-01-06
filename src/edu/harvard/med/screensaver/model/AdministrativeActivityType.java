@@ -9,11 +9,9 @@
 
 package edu.harvard.med.screensaver.model;
 
-import edu.harvard.med.screensaver.model.VocabularyTerm;
-import edu.harvard.med.screensaver.model.VocabularyUserType;
-import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-
 import com.google.common.base.Predicate;
+
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 
 /**
  * The vocabulary of values for AdministrativeActivity types.
@@ -32,8 +30,24 @@ public enum AdministrativeActivityType implements VocabularyTerm
   LIBRARY_CONTENTS_VERSION_RELEASE("Library Contents Version Release", ScreensaverUserRole.LAB_HEADS_ADMIN),
   SCREEN_RESULT_DATA_LOADING("Screen Result Data Loading", ScreensaverUserRole.SCREEN_RESULTS_ADMIN),
   SCREEN_RESULT_DATA_DELETION("Screen Result Data Deletion", ScreensaverUserRole.SCREEN_RESULTS_ADMIN),
-  /** For general recording of changes made to the data in an entity (audit log) */
+  PLATE_LOCATION_TRANSFER("Plate Location Transfer", ScreensaverUserRole.LIBRARY_COPIES_ADMIN),
+  PLATE_STATUS_UPDATE("Plate Status Update", ScreensaverUserRole.LIBRARY_COPIES_ADMIN),
+  PLATE_VOLUME_CORRECTION("Plate Volume Correction", ScreensaverUserRole.LIBRARY_COPIES_ADMIN),
+  PLATE_VOLUME_TRANSFER("Plate Volume Transfer", ScreensaverUserRole.LIBRARY_COPIES_ADMIN),
+  /**
+   * For general recording of changes made to the data in an entity (audit log). Comments should be used to record
+   * old/new values or to explain why a change was made if it does not correspond to a real-world event (e.g. data
+   * correction, database migration, etc.).
+   */
   ENTITY_UPDATE("Entity Update", ScreensaverUserRole.READ_EVERYTHING_ADMIN),
+  /**
+   * For recording time-stamped comments on an entity (this is replacing entity-specific "comments"
+   * properties). These types of comments are intended to be made more highly visible to administrators than comments
+   * associated
+   * with the other administrative activity types, which are intended more for data auditing purposes. Comments on this
+   * activity type will usually provide information about the corresponding real-world entity.
+   */
+  COMMENT("Comment", ScreensaverUserRole.READ_EVERYTHING_ADMIN),
   ;
 
   public Predicate<AdministrativeActivity> isValuePredicate()

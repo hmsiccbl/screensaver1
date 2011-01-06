@@ -199,4 +199,12 @@
     <constructor-arg ref="serviceMessages"/>
   </bean>
   
+  <bean 
+    id="plateUpdater" 
+    class="edu.harvard.med.screensaver.service.libraries.PlateUpdater" 
+    scope="singleton">
+    <constructor-arg ref="genericEntityDao"/>
+    <constructor-arg ref="plateFacilityIdInitializer"/>
+  </bean>
+
 </beans>

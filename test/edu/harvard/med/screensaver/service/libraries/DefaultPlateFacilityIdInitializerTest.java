@@ -29,8 +29,5 @@ public class DefaultPlateFacilityIdInitializerTest extends TestCase
     Plate plate = copy.findPlate(1);
     assertTrue(defaultPlateFacilityIdInitializer.initializeFacilityId(plate));
     assertEquals("1-A", plate.getFacilityId());
-    plate.setLocation("Freezer1");
-    assertTrue(defaultPlateFacilityIdInitializer.initializeFacilityId(plate));
-    assertEquals("1-A-Freezer1", plate.getFacilityId());
   }
 }

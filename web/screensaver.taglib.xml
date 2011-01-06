@@ -56,6 +56,11 @@
     </tag>
 
     <tag>
+      <tag-name>selectOneMenu</tag-name>
+      <source>../util/selectOneMenu.xhtml</source>
+    </tag>
+
+    <tag>
       <tag-name>collapsiblePanel</tag-name>
       <source>../util/collapsiblePanel.xhtml</source>
     </tag>

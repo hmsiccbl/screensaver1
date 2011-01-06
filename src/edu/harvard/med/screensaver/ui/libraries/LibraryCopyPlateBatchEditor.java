@@ -1,0 +1,470 @@
+// $HeadURL: $
+// $Id: $
+//
+// Copyright © 2010 by the President and Fellows of Harvard College.
+// 
+// Screensaver is an open-source project developed by the ICCB-L and NSRB labs
+// at Harvard Medical School. This software is distributed under the terms of
+// the GNU General Public License.
+
+package edu.harvard.med.screensaver.ui.libraries;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.faces.model.SelectItem;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.joda.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
+import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.VolumeUnit;
+import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateLocation;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
+import edu.harvard.med.screensaver.model.libraries.PlateType;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
+import edu.harvard.med.screensaver.service.libraries.PlateUpdater;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.util.NullSafeUtils;
+import edu.harvard.med.screensaver.util.StringUtils;
+
+public class LibraryCopyPlateBatchEditor extends AbstractBackingBean
+{
+  public class LocationPartUISelectOneBean extends UISelectOneBean<String>
+  {
+    private String _locationPartName;
+
+    public LocationPartUISelectOneBean(String locationPartName)
+    {
+      super(Sets.newTreeSet(getDao().<PlateLocation,String>findDistinctPropertyValues(PlateLocation.class, locationPartName)),
+            null,
+            true);
+      _locationPartName = locationPartName;
+    }
+    
+    public void refresh()
+    {
+      setDomain(getDao().<PlateLocation,String>findDistinctPropertyValues(PlateLocation.class, _locationPartName), 
+                getSelection());
+    }
+
+    @Override
+    protected String getEmptyLabel()
+    {
+      return NO_CHANGE;
+    }
+  }
+
+  private static final Logger log = Logger.getLogger(LibraryCopyPlateBatchEditor.class);
+
+  private static final String NO_CHANGE = "<no change>";
+  private static final VolumeUnit DEFAULT_PLATE_WELL_VOLUME_UNITS = VolumeUnit.MICROLITERS;
+
+  private static final ConcentrationUnit DEFAULT_PLATE_CONCENTRATION_UNITS = ConcentrationUnit.MICROMOLAR;
+
+  private PlateUpdater _plateUpdater;
+  private GenericEntityDAO _dao;
+
+  private UISelectOneBean<PlateType> _plateType;
+  private UISelectOneBean<PlateStatus> _plateStatus;
+  private ActivityDTO _statusChangeActivity;
+  private LocationPartUISelectOneBean _room;
+  private LocationPartUISelectOneBean _freezer;
+  private LocationPartUISelectOneBean _shelf;
+  private LocationPartUISelectOneBean _bin;
+  private PlateLocation _newPlateLocation;
+  private ActivityDTO _locationChangeActivity;
+  private UISelectOneBean<VolumeUnit> _volumeType;
+  private String _volumeValue;
+  private UISelectOneBean<ConcentrationUnit> _concentrationType;
+  private String _concentrationValue;
+  private String _comments;
+
+  /** @motivation for CGLIB2 */
+  protected LibraryCopyPlateBatchEditor()
+  {}
+
+  public LibraryCopyPlateBatchEditor(GenericEntityDAO dao,
+                                     PlateUpdater plateUpdater)
+  {
+    super();
+    _dao = dao;
+    _plateUpdater = plateUpdater;
+    getIsPanelCollapsedMap().put("batchEdit", true);
+  }
+
+  public void initialize()
+  {
+    _plateType = null;
+    _plateStatus = null;
+    _statusChangeActivity = new ActivityDTO();
+    _statusChangeActivity.setDateOfActivity(new LocalDate());
+    _statusChangeActivity.setPerformedBy(getScreensaverUser());
+    _volumeValue = null;
+    _volumeType = null;
+    _concentrationValue = null;
+    _concentrationType = null;
+    _room = null;
+    _freezer = null;
+    _shelf = null;
+    _bin = null;
+    _newPlateLocation = new PlateLocation();
+    _locationChangeActivity = new ActivityDTO();
+    _locationChangeActivity.setDateOfActivity(new LocalDate());
+    _locationChangeActivity.setPerformedBy(getScreensaverUser());
+    _comments = null;
+  }
+
+  private boolean validate()
+  {
+    boolean valid = true;
+
+    try {
+      Volume.makeVolume(getVolumeValue(),
+                        getVolumeType().getSelection());
+    }
+    catch (Exception e) {
+      showMessage("invalid volume: " + e.getLocalizedMessage());
+      valid = false;
+    }
+
+    try {
+      Concentration.makeConcentration(getConcentrationValue(),
+                                      getConcentrationType().getSelection());
+    }
+    catch (Exception e) {
+      showMessage("invalid concentration: " + e.getLocalizedMessage());
+      valid = false;
+    }
+
+    if (getPlateStatus().getSelection() != null) {
+      if (_statusChangeActivity.getPerformedBy() == null) {
+        showMessage("requiredValue", "plate status change performed by");
+        valid = false;
+      }
+      if (_statusChangeActivity.getDateOfActivity() == null) {
+        showMessage("requiredValue", "plate status change date");
+        valid = false;
+      }
+    }
+
+    if (getRoom().getSelection() != null || getNewPlateLocationFields().getRoom() != null ||
+      getFreezer().getSelection() != null || getNewPlateLocationFields().getFreezer() != null ||
+      getShelf().getSelection() != null || getNewPlateLocationFields().getShelf() != null ||
+      getBin().getSelection() != null || getNewPlateLocationFields().getBin() != null) {
+      if (_locationChangeActivity.getPerformedBy() == null) {
+        showMessage("requiredValue", "plate location change performed by");
+        valid = false;
+      }
+      if (_locationChangeActivity.getDateOfActivity() == null) {
+        showMessage("requiredValue", "plate location change date");
+        valid = false;
+      }
+    }
+
+    return valid;
+  }
+
+  @UICommand
+  @Transactional
+  public boolean updatePlates(Set<Plate> plates)
+  {
+    ScreensaverUser screensaverUser = getCurrentScreensaverUser().getScreensaverUser();
+    if (!(screensaverUser instanceof AdministratorUser) ||
+      !((AdministratorUser) screensaverUser).isUserInRole(ScreensaverUserRole.LIBRARY_COPIES_ADMIN)) {
+      throw new BusinessRuleViolationException("only library copies administrators can edit library copy plates");
+    }
+    if (!validate()) {
+      return false;
+    }
+
+    int modifiedCount = 0;
+    AdministratorUser adminUser = getDao().reloadEntity((AdministratorUser) getScreensaverUser());
+    for (Plate plate : plates) {
+      boolean modified = false;
+      if (!StringUtils.isEmpty(getVolumeValue())) {
+        Volume newVolume = new Volume(getVolumeValue(), getVolumeType().getSelection());
+        modified |= _plateUpdater.updateWellVolume(plate, newVolume, adminUser);
+      }
+      if (!StringUtils.isEmpty(getConcentrationValue())) {
+        Concentration newConcentration = new Concentration(getConcentrationValue(), getConcentrationType().getSelection());
+        modified |= _plateUpdater.updateConcentration(plate, newConcentration, adminUser);
+      }
+      if (getPlateType().getSelection() != null) {
+        modified |= _plateUpdater.updatePlateType(plate, getPlateType().getSelection(), adminUser);
+      }
+      if (getPlateStatus().getSelection() != null) {
+        modified |= _plateUpdater.updatePlateStatus(plate,
+                                                    getPlateStatus().getSelection(),
+                                                    adminUser,
+                                                    (AdministratorUser) _statusChangeActivity.getPerformedBy(),
+                                                    _statusChangeActivity.getDateOfActivity());
+      }
+      if (!StringUtils.isEmpty(_comments)) {
+        _plateUpdater.addComment(plate, adminUser, _comments);
+        modified = true;
+      }
+      PlateLocation newLocation = makeNewLocation(plate);
+      if (newLocation != null) {
+        modified |= _plateUpdater.updatePlateLocation(plate,
+                                                      newLocation,
+                                                      adminUser,
+                                                      (AdministratorUser) _locationChangeActivity.getPerformedBy(),
+                                                      _locationChangeActivity.getDateOfActivity());
+      }
+      if (modified) {
+        // note: if no other properties were modified, the facility ID will not be modified, 
+        // even if it is not up-to-date; this is less confusing to the user, who would 
+        // otherwise expect only properties with specified values to affect the modified count
+        _plateUpdater.updateFacilityId(plate, adminUser);
+      }
+
+      if (modified) {
+        ++modifiedCount;
+        getDao().flush(); // HACK: due to commented-out flush() in PlateUpdate.findPlateLocation()
+      }
+    }
+    _plateUpdater.validateLocations();
+    showMessage("libraries.updatedPlates", modifiedCount, plates.size());
+    getRoom().refresh();
+    getFreezer().refresh();
+    getShelf().refresh();
+    getBin().refresh();
+    return true;
+  }
+
+  private PlateLocation makeNewLocation(Plate plate)
+  {
+    PlateLocation oldLocation = plate.getLocation();
+    String room = getNewPlateLocationFields().getRoom() != null ? getNewPlateLocationFields().getRoom()
+      : getRoom().getSelection() != null
+      ? getRoom().getSelection() : null;
+    String freezer = getNewPlateLocationFields().getFreezer() != null ? getNewPlateLocationFields().getFreezer()
+      : getFreezer().getSelection() != null ? getFreezer().getSelection() : null;
+    String shelf = getNewPlateLocationFields().getShelf() != null ? getNewPlateLocationFields().getShelf()
+      : getShelf().getSelection() != null
+      ? getShelf().getSelection() : null;
+    String bin = getNewPlateLocationFields().getBin() != null ? getNewPlateLocationFields().getBin()
+      : getBin().getSelection() != null
+      ? getBin().getSelection() : null;
+
+    if (room == null && freezer == null && shelf == null && bin == null) {
+      return null;
+    }
+
+    if (oldLocation != null) {
+      if (room == null) {
+        room = oldLocation.getRoom();
+      }
+      if (freezer == null) {
+        freezer = oldLocation.getFreezer();
+      }
+      if (shelf == null) {
+        shelf = oldLocation.getShelf();
+      }
+      if (bin == null) {
+        bin = oldLocation.getBin();
+      }
+
+      if (NullSafeUtils.nullSafeEquals(room, oldLocation.getRoom()) &&
+        NullSafeUtils.nullSafeEquals(freezer, oldLocation.getFreezer()) &&
+        NullSafeUtils.nullSafeEquals(shelf, oldLocation.getShelf()) &&
+        NullSafeUtils.nullSafeEquals(bin, oldLocation.getBin())) {
+        // no change
+        return null;
+      }
+    }
+    else {
+      room = room == null ? PlateUpdater.NO_ROOM : room;
+      freezer = freezer == null ? PlateUpdater.NO_FREEZER : freezer;
+      shelf = shelf == null ? PlateUpdater.NO_SHELF : shelf;
+      bin = bin == null ? PlateUpdater.NO_BIN : bin;
+    }
+
+    PlateLocation newLocation = new PlateLocation(room, freezer, shelf, bin);
+    return newLocation;
+  }
+
+  private GenericEntityDAO getDao()
+  {
+    return _dao;
+  }
+
+  public String getVolumeValue()
+  {
+    return _volumeValue;
+  }
+
+  public void setVolumeValue(String value)
+  {
+    _volumeValue = value;
+  }
+
+  public UISelectOneBean<VolumeUnit> getVolumeType()
+  {
+    try {
+      if (_volumeType == null) {
+        Volume v = null;
+        VolumeUnit unit = (v == null ? DEFAULT_PLATE_WELL_VOLUME_UNITS : v.getUnits());
+
+        _volumeType = new UISelectOneBean<VolumeUnit>(VolumeUnit.DISPLAY_VALUES, unit)
+        {
+          @Override
+          protected String makeLabel(VolumeUnit t)
+          {
+            return t.getValue();
+          }
+        };
+      }
+      return _volumeType;
+    }
+    catch (Exception e) {
+      log.error("err: " + e);
+      return null;
+    }
+  }
+
+  public String getConcentrationValue()
+  {
+    return _concentrationValue;
+  }
+
+  public void setConcentrationValue(String value)
+  {
+    _concentrationValue = value;
+  }
+
+  public UISelectOneBean<ConcentrationUnit> getConcentrationType()
+  {
+    try {
+      if (_concentrationType == null) {
+        Concentration c = null;
+        ConcentrationUnit unit = (c == null ? DEFAULT_PLATE_CONCENTRATION_UNITS : c.getUnits());
+
+        _concentrationType = new UISelectOneBean<ConcentrationUnit>(ConcentrationUnit.DISPLAY_VALUES, unit)
+        {
+          @Override
+          protected String makeLabel(ConcentrationUnit t)
+          {
+            return t.getValue();
+          }
+        };
+      }
+      return _concentrationType;
+    }
+    catch (Exception e) {
+      log.error("err: " + e);
+      return null;
+    }
+  }
+
+  public UISelectOneBean<PlateType> getPlateType()
+  {
+    if (_plateType == null) {
+      _plateType = new UISelectOneBean<PlateType>(Lists.newArrayList(PlateType.values()), null, true) {
+        @Override
+        protected String getEmptyLabel()
+        {
+          return NO_CHANGE;
+        }
+      };
+    }
+    return _plateType;
+  }
+
+  public UISelectOneBean<PlateStatus> getPlateStatus()
+  {
+    if (_plateStatus == null) {
+      _plateStatus = new UISelectOneBean<PlateStatus>(Lists.newArrayList(PlateStatus.values()), null, true) {
+        @Override
+        protected String getEmptyLabel()
+        {
+          return NO_CHANGE;
+        }
+      };
+    }
+    return _plateStatus;
+  }
+
+  public ActivityDTO getStatusChangeActivity()
+  {
+    return _statusChangeActivity;
+  }
+
+  public ActivityDTO getLocationChangeActivity()
+  {
+    return _locationChangeActivity;
+  }
+
+  public LocationPartUISelectOneBean getRoom()
+  {
+    if (_room == null) {
+      _room = new LocationPartUISelectOneBean("room");
+    }
+
+    return _room;
+  }
+
+  public LocationPartUISelectOneBean getFreezer()
+  {
+    if (_freezer == null) {
+      _freezer = new LocationPartUISelectOneBean("freezer");
+    }
+
+    return _freezer;
+  }
+
+  public LocationPartUISelectOneBean getShelf()
+  {
+    if (_shelf == null) {
+      _shelf = new LocationPartUISelectOneBean("shelf");
+    }
+    return _shelf;
+  }
+
+  public LocationPartUISelectOneBean getBin()
+  {
+    if (_bin == null) {
+      _bin = new LocationPartUISelectOneBean("bin");
+    }
+
+    return _bin;
+  }
+
+  public List<SelectItem> getAdministratorUserSelectItems()
+  {
+    return JSFUtils.createUISelectItemsWithEmptySelection(getDao().findAllEntitiesOfType(AdministratorUser.class),
+                                                          ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT,
+                                                          ScreensaverUser.ToDisplayStringFunction);
+  }
+
+  public PlateLocation getNewPlateLocationFields()
+  {
+    return _newPlateLocation;
+  }
+
+  public String getComments()
+  {
+    return _comments;
+  }
+
+  public void setComments(String comments)
+  {
+    _comments = comments;
+  }
+}
+

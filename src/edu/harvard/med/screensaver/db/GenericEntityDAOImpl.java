@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -903,6 +905,15 @@ public class GenericEntityDAOImpl extends AbstractDAO implements GenericEntityDA
     if (entityInflatorLog.isDebugEnabled()) {
       entityInflatorLog.debug("inflating " + entity + " took " + (System.currentTimeMillis() - start) / 1000.0 + " seconds");
     }
+  }
+
+  @Override
+  public <E extends Entity,T> Set<T> findDistinctPropertyValues(Class<E> entityClass, String propertyName)
+  {
+    String hql = "select distinct e. " + propertyName + " from " + entityClass.getSimpleName() + " e where e." + propertyName +
+      " is not null";
+    List<?> result = getHibernateTemplate().find(hql);
+    return Sets.<T>newHashSet((List<T>) result);
   }
 }
 

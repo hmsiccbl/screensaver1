@@ -23,6 +23,21 @@
         rendered="#{libraryDetailViewer.editable &amp;&amp; !libraryDetailViewer.editMode}"
         styleClass="command" title="Delete this library" />
     </ui:remove>
+
+      <h:commandButton value="View Library Contents"
+        action="#{libraryViewer.viewLibraryContents}"
+        styleClass="command"
+        title="View a list of all the wells in the library" />
+
+      <h:commandButton value="View Well Volumes"
+        action="#{libraryViewer.viewLibraryWellCopyVolumes}"
+        rendered="#{libraryViewer.readAdmin}" styleClass="command"
+        title="View volume information for all the wells in the library" />
+
+      <h:commandButton value="Add Copy..."
+        action="#{libraryViewer.addLibraryCopy}"
+        rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['libraryCopiesAdmin']}"
+        styleClass="command" title="Add a copy to the Library" />
   </ui:define>
   
 
@@ -59,7 +74,22 @@
 			</t:selectOneMenu>
 		</t:panelGroup>
 
-		<t:outputText id="libraryTypeLabel" value="Library Type"
+    <ss:property id="solvent" label="Solvent"
+      description="Solvent used in the library wells"
+      editable="#{libraryDetailViewer.editMode}"
+      value="#{libraryDetailViewer.entity.solvent}"
+      converter="#{solventConverter}">
+      <ui:define name="editableData">
+        <t:selectOneMenu id="solvent" styleClass="inputText selectMenu"
+          required="true" value="#{libraryDetailViewer.entity.solvent}"
+          converter="#{solventConverter}">
+          <f:selectItems
+            value="#{libraryDetailViewer.solventSelectItems}" />
+        </t:selectOneMenu>
+      </ui:define>
+    </ss:property>
+
+    <t:outputText id="libraryTypeLabel" value="Library Type"
 				title="The type of library, e.g., 'Commercial', 'Known Bioactives', 'siRNA', etc."
 				escape="false" styleClass="label" />
 		<t:panelGroup rendered="#{!libraryDetailViewer.editMode}">
@@ -95,6 +125,12 @@
         </t:selectOneMenu>
       </ui:define>
     </ss:property>
+
+    <ss:property id="dateFirstPlated" label="Date First Plated"
+      description="The earliest date on which a copy of this library was plated"
+      type="Date" value="#{libraryDetailViewer.entity.dateScreenable}"
+      adminOnly="true"
+      editable="false" />
 
     <ss:propertyGroup label="Plates">
 

@@ -18,11 +18,9 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.annotations.AnnotationTypesTable;
-import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.StudySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.arch.searchresults.EntitySearchResults;
+import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 
 public class StudyViewer<E extends Study> extends SearchResultContextEntityViewerBackingBean<E,E>

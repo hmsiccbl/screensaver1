@@ -23,6 +23,7 @@ import javax.faces.model.SelectItem;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -31,12 +32,12 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.arch.view.EditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 public abstract class AbstractStudyDetailViewer<E extends Study> extends EditableEntityViewerBackingBean<E>
 {
@@ -76,7 +77,7 @@ public abstract class AbstractStudyDetailViewer<E extends Study> extends Editabl
   {
     List<ScreenType> items = Arrays.asList(ScreenType.values());
     if (getEntity().getScreenType() == null) {
-      return JSFUtils.createUISelectItemsWithEmptySelection(items, "<select>");
+      return JSFUtils.createUISelectItemsWithEmptySelection(items, ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT);
     }
     else {
       return JSFUtils.createUISelectItems(items);
@@ -87,7 +88,7 @@ public abstract class AbstractStudyDetailViewer<E extends Study> extends Editabl
   {
     List<ProjectPhase> items = Arrays.asList(ProjectPhase.values());
     if (getEntity().getProjectPhase() == null) {
-      return JSFUtils.createUISelectItemsWithEmptySelection(items, "<select>");
+      return JSFUtils.createUISelectItemsWithEmptySelection(items, ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT);
     }
     else {
       return JSFUtils.createUISelectItems(items);
@@ -114,7 +115,10 @@ public abstract class AbstractStudyDetailViewer<E extends Study> extends Editabl
         @Override
         protected String makeLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
         @Override 
-        protected String getEmptyLabel() { return "<select>"; }
+        protected String getEmptyLabel()
+        {
+          return ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT;
+        }
       };
     }
     return _newCollaborator;
@@ -133,7 +137,10 @@ public abstract class AbstractStudyDetailViewer<E extends Study> extends Editabl
         @Override
         protected String makeLabel(ScreeningRoomUser t) { return t.getFullNameLastFirst(); }
         @Override
-        protected String getEmptyLabel() { return "<select>"; }
+        protected String getEmptyLabel()
+        {
+          return ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT;
+        }
       };
     }
     return _leadScreener;

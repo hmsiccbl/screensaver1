@@ -29,5 +29,7 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(ReagentFinderTest.class);
+    addTestSuite(LibraryDetailViewerTest.class);
+    addTestSuite(LibraryCopyPlatesBatchEditorTest.class);
   }
 }

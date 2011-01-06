@@ -18,8 +18,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.math.IntRange;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.ParseError;
 import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.io.workbook2.Workbook;

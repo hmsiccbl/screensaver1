@@ -26,6 +26,7 @@
 
     <mapping class="edu.harvard.med.screensaver.model.libraries.Copy" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Plate" />
+    <mapping class="edu.harvard.med.screensaver.model.libraries.PlateLocation" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Gene" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.Library" />
     <mapping class="edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion" />

@@ -29,7 +29,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.dao.DataAccessException;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 
 /**
  * Utility for manipulating schemas, via Spring+Hibernate.

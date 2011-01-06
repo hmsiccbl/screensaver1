@@ -24,7 +24,7 @@ import org.springframework.orm.hibernate3.HibernateCallback;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public class ScreenDAOImpl extends AbstractDAO implements ScreenDAO
 {

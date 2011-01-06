@@ -27,9 +27,10 @@ import edu.harvard.med.screensaver.model.users.ChecklistItemEvent;
 import edu.harvard.med.screensaver.model.users.ChecklistItemGroup;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.util.Messages;
+import edu.harvard.med.screensaver.ui.arch.util.Messages;
 import edu.harvard.med.screensaver.util.CryptoUtils;
 
+// TODO: extend AbstractBackingBeanTest
 public class UserViewerTest extends AbstractTransactionalSpringContextTests
 {
   private static Logger log = Logger.getLogger(UserViewerTest.class);

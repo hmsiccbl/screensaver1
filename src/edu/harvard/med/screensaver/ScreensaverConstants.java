@@ -96,7 +96,13 @@ public interface ScreensaverConstants
   public static final int MOLECULAR_MASS_SCALE = 9;
   public static final int MOLECULAR_WEIGHT_PRECISION = 15;
   public static final int MOLECULAR_WEIGHT_SCALE = 9;
-  
+
+  /**
+   * The label to display in UI selection lists for fields that require a value, but that initially have no value
+   * (null). This is intended to help the user understand that a value must be selected before proceeding.
+   */
+  public static final String REQUIRED_VOCAB_FIELD_PROMPT = "<select>";
+
   // Keep track of the study facility ID's being used for the batch process studies
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_SM = "200001";
   public static final String DEFAULT_BATCH_STUDY_ID_POSITIVE_COUNT_RNAI = "200002";

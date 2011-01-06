@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.faces.model.SelectItem;
 
-import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
@@ -23,16 +22,16 @@ import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
+import edu.harvard.med.screensaver.model.libraries.Solvent;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
-import edu.harvard.med.screensaver.ui.EditResult;
-import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.searchresults.LibraryPlateSearchResults;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.arch.view.EditResult;
+import edu.harvard.med.screensaver.ui.arch.view.EditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 /**
  * Backing class for the Library creation page.
@@ -42,6 +41,7 @@ import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library>
 {
   // static members
+
 
   private static Logger log = Logger.getLogger(LibraryDetailViewer.class);
 
@@ -76,17 +76,38 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   
   public List<SelectItem> getLibraryScreeningStatusSelectItems()    
   {
-    return JSFUtils.createUISelectItems(Lists.newArrayList(LibraryScreeningStatus.values()));
+    List<LibraryScreeningStatus> values = Arrays.asList(LibraryScreeningStatus.values());
+    if (getEntity().getScreeningStatus() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
+    }
+    return JSFUtils.createUISelectItems(values);
   }
 
   public List<SelectItem> getScreenTypeSelectItems()
   {
-    return JSFUtils.createUISelectItems(Arrays.asList(ScreenType.values()));
+    List<ScreenType> values = Arrays.asList(ScreenType.values());
+    if (getEntity().getScreenType() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
+    }
+    return JSFUtils.createUISelectItems(values);
+  }
+
+  public List<SelectItem> getSolventSelectItems()
+  {
+    List<Solvent> values = Arrays.asList(Solvent.values());
+    if (getEntity().getSolvent() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
+    }
+    return JSFUtils.createUISelectItems(values);
   }
 
   public List<SelectItem> getLibraryTypeSelectItems()
   {
-    return JSFUtils.createUISelectItems(Arrays.asList(LibraryType.values()));
+    List<LibraryType> values = Arrays.asList(LibraryType.values());
+    if (getEntity().getLibraryType() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
+    }
+    return JSFUtils.createUISelectItems(values);
   }
   
   @Override
@@ -96,14 +117,13 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   
   @Override
   protected void initializeViewer(Library entity)
-  {
-    }
+  {}
 
   @Override
   protected void initializeNewEntity(Library library)
   {
-    library.setScreeningStatus(LibraryScreeningStatus.ALLOWED);
     library.setPlateSize(ScreensaverConstants.DEFAULT_PLATE_SIZE);
+    library.setSolvent(Solvent.getDefaultSolventType(library.getScreenType()));
   }
 
   @Override
@@ -113,12 +133,18 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
       if (entity.isTransient()) {
         _libraryCreator.validateLibrary(entity);
       }
-      return true;
     }
     catch (DataModelViolationException e) {
       showMessage("libraries.libraryCreationFailed", e.getMessage());
       return false;
     }
+
+    if (entity.getSolvent() != null && !entity.getSolvent().isValidForScreenType(entity.getScreenType())) {
+      showMessage("libraries.invalidSolventType", entity.getSolvent(), entity.getScreenType());
+      return false;
+    }
+
+    return true;
   }
   
   @Override

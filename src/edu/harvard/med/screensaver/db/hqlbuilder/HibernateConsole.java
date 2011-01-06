@@ -19,7 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 /**

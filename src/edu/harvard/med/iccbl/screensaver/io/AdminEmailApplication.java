@@ -26,7 +26,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import edu.harvard.med.iccbl.screensaver.service.SmtpEmailService;
-import edu.harvard.med.screensaver.CommandLineApplication;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.service.EmailService;

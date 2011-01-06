@@ -18,7 +18,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.model.libraries.WellName;
-import edu.harvard.med.screensaver.ui.cherrypickrequests.EmptyWellsConverter;
+import edu.harvard.med.screensaver.ui.arch.util.converter.EmptyWellsConverter;
 
 public class EmptyWellsConverterTest extends TestCase
 {

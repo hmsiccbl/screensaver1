@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.NonPersistentEntity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
-
-import org.apache.log4j.Logger;
 
 public class WellVolume extends NonPersistentEntity<String> implements Comparable<WellVolume>
 {
@@ -41,13 +41,11 @@ public class WellVolume extends NonPersistentEntity<String> implements Comparabl
     List<WellCopy> retiredVolumes = new ArrayList<WellCopy>();
     for(WellCopy wc:wellCopies)
     {
-      Plate ci = wc.getCopy().getPlates().get(_well.getPlateNumber());
-      if(ci == null || !ci.isRetired())
-      {
+      Plate plate = wc.getCopy().getPlates().get(_well.getPlateNumber());
+      if (plate == null || plate.getStatus() != PlateStatus.RETIRED) {
         activeVolumes.add(wc);
       }
-      else if(ci.isRetired())
-      {
+      else if (plate.getStatus() == PlateStatus.RETIRED) {
         retiredVolumes.add(wc);
       }
     }

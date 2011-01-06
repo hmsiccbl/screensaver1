@@ -18,9 +18,8 @@ import java.util.SortedSet;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 public class ReagentFinder extends AbstractBackingBean
 {

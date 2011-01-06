@@ -113,7 +113,7 @@ public abstract class LabActivity extends Activity
    * @return the concentration
    */
   @Column(precision=ScreensaverConstants.CONCENTRATION_PRECISION, scale=ScreensaverConstants.CONCENTRATION_SCALE)
-  @org.hibernate.annotations.Type(type="edu.harvard.med.screensaver.db.hqlbuilder.ConcentrationType") 
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.ConcentrationType")
   public Concentration getConcentration()
   {
     return _concentration;

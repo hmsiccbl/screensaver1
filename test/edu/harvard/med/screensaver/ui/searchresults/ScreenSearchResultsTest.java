@@ -20,6 +20,7 @@ import edu.harvard.med.screensaver.model.screens.ProjectPhase;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.screens.StudyType;
+import edu.harvard.med.screensaver.ui.screens.ScreenSearchResults;
 
 public class ScreenSearchResultsTest extends AbstractSpringPersistenceTest
 {

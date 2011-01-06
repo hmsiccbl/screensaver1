@@ -38,77 +38,52 @@
     </ss:property>
 
     <ss:property id="copyUsageType" label="Usage Type"
-      value="#{libraryCopyDetail.copyUsageType.selection}"
+      value="#{libraryCopyDetail.entity.usageType}"
       editable="#{libraryCopyDetail.editMode}">
       <ui:define name="editableData">
         <t:selectOneMenu id="usageTypeMenu"
-          value="#{libraryCopyDetail.copyUsageType.value}"
-          required="true" styleClass="inputText selectMenu">
+          value="#{libraryCopyDetail.entity.usageType}"
+          required="true" styleClass="inputText selectMenu"
+          converter="#{copyUsageTypeConverter}">
           <f:selectItems
-            value="#{libraryCopyDetail.copyUsageType.selectItems}" />
+            value="#{libraryCopyDetail.copyUsageTypeSelectItems}" />
         </t:selectOneMenu>
       </ui:define>
     </ss:property>
 
+    <ss:property id="datePlated" label="Date Plated"
+      description="The earliest date on which a plate of this copy was created"
+      type="Date" value="#{libraryCopyDetail.entity.datePlated}"
+      editable="false" rendered="#{!entity.transient}" />
+
+    <ss:property id="locations" label="Locations" type="List" 
+      description="The list of unique plate locations represented in this search"
+      value="#{libraryCopyViewer.plateAggregateFields.locations}" 
+      editable="false" rendered="#{!entity.transient}" 
+      escape="false"
+    />
+    
+    <ss:property id="type" label="Type" type="List" 
+      description="The list of unique plate types represented in this search"
+      value="#{libraryCopyViewer.plateAggregateFields.types}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    <ss:property id="statuses" label="Status" type="List" 
+      description="The list of unique plate statuses represented in this search"
+      value="#{libraryCopyViewer.plateAggregateFields.statuses}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    <ss:property id="initialVolumes" label="Initial Volume" type="List" 
+      description="The list of unique plate initial volumes represented in this search"
+      value="#{libraryCopyViewer.plateAggregateFields.volumes}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    
     <ss:property id="copyComments" label="Comments" type="Textarea"
       value="#{libraryCopyDetail.entity.comments}"
       editable="#{libraryCopyDetail.editMode}" editWidth="80"
       editHeight="3" />
 
-    <ss:propertyGroup id="platesBatchEditor" label="Plates"
-      rendered="#{libraryCopyDetail.editMode}">
-
-      <ss:propertyGroup id="plateRangeToUpdate"
-        label="Plate range to update">
-        <ss:property id="fromPlate" label="From plate #"
-          description="The first plate number of the range of plates to be updated"
-          value="#{libraryCopyDetail.startPlate}" editable="true" />
-
-        <ss:property id="toPlate" label="To plate #"
-          description="The last plate number of the range of plates to be updated"
-          value="#{libraryCopyDetail.endPlate}" editable="true" />
-      </ss:propertyGroup>
-
-      <ss:propertyGroup id="initialPlateValues"
-        label="#{libraryCopyDetail.entity.transient ? 'Create' : 'Update'} plates with these values (all optional#{libraryCopyDetail.entity.transient ? '' : '; specified values will override existing values'})">
-
-        <ss:property id="plateTypeLabel" label="Plate Type"
-          value="#{libraryCopyDetail.plateType.selection}"
-          editable="true">
-          <ui:define name="editableData">
-            <t:selectOneMenu id="plateType"
-              styleClass="inputText selectMenu"
-              value="#{libraryCopyDetail.plateType.value}">
-              <f:selectItems
-                value="#{libraryCopyDetail.plateType.selectItems}" />
-            </t:selectOneMenu>
-          </ui:define>
-        </ss:property>
-
-        <ss:property id="volume" label="Initial Well Volume"
-          value="#{libraryCopyDetail.volumeValue}" type="Volume"
-          unitsSelector="#{libraryCopyDetail.volumeType}"
-          description="The volume per copy well" editable="true"
-          editWidth="6" />
-
-        <ss:property id="location" label="Location" type="Text"
-          description="The storage location of the plate"
-          value="#{libraryCopyDetail.location}" editable="true" />
-
-        <ss:property id="datePlated" label="Date Plated" type="Date"
-          description="The date plated"
-          value="#{libraryCopyDetail.datePlated}" editable="true" />
-
-        <ss:property id="dateRetired" label="Date Retired" type="Date"
-          description="The date retired"
-          value="#{libraryCopyDetail.dateRetired}" editable="true" />
-
-        <ss:property id="plateComments" label="Comments" type="Text"
-          description="Plate comments"
-          value="#{libraryCopyDetail.comments}" editable="true" />
-
-      </ss:propertyGroup>
-    </ss:propertyGroup>
   </ui:define>
 
 </ui:composition>

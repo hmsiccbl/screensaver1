@@ -220,7 +220,7 @@ public class CherryPickRequestAllocator
       log.debug("need " + volumeNeeded + " for " + well);
     }
     SortedSet<Copy> result = new TreeSet<Copy>();
-    Map<Copy,Volume> wellCopiesVolumeRemaining = _librariesDao.findRemainingVolumesInWellCopies(well, CopyUsageType.CHERRY_PICK_STOCK_PLATES);
+    Map<Copy,Volume> wellCopiesVolumeRemaining = _librariesDao.findRemainingVolumesInWellCopies(well, CopyUsageType.CHERRY_PICK_SOURCE_PLATES);
     Volume minimumSourceWellVolume = _cherryPickPlateSourceWellMinimumVolumePolicy.getMinimumVolumeAllowed(well);
 
     for (Copy copy : wellCopiesVolumeRemaining.keySet()) {

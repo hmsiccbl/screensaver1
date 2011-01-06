@@ -27,7 +27,7 @@
     />
 
   <Resource name="bean/loginModuleFactoryCapsule" auth="Container"
-            type="edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule"
+            type="edu.harvard.med.screensaver.ui.arch.auth.tomcat.LoginModuleFactoryCapsule"
             factory="org.apache.naming.factory.BeanFactory"
             />
 

@@ -26,5 +26,10 @@ public class PlateTest extends AbstractEntityInstanceTest<Plate>
   {
     super(Plate.class);
   }
+
+  public void testLastPlateTransferActivity()
+  {
+    fail("not yet implemented");
+  }
 }
 

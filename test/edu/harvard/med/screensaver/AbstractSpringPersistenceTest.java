@@ -11,7 +11,7 @@ package edu.harvard.med.screensaver;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SchemaUtil;
-import edu.harvard.med.screensaver.ui.util.Messages;
+import edu.harvard.med.screensaver.ui.arch.util.Messages;
 
 import org.apache.log4j.Logger;
 

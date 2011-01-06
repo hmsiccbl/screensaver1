@@ -26,14 +26,14 @@ public class PackageTestSuite extends TestSuite
 
   public PackageTestSuite()
   {
-    addTest(edu.harvard.med.screensaver.ui.authentication.PackageTestSuite.suite());
+    addTest(edu.harvard.med.screensaver.ui.arch.auth.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.cherrypickrequests.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.libraries.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.screenresults.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.searchresults.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.activities.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.ui.table.PackageTestSuite.suite());
+    addTest(edu.harvard.med.screensaver.ui.arch.datatable.PackageTestSuite.suite());
     addTest(edu.harvard.med.screensaver.ui.users.PackageTestSuite.suite());
-    addTest(edu.harvard.med.screensaver.ui.util.PackageTestSuite.suite());
+    addTest(edu.harvard.med.screensaver.ui.arch.util.PackageTestSuite.suite());
   }
 }

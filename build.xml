@@ -203,7 +203,7 @@
 		<antcall target="set.servlet.authentication.method">
 			<param name="exploded.war.dir" location="${deploy.dir}" />
 		</antcall>
-
+	  
 	  <copy file="${release.notes.file}"
 	        todir="${deploy.dir}/main/"
 	        verbose="${verbose}"
@@ -304,6 +304,11 @@
 				<include name="*.taglib.xml" />
 			</fileset>
 		</copy>
+	  
+    <copy file="resources/${web.application.context.file}"
+          tofile="${classes.dir}/spring-context-web.xml"
+          verbose="${verbose}"
+          failonerror="true" overwrite="true" />        
 
 	</target>
 

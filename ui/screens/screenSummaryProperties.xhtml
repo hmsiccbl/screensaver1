@@ -27,7 +27,7 @@
     </ui:define>
   </ss:property>
 
-  <ss:property id="screenType" label="Screen Type"
+  <ss:property id="screenType" label="Screen Type" type="Text"
 		description="'Small Molecule' or 'RNAi'" value="#{screen.screenType}"
 		editable="#{editable &amp;&amp; !screenDetailViewer.entity.dataLoaded}"
 		converter="#{screenTypeConverter}">

@@ -25,11 +25,8 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsVersionManager;
-import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.searchresults.LibraryCopySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
+import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 /**
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
@@ -47,6 +44,8 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
   private LibraryDetailViewer _libraryDetailViewer;
   private LibraryCopySearchResults _libraryCopiesBrowser;
   private LibraryCopyDetail _libraryCopyDetail;
+  private LibraryCopyPlateSearchResults _libraryCopyPlateSearchResults;
+  private LibraryCopyPlateCommentSearchResults _libraryCopyPlateCommentSearchResults;
 
   private DataModel _contentsVersionsDataModel;
 
@@ -68,7 +67,9 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
                        LibraryDetailViewer libraryDetailViewer,
                        LibraryContentsVersionManager libraryContentsVersionManager,
                        LibraryCopySearchResults libraryCopiesBrowser,
-                       LibraryCopyDetail libraryCopyDetail)
+                       LibraryCopyDetail libraryCopyDetail,
+                       LibraryCopyPlateSearchResults libraryCopyPlateSearchResults,
+                       LibraryCopyPlateCommentSearchResults libraryCopyPlateCommentSearchResults)
   {
     super(thisProxy,
           Library.class,
@@ -84,7 +85,12 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
     _libraryContentsVersionManager = libraryContentsVersionManager;
     _libraryCopiesBrowser = libraryCopiesBrowser;
     _libraryCopyDetail = libraryCopyDetail;
-    getIsPanelCollapsedMap().put("contentsVersions", Boolean.TRUE);
+    _libraryCopyPlateSearchResults = libraryCopyPlateSearchResults;
+    _libraryCopyPlateCommentSearchResults = libraryCopyPlateCommentSearchResults;
+    getIsPanelCollapsedMap().put("copies", true);
+    getIsPanelCollapsedMap().put("plateComments", true);
+    getIsPanelCollapsedMap().put("plates", true);
+    getIsPanelCollapsedMap().put("contentsVersions", true);
   }
 
 
@@ -103,6 +109,8 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
     _contentsVersionsDataModel = null;
     _libraryDetailViewer.setEntity(library);
     _libraryCopiesBrowser.searchCopiesByLibrary(library);
+    getLibraryCopyPlateSearchResults().searchPlatesForLibrary(library);
+    getLibraryCopyPlateCommentSearchResults().searchForLibrary(library);
   }
 
   public DataModel getContentsVersionsDataModel()
@@ -185,5 +193,15 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
       showMessage("cannotDeleteEntityInUse", getEntity().getLibraryName());
       return REDISPLAY_PAGE_ACTION_RESULT;
     }
+  }
+
+  public LibraryCopyPlateSearchResults getLibraryCopyPlateSearchResults()
+  {
+    return _libraryCopyPlateSearchResults;
+  }
+
+  public LibraryCopyPlateCommentSearchResults getLibraryCopyPlateCommentSearchResults()
+  {
+    return _libraryCopyPlateCommentSearchResults;
   }
 }

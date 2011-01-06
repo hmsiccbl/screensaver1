@@ -477,4 +477,24 @@ public class GenericEntityDAOTest extends AbstractSpringPersistenceTest
     assertNotNull(genericEntityDao.findEntityById(Well.class, "00001:A01"));
     
   }
+
+  public void testDistinctPropertyValues()
+  {
+    ScreeningRoomUser user1 = new ScreeningRoomUser("A", "D");
+    user1.setLoginId("AD");
+    ScreeningRoomUser user2 = new ScreeningRoomUser("A", "B");
+    ScreeningRoomUser user3 = new ScreeningRoomUser("B", "C");
+    ScreeningRoomUser user4 = new ScreeningRoomUser("C", "D");
+    genericEntityDao.persistEntity(user1);
+    genericEntityDao.persistEntity(user2);
+    genericEntityDao.persistEntity(user3);
+    genericEntityDao.persistEntity(user4);
+    assertEquals(Sets.newHashSet("A", "B", "C"), 
+                 genericEntityDao.findDistinctPropertyValues(ScreeningRoomUser.class, "firstName"));
+    assertEquals(Sets.newHashSet("B", "C", "D"),
+                 genericEntityDao.findDistinctPropertyValues(ScreeningRoomUser.class, "lastName"));
+    assertEquals("nulls ignored in distinct values",
+                 Sets.newHashSet("AD"),
+                 genericEntityDao.findDistinctPropertyValues(ScreeningRoomUser.class, "loginId"));
+  }
 }

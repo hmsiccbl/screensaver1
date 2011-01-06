@@ -14,12 +14,12 @@ import java.util.Set;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.db.ScreenDAO;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.libraries.ExtantLibraryException;
 import edu.harvard.med.screensaver.io.screens.ScreenCreator;
 import edu.harvard.med.screensaver.model.libraries.Reagent;

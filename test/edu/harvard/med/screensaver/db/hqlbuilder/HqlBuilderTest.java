@@ -16,7 +16,7 @@ import junit.framework.TestCase;
 
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.screens.Screen;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 public class HqlBuilderTest extends TestCase
 {

@@ -26,10 +26,10 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.dao.DataIntegrityViolationException;
 
-import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.DAOTransaction;
 import edu.harvard.med.screensaver.db.DAOTransactionRollbackException;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.UnrecoverableParseException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.screens.ProjectPhase;
@@ -87,7 +87,7 @@ public class StudyCreator
     app = new CommandLineApplication(args);
     configureCommandLineArguments(app);
 
-    if (!app.processOptions(true, false, true)) {
+    if (!app.processOptions(true, /* acceptAdminUserOptions= */true, true)) { // require acceptAdminUserOptions=true for app.findAdministratorUser
       throw new IllegalArgumentException("invalid usage");
     }
 

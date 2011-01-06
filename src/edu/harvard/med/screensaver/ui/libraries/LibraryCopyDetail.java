@@ -9,50 +9,31 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
-import java.util.Observable;
-import java.util.Observer;
+import java.util.Arrays;
+import java.util.List;
 
-import com.google.common.collect.Lists;
-import org.apache.commons.lang.math.IntRange;
+import javax.faces.model.SelectItem;
+
 import org.apache.log4j.Logger;
-import org.joda.time.LocalDate;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.Volume;
-import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
-import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateType;
-import edu.harvard.med.screensaver.ui.EditResult;
-import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.util.StringUtils;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.view.EditResult;
+import edu.harvard.med.screensaver.ui.arch.view.EditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 /**
  */
 public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
 {
-  private static final VolumeUnit DEFAULT_PLATE_WELL_VOLUME_UNITS = VolumeUnit.MICROLITERS;
-
   private static Logger log = Logger.getLogger(LibraryCopyDetail.class);
 
   private LibraryCopyViewer _libraryCopyViewer;
   private LibraryViewer _libraryViewer;
-
-  private UISelectOneBean<CopyUsageType> _copyUsageType;
-  private UISelectOneBean<PlateType> _plateType;
-  private String _location;
-  private UISelectOneBean<VolumeUnit> _volumeType;
-  private String _volumeValue;
-  private LocalDate _datePlated;
-  private LocalDate _dateRetired;
-  private String _comments;
-  private Integer _startPlate;
-  private Integer _endPlate;
 
   /**
    * @motivation for CGLIB2
@@ -74,42 +55,9 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     _libraryViewer = libraryViewer;
   }
 
-  public UISelectOneBean<CopyUsageType> getCopyUsageType()
-  {
-    if (_copyUsageType == null) {
-      _copyUsageType = new UISelectOneBean<CopyUsageType>(Lists.newArrayList(CopyUsageType.values()),
-                                                          getEntity().isTransient() ? null : getEntity().getUsageType(),
-                                                          getEntity().isTransient()) {
-        @Override
-        protected String getEmptyLabel()
-        {
-          return "<select>";
-        }
-      };
-      _copyUsageType.addObserver(new Observer() {
-
-        @Override
-        public void update(Observable o, Object value)
-        {
-          getEntity().setUsageType(_copyUsageType.getSelection());
-        }
-      });
-    }
-    return _copyUsageType;
-  }
-
   @Override
-  protected void initializeViewer(Copy copy)
+  protected void initializeViewer(Copy entity)
   {
-    _copyUsageType = null;
-    _plateType = null;
-    _volumeValue = null;
-    _volumeType = null;
-    _location = null;
-    _datePlated = null;
-    _dateRetired = null;
-    _startPlate = copy.getLibrary().getStartPlate();
-    _endPlate = copy.getLibrary().getEndPlate();
   }
 
   @Override
@@ -137,78 +85,6 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
   }
 
   @Override
-  protected boolean validateEntity(Copy entity)
-  {
-    boolean valid = true;
-
-    try {
-      Volume.makeVolume(getVolumeValue(),
-                        getVolumeType().getSelection());
-    }
-    catch (Exception e) {
-      showFieldInputError("Volume", e.getLocalizedMessage());
-      valid = false;
-    }
-
-    if (getEndPlate() < getStartPlate()) {
-      showFieldInputError("To Plate #", "must be >= From Plate #");
-      valid = false;
-      int temp = getStartPlate();
-      setStartPlate(getEndPlate());
-      setEndPlate(temp);
-    }
-    if (getStartPlate() < entity.getLibrary().getStartPlate()) {
-      showFieldInputError("From Plate #", "must be >= library start plate: " + entity.getLibrary().getStartPlate());
-      valid = false;
-      setStartPlate(entity.getLibrary().getStartPlate());
-    }
-    if (getEndPlate() > entity.getLibrary().getEndPlate()) {
-      showFieldInputError("To Plate #", "must be <= library end plate: " + entity.getLibrary().getEndPlate());
-      valid = false;
-      setEndPlate(entity.getLibrary().getEndPlate());
-    }
-
-    return valid;
-  }
-
-  @Override
-  protected void updateEntityProperties(Copy copy)
-  {
-    updatePlates();
-  }
-
-  private void updatePlates()
-  {
-    Copy copy = getEntity();
-    IntRange plateRange = new IntRange(getStartPlate(), getEndPlate());
-    for (Plate plate : copy.getPlates().values()) {
-      if (plateRange.containsInteger(plate.getPlateNumber())) {
-        if (!StringUtils.isEmpty(getVolumeValue())) {
-          plate.setWellVolume(new Volume(getVolumeValue(),
-                                         getVolumeType().getSelection()));
-        }
-        if (getPlateType().getSelection() != null) {
-          plate.setPlateType(getPlateType().getSelection());
-        }
-        if (getDatePlated() != null) {
-          plate.setDatePlated(getDatePlated());
-        }
-        if (getDateRetired() != null) {
-          plate.setDateRetired(getDateRetired());
-        }
-        if (!StringUtils.isEmpty(getLocation())) {
-          plate.setLocation(getLocation());
-        }
-        if (!StringUtils.isEmpty(getComments())) {
-          plate.setComments(getComments());
-        }
-        plate.invalidate();
-        plate.update();
-      }
-    }
-  }
-
-  @Override
   protected String postEditAction(EditResult editResult)
   {
     switch (editResult) {
@@ -223,111 +99,12 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
     }
   }
 
-  public String getVolumeValue()
+  public List<SelectItem> getCopyUsageTypeSelectItems()
   {
-    return _volumeValue;
-  }
-
-  public void setVolumeValue(String value)
-  {
-    _volumeValue = value;
-  }
-
-  public UISelectOneBean<VolumeUnit> getVolumeType()
-  {
-    try {
-      if (_volumeType == null) {
-        Volume v = null;
-        VolumeUnit unit = (v == null ? DEFAULT_PLATE_WELL_VOLUME_UNITS : v.getUnits());
-
-        _volumeType = new UISelectOneBean<VolumeUnit>(VolumeUnit.DISPLAY_VALUES, unit)
-          {
-            @Override
-            protected String makeLabel(VolumeUnit t)
-            {
-              return t.getValue();
-            }
-          };
-      }
-      return _volumeType;
+    List<CopyUsageType> values = Arrays.asList(CopyUsageType.values());
+    if (getEntity().getUsageType() == null) {
+      return JSFUtils.createUISelectItemsWithEmptySelection(values, REQUIRED_VOCAB_FIELD_PROMPT);
     }
-    catch (Exception e) {
-      log.error("err: " + e);
-      return null;
-    }
-  }
-
-  public UISelectOneBean<PlateType> getPlateType()
-  {
-    if (_plateType == null) {
-      _plateType = new UISelectOneBean<PlateType>(Lists.newArrayList(PlateType.values()), null, true) {
-        @Override
-        protected String getEmptyLabel()
-        {
-          return getEntity().isTransient() ? super.getEmptyLabel() : "";
-        }
-      };
-    }
-    return _plateType;
-  }
-
-  public void setDatePlated(LocalDate value)
-  {
-    _datePlated = value;
-  }
-
-  public LocalDate getDatePlated()
-  {
-    return _datePlated;
-  }
-
-  public LocalDate getDateRetired()
-  {
-    return _dateRetired;
-  }
-
-  public void setDateRetired(LocalDate dateRetired)
-  {
-    _dateRetired = dateRetired;
-  }
-
-  public String getLocation()
-  {
-    return _location;
-  }
-
-  public void setLocation(String location)
-  {
-    _location = location;
-  }
-
-  public String getComments()
-  {
-    return _comments;
-  }
-
-  public void setComments(String comments)
-  {
-    _comments = comments;
-  }
-
-  public void setStartPlate(Integer startPlate)
-  {
-    _startPlate = startPlate;
-  }
-
-  public Integer getStartPlate()
-  {
-    return _startPlate;
-  }
-
-  public void setEndPlate(Integer endPlate)
-  {
-    _endPlate = endPlate;
-  }
-
-  public Integer getEndPlate()
-  {
-    return _endPlate;
+    return JSFUtils.createUISelectItems(values);
   }
 }

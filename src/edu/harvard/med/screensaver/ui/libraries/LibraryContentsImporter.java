@@ -25,8 +25,8 @@ import edu.harvard.med.screensaver.io.ParseErrorsException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryContentsLoader;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 /**
  * JSF backing bean for the Library Contents Importer page.

@@ -17,7 +17,7 @@ import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
-import edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule;
+import edu.harvard.med.screensaver.ui.arch.auth.ScreensaverLoginModule;
 
 import org.apache.log4j.Logger;
 

@@ -92,7 +92,7 @@
 
   <filter>
     <filter-name>ScreensaverServletFilter</filter-name>
-    <filter-class>edu.harvard.med.screensaver.ui.util.ScreensaverServletFilter</filter-class>
+    <filter-class>edu.harvard.med.screensaver.ui.arch.util.servlet.ScreensaverServletFilter</filter-class>
   </filter>
 
   <filter-mapping>
@@ -115,8 +115,24 @@
     <url-pattern>/cellHTS2/*</url-pattern>
   </filter-mapping>
 
-  <!-- JSF/MyFaces configuration -->
+  <!--  ImageServlet wrapper -->
+  <servlet>
+    <servlet-name>imageProviderServlet</servlet-name>
+    <servlet-class>edu.harvard.med.screensaver.ui.arch.util.servlet.DelegatingServletProxy</servlet-class>
+    <init-param>
+      <param-name>beanName</param-name>
+      <param-value>imageProviderServlet</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
 
+  <servlet-mapping>
+    <servlet-name>imageProviderServlet</servlet-name>
+    <url-pattern>/imageprovider/*</url-pattern>
+  </servlet-mapping>
+
+  <!-- JSF/MyFaces configuration -->
+  
   <servlet>
     <servlet-name>Faces Servlet</servlet-name>
     <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -144,7 +160,6 @@
      <servlet-name>cellHTS2DataServlet</servlet-name>
      <url-pattern>/cellHTS2/*</url-pattern>
    </servlet-mapping>
-  
 
   <context-param>
     <description>
@@ -315,45 +330,6 @@
     <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
   </filter-mapping>
 
-  <filter>
-    <description>
-      Restrict access for a set of servlet paths to a role.
-      Params:
-      
-      - roles: comma separated list of roles
-      
-      - preRegexString: a regex pattern that is used to pre-filter; 
-      group(1) for this pattern (the "subDir") is used in a second-level match
-      against each of the "regexes".  Should have the form regex_pattern(subDir pattern) 
-      
-      - regexes: comma separated list of regex patterns 
-      to match against the group(1) match (the "subDir") from the preRegexString
-      
-      Operation: if one of the regexes matches a subDir, then see if the current user is in 
-      one of the roles (using HttpServletRequest.isUserInRole ) 
-    </description>
-    <filter-name>AuthenticationFilter</filter-name>
-    <filter-class>edu.harvard.med.iccbl.screensaver.io.AuthenticationFilter</filter-class>
-    <init-param>
-      <param-name>roles</param-name>
-      <param-value>
-        readEverythingAdmin
-      </param-value>
-    </init-param>
-    <init-param>
-      <param-name>regexs</param-name>
-      <param-value>0179[5-9]+/.*,018\d\d/.*,0190\d/.*,0191\d/.*</param-value>
-    </init-param>
-    <init-param>
-      <param-name>preRegexString</param-name>
-      <param-value>/images/structure-images/(.*)</param-value>
-    </init-param>
-  </filter>
-  <filter-mapping>
-    <filter-name>AuthenticationFilter</filter-name>
-    <url-pattern>/images/structure-images/*</url-pattern>
-  </filter-mapping>
-
   <!-- Log4j setup -->
 
   <!-- This context-param provides explicit path to log4j properties file, but
@@ -373,7 +349,7 @@
   <resource-ref>
     <description>Mutable capsule that allows us to store a LoginModuleFactory in JNDI, which is instantiated by our web app, and not available at Tomcat initialization time.</description>
     <res-ref-name>bean/loginModuleFactoryCapsule</res-ref-name>
-    <res-type>edu.harvard.med.screensaver.ui.authentication.tomcat.LoginModuleFactoryCapsule</res-type>
+    <res-type>edu.harvard.med.screensaver.ui.arch.auth.tomcat.LoginModuleFactoryCapsule</res-type>
     <res-auth>Container</res-auth>
   </resource-ref>
   
@@ -429,6 +405,7 @@
       <description>Images, stylesheets, etc.  Access via HTTP GET and HEAD methods only.</description>
       <url-pattern>/css/*</url-pattern>
       <url-pattern>/images/*</url-pattern>
+      <url-pattern>/imageprovider/*</url-pattern>
       <!-- resources provided by Apache MyFaces and by Apache Tomahawk components -->
       <url-pattern>/faces/*</url-pattern>
 

@@ -48,15 +48,15 @@ import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.policy.CherryPickRequestAllowancePolicy;
-import edu.harvard.med.screensaver.ui.EditResult;
-import edu.harvard.med.screensaver.ui.EditableEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.arch.view.EditResult;
+import edu.harvard.med.screensaver.ui.arch.view.EditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 
 /**
@@ -147,10 +147,7 @@ public class CherryPickRequestDetailViewer extends EditableEntityViewerBackingBe
       protected String makeLabel(AdministratorUser a) { return a.getFullNameLastFirst(); }
     };
 
-    _assayPlateType = new UISelectOneBean<PlateType>(Arrays.asList(PlateType.values()), cherryPickRequest.getAssayPlateType()) {
-      @Override
-      protected String makeLabel(PlateType plateType) { return plateType.getFullName(); }
-    };
+    _assayPlateType = new UISelectOneBean<PlateType>(Arrays.asList(PlateType.values()), cherryPickRequest.getAssayPlateType());
 
     _transferVolumePerWellRequestedType = null;
     _transferVolumePerWellRequestedValue = null;

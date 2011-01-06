@@ -185,7 +185,7 @@ public class LibraryTest extends AbstractEntityInstanceTest<Library>
     assertEquals(new Integer(1), library.getExperimentalWellCount());
     Well well = library.createWell(new WellKey(library.getStartPlate(), "A03"), LibraryWellType.EXPERIMENTAL);
     assertEquals(new Integer(2), library.getExperimentalWellCount());
-    well.setLibraryWellType(LibraryWellType.BUFFER);
+    well.setLibraryWellType(LibraryWellType.RNAI_BUFFER);
     assertEquals(new Integer(1), library.getExperimentalWellCount());
     library.createWell(new WellKey(library.getStartPlate(), "A04"), LibraryWellType.EXPERIMENTAL);
     

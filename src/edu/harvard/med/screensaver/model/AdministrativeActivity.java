@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
+import com.google.common.base.Predicate;
 import org.hibernate.annotations.Immutable;
 import org.joda.time.LocalDate;
 
@@ -34,8 +35,21 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 public class AdministrativeActivity extends Activity
 {
   private static final long serialVersionUID = 1L;
+  public static final AdministrativeActivity Null = new AdministrativeActivity();
 
+  public static Predicate<AdministrativeActivity> IsOfType(final AdministrativeActivityType type) 
+  {
+    return new Predicate<AdministrativeActivity>() {
+      @Override
+      public boolean apply(AdministrativeActivity a)
+      {
+        return a.getType() == type;
+      }
+    };
+  }
+  
   private AdministrativeActivityType _type;
+
 
   @Override
   @Transient

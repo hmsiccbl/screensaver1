@@ -31,7 +31,7 @@
 
   <bean
     id="screensaverLoginModule"
-    class="edu.harvard.med.screensaver.ui.authentication.ScreensaverLoginModule"
+    class="edu.harvard.med.screensaver.ui.arch.auth.ScreensaverLoginModule"
     scope="prototype">
     <description>JAAS LoginModule implementation that can be used to authenticate and authorize a user.  In our case, the Tomcat app server will make calls to this bean.  Maintains state between method calls, so cannot be a singleton.</description>
     <property name="dao" ref="genericEntityDao"/>
@@ -40,7 +40,7 @@
   
   <bean
     id="loginModuleFactory" 
-    class="edu.harvard.med.screensaver.ui.authentication.LoginModuleFactoryImpl"
+    class="edu.harvard.med.screensaver.ui.arch.auth.LoginModuleFactoryImpl"
     init-method="initialize">
   </bean>
   

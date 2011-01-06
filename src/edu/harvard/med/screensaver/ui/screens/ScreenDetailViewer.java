@@ -35,6 +35,7 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.NoSuchEntityException;
 import edu.harvard.med.screensaver.db.ScreenDAO;
@@ -59,19 +60,19 @@ import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
-import edu.harvard.med.screensaver.ui.EditResult;
-import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
+import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.arch.view.EditResult;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestDetailViewer;
-import edu.harvard.med.screensaver.ui.util.AttachedFiles;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 import edu.harvard.med.screensaver.util.eutils.EutilsException;
@@ -258,7 +259,10 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
       candidateFundingSupports.removeAll(getEntity().getFundingSupports());
       _newFundingSupport = new UISelectOneEntityBean<FundingSupport>(candidateFundingSupports, null, true, getDao()) {
           @Override
-          protected String getEmptyLabel() { return "<select>"; }
+        protected String getEmptyLabel()
+        {
+          return ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT;
+        }
       };
     }
     return _newFundingSupport;

@@ -122,6 +122,7 @@ public class Library extends AuditedAbstractEntity<Integer>
   private String _provider;
   private ScreenType _screenType;
   private LibraryType _libraryType;
+  private Solvent _solvent;
   private boolean _isPool;
   private Integer _startPlate;
   private Integer _endPlate;
@@ -179,6 +180,7 @@ public class Library extends AuditedAbstractEntity<Integer>
     _libraryName = libraryName;
     _shortName = shortName;
     _screenType = screenType;
+    _solvent = Solvent.getDefaultSolventType(_screenType);
     _libraryType = libraryType;
     _startPlate = startPlate;
     _endPlate = endPlate;
@@ -450,6 +452,18 @@ public class Library extends AuditedAbstractEntity<Integer>
   public void setLibraryType(LibraryType libraryType)
   {
     _libraryType = libraryType;
+  }
+
+  @Column(nullable = false)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.libraries.Solvent$UserType")
+  public Solvent getSolvent()
+  {
+    return _solvent;
+  }
+
+  public void setSolvent(Solvent solvent)
+  {
+    _solvent = solvent;
   }
 
   /**

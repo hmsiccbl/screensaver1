@@ -10,44 +10,22 @@
 
 <ui:composition>
 
-	<h:form id="libraryDetailForm">
-		<t:panelGroup>
-			<ui:include src="/libraries/libraryDetailViewerBody.xhtml" />
-		</t:panelGroup>
-	</h:form>
- 
- 
-  <t:panelGrid id="propertiesPanel" columns="2"
-   columnClasses="propertyLabelColumn,column"
-   styleClass="layoutPanel">
- 
-    <ss:property id="libraryCopiesTable" label="Copy Information"
-      description="The copies for this library"
-      rendered="#{libraryDetailViewer.readAdmin}"
-      editable="false">
-      <ui:define name="data">
-        <ss:searchResult searchResults="#{libraryViewer.copiesBrowser}" />
-      </ui:define>
-    </ss:property>
-  </t:panelGrid>
+  <h:form id="libraryDetailForm">
+    <ui:include src="libraryDetailViewerBody.xhtml"/>
+  </h:form>
 
-	<t:panelGroup>
-		<h:form id="libraryCommandsForm">
-			<h:commandButton value="View Library Contents"
-				action="#{libraryViewer.viewLibraryContents}" styleClass="command"
-				title="View a list of all the wells in the library" />
-  
-      <h:commandButton value="View Well Volumes"
-        action="#{libraryViewer.viewLibraryWellCopyVolumes}"
-        rendered="#{libraryViewer.readAdmin}" styleClass="command"
-        title="View volume information for all the wells in the library" />
-         
-      <h:commandButton value="Add Copy..."
-        action="#{libraryViewer.addLibraryCopy}"
-        rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['libraryCopiesAdmin']}" styleClass="command"
-        title="Add a copy to the Library" />
-		</h:form>
-	</t:panelGroup>
+  <h:form id="copiesForm" rendered="#{libraryViewer.readAdmin}">
+    <ss:collapsiblePanel id="copiesPanel"
+      isCollapsed="#{libraryViewer.isPanelCollapsedMap['copies']}"
+      label="Copies" />
+  </h:form>
+
+  <ss:searchResult searchResults="#{libraryViewer.copiesBrowser}"
+    rendered="#{libraryViewer.readAdmin &amp;&amp; !libraryViewer.isPanelCollapsedMap['copies']}" />
+
+  <ui:include src="platesBrowserWithComments.xhtml">
+    <ui:param name="viewer" value="#{libraryViewer}" />
+  </ui:include>
 
 	<t:panelGroup rendered="#{libraryViewer.entity.reagentType.class.simpleName == 'SmallMoleculeReagent'}">
 		<h:form id="viewDownloadsForm" style="margin-top: 10px">

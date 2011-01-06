@@ -11,9 +11,9 @@ package edu.harvard.med.screensaver.analysis.cellhts2;
 
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
-import edu.harvard.med.screensaver.model.libraries.SilencingReagentType;
 
 // BII (Siew Cheng): Implement VocabularyTerm
+// TODO: no need to implement VocabularyTerm, as this is not a persisted type
 public enum ScoreReplicatesMethod implements VocabularyTerm
 {
   // the vocabulary

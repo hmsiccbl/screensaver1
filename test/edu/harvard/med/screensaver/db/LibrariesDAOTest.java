@@ -38,6 +38,7 @@ import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -102,22 +103,22 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     genericEntityDao.doInTransaction(new DAOTransaction() {
       public void runTransaction() {
         Library library = CherryPickRequestAllocatorTest.makeRNAiDuplexLibrary("library", 1, 2, PlateSize.WELLS_384);
-        Copy copyC = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "C");
-        copyC.findPlate(1).withWellVolume(new Volume(10));
-        copyC.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
-        Copy copyD = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "D");
-        copyD.findPlate(1).withWellVolume(new Volume(10));
-        copyD.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
-        Copy copyE = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "E");
-        copyE.findPlate(1).withWellVolume(new Volume(10));
-        copyE.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
-        Copy copyF = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "F");
-        copyF.findPlate(1).withWellVolume(new Volume(10));
-        copyF.findPlate(2).withWellVolume(new Volume(100)); // should be ignored
-        Copy copyG = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, "G"); // retired copies should be ignored
-        copyG.findPlate(1).withWellVolume(new Volume(10)).setDateRetired(new LocalDate());
+        Copy copyC = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "C");
+        copyC.findPlate(1).withWellVolume(new Volume(10)).withStatus(PlateStatus.AVAILABLE);
+        copyC.findPlate(2).withWellVolume(new Volume(100)).withStatus(PlateStatus.AVAILABLE); // should be ignored
+        Copy copyD = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "D");
+        copyD.findPlate(1).withWellVolume(new Volume(10)).withStatus(PlateStatus.AVAILABLE);
+        copyD.findPlate(2).withWellVolume(new Volume(100)).withStatus(PlateStatus.AVAILABLE); // should be ignored
+        Copy copyE = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "E");
+        copyE.findPlate(1).withWellVolume(new Volume(10)).withStatus(PlateStatus.AVAILABLE);
+        copyE.findPlate(2).withWellVolume(new Volume(100)).withStatus(PlateStatus.AVAILABLE); // should be ignored
+        Copy copyF = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "F");
+        copyF.findPlate(1).withWellVolume(new Volume(10)).withStatus(PlateStatus.AVAILABLE);
+        copyF.findPlate(2).withWellVolume(new Volume(100)).withStatus(PlateStatus.AVAILABLE); // should be ignored
+        Copy copyG = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, "G"); // retired copies should be ignored
+        copyG.findPlate(1).withWellVolume(new Volume(10)).withStatus(PlateStatus.RETIRED);
         Copy copyA = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.LIBRARY_SCREENING_PLATES, "A"); // library screening copies should be ignored
-        copyA.findPlate(1).withWellVolume(new Volume(10));
+        copyA.findPlate(1).withWellVolume(new Volume(10)).withStatus(PlateStatus.AVAILABLE);
 
         genericEntityDao.saveOrUpdateEntity(library);
 
@@ -155,22 +156,22 @@ public class LibrariesDAOTest extends AbstractSpringPersistenceTest
     Well wellB02 = genericEntityDao.findEntityById(Well.class, "00001:B02");
     Well wellC03 = genericEntityDao.findEntityById(Well.class, "00001:C03");
 
-    assertEquals("C:A01", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyC));
-    assertEquals("C:B02", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyC));
-    assertEquals("C:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyC));
-    assertEquals("D:A01", new Volume(9), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyD));
-    assertEquals("D:B02", new Volume(9), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyD));
-    assertEquals("D:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyD));
-    assertEquals("E:A01", new Volume(8), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyE));
-    assertEquals("E:B02", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyE));
-    assertEquals("E:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyE));
-    assertEquals("F:A01", new Volume(9), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyF));
-    assertEquals("F:B02", new Volume(7), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyF));
-    assertEquals("F:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyF));
+    assertEquals("C:A01", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyC));
+    assertEquals("C:B02", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyC));
+    assertEquals("C:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyC));
+    assertEquals("D:A01", new Volume(9), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyD));
+    assertEquals("D:B02", new Volume(9), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyD));
+    assertEquals("D:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyD));
+    assertEquals("E:A01", new Volume(8), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyE));
+    assertEquals("E:B02", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyE));
+    assertEquals("E:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyE));
+    assertEquals("F:A01", new Volume(9), librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyF));
+    assertEquals("F:B02", new Volume(7), librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyF));
+    assertEquals("F:C03", new Volume(10), librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyF));
     // note: copy G is retired
-    assertEquals("G:A01", null, librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyG));
-    assertEquals("G:B02", null, librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyG));
-    assertEquals("G:C03", null, librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_STOCK_PLATES).get(copyG));
+    assertEquals("G:A01", null, librariesDao.findRemainingVolumesInWellCopies(wellA01, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyG));
+    assertEquals("G:B02", null, librariesDao.findRemainingVolumesInWellCopies(wellB02, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyG));
+    assertEquals("G:C03", null, librariesDao.findRemainingVolumesInWellCopies(wellC03, CopyUsageType.CHERRY_PICK_SOURCE_PLATES).get(copyG));
   }
   
   public void testDeleteLibraryContentsVersion()

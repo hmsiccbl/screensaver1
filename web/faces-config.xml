@@ -40,7 +40,7 @@ Config 1.1//EN" "http://java.sun.com/dtd/web-facesconfig_1_1.dtd">
   <!-- The Messages class implements the JSF PhaseListener interface, allowing
        it display enqueued messages on a new, subsequent view. -->
   <lifecycle>
-    <phase-listener>edu.harvard.med.screensaver.ui.util.Messages</phase-listener>
+    <phase-listener>edu.harvard.med.screensaver.ui.arch.util.Messages</phase-listener>
   </lifecycle>
 
 

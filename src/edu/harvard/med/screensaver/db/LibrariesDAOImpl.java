@@ -24,6 +24,7 @@ import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.db.hqlbuilder.JoinType;
+import edu.harvard.med.screensaver.io.libraries.LibraryCopyPlateListParserResult;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DuplicateEntityException;
 import edu.harvard.med.screensaver.model.Volume;
@@ -35,6 +36,7 @@ import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.LibraryWellType;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.Reagent;
 import edu.harvard.med.screensaver.model.libraries.ReagentVendorIdentifier;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
@@ -42,7 +44,8 @@ import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.util.Pair;
 
 public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
 {
@@ -276,13 +279,15 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     String hql = "select c, p.wellVolume, " +
     		"(select sum(wva.volume) from WellVolumeAdjustment wva where wva.copy = c and wva.well.id=?) " +
         "from Plate p join p.copy c " +
-        "where p.plateNumber=? and p.dateRetired is null and c.usageType = ?";
+        "where p.plateNumber=? and (p.status = ? or p.status = ?) and c.usageType = ?";
     
     
     List<Object[]> copyVolumes = 
       getHibernateTemplate().find(hql, 
                                   new Object[] { well.getWellKey().toString(), well.getPlateNumber(),
-                                    CopyUsageType.CHERRY_PICK_STOCK_PLATES });
+                                    PlateStatus.NOT_SPECIFIED,
+                                    PlateStatus.AVAILABLE,
+                                    CopyUsageType.CHERRY_PICK_SOURCE_PLATES });
     Map<Copy,Volume> remainingVolumes = Maps.newHashMap();
     for (Object[] row : copyVolumes) {
       Volume remainingVolume = 
@@ -350,4 +355,105 @@ public class LibrariesDAOImpl extends AbstractDAO implements LibrariesDAO
     }
     return plates.get(0);
   }
+
+  @Override
+  public Set<Integer> queryForPlateIds(LibraryCopyPlateListParserResult parserResult)
+  {
+    Set<Integer> plateIds = Sets.newHashSet();
+
+    Set<String> copyNames = parserResult.getCopies();
+    Set<Pair<Integer,Integer>> plateRanges = parserResult.getCompletePlateRanges();
+
+    if (copyNames.isEmpty() && plateRanges.isEmpty()) {
+      // nop
+      //return plateIds;
+    }
+    else if (!copyNames.isEmpty() && plateRanges.isEmpty()) {
+      Set<Plate> plates = findPlatesByCopyName(copyNames);
+      for (Plate p : plates) {
+        plateIds.add(p.getPlateId());
+      }
+    }
+
+    // Finally, do the plate range separately
+    if (!plateRanges.isEmpty()) {
+      for (Pair<Integer,Integer> range : plateRanges) {
+        if (!copyNames.isEmpty()) {
+          for (String copyName : copyNames) {
+            Set<Plate> plates = findPlateRangeFromCopyCaseInsensitive(range.getFirst(), range.getSecond(), copyName);
+            for (Plate p : plates) {
+                plateIds.add(p.getPlateId());
+              }
+            }
+        }
+        else {
+          for (Plate p : findPlateRangeFromCopyCaseInsensitive(range.getFirst(), range.getSecond(), null)) {
+            plateIds.add(p.getPlateId());
+          }
+        }
+      }
+    }
+
+    return plateIds;
+  }
+
+  /**
+   * Return all plates where the first <= plateNumber <= second<br/>
+   * Note: if first=second, then treat as &quot;plateNumber=first&quot;
+   * 
+   * @param firstPlateNumber
+   * @param secondPlateNumber
+   * @param copyName if null return all plates in the range across all copies
+   * @return
+   */
+  private Set<Plate> findPlateRangeFromCopyCaseInsensitive(int firstPlateNumber, int secondPlateNumber, final String copyName)
+  {
+    if (firstPlateNumber > secondPlateNumber) {
+      int temp = firstPlateNumber;
+      firstPlateNumber = secondPlateNumber;
+      secondPlateNumber = temp;
+    }
+    final int first = firstPlateNumber;
+    final int second = secondPlateNumber;
+
+    List<Plate> plates = runQuery(new Query<Plate>() {
+      public List<Plate> execute(Session session)
+        {
+          HqlBuilder builder = new HqlBuilder();
+          builder.from(Plate.class, "p");
+          if (copyName != null) builder.from("p", "copy", "c", JoinType.INNER);
+          builder.select("p").distinctProjectionValues();
+          if (first != second) {
+            builder.where("p", "plateNumber", Operator.GREATER_THAN_EQUAL, first);
+            builder.where("p", "plateNumber", Operator.LESS_THAN_EQUAL, second);
+          }
+          else {
+            // special case where range is actually as single value
+            builder.where("p", "plateNumber", Operator.EQUAL, first);
+          }
+          if (copyName != null) builder.where("c", "name", Operator.TEXT_LIKE, copyName);
+          return builder.toQuery(session, true).list();
+        }
+    });
+    return Sets.newHashSet(plates);
+  }
+  
+  private Set<Plate> findPlatesByCopyName(final Set<String> copies)
+  {
+    List<Plate> plates = runQuery(new Query<Plate>() {
+      public List<Plate> execute(Session session)
+        {
+          HqlBuilder builder = new HqlBuilder();
+          builder.from(Plate.class, "p");
+          builder.from("p", Plate.copy.getPath(), "c", JoinType.LEFT_FETCH);
+          builder.select("p").distinctProjectionValues();
+          for (String copyName : copies) {
+            builder.where("c", "name", Operator.TEXT_LIKE, copyName);
+          }
+          return builder.toQuery(session, true).list();
+        }
+    });
+    return Sets.newHashSet(plates);
+  }
+
 }

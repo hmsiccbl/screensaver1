@@ -39,6 +39,7 @@ import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateSize;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.libraries.WellName;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -470,9 +471,9 @@ public class CherryPickRequestPlateMapperTest extends AbstractSpringPersistenceT
    */
   private void makeLibraryCopy(Library library, String copyName, int volume)
   {
-    Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_STOCK_PLATES, copyName);
+    Copy copy = library.createCopy((AdministratorUser) library.getCreatedBy(), CopyUsageType.CHERRY_PICK_SOURCE_PLATES, copyName);
     for (Plate plate : copy.getPlates().values()) {
-      plate.withWellVolume(new Volume(volume).add(_minimumSourceWellVolume));
+      plate.withWellVolume(new Volume(volume, VolumeUnit.MICROLITERS).add(_minimumSourceWellVolume)).withStatus(PlateStatus.AVAILABLE);
     }
   }
 

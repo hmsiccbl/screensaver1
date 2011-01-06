@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
 /**
- * The vocabulary of values for StatusItem. The ranking of these vocabularly
+ * The vocabulary of values for StatusItem. The ranking of these vocabulary
  * items is significant, as they represent a temporal sequence of events. In
  * particular the following ordering is critical:
  * <ul>
@@ -26,7 +26,7 @@ import edu.harvard.med.screensaver.model.VocabularyUserType;
  * Statuses after and including <code>Completed*</code> are mutually
  * exclusive, but always represent a final status. A screen may only contain one
  * status with a given <code>rank<code> value.
- *
+ * 
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  * @author <a mailto="andrew_tolopko@hms.harvard.edu">Andrew Tolopko</a>
  */

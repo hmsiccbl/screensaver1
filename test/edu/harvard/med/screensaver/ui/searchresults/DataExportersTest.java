@@ -35,11 +35,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
-import edu.harvard.med.screensaver.CommandLineApplication;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.Tuple;
 import edu.harvard.med.screensaver.db.datafetcher.TupleDataFetcher;
+import edu.harvard.med.screensaver.io.CommandLineApplication;
 import edu.harvard.med.screensaver.io.DataExporter;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.libraries.Library;
@@ -53,19 +53,22 @@ import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.policy.DefaultEntityViewPolicy;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.table.DataTableModelType;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.TextColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.BooleanTupleColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EnumTupleColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.FetchPaths;
-import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
-import edu.harvard.med.screensaver.ui.table.column.entity.IntegerSetTupleColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.IntegerTupleColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.TextTupleColumn;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.DataTableModelType;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TextColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanTupleColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumTupleColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.FetchPaths;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerSetTupleColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerTupleColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextTupleColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.searchresults.CsvDataExporter;
+import edu.harvard.med.screensaver.ui.arch.searchresults.ExcelWorkbookDataExporter;
+import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 
 public class DataExportersTest extends AbstractSpringPersistenceTest
 {

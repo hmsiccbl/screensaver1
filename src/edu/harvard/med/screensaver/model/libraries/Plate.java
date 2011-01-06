@@ -10,7 +10,9 @@
 package edu.harvard.med.screensaver.model.libraries;
 
 import java.util.Set;
+import java.util.SortedSet;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -18,9 +20,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -29,18 +34,21 @@ import javax.persistence.Version;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.joda.time.LocalDate;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
-import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
+import edu.harvard.med.screensaver.model.AdministrativeActivity;
+import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
+import edu.harvard.med.screensaver.model.Concentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
+import edu.harvard.med.screensaver.model.users.AdministratorUser;
 
 /**
  * A plate for a particular {@link Library} {@link Copy}.
@@ -52,29 +60,39 @@ import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 @Table(uniqueConstraints={ @UniqueConstraint(columnNames={ "copyId", "plateNumber" }) })
 @org.hibernate.annotations.Proxy
 @ContainedEntity(containingEntityClass=Copy.class)
-public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
+public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<Plate>
 {
   private static final long serialVersionUID = 0L;
   
   public static final RelationshipPath<Plate> copy = RelationshipPath.from(Plate.class).to("copy", Cardinality.TO_ONE);
+  public static final RelationshipPath<Plate> location = RelationshipPath.from(Plate.class).to("location", Cardinality.TO_ONE);
+  public static final RelationshipPath<Plate> platedActivity = RelationshipPath.from(Plate.class).to("platedActivity", Cardinality.TO_ONE);
+  public static final RelationshipPath<Plate> retiredActivity = RelationshipPath.from(Plate.class).to("retiredActivity", Cardinality.TO_ONE);
   
   public static final Function<Plate,Integer> ToPlateNumber = new Function<Plate,Integer>() { public Integer apply(Plate p) { return p.getPlateNumber(); } };
   public static final Function<Plate,Copy> ToCopy = new Function<Plate,Copy>() { public Copy apply(Plate p) { return p.getCopy(); } };
+  public static final Function<Plate,PlateLocation> ToLocation = new Function<Plate,PlateLocation>() {
+    public PlateLocation apply(Plate p)
+    {
+      return p.getLocation();
+    }
+  };
     
 
   private Integer _version;
   private Copy _copy;
   private Integer _plateNumber;
-  private String _location;
+  private PlateLocation _location;
   private String _facilityId;
   private PlateType _plateType;
   /** The default initial volume for a well on this copy plate. */
   private Volume _wellVolume;
+  private Concentration _concentration;
+  private PlateStatus _status;
+  private AdministrativeActivity _platedActivity;
+  private AdministrativeActivity _retiredActivity;
   private String _comments;
-  private LocalDate _datePlated;
-  private LocalDate _dateRetired;
   private Set<AssayPlate> _assayPlates = ImmutableSet.of();
-
   private ScreeningStatistics _screeningStatistics;
 
   /**
@@ -84,8 +102,10 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
   Plate(Copy copy,
         Integer plateNumber)
   {
+    super((AdministratorUser) copy.getCreatedBy());
     _copy = copy;
     _plateNumber = plateNumber;
+    _status = PlateStatus.NOT_SPECIFIED;
   }
 
   /**
@@ -168,7 +188,13 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
    * @return the location
    */
   @org.hibernate.annotations.Type(type="text")
-  public String getLocation()
+  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE })
+  @JoinColumn(name = "plateLocationId")
+  @org.hibernate.annotations.ForeignKey(name = "fk_plate_to_plate_location")
+  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
+  public PlateLocation getLocation()
   {
     return _location;
   }
@@ -177,7 +203,7 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
    * Set the location.
    * @param location the new location
    */
-  public void setLocation(String location)
+  public void setLocation(PlateLocation location)
   {
     _location = location;
   }
@@ -229,89 +255,41 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
     _wellVolume = volume;
   }
 
+  public void setConcentration(Concentration concentration)
+  {
+    _concentration = concentration;
+  }
+
+  @Column(precision = ScreensaverConstants.CONCENTRATION_PRECISION, scale = ScreensaverConstants.CONCENTRATION_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.ConcentrationType")
+  public Concentration getConcentration()
+  {
+    return _concentration;
+  }
+
   public Plate withWellVolume(Volume volume)
   {
     setWellVolume(volume);
     return this;
   }
 
-  /**
-   * Get the comments.
-   * @return the comments
-   */
-  @org.hibernate.annotations.Type(type="text")
-  public String getComments()
+  @Column(nullable = false)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.libraries.PlateStatus$UserType")
+  public PlateStatus getStatus()
   {
-    return _comments;
+    return _status;
   }
 
-  /**
-   * Set the comments.
-   * @param comments the new comments
-   */
-  public void setComments(String comments)
+  public void setStatus(PlateStatus status)
   {
-    _comments = comments;
+    _status = status;
   }
 
-  /**
-   * @return true if the plate has been physically created and exists at the screening facility. If true, the Plate will
-   *         have a {@link #getDatePlated() plated date}.
-   */
-  @Transient
-  public boolean isCreated()
+  public Plate withStatus(PlateStatus status)
   {
-    return _datePlated != null;
+    setStatus(status);
+    return this;
   }
-
-  /**
-   * Get the date plated.
-   * @return the date plated
-   */
-  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
-  public LocalDate getDatePlated()
-  {
-    return _datePlated;
-  }
-
-  /**
-   * Set the date plated.
-   * @param datePlated the new date plated
-   */
-  public void setDatePlated(LocalDate datePlated)
-  {
-    _datePlated = datePlated;
-  }
-
-  /**
-   * Get the date retired.
-   * @return the date retired
-   */
-  @Type(type="edu.harvard.med.screensaver.db.usertypes.LocalDateType")
-  public LocalDate getDateRetired()
-  {
-    return _dateRetired;
-  }
-
-  /**
-   * Set the date retired.
-   * @param dateRetired the new date retired
-   */
-  public void setDateRetired(LocalDate dateRetired)
-  {
-    _dateRetired = dateRetired;
-  }
-
-  /**
-   * Return true iff this library has been retired.
-   * @return true iff this library has been retired
-   */
-  @Transient
-  public boolean isRetired()
-  {
-    return _dateRetired != null;
-  }
-
 
   /**
    * @motivation for hibernate
@@ -351,7 +329,7 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
     return result;
   }
 
-  public Plate withLocation(String location)
+  public Plate withLocation(PlateLocation location)
   {
     setLocation(location);
     return this;
@@ -366,14 +344,61 @@ public class Plate extends AbstractEntity<Integer> implements Comparable<Plate>
   @Transient
   public ScreeningStatistics getScreeningStatistics()
   {
-    if (_screeningStatistics == null) {
-      _screeningStatistics = new ScreeningStatistics();
-    }
     return _screeningStatistics;
   }
 
   public void setScreeningStatistics(ScreeningStatistics screeningStatistics)
   {
     _screeningStatistics = screeningStatistics;
+  }
+
+  @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  @JoinTable(name = "plateUpdateActivity",
+             joinColumns = @JoinColumn(name = "plateId", nullable = false, updatable = false),
+             inverseJoinColumns = @JoinColumn(name = "updateActivityId", nullable = false, updatable = false, unique = true))
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @Sort(type = SortType.NATURAL)
+  @ToMany(singularPropertyName = "updateActivity", hasNonconventionalMutation = true /*
+                                                                                      * model testing framework doesn't
+                                                                                      * understand this is a containment
+                                                                                      * relationship, and so requires
+                                                                                      * addUpdateActivity() method
+                                                                                      */)
+  @Override
+  public SortedSet<AdministrativeActivity> getUpdateActivities()
+  {
+    return _updateActivities;
+  }
+
+  @OneToOne(cascade = {}, fetch = FetchType.LAZY)
+  @JoinColumn(name = "plated_activity_id", nullable = true, updatable = true, unique = true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true,
+                                                       hasNonconventionalSetterMethod = true)
+  public AdministrativeActivity getPlatedActivity()
+  {
+    return _platedActivity;
+  }
+
+  /**
+   * Get the activity associated with changing the plate status from {@link PlateStatus#AVAILABLE Available} to any
+   * non-available status ({@link PlateStatus#RETIRED Retired} or greater.
+   */
+  @OneToOne(cascade = {}, fetch = FetchType.LAZY)
+  @JoinColumn(name = "retired_activity_id", nullable = true, updatable = true, unique = true)
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true,
+                                                       hasNonconventionalSetterMethod = true)
+  public AdministrativeActivity getRetiredActivity()
+  {
+    return _retiredActivity;
+  }
+
+  public void setRetiredActivity(AdministrativeActivity retiredActivity)
+  {
+    _retiredActivity = retiredActivity;
+  }
+
+  public void setPlatedActivity(AdministrativeActivity platedActivity)
+  {
+    _platedActivity = platedActivity;
   }
 }

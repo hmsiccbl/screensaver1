@@ -12,13 +12,12 @@ package edu.harvard.med.iccbl.screensaver.policy;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.Query;
@@ -36,12 +35,12 @@ import edu.harvard.med.screensaver.model.cherrypicks.RNAiKnockdownConfirmation;
 import edu.harvard.med.screensaver.model.cherrypicks.ScreenerCherryPick;
 import edu.harvard.med.screensaver.model.cherrypicks.SmallMoleculeCherryPickRequest;
 import edu.harvard.med.screensaver.model.libraries.Copy;
-import edu.harvard.med.screensaver.model.libraries.CopyScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.Gene;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryContentsVersion;
 import edu.harvard.med.screensaver.model.libraries.NaturalProductReagent;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateLocation;
 import edu.harvard.med.screensaver.model.libraries.SilencingReagent;
 import edu.harvard.med.screensaver.model.libraries.SmallMoleculeReagent;
 import edu.harvard.med.screensaver.model.libraries.Well;
@@ -77,7 +76,7 @@ import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 
 /**
  * An EntityViewPolicy implementation for ICCB-Longwood that is used by the production web application. 
@@ -222,12 +221,13 @@ public class IccblEntityViewPolicy implements EntityViewPolicy
     return true;
   }
 
-  public boolean visit(CopyScreeningStatus entity)
+  public boolean visit(Plate entity)
   {
     return true;
   }
 
-  public boolean visit(Plate entity)
+  @Override
+  public boolean visit(PlateLocation entity)
   {
     return true;
   }

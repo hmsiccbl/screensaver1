@@ -36,7 +36,7 @@ public class RNAiCherryPickRequest extends CherryPickRequest
 {
   private static final long serialVersionUID = 1L;
   /* Currently (2007-04-20), all RNAi cherry pick assay plates use EPPENDORF plate types. */
-  private static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF;
+  private static final PlateType RNAI_CHERRY_PICK_ASSAY_PLATE_TYPE = PlateType.EPPENDORF_384;
   private static final Volume DEFAULT_TRANSFER_VOLUME = null;
   
 

@@ -13,7 +13,7 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.screens.Study;
-import edu.harvard.med.screensaver.ui.EditResult;
+import edu.harvard.med.screensaver.ui.arch.view.EditResult;
 
 public class StudyDetailViewer extends AbstractStudyDetailViewer<Study>
 {

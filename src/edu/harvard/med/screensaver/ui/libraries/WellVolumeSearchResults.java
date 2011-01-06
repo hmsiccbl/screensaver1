@@ -21,14 +21,14 @@ import org.apache.log4j.Logger;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.WellVolume;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.ColumnType;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.SetColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TextColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.VolumeColumn;
+import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
-import edu.harvard.med.screensaver.ui.table.column.ColumnType;
-import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
-import edu.harvard.med.screensaver.ui.table.column.SetColumn;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.TextColumn;
-import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
 
 /**
  * Aggregates WellVolumeAdjustments into WellVolumes, and provides these

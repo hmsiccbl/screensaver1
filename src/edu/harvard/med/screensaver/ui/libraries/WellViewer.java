@@ -50,13 +50,12 @@ import edu.harvard.med.screensaver.model.screens.Study;
 import edu.harvard.med.screensaver.policy.EntityViewPolicy;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultReporter.ConfirmationReport;
-import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.util.SimpleCell;
+import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.ui.screens.AnnotationHeaderColumn;
 import edu.harvard.med.screensaver.ui.screens.StudyViewer;
-import edu.harvard.med.screensaver.ui.searchresults.AnnotationHeaderColumn;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-import edu.harvard.med.screensaver.ui.table.SimpleCell;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 import edu.harvard.med.screensaver.util.StringUtils;
 
 public class WellViewer extends SearchResultContextEntityViewerBackingBean<Well,Tuple<String>>

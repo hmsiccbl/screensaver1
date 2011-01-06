@@ -16,7 +16,7 @@ import java.util.TreeSet;
 
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserComparator;
 
 import org.apache.log4j.Logger;
 

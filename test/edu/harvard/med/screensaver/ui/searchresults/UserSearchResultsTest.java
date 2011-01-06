@@ -18,11 +18,12 @@ import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.table.column.TableColumnManager;
-import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumnManager;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.users.ScreenerSearchResults;
 
 public class UserSearchResultsTest extends AbstractSpringPersistenceTest
 {
@@ -42,7 +43,7 @@ public class UserSearchResultsTest extends AbstractSpringPersistenceTest
     screenersBrowser.searchAll();
     TableColumnManager<ScreeningRoomUser> columnManager = screenersBrowser.getColumnManager();
     screenersBrowser.getColumnManager().addCompoundSortColumns(columnManager.getColumn("User"),
-                                                               columnManager.getColumn("Date Created"));
+                                                               columnManager.getColumn("Date Recorded"));
     screenersBrowser.getColumnManager().setSortColumnName("Name");
     screenersBrowser.getColumnManager().setSortDirection(SortDirection.DESCENDING);
 

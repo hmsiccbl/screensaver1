@@ -29,7 +29,7 @@ public enum LibraryWellType implements VocabularyTerm
   EMPTY("empty"), // for RNAi libraries, on assay, can become Assay Control, Assay Positive Control, Other (see AssayWellControlType)
   DMSO("DMSO"), // small molecule libraries only
   LIBRARY_CONTROL("library control"), // RNAi libraries only
-  BUFFER("buffer")  // RNAi libraries only
+  RNAI_BUFFER("RNAi buffer") // RNAi libraries only
   ;
   
   // static inner class

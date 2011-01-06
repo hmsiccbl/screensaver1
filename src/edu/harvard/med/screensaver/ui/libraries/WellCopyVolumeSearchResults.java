@@ -39,6 +39,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.Well;
 import edu.harvard.med.screensaver.model.libraries.WellCopy;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
@@ -49,14 +50,14 @@ import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.column.BooleanColumn;
-import edu.harvard.med.screensaver.ui.table.column.IntegerColumn;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.TextColumn;
-import edu.harvard.med.screensaver.ui.table.column.VolumeColumn;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.BooleanColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TextColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.VolumeColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryDataModel;
+import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
 
 public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<WellCopy,String>
 {
@@ -246,13 +247,8 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
         @Override
         public Boolean getCellValue(WellCopy wc) 
         {
-          Plate ci = wc.getCopy().getPlates().get(wc.getWell().getPlateNumber());
-          if(ci != null && ci.isRetired())
-          {
-            return true;
-          }else {
-            return false;
-          }
+          Plate plate = wc.getCopy().getPlates().get(wc.getWell().getPlateNumber());
+          return plate != null && plate.getStatus() == PlateStatus.RETIRED;
         }
       };
     col.clearCriteria();

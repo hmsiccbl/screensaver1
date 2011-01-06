@@ -70,10 +70,16 @@
             </t:panelGrid>
 
             <t:commandLink action="#{menu.browseLibraryCopies}"
-              styleClass="menuItem" accesskey="P"
-              title="Browse all available copies"
+              styleClass="menuItem" accesskey="C"
+              title="Browse all available library copies"
               rendered="#{menu.readAdmin}">
-            Co<u>p</u>ies</t:commandLink>
+            <u>C</u>opies</t:commandLink>
+
+            <t:commandLink action="#{menu.browseLibraryCopyPlates}"
+              styleClass="menuItem" accesskey="P"
+              title="Browse all available library copy plates"
+              rendered="#{menu.readAdmin}">
+            <u>P</u>lates</t:commandLink>
 
             <t:panelGrid columns="2" styleClass="layoutPanel"
               onmouseover="javascript:document.getElementById('screensSubmenu').style.visibility='visible'"
@@ -114,9 +120,9 @@
               onmouseout="javascript:document.getElementById('cprsSubmenu').style.visibility='hidden'"
               rendered="#{menu.screener || menu.readAdmin}">
               <t:commandLink action="#{menu.browseCherryPickRequests}"
-                styleClass="menuItem" accesskey="C"
+                styleClass="menuItem" accesskey="Q"
                 title="Browse the cherry pick requests currently available and accessible to you">
-                <u>C</u>PRs</t:commandLink>
+                CP Re<u>q</u>uests</t:commandLink>
               <t:panelGrid columns="2" id="cprsSubmenu" forceId="true"
                 styleClass="layoutPanel"
                 style="visibility:hidden; margin-right: 10px">
@@ -248,6 +254,25 @@
             <t:commandButton
               action="#{cherryPickRequestFinder.findCherryPickRequest}"
               id="findCherryPickRequestCommand" value="Go"
+              image="/images/arrow-next.png" />
+          </t:panelGrid>
+        </h:form>
+
+        <h:form id="findLibraryCopyPlatesForm"
+          title="Look up library copy plate(s) by plate number(s), plate range(s) and copy name(s)">
+          <t:panelGrid columns="2"
+            rendered="#{menu.readAdmin}">
+            <t:outputLabel 
+              for="copyPlateInput" value="Plate #, Copy Name"
+              styleClass="menuItem" />
+            <t:outputText value="" />
+            <t:inputTextarea id="copyPlateInput"
+              value="#{libraryCopyPlateFinder.plateCopyInput}"
+              styleClass="inputText"
+              forceId="true" cols="12" rows="1" />
+            <t:commandButton
+              action="#{libraryCopyPlateFinder.findPlates}"
+              id="findLibraryCopyPlateCommand" value="Go"
               image="/images/arrow-next.png" />
           </t:panelGrid>
         </h:form>

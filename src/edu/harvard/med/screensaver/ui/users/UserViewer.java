@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.harvard.med.iccbl.screensaver.policy.DataSharingLevelMapper;
+import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.UsersDAO;
 import edu.harvard.med.screensaver.model.AttachedFile;
@@ -53,24 +54,23 @@ import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUserClassification;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserComparator;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.model.users.UserAttachedFileType;
 import edu.harvard.med.screensaver.service.OperationRestrictedException;
 import edu.harvard.med.screensaver.service.screens.ScreenGenerator;
-import edu.harvard.med.screensaver.ui.EditResult;
-import edu.harvard.med.screensaver.ui.SearchResultContextEditableEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.util.AttachedFiles;
+import edu.harvard.med.screensaver.ui.arch.util.ChecklistItems;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.arch.view.EditResult;
+import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.screens.ScreenDetailViewer;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.UserSearchResults;
-import edu.harvard.med.screensaver.ui.table.Criterion;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.util.AttachedFiles;
-import edu.harvard.med.screensaver.ui.util.ChecklistItems;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
-import edu.harvard.med.screensaver.ui.util.ScreensaverUserComparator;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
-import edu.harvard.med.screensaver.ui.util.UISelectOneEntityBean;
+import edu.harvard.med.screensaver.ui.screens.ScreenSearchResults;
 import edu.harvard.med.screensaver.util.DevelopmentException;
 import edu.harvard.med.screensaver.util.NullSafeComparator;
 import edu.harvard.med.screensaver.util.NullSafeUtils;
@@ -336,7 +336,7 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
       userClassifications.remove(ScreeningRoomUserClassification.PRINCIPAL_INVESTIGATOR);
     }
     if (getEntity().getEntityId() == null) {
-      return JSFUtils.createUISelectItemsWithEmptySelection(userClassifications, "<select>");
+      return JSFUtils.createUISelectItemsWithEmptySelection(userClassifications, ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT);
     }
     else {
       return JSFUtils.createUISelectItems(userClassifications);
@@ -352,7 +352,11 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
         @Override
         protected String makeLabel(LabHead t) { return t.getLab().getLabName(); }
         @Override
-        protected String getEmptyLabel() { return getEntity().getEntityId() == null ? "<select>" : super.getEmptyLabel(); }
+        protected String getEmptyLabel()
+        {
+          return getEntity().getEntityId() == null ? ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT
+            : super.getEmptyLabel();
+        }
       };
     }
     return _labName;
@@ -411,7 +415,10 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
         @Override
         protected String makeLabel(FacilityUsageRole fu) { return fu.getDisplayableName(); }
         @Override
-        protected String getEmptyLabel() { return "<select>"; }
+        protected String getEmptyLabel()
+        {
+          return ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT;
+        }
       };
     }
     return _newFacilityUsageRole;
@@ -444,7 +451,10 @@ public class UserViewer extends SearchResultContextEditableEntityViewerBackingBe
         @Override
         protected String makeLabel(ScreensaverUserRole r) { return r.getDisplayableRoleName(); }
         @Override
-        protected String getEmptyLabel() { return "<select>"; }
+        protected String getEmptyLabel()
+        {
+          return ScreensaverConstants.REQUIRED_VOCAB_FIELD_PROMPT;
+        }
       };
     }
     return _newUserRole;

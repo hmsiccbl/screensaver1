@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
-import edu.harvard.med.screensaver.ui.table.Criterion;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 
 /**
  * General purpose interface for fetch a set of objects from persistent storage,

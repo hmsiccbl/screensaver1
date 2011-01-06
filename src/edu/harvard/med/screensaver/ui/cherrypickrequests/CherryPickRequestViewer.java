@@ -60,24 +60,22 @@ import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestCherryPi
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapFilesBuilder;
 import edu.harvard.med.screensaver.service.cherrypicks.CherryPickRequestPlateMapper;
 import edu.harvard.med.screensaver.service.screens.ScreeningDuplicator;
-import edu.harvard.med.screensaver.ui.SearchResultContextEntityViewerBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
 import edu.harvard.med.screensaver.ui.activities.LabActivityViewer;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.BooleanEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryDataModel;
+import edu.harvard.med.screensaver.ui.arch.datatable.model.InMemoryEntityDataModel;
+import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
+import edu.harvard.med.screensaver.ui.arch.searchresults.EntitySearchResults;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.view.SearchResultContextEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.WellCopyVolumeSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.EntitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LabCherryPickReagentEntityColumn;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenerCherryPickReagentEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.BooleanEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.EnumEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.HasFetchPaths;
-import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
-import edu.harvard.med.screensaver.ui.table.model.DataTableModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryDataModel;
-import edu.harvard.med.screensaver.ui.table.model.InMemoryEntityDataModel;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
 
 /**
  * Backing bean for Cherry Pick Request Viewer page.

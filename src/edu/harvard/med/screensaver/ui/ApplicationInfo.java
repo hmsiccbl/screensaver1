@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+
 
 /**
  * A global UI backing bean that provides basic, static information about the

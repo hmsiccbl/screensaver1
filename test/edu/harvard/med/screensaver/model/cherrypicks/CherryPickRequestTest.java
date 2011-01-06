@@ -47,7 +47,7 @@ public abstract class CherryPickRequestTest<CPR extends CherryPickRequest> exten
       for (int attempt = 0; attempt <= plateOrdinal; ++attempt) {
         cherryPickRequest.createCherryPickAssayPlate(plateOrdinal,
                                                      attempt,
-                                                     PlateType.EPPENDORF);
+                                                     PlateType.EPPENDORF_384);
       }
     }
     List<CherryPickAssayPlate> activeAssayPlates = cherryPickRequest.getActiveCherryPickAssayPlates();

@@ -22,14 +22,14 @@ import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.WellVolumeAdjustment;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.users.ScreensaverUser;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.FixedDecimalEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
+import edu.harvard.med.screensaver.ui.arch.searchresults.EntityBasedEntitySearchResults;
 import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestViewer;
-import edu.harvard.med.screensaver.ui.searchresults.EntityBasedEntitySearchResults;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.DateEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.FixedDecimalEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.IntegerEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.TextEntityColumn;
-import edu.harvard.med.screensaver.ui.table.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.users.UserViewer;
 
 public class WellVolumeAdjustmentSearchResults extends EntityBasedEntitySearchResults<WellVolumeAdjustment,Integer>

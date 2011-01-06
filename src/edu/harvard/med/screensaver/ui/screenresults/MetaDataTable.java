@@ -21,8 +21,8 @@ import javax.faces.model.ListDataModel;
 
 import edu.harvard.med.screensaver.model.screenresults.AnnotationType;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.util.HtmlUtils;
+import edu.harvard.med.screensaver.ui.arch.util.HtmlUtils;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;

@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
 import edu.harvard.med.screensaver.ui.CurrentScreensaverUser;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
 
 public class DataServlet extends HttpServlet {
 

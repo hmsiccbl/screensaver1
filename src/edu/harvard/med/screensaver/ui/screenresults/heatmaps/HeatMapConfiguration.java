@@ -15,8 +15,8 @@ import edu.harvard.med.screensaver.analysis.Filter;
 import edu.harvard.med.screensaver.model.libraries.WellKey;
 import edu.harvard.med.screensaver.model.screenresults.ResultValue;
 import edu.harvard.med.screensaver.model.screenresults.DataColumn;
-import edu.harvard.med.screensaver.ui.util.UISelectManyBean;
-import edu.harvard.med.screensaver.ui.util.UISelectOneBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectManyBean;
+import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.util.Pair;
 
 import org.apache.log4j.Logger;

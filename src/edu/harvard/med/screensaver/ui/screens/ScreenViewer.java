@@ -26,19 +26,18 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.LabHead;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
-import edu.harvard.med.screensaver.ui.UICommand;
+import edu.harvard.med.screensaver.ui.activities.LabActivitySearchResults;
+import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
+import edu.harvard.med.screensaver.ui.cherrypickrequests.CherryPickRequestSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.LibraryPlateSearchResults;
+import edu.harvard.med.screensaver.ui.libraries.LibrarySearchResults;
+import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultImporter;
 import edu.harvard.med.screensaver.ui.screenresults.ScreenResultViewer;
 import edu.harvard.med.screensaver.ui.screenresults.cellhts2.CellHTS2Runner;
 import edu.harvard.med.screensaver.ui.screenresults.heatmaps.HeatMapViewer;
-import edu.harvard.med.screensaver.ui.searchresults.CherryPickRequestSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LabActivitySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LibraryPlateSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.LibrarySearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.ScreenSearchResults;
-import edu.harvard.med.screensaver.ui.searchresults.WellSearchResults;
-import edu.harvard.med.screensaver.ui.table.Criterion.Operator;
-import edu.harvard.med.screensaver.ui.table.column.TableColumn;
 
 public class ScreenViewer extends StudyViewer<Screen>
 {

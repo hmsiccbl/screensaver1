@@ -18,9 +18,9 @@ import edu.harvard.med.screensaver.analysis.cellhts2.ScoreReplicatesMethod;
 import edu.harvard.med.screensaver.analysis.cellhts2.SummarizeReplicatesMethod;
 import edu.harvard.med.screensaver.model.screenresults.ScreenResult;
 import edu.harvard.med.screensaver.service.cellhts2.CellHts2Annotator;
-import edu.harvard.med.screensaver.ui.AbstractBackingBean;
-import edu.harvard.med.screensaver.ui.UICommand;
-import edu.harvard.med.screensaver.ui.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 
 /**
  * @author Siew Cheng Aw

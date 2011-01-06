@@ -9,6 +9,8 @@
 
 package edu.harvard.med.screensaver.ui;
 
+import edu.harvard.med.screensaver.ui.arch.view.AbstractBackingBean;
+
 
 
 /**

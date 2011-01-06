@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.db;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.ScrollableResults;
 import org.springframework.transaction.annotation.Transactional;
@@ -393,5 +394,8 @@ public interface GenericEntityDAO
   public <E extends Entity> List<E> findEntitiesByHql(Class<E> entityClass,
                                                       String hql,
                                                       Object... hqlParameters);
+  
+  public <E extends Entity,T> Set<T> findDistinctPropertyValues(Class<E> entityClass,
+                                                                String propertyName);
 }
 

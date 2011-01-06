@@ -299,9 +299,9 @@ public class CherryPickRequestPlateMapFilesBuilder
     out.print(cherryPick.getSourceWell().getPlateNumber());
     out.print(cherryPick.getSourceCopy().getName());
     out.print(cherryPick.getSourceWell().getWellName());
-    out.print(cherryPick.getSourceCopy().findPlate(cherryPick.getSourceWell().getPlateNumber()).getPlateType().getFullName());
+    out.print(cherryPick.getSourceCopy().findPlate(cherryPick.getSourceWell().getPlateNumber()).getPlateType());
     out.print(cherryPick.getAssayPlateWellName());
-    out.print(cherryPick.getAssayPlate().getAssayPlateType().getFullName());
+    out.print(cherryPick.getAssayPlate().getAssayPlateType());
     out.print(cherryPick.getCherryPickRequest().getRequestedBy().getFullNameFirstLast());
     out.print(cherryPick.getCherryPickRequest().getScreen().getFacilityId());
     out.print(cherryPick.getCherryPickRequest().getTransferVolumePerWellApproved().convert(VolumeUnit.MICROLITERS).getValue().setScale(2, RoundingMode.HALF_UP));

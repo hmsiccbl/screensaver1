@@ -37,6 +37,7 @@ import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
+import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
 import edu.harvard.med.screensaver.model.screens.LabActivity;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -57,7 +58,7 @@ public abstract class Activity extends AuditedAbstractEntity<Integer> implements
   private static final long serialVersionUID = 0L;
   
   public static final RelationshipPath<Activity> performedBy = RelationshipPath.from(Activity.class).to("performedBy", Cardinality.TO_ONE);
-
+  public static final PropertyPath<Activity> dateOfActivity = RelationshipPath.from(Activity.class).toProperty("dateOfActivity");
 
   // instance fields
 
