@@ -393,7 +393,7 @@ public class CommandLineApplication
                          .hasArg()
                          .withArgName("eCommons ID")
                          .withDescription("the eCommons ID of the administrative user performing the load")
-                         .withLongOpt("user-ecommons-id")
+                         .withLongOpt("admin-ecommons-id")
                          .create("AE"));
   }
 
