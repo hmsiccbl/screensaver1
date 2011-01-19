@@ -133,7 +133,7 @@ public class LibraryScreeningSplitter
     newLibraryScreening.setComments(MIGRATION_COMMENT_TEMPLATE.replaceFirst("#", Integer.toString(libraryScreening.getEntityId())) +
       "\n" +
       (libraryScreening.getComments() == null ? "" : libraryScreening.getComments()));
-    newLibraryScreening.setConcentration(libraryScreening.getConcentration());
+    newLibraryScreening.setMolarConcentration(libraryScreening.getMolarConcentration());
     newLibraryScreening.setForExternalLibraryPlates(libraryScreening.isForExternalLibraryPlates());
     newLibraryScreening.setNumberOfReplicates(libraryScreening.getNumberOfReplicates());
     newLibraryScreening.setVolumeTransferredPerWell(libraryScreening.getVolumeTransferredPerWell());

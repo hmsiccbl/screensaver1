@@ -14,8 +14,8 @@ import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.db.DAOTransaction;
-import edu.harvard.med.screensaver.model.Concentration;
-import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.MakeDummyEntities;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
@@ -57,7 +57,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertNull(libraryScreening1.getAssayProtocolType()); 
         assertNull(libraryScreening1.getNumberOfReplicates()); 
         assertNull(libraryScreening1.getVolumeTransferredPerWell()); 
-        assertNull(libraryScreening1.getConcentration());
+        assertNull(libraryScreening1.getMolarConcentration());
         assertEquals(_screen.getLeadScreener(), libraryScreening1.getPerformedBy());
 
         // setup for next part of test
@@ -66,7 +66,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         libraryScreening1.setAssayProtocolType(AssayProtocolType.ESTABLISHED);
         libraryScreening1.setNumberOfReplicates(1);
         libraryScreening1.setVolumeTransferredPerWell(new Volume("1.00", VolumeUnit.MILLILITERS));
-        libraryScreening1.setConcentration(new Concentration("2.00", ConcentrationUnit.MILLIMOLAR));
+        libraryScreening1.setMolarConcentration(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR));
         libraryScreening1.setPerformedBy(_screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(libraryScreening1);
       }
@@ -82,7 +82,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertEquals(AssayProtocolType.ESTABLISHED, libraryScreening2.getAssayProtocolType()); 
         assertEquals(Integer.valueOf(1), libraryScreening2.getNumberOfReplicates());
         assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), libraryScreening2.getVolumeTransferredPerWell()); 
-        assertEquals(new Concentration("2.00", ConcentrationUnit.MILLIMOLAR), libraryScreening2.getConcentration()); 
+        assertEquals(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR), libraryScreening2.getMolarConcentration()); 
         assertEquals(_screen.getLabHead(), libraryScreening2.getPerformedBy());
       }
     });
@@ -111,7 +111,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertNull(rnaiCpScreening1.getAssayProtocolType()); 
         assertNull(rnaiCpScreening1.getNumberOfReplicates()); 
         assertNull(rnaiCpScreening1.getVolumeTransferredPerWell()); 
-        assertNull(rnaiCpScreening1.getConcentration());
+        assertNull(rnaiCpScreening1.getMolarConcentration());
         assertEquals(cpr.getRequestedBy(), rnaiCpScreening1.getPerformedBy());
 
         // setup for next part of test
@@ -120,7 +120,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         rnaiCpScreening1.setAssayProtocolType(AssayProtocolType.ESTABLISHED);
         rnaiCpScreening1.setNumberOfReplicates(1);
         rnaiCpScreening1.setVolumeTransferredPerWell(new Volume("1.00", VolumeUnit.MILLILITERS));
-        rnaiCpScreening1.setConcentration(new Concentration("2.00", ConcentrationUnit.MILLIMOLAR));
+        rnaiCpScreening1.setMolarConcentration(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR));
         rnaiCpScreening1.setPerformedBy(_screen.getLabHead());
         genericEntityDao.saveOrUpdateEntity(rnaiCpScreening1);
       }
@@ -138,7 +138,7 @@ public class ScreeningDuplicatorTest extends AbstractSpringPersistenceTest
         assertEquals(AssayProtocolType.ESTABLISHED, rnaiCpScreening2.getAssayProtocolType()); 
         assertEquals(Integer.valueOf(1), rnaiCpScreening2.getNumberOfReplicates());
         assertEquals(new Volume("1.00", VolumeUnit.MILLILITERS), rnaiCpScreening2.getVolumeTransferredPerWell()); 
-        assertEquals(new Concentration("2.00", ConcentrationUnit.MILLIMOLAR), rnaiCpScreening2.getConcentration()); 
+        assertEquals(new MolarConcentration("2.00", MolarUnit.MILLIMOLAR), rnaiCpScreening2.getMolarConcentration()); 
         assertEquals(_screen.getLabHead(), rnaiCpScreening2.getPerformedBy());
       }
     });

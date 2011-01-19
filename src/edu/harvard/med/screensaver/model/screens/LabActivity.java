@@ -27,8 +27,8 @@ import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.Concentration;
-import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -62,7 +62,7 @@ public abstract class LabActivity extends Activity
   private Set<EquipmentUsed> _equipmentUsed = new HashSet<EquipmentUsed>();
   private Volume _volumeTransferredPerWell;
 
-  private Concentration _concentration;
+  private MolarConcentration _molarConcentration;
 
 
   // public instance methods
@@ -103,35 +103,35 @@ public abstract class LabActivity extends Activity
   }
 
   @Transient
-  public String getConcentrationValue()
+  public String getMolarConcentrationValue()
   {
-    return _concentration == null ? null : _concentration.getDisplayValue().toString();
+    return _molarConcentration == null ? null : _molarConcentration.getDisplayValue().toString();
   }  
 
   /**
    * Get the concentration
    * @return the concentration
    */
-  @Column(precision=ScreensaverConstants.CONCENTRATION_PRECISION, scale=ScreensaverConstants.CONCENTRATION_SCALE)
-  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.ConcentrationType")
-  public Concentration getConcentration()
+  @Column(precision=ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale=ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
+  public MolarConcentration getMolarConcentration()
   {
-    return _concentration;
+    return _molarConcentration;
   }
 
   /**
    * Set Concentration
    * @param value
    */
-  public void setConcentration(Concentration value)
+  public void setMolarConcentration(MolarConcentration value)
   {
-    _concentration = value;
+    _molarConcentration = value;
   }
   
   @Transient
-  public ConcentrationUnit getConcentrationUnits()
+  public MolarUnit getMolarConcentrationUnits()
   {
-    return _concentration == null ? ConcentrationUnit.DEFAULT : _concentration.getUnits();
+    return _molarConcentration == null ? MolarUnit.DEFAULT : _molarConcentration.getUnits();
   }
 
   /**

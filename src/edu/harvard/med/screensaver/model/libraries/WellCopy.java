@@ -12,11 +12,11 @@ package edu.harvard.med.screensaver.model.libraries;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.harvard.med.screensaver.model.NonPersistentEntity;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
-
-import org.apache.log4j.Logger;
 
 public class WellCopy extends NonPersistentEntity<String> implements Comparable<WellCopy>
 {
@@ -40,7 +40,7 @@ public class WellCopy extends NonPersistentEntity<String> implements Comparable<
     _well = well;
     _copy = copy;
     Plate plate = _copy.getPlates().get(_well.getPlateNumber());
-    if (plate == null) {
+    if (plate == null || plate.getWellVolume() == null) {
       _initialVolume = VolumeUnit.ZERO;
     }
     else {

@@ -389,8 +389,8 @@ public class WellCopyVolumeSearchResults extends EntityBasedEntitySearchResults<
       }
     });
     if (_newRemainingVolumes.size() > 0) {
-      refetch();
-      _wellVolumeSearchResults.refetch();
+      reload();
+      _wellVolumeSearchResults.reload();
       // TODO: this showMessage() call prevents data table from being rendered with updated values!
       //showMessage("libraries.updatedWellVolumes", new Integer(_newRemainingVolumes.size()));
     }

@@ -90,8 +90,10 @@ public interface ScreensaverConstants
   public static final int PLATE_NUMBER_LEN = 5;
   public static final int VOLUME_PRECISION = 10;
   public static final int VOLUME_SCALE = 9;
-  public static final int CONCENTRATION_PRECISION = 12;
-  public static final int CONCENTRATION_SCALE = 9;
+  public static final int MOLAR_CONCENTRATION_PRECISION = 12;
+  public static final int MOLAR_CONCENTRATION_SCALE = 9;
+  public static final int MG_ML_CONCENTRATION_PRECISION = 4;
+  public static final int MG_ML_CONCENTRATION_SCALE = 1;
   public static final int MOLECULAR_MASS_PRECISION = 15;
   public static final int MOLECULAR_MASS_SCALE = 9;
   public static final int MOLECULAR_WEIGHT_PRECISION = 15;

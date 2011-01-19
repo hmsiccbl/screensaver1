@@ -139,7 +139,7 @@ public class ScreeningDuplicator
   private void copyActivityProperties(LabActivity fromActivity, LabActivity toActivity)
   {
     toActivity.setVolumeTransferredPerWell(fromActivity.getVolumeTransferredPerWell());
-    toActivity.setConcentration(fromActivity.getConcentration());
+    toActivity.setMolarConcentration(fromActivity.getMolarConcentration());
     toActivity.setPerformedBy(fromActivity.getPerformedBy());
   }
 

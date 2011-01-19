@@ -10,7 +10,10 @@
 package edu.harvard.med.iccbl.screensaver.io.libraries;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.cli.OptionBuilder;
@@ -28,7 +31,9 @@ import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.Worksheet;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
-import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -44,6 +49,7 @@ import edu.harvard.med.screensaver.service.libraries.PlateUpdater;
 import edu.harvard.med.screensaver.ui.arch.util.converter.CopyUsageTypeConverter;
 import edu.harvard.med.screensaver.ui.arch.util.converter.PlateTypeConverter;
 import edu.harvard.med.screensaver.ui.arch.util.converter.SolventConverter;
+import edu.harvard.med.screensaver.util.StringUtils;
 
 /**
  * Command-line application that updates library copy plate information.
@@ -121,20 +127,20 @@ public class SmallMoleculePlateBatchUpdater
       }
       log.info("parsing row " + (row.getRow() + 1));
 
-      Integer plateNumber = row.getCell(3, true).getInteger();
-      String copyName = row.getCell(4, true).getString();
+      Integer plateNumber = row.getCell(3).getInteger();
+      String copyName = row.getCell(4).getString();
       String room = row.getCell(5).getString();
       String freezer = row.getCell(6).getString();
       String shelf = row.getCell(7).getString();
       String bin = row.getCell(8).getString();
-      PlateType plateType = (PlateType) new PlateTypeConverter().getAsObject(null, null, row.getCell(9, true).getString());
+      PlateType plateType = (PlateType) new PlateTypeConverter().getAsObject(null, null, row.getCell(9).getString());
       Volume volume = row.getCell(10).isEmpty() ? null : new Volume(row.getCell(10).getBigDecimal(), VolumeUnit.MICROLITERS);
-      CopyUsageType copyUsageType = (CopyUsageType) new CopyUsageTypeConverter().getAsObject(null, null, row.getCell(11, true).getString());
-      Concentration concentration = null; //row.getCell(12).isEmpty() ? null : new Concentration(row.getCell(12).getBigDecimal(), ConcentrationUnit.MICROMOLAR);
+      CopyUsageType copyUsageType = (CopyUsageType) new CopyUsageTypeConverter().getAsObject(null, null, row.getCell(11).getString());
+      UniversalConcentration universalConcentration = parseConcentration(row.getCell(12).getAsString());
       Solvent solvent = (Solvent) new SolventConverter().getAsObject(null, null, row.getCell(13, true).getString());
-      LocalDate datePlated = row.getCell(15, true).getDate().toLocalDate();
+      LocalDate datePlated = row.getCell(15).getDate() == null ? null : row.getCell(15).getDate().toLocalDate();
       LocalDate dateRetired = row.getCell(16).getDate() == null ? null : row.getCell(16).getDate().toLocalDate();
-      PlateStatus plateStatus = plateStatusMap.get(row.getCell(17, true).getString());
+      PlateStatus plateStatus = plateStatusMap.get(row.getCell(17).getString());
       String comments = row.getCell(19).getString();
 
       AdministratorUser recordedBy = dao.reloadEntity(recordedByIn);
@@ -142,7 +148,12 @@ public class SmallMoleculePlateBatchUpdater
       log.info("updating plate " + plateNumber + ":" + copyName);
       boolean modified = false;
 
-      modified |= plateUpdater.updateConcentration(plate, concentration, recordedBy);
+      if (universalConcentration.mgMl != null) {
+        modified |= plateUpdater.updateMgMlConcentration(plate, universalConcentration.mgMl, recordedBy);
+      }
+      if (universalConcentration.molar != null) {
+        modified |= plateUpdater.updateMolarConcentration(plate, universalConcentration.molar, recordedBy);
+      }
       modified |= plateUpdater.updateWellVolume(plate, volume, recordedBy);
       modified |= plateUpdater.updatePlateType(plate, plateType, recordedBy);
       if (comments != null) {
@@ -158,13 +169,31 @@ public class SmallMoleculePlateBatchUpdater
         plate.setStatus(PlateStatus.NOT_SPECIFIED);
       }
 
-      modified |= plateUpdater.updatePlateStatus(plate,
-                                                 PlateStatus.AVAILABLE,
-                                                 recordedBy,
-                                                 recordedBy,
-                                                 datePlated);
-      appendComment(plate.getLastRecordedUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE),
-                    ". Status updated by batch update (user that created the plate is unknown)");
+      if (plateStatus == null) {
+        throw new BusinessRuleViolationException("plate status must be specified");
+      }
+      // Note: this logic does not yet handle the NOT_AVAILABLE status properly;
+      // will only matter if we add NOT_AVAILABLE to the plateStatusMap, above
+      if (plateStatus.compareTo(PlateStatus.AVAILABLE) >= 0) {
+        String datePlatedComment = "";
+        if (datePlated == null) {
+          datePlatedComment = ". Date plated is unknown, using Copy recorded date";
+          datePlated = plate.getCopy().getDateCreated().toLocalDate();
+        }
+        modified |= plateUpdater.updatePlateStatus(plate,
+                                                   PlateStatus.AVAILABLE,
+                                                   recordedBy,
+                                                   recordedBy,
+                                                   datePlated);
+        appendComment(plate.getLastRecordedUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE),
+                    ". Status updated by batch update (user that created the plate is unknown)" + datePlatedComment);
+      }
+
+      String dateRetiredComment = "";
+      if (dateRetired == null && plateStatus.compareTo(PlateStatus.AVAILABLE) > 0) {
+        dateRetiredComment = ". Date retired is unknown, using current date";
+        dateRetired = new LocalDate();
+      }
       if (dateRetired != null) {
         modified |= plateUpdater.updatePlateStatus(plate,
                                                    plateStatus,
@@ -172,7 +201,7 @@ public class SmallMoleculePlateBatchUpdater
                                                    recordedBy,
                                                    dateRetired);
         appendComment(plate.getLastRecordedUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE),
-                      ". Status updated by batch update (user that retired the plate is unknown)");
+                      ". Status updated by batch update (user that retired the plate is unknown)" + dateRetiredComment);
       }
 
       if (room != null || freezer != null || shelf != null || bin != null) {
@@ -209,6 +238,42 @@ public class SmallMoleculePlateBatchUpdater
     plateUpdater.validateLocations();
     log.info("plates updated: " + n);
     return n;
+  }
+
+
+  private static class UniversalConcentration
+  {
+    BigDecimal mgMl;
+    MolarConcentration molar;
+
+    public UniversalConcentration(BigDecimal mgMlConcentration)
+    {
+      mgMl = mgMlConcentration;
+    }
+
+    public UniversalConcentration(MolarConcentration molarConcentration)
+    {
+      molar = molarConcentration;
+    }
+
+    static Pattern MG_ML_CONCENTRATION_PATTERN = Pattern.compile("([0-9]+) mg/ml");
+    static Pattern MILLIMOLAR_CONCENTRATION_PATTERN = Pattern.compile("([0-9]+) mM");
+  };
+
+  private static UniversalConcentration parseConcentration(String s)
+  {
+    if (StringUtils.isEmpty(s)) {
+      return null;
+    }
+    Matcher matcher = UniversalConcentration.MG_ML_CONCENTRATION_PATTERN.matcher(s);
+    if (matcher.matches()) {
+      return new UniversalConcentration(new BigDecimal(matcher.group(1)));
+    }
+    matcher = UniversalConcentration.MILLIMOLAR_CONCENTRATION_PATTERN.matcher(s);
+    if (matcher.matches()) {
+      return new UniversalConcentration(new MolarConcentration(matcher.group(1), MolarUnit.MILLIMOLAR));
+    }
+    throw new IllegalArgumentException("unparseable concentration value: " + s);
   }
 
   private static void appendComment(AdministrativeActivity activity, String comment)

@@ -106,9 +106,7 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     _dataTableModel = new DataTableModelLazyUpdateDecorator<R>(_baseDataTableModel);
     _pendingFirstRow = null;
 
-    refetch();
-    refilter();
-    resort();
+    reload();
   } 
 
   public UIData getDataTableUIComponent()
@@ -453,6 +451,13 @@ public class DataTable<R> extends AbstractBackingBean implements Observer
     getDataTableModel().sort(getColumnManager().getSortColumns(),
                              getColumnManager().getSortDirection());
     setRowIndex(0);
+  }
+
+  final public void reload()
+  {
+    refetch();
+    refilter();
+    resort();
   }
 
   // private methods

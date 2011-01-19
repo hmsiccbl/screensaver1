@@ -17,24 +17,24 @@ import edu.harvard.med.screensaver.util.StringUtils;
  * A Concentration, in either millimolar, micromolar or nanomolar units, with
  * 1-nanoliter resolution (maximum).
  */
-public class Concentration extends Quantity<Concentration,ConcentrationUnit>
+public class MolarConcentration extends Quantity<MolarConcentration,MolarUnit>
     {
-  public Concentration(Integer value)
+  public MolarConcentration(Integer value)
   {
-    super(value, ConcentrationUnit.MILLIMOLAR);
+    super(value, MolarUnit.MILLIMOLAR);
   }
 
-  public Concentration(Integer value, ConcentrationUnit units)
+  public MolarConcentration(Integer value, MolarUnit units)
   {
     super(value.toString(), units);
   }
 
-  public Concentration(Long value)
+  public MolarConcentration(Long value)
   {
-    this(value, ConcentrationUnit.MILLIMOLAR);
+    this(value, MolarUnit.MILLIMOLAR);
   }
 
-  public Concentration(Long value, ConcentrationUnit units)
+  public MolarConcentration(Long value, MolarUnit units)
   {
     super(value.toString(), units);
   }
@@ -47,31 +47,31 @@ public class Concentration extends Quantity<Concentration,ConcentrationUnit>
    * @param value
    * @param units
    */
-  public Concentration(String value, ConcentrationUnit units)
+  public MolarConcentration(String value, MolarUnit units)
   {
     super(new BigDecimal(value), units);
   }
 
-  public Concentration(BigDecimal value, ConcentrationUnit units)
+  public MolarConcentration(BigDecimal value, MolarUnit units)
   {
     super(value, units);
   }
 
   @Override
-  protected Concentration newQuantity(BigDecimal value,
-                                      ConcentrationUnit unit)
+  protected MolarConcentration newQuantity(BigDecimal value,
+                                      MolarUnit unit)
   {
-    return new Concentration(value, unit);
+    return new MolarConcentration(value, unit);
   }
   
   /**
    * @motivation for UI
    */
-  public static Concentration makeConcentration(String value, ConcentrationUnit unit)
+  public static MolarConcentration makeConcentration(String value, MolarUnit unit)
   {
-    Concentration c = null;
+    MolarConcentration c = null;
     if (!StringUtils.isEmpty(value)) {
-      c = new Concentration(value, unit).convertToReasonableUnits();
+      c = new MolarConcentration(value, unit).convertToReasonableUnits();
     }
     return c;
   }

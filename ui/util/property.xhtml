@@ -12,12 +12,12 @@
 	   facelets parameters:
 	     - id
 	     - label
-	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'ListOfLinks', 'Link', 'Currency', 'Volume', 'Concentration', 'Vocabulary'
+	     - type: 'Text' (default), 'Textarea', 'Date', 'Boolean', 'Set', 'List', 'ListOfLinks', 'Link', 'Currency', 'Volume', 'MolarConcentration', 'Vocabulary'
 	     - description: used for popup
 	     - value
        - linkValue: required for the type 'Link' (in this case, 'value' is the text of the link
        - linkPrefix: required if type=='ListOfLinks' - this is the uri value to precedes the link value
-	     - unitsSelector: required if type=='Volume' || type=='Concentration', must be instance of edu.harvard.med.screensaver.ui.arch.util.UiSelectOneBean
+	     - unitsSelector: required if type=='Volume' || type=='MolarConcentration', must be instance of edu.harvard.med.screensaver.ui.arch.util.UiSelectOneBean
 	     - editable: boolean, (optional, defaults to false - not available for ListOfLinks, Link)
 	     - rendered: boolean, (optional, defaults to true)
        - adminOnly: boolean (optional, defaults to false)
@@ -53,8 +53,8 @@
       <ui:insert name="data">
         <t:outputText id="#{id}#{type}Value" value="#{value}"
           escape="#{(empty escape ? true : escape)}"
-          rendered="#{!(type == 'Textarea' || type == 'Volume' || type == 'Concentration' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
-          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Concentration' ? concentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
+          rendered="#{!(type == 'Textarea' || type == 'Volume' || type == 'MolarConcentration' || type == 'ListOfLinks' || type == 'Link' || type == 'Vocabulary')}"
+          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'MolarConcentration' ? molarConcentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
         <!-- TODO: not sure why we need to repeat styleClass attribute here to make it take effect... -->
         <t:inputTextarea id="#{id}#{type}Value1"
           rendered="#{type == 'Textarea'}" value="#{value}"
@@ -66,7 +66,7 @@
           selectItems="#{selectItems}" 
           displayValueOnly="true" />
         <t:outputText id="#{id}#{type}Value2"
-          rendered="#{(type == 'Volume' || type == 'Concentration') &amp;&amp; !empty value }"
+          rendered="#{(type == 'Volume' || type == 'MolarConcentration') &amp;&amp; !empty value }"
           value="#{value} #{unitsSelector.selection}" />
         <t:dataList id="#{id}#{type}DataLinkList" var="eltValue"
           value="#{value}" layout="simple"
@@ -92,10 +92,10 @@
     <t:div rendered="#{editable}">
       <ui:insert name="editableData">
         <t:inputText id="#{id}#{type}Field"
-          rendered="#{!(type == 'Textarea' || type == 'Boolean' || type == 'Volume' || type == 'Concentration' || type == 'Vocabulary' )}"
+          rendered="#{!(type == 'Textarea' || type == 'Boolean' || type == 'Volume' || type == 'MolarConcentration' || type == 'Vocabulary' )}"
           required="#{required}" value="#{value}" size="#{editWidth}"
           styleClass="inputText"
-          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'Concentration' ? concentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
+          converter="#{!empty converter ? converter : type == 'Date' ? dateConverter : type == 'Set' ? setConverter : type == 'List' ? listConverter : type == 'Volume' ? volumeConverter : type == 'MolarConcentration' ? molarConcentrationConverter : type == 'Currency' ? currencyConverter : stringConverter}" />
         <t:inputTextarea id="#{id}#{type}Field1"
           rendered="#{type == 'Textarea'}" required="#{required}"
           value="#{value}" cols="#{editWidth}" rows="#{editHeight}"
@@ -109,7 +109,7 @@
           rendered="#{type == 'Vocabulary'}"
           selectItems="#{selectItems}" required="#{required}"
           submitOnChange="#{empty submitOnChange ? false : submitOnChange}" />
-        <t:div rendered="#{type == 'Volume' || type == 'Concentration'}">
+        <t:div rendered="#{type == 'Volume' || type == 'MolarConcentration'}">
           <t:inputText id="#{id}#{type}Field3" value="#{value}" size="4"
             styleClass="inputText">
             <ui:insert name="editValidator" />

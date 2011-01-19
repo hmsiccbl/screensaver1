@@ -887,6 +887,8 @@
 
   <bean id="stringConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.NoOpStringConverter" />
 
+  <bean id="mgMlConcentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.MgMlConcentrationConverter" />
+
   <bean id="toLowerCaseConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ToLowerCaseConverter" />
 
   <bean id="dateConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.LocalDateConverter" />
@@ -899,7 +901,7 @@
 
   <bean id="volumeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.VolumeConverter" />
 
-  <bean id="concentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.ConcentrationConverter" />
+  <bean id="molarConcentrationConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.MolarConcentrationConverter" />
 
   <bean id="silencingReagentTypeConverter" class="edu.harvard.med.screensaver.ui.arch.util.converter.SilencingReagentTypeConverter" />
 

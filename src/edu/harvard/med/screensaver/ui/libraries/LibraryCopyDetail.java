@@ -76,6 +76,7 @@ public class LibraryCopyDetail extends EditableEntityViewerBackingBean<Copy>
       Library library = getEntity().getLibrary();
       getDao().deleteEntity(getEntity());
       showMessage("deletedEntity", "copy " + copyName);
+      _libraryViewer.getContextualSearchResults().reload();
       return _libraryViewer.viewEntity(library);
     }
     catch (DataIntegrityViolationException e) {

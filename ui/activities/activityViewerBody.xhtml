@@ -25,9 +25,9 @@
       required="true" editable="#{activityViewer.editMode}" />
 
     <ss:property id="concentration" label="Concentration"
-      value="#{activityViewer.concentrationValue}" type="Concentration"
-      unitsSelector="#{activityViewer.concentrationType}"
-      description="concentration"
+      value="#{activityViewer.molarConcentrationValue}" type="MolarConcentration"
+      unitsSelector="#{activityViewer.molarConcentrationType}"
+      description="Molar concentration"
       rendered="#{activityViewer.entity.class.simpleName == 'LibraryScreening' || activityViewer.entity.class.simpleName == 'CherryPickScreening'}"
       editable="#{activityViewer.editMode}" />
 
@@ -157,8 +157,7 @@
                   <t:outputText value="Library Warning" />
                 </f:facet>
                 <t:outputText id="libraryWarning"
-                  value="#{element.startPlate.copy.library.screeningStatus}"
-                  rendered="#{element.startPlate.copy.library.screeningStatus.value != 'Allowed'}"
+                  value="#{element.adminLibraryWarning}"
                   styleClass="dataText errorMessage" />
               </t:column>
             </ui:define>

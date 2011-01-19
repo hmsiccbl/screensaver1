@@ -21,7 +21,7 @@
 
 	<t:inputText id="simpleCriterionValue"
 		value="#{column.criterion.value}" converter="#{column.converter}"
-		rendered="#{(empty rendered ? true : rendered) &amp;&amp; (column.columnType.name == 'TEXT' || column.columnType.name == 'TEXT_SET' || column.columnType.name == 'INTEGER' || column.columnType.name == 'INTEGER_SET' || column.columnType.name == 'REAL' || column.columnType.name == 'DATE' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME' || column.columnType.name == 'CONCENTRATION')}"
+		rendered="#{(empty rendered ? true : rendered) &amp;&amp; (column.columnType.name == 'TEXT' || column.columnType.name == 'TEXT_SET' || column.columnType.name == 'INTEGER' || column.columnType.name == 'INTEGER_SET' || column.columnType.name == 'REAL' || column.columnType.name == 'DATE' || column.columnType.name == 'FIXED_DECIMAL' || column.columnType.name == 'VOLUME' || column.columnType.name == 'MOLAR_CONCENTRATION')}"
 		size="#{column.columnType.name == 'TEXT' || column.columnType.name == 'TEXT_SET' ? (empty editWidth ? 30 : editWidth)  : column.columnType.name == 'DATE' ? 10 : 8}"
 		styleClass="inputText"
 		displayValueOnly="#{empty editable ? false : !editable}"

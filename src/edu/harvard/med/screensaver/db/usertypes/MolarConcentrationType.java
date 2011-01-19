@@ -19,15 +19,15 @@ import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
 
-import edu.harvard.med.screensaver.model.Concentration;
-import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 
-public class ConcentrationType implements UserType
+public class MolarConcentrationType implements UserType
 {
 
   // static members
 
-  public static final ConcentrationUnit NORMALIZED_UNITS = ConcentrationUnit.NORMALIZED_UNITS; 
+  public static final MolarUnit NORMALIZED_UNITS = MolarUnit.NORMALIZED_UNITS; 
 
 
   // instance data members
@@ -80,7 +80,7 @@ public class ConcentrationType implements UserType
     BigDecimal rawValue = rs.getBigDecimal(names[0]);
     // Deferred check after first read
     if (rs.wasNull()) return null;
-    return new Concentration(rawValue.toString(), NORMALIZED_UNITS).convertToReasonableUnits();
+    return new MolarConcentration(rawValue.toString(), NORMALIZED_UNITS).convertToReasonableUnits();
   }
 
   public void nullSafeSet(PreparedStatement st, Object value, int index)
@@ -91,7 +91,7 @@ public class ConcentrationType implements UserType
       st.setNull(index, Hibernate.BIG_DECIMAL.sqlType());
     } 
     else {
-      st.setBigDecimal(index, ((Concentration) value).getValue(NORMALIZED_UNITS));
+      st.setBigDecimal(index, ((MolarConcentration) value).getValue(NORMALIZED_UNITS));
     }    
   }
 
@@ -103,7 +103,7 @@ public class ConcentrationType implements UserType
 
   public Class returnedClass()
   {
-    return Concentration.class;
+    return MolarConcentration.class;
   }
 
   // private methods

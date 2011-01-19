@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -41,7 +42,7 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AuditedAbstractEntity;
-import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.annotations.ContainedEntity;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
@@ -77,6 +78,13 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
       return p.getLocation();
     }
   };
+  public static final Function<Plate,PlateStatus> ToStatus = new Function<Plate,PlateStatus>() {
+    public PlateStatus apply(Plate p)
+    {
+      return p.getStatus();
+    }
+  };  
+  
     
 
   private Integer _version;
@@ -87,7 +95,8 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
   private PlateType _plateType;
   /** The default initial volume for a well on this copy plate. */
   private Volume _wellVolume;
-  private Concentration _concentration;
+  private MolarConcentration _molarConcentration;
+  private BigDecimal _mgMlConcentration;
   private PlateStatus _status;
   private AdministrativeActivity _platedActivity;
   private AdministrativeActivity _retiredActivity;
@@ -255,16 +264,27 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
     _wellVolume = volume;
   }
 
-  public void setConcentration(Concentration concentration)
+  public void setMolarConcentration(MolarConcentration molarConcentration)
   {
-    _concentration = concentration;
+    _molarConcentration = molarConcentration;
   }
 
-  @Column(precision = ScreensaverConstants.CONCENTRATION_PRECISION, scale = ScreensaverConstants.CONCENTRATION_SCALE)
-  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.ConcentrationType")
-  public Concentration getConcentration()
+  @Column(precision = ScreensaverConstants.MOLAR_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MOLAR_CONCENTRATION_SCALE)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.db.usertypes.MolarConcentrationType")
+  public MolarConcentration getMolarConcentration()
   {
-    return _concentration;
+    return _molarConcentration;
+  }
+
+  public void setMgMlConcentration(BigDecimal mgMlConcentration)
+  {
+    _mgMlConcentration = mgMlConcentration;
+  }
+
+  @Column(precision = ScreensaverConstants.MG_ML_CONCENTRATION_PRECISION, scale = ScreensaverConstants.MG_ML_CONCENTRATION_SCALE)
+  public BigDecimal getMgMlConcentration()
+  {
+    return _mgMlConcentration;
   }
 
   public Plate withWellVolume(Volume volume)

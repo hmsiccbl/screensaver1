@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.service.libraries;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.google.common.collect.ImmutableMap;
@@ -21,7 +22,7 @@ import edu.harvard.med.screensaver.db.Query;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
-import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateLocation;
@@ -63,7 +64,7 @@ public class PlateUpdater
       return false;
     }
     
-    if (newStatus.compareTo(plate.getStatus()) < 0 || plate.getStatus().compareTo(PlateStatus.RETIRED) > 0) {
+    if (!!!plate.getStatus().canTransitionTo(newStatus)) {
       throw new BusinessRuleViolationException("plate status cannot be changed from '" + plate.getStatus() + "' to '" + newStatus +
         "'");
     }
@@ -71,8 +72,8 @@ public class PlateUpdater
     plate = _dao.reloadEntity(plate);
     recordedBy = _dao.reloadEntity(recordedBy);
     performedBy = _dao.reloadEntity(performedBy);
-    StringBuilder comments = new StringBuilder();
-    comments.append("Status changed from '").append(plate.getStatus()).append("' to '").append(newStatus).append("'");
+
+    StringBuilder comments = new StringBuilder().append("Status changed from '").append(plate.getStatus()).append("' to '").append(newStatus).append("'");
     AdministrativeActivity updateActivity = plate.createUpdateActivity(AdministrativeActivityType.PLATE_STATUS_UPDATE,
                                                                        recordedBy,
                                                                        comments.toString());
@@ -80,31 +81,45 @@ public class PlateUpdater
     updateActivity.setDateOfActivity(datePerformed);
     plate.setStatus(newStatus);
 
-    if (newStatus == PlateStatus.AVAILABLE) {
-      plate.setPlatedActivity(updateActivity);
-      LocalDate datePlated = updateActivity.getDateOfActivity();
-      plate.getCopy().setDatePlated(datePlated);
-      LocalDate dateLibraryScreenable = plate.getCopy().getLibrary().getDateScreenable();
-      if (dateLibraryScreenable == null || datePlated.compareTo(dateLibraryScreenable) < 0) {
-        plate.getCopy().getLibrary().setDateScreenable(datePlated);
-      }
+    if (plate.getPlatedActivity() == null && (newStatus == PlateStatus.AVAILABLE || newStatus == PlateStatus.NOT_AVAILABLE)) {
+      plateCreated(plate, updateActivity);
     }
-    else if (newStatus.compareTo(PlateStatus.RETIRED) >= 0) {
+    if (newStatus.compareTo(PlateStatus.RETIRED) >= 0) {
       if (plate.getRetiredActivity() == null) {
         plate.setRetiredActivity(updateActivity);
       }
       if (newStatus.compareTo(PlateStatus.RETIRED) > 0) {
-        updatePlateLocation(plate,
-                            null,
-                            recordedBy,
-                            performedBy,
-                            datePerformed);
-        AdministrativeActivity lastActivity = plate.getLastRecordedUpdateActivityOfType(AdministrativeActivityType.PLATE_LOCATION_TRANSFER);
-        lastActivity.setComments(lastActivity.getComments() + " (plate no longer has a location due to change of status to " +
-          newStatus + ")");
+        plateNoLongerMaintained(plate, newStatus, recordedBy, performedBy, datePerformed);
       }
     }
     return true;
+  }
+
+  private void plateNoLongerMaintained(Plate plate,
+                                      PlateStatus newStatus,
+                                      AdministratorUser recordedBy,
+                                      AdministratorUser performedBy,
+                                      LocalDate datePerformed)
+  {
+    updatePlateLocation(plate,
+                        null,
+                        recordedBy,
+                        performedBy,
+                        datePerformed);
+    AdministrativeActivity lastActivity = plate.getLastRecordedUpdateActivityOfType(AdministrativeActivityType.PLATE_LOCATION_TRANSFER);
+    lastActivity.setComments(lastActivity.getComments() + " (plate no longer has a location due to change of status to " +
+      newStatus + ")");
+  }
+
+  private void plateCreated(Plate plate, AdministrativeActivity updateActivity)
+  {
+    plate.setPlatedActivity(updateActivity);
+    LocalDate datePlated = updateActivity.getDateOfActivity();
+    plate.getCopy().setDatePlated(datePlated);
+    LocalDate dateLibraryScreenable = plate.getCopy().getLibrary().getDateScreenable();
+    if (dateLibraryScreenable == null || datePlated.compareTo(dateLibraryScreenable) < 0) {
+      plate.getCopy().getLibrary().setDateScreenable(datePlated);
+    }
   }
 
   /*
@@ -243,13 +258,26 @@ public class PlateUpdater
   }
 
   @Transactional
-  public boolean updateConcentration(Plate plate, Concentration newConcentration, AdministratorUser recordByAdmin)
+  public boolean updateMolarConcentration(Plate plate, MolarConcentration newConcentration, AdministratorUser recordByAdmin)
   {
-    if (!!!NullSafeUtils.nullSafeEquals(newConcentration, plate.getConcentration())) {
+    if (!!!NullSafeUtils.nullSafeEquals(newConcentration, plate.getMolarConcentration())) {
       plate = _dao.reloadEntity(plate);
-      StringBuilder updateComments = new StringBuilder().append("Concentration changed from '").append(NullSafeUtils.toString(plate.getConcentration(), "<not specified>")).append("' to '").append(newConcentration).append("'");
+      StringBuilder updateComments = new StringBuilder().append("Concentration (molar) changed from '").append(NullSafeUtils.toString(plate.getMolarConcentration(), "<not specified>")).append("' to '").append(newConcentration).append("'");
       plate.createUpdateActivity(recordByAdmin, updateComments.toString());
-      plate.setConcentration(newConcentration);
+      plate.setMolarConcentration(newConcentration);
+      return true;
+    }
+    return false;
+  }
+
+  @Transactional
+  public boolean updateMgMlConcentration(Plate plate, BigDecimal newConcentration, AdministratorUser recordByAdmin)
+  {
+    if (!!!NullSafeUtils.nullSafeEquals(newConcentration, plate.getMgMlConcentration())) {
+      plate = _dao.reloadEntity(plate);
+      StringBuilder updateComments = new StringBuilder().append("Concentration (mg/mL) changed from '").append(NullSafeUtils.toString(plate.getMgMlConcentration(), "<not specified>")).append("' to '").append(newConcentration).append("'");
+      plate.createUpdateActivity(recordByAdmin, updateComments.toString());
+      plate.setMgMlConcentration(newConcentration);
       return true;
     }
     return false;

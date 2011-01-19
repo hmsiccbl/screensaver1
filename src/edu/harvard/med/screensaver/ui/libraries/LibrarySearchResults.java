@@ -217,7 +217,7 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
         if (library == null) {
           return null;
         }
-        return Sets.newHashSet(Iterables.transform(library.getCopies(), Copy.ToName));
+        return Sets.newTreeSet(Iterables.transform(library.getCopies(), Copy.ToName));
       }
     });
     columns.get(columns.size() - 1).setAdministrative(true);

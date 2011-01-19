@@ -9,6 +9,13 @@
 
 package edu.harvard.med.screensaver.model.libraries;
 
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 import edu.harvard.med.screensaver.model.VocabularyTerm;
 import edu.harvard.med.screensaver.model.VocabularyUserType;
 
@@ -24,9 +31,19 @@ public enum PlateStatus implements VocabularyTerm
    */
   NOT_SPECIFIED("Not specified"),
   /**
+   * {@link Plate} has not yet been created (any may never be created), and so is not available for use; implies that
+   * plate is not stored at the facility and does not a {@link Plate#getLocation() location}.
+   */
+  NOT_CREATED("Not created"),
+  /**
+   * {@link Plate} has been created but is not available for use; implies that plate is stored at the facility at a
+   * known {@link Plate#getLocation() location}. A plate that is "Not available" may become available at a later time.
+   */
+  NOT_AVAILABLE("Not available"),
+  /**
    * {@link Plate} is available for use (where "use" is determined by the {@link Plate} {@link Copy}'s
    * {@link CopyUsageType}; implies that plate has been created by the facility and is stored at the facility at a known
-   * {@link Plate#getLocation() location}.
+   * {@link Plate#getLocation() location}. A plate that is "Available" may become "Not available" at a later time.
    */
   AVAILABLE("Available"),
   /**
@@ -55,6 +72,24 @@ public enum PlateStatus implements VocabularyTerm
    */
   LOST("Lost");
 
+  private static Set<PlateStatus> allExcept(Set<PlateStatus> invalidPlateStatuses)
+  {
+    return Sets.difference(ImmutableSet.of(PlateStatus.values()), invalidPlateStatuses);
+  }
+
+  private static Map<PlateStatus,Set<PlateStatus>> Transitions = Maps.newHashMap();
+  static {
+    Transitions.put(NOT_SPECIFIED, ImmutableSet.of(PlateStatus.values()));
+    Transitions.put(NOT_CREATED, allExcept(ImmutableSet.of(NOT_SPECIFIED)));
+    Transitions.put(NOT_AVAILABLE, allExcept(ImmutableSet.of(NOT_SPECIFIED, NOT_CREATED)));
+    Transitions.put(AVAILABLE, allExcept(ImmutableSet.of(NOT_SPECIFIED, NOT_CREATED)));
+    Transitions.put(RETIRED, ImmutableSet.of(GIVEN_AWAY, DISCARDED, VOLUME_TRANSFERRED_AND_DISCARDED, LOST));
+    Transitions.put(GIVEN_AWAY, ImmutableSet.<PlateStatus>of());
+    Transitions.put(DISCARDED, ImmutableSet.<PlateStatus>of());
+    Transitions.put(VOLUME_TRANSFERRED_AND_DISCARDED, ImmutableSet.<PlateStatus>of());
+    Transitions.put(LOST, ImmutableSet.<PlateStatus>of());
+  }
+
   /**
    * A Hibernate <code>UserType</code> to map the {@link PlateStatus} vocabulary.
    */
@@ -74,7 +109,6 @@ public enum PlateStatus implements VocabularyTerm
     _value = value;
   }
 
-
   public String getValue()
   {
     return _value;
@@ -84,5 +118,10 @@ public enum PlateStatus implements VocabularyTerm
   public String toString()
   {
     return getValue();
+  }
+  
+  public boolean canTransitionTo(PlateStatus newStatus)
+  {
+    return Transitions.get(this).contains(newStatus);
   }
 }

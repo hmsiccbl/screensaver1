@@ -187,7 +187,7 @@ public class LibraryViewer extends SearchResultContextEntityViewerBackingBean<Li
     try {
       getDao().deleteEntity(getEntity());
       showMessage("deletedEntity", getEntity().getLibraryName());
-      getContextualSearchResults().refetch();
+      getContextualSearchResults().reload();
       return BROWSE_LIBRARIES;
     } catch (DataIntegrityViolationException e) {
       showMessage("cannotDeleteEntityInUse", getEntity().getLibraryName());

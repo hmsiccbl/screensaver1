@@ -14,13 +14,13 @@ import java.util.Set;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
-import edu.harvard.med.screensaver.ui.arch.datatable.column.ConcentrationColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.MolarConcentrationColumn;
 
-public abstract class ConcentrationEntityColumn<E extends Entity> extends ConcentrationColumn<E> implements HasFetchPaths<E>
+public abstract class MolarConcentrationEntityColumn<E extends Entity> extends MolarConcentrationColumn<E> implements HasFetchPaths<E>
 {
   private FetchPaths<E,E> _fetchPaths;
   
-  public ConcentrationEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
+  public MolarConcentrationEntityColumn(RelationshipPath<E> relationshipPath, String name, String description, String group)
   {
     super(name, description, group);
     _fetchPaths = new FetchPaths<E,E>(relationshipPath);

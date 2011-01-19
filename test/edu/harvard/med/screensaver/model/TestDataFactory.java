@@ -112,8 +112,8 @@ public class TestDataFactory
       Volume val = new Volume(((Integer) getTestValueForType(Integer.class)).longValue());
       return (T) val;
     }
-    if (type.equals(Concentration.class)) {
-      Concentration val = new Concentration(((Integer) getTestValueForType(Integer.class)).longValue());
+    if (type.equals(MolarConcentration.class)) {
+      MolarConcentration val = new MolarConcentration(((Integer) getTestValueForType(Integer.class)).longValue());
       return (T) val;
     }
     if (type.equals(Boolean.class)) {

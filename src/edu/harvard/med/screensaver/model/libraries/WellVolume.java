@@ -165,7 +165,7 @@ public class WellVolume extends NonPersistentEntity<String> implements Comparabl
       if (wellCopies.size() > 0) {
         for (WellCopy wellCopy : wellCopies) {
           Plate plateForWellCopy = wellCopy.getCopy().getPlates().get(_well.getPlateNumber());
-          if (plateForWellCopy != null) {
+          if (plateForWellCopy != null && plateForWellCopy.getWellVolume() != null) {
              totalInitialVolume = totalInitialVolume.add(plateForWellCopy.getWellVolume());
           }
         }

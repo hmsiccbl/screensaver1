@@ -19,10 +19,10 @@ import javax.faces.convert.ConverterException;
 
 import com.google.common.base.Joiner;
 
-import edu.harvard.med.screensaver.model.Concentration;
-import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 
-public class ConcentrationConverter implements Converter
+public class MolarConcentrationConverter implements Converter
 {
   private static Pattern concentrationAndUnitsPattern = Pattern.compile("\\s*([0-9.]+)\\s*([munp]?[mM])?");
 
@@ -36,23 +36,23 @@ public class ConcentrationConverter implements Converter
     if (matcher.matches()) {
       String valueStr = matcher.group(1);
       String unitsStr = matcher.group(2);
-      ConcentrationUnit units = parseUnits(arg0, arg1, unitsStr);
-      return new Concentration(valueStr, units).convertToReasonableUnits();
+      MolarUnit units = parseUnits(arg0, arg1, unitsStr);
+      return new MolarConcentration(valueStr, units).convertToReasonableUnits();
     }
     throw new ConverterException("invalid concentration value");
   }
 
-  private ConcentrationUnit parseUnits(FacesContext arg0, UIComponent arg1, String unitsStr)
+  private MolarUnit parseUnits(FacesContext arg0, UIComponent arg1, String unitsStr)
   {
     if (unitsStr != null) {
-      for (ConcentrationUnit units : ConcentrationUnit.values()) {
+      for (MolarUnit units : MolarUnit.values()) {
         if (units.getSymbol().toLowerCase().equalsIgnoreCase(unitsStr)) {
           return units;
         }
       }
-      throw new ConverterException("unknown units (valid units: " + Joiner.on(", ").join(ConcentrationUnit.values()) + ")");
+      throw new ConverterException("unknown units (valid units: " + Joiner.on(", ").join(MolarUnit.values()) + ")");
     }
-    return ConcentrationUnit.DEFAULT;
+    return MolarUnit.DEFAULT;
   }
 
   public String getAsString(FacesContext arg0, UIComponent arg1, Object obj)
@@ -61,7 +61,7 @@ public class ConcentrationConverter implements Converter
     if (obj == null) {
       return "";
     }
-    return ((Concentration) obj).toString();
+    return ((MolarConcentration) obj).toString();
   }
 
 }

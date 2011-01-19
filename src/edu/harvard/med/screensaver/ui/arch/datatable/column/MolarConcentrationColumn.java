@@ -9,12 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.arch.datatable.column;
 
-import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 
-public abstract class ConcentrationColumn<R> extends TableColumn<R,Concentration>
+public abstract class MolarConcentrationColumn<R> extends TableColumn<R,MolarConcentration>
 {
-  public ConcentrationColumn(String name, String description, String group)
+  public MolarConcentrationColumn(String name, String description, String group)
   {
-    super(name, description, ColumnType.CONCENTRATION, group);
+    super(name, description, ColumnType.MOLAR_CONCENTRATION, group);
   }
 }

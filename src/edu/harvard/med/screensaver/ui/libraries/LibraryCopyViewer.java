@@ -20,7 +20,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Plate;
@@ -157,9 +157,9 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
       }
     };
 
-    private Function<Concentration,String> _plateConcentrationFunction = new Function<Concentration,String>() {
+    private Function<MolarConcentration,String> _plateConcentrationFunction = new Function<MolarConcentration,String>() {
       @Override
-      public String apply(Concentration from)
+      public String apply(MolarConcentration from)
       {
         return from == null ? "" : from.toString();
       }

@@ -64,8 +64,25 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
     final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
     Plate plate = _copyC.findPlate(1);
     genericEntityDao.persistEntity(admin2);
-    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 1));
-    plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 1));
+
+    plateUpdater.updatePlateStatus(plate, PlateStatus.NOT_CREATED, _admin, admin2, new LocalDate(2010, 1, 1));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate updatedPlate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        AdministrativeActivity activity = updatedPlate.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE);
+        assertEquals(PlateStatus.NOT_CREATED, updatedPlate.getStatus());
+        assertEquals(genericEntityDao.reloadEntity(admin2), activity.getPerformedBy());
+        assertEquals(genericEntityDao.reloadEntity(_admin), activity.getCreatedBy());
+        assertEquals("Status changed from 'Not specified' to 'Not created'", activity.getComments());
+        assertEquals(new LocalDate(2010, 1, 1), activity.getDateOfActivity());
+        assertNull(updatedPlate.getPlatedActivity());
+      }
+    });
+
+    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 2));
+    plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 2));
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -75,13 +92,46 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
         assertEquals(PlateStatus.AVAILABLE, updatedPlate.getStatus());
         assertEquals(genericEntityDao.reloadEntity(admin2), activity.getPerformedBy());
         assertEquals(genericEntityDao.reloadEntity(_admin), activity.getCreatedBy());
-        assertEquals("Status changed from 'Not specified' to 'Available'", activity.getComments());
-        assertEquals(new LocalDate(2010, 1, 1), activity.getDateOfActivity());
+        assertEquals("Status changed from 'Not created' to 'Available'", activity.getComments());
+        assertEquals(new LocalDate(2010, 1, 2), activity.getDateOfActivity());
         assertEquals(activity, updatedPlate.getPlatedActivity());
       }
     });
 
-    plateUpdater.updatePlateStatus(plate, PlateStatus.RETIRED, _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 3));
+    plateUpdater.updatePlateStatus(plate, PlateStatus.NOT_AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 3));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate updatedPlate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        AdministrativeActivity activity = updatedPlate.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE);
+        assertEquals(PlateStatus.NOT_AVAILABLE, updatedPlate.getStatus());
+        assertEquals(genericEntityDao.reloadEntity(admin2), activity.getPerformedBy());
+        assertEquals(genericEntityDao.reloadEntity(_admin), activity.getCreatedBy());
+        assertEquals("Status changed from 'Available' to 'Not available'", activity.getComments());
+        assertEquals(new LocalDate(2010, 1, 3), activity.getDateOfActivity());
+        assertEquals("original plate status update activity maintained", new LocalDate(2010, 1, 2), updatedPlate.getPlatedActivity().getDateOfActivity());
+      }
+    });
+
+    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 4));
+    plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 4));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate updatedPlate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        AdministrativeActivity activity = updatedPlate.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE);
+        assertEquals(PlateStatus.AVAILABLE, updatedPlate.getStatus());
+        assertEquals(genericEntityDao.reloadEntity(admin2), activity.getPerformedBy());
+        assertEquals(genericEntityDao.reloadEntity(_admin), activity.getCreatedBy());
+        assertEquals("Status changed from 'Not available' to 'Available'", activity.getComments());
+        assertEquals("original plate status update activity maintained", new LocalDate(2010, 1, 2), updatedPlate.getPlatedActivity().getDateOfActivity());
+      }
+    });
+
+    plateUpdater.updatePlateStatus(plate, PlateStatus.RETIRED, _admin, admin2, new LocalDate(2010, 1, 5));
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -92,12 +142,12 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
         assertEquals(genericEntityDao.reloadEntity(admin2), activity.getPerformedBy());
         assertEquals(genericEntityDao.reloadEntity(_admin), activity.getCreatedBy());
         assertEquals("Status changed from 'Available' to 'Retired'", activity.getComments());
-        assertEquals(new LocalDate(2010, 1, 1), activity.getDateOfActivity());
+        assertEquals(new LocalDate(2010, 1, 5), activity.getDateOfActivity());
         assertEquals(activity, updatedPlate.getRetiredActivity());
       }
     });
     
-    plateUpdater.updatePlateStatus(plate, PlateStatus.DISCARDED, _admin, admin2, new LocalDate(2010, 1, 2));
+    plateUpdater.updatePlateStatus(plate, PlateStatus.DISCARDED, _admin, admin2, new LocalDate(2010, 1, 6));
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -108,16 +158,82 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
         assertEquals(genericEntityDao.reloadEntity(admin2), activity.getPerformedBy());
         assertEquals(genericEntityDao.reloadEntity(_admin), activity.getCreatedBy());
         assertEquals("Status changed from 'Retired' to 'Discarded'", activity.getComments());
-        assertEquals(new LocalDate(2010, 1, 2), activity.getDateOfActivity());
+        assertEquals(new LocalDate(2010, 1, 6), activity.getDateOfActivity());
         assertEquals("extant retired date does not change when a retired plate is discarded, etc.",
-                     new LocalDate(2010, 1, 1), updatedPlate.getRetiredActivity().getDateOfActivity());
+                     new LocalDate(2010, 1, 5), updatedPlate.getRetiredActivity().getDateOfActivity());
         assertNull(updatedPlate.getLocation());
         AdministrativeActivity locationTransferActivity = updatedPlate.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_LOCATION_TRANSFER);
-        assertEquals(new LocalDate(2010, 1, 2), locationTransferActivity.getDateOfActivity());
+        assertEquals(new LocalDate(2010, 1, 6), locationTransferActivity.getDateOfActivity());
         assertTrue(locationTransferActivity.getComments().contains("plate no longer has a location due to change of status to " +
           PlateStatus.DISCARDED));
       }
     });
+  }
+
+  public void testInvalidPlateStatusUpdateFromNotCreatedToNotSpecified()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.NOT_CREATED, PlateStatus.NOT_SPECIFIED);
+  }
+
+  public void testInvalidPlateStatusUpdateFromNotAvailableToNotSpecified()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.NOT_AVAILABLE, PlateStatus.NOT_SPECIFIED);
+  }
+
+  public void testInvalidPlateStatusUpdateFromNotAvailableToNotCreated()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.NOT_AVAILABLE, PlateStatus.NOT_CREATED);
+  }
+
+  public void testInvalidPlateStatusUpdateFromAvailableToNotSpecified()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.AVAILABLE, PlateStatus.NOT_SPECIFIED);
+  }
+
+  public void testInvalidPlateStatusUpdateFromAvailableToNotCreated()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.AVAILABLE, PlateStatus.NOT_CREATED);
+  }
+
+  public void testInvalidPlateStatusUpdateFromRetiredToNotSpecified()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_SPECIFIED);
+  }
+
+  public void testInvalidPlateStatusUpdateFromRetiredToNotCreated()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_CREATED);
+  }
+
+  public void testInvalidPlateStatusUpdateFromRetiredToNotAvailable()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.NOT_AVAILABLE);
+  }
+
+  public void testInvalidPlateStatusUpdateFromRetiredToAvailable()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.RETIRED, PlateStatus.AVAILABLE);
+  }
+
+  public void testInvalidPlateStatusUpdateFromDiscardedToLost()
+  {
+    doTestInvalidStatusUpdate(PlateStatus.DISCARDED, PlateStatus.LOST);
+  }
+
+  private void doTestInvalidStatusUpdate(final PlateStatus initialStatus, final PlateStatus invalidStatus)
+  {
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    Plate plate = _copyC.findPlate(1);
+    genericEntityDao.persistEntity(admin2);
+    plateUpdater.updatePlateStatus(plate, initialStatus, _admin, admin2, new LocalDate(2010, 1, 1));
+    plate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+    assertEquals(initialStatus, plate.getStatus());
+
+    try {
+      plateUpdater.updatePlateStatus(plate, invalidStatus, _admin, admin2, new LocalDate(2010, 1, 1));
+      fail("expected BusinessRuleViolationException");
+    }
+    catch (BusinessRuleViolationException e) {}
   }
 
   public void testPlatedDate()

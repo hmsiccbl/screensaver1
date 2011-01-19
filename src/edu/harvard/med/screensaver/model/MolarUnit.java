@@ -13,7 +13,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
-public enum ConcentrationUnit implements QuantityUnit<ConcentrationUnit>
+public enum MolarUnit implements QuantityUnit<MolarUnit>
 {
   MOLAR("M", 0),
   MILLIMOLAR("mM", 3),
@@ -21,14 +21,14 @@ public enum ConcentrationUnit implements QuantityUnit<ConcentrationUnit>
   NANOMOLAR("nM", 9),
   PICOMOLAR("pM", 12);
   
-  public static final ConcentrationUnit DEFAULT = MILLIMOLAR;
-  public static final ConcentrationUnit NORMALIZED_UNITS = MOLAR;
-  public static final List<ConcentrationUnit> DISPLAY_VALUES = ImmutableList.of(MILLIMOLAR,MICROMOLAR, NANOMOLAR, PICOMOLAR);    
+  public static final MolarUnit DEFAULT = MILLIMOLAR;
+  public static final MolarUnit NORMALIZED_UNITS = MOLAR;
+  public static final List<MolarUnit> DISPLAY_VALUES = ImmutableList.of(MILLIMOLAR,MICROMOLAR, NANOMOLAR, PICOMOLAR);    
   
   private String _symbol;
   private int _scale;
 
-  private ConcentrationUnit(String symbol, int scale)
+  private MolarUnit(String symbol, int scale)
   {
     _symbol = symbol;
     _scale = scale;
@@ -64,12 +64,12 @@ public enum ConcentrationUnit implements QuantityUnit<ConcentrationUnit>
     return printAsVocabularyTerm();
   }
   
-  public ConcentrationUnit[] getValues() 
+  public MolarUnit[] getValues() 
   {
     return values();
   }
 
-  public ConcentrationUnit getDefault()
+  public MolarUnit getDefault()
   {
     return DEFAULT;
   }

@@ -9,6 +9,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.google.common.base.Predicate;
@@ -17,6 +18,8 @@ import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.AbstractSpringPersistenceTest;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -57,7 +60,7 @@ public class LibraryCopyPlatesBatchEditorTest extends AbstractSpringPersistenceT
     libraryCopyPlatesBrowser.getBatchEditor().getCurrentScreensaverUser().setScreensaverUser(_admin);
   }
 
-  public void testBatchEditPlateTypeAndVolumeAndComment()
+  public void testBatchEditPlateTypeAndVolumeAndConcentrationAndComment()
   {
     libraryCopyPlatesBrowser.searchAll();
     ((TableColumn<Plate,String>) libraryCopyPlatesBrowser.getColumnManager().getColumn("Copy")).getCriterion().setOperatorAndValue(Operator.EQUAL, "C");
@@ -65,6 +68,9 @@ public class LibraryCopyPlatesBatchEditorTest extends AbstractSpringPersistenceT
     libraryCopyPlatesBrowser.getBatchEditor().getPlateType().setSelection(PlateType.ABGENE);
     libraryCopyPlatesBrowser.getBatchEditor().setVolumeValue("10.0");
     libraryCopyPlatesBrowser.getBatchEditor().getVolumeType().setSelection(VolumeUnit.MICROLITERS);
+    libraryCopyPlatesBrowser.getBatchEditor().setMolarConcentrationValue("1.5");
+    libraryCopyPlatesBrowser.getBatchEditor().getMolarConcentrationType().setSelection(MolarUnit.MICROMOLAR);
+    libraryCopyPlatesBrowser.getBatchEditor().setMgMlConcentration(new BigDecimal("2.5"));
     libraryCopyPlatesBrowser.getBatchEditor().setComments("test comment");
     libraryCopyPlatesBrowser.batchUpdate();
     
@@ -77,9 +83,11 @@ public class LibraryCopyPlatesBatchEditorTest extends AbstractSpringPersistenceT
                                public boolean apply(Plate plate)
                                {
                                  boolean result = plate.getPlateType() == PlateType.ABGENE &&
-                                   plate.getWellVolume().equals(new Volume(10, VolumeUnit.MICROLITERS));
-                                 result &= plate.getUpdateActivities().size() == 4;
-                                 result &= plate.getLastUpdateActivityOfType(AdministrativeActivityType.COMMENT).getComments().equals("test comment");
+                                   plate.getWellVolume().equals(new Volume(10, VolumeUnit.MICROLITERS)) &&
+                                   plate.getMolarConcentration().equals(new MolarConcentration("1.5", MolarUnit.MICROMOLAR)) &&
+                                   plate.getMgMlConcentration().equals(new BigDecimal("2.5"));
+                                 //                                 result &= plate.getUpdateActivities().size() == 4;
+                                 //                                 result &= plate.getLastUpdateActivityOfType(AdministrativeActivityType.COMMENT).getComments().equals("test comment");
                                  return result;
                                }
                              }));
@@ -103,15 +111,13 @@ public class LibraryCopyPlatesBatchEditorTest extends AbstractSpringPersistenceT
                                @Override
                                public boolean apply(Plate p)
                                {
-                                 boolean result = false;
                                  if (p.getCopy().getName().equals("C")) {
-                                   result |= p.getStatus().equals(PlateStatus.RETIRED);
-                                   result |= p.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE).getDateOfActivity().equals(new LocalDate(2010, 1, 1));
+                                   return p.getStatus().equals(PlateStatus.RETIRED) &&
+                                     p.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE).getDateOfActivity().equals(new LocalDate(2010, 1, 1));
                                  }
                                  else {
-                                   result |= p.getStatus().equals(PlateStatus.NOT_SPECIFIED);
+                                   return p.getStatus().equals(PlateStatus.NOT_SPECIFIED);
                                  }
-                                 return result;
                                }
                              }));
   }

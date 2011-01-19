@@ -29,8 +29,8 @@ import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.LibrariesDAO;
 import edu.harvard.med.screensaver.model.Activity;
-import edu.harvard.med.screensaver.model.Concentration;
-import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
@@ -73,7 +73,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   private Screen _screen;
   private UISelectOneEntityBean<ScreensaverUser> _performedBy;
   private UISelectOneBean<AssayProtocolType> _assayProtocolType;
-  private UISelectOneBean<ConcentrationUnit> _concentrationType;
+  private UISelectOneBean<MolarUnit> _concentrationType;
   private UISelectOneBean<VolumeUnit> _volumeType;
   private String _concentrationValue;
   private String _volumeValue;
@@ -253,16 +253,16 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     _volumeValue = value;
   }
 
-  public Concentration getConcentration()
+  public MolarConcentration getMolarConcentration()
   {
-    return getEntity().getConcentration();
+    return getEntity().getMolarConcentration();
   }
   
-  public UISelectOneBean<ConcentrationUnit> getConcentrationType()
+  public UISelectOneBean<MolarUnit> getMolarConcentrationType()
   {
     try {
       if (_concentrationType == null) {
-        setConcentrationType(getEntity().getConcentrationUnits());
+        setMolarConcentrationType(getEntity().getMolarConcentrationUnits());
       }
       return _concentrationType;
     } catch (Exception e) {
@@ -271,13 +271,13 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     }
   }
 
-  private void setConcentrationType( ConcentrationUnit unit )
+  private void setMolarConcentrationType( MolarUnit unit )
   {
     _concentrationType =
-      new UISelectOneBean<ConcentrationUnit>(ConcentrationUnit.DISPLAY_VALUES, unit)
+      new UISelectOneBean<MolarUnit>(MolarUnit.DISPLAY_VALUES, unit)
       {
         @Override
-        protected String makeLabel(ConcentrationUnit t) { return t.getValue(); }
+        protected String makeLabel(MolarUnit t) { return t.getValue(); }
       };
   }
 
@@ -285,10 +285,10 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   /**
    * This method exists to grab the value portion of the Quantity stored
   */
-  public String getConcentrationValue()
+  public String getMolarConcentrationValue()
   {
     if (_concentrationValue == null) {
-      _concentrationValue = getEntity().getConcentrationValue();
+      _concentrationValue = getEntity().getMolarConcentrationValue();
     }
     return _concentrationValue;
   }
@@ -298,7 +298,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
    * This method exists to set the value portion of the Quantity stored
    * @see #save()
   */
-  public void setConcentrationValue( String value )
+  public void setMolarConcentrationValue( String value )
   {
     _concentrationValue = value;
   }
@@ -331,11 +331,11 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
         valid = false;
       }
       try {
-        Concentration.makeConcentration(getConcentrationValue(),
-                                        getConcentrationType().getSelection());
+        MolarConcentration.makeConcentration(getMolarConcentrationValue(),
+                                             getMolarConcentrationType().getSelection());
       } 
       catch (Exception e) {
-        showFieldInputError("Concentration", e.getLocalizedMessage());
+        showFieldInputError("molarConcentration", e.getLocalizedMessage());
         valid = false;
       }
     }
@@ -360,7 +360,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
   {
     if (entity instanceof Screening) {
       ((Screening) entity).setVolumeTransferredPerWell(Volume.makeVolume(_volumeValue, _volumeType.getSelection()));
-      ((Screening) entity).setConcentration(Concentration.makeConcentration(_concentrationValue, _concentrationType.getSelection()));
+      ((Screening) entity).setMolarConcentration(MolarConcentration.makeConcentration(_concentrationValue, _concentrationType.getSelection()));
     }
     if (entity instanceof CherryPickScreening) {
       CherryPickScreening screening = (CherryPickScreening) entity;

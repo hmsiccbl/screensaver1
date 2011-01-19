@@ -28,8 +28,8 @@ import edu.harvard.med.screensaver.io.workbook2.Workbook;
 import edu.harvard.med.screensaver.io.workbook2.Worksheet;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
-import edu.harvard.med.screensaver.model.Concentration;
-import edu.harvard.med.screensaver.model.ConcentrationUnit;
+import edu.harvard.med.screensaver.model.MolarConcentration;
+import edu.harvard.med.screensaver.model.MolarUnit;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.VolumeUnit;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -124,8 +124,8 @@ public class PlateBatchUpdater
 
       Integer plateNumber = row.getCell(0, true).getInteger();
       String copyName = row.getCell(1, true).getString();
-      Concentration concentration = row.getCell(4).isEmpty() ? null
-        : new Concentration(row.getCell(4).getBigDecimal(), ConcentrationUnit.MICROMOLAR);
+      MolarConcentration molarConcentration = row.getCell(4).isEmpty() ? null
+        : new MolarConcentration(row.getCell(4).getBigDecimal(), MolarUnit.MICROMOLAR);
       Volume volume = row.getCell(5).isEmpty() ? null : new Volume(row.getCell(5).getBigDecimal(), VolumeUnit.MICROLITERS);
       LocalDate datePlated = row.getCell(7, true).getDate().toLocalDate();
       LocalDate dateRetired = row.getCell(8).isEmpty() ? null : row.getCell(8).getDate().toLocalDate();
@@ -144,7 +144,7 @@ public class PlateBatchUpdater
       log.info("updating plate " + plateNumber + ":" + copyName);
       boolean modified = false;
 
-      modified |= plateUpdater.updateConcentration(plate, concentration, recordedBy);
+      modified |= plateUpdater.updateMolarConcentration(plate, molarConcentration, recordedBy);
       modified |= plateUpdater.updateWellVolume(plate, volume, recordedBy);
       modified |= plateUpdater.updatePlateType(plate, plateType, recordedBy);
       if (comments != null) {

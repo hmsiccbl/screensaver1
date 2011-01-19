@@ -11,6 +11,7 @@
 
 package edu.harvard.med.screensaver.ui.libraries;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -39,9 +40,10 @@ import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.AdministrativeActivity;
 import edu.harvard.med.screensaver.model.AdministrativeActivityType;
-import edu.harvard.med.screensaver.model.Concentration;
+import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
+import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateLocation;
@@ -60,11 +62,12 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.DateColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.DateTimeColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
-import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.ConcentrationEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.FixedDecimalEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.HasFetchPaths;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.MolarConcentrationEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.UserNameColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.VolumeEntityColumn;
@@ -385,6 +388,19 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
     });
     Iterables.getLast(columns).setVisible(_mode != Mode.COPY);
 
+    columns.add(new EnumEntityColumn<Plate,CopyUsageType>(Plate.copy.toProperty("usageType"),
+                                                          "Copy Usage Type",
+                                                          "The usage type of the copy containing the plate",
+                                                          TableColumn.UNGROUPED,
+                                                          CopyUsageType.values()) {
+      @Override
+      public CopyUsageType getCellValue(Plate plate)
+      {
+        return plate.getCopy().getUsageType();
+      }
+    });
+    Iterables.getLast(columns).setVisible(false);
+
     columns.add(new TextEntityColumn<Plate>(Plate.copy.to(Copy.library).toProperty("libraryName"),
                                             "Library",
                                             "The library containing the plate",
@@ -540,14 +556,25 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       }
     });
 
-    columns.add(new ConcentrationEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("concentration"),
-                                                     "Concentration",
-                                                     "The concentration of each well of the plate when it was created",
-                                                     TableColumn.UNGROUPED) {
+    columns.add(new MolarConcentrationEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("molarConcentration"),
+                                                          "Molar Concentration",
+                                                          "The molar concentration of each well of the plate when it was created",
+                                                          TableColumn.UNGROUPED) {
       @Override
-      public Concentration getCellValue(Plate plate)
+      public MolarConcentration getCellValue(Plate plate)
       {
-        return plate.getConcentration();
+        return plate.getMolarConcentration();
+      }
+    });
+
+    columns.add(new FixedDecimalEntityColumn<Plate>(PropertyPath.from(Plate.class).toProperty("mgMlConcentration"),
+                                                    "Concentration (mg/mL)",
+                                                    "The mg/mL concentration of each well of the plate when it was created",
+                                                    TableColumn.UNGROUPED) {
+      @Override
+      public BigDecimal getCellValue(Plate plate)
+      {
+        return plate.getMgMlConcentration();
       }
     });
 
@@ -827,10 +854,8 @@ public class LibraryCopyPlateSearchResults extends EntityBasedEntitySearchResult
       catch (Exception e) {
         showMessage("applicationError", e.getMessage());
       }
-      // note: we refetch() after success *or* failure, since we want the Plate entities to be reloaded in either case
-      refetch();
-      refilter();
-      resort();
+      // note: we reload()after success *or* failure, since we want the Plate entities to be reloaded in either case
+      reload();
 
       _libraryCopyViewer.reload();
     }
