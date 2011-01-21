@@ -126,6 +126,7 @@ public class LabActivityViewer extends SearchResultContextEditableEntityViewerBa
     if (activity instanceof CherryPickScreening) {
       getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.requestedBy).getPath());
       getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.cherryPickAssayPlates).to(CherryPickAssayPlate.cherryPickLiquidTransfer).getPath());
+      getDao().needReadOnly(activity, CherryPickScreening.cherryPickRequest.to(CherryPickRequest.cherryPickAssayPlates).to(CherryPickAssayPlate.cherryPickScreenings).getPath());
       getDao().needReadOnly(activity, CherryPickScreening.cherryPickAssayPlatesScreened.getPath());
     }
     if (activity instanceof CherryPickLiquidTransfer) {

@@ -716,7 +716,7 @@ public class CherryPickRequestViewer extends SearchResultContextEntityViewerBack
         {
           CherryPickRequest cpr = getDao().reloadEntity(getEntity(), true);
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickLiquidTransfer).to(CherryPickLiquidTransfer.performedBy).getPath());
-          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreening).to(Activity.performedBy).getPath());
+          getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickScreenings).to(Activity.performedBy).getPath());
           getDao().needReadOnly(cpr, CherryPickRequest.cherryPickAssayPlates.to(CherryPickAssayPlate.cherryPickRequest).to(CherryPickRequest.requestedBy).getPath());
           getDao().needReadOnly(cpr, CherryPickRequest.screen.getPath());
           // HACK: following reln is (only) needed by validateSelectedAssayPlates() in LIQUID_TRANSFER case 

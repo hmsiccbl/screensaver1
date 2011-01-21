@@ -14,8 +14,8 @@ import java.util.SortedSet;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
@@ -23,7 +23,6 @@ import com.google.common.collect.Sets;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
-import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.annotations.ToMany;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickAssayPlate;
 import edu.harvard.med.screensaver.model.cherrypicks.CherryPickRequest;
@@ -124,7 +123,8 @@ public class CherryPickScreening extends Screening
    * Get the plates used.
    * @return the plates used
    */
-  @OneToMany(mappedBy="cherryPickScreening", cascade={}, fetch=FetchType.LAZY) /* note: no cascades, since CherryPickAssayPlate is managed by CherryPickRequest, not CherryPickScreeing */
+  @ManyToMany(mappedBy = "cherryPickScreenings", cascade = {}, fetch = FetchType.LAZY)
+  /* note: no cascades, since CherryPickAssayPlate is managed by CherryPickRequest, not CherryPickScreeing */
   @org.hibernate.annotations.Sort(type=org.hibernate.annotations.SortType.NATURAL)
   @ToMany(singularPropertyName="assayPlateScreened", hasNonconventionalMutation=true /* has constraint that CPAP.isPlated()==true */ )
   public SortedSet<CherryPickAssayPlate> getCherryPickAssayPlatesScreened()
@@ -139,11 +139,8 @@ public class CherryPickScreening extends Screening
   
   public boolean addCherryPickAssayPlateScreened(CherryPickAssayPlate cherryPickAssayPlateScreened)
   {
-    if (cherryPickAssayPlateScreened.getCherryPickScreening() != null && cherryPickAssayPlateScreened.getCherryPickScreening() != this) {
-      throw new DataModelViolationException(cherryPickAssayPlateScreened + " has already been assigned to " + cherryPickAssayPlateScreened.getCherryPickScreening());
-    }
     if (_cherryPickAssayPlatesScreened.add(cherryPickAssayPlateScreened)) {
-      cherryPickAssayPlateScreened.setCherryPickScreening(this);
+      cherryPickAssayPlateScreened.getCherryPickScreenings().add(this);
       return true;
     }
     return false;
@@ -152,7 +149,7 @@ public class CherryPickScreening extends Screening
   public boolean removeCherryPickAssayPlateScreened(CherryPickAssayPlate cherryPickAssayPlateScreened)
   {
     if (_cherryPickAssayPlatesScreened.remove(cherryPickAssayPlateScreened)) {
-      cherryPickAssayPlateScreened.setCherryPickScreening(null);
+      cherryPickAssayPlateScreened.getCherryPickScreenings().remove(this);
       return true;
     }
     return false;

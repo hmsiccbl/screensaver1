@@ -27,5 +27,6 @@ public class PackageTestSuite extends TestSuite
   public PackageTestSuite()
   {
     addTestSuite(EmptyWellsConverterTest.class);
+    addTestSuite(CherryPickRequestViewerTest.class);
   }
 }

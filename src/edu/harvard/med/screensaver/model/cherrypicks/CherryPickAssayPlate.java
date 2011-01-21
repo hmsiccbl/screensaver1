@@ -11,6 +11,7 @@ package edu.harvard.med.screensaver.model.cherrypicks;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -24,6 +25,8 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -31,14 +34,16 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Sort;
+import org.hibernate.annotations.SortType;
 
 import edu.harvard.med.screensaver.model.AbstractEntity;
 import edu.harvard.med.screensaver.model.AbstractEntityVisitor;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
-import edu.harvard.med.screensaver.model.annotations.ToOne;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.meta.Cardinality;
 import edu.harvard.med.screensaver.model.meta.RelationshipPath;
@@ -123,7 +128,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
   public static final RelationshipPath<CherryPickAssayPlate> thisEntity = RelationshipPath.from(CherryPickAssayPlate.class);
   public static final RelationshipPath<CherryPickAssayPlate> cherryPickRequest = thisEntity.to("cherryPickRequest", Cardinality.TO_ONE);
   public static final RelationshipPath<CherryPickAssayPlate> cherryPickLiquidTransfer = thisEntity.to("cherryPickLiquidTransfer", Cardinality.TO_ONE);
-  public static final RelationshipPath<CherryPickAssayPlate> cherryPickScreening = thisEntity.to("cherryPickScreening", Cardinality.TO_ONE);
+  public static final RelationshipPath<CherryPickAssayPlate> cherryPickScreenings = thisEntity.to("cherryPickScreenings", Cardinality.TO_MANY);
   public static final RelationshipPath<CherryPickAssayPlate> labCherryPicks = thisEntity.to("labCherryPicks");
 
   // private instance data
@@ -138,7 +143,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
   // schema-level (this design is denormalized)
   private PlateType _plateType;
   private CherryPickLiquidTransfer _cherryPickLiquidTransfer;
-  private CherryPickScreening _cherryPickScreening;
+  private SortedSet<CherryPickScreening> _cherryPickScreenings = Sets.newTreeSet();
   private transient int _logicalAssayPlateCount;
   private transient String _name;
 
@@ -314,7 +319,7 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
   @Transient
   public boolean isPlatedAndScreened()
   {
-    return _cherryPickScreening != null;
+    return !_cherryPickScreenings.isEmpty();
   }
 
   /**
@@ -390,32 +395,51 @@ public class CherryPickAssayPlate extends AbstractEntity<Integer> implements Com
   /**
    * Get the cherry pick screening activity that recorded the screening of this assay plate.
    */
-  @ManyToOne
-  @JoinColumn(name="cherryPickScreeningId", nullable=true)
-  @org.hibernate.annotations.ForeignKey(name="fk_cherry_pick_assay_plate_to_cherry_pick_screening")
-  @org.hibernate.annotations.LazyToOne(value=org.hibernate.annotations.LazyToOneOption.PROXY)
-  @ToOne(inverseProperty="cherryPickAssayPlatesScreened", hasNonconventionalSetterMethod=true /* has constraint that isPlated()==true */ )
-  public CherryPickScreening getCherryPickScreening()
+  @ManyToMany
+  @JoinTable(name = "cherryPickAssayPlateScreeningLink",
+             joinColumns = @JoinColumn(name = "cherryPickAssayPlateId"),
+             inverseJoinColumns = @JoinColumn(name = "cherryPickScreeningId"))
+  /* has constraint that isPlated() == true */
+  @edu.harvard.med.screensaver.model.annotations.ToMany(inverseProperty = "screensCollaborated", hasNonconventionalMutation = true)
+  @Sort(type = SortType.NATURAL)
+  public SortedSet<CherryPickScreening> getCherryPickScreenings()
   {
-    return _cherryPickScreening;
+    return _cherryPickScreenings;
   }
 
-  public void setCherryPickScreening(CherryPickScreening cherryPickScreening)
+  @Transient
+  public CherryPickScreening getMostRecentCherryPickScreening()
   {
-    if (isHibernateCaller()) {
-      _cherryPickScreening = cherryPickScreening;
-      return;
+    if (_cherryPickScreenings.isEmpty()) {
+      return null;
     }
-    if (_cherryPickScreening != null && cherryPickScreening == null) {
-      _cherryPickScreening.getCherryPickAssayPlatesScreened().remove(this);
+    return _cherryPickScreenings.last();
+  }
+
+  private void setCherryPickScreenings(SortedSet<CherryPickScreening> cherryPickScreenings)
+  {
+    _cherryPickScreenings = cherryPickScreenings;
+  }
+
+  public boolean addCherryPickScreening(CherryPickScreening cherryPickScreening)
+  {
+    if (!_cherryPickScreenings.isEmpty() && !isPlated()) {
+      throw new DataModelViolationException("cannot mark assay plate as \"screened\" unless it has been \"plated\"");
     }
-    _cherryPickScreening = cherryPickScreening;
-    if (_cherryPickScreening != null) {
-      if (!isPlated()) {
-        throw new DataModelViolationException("cannot mark assay plate as \"screened\" unless it has been \"plated\"");
-      }
-      _cherryPickScreening.getCherryPickAssayPlatesScreened().add(this);
+    if (cherryPickScreening.getCherryPickAssayPlatesScreened().add(this)) {
+      _cherryPickScreenings.add(cherryPickScreening);
+      return true;
     }
+    return false;
+  }
+
+  public boolean removeCherryPickScreening(CherryPickScreening cherryPickScreening)
+  {
+    if (cherryPickScreening.getCherryPickAssayPlatesScreened().remove(this)) {
+      _cherryPickScreenings.remove(cherryPickScreening);
+      return true;
+    }
+    return false;
   }
 
   /**

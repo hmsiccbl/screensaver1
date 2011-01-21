@@ -224,17 +224,23 @@
               <t:outputText value="#{row.data.cherryPickLiquidTransfer.comments}"/>
             </t:column>
             <t:column>
-              <f:facet name="header">Screening Date</f:facet>
-              <t:outputText value="#{row.data.cherryPickScreening.dateOfActivity}"/>
+              <f:facet name="header">Last Screening Date</f:facet>
+              <t:outputText value="#{row.data.mostRecentCherryPickScreening.dateOfActivity}" rendered="#{!empty row.data.mostRecentCherryPickScreening}"/>
             </t:column>
             <t:column>
-              <f:facet name="header">Screened By</f:facet>
-              <t:outputText value="#{row.data.cherryPickScreening.performedBy.fullNameLastFirst}"/>
+              <f:facet name="header">Last Screened By</f:facet>
+              <t:outputText value="#{row.data.mostRecentCherryPickScreening.performedBy.fullNameLastFirst}" rendered="#{!empty row.data.mostRecentCherryPickScreening}"/>
             </t:column>
             <t:column>
-              <f:facet name="header">Screening Activity</f:facet>
+              <f:facet name="header">Screening Activities</f:facet>
               <!-- note: explicit ID is needed to differentiate from cherryPickLiquidTransferColumn ss:entityLink -->
-              <ss:entityLink id="cherryPickScreeningActivityColumn" entity="#{row.data.cherryPickScreening}" viewer="#{activityViewer}"/>
+              <t:dataList id="cpScreeningsLinkList" var="cps"
+                value="#{row.data.cherryPickScreenings}" layout="simple" 
+                rowIndexVar="eltIndex" rowCountVar="eltCount" styleClass="propertyValue dataText" >
+                <ss:entityLink id="cherryPickScreeningActivityColumn" entity="#{cps}" viewer="#{activityViewer}"/>
+                <h:outputText value=", "
+                  rendered="#{eltIndex &lt; eltCount - 1}" />
+              </t:dataList>
             </t:column>
             
           </t:dataTable>

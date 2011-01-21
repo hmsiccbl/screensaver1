@@ -9,9 +9,12 @@
 
 package edu.harvard.med.screensaver.ui.cherrypickrequests;
 
+import java.util.List;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
@@ -26,6 +29,7 @@ import edu.harvard.med.screensaver.model.cherrypicks.LabCherryPick;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Well;
+import edu.harvard.med.screensaver.model.screens.CherryPickScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
@@ -45,7 +49,7 @@ public class CherryPickRequestViewerTest extends AbstractSpringPersistenceTest
   protected CurrentScreensaverUser currentScreensaverUser;
   protected UsersDAO usersDao;
   protected CherryPickRequestViewer cherryPickRequestViewer;
-  protected LabActivityViewer labActivityViewer;
+  protected LabActivityViewer activityViewer;
 
   private Library _library;
 
@@ -80,7 +84,7 @@ public class CherryPickRequestViewerTest extends AbstractSpringPersistenceTest
     initializeAssayPlates();
     cherryPickRequestViewer.selectAllAssayPlates();
     cherryPickRequestViewer.recordSuccessfulCreationOfAssayPlates();
-    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, labActivityViewer.save());
+    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, activityViewer.save());
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -99,7 +103,8 @@ public class CherryPickRequestViewerTest extends AbstractSpringPersistenceTest
     cherryPickRequestViewer.viewEntity(_cpr);
     cherryPickRequestViewer.selectAllAssayPlates();
     cherryPickRequestViewer.recordScreeningOfAssayPlates();
-    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, labActivityViewer.save());
+    activityViewer.getEntity().setDateOfActivity(new LocalDate(2010, 1, 1));
+    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, activityViewer.save());
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -108,6 +113,26 @@ public class CherryPickRequestViewerTest extends AbstractSpringPersistenceTest
         assertTrue(cpr.getCherryPickAssayPlates().first().isPlatedAndScreened());
       }
     });
+    
+    // test multiple screening of a CPAP
+    cherryPickRequestViewer.viewEntity(_cpr);
+    cherryPickRequestViewer.selectAllAssayPlates();
+    cherryPickRequestViewer.recordScreeningOfAssayPlates();
+    activityViewer.getEntity().setDateOfActivity(new LocalDate(2011, 1, 1));
+    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, activityViewer.save());
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        CherryPickRequest cpr = genericEntityDao.reloadEntity(_cpr);
+        assertTrue(cpr.getCherryPickAssayPlates().first().isPlatedAndScreened());
+        List<CherryPickScreening> screenings = Lists.newArrayList(cpr.getCherryPickAssayPlates().first().getCherryPickScreenings());
+        assertEquals(2, screenings.size());
+        assertEquals(new LocalDate(2010, 1, 1), screenings.get(0).getDateOfActivity());
+        assertEquals(new LocalDate(2011, 1, 1), screenings.get(1).getDateOfActivity());
+      }
+    });
+    
   }
 
   public void testCherryPickPlatesCanceled()
@@ -115,7 +140,7 @@ public class CherryPickRequestViewerTest extends AbstractSpringPersistenceTest
     initializeAssayPlates();
     cherryPickRequestViewer.selectAllAssayPlates();
     cherryPickRequestViewer.deallocateCherryPicksByPlate();
-    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, labActivityViewer.save());
+    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, activityViewer.save());
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()
@@ -140,7 +165,7 @@ public class CherryPickRequestViewerTest extends AbstractSpringPersistenceTest
 
     cherryPickRequestViewer.selectAllAssayPlates();
     cherryPickRequestViewer.recordFailedCreationOfAssayPlates();
-    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, labActivityViewer.save());
+    assertEquals(ScreensaverConstants.VIEW_CHERRY_PICK_REQUEST, activityViewer.save());
     genericEntityDao.doInTransaction(new DAOTransaction() {
       @Override
       public void runTransaction()

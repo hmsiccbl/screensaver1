@@ -1,0 +1,1 @@
+echo $(( 1 + $( svn info http://forge.abcd.harvard.edu/svn/screensaver/ | sed -e '5 s/^Revision: // p; d' ) ))

@@ -158,10 +158,10 @@ public class CherryPickRequestPlateMapFilesBuilder
         append("\t").append(assayPlate.getStatusLabel());
         if (assayPlate.isPlatedAndScreened()) {
           buf.append("\t(").
-          append(assayPlate.getCherryPickScreening().getDateOfActivity()).
-          append(" by ").
-          append(assayPlate.getCherryPickScreening().getPerformedBy().getFullNameFirstLast()).
-          append(')');
+            append(assayPlate.getCherryPickScreenings().last().getDateOfActivity()).
+            append(" by ").
+            append(assayPlate.getCherryPickScreenings().last().getPerformedBy().getFullNameFirstLast()).
+            append(')');
         }
         else if (assayPlate.isPlated()) {
           buf.append("\t(").
