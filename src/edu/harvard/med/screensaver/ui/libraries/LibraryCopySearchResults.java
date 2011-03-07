@@ -30,6 +30,7 @@ import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.CopyUsageType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.Plate;
+import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.ScreeningStatistics;
 import edu.harvard.med.screensaver.model.meta.PropertyPath;
 import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
@@ -40,6 +41,7 @@ import edu.harvard.med.screensaver.ui.arch.datatable.column.DateColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.FixedDecimalColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.IntegerColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
+import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.DateEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.EnumEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.IntegerEntityColumn;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.entity.TextEntityColumn;
@@ -288,9 +290,71 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       }
     });
 
-    columns.add(new DateColumn<Copy>("Date Plated",
-                                     "The earliest date on which a plate of this copy was created",
+    columns.add(new TextEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("primaryPlateLocation"),
+                                           "Primary Plate Location",
+                                           "The most common plate location for plates of this copy",
+                                           TableColumn.UNGROUPED) {
+      @Override
+      public String getCellValue(Copy copy)
+      {
+        if (copy.getPrimaryPlateLocation() == null) {
+          return null;
+        }
+        return copy.getPrimaryPlateLocation().toDisplayString();
+      }
+    });
+
+    columns.add(new EnumEntityColumn<Copy,PlateStatus>(PropertyPath.from(Copy.class).toProperty("primaryPlateStatus"),
+                                                       "Primary Plate Status",
+                                                       "The most common plate status for plates of this copy",
+                                                       TableColumn.UNGROUPED,
+                                                       PlateStatus.values()) {
+      @Override
+      public PlateStatus getCellValue(Copy copy)
+      {
+        return copy.getPrimaryPlateStatus();
+      }
+    });
+
+    columns.add(new FixedDecimalColumn<Copy>("Plate Screening Count Average",
+                                             "The average number of times this copy's plates have been screened, ignoring replicates",
+                                             TableColumn.UNGROUPED) {
+      @Override
+      public BigDecimal getCellValue(Copy copy)
+      {
+        if (copy.getScreeningStatistics().getPlateCount() == 0) return null;
+        if (copy.getScreeningStatistics().getPlateScreeningCount() == 0) return BigDecimal.ZERO;
+        BigDecimal val = new BigDecimal(copy.getScreeningStatistics().getPlateScreeningCount()).divide(new BigDecimal(copy.getScreeningStatistics().getPlateCount()),
+                                                                                                       DECIMAL_SCALE,
+                                                                                                       RoundingMode.CEILING);
+        return val;
+      }
+    });
+
+    columns.add(new DateColumn<Copy>("Last Date Screened",
+                                     "The date the copy was last screened",
                                      TableColumn.UNGROUPED) {
+      @Override
+      public LocalDate getDate(Copy copy)
+    {
+      return copy.getScreeningStatistics().getLastDateScreened();
+    }
+    });
+
+    columns.add(new DateColumn<Copy>("First Date Screened",
+                                     "The date the copy was first screened",
+                                     TableColumn.UNGROUPED) {
+      @Override
+      public LocalDate getDate(Copy copy)
+      {
+        return copy.getScreeningStatistics().getFirstDateScreened();
+      }
+    });
+
+    columns.add(new DateEntityColumn<Copy>(PropertyPath.from(Copy.class).toProperty("datePlated"),
+                                           "Date Plated",
+                                           "The earliest date on which a plate of this copy was created",
+                                           TableColumn.UNGROUPED) {
       @Override
       public LocalDate getDate(Copy copy)
       {
@@ -398,41 +462,6 @@ public class LibraryCopySearchResults extends EntityBasedEntitySearchResults<Cop
       }
     });
     Iterables.getLast(columns).setVisible(false);
-
-    columns.add(new FixedDecimalColumn<Copy>("Plate Screening Count Average",
-                                             "The average number of times this copy's plates have been screened, ignoring replicates",
-                                             TableColumn.UNGROUPED) {
-      @Override
-      public BigDecimal getCellValue(Copy copy)
-      {
-        if (copy.getScreeningStatistics().getPlateCount() == 0) return null;
-        if (copy.getScreeningStatistics().getPlateScreeningCount() == 0) return BigDecimal.ZERO;
-        BigDecimal val = new BigDecimal(copy.getScreeningStatistics().getPlateScreeningCount()).divide(new BigDecimal(copy.getScreeningStatistics().getPlateCount()),
-                                                                                                   DECIMAL_SCALE,
-                                                                                                   RoundingMode.CEILING);
-        return val;
-      }
-    });
-
-    columns.add(new DateColumn<Copy>("First Date Screened",
-                                     "The date the copy was first screened",
-                                     TableColumn.UNGROUPED) {
-      @Override
-      public LocalDate getDate(Copy copy)
-      {
-        return copy.getScreeningStatistics().getFirstDateScreened();
-      }
-    });
-
-    columns.add(new DateColumn<Copy>("Last Date Screened",
-                                     "The date the copy was last screened",
-                                     TableColumn.UNGROUPED) {
-      @Override
-      public LocalDate getDate(Copy copy)
-      {
-        return copy.getScreeningStatistics().getLastDateScreened();
-      }
-    });
 
     columns.add(new IntegerColumn<Copy>("Data Loading Count",
                                         "The number of screen results loaded for screens of this copy",

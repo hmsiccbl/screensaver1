@@ -41,14 +41,6 @@ public class PlateLocation extends AbstractEntity<Integer>
 {
   private static final long serialVersionUID = 1L;
 
-//  public static final Function<PlateLocation,String> ToLocation = new Function<PlateLocation,String>() {
-//    @Override
-//    public String apply(PlateLocation pl)
-//    {
-//      return pl.getLocation();
-//    }
-//  };
-
   public static final Function<PlateLocation,String> ToRoom = new Function<PlateLocation,String>() {
     public String apply(PlateLocation pl)
     {
@@ -91,7 +83,6 @@ public class PlateLocation extends AbstractEntity<Integer>
   private String _freezer;
   private String _shelf;
   private String _bin;
-  //private boolean _isExtant;
 
   /**
    * @motivation for hibernate or DTO

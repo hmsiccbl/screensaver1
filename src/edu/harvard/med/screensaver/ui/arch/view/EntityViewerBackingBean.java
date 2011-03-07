@@ -11,15 +11,14 @@ package edu.harvard.med.screensaver.ui.arch.view;
 
 import java.io.Serializable;
 
-import edu.harvard.med.screensaver.db.DAOTransaction;
+import org.apache.log4j.Logger;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
 import edu.harvard.med.screensaver.db.NoSuchEntityException;
 import edu.harvard.med.screensaver.model.Entity;
 import edu.harvard.med.screensaver.policy.EntityRestrictedException;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
-
-import org.apache.log4j.Logger;
-import org.springframework.transaction.annotation.Transactional;
 
 public abstract class EntityViewerBackingBean<E extends Entity<? extends Serializable>> extends AbstractBackingBean implements EntityViewer<E>
 {
@@ -151,33 +150,9 @@ public abstract class EntityViewerBackingBean<E extends Entity<? extends Seriali
     return Integer.valueOf(entityIdAsString);
   }
 
-  /**
-   * Revert the current entity to the state represented in the database. This is
-   * useful after a edit/cancel operation, for example, or to recover from a
-   * system error. This works by clearing the entire Hibernate session cache (so
-   * that other entities will be cleared as well!), before reloading the entity.
-   * If instead you simply need to view the current entity, call {@link #view()}.
-   * If you have a detached and/or updated entity in memory and want to view
-   * that instance, use {@link #viewEntity(Entity)}.
-   */
-  @Transactional
-  /*final*/ public String reload()
+  /* final */public String reload()
   {
-    // we end having to use a programmatic transaction, to handle the
-    // exceptional case where we're trying to recover from a system error (see
-    // UICommandExceptionHandlerAspect) and the reload call is made to the
-    // unproxied instance.  (we need *real* AOP with AspectJ weaving...)
-    _dao.doInTransaction(new DAOTransaction() {
-      public void runTransaction()
-      {
-        _dao.clear();
-        setEntity(_entity);
-      }
-    });
-    return view();
-    
-    // how we would prefer to implement this method:
-    // return viewEntity(_entity);
+    return viewEntity(_entity);
   }
 
   protected GenericEntityDAO getDao()

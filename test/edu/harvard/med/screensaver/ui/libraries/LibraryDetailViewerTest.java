@@ -12,6 +12,7 @@ package edu.harvard.med.screensaver.ui.libraries;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
+import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
 import edu.harvard.med.screensaver.model.libraries.LibraryType;
@@ -25,28 +26,56 @@ public class LibraryDetailViewerTest extends AbstractBackingBeanTest
 
   protected LibraryDetailViewer libraryDetailViewer;
 
+  private Library _library;
+
+  @Override
+  public void onSetUp() throws Exception
+  {
+    super.onSetUp();
+    _library = new Library(_admin);
+    _library.setScreenType(ScreenType.RNAI);
+    libraryDetailViewer.editNewEntity(_library);
+    _library.setLibraryName("y");
+    _library.setShortName("y");
+    _library.setStartPlate(2);
+    _library.setEndPlate(2);
+    _library.setLibraryType(LibraryType.COMMERCIAL);
+    _library.setSolvent(Solvent.RNAI_BUFFER);
+    _library.setScreeningStatus(LibraryScreeningStatus.ALLOWED);
+    libraryDetailViewer.save();
+    _library = genericEntityDao.reloadEntity(_library);
+  }
+
   public void testSolventType()
   {
-    Library library = new Library(_admin);
-    library.setScreenType(ScreenType.RNAI);
-    libraryDetailViewer.editNewEntity(library);
-    library.setLibraryName("y");
-    library.setShortName("y");
-    library.setStartPlate(2);
-    library.setEndPlate(2);
-    library.setLibraryType(LibraryType.COMMERCIAL);
-    library.setSolvent(Solvent.RNAI_BUFFER);
-    library.setScreeningStatus(LibraryScreeningStatus.ALLOWED);
-    libraryDetailViewer.save();
-    library = genericEntityDao.reloadEntity(library);
-    assertEquals(Solvent.RNAI_BUFFER, library.getSolvent());
-
-    libraryDetailViewer.viewEntity(library);
+    assertEquals(Solvent.RNAI_BUFFER, _library.getSolvent());
+    libraryDetailViewer.viewEntity(_library);
     libraryDetailViewer.edit();
     libraryDetailViewer.getEntity().setSolvent(Solvent.DMSO);
     assertEquals(ScreensaverConstants.REDISPLAY_PAGE_ACTION_RESULT, libraryDetailViewer.save());
     // TODO: assert validation message
     //assertTrue(libraryDetailViewer.isEditMode());
-    assertEquals(Solvent.RNAI_BUFFER, library.getSolvent());
+    assertEquals(Solvent.RNAI_BUFFER, _library.getSolvent());
+  }
+
+  public void testComments()
+  {
+    _library = genericEntityDao.reloadEntity(_library, true, Library.updateActivities.getPath());
+    assertEquals(0, _library.getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).size());
+
+    libraryDetailViewer.viewEntity(_library);
+    libraryDetailViewer.edit();
+    libraryDetailViewer.getComments().setNewComment("new comment 1");
+    libraryDetailViewer.getComments().addNewComment();
+    libraryDetailViewer.save();
+    assertEquals(1, libraryDetailViewer.getComments().getCommentsDataModel().getRowCount());
+    assertEquals(1, libraryDetailViewer.getEntity().getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).size());
+    libraryDetailViewer.viewEntity(_library);
+    libraryDetailViewer.edit();
+    libraryDetailViewer.getComments().setNewComment("new comment 2");
+    libraryDetailViewer.getComments().addNewComment();
+    libraryDetailViewer.save();
+    assertEquals(2, libraryDetailViewer.getComments().getCommentsDataModel().getRowCount());
+    assertEquals(2, libraryDetailViewer.getEntity().getUpdateActivitiesOfType(AdministrativeActivityType.COMMENT).size());
   }
 }

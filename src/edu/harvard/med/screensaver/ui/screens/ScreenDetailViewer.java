@@ -777,11 +777,15 @@ public class ScreenDetailViewer extends AbstractStudyDetailViewer<Screen>
   protected String postEditAction(EditResult editResult)
   {
     switch (editResult) {
-    case CANCEL_EDIT: return _screenViewer.reload();
-    case SAVE_EDIT: return _screenViewer.reload();
-    case CANCEL_NEW: return VIEW_MAIN;
-    case SAVE_NEW: return _screenViewer.viewEntity(getEntity()); // note: can't call reload() since parent viewer is not yet configured with our new screen
-    default: return null;
+      case CANCEL_EDIT:
+      case SAVE_EDIT:
+        return _screenViewer.reload();
+      case CANCEL_NEW:
+        return VIEW_MAIN;
+      case SAVE_NEW:
+        return _screenViewer.viewEntity(getEntity()); // note: can't call reload() since parent viewer is not yet configured with our new screen
+      default:
+        return null;
     }
   }
 }

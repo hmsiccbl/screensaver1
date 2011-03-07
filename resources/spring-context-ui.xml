@@ -179,6 +179,13 @@
       <constructor-arg ref="genericEntityDao" />
   </bean>
 
+  <bean id="entityComments"
+        class="edu.harvard.med.screensaver.ui.arch.util.EntityComments" 
+        parent="uiBean"
+        scope="prototype">
+      <constructor-arg ref="genericEntityDao" />
+  </bean>
+
   <bean id="userChecklistItems"
         class="edu.harvard.med.screensaver.ui.arch.util.ChecklistItems" 
         parent="uiBean"
@@ -236,6 +243,16 @@
     class="edu.harvard.med.screensaver.ui.libraries.LibrarySearchResults">
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="genericEntityDao" />
+    <property
+      name="rowsPerPageSelections">
+      <list>
+        <value>20</value>
+        <value>50</value>
+        <value>100</value>
+        <value>200</value>
+      </list>
+    </property>
+    <property name="defaultRowsPerPage" value="200"/>
     <aop:scoped-proxy/>
   </bean>
 
@@ -332,6 +349,17 @@
           </bean>
       </list>
     </constructor-arg>
+    <property
+      name="rowsPerPageSelections">
+      <list>
+        <value>12</value>
+        <value>24</value>
+        <value>48</value>
+        <value>96</value>
+        <value>384</value>
+      </list>
+    </property>
+    <property name="defaultRowsPerPage" value="24" /> 
     <aop:scoped-proxy/>
   </bean>
 
@@ -587,9 +615,6 @@
         parent="uiBean" />
     </constructor-arg>
     <constructor-arg ref="wellsBrowser" />
-    <property
-      name="entityEditPolicy"
-      ref="entityEditPolicy" />
     <aop:scoped-proxy />
   </bean>
 
@@ -862,6 +887,7 @@
     <constructor-arg ref="libraryCreator" />
     <constructor-arg ref="libraryViewer" />
     <constructor-arg ref="libraryPlatesBrowser" />
+    <constructor-arg ref="entityComments" />
     <property
       name="entityUpdateHistoryBrowser"
       ref="entityUpdateHistoryBrowser" />

@@ -79,7 +79,6 @@ import edu.harvard.med.screensaver.ui.arch.datatable.model.DataTableModel;
 import edu.harvard.med.screensaver.ui.arch.datatable.model.VirtualPagingEntityDataModel;
 import edu.harvard.med.screensaver.ui.arch.searchresults.SearchResults;
 import edu.harvard.med.screensaver.ui.arch.searchresults.TupleBasedEntitySearchResults;
-import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.util.ValueReference;
 import edu.harvard.med.screensaver.ui.screenresults.MetaDataType;
 import edu.harvard.med.screensaver.util.Triple;
@@ -388,17 +387,6 @@ public class WellSearchResults extends TupleBasedEntitySearchResults<Well,String
     DataTableModel<Tuple<String>> dataModel =
       new VirtualPagingEntityDataModel<String,Well,Tuple<String>>(dataFetcher, new RowsToFetchReference());
     initialize(dataModel);
-  }
-
-  @Override
-  protected UISelectOneBean<Integer> buildRowsPerPageSelector()
-  {
-    UISelectOneBean<Integer> rowsPerPageSelector = super.buildRowsPerPageSelector();
-    rowsPerPageSelector.deleteObserver(_rowsPerPageSelectorObserver);
-    rowsPerPageSelector.setDomain(Lists.newArrayList(1, 12, 24, 48, 96, 384), 24);
-    rowsPerPageSelector.setSelectionIndex(1);
-    rowsPerPageSelector.addObserver(_rowsPerPageSelectorObserver);
-    return rowsPerPageSelector;
   }
 
   @Override

@@ -99,6 +99,8 @@ public interface ScreensaverConstants
   public static final int MOLECULAR_WEIGHT_PRECISION = 15;
   public static final int MOLECULAR_WEIGHT_SCALE = 9;
 
+  public static final String PUBCHEM_BIOASSAY_ID_URL_PREFIX = "http://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid=";
+
   /**
    * The label to display in UI selection lists for fields that require a value, but that initially have no value
    * (null). This is intended to help the user understand that a value must be selected before proceeding.

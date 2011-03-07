@@ -366,18 +366,32 @@ TODO:
       </ui:define>
     </ss:property>
 
-    <ss:property id="comsRegistrationNumber"
-      label="COMS Registration Number"
-      value="#{screenDetailViewer.entity.comsRegistrationNumber}"
+    <ss:propertyGroup label="COMS"
       rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
-      editable="#{screenDetailViewer.editMode}"
-      adminOnly="true" description="COMS number, provided by PI's lab" />
-    <ss:property id="comsApprovalDate"
-      label="ICCB-L/NSRB COMS Approval Date" type="Date"
-      value="#{screenDetailViewer.entity.comsApprovalDate}"
-      rendered="#{screenDetailViewer.editMode || screenDetailViewer.adminViewMode}"
-      editable="#{screenDetailViewer.editMode}" adminOnly="true"
-      description="the date of approval by COMS or the date on which we determine that our existing approval already covers the proposed experiments" />
+      editable="#{screenDetailViewer.editMode}" adminOnly="true">
+      <ss:property id="comsRegistrationNumber"
+        label="COMS Registration Number"
+        value="#{screenDetailViewer.entity.comsRegistrationNumber}"
+        description="COMS number, provided by PI's lab" />
+      <ss:property id="comsApprovalDate"
+        label="ICCB-L/NSRB COMS Approval Date" type="Date"
+        value="#{screenDetailViewer.entity.comsApprovalDate}"
+        description="the date of approval by COMS or the date on which we determine that our existing approval already covers the proposed experiments" />
+    </ss:propertyGroup>
+
+    <ss:propertyGroup label="PubChem BioAssay">
+      <ss:property id="dateDeposited" label="Date deposited"
+        description="The date the screen result was deposited in PubChem BioAssay"
+        value="#{screenDetailViewer.entity.pubchemDepositedDate}"
+        type="Date"
+        editable="#{screenDetailViewer.editMode}" />
+
+      <ss:property id="bioAssayId" label="Assay ID" type="Link"
+        description="The PubChem Assay identifier (AID)"
+        value="#{screenDetailViewer.entity.pubchemAssayId}"
+        linkValue="http://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?aid=#{screenDetailViewer.entity.pubchemAssayId}"
+        editable="#{screenDetailViewer.editMode}" />
+    </ss:propertyGroup>
 
     <ss:property id="fulfilledLabCherryPicksCount"
       label="Total Plated Cherry Picks"

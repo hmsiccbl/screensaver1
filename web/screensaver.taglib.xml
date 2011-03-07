@@ -121,6 +121,11 @@
     </tag>
 
     <tag>
+      <tag-name>entityComments</tag-name>
+      <source>../util/entityComments.xhtml</source>
+    </tag>
+
+    <tag>
       <tag-name>checklistItems</tag-name>
       <source>../util/checklistItems.xhtml</source>
     </tag>

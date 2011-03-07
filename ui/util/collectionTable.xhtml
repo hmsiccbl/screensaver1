@@ -41,7 +41,7 @@
 				<t:outputText value="#{element}" />
 			</t:column>
 		</ui:insert>
-		<t:column rendered="#{editable}">
+		<t:column rendered="#{editable &amp;&amp; !empty deleteAction}">
 			<t:commandButton id="#{id}DeleteCommand" value="Delete"
 				image="/images/delete.png" action="#{actionBean[deleteAction]}"
         onclick="#{confirmDelete ? &quot;javascript: return confirm('Are you sure you want to delete this item?');&quot; : ''}"

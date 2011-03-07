@@ -42,10 +42,14 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
   public static final List<Integer> DEFAULT_ROWS_PER_PAGE_SELECTIONS = Arrays.asList(10,
                                                                                      20,
                                                                                      50,
-                                                                                     100);
+                                                                                     100,
+                                                                                     250,
+                                                                                     500);
 
   private String _title;
   private Map<String,Boolean> _capabilities = new HashMap<String,Boolean>();
+  private List<Integer> rowsPerPageSelections = DEFAULT_ROWS_PER_PAGE_SELECTIONS;
+  private Integer defaultRowsPerPage = DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1);
 
   /**
    * @motivation for CGLIB2
@@ -138,7 +142,26 @@ abstract public class SearchResults<R, K, P> extends EditableDataTable<R>
    */
   protected UISelectOneBean<Integer> buildRowsPerPageSelector()
   {
-    return new UISelectOneBean<Integer>(DEFAULT_ROWS_PER_PAGE_SELECTIONS,
-                                        DEFAULT_ROWS_PER_PAGE_SELECTIONS.get(1));
+    return new UISelectOneBean<Integer>(getRowsPerPageSelections(), getDefaultRowsPerPage());
+  }
+
+  public List<Integer> getRowsPerPageSelections()
+  {
+    return rowsPerPageSelections;
+  }
+
+  public void setRowsPerPageSelections(List<Integer> rowsPerPageSelections)
+  {
+    this.rowsPerPageSelections = rowsPerPageSelections;
+  }
+
+  public Integer getDefaultRowsPerPage()
+  {
+    return defaultRowsPerPage;
+  }
+
+  public void setDefaultRowsPerPage(Integer defaultRowsPerPage)
+  {
+    this.defaultRowsPerPage = defaultRowsPerPage;
   }
 }

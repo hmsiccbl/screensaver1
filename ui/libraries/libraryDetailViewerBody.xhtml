@@ -26,17 +26,18 @@
 
       <h:commandButton value="View Library Contents"
         action="#{libraryViewer.viewLibraryContents}"
+        rendered="#{!libraryDetailViewer.editMode}"
         styleClass="command"
         title="View a list of all the wells in the library" />
 
       <h:commandButton value="View Well Volumes"
         action="#{libraryViewer.viewLibraryWellCopyVolumes}"
-        rendered="#{libraryViewer.readAdmin}" styleClass="command"
+        rendered="#{libraryViewer.readAdmin &amp;&amp; !libraryDetailViewer.editMode}" styleClass="command"
         title="View volume information for all the wells in the library" />
 
       <h:commandButton value="Add Copy..."
         action="#{libraryViewer.addLibraryCopy}"
-        rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['libraryCopiesAdmin']}"
+        rendered="#{libraryViewer.screensaverUser.isUserInRoleOfNameMap['libraryCopiesAdmin'] &amp;&amp; !libraryDetailViewer.editMode}"
         styleClass="command" title="Add a copy to the Library" />
   </ui:define>
   
@@ -131,6 +132,11 @@
       type="Date" value="#{libraryDetailViewer.entity.dateScreenable}"
       adminOnly="true"
       editable="false" />
+
+    <ss:entityComments id="libraryComments"
+      comments="#{libraryDetailViewer.comments}"
+      entityTypeName="Library" 
+      editMode="#{libraryDetailViewer.editMode}"/>
 
     <ss:propertyGroup label="Plates">
 

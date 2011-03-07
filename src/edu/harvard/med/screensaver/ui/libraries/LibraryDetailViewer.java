@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.ScreensaverConstants;
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.model.Activity;
 import edu.harvard.med.screensaver.model.DataModelViolationException;
 import edu.harvard.med.screensaver.model.libraries.Library;
 import edu.harvard.med.screensaver.model.libraries.LibraryScreeningStatus;
@@ -26,6 +27,7 @@ import edu.harvard.med.screensaver.model.libraries.Solvent;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.ScreeningRoomUser;
 import edu.harvard.med.screensaver.service.libraries.LibraryCreator;
+import edu.harvard.med.screensaver.ui.arch.util.EntityComments;
 import edu.harvard.med.screensaver.ui.arch.util.JSFUtils;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneBean;
 import edu.harvard.med.screensaver.ui.arch.util.UISelectOneEntityBean;
@@ -48,6 +50,7 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   private LibraryCreator _libraryCreator;
   private LibraryViewer _libraryViewer;
   private LibraryPlateSearchResults _libraryPlatesBrowser;
+  private EntityComments _comments;
 
   private UISelectOneEntityBean<ScreeningRoomUser> owner;
 
@@ -63,7 +66,8 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
                              GenericEntityDAO dao,
                              LibraryCreator libraryCreator,
                              LibraryViewer libraryViewer,
-                             LibraryPlateSearchResults libraryPlatesBrowser)
+                             LibraryPlateSearchResults libraryPlatesBrowser,
+                             EntityComments comments)
   {
     super(thisProxy,
           Library.class,
@@ -72,6 +76,7 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
     _libraryCreator = libraryCreator;
     _libraryViewer = libraryViewer;
     _libraryPlatesBrowser = libraryPlatesBrowser;
+    _comments = comments;
   }
   
   public List<SelectItem> getLibraryScreeningStatusSelectItems()    
@@ -113,11 +118,14 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   @Override
   protected void initializeEntity(Library entity)
   {
+    getDao().needReadOnly(entity, Library.updateActivities.to(Activity.performedBy).getPath());
   }
   
   @Override
   protected void initializeViewer(Library entity)
-  {}
+  {
+    _comments.setEntity(entity);
+  }
 
   @Override
   protected void initializeNewEntity(Library library)
@@ -160,11 +168,15 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   protected String postEditAction(EditResult editResult)
   {
     switch (editResult) {
-    case CANCEL_EDIT: return _libraryViewer.reload();
-    case SAVE_EDIT: return _libraryViewer.reload();
-    case CANCEL_NEW: return VIEW_MAIN;
-    case SAVE_NEW: return _libraryViewer.viewEntity(getEntity()); // note: can't call reload() since parent viewer is not yet configured with our new library    
-    default: return null;
+      case CANCEL_EDIT:
+      case SAVE_EDIT:
+        return _libraryViewer.reload();
+      case SAVE_NEW: // note: can't call reload() since parent viewer is not yet configured with our new library    
+        return _libraryViewer.viewEntity(getEntity());
+      case CANCEL_NEW:
+        return VIEW_MAIN;
+      default:
+        return null;
     }
   }
   
@@ -188,5 +200,10 @@ public class LibraryDetailViewer extends EditableEntityViewerBackingBean<Library
   {
     _libraryPlatesBrowser.searchLibraryPlatesByLibrary(getEntity());
     return BROWSE_LIBRARY_PLATES_SCREENED;
+  }
+
+  public EntityComments getComments()
+  {
+    return _comments;
   }
 }

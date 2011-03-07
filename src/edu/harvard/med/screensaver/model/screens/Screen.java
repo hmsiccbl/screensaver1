@@ -195,6 +195,9 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   private LocalDate _dataPrivacyExpirationDate;
   private LocalDate _dataPrivacyExpirationNotifiedDate;
   
+  private LocalDate _pubchemDepositedDate;
+  private Integer _pubchemAssayId;
+
   private int _assayPlatesScreenedCount;
   private int _librariesScreenedCount;
   private int _libraryPlatesScreenedCount;
@@ -2012,6 +2015,29 @@ public class Screen extends Study implements AttachedFilesEntity<Integer>
   public LocalDate getDataPrivacyExpirationNotifiedDate()
   {
     return _dataPrivacyExpirationNotifiedDate;
+  }
+
+  @Column(nullable = true)
+  @Type(type = "edu.harvard.med.screensaver.db.usertypes.LocalDateType")
+  public LocalDate getPubchemDepositedDate()
+  {
+    return _pubchemDepositedDate;
+  }
+
+  public void setPubchemDepositedDate(LocalDate pubchemDepositedDate)
+  {
+    _pubchemDepositedDate = pubchemDepositedDate;
+  }
+
+  @Column(nullable = true)
+  public Integer getPubchemAssayId()
+  {
+    return _pubchemAssayId;
+  }
+
+  public void setPubchemAssayId(Integer pubchemAssayId)
+  {
+    _pubchemAssayId = pubchemAssayId;
   }
 
 }

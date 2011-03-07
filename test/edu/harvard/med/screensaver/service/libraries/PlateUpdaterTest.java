@@ -170,6 +170,42 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
     });
   }
 
+  public void testPlateStatusUpdateFromLost()
+  {
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    Plate plate = _copyC.findPlate(1);
+    genericEntityDao.persistEntity(admin2);
+
+    plateUpdater.updatePlateStatus(plate, PlateStatus.LOST, _admin, admin2, new LocalDate(2010, 1, 1));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate updatedPlate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        AdministrativeActivity activity = updatedPlate.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE);
+        assertEquals(PlateStatus.LOST, updatedPlate.getStatus());
+        assertEquals("Status changed from 'Not specified' to 'Lost'", activity.getComments());
+        assertEquals(new LocalDate(2010, 1, 1), activity.getDateOfActivity());
+        assertNull(updatedPlate.getPlatedActivity());
+      }
+    });
+
+    plateUpdater.updatePlateLocation(plate, new PlateLocation("W", "X", "Y", "Z"), _admin, admin2, new LocalDate(2010, 1, 2));
+    plateUpdater.updatePlateStatus(plate, PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 2));
+    genericEntityDao.doInTransaction(new DAOTransaction() {
+      @Override
+      public void runTransaction()
+      {
+        Plate updatedPlate = genericEntityDao.reloadEntity(_copyC.findPlate(1));
+        AdministrativeActivity activity = updatedPlate.getLastUpdateActivityOfType(AdministrativeActivityType.PLATE_STATUS_UPDATE);
+        assertEquals(PlateStatus.AVAILABLE, updatedPlate.getStatus());
+        assertEquals("Status changed from 'Lost' to 'Available'", activity.getComments());
+        assertEquals(new LocalDate(2010, 1, 2), activity.getDateOfActivity());
+        assertEquals(activity, updatedPlate.getPlatedActivity());
+      }
+    });
+  }
+
   public void testInvalidPlateStatusUpdateFromNotCreatedToNotSpecified()
   {
     doTestInvalidStatusUpdate(PlateStatus.NOT_CREATED, PlateStatus.NOT_SPECIFIED);
@@ -234,6 +270,51 @@ public class PlateUpdaterTest extends AbstractSpringPersistenceTest
       fail("expected BusinessRuleViolationException");
     }
     catch (BusinessRuleViolationException e) {}
+  }
+
+  public void testPrimaryPlateStatus()
+  {
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    genericEntityDao.persistEntity(admin2);
+
+    plateUpdater.updatePlateStatus(_copyC.findPlate(1), PlateStatus.NOT_AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateStatus(_copyC.findPlate(2), PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateStatus(_copyC.findPlate(3), PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateStatus(_copyC.findPlate(4), PlateStatus.LOST, _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateStatus(_copyC.findPlate(5), PlateStatus.AVAILABLE, _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateStatus(_copyC.findPlate(6), PlateStatus.NOT_CREATED, _admin, admin2, new LocalDate(2010, 1, 1));
+    assertEquals(PlateStatus.AVAILABLE, genericEntityDao.reloadEntity(_copyC).getPrimaryPlateStatus());
+
+    plateUpdater.updatePlateStatus(_copyC.findPlate(5), PlateStatus.LOST, _admin, admin2, new LocalDate(2010, 1, 1));
+    assertEquals("primary plate status ties are broken by ordering of PlateStatus enum values",
+                 PlateStatus.AVAILABLE, genericEntityDao.reloadEntity(_copyC).getPrimaryPlateStatus());
+
+    plateUpdater.updatePlateStatus(_copyC.findPlate(6), PlateStatus.LOST, _admin, admin2, new LocalDate(2010, 1, 1));
+    assertEquals(PlateStatus.LOST, genericEntityDao.reloadEntity(_copyC).getPrimaryPlateStatus());
+  }
+
+  public void testPrimaryPlateLocation()
+  {
+    final AdministratorUser admin2 = new AdministratorUser("Admin2", "User", "", "", "", "", null, "");
+    genericEntityDao.persistEntity(admin2);
+
+    plateUpdater.updatePlateLocation(_copyC.findPlate(1), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateLocation(_copyC.findPlate(2), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateLocation(_copyC.findPlate(3), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateLocation(_copyC.findPlate(4), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateLocation(_copyC.findPlate(5), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateLocation(_copyC.findPlate(6), new PlateLocation("R1", "F1", "S1", "B1"), _admin, admin2, new LocalDate(2010, 1, 1));
+    assertEquals(new PlateLocation("R1", "F1", "S1", "B1").toDisplayString(), genericEntityDao.reloadEntity(_copyC).getPrimaryPlateLocation().toDisplayString());
+
+    plateUpdater.updatePlateLocation(_copyC.findPlate(5), null, _admin, admin2, new LocalDate(2010, 1, 1));
+    assertEquals(new PlateLocation("R1", "F1", "S1", "B1").toDisplayString(), genericEntityDao.reloadEntity(_copyC).getPrimaryPlateLocation().toDisplayString());
+
+    plateUpdater.updatePlateLocation(_copyC.findPlate(2), new PlateLocation("R1", "F1", "S1", "B2"), _admin, admin2, new LocalDate(2010, 1, 1));
+    plateUpdater.updatePlateLocation(_copyC.findPlate(3), new PlateLocation("R1", "F1", "S1", "B2"), _admin, admin2, new LocalDate(2010, 1, 1));
+    assertEquals(new PlateLocation("R1", "F1", "S1", "B1").toDisplayString(), genericEntityDao.reloadEntity(_copyC).getPrimaryPlateLocation().toDisplayString());
+
+    plateUpdater.updatePlateLocation(_copyC.findPlate(4), new PlateLocation("R1", "F1", "S1", "B2"), _admin, admin2, new LocalDate(2010, 1, 1));
+    assertEquals(new PlateLocation("R1", "F1", "S1", "B2").toDisplayString(), genericEntityDao.reloadEntity(_copyC).getPrimaryPlateLocation().toDisplayString());
   }
 
   public void testPlatedDate()

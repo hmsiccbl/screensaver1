@@ -30,8 +30,7 @@ import edu.harvard.med.screensaver.model.screens.ScreenType;
 import edu.harvard.med.screensaver.model.users.AdministratorUser;
 import edu.harvard.med.screensaver.service.screenresult.ScreenResultDeleter;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.TableColumn;
-import edu.harvard.med.screensaver.ui.arch.view.EditResult;
-import edu.harvard.med.screensaver.ui.arch.view.EditableEntityViewerBackingBean;
+import edu.harvard.med.screensaver.ui.arch.view.EntityViewerBackingBean;
 import edu.harvard.med.screensaver.ui.arch.view.aspects.UICommand;
 import edu.harvard.med.screensaver.ui.libraries.WellSearchResults;
 import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
@@ -46,7 +45,7 @@ import edu.harvard.med.screensaver.ui.screens.ScreenViewer;
  * @author <a mailto="john_sullivan@hms.harvard.edu">John Sullivan</a>
  */
 @SuppressWarnings("unchecked")
-public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenResult>
+public class ScreenResultViewer extends EntityViewerBackingBean<ScreenResult>
 {
   private static Logger log = Logger.getLogger(ScreenResultViewer.class);
 
@@ -93,14 +92,6 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
     getIsPanelCollapsedMap().put("dataTable", true);
     getIsPanelCollapsedMap().put("heatMaps", true);
     getIsPanelCollapsedMap().put("cellHTS2", true);
-  }
-  
-  public String postEditAction(ScreenResult entity)
-  {
-    if (entity == null) {
-      return VIEW_MAIN;
-    }
-    return _screenViewer.viewEntity(entity.getScreen());
   }
   
   @Override
@@ -265,18 +256,5 @@ public class ScreenResultViewer extends EditableEntityViewerBackingBean<ScreenRe
     }
 
     return REDISPLAY_PAGE_ACTION_RESULT;
-  }
-
-  @Override
-  protected String postEditAction(EditResult editResult)
-  {
-    switch (editResult) {
-      case CANCEL_EDIT:
-        return _screenViewer.reload();
-      case SAVE_EDIT:
-        return _screenViewer.reload();
-      default:
-        return null;
-    }
   }
 }

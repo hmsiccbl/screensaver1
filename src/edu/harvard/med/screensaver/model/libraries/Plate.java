@@ -196,11 +196,9 @@ public class Plate extends AuditedAbstractEntity<Integer> implements Comparable<
    * Get the location.
    * @return the location
    */
-  @org.hibernate.annotations.Type(type="text")
-  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE })
+  @ManyToOne(cascade = { CascadeType.MERGE })
   @JoinColumn(name = "plateLocationId")
   @org.hibernate.annotations.ForeignKey(name = "fk_plate_to_plate_location")
-  @org.hibernate.annotations.LazyToOne(value = org.hibernate.annotations.LazyToOneOption.PROXY)
   @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
   @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
   public PlateLocation getLocation()

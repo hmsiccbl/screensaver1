@@ -86,7 +86,10 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   private String _comments;
   private LocalDate _datePlated;
   private Map<Integer,Plate> _plates = Maps.newHashMap();
+  private PlateLocation _primaryPlateLocation;
+  private PlateStatus _primaryPlateStatus;
   private ScreeningStatistics _screeningStatistics;
+
 
   // TODO: [#2474] library copy well concentration
 
@@ -244,6 +247,7 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
     for (int p = library.getStartPlate(); p <= library.getEndPlate(); ++p) {
       createPlate(p);
     }
+    _primaryPlateStatus = PlateStatus.NOT_SPECIFIED;
   }
 
   /**
@@ -314,5 +318,34 @@ public class Copy extends AuditedAbstractEntity<Integer> implements Comparable<C
   public void setDatePlated(LocalDate datePlated)
   {
     _datePlated = datePlated;
+  }
+
+  @ManyToOne(cascade = { CascadeType.MERGE })
+  @JoinColumn(name = "primaryPlateLocationId")
+  @org.hibernate.annotations.ForeignKey(name = "fk_copy_to_primary_plate_location")
+  @org.hibernate.annotations.Cascade(value = { org.hibernate.annotations.CascadeType.SAVE_UPDATE })
+  @edu.harvard.med.screensaver.model.annotations.ToOne(unidirectional = true)
+  @Derived
+  public PlateLocation getPrimaryPlateLocation()
+  {
+    return _primaryPlateLocation;
+  }
+
+  public void setPrimaryPlateLocation(PlateLocation primaryPlateLocation)
+  {
+    _primaryPlateLocation = primaryPlateLocation;
+  }
+
+  @Column(nullable = false)
+  @org.hibernate.annotations.Type(type = "edu.harvard.med.screensaver.model.libraries.PlateStatus$UserType")
+  @Derived
+  public PlateStatus getPrimaryPlateStatus()
+  {
+    return _primaryPlateStatus;
+  }
+
+  public void setPrimaryPlateStatus(PlateStatus primaryPlateStatus)
+  {
+    _primaryPlateStatus = primaryPlateStatus;
   }
 }

@@ -10,21 +10,16 @@
 package edu.harvard.med.screensaver.ui.libraries;
 
 import java.util.List;
-import java.util.Set;
+import java.util.SortedSet;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
-import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
 import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Plate;
-import edu.harvard.med.screensaver.model.libraries.PlateLocation;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
 import edu.harvard.med.screensaver.model.libraries.PlateType;
 import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
@@ -127,94 +122,44 @@ public class LibraryCopyViewer extends SearchResultContextEntityViewerBackingBea
    */
   public class PlateAggregateFields
   {
-    private List<String> _locations = Lists.newArrayList();
-    private List<String> _volumes = Lists.newArrayList();
-    private List<String> _concentrations = Lists.newArrayList();
-    private List<String> _statuses = Lists.newArrayList();
-    private List<String> _types = Lists.newArrayList();
-
-    private Function<PlateLocation,String> _plateLocationFunction = new Function<PlateLocation,String>() {
-      @Override
-      public String apply(PlateLocation from)
-      {
-        return from == null ? "" : StringEscapeUtils.escapeHtml(from.toDisplayString());
-      }
-    };
-
-    private Function<PlateStatus,String> _plateStatusFunction = new Function<PlateStatus,String>() {
-      @Override
-      public String apply(PlateStatus from)
-      {
-        return from == null ? "" : from.toString();
-      }
-    };
-
-    private Function<Volume,String> _plateVolumeFunction = new Function<Volume,String>() {
-      @Override
-      public String apply(Volume from)
-      {
-        return from == null ? "" : from.toString();
-      }
-    };
-
-    private Function<MolarConcentration,String> _plateConcentrationFunction = new Function<MolarConcentration,String>() {
-      @Override
-      public String apply(MolarConcentration from)
-      {
-        return from == null ? "" : from.toString();
-      }
-    };
-
-    private Function<PlateType,String> _plateTypeFunction = new Function<PlateType,String>() {
-      @Override
-      public String apply(PlateType from)
-      {
-        return from == null ? "" : from.toString();
-      }
-    };
+    private SortedSet<String> _locations = Sets.newTreeSet();
+    private SortedSet<Volume> _volumes = Sets.newTreeSet();
+    private SortedSet<PlateStatus> _secondaryStatuses = Sets.newTreeSet();
+    private SortedSet<PlateType> _types = Sets.newTreeSet();
 
     private PlateAggregateFields(List<Plate> plates)
     {
-      Set<PlateLocation> locations = Sets.newHashSet();
-      Set<Volume> volumes = Sets.newHashSet();
-      //      Set<Concentration> concentrations = Sets.newHashSet();
-      Set<PlateStatus> statuses = Sets.newHashSet();
-      Set<PlateType> types = Sets.newHashSet();
       for (Plate plate : plates) {
-        locations.add(plate.getLocation());
-        volumes.add(plate.getWellVolume());
-        statuses.add(plate.getStatus());
-        types.add(plate.getPlateType());
+        if (plate.getLocation() != null) {
+          _locations.add(StringEscapeUtils.escapeHtml(plate.getLocation().toDisplayString()));
+        }
+        if (plate.getWellVolume() != null) {
+          _volumes.add(plate.getWellVolume());
+        }
+        _secondaryStatuses.add(plate.getStatus());
+        if (plate.getPlateType() != null) {
+          _types.add(plate.getPlateType());
+        }
       }
-      _locations = Lists.newArrayList(Iterables.transform(locations, _plateLocationFunction));
-      _volumes = Lists.newArrayList(Iterables.transform(volumes, _plateVolumeFunction));
-      //      _concentrations = Lists.newArrayList(Iterables.transform(concentrations, _plateConcentrationFunction));
-      _statuses = Lists.newArrayList(Iterables.transform(statuses, _plateStatusFunction));
-      _types = Lists.newArrayList(Iterables.transform(types, _plateTypeFunction));
+      _secondaryStatuses.remove(getEntity().getPrimaryPlateStatus());
     }
 
-    public List<String> getLocations()
+    public SortedSet<String> getLocations()
     {
       return _locations;
     }
 
-    public List<String> getVolumes()
+    public SortedSet<Volume> getVolumes()
     {
       return _volumes;
     }
 
-    //TODO: verify that this will actually ever be used
-    //    public List<String> getConcentrations()
-    //    {
-    //      return _concentrations;
-    //    }
-
-    public List<String> getStatuses()
+    public SortedSet<PlateStatus> getSecondaryStatuses()
     {
-      return _statuses;
+      return _secondaryStatuses;
     }
 
-    public List<String> getTypes()
+    public SortedSet<PlateType> getTypes()
     {
       return _types;
     }

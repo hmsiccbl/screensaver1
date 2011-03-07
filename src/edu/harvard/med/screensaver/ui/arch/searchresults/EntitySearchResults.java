@@ -10,7 +10,6 @@
 package edu.harvard.med.screensaver.ui.arch.searchresults;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
@@ -20,6 +19,7 @@ import javax.faces.component.UIData;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModelListener;
 
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.apache.myfaces.custom.datascroller.HtmlDataScroller;
 import org.apache.myfaces.custom.datascroller.ScrollerActionEvent;
@@ -120,12 +120,13 @@ public abstract class EntitySearchResults<E extends Entity<K>,R,K extends Serial
     }
     // note: we need a special "single" (1) selection item, for viewing the
     // entity in its full viewer page
-    UISelectOneBean<Integer> rowsPerPageSelector = new UISelectOneBean<Integer>(Arrays.asList(1,
-                                                                                              10,
-                                                                                              20,
-                                                                                              50,
-                                                                                              100),
-                                                                                20) {
+    if (getRowsPerPageSelections().get(0) != 1) {
+      List<Integer> rowsPerPageSelections = Lists.newArrayList(getRowsPerPageSelections());
+      rowsPerPageSelections.add(0, 1);
+      setRowsPerPageSelections(rowsPerPageSelections);
+    }
+    UISelectOneBean<Integer> rowsPerPageSelector = new UISelectOneBean<Integer>(getRowsPerPageSelections(),
+                                                                                getDefaultRowsPerPage()) {
       @Override
       public String makeLabel(Integer value)
       {

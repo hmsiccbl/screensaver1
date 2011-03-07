@@ -56,25 +56,30 @@
       type="Date" value="#{libraryCopyDetail.entity.datePlated}"
       editable="false" rendered="#{!entity.transient}" />
 
-    <ss:property id="locations" label="Locations" type="List" 
-      description="The list of unique plate locations represented in this search"
+    <ss:property id="locations" label="Plate Location(s)" type="List" 
+      description="The location(s) of this copy's plates"
       value="#{libraryCopyViewer.plateAggregateFields.locations}" 
       editable="false" rendered="#{!entity.transient}" 
       escape="false"
     />
     
-    <ss:property id="type" label="Type" type="List" 
-      description="The list of unique plate types represented in this search"
+    <ss:property id="type" label="Plate Type" type="List" 
+      description="The plate type(s) represented in this search"
       value="#{libraryCopyViewer.plateAggregateFields.types}" 
       editable="false" rendered="#{!entity.transient}"
     />
-    <ss:property id="statuses" label="Status" type="List" 
-      description="The list of unique plate statuses represented in this search"
-      value="#{libraryCopyViewer.plateAggregateFields.statuses}" 
+    <ss:property id="primaryPlateStatus" label="Status" 
+      description="The most frequently occurring plate status among this copy's plates"
+      value="#{libraryCopyViewer.entity.primaryPlateStatus}" 
+      editable="false" rendered="#{!entity.transient}"
+    />
+    <ss:property id="statuses" label="Secondary Plate Statuses" type="List" 
+      description="The non-primary statuses of the copy's plates"
+      value="#{libraryCopyViewer.plateAggregateFields.secondaryStatuses}" 
       editable="false" rendered="#{!entity.transient}"
     />
     <ss:property id="initialVolumes" label="Initial Volume" type="List" 
-      description="The list of unique plate initial volumes represented in this search"
+      description="The plate initial volume(s) of the copy's plates"
       value="#{libraryCopyViewer.plateAggregateFields.volumes}" 
       editable="false" rendered="#{!entity.transient}"
     />

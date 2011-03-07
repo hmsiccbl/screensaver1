@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 
 import edu.harvard.med.screensaver.db.GenericEntityDAO;
+import edu.harvard.med.screensaver.db.SortDirection;
 import edu.harvard.med.screensaver.db.datafetcher.EntityDataFetcher;
 import edu.harvard.med.screensaver.db.hqlbuilder.HqlBuilder;
 import edu.harvard.med.screensaver.model.libraries.Copy;
@@ -35,6 +36,7 @@ import edu.harvard.med.screensaver.model.screenresults.AssayPlate;
 import edu.harvard.med.screensaver.model.screens.LibraryScreening;
 import edu.harvard.med.screensaver.model.screens.Screen;
 import edu.harvard.med.screensaver.model.screens.ScreenType;
+import edu.harvard.med.screensaver.model.users.ScreensaverUserRole;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion;
 import edu.harvard.med.screensaver.ui.arch.datatable.Criterion.Operator;
 import edu.harvard.med.screensaver.ui.arch.datatable.column.DateColumn;
@@ -90,8 +92,14 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
   @Override
   public void searchAll()
   {
-    searchLibraryScreenType(null);
     setTitle("Libraries");
+    initialize(new InMemoryEntityDataModel<Library,Integer>(new EntityDataFetcher<Library,Integer>(Library.class, _dao) {
+      @Override
+      public void addDomainRestrictions(HqlBuilder hql)
+      {
+        hql.whereIn(getRootAlias(), "libraryType", LIBRARY_TYPES_TO_DISPLAY);
+      }
+    }));
   }
 
   public void searchLibraryScreenType(ScreenType screenType)
@@ -108,6 +116,12 @@ public class LibrarySearchResults extends EntityBasedEntitySearchResults<Library
     TableColumn<Library,ScreenType> column = (TableColumn<Library,ScreenType>) getColumnManager().getColumn("Screen Type");
     column.clearCriteria();
     column.addCriterion(new Criterion<ScreenType>(Operator.EQUAL, screenType));
+
+    // [#2867]
+    if (getScreensaverUser().isUserInRole(ScreensaverUserRole.LIBRARIES_ADMIN)) {
+      getColumnManager().setSortColumnName("Start Plate");
+      getColumnManager().setSortDirection(SortDirection.DESCENDING);
+    }
   }
 
   @SuppressWarnings("unchecked")

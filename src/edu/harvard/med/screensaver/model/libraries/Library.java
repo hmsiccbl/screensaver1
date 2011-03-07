@@ -129,7 +129,6 @@ public class Library extends AuditedAbstractEntity<Integer>
   private LibraryScreeningStatus _screeningStatus;
   private LocalDate _dateReceived;
   private LocalDate _dateScreenable;
-  private String _comments;
   private PlateSize _plateSize;
   private ScreeningRoomUser _owner;
   private Integer _experimentalWellCount = new Integer(0);	
@@ -618,18 +617,6 @@ public class Library extends AuditedAbstractEntity<Integer>
   {
     _dateScreenable = dateScreenable;
   }
-
-  @org.hibernate.annotations.Type(type = "text")
-  public String getComments()
-  {
-    return _comments;
-  }
-
-  public void setComments(String comments)
-  {
-    _comments = comments;
-  }
-
 
   // private instance methods
 

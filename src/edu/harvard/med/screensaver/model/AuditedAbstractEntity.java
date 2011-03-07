@@ -175,7 +175,13 @@ public abstract class AuditedAbstractEntity<K extends Serializable> extends Abst
     return updateActivity;
   }
 
-
+  public AdministrativeActivity createComment(AdministratorUser recordedBy,
+                                              String comment)
+  {
+    return createUpdateActivity(AdministrativeActivityType.COMMENT,
+                                recordedBy,
+                                comment);
+  }
 
   //  public DateTime getDateLastUpdated()
 //  {

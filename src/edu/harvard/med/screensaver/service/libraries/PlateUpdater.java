@@ -10,9 +10,20 @@
 package edu.harvard.med.screensaver.service.libraries;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimaps;
 import org.apache.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +35,7 @@ import edu.harvard.med.screensaver.model.AdministrativeActivityType;
 import edu.harvard.med.screensaver.model.BusinessRuleViolationException;
 import edu.harvard.med.screensaver.model.MolarConcentration;
 import edu.harvard.med.screensaver.model.Volume;
+import edu.harvard.med.screensaver.model.libraries.Copy;
 import edu.harvard.med.screensaver.model.libraries.Plate;
 import edu.harvard.med.screensaver.model.libraries.PlateLocation;
 import edu.harvard.med.screensaver.model.libraries.PlateStatus;
@@ -39,6 +51,13 @@ public class PlateUpdater
   public static final String NO_SHELF = "<not specified>";
   public static final String NO_FREEZER = "<not specified>";
   public static final String NO_ROOM = "<not specified>";
+
+  private static final Function<Collection<?>,Integer> CollectionSize = new Function<Collection<?>,Integer>() {
+    public Integer apply(Collection<?> c)
+    {
+      return c.size();
+    }
+  };
 
   private GenericEntityDAO _dao;
   private PlateFacilityIdInitializer _plateFacilityIdInitializer;
@@ -79,7 +98,11 @@ public class PlateUpdater
                                                                        comments.toString());
     updateActivity.setPerformedBy(performedBy);
     updateActivity.setDateOfActivity(datePerformed);
-    plate.setStatus(newStatus);
+    if (plate.getStatus() != newStatus) {
+      plate.setStatus(newStatus);
+      // TODO: if this method is being called repeatedly for multiple plates, it is inefficient to make the following call each time
+      updatePrimaryPlateStatus(plate.getCopy());
+    }
 
     if (plate.getPlatedActivity() == null && (newStatus == PlateStatus.AVAILABLE || newStatus == PlateStatus.NOT_AVAILABLE)) {
       plateCreated(plate, updateActivity);
@@ -93,6 +116,28 @@ public class PlateUpdater
       }
     }
     return true;
+  }
+
+  private static Comparator<Map.Entry<PlateStatus,Integer>> plateStatusFrequencyComparator =
+    new Comparator<Map.Entry<PlateStatus,Integer>>() {
+      @Override
+      public int compare(Entry<PlateStatus,Integer> o1, Entry<PlateStatus,Integer> o2)
+      {
+        int result = o1.getValue().compareTo(o2.getValue());
+        if (result == 0) {
+          result = -1 * o1.getKey().compareTo(o2.getKey());
+        }
+        return result;
+      }
+    };
+
+  private void updatePrimaryPlateStatus(Copy copy)
+  {
+    PlateStatus primaryPlateStatus =
+      Collections.max(Maps.transformValues(Multimaps.index(copy.getPlates().values(),
+                                                           Plate.ToStatus).asMap(), CollectionSize).entrySet(),
+                                                           plateStatusFrequencyComparator).getKey();
+    copy.setPrimaryPlateStatus(primaryPlateStatus);
   }
 
   private void plateNoLongerMaintained(Plate plate,
@@ -154,7 +199,10 @@ public class PlateUpdater
       return false;
     }
 
+    
     plate.setLocation(newLocation);
+    // TODO: if this method is being called repeatedly for multiple plates, it is inefficient to make the following call each time
+    updatePrimaryPlateLocation(plate.getCopy());
 
     StringBuilder comments = new StringBuilder();
     comments.append("Location changed from '").append(oldLocation == null ? "<none>" : oldLocation.toDisplayString()).
@@ -170,6 +218,32 @@ public class PlateUpdater
     //validateLocations();
     
     return true;
+  }
+
+  private static Comparator<Map.Entry<PlateLocation,Integer>> plateLocationFrequencyComparator =
+    new Comparator<Map.Entry<PlateLocation,Integer>>() {
+      @Override
+      public int compare(Entry<PlateLocation,Integer> o1, Entry<PlateLocation,Integer> o2)
+      {
+        int result = o1.getValue().compareTo(o2.getValue());
+        if (result == 0) {
+          result = -1 * o1.getKey().toDisplayString().compareTo(o2.getKey().toDisplayString());
+        }
+        return result;
+      }
+    };
+
+  private void updatePrimaryPlateLocation(Copy copy)
+  {
+    Set<Entry<PlateLocation,Integer>> plateLocationCounts = Maps.transformValues(Multimaps.index(Iterables.filter(copy.getPlates().values(), Predicates.compose(Predicates.notNull(), Plate.ToLocation)), Plate.ToLocation).asMap(), CollectionSize).entrySet();
+    if (plateLocationCounts.isEmpty()) {
+      copy.setPrimaryPlateLocation(null);
+    }
+    else {
+      PlateLocation primaryPlateLocation =
+        Collections.max(plateLocationCounts, plateLocationFrequencyComparator).getKey();
+      copy.setPrimaryPlateLocation(primaryPlateLocation);
+    }
   }
 
   private PlateLocation findLocation(PlateLocation locationDto)
@@ -316,6 +390,6 @@ public class PlateUpdater
   public void addComment(Plate plate, AdministratorUser recordedByAdmin, String comment)
   {
     plate = _dao.reloadEntity(plate);
-    plate.createUpdateActivity(AdministrativeActivityType.COMMENT, recordedByAdmin, comment);
+    plate.createComment(recordedByAdmin, comment);
   }
 }
